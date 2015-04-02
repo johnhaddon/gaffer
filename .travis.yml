@@ -13,30 +13,30 @@ before_install:
 
 install:
     - python ./config/travis/installDependencies.py
-    - export DELIGHT_PACKAGE=3delight-11.0.85-Linux-x86_64
-    - curl -A Mozilla/4.0 http://www.3delight.com/downloads/free/$DELIGHT_PACKAGE.tar.gz > $DELIGHT_PACKAGE.tar.gz
-    - tar -xf $DELIGHT_PACKAGE.tar.gz
-    - export DELIGHT=`pwd`/$DELIGHT_PACKAGE/3delight/Linux-x86_64
-    - export LD_LIBRARY_PATH=$DELIGHT/lib:$LD_LIBRARY_PATH
-    - export DL_SHADERS_PATH=$DELIGHT/shaders
-    - export DL_DISPLAYS_PATH=$DELIGHT/displays
-    - export PATH=$DELIGHT/bin:$PATH
+#    - export DELIGHT_PACKAGE=3delight-11.0.85-Linux-x86_64
+#    - curl -A Mozilla/4.0 http://www.3delight.com/downloads/free/$DELIGHT_PACKAGE.tar.gz > $DELIGHT_PACKAGE.tar.gz
+#    - tar -xf $DELIGHT_PACKAGE.tar.gz
+#    - export DELIGHT=`pwd`/$DELIGHT_PACKAGE/3delight/Linux-x86_64
+#    - export LD_LIBRARY_PATH=$DELIGHT/lib:$LD_LIBRARY_PATH
+#    - export DL_SHADERS_PATH=$DELIGHT/shaders
+#    - export DL_DISPLAYS_PATH=$DELIGHT/displays
+#    - export PATH=$DELIGHT/bin:$PATH
 
 script:
-    - scons install CXX=$CXX ENV_VARS_TO_IMPORT=PATH RMAN_ROOT=$DELIGHT
+    - scons install CXX=$CXX ENV_VARS_TO_IMPORT=PATH
     # Preload libSegFault when running tests, so we get stack
     # traces from any crashes.
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
-    - ./install/gaffer-*/bin/gaffer test GafferTest
-    - ./install/gaffer-*/bin/gaffer test GafferUITest
-    - ./install/gaffer-*/bin/gaffer test GafferCortexTest
-    - ./install/gaffer-*/bin/gaffer test GafferCortexUITest
+#    - ./install/gaffer-*/bin/gaffer test GafferTest
+#    - ./install/gaffer-*/bin/gaffer test GafferUITest
+#    - ./install/gaffer-*/bin/gaffer test GafferCortexTest
+#    - ./install/gaffer-*/bin/gaffer test GafferCortexUITest
     - ./install/gaffer-*/bin/gaffer test GafferImageTest
-    - ./install/gaffer-*/bin/gaffer test GafferImageUITest
-    - ./install/gaffer-*/bin/gaffer test GafferSceneTest
-    - ./install/gaffer-*/bin/gaffer test GafferSceneUITest
-    - ./install/gaffer-*/bin/gaffer test GafferOSLTest
-    - ./install/gaffer-*/bin/gaffer test GafferRenderManTest
+#    - ./install/gaffer-*/bin/gaffer test GafferImageUITest
+#   - ./install/gaffer-*/bin/gaffer test GafferSceneTest
+#    - ./install/gaffer-*/bin/gaffer test GafferSceneUITest
+#   - ./install/gaffer-*/bin/gaffer test GafferOSLTest
+#    - ./install/gaffer-*/bin/gaffer test GafferRenderManTest
 
 compiler:
     - gcc
