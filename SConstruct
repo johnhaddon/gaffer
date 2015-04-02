@@ -930,70 +930,70 @@ libraries = {
 		"additionalFiles" : glob.glob( "python/GafferTest/*/*" ) + glob.glob( "python/GafferTest/*/*/*" ),
 	},
 
-	"GafferUI" : {
-		"envAppends" : {
-			"LIBS" : [ "Gaffer", "Iex$OPENEXR_LIB_SUFFIX", "IECoreGL$CORTEX_LIB_SUFFIX", "GLEW$GLEW_LIB_SUFFIX" ],
-		},
-		"pythonEnvAppends" : {
-			"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "GafferUI", "GafferBindings" ],
-			 # Prevent Qt clashing with boost::signals - we can remove
-			 # this if we move to boost::signals2.
-			 "CXXFLAGS" : [ "-DQT_NO_KEYWORDS" ],
-		},
-	},
+	# "GafferUI" : {
+	# 	"envAppends" : {
+	# 		"LIBS" : [ "Gaffer", "Iex$OPENEXR_LIB_SUFFIX", "IECoreGL$CORTEX_LIB_SUFFIX", "GLEW$GLEW_LIB_SUFFIX" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "GafferUI", "GafferBindings" ],
+	# 		 # Prevent Qt clashing with boost::signals - we can remove
+	# 		 # this if we move to boost::signals2.
+	# 		 "CXXFLAGS" : [ "-DQT_NO_KEYWORDS" ],
+	# 	},
+	# },
 
-	"GafferUITest" : {},
+	# "GafferUITest" : {},
 
-	"GafferCortex" : {
-		"envAppends" : {
-			"LIBS" : [ "Gaffer" ],
-		},
-		"pythonEnvAppends" : {
-			"LIBS" : [ "GafferBindings", "GafferCortex" ],
-		},
-	},
+	# "GafferCortex" : {
+	# 	"envAppends" : {
+	# 		"LIBS" : [ "Gaffer" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"LIBS" : [ "GafferBindings", "GafferCortex" ],
+	# 	},
+	# },
 
-	"GafferCortexTest" : {
-		"additionalFiles" : glob.glob( "python/GafferTest/*/*" ) + glob.glob( "python/GafferCortexTest/*/*/*" ),
-	},
+	# "GafferCortexTest" : {
+	# 	"additionalFiles" : glob.glob( "python/GafferTest/*/*" ) + glob.glob( "python/GafferCortexTest/*/*/*" ),
+	# },
 
-	"GafferCortexUI" : {},
+	# "GafferCortexUI" : {},
 
-	"GafferCortexUITest" : {},
+	# "GafferCortexUITest" : {},
 
-	"GafferScene" : {
-		"envAppends" : {
-			"LIBS" : [ "Gaffer", "Iex$OPENEXR_LIB_SUFFIX", "IECoreGL$CORTEX_LIB_SUFFIX", "IECoreAlembic$CORTEX_LIB_SUFFIX", "GafferImage" ],
-		},
-		"pythonEnvAppends" : {
-			"LIBS" : [ "GafferBindings", "GafferScene" ],
-		},
-		"classStubs" : [
-			( "ScriptProcedural", "procedurals/gaffer/script" ),
-		],
-		"additionalFiles" : glob.glob( "glsl/*.frag" ) + glob.glob( "glsl/*.vert" ),
-	},
+	# "GafferScene" : {
+	# 	"envAppends" : {
+	# 		"LIBS" : [ "Gaffer", "Iex$OPENEXR_LIB_SUFFIX", "IECoreGL$CORTEX_LIB_SUFFIX", "IECoreAlembic$CORTEX_LIB_SUFFIX", "GafferImage" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"LIBS" : [ "GafferBindings", "GafferScene" ],
+	# 	},
+	# 	"classStubs" : [
+	# 		( "ScriptProcedural", "procedurals/gaffer/script" ),
+	# 	],
+	# 	"additionalFiles" : glob.glob( "glsl/*.frag" ) + glob.glob( "glsl/*.vert" ),
+	# },
 
-	"GafferSceneTest" : {
-		"envAppends" : {
-			"LIBS" : [ "Gaffer", "GafferScene" ],
-		},
-		"pythonEnvAppends" : {
-			"LIBS" : [ "Gaffer", "GafferBindings", "GafferScene", "GafferSceneTest" ],
-		},
-		"additionalFiles" : glob.glob( "python/GafferSceneTest/*/*" ),
-	},
+	# "GafferSceneTest" : {
+	# 	"envAppends" : {
+	# 		"LIBS" : [ "Gaffer", "GafferScene" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"LIBS" : [ "Gaffer", "GafferBindings", "GafferScene", "GafferSceneTest" ],
+	# 	},
+	# 	"additionalFiles" : glob.glob( "python/GafferSceneTest/*/*" ),
+	# },
 
-	"GafferSceneUI" : {
-		"envAppends" : {
-			"LIBS" : [ "Gaffer", "GafferUI", "GafferScene", "IECoreGL$CORTEX_LIB_SUFFIX", "GLEW$GLEW_LIB_SUFFIX" ],
-		},
-		"pythonEnvAppends" : {
-			"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "GafferScene", "GafferUI", "GafferSceneUI" ],
-		},
-	},
+	# "GafferSceneUI" : {
+	# 	"envAppends" : {
+	# 		"LIBS" : [ "Gaffer", "GafferUI", "GafferScene", "IECoreGL$CORTEX_LIB_SUFFIX", "GLEW$GLEW_LIB_SUFFIX" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "GafferScene", "GafferUI", "GafferSceneUI" ],
+	# 	},
+	# },
 
-	"GafferSceneUITest" : {},
+	# "GafferSceneUITest" : {},
 
 	"GafferImage" : {
 		"envAppends" : {
@@ -1014,93 +1014,93 @@ libraries = {
 		},
 	},
 
-	"GafferImageUITest" : {},
+	# "GafferImageUITest" : {},
 
-	"GafferImageUI" : {
-		"envAppends" : {
-			"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "Gaffer", "GafferImage", "GafferUI", "GLEW$GLEW_LIB_SUFFIX" ],
-		},
-		"pythonEnvAppends" : {
-			"LIBS" : [ "GafferUI", "GafferImageUI" ],
-		},
-	},
+	# "GafferImageUI" : {
+	# 	"envAppends" : {
+	# 		"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "Gaffer", "GafferImage", "GafferUI", "GLEW$GLEW_LIB_SUFFIX" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"LIBS" : [ "GafferUI", "GafferImageUI" ],
+	# 	},
+	# },
 
-	"GafferArnold" : {
-		"envAppends" : {
-			"CPPPATH" : [ "$ARNOLD_ROOT/include" ],
-			"LIBPATH" : [ "$ARNOLD_ROOT/bin" ],
-			"LIBS" : [ "Gaffer", "GafferScene", "ai", "IECoreArnold$CORTEX_LIB_SUFFIX" ],
-		},
-		"pythonEnvAppends" : {
-			"CPPPATH" : [ "$ARNOLD_ROOT/include" ],
-			"LIBPATH" : [ "$ARNOLD_ROOT/bin" ],
-			"LIBS" : [ "Gaffer", "GafferScene", "GafferBindings", "GafferArnold" ],
-		},
-		"requiredOptions" : [ "ARNOLD_ROOT" ],
-	},
+	# "GafferArnold" : {
+	# 	"envAppends" : {
+	# 		"CPPPATH" : [ "$ARNOLD_ROOT/include" ],
+	# 		"LIBPATH" : [ "$ARNOLD_ROOT/bin" ],
+	# 		"LIBS" : [ "Gaffer", "GafferScene", "ai", "IECoreArnold$CORTEX_LIB_SUFFIX" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"CPPPATH" : [ "$ARNOLD_ROOT/include" ],
+	# 		"LIBPATH" : [ "$ARNOLD_ROOT/bin" ],
+	# 		"LIBS" : [ "Gaffer", "GafferScene", "GafferBindings", "GafferArnold" ],
+	# 	},
+	# 	"requiredOptions" : [ "ARNOLD_ROOT" ],
+	# },
 
-	"GafferArnoldTest" : {},
+	# "GafferArnoldTest" : {},
 
-	"GafferArnoldUI" : {},
+	# "GafferArnoldUI" : {},
 
-	"GafferRenderMan" : {
-		"envAppends" : {
-			"LIBS" : [ "Gaffer", "GafferScene", "IECoreRI$CORTEX_LIB_SUFFIX" ],
-			"LIBPATH" : [ "$RMAN_ROOT/lib" ],
-		},
-		"pythonEnvAppends" : {
-			"LIBS" : [ "GafferBindings", "GafferScene", "GafferRenderMan" ],
-			"LIBPATH" : [ "$RMAN_ROOT/lib" ],
-		},
-		"requiredOptions" : [ "RMAN_ROOT" ],
-	},
+	# "GafferRenderMan" : {
+	# 	"envAppends" : {
+	# 		"LIBS" : [ "Gaffer", "GafferScene", "IECoreRI$CORTEX_LIB_SUFFIX" ],
+	# 		"LIBPATH" : [ "$RMAN_ROOT/lib" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"LIBS" : [ "GafferBindings", "GafferScene", "GafferRenderMan" ],
+	# 		"LIBPATH" : [ "$RMAN_ROOT/lib" ],
+	# 	},
+	# 	"requiredOptions" : [ "RMAN_ROOT" ],
+	# },
 
-	"GafferRenderManUI" : {},
+	# "GafferRenderManUI" : {},
 
-	"GafferRenderManTest" : {
-		"additionalFiles" : glob.glob( "python/GafferRenderManTest/*/*" ),
-	},
+	# "GafferRenderManTest" : {
+	# 	"additionalFiles" : glob.glob( "python/GafferRenderManTest/*/*" ),
+	# },
 
-	"GafferOSL" : {
-		"envAppends" : {
-			"CPPPATH" : [ "$BUILD_DIR/include/OSL" ],
-			"LIBS" : [ "Gaffer", "GafferScene", "GafferImage", "OpenImageIO$OIIO_LIB_SUFFIX", "oslquery$OSL_LIB_SUFFIX", "oslexec$OSL_LIB_SUFFIX" ],
-		},
-		"pythonEnvAppends" : {
-			"CPPPATH" : [ "$BUILD_DIR/include/OSL" ],
-			"LIBS" : [ "GafferBindings", "GafferScene", "GafferImage", "GafferOSL" ],
-		},
-		"requiredOptions" : [ "OSL_SRC_DIR" ],
-		"oslHeaders" : glob.glob( "shaders/*/*.h" ),
-		"oslShaders" : glob.glob( "shaders/*/*.osl" ),
-	},
+	# "GafferOSL" : {
+	# 	"envAppends" : {
+	# 		"CPPPATH" : [ "$BUILD_DIR/include/OSL" ],
+	# 		"LIBS" : [ "Gaffer", "GafferScene", "GafferImage", "OpenImageIO$OIIO_LIB_SUFFIX", "oslquery$OSL_LIB_SUFFIX", "oslexec$OSL_LIB_SUFFIX" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"CPPPATH" : [ "$BUILD_DIR/include/OSL" ],
+	# 		"LIBS" : [ "GafferBindings", "GafferScene", "GafferImage", "GafferOSL" ],
+	# 	},
+	# 	"requiredOptions" : [ "OSL_SRC_DIR" ],
+	# 	"oslHeaders" : glob.glob( "shaders/*/*.h" ),
+	# 	"oslShaders" : glob.glob( "shaders/*/*.osl" ),
+	# },
 
-	"GafferOSLUI" : {
-		"requiredOptions" : [ "OSL_SRC_DIR" ],
-	},
+	# "GafferOSLUI" : {
+	# 	"requiredOptions" : [ "OSL_SRC_DIR" ],
+	# },
 
-	"GafferOSLTest" : {
-		"additionalFiles" : glob.glob( "python/GafferOSLTest/*/*" ),
-		"requiredOptions" : [ "OSL_SRC_DIR" ],
-	},
+	# "GafferOSLTest" : {
+	# 	"additionalFiles" : glob.glob( "python/GafferOSLTest/*/*" ),
+	# 	"requiredOptions" : [ "OSL_SRC_DIR" ],
+	# },
 
-	"GafferAppleseed" : {
-		"envAppends" : {
-			"CPPPATH" : [ "$APPLESEED_INCLUDE_PATH" ],
-			"LIBPATH" : [ "$APPLESEED_LIB_PATH" ],
-			"LIBS" : [ "Gaffer", "GafferScene", "appleseed", "IECoreAppleseed$CORTEX_LIB_SUFFIX" ],
-		},
-		"pythonEnvAppends" : {
-			"CPPPATH" : [ "$APPLESEED_INCLUDE_PATH" ],
-			"LIBPATH" : [ "$APPLESEED_LIB_PATH" ],
-			"LIBS" : [ "Gaffer", "GafferScene", "GafferBindings", "GafferAppleseed" ],
-		},
-		"requiredOptions" : [ "APPLESEED_INCLUDE_PATH", "APPLESEED_LIB_PATH" ],
-	},
+	# "GafferAppleseed" : {
+	# 	"envAppends" : {
+	# 		"CPPPATH" : [ "$APPLESEED_INCLUDE_PATH" ],
+	# 		"LIBPATH" : [ "$APPLESEED_LIB_PATH" ],
+	# 		"LIBS" : [ "Gaffer", "GafferScene", "appleseed", "IECoreAppleseed$CORTEX_LIB_SUFFIX" ],
+	# 	},
+	# 	"pythonEnvAppends" : {
+	# 		"CPPPATH" : [ "$APPLESEED_INCLUDE_PATH" ],
+	# 		"LIBPATH" : [ "$APPLESEED_LIB_PATH" ],
+	# 		"LIBS" : [ "Gaffer", "GafferScene", "GafferBindings", "GafferAppleseed" ],
+	# 	},
+	# 	"requiredOptions" : [ "APPLESEED_INCLUDE_PATH", "APPLESEED_LIB_PATH" ],
+	# },
 
-	"GafferAppleseedTest" : {},
+	# "GafferAppleseedTest" : {},
 
-	"GafferAppleseedUI" : {},
+	# "GafferAppleseedUI" : {},
 
 	"apps" : {
 		"additionalFiles" : glob.glob( "apps/*/*-1.py" ),
@@ -1172,21 +1172,21 @@ libraries = {
 }
 
 # Add on OpenGL libraries to definitions - these vary from platform to platform
-for library in ( "GafferUI", "GafferSceneUI", "GafferImageUI" ) :
-	if env["PLATFORM"] == "darwin" :
-		libraries[library]["envAppends"].setdefault( "FRAMEWORKS", [] ).append( "OpenGL" )
-	else :
-		libraries[library]["envAppends"]["LIBS"].append( "GL" )
+# for library in ( "GafferUI", "GafferSceneUI", "GafferImageUI" ) :
+# 	if env["PLATFORM"] == "darwin" :
+# 		libraries[library]["envAppends"].setdefault( "FRAMEWORKS", [] ).append( "OpenGL" )
+# 	else :
+# 		libraries[library]["envAppends"]["LIBS"].append( "GL" )
 
-# Add on Qt libraries to definitions - these vary from platform to platform
-for library in ( "GafferUI", ) :
-	if env["PLATFORM"] == "darwin" :
-		libraries[library]["pythonEnvAppends"].setdefault( "FRAMEWORKPATH", [] ).append( "$BUILD_DIR/lib" )
-		libraries[library]["pythonEnvAppends"].setdefault( "FRAMEWORKS", [] ).append( "QtCore" )
-		libraries[library]["pythonEnvAppends"].setdefault( "FRAMEWORKS", [] ).append( "QtGui" )
-	else :
-		libraries[library]["pythonEnvAppends"]["LIBS"].append( "QtCore" )
-		libraries[library]["pythonEnvAppends"]["LIBS"].append( "QtGui" )
+# # Add on Qt libraries to definitions - these vary from platform to platform
+# for library in ( "GafferUI", ) :
+# 	if env["PLATFORM"] == "darwin" :
+# 		libraries[library]["pythonEnvAppends"].setdefault( "FRAMEWORKPATH", [] ).append( "$BUILD_DIR/lib" )
+# 		libraries[library]["pythonEnvAppends"].setdefault( "FRAMEWORKS", [] ).append( "QtCore" )
+# 		libraries[library]["pythonEnvAppends"].setdefault( "FRAMEWORKS", [] ).append( "QtGui" )
+# 	else :
+# 		libraries[library]["pythonEnvAppends"]["LIBS"].append( "QtCore" )
+# 		libraries[library]["pythonEnvAppends"]["LIBS"].append( "QtGui" )
 		
 
 ###############################################################################################
