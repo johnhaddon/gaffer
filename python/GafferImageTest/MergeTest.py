@@ -178,16 +178,30 @@ class MergeTest( GafferTest.TestCase ) :
 
 	def testAffects( self ) :
 
+		print "C1"
+
 		c1 = GafferImage.Constant()
 		c2 = GafferImage.Constant()
 
+		print "C2"
+
 		m = GafferImage.Merge()
+
+		print "C2.1"
+
 		m["in"].setInput( c1["out"] )
+
+		print "C2.5"
+
 		m["in1"].setInput( c2["out"] )
+
+		print "C2.6"
 
 		cs = GafferTest.CapturingSlot( m.plugDirtiedSignal() )
 
 		c1["color"]["r"].setValue( 0.1 )
+
+		print "C3"
 
 		self.assertEqual( len( cs ), 4 )
 		self.assertTrue( cs[0][0].isSame( m["in"]["channelData"] ) )
@@ -197,13 +211,19 @@ class MergeTest( GafferTest.TestCase ) :
 
 		del cs[:]
 
+		print "C4"
+
 		c2["color"]["g"].setValue( 0.2 )
+
+		print "C5"
 
 		self.assertEqual( len( cs ), 4 )
 		self.assertTrue( cs[0][0].isSame( m["in1"]["channelData"] ) )
 		self.assertTrue( cs[1][0].isSame( m["in1"] ) )
 		self.assertTrue( cs[2][0].isSame( m["out"]["channelData"] ) )
 		self.assertTrue( cs[3][0].isSame( m["out"] ) )
+
+		print "C6"
 
 	def testPassThrough( self ) :
 
