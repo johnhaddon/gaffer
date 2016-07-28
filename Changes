@@ -1,3 +1,14 @@
+0.27.0.1.arnoldOverscan
+=======================
+
+Temp release for POW weekend renders.  Remains to be seen whether this will actually get merged to trunk or if we'll approach this differently
+
+* dae2c9c (HEAD -> overscanNew) GafferArnoldTest : switched from cropWindow to renderRegion
+* 8d277fd SceneAlgo : removed deprecated overscan handling.  Overscan is now handled by setting renderRegion, which the renderer backend should respond to appropriately
+* 1ccaca6 SceneAlgo : applyCameraGlobals now sets up new renderRegion parameter, which can be used if you set render:deprecatedOverscanFormat to false
+* d93cce7 IECoreArnoldPreview : Now use new "renderRegion" camera parameter instead of cropWindow
+
+
 0.27.0.1
 ========
 
