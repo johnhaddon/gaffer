@@ -269,102 +269,10 @@ void GafferScene::applyCameraGlobals( IECore::Camera *camera, const IECore::Comp
 
 	// apply overscan
 
-	const BoolData *doDeprecatedOverscan = globals->member<BoolData>( "option:render:deprecatedOverscanFormat" );
-	const BoolData *overscanData = globals->member<BoolData>( "option:render:overscan" );
-	if( !doDeprecatedOverscan || doDeprecatedOverscan->readable() )
-	{
-		if( overscanData && overscanData->readable() && !resolutionOverrideData )
-		{
-
-			// get offsets for each corner of image (as a multiplier of the image width)
-			V2f minOffset( 0.1 ), maxOffset( 0.1 );
-			if( const FloatData *overscanValueData = globals->member<FloatData>( "option:render:overscanLeft" ) )
-			{
-				minOffset.x = overscanValueData->readable();
-			}
-			if( const FloatData *overscanValueData = globals->member<FloatData>( "option:render:overscanRight" ) )
-			{
-				maxOffset.x = overscanValueData->readable();
-			}
-			if( const FloatData *overscanValueData = globals->member<FloatData>( "option:render:overscanBottom" ) )
-			{
-				minOffset.y = overscanValueData->readable();
-			}
-			if( const FloatData *overscanValueData = globals->member<FloatData>( "option:render:overscanTop" ) )
-			{
-				maxOffset.y = overscanValueData->readable();
-			}
-
-			// convert those offsets into pixel values
-
-			V2i minPixelOffset(
-				int(minOffset.x * (float)resolution.x),
-				int(minOffset.y * (float)resolution.y)
-			);
-
-			V2i maxPixelOffset(
-				int(maxOffset.x * (float)resolution.x),
-				int(maxOffset.y * (float)resolution.y)
-			);
-
-			// recalculate original offsets to account for the rounding when
-			// converting to integer pixel space
-
-			minOffset = V2f(
-				(float)minPixelOffset.x / (float)resolution.x,
-				(float)minPixelOffset.y / (float)resolution.y
-			);
-
-			maxOffset = V2f(
-				(float)maxPixelOffset.x / (float)resolution.x,
-				(float)maxPixelOffset.y / (float)resolution.y
-			);
-
-			// adjust camera resolution and screen window appropriately
-
-			V2i &cameraResolution = camera->parametersData()->member<V2iData>( "resolution" )->writable();
-			Box2f &cameraScreenWindow = camera->parametersData()->member<Box2fData>( "screenWindow" )->writable();
-
-			cameraResolution += minPixelOffset + maxPixelOffset;
-
-			const Box2f originalScreenWindow = cameraScreenWindow;
-			cameraScreenWindow.min -= originalScreenWindow.size() * minOffset;
-			cameraScreenWindow.max += originalScreenWindow.size() * maxOffset;
-
-			// adjust crop window too, if it was specified by the user
-
-			if( cropWindowData )
-			{
-				Box2f &cameraCropWindow = camera->parametersData()->member<Box2fData>( "cropWindow" )->writable();
-				// convert into original screen space
-				Box2f cropWindowScreen(
-					V2f(
-						Imath::lerp( originalScreenWindow.min.x, originalScreenWindow.max.x, cameraCropWindow.min.x ),
-						Imath::lerp( originalScreenWindow.max.y, originalScreenWindow.min.y, cameraCropWindow.max.y )
-					),
-					V2f(
-						Imath::lerp( originalScreenWindow.min.x, originalScreenWindow.max.x, cameraCropWindow.max.x ),
-						Imath::lerp( originalScreenWindow.max.y, originalScreenWindow.min.y, cameraCropWindow.min.y )
-					)
-				);
-				// convert out of new screen space
-				cameraCropWindow = Box2f(
-					V2f(
-						lerpfactor( cropWindowScreen.min.x, cameraScreenWindow.min.x, cameraScreenWindow.max.x ),
-						lerpfactor( cropWindowScreen.max.y, cameraScreenWindow.max.y, cameraScreenWindow.min.y )
-					),
-					V2f(
-						lerpfactor( cropWindowScreen.max.x, cameraScreenWindow.min.x, cameraScreenWindow.max.x ),
-						lerpfactor( cropWindowScreen.min.y, cameraScreenWindow.max.y, cameraScreenWindow.min.y )
-					)
-				);
-			}
-
-		}
-	}
 
 	Box2i renderRegion( V2i( 0 ), resolution - V2i( 1 ) );
 
+	const BoolData *overscanData = globals->member<BoolData>( "option:render:overscan" );
 	if( overscanData && overscanData->readable() )
 	{
 		// get offsets for each corner of image (as a multiplier of the image width)
