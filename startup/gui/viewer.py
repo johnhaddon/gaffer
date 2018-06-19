@@ -59,7 +59,7 @@ def __sceneView( plug ) :
 
 	view = GafferSceneUI.SceneView()
 	view["in"].setInput( plug )
-	view["grid"]["dimensions"].setInput( preferences["viewer"]["gridDimensions"] )
+	#view["grid"]["dimensions"].setInput( preferences["viewer"]["gridDimensions"] )
 
 	return view
 

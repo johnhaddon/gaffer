@@ -1381,7 +1381,7 @@ SceneView::SceneView( const std::string &name )
 	m_drawingMode.reset( new DrawingMode( this ) );
 	m_shadingMode.reset( new ShadingMode( this ) );
 	m_camera.reset( new Camera( this ) );
-	m_grid.reset( new Grid( this ) );
+	//m_grid.reset( new Grid( this ) );
 	m_gnomon.reset( new Gnomon( this ) );
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1527,10 +1527,10 @@ Imath::Box3f SceneView::framingBound() const
 	}
 
 	b = m_sceneGadget->bound();
-	if( m_grid->gadget()->getVisible() )
-	{
-		b.extendBy( m_grid->gadget()->bound() );
-	}
+	// if( m_grid->gadget()->getVisible() )
+	// {
+	// 	b.extendBy( m_grid->gadget()->bound() );
+	// }
 
 	return b;
 }
