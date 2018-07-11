@@ -1360,6 +1360,25 @@ libraries = {
 		"requiredOptions" : [ "RENDERMAN_ROOT" ],
 	},
 
+	"GafferRenderMan" : {
+		"envAppends" : {
+			"CPPPATH" : [ "$RENDERMAN_ROOT/include" ],
+			"LIBS" : [ "Iex$OPENEXR_LIB_SUFFIX", "Gaffer", "GafferDispatch", "GafferScene", "IECoreScene", "prman" ],
+			"LIBPATH" : [ "$RENDERMAN_ROOT/lib" ],
+		},
+		"pythonEnvAppends" : {
+			"LIBS" : [ "GafferDispatch", "GafferRenderMan", "GafferScene" ],
+			"LIBPATH" : [ "$RENDERMAN_ROOT/lib" ],
+		},
+		"requiredOptions" : [ "RENDERMAN_ROOT" ],
+	},
+
+	"GafferRenderManTest" : {},
+
+	"GafferRenderManUI" : {},
+
+	"GafferRenderManUITest" : {},
+
 	"GafferTractor" : {},
 
 	"GafferTractorTest" : {},
