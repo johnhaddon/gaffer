@@ -15,6 +15,7 @@ Fixes
 API
 ---
 
+- ValuePlug : Added `defaultHash()` virtual method.
 - Node :
   - Improved speed of `RecursiveIterator` and `RecursiveRange` for nodes.
   - Added new `GAFFER_NODE_DECLARE_TYPE` and `GAFFER_NODE_DEFINE_TYPE` macros. Subclasses should use these in preference to `GAFFER_GRAPHCOMPONENT_DECLARE_TYPE` and `GAFFER_GRAPHCOMPONENT_DEFINE_TYPE`.
