@@ -14,6 +14,8 @@ steps:
   displayName: 'Run a one-line script'
 
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
+    ./config/travis/installDependencies.sh
+    ./config/travis/installDelight.sh
+    scons -j 2 install CXX=$COMPILER CXXSTD=$CXXSTD BUILD_TYPE=$BUILD_TYPE ENV_VARS_TO_IMPORT=PATH DELIGHT_ROOT=$DELIGHT BUILD_CACHEDIR=sconsCache
+
   displayName: 'Run a multi-line script'
