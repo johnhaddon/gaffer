@@ -43,6 +43,7 @@ INSTALL_DIR = os.path.expanduser( "~/dev/install/gaffer-${GAFFER_MAJOR_VERSION}.
 DEPENDENCIES_SRC_DIR = os.path.expanduser( "~/dev/gafferDependencies" )
 DELIGHT_ROOT = os.environ["DELIGHT"]
 ARNOLD_ROOT = os.environ["ARNOLD_ROOT"]
+RENDERMAN_ROOT = os.environ["RMANTREE"]
 DOXYGEN = "/usr/local/bin/doxygen"
 PYTHON_LINK_FLAGS = [ "-lpython$PYTHON_VERSION" ]
 ENV_VARS_TO_IMPORT = "PATH"
