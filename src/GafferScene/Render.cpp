@@ -301,6 +301,12 @@ void Render::execute() const
 		RendererAlgo::LightLinks lightLinks;
 
 		RendererAlgo::outputCameras( adaptedInPlug(), globals.get(), renderSets, renderer.get() );
+		if( renderer->name() == "RenderMan" )
+		{
+			/// \todo Remove once Riley's `SetActiveCamera()` restrictions
+			/// have been lifted.
+			renderer->command( "renderman:worldBegin" );
+		}
 		RendererAlgo::outputLights( adaptedInPlug(), globals.get(), renderSets, &lightLinks, renderer.get() );
 		RendererAlgo::outputLightFilters( adaptedInPlug(), globals.get(), renderSets, &lightLinks, renderer.get() );
 		lightLinks.outputLightFilterLinks( adaptedInPlug() );
