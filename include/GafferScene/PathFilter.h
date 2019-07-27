@@ -58,6 +58,9 @@ class GAFFERSCENE_API PathFilter : public Filter
 		Gaffer::StringVectorDataPlug *pathsPlug();
 		const Gaffer::StringVectorDataPlug *pathsPlug() const;
 
+		Gaffer::BoolVectorDataPlug *enabledPathsPlug();
+		const Gaffer::BoolVectorDataPlug *enabledPathsPlug() const;
+
 		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
 	protected :
@@ -83,7 +86,7 @@ class GAFFERSCENE_API PathFilter : public Filter
 
 		void plugDirtied( const Gaffer::Plug *plug );
 
-		IECore::PathMatcherDataPtr m_pathMatcher;
+		IECore::ConstPathMatcherDataPtr m_pathMatcher;
 
 		static size_t g_firstPlugIndex;
 

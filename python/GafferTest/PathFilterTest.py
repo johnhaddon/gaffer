@@ -130,5 +130,9 @@ class PathFilterTest( GafferTest.TestCase ) :
 		self.assertEqual( pathFilter.userData(), ud )
 		self.failIf( pathFilter.userData() is ud )
 
+	def testEnabledPaths( self ) :
+
+
+
 if __name__ == "__main__":
 	unittest.main()

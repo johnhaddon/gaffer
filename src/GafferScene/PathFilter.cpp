@@ -48,6 +48,18 @@ using namespace Gaffer;
 using namespace IECore;
 using namespace std;
 
+namespace
+{
+
+/// \todo Move to PlugAlgo and use instead of `Switch::variesWithContext()`
+bool isComputed( const ValuePlug *plug )
+{
+	const Plug *source = plug->source();
+	return source->direction() == Plug::Out && IECore::runTimeCast<const ComputeNode>( source->node() );
+}
+
+} // namespace
+
 IE_CORE_DEFINERUNTIMETYPED( PathFilter );
 
 size_t PathFilter::g_firstPlugIndex = 0;
@@ -57,6 +69,7 @@ PathFilter::PathFilter( const std::string &name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringVectorDataPlug( "paths", Plug::In, new StringVectorData ) );
+	addChild( new BoolVectorDataPlug( "enabledPaths", Plug::In, new BoolVectorData ) );
 	addChild( new PathMatcherDataPlug( "__pathMatcher", Plug::Out, new PathMatcherData ) );
 
 	plugDirtiedSignal().connect( boost::bind( &PathFilter::plugDirtied, this, ::_1 ) );
@@ -76,37 +89,39 @@ const Gaffer::StringVectorDataPlug *PathFilter::pathsPlug() const
 	return getChild<Gaffer::StringVectorDataPlug>( g_firstPlugIndex );
 }
 
+Gaffer::BoolVectorDataPlug *PathFilter::enabledPathsPlug()
+{
+	return getChild<Gaffer::BoolVectorDataPlug>( g_firstPlugIndex + 1 );
+}
+
+const Gaffer::BoolVectorDataPlug *PathFilter::enabledPathsPlug() const
+{
+	return getChild<Gaffer::BoolVectorDataPlug>( g_firstPlugIndex + 1 );
+}
+
 Gaffer::PathMatcherDataPlug *PathFilter::pathMatcherPlug()
 {
-	return getChild<PathMatcherDataPlug>( g_firstPlugIndex + 1 );
+	return getChild<PathMatcherDataPlug>( g_firstPlugIndex + 2 );
 }
 
 const Gaffer::PathMatcherDataPlug *PathFilter::pathMatcherPlug() const
 {
-	return getChild<PathMatcherDataPlug>( g_firstPlugIndex + 1 );
+	return getChild<PathMatcherDataPlug>( g_firstPlugIndex + 2 );
 }
 
 void PathFilter::plugDirtied( const Gaffer::Plug *plug )
 {
-	if( plug == pathsPlug() )
+	if( plug == pathsPlug() || plug == enabledPathsPlug() )
 	{
-		//\todo: share this logic with Switch::variesWithContext()
-		Plug* sourcePlug = pathsPlug()->source();
-		if( sourcePlug->direction() == Plug::Out && IECore::runTimeCast<const ComputeNode>( sourcePlug->node() ) )
+		if( !isComputed( pathsPlug() ) && !isComputed( enabledPathsPlug() ) )
 		{
-			// pathsPlug() is receiving data from a plug whose value is context varying, meaning
-			// we need to use the intermediate pathMatcherPlug() in computeMatch() instead:
-
-			m_pathMatcher = nullptr;
+			// Paths are constant, so we an optimise by precomputing and
+			// storing them locally.
+			m_pathMatcher = pathMatcherPlug()->getValue();
 		}
 		else
 		{
-			// pathsPlug() value is not context varying, meaning we can save on graph evaluations
-			// by just precomputing it here and directly using it in computeMatch():
-
-			ConstStringVectorDataPtr paths = pathsPlug()->getValue();
-			m_pathMatcher = new PathMatcherData;
-			m_pathMatcher->writable().init( paths->readable().begin(), paths->readable().end() );
+			m_pathMatcher = nullptr;
 		}
 	}
 }
@@ -115,7 +130,7 @@ void PathFilter::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 {
 	Filter::affects( input, outputs );
 
-	if( input == pathsPlug() )
+	if( input == pathsPlug() || input == enabledPathsPlug() )
 	{
 		outputs.push_back( pathMatcherPlug() );
 	}
@@ -132,6 +147,7 @@ void PathFilter::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *c
 	if( output == pathMatcherPlug() )
 	{
 		pathsPlug()->hash( h );
+		enabledPathsPlug()->hash( h );
 	}
 }
 
@@ -139,9 +155,23 @@ void PathFilter::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 {
 	if( output == pathMatcherPlug() )
 	{
-		ConstStringVectorDataPtr paths = pathsPlug()->getValue();
+		ConstStringVectorDataPtr pathsData = pathsPlug()->getValue();
+		const auto &paths = pathsData->readable();
+
+		ConstBoolVectorDataPtr enabledPathsData = enabledPathsPlug()->getValue();
+		const auto &enabledPaths = enabledPathsData->readable();
+
 		PathMatcherDataPtr pathMatcherData = new PathMatcherData;
-		pathMatcherData->writable().init( paths->readable().begin(), paths->readable().end() );
+		auto &pathMatcher = pathMatcherData->writable();
+
+		for( int i = 0, e = paths.size(); i < e; ++i )
+		{
+			if( enabledPaths.size() <= i || enabledPaths[i] )
+			{
+				pathMatcher.addPath( paths[i] );
+			}
+		}
+
 		static_cast<PathMatcherDataPlug *>( output )->setValue( pathMatcherData );
 		return;
 	}
