@@ -92,6 +92,19 @@ class LightSerialiser : public GafferBindings::NodeSerialiser
 		{
 			shaderNamePlug = light->getChild<Gaffer::StringPlug>( "__model" );
 		}
+		if( !shaderNamePlug )
+		{
+			if( const auto *shader = light->getChild<Shader>( "__shader" ) )
+			{
+				// Once the Light base requires derived classes to operate using
+				// an internal Shader, this could be the only approach we need
+				// to getting the shader name. But perhaps we should also
+				// standardise on "shaderName" plug that can be used for public
+				// introspection of the loaded shader. We really should be
+				// displaying the shader name in the NodeEditor, for instance.
+				shaderNamePlug = shader->namePlug();
+			}
+		}
 
 		const std::string shaderName = shaderNamePlug ? shaderNamePlug->getValue() : "";
 		if( shaderName.size() )
