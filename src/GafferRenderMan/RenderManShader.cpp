@@ -125,7 +125,7 @@ T parseCompoundNumericValue( const string &s )
 	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
 
 	T result( 0 );
-	int i = 0;
+	uint i = 0;
 	for( auto token : Tokenizer( s, boost::char_separator<char>( " " ) ) )
 	{
 		if( i >= T::dimensions() )

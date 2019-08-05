@@ -99,6 +99,7 @@ RixDetailType detail( IECoreScene::PrimitiveVariable::Interpolation interpolatio
 	{
 		case PrimitiveVariable::Invalid :
 			throw IECore::Exception( "No detail equivalent to PrimitiveVariable::Invalid" );
+			return RixDetailType::k_constant;
 		case PrimitiveVariable::Constant :
 			return RixDetailType::k_constant;
 		case PrimitiveVariable::Uniform :
@@ -109,6 +110,9 @@ RixDetailType detail( IECoreScene::PrimitiveVariable::Interpolation interpolatio
 			return RixDetailType::k_varying;
 		case PrimitiveVariable::FaceVarying :
 			return RixDetailType::k_facevarying;
+		default :
+			throw IECore::Exception( "Cannot convert PrimitiveVariable interpolation." );
+			return RixDetailType::k_constant;
 	}
 }
 
