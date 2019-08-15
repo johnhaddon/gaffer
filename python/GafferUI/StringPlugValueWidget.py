@@ -38,10 +38,14 @@
 import Gaffer
 import GafferUI
 
+from Qt import QtCore
+from Qt import QtGui
+
 ## Supported Metadata :
 #
 # - "stringPlugValueWidget:continuousUpdate"
 # - "stringPlugValueWidget:placeholderText" : The text displayed when the string value is left empty
+# - "stringPlugValueWidget:validator" : A match pattern used to validate the input text
 class StringPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plug, **kw ) :
@@ -55,6 +59,7 @@ class StringPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__textWidget.keyPressSignal().connect( Gaffer.WeakMethod( self.__keyPress ), scoped = False )
 		self.__textWidget.editingFinishedSignal().connect( Gaffer.WeakMethod( self.__textChanged ), scoped = False )
 		self.__textChangedConnection = self.__textWidget.textChangedSignal().connect( Gaffer.WeakMethod( self.__textChanged ), scoped = False )
+		self.__validator = None
 
 		self._updateFromPlug()
 
@@ -93,6 +98,7 @@ class StringPlugValueWidget( GafferUI.PlugValueWidget ) :
 			)
 
 			self.__textWidget._qtWidget().setPlaceholderText( Gaffer.Metadata.value( self.getPlug(), "stringPlugValueWidget:placeholderText" ) )
+			self.__updateValidator()
 
 		self.__textWidget.setEditable( self._editable() )
 
@@ -123,5 +129,23 @@ class StringPlugValueWidget( GafferUI.PlugValueWidget ) :
 			# from the widget's private text editing undo queue. it will then ignore undo shortcuts,
 			# allowing them to fall through to the global undo shortcut.
 			self.__textWidget.clearUndo()
+
+	def __updateValidator( self ) :
+
+		pattern = Gaffer.Metadata.value( self.getPlug(), "stringPlugValueWidget:validator" ) if self.getPlug() is not None else ""
+		if pattern :
+			if self.__validator is None :
+				self.__validator = QtGui.QRegExpValidator( self._qtWidget() )
+			self.__validator.setRegExp(
+				# `PatternSyntax.WildcardUnix` isn't exactly the same as the syntax of
+				# `IECore::StringAlgo::MatchPattern` but it's close enough. Its main
+				# benefit is that QRegExp supports partial prefix matching which allows
+				# the validator to return `State::Intermediate`. Ideally we'd support
+				# prefix matches in `StringAlgo::match()` and then we could use that.
+				QtCore.QRegExp( pattern, syntax = QtCore.QRegExp.PatternSyntax.WildcardUnix )
+			)
+			self.__textWidget._qtWidget().setValidator( self.__validator )
+		else :
+			self.__textWidget._qtWidget().setValidator( None )
 
 GafferUI.PlugValueWidget.registerType( Gaffer.StringPlug, StringPlugValueWidget )
