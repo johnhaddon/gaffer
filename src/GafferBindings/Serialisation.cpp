@@ -42,6 +42,7 @@
 #include "GafferBindings/GraphComponentBinding.h"
 #include "GafferBindings/MetadataBinding.h"
 
+#include "Gaffer/ArrayPlug.h"
 #include "Gaffer/Context.h"
 #include "Gaffer/Plug.h"
 
@@ -57,6 +58,30 @@ using namespace IECore;
 using namespace Gaffer;
 using namespace GafferBindings;
 using namespace boost::python;
+
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+std::string childKey( const GraphComponent *g )
+{
+	if( auto p = g->parent<ArrayPlug>() )
+	{
+		// Access by index rather than name
+		return std::to_string(
+			std::find( p->children().begin(), p->children().end(), g ) - p->children().begin()
+		);
+	}
+	else
+	{
+		return "\"" + g->getName().string() + "\"";
+	}
+}
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Serialisation
@@ -251,11 +276,11 @@ void Serialisation::walk( const Gaffer::GraphComponent *parent, const std::strin
 		std::string childIdentifier;
 		if( parent == m_parent && childConstructor.size() && m_protectParentNamespace )
 		{
-			childIdentifier = "__children[\"" + child->getName().string() + "\"]";
+			childIdentifier = "__children[" + childKey( child ) + "]";
 		}
 		else
 		{
-			childIdentifier = parentIdentifier + "[\"" + child->getName().string() + "\"]";
+			childIdentifier = parentIdentifier + "[" + childKey( child ) + "]";
 		}
 
 		if( childConstructor.size() )
@@ -301,14 +326,14 @@ std::string Serialisation::identifier( const Gaffer::GraphComponent *graphCompon
 			const Serialiser *parentSerialiser = acquireSerialiser( parent );
 			if( m_protectParentNamespace && parentSerialiser->childNeedsConstruction( graphComponent, *this ) )
 			{
-				return "__children[\"" + graphComponent->getName().string() + "\"]" + result;
+				return "__children[" + childKey( graphComponent ) + "]" + result;
 			}
 			else
 			{
-				return m_parentName + "[\"" + graphComponent->getName().string() + "\"]" + result;
+				return m_parentName + "[" + childKey( graphComponent ) + "]" + result;
 			}
 		}
-		result = "[\"" + graphComponent->getName().string() + "\"]" + result;
+		result = "[" + childKey( graphComponent ) + "]" + result;
 		graphComponent = parent;
 	}
 
