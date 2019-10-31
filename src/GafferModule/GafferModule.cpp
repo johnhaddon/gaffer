@@ -49,10 +49,12 @@
 #include "DotBinding.h"
 #include "ExpressionBinding.h"
 #include "GraphComponentBinding.h"
+#include "GraphComponentAlgoBinding.h"
 #include "ProcessMessageHandlerBinding.h"
 #include "MetadataAlgoBinding.h"
 #include "MetadataBinding.h"
 #include "MonitorBinding.h"
+#include "NameValuePlugBinding.h"
 #include "NodeBinding.h"
 #include "NumericPlugBinding.h"
 #include "ParallelAlgoBinding.h"
@@ -76,7 +78,6 @@
 #include "TypedPlugBinding.h"
 #include "UndoScopeBinding.h"
 #include "ValuePlugBinding.h"
-#include "NameValuePlugBinding.h"
 
 #include "GafferBindings/DependencyNodeBinding.h"
 
@@ -218,6 +219,7 @@ BOOST_PYTHON_MODULE( _Gaffer )
 	bindProcessMessageHandler();
 	bindNameValuePlug();
 	bindProcess();
+	bindGraphComponentAlgo();
 
 	NodeClass<Backdrop>();
 
