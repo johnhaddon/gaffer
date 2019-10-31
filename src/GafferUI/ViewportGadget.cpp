@@ -40,6 +40,8 @@
 #include "GafferUI/Style.h"
 #include "GafferUI/Pointer.h"
 
+#include "Gaffer/GraphComponentAlgo.h"
+
 #include "IECoreGL/PerspectiveCamera.h"
 #include "IECoreGL/Selector.h"
 #include "IECoreGL/State.h"
@@ -65,6 +67,7 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreGL;
+using namespace Gaffer;
 using namespace GafferUI;
 
 //////////////////////////////////////////////////////////////////////////
@@ -1083,7 +1086,7 @@ void ViewportGadget::emitEnterLeaveEvents( GadgetPtr newGadgetUnderMouse, Gadget
 		}
 		else
 		{
-			if( Gadget *commonAncestor = oldGadgetUnderMouse->commonAncestor<Gadget>( newGadgetUnderMouse.get() ) )
+			if( Gadget *commonAncestor = GraphComponentAlgo::commonAncestor<Gadget>( oldGadgetUnderMouse.get(), newGadgetUnderMouse.get() ) )
 			{
 				lowestUnchanged = commonAncestor;
 			}

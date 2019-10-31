@@ -43,6 +43,7 @@
 #include "GafferUI/Style.h"
 
 #include "Gaffer/Dot.h"
+#include "Gaffer/GraphComponentAlgo.h"
 #include "Gaffer/Metadata.h"
 #include "Gaffer/MetadataAlgo.h"
 #include "Gaffer/ScriptNode.h"
@@ -561,7 +562,7 @@ std::string StandardConnectionGadget::getToolTip( const IECore::LineSegment3f &l
 		}
 	}
 
-	const Gaffer::GraphComponent *ancestor = srcPlug->commonAncestor<Gaffer::GraphComponent>( dstPlug );
+	const Gaffer::GraphComponent *ancestor = GraphComponentAlgo::commonAncestor( srcPlug, dstPlug );
 
 	std::string srcName;
 	std::string dstName;
