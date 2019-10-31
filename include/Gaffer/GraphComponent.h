@@ -213,12 +213,12 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public boost::sig
 		//@}
 
 		/// \deprecated Use `GraphComponentAlgo::commonAncestor()` instead.
-		// template<typename T=GraphComponent>
-		// T *commonAncestor( const GraphComponent *other );
-		// template<typename T=GraphComponent>
-		// const T *commonAncestor( const GraphComponent *other ) const;
-		// GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType );
-		// const GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType ) const;
+		template<typename T=GraphComponent>
+		T *commonAncestor( const GraphComponent *other );
+		template<typename T=GraphComponent>
+		const T *commonAncestor( const GraphComponent *other ) const;
+		GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType );
+		const GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType ) const;
 
 	protected :
 
