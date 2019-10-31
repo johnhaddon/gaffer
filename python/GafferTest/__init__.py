@@ -161,6 +161,7 @@ from ExtensionAlgoTest import ExtensionAlgoTest
 from ModuleTest import ModuleTest
 from NumericBookmarkSetTest import NumericBookmarkSetTest
 from NameSwitchTest import NameSwitchTest
+from GraphComponentAlgoTest import GraphComponentAlgoTest
 
 from IECorePreviewTest import *
 

@@ -197,7 +197,7 @@ class AnimationEditor( GafferUI.NodeSetEditor ) :
 			pathRoot = nodeSet[0].parent()
 			for node in nodeSet[1:] :
 				if not pathRoot.isAncestorOf( node ) :
-					pathRoot = pathRoot.commonAncestor( node )
+					pathRoot = Gaffer.GraphComponentAlgo.commonAncestor( pathRoot, node )
 
 		self.__curveList.setPath(
 			Gaffer.GraphComponentPath(
