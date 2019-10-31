@@ -197,17 +197,6 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public boost::sig
 		/// As above, but taking a TypeId to specify type - this is mainly provided for the binding.
 		GraphComponent *ancestor( IECore::TypeId ancestorType );
 		const GraphComponent *ancestor( IECore::TypeId ancestorType ) const;
-		/// Returns the first ancestor of type T which
-		/// is also an ancestor of other.
-		template<typename T=GraphComponent>
-		T *commonAncestor( const GraphComponent *other );
-		/// Returns the first ancestor of type T which
-		/// is also an ancestor of other.
-		template<typename T=GraphComponent>
-		const T *commonAncestor( const GraphComponent *other ) const;
-		/// As above, but taking a TypeId to specify type - this is mainly provided for the binding.
-		GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType );
-		const GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType ) const;
 		/// Returns true if this GraphComponent is an ancestor (or direct parent) of other.
 		bool isAncestorOf( const GraphComponent *other ) const;
 		/// A signal emitted when a child is added to this component. Slots should
@@ -222,6 +211,14 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public boost::sig
 		/// will be null as it is no longer available.
 		BinarySignal &parentChangedSignal();
 		//@}
+
+		/// \deprecated Use `GraphComponentAlgo::commonAncestor()` instead.
+		// template<typename T=GraphComponent>
+		// T *commonAncestor( const GraphComponent *other );
+		// template<typename T=GraphComponent>
+		// const T *commonAncestor( const GraphComponent *other ) const;
+		// GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType );
+		// const GraphComponent *commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType ) const;
 
 	protected :
 
