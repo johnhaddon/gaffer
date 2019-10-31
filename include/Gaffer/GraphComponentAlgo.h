@@ -57,6 +57,11 @@ GAFFER_API const T *commonAncestor( const GraphComponent *graphComponent, const 
 GAFFER_API GraphComponent *commonAncestor( GraphComponent *graphComponent, const GraphComponent *other, IECore::TypeId ancestorType );
 GAFFER_API const GraphComponent *commonAncestor( const GraphComponent *graphComponent, const GraphComponent *other, IECore::TypeId ancestorType );
 
+/// Returns the equivalent of `correspondingAncestor->descendant<T>( descendant->relativeName( ancestor ) )`.
+/// Returns null if `descendant` is not a descendant of `ancestor`.
+template<typename T=GraphComponent>
+const T *correspondingDescendant( const GraphComponent *ancestor, const GraphComponent *descendant, const GraphComponent *correspondingAncestor );
+
 } // namespace GraphComponentAlgo
 
 } // namespace Gaffer

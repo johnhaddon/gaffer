@@ -55,6 +55,37 @@ const T *commonAncestor( const GraphComponent *graphComponent, const GraphCompon
 	return static_cast<const T *>( commonAncestor( graphComponent, other, T::staticTypeId() ) );
 }
 
+template<typename T>
+const T *correspondingDescendant( const GraphComponent *ancestor, const GraphComponent *descendant, const GraphComponent *correspondingAncestor )
+{
+	if( descendant == ancestor )
+	{
+		// We're already at plugAncestor, so the relative path has zero length
+		// and we can return oppositeAncestor.
+		return correspondingAncestor;
+	}
+
+	// now we find the corresponding descendant of plug->parent(), and
+	// return its child with the same name as "plug" (if either of those things exist):
+
+	const GraphComponent *descendantParent = descendant->parent();
+	if( !descendantParent )
+	{
+		// `descendant` wasn't a descendant of `ancestor`.
+		return nullptr;
+	}
+
+	// find the corresponding plug for the parent:
+	const GraphComponent *correspondingParent = correspondingDescendant( ancestor, descendantParent, correspondingAncestor );
+	if( !correspondingParent )
+	{
+		return nullptr;
+	}
+
+	// find the child corresponding to "plug"
+	return correspondingParent->getChild<T>( descendant->getName() ); // CAST TO T HERE IS WRONG!!!!!!!
+}
+
 } // namespace GraphComponentAlgo
 
 } // namespace Gaffer
