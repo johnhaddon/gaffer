@@ -47,6 +47,7 @@
 #include "Gaffer/ScriptNode.h"
 #include "Gaffer/NameValuePlug.h"
 
+#include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/Primitive.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
 
@@ -367,7 +368,18 @@ IECore::ConstObjectPtr OSLObject::computeProcessedObject( const ScenePath &path,
 		gafferAttributes = inPlug()->fullAttributes( path );
 	}
 
-	IECoreScene::ConstPrimitivePtr resampledObject = IECore::runTimeCast<const IECoreScene::Primitive>( resampledInPlug()->objectPlug()->getValue() );
+	IECoreScene::ConstPrimitivePtr resampledObject;
+	if( runTimeCast<const PointsPrimitive>( inputObject ) )
+	{
+		// We never need to resample PointsPrimitives, because
+		// Varying/Vertex/FaceVarying are all the same size, and
+		// Uniform is the same size as Constant.
+		resampledObject = inputPrimitive;
+	}
+	else
+	{
+		resampledObject = IECore::runTimeCast<const IECoreScene::Primitive>( resampledInPlug()->objectPlug()->getValue() );
+	}
 	CompoundDataPtr shadingPoints = prepareShadingPoints( resampledObject.get(), shadingEngine.get(), gafferAttributes.get() );
 
 	PrimitivePtr outputPrimitive = inputPrimitive->copy();

@@ -38,6 +38,7 @@ import os
 import imath
 import subprocess
 import inspect
+import functools
 
 import IECore
 import IECoreScene
@@ -49,6 +50,12 @@ import GafferOSL
 import GafferOSLTest
 
 class OSLObjectTest( GafferOSLTest.OSLTestCase ) :
+
+	def setUp( self ) :
+
+		GafferOSLTest.OSLTestCase.setUp( self )
+
+		self.addCleanup( functools.partial( Gaffer.ValuePlug.setCacheMemoryLimit, Gaffer.ValuePlug.getCacheMemoryLimit() ) )
 
 	def test( self ) :
 
@@ -1129,6 +1136,53 @@ class OSLObjectTest( GafferOSLTest.OSLTestCase ) :
 
 		self.assertScenesEqual( oslObject["out"], oslObject["in"], checks = { "bound" } )
 		self.assertSceneHashesEqual( oslObject["out"], oslObject["in"], checks = { "bound" } )
+
+	def testUnnecessaryPointsPrimitiveResampling( self ) :
+
+		plane = GafferScene.Plane()
+		plane["divisions"].setValue( imath.V2i( 1000 ) )
+
+		planeFilter = GafferScene.PathFilter()
+		planeFilter["paths"].setValue( IECore.StringVectorData( [ "/plane" ] ) )
+
+		meshToPoints = GafferScene.MeshToPoints()
+		meshToPoints["in"].setInput( plane["out"] )
+		meshToPoints["filter"].setInput( planeFilter["out"] )
+
+		inPoint = GafferOSL.OSLShader()
+		inPoint.loadShader( "ObjectProcessing/InPoint" )
+
+		addVector = GafferOSL.OSLShader()
+		addVector.loadShader( "Maths/AddVector" )
+		addVector["parameters"]["a"].setInput( inPoint["out"]["value"] )
+		addVector["parameters"]["b"]["y"].setValue( 1 )
+
+		outScene = meshToPoints["out"]
+		oslObjects = []
+
+		for i in range( 0, 5 ) :
+
+			oslObject = GafferOSL.OSLObject()
+			oslObject["in"].setInput( outScene )
+			oslObject["filter"].setInput( planeFilter["out"] )
+			oslObject["primitiveVariables"].addChild(
+				Gaffer.NameValuePlug(
+					"P", IECore.V3fData( imath.V3f( 0 ), IECore.GeometricData.Interpretation.Point )
+				)
+			)
+			oslObject["primitiveVariables"][0]["value"].setInput( addVector["out"]["out"] )
+
+			oslObjects.append( oslObject )
+			outScene = oslObject["out"]
+
+		planeObject = plane["out"].object( "/plane" )
+		Gaffer.ValuePlug.setCacheMemoryLimit( planeObject.memoryUsage() / 10 )
+		Gaffer.ValuePlug.clearCache()
+
+		with Gaffer.PerformanceMonitor() as m :
+			outScene.object( "/plane" )
+
+		self.assertEqual( m.plugStatistics( plane["out"]["object"] ).computeCount, 1 )
 
 if __name__ == "__main__":
 	unittest.main()
