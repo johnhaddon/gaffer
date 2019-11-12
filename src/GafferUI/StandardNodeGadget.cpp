@@ -749,7 +749,7 @@ ConnectionCreator *StandardNodeGadget::closestDragDestination( const DragDropEve
 
 		const V3f closestPoint = closestPointOnBox( event.line.p0, bound );
 		const float dist = ( closestPoint - event.line.p0 ).length2();
-		if( dist < maxDist )
+		if( dist <= maxDist )
 		{
 			result = it->get();
 			maxDist = dist;
