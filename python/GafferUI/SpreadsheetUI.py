@@ -36,6 +36,8 @@
 
 import collections
 import functools
+import re
+import sys
 
 import imath
 
@@ -280,9 +282,17 @@ class _RowsPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		with self.__grid :
 
+			self.__tabBar = _ColumnTabBar(
+				plug,
+				parenting = {
+					"index" : ( 1, 0 ),
+				}
+			)
+			self.__tabBar.visibleColumnsChangedSignal().connect( Gaffer.WeakMethod( self.__visibleColumnsChanged ), scoped = False )
+
 			with GafferUI.ListContainer(
 				parenting = {
-					"index" : ( 0, 0 ),
+					"index" : ( 0, 1 ),
 					"alignment" : ( GafferUI.HorizontalAlignment.Left, GafferUI.VerticalAlignment.Bottom ),
 				}
 			) :
@@ -290,46 +300,46 @@ class _RowsPlugValueWidget( GafferUI.PlugValueWidget ) :
 				GafferUI.Label( "Default" )._qtWidget().setIndent( 6 )
 				GafferUI.Spacer( imath.V2i( 1, 8 ) )
 
-			defaultTable = _PlugTableView(
+			self.__defaultTable = _PlugTableView(
 				plug, self.getContext(), _PlugTableView.Mode.Defaults,
 				parenting = {
-					"index" : ( 1, 0 ),
+					"index" : ( 1, 1 ),
 				}
 			)
 
 			self.__rowNamesTable = _PlugTableView(
 				plug, self.getContext(), _PlugTableView.Mode.RowNames,
 				parenting = {
-					"index" : ( 0, 1 ),
+					"index" : ( 0, 2 ),
 				}
 			)
 			self.__updateRowNamesWidth()
 
-			cellsTable = _PlugTableView(
+			self.__cellsTable = _PlugTableView(
 				plug, self.getContext(), _PlugTableView.Mode.Cells,
 				parenting = {
-					"index" : ( 1, 1 ),
-				}
-			)
-
-			_LinkedScrollBar(
-				GafferUI.ListContainer.Orientation.Vertical, [ cellsTable, self.__rowNamesTable ],
-				parenting = {
-					"index" : ( 2, 1 ),
-				}
-			)
-
-			_LinkedScrollBar(
-				GafferUI.ListContainer.Orientation.Horizontal, [ cellsTable, defaultTable ],
-				parenting = {
 					"index" : ( 1, 2 ),
+				}
+			)
+
+			_LinkedScrollBar(
+				GafferUI.ListContainer.Orientation.Vertical, [ self.__cellsTable, self.__rowNamesTable ],
+				parenting = {
+					"index" : ( 2, 2 ),
+				}
+			)
+
+			_LinkedScrollBar(
+				GafferUI.ListContainer.Orientation.Horizontal, [ self.__cellsTable, self.__defaultTable ],
+				parenting = {
+					"index" : ( 1, 3 ),
 				}
 			)
 
 			addRowButton = GafferUI.Button(
 				image="plus.png", hasFrame=False, toolTip = "Click to add row, or drop new row names",
 				parenting = {
-					"index" : ( 0, 3 )
+					"index" : ( 0, 4 )
 				}
 			)
 			addRowButton.clickedSignal().connect( Gaffer.WeakMethod( self.__addRowButtonClicked ), scoped = False )
@@ -340,7 +350,7 @@ class _RowsPlugValueWidget( GafferUI.PlugValueWidget ) :
 			self.__statusLabel = GafferUI.Label(
 				"",
 				parenting = {
-					"index" : ( slice( 1, 3 ), 3 ),
+					"index" : ( slice( 1, 3 ), 4 ),
 					"alignment" : ( GafferUI.HorizontalAlignment.Left, GafferUI.VerticalAlignment.Top )
 				}
 			)
@@ -353,11 +363,13 @@ class _RowsPlugValueWidget( GafferUI.PlugValueWidget ) :
 			widget.enterSignal().connect( Gaffer.WeakMethod( self.__enterToolTippedWidget ), scoped = False )
 			widget.leaveSignal().connect( Gaffer.WeakMethod( self.__leaveToolTippedWidget ), scoped = False )
 
-		for widget in [ defaultTable, cellsTable ] :
+		for widget in [ self.__defaultTable, self.__cellsTable ] :
 			widget.mouseMoveSignal().connect( Gaffer.WeakMethod( self.__cellsMouseMove ), scoped = False )
 			widget.leaveSignal().connect( Gaffer.WeakMethod( self.__cellsLeave ), scoped = False )
 
 		Gaffer.Metadata.plugValueChangedSignal().connect( Gaffer.WeakMethod( self.__plugMetadataChanged ), scoped = False )
+
+		self.__updateVisibleColumns()
 
 	def hasLabel( self ) :
 
@@ -445,6 +457,16 @@ class _RowsPlugValueWidget( GafferUI.PlugValueWidget ) :
 			if self.getPlug().isAncestorOf( plug ) :
 				self.__updateRowNamesWidth()
 
+	def __visibleColumnsChanged( self, tabBar ) :
+
+		self.__updateVisibleColumns()
+
+	def __updateVisibleColumns( self ) :
+
+		visibleColumns = self.__tabBar.visibleColumns()
+		self.__defaultTable.setVisibleColumns( visibleColumns )
+		self.__cellsTable.setVisibleColumns( visibleColumns )
+
 GafferUI.PlugValueWidget.registerType( Gaffer.Spreadsheet.RowsPlug, _RowsPlugValueWidget )
 
 # _PlugTableView
@@ -488,7 +510,7 @@ class _PlugTableView( GafferUI.Widget ) :
 			tableView.horizontalHeader().sectionResized.connect( Gaffer.WeakMethod( self.__sectionResized ) )
 			tableView.horizontalHeader().sectionMoved.connect( Gaffer.WeakMethod( self.__sectionMoved ) )
 
-			self.__callingResizeSection = False
+			self.__ignoreSectionResized = False
 			self.__callingMoveSection = False
 
 			self.__plugMetadataChangedConnection = Gaffer.Metadata.plugValueChangedSignal().connect(
@@ -565,6 +587,32 @@ class _PlugTableView( GafferUI.Widget ) :
 			)
 		)
 
+	def setVisibleColumns( self, cellPlugs ) :
+
+		# Changing column visibility seems to cause the
+		# `sectionResized()` signal to be emitted unnecessarily,
+		# so we suppress the slot we've attached to it.
+		self.__ignoreSectionResized = True
+		try :
+			rowsPlug = self._qtWidget().model().rowsPlug()
+			for i, plug in enumerate( rowsPlug["default"]["cells"].children() ) :
+				if plug in cellPlugs :
+					self._qtWidget().showColumn( i )
+				else :
+					self._qtWidget().hideColumn( i )
+		finally :
+			self.__ignoreSectionResized = False
+
+	def getVisibleColumns( self ) :
+
+		result = []
+		rowsPlug = self._qtWidget().model().rowsPlug()
+		for i, plug in enumerate( rowsPlug["default"]["cells"].children() ) :
+			if not self._qtWidget().isColumnHidden( i ) :
+				result.append( plug )
+
+		return result
+
 	def __sectionMoved( self, logicalIndex, oldVisualIndex, newVisualIndex ) :
 
 		if self.__callingMoveSection :
@@ -581,7 +629,7 @@ class _PlugTableView( GafferUI.Widget ) :
 
 	def __sectionResized( self, logicalIndex, oldSize, newSize ) :
 
-		if self.__callingResizeSection :
+		if self.__ignoreSectionResized :
 			return
 
 		model = self._qtWidget().model()
@@ -618,12 +666,12 @@ class _PlugTableView( GafferUI.Widget ) :
 		if key == "spreadsheet:columnWidth" :
 
 			column = rowsPlug["default"]["cells"].children().index( plug )
-			self.__callingResizeSection = True
+			self.__ignoreSectionResized = True
 			width = Gaffer.Metadata.value( plug, "spreadsheet:columnWidth" )
 			if width is None :
 				width = self._qtWidget().horizontalHeader().defaultSectionSize()
 			self._qtWidget().horizontalHeader().resizeSection( column, width )
-			self.__callingResizeSection = False
+			self.__ignoreSectionResized = False
 
 		elif key == "spreadsheet:columnIndex" :
 
@@ -684,6 +732,27 @@ class _PlugTableView( GafferUI.Widget ) :
 			}
 		)
 
+		tabNames = _ColumnTabBar.tabNames( self._qtWidget().model().rowsPlug() )
+		for tabName in tabNames :
+			menuDefinition.append(
+				"/Move to Tab/{}".format( tabName ),
+				{
+					"command" : functools.partial( _ColumnTabBar.assignTab, cellPlug, tabName = tabName ),
+					"active" : not Gaffer.MetadataAlgo.readOnly( cellPlug ),
+				}
+			)
+
+		if tabNames :
+			menuDefinition.append( "/Move to Tab/__divider__", { "divider" : True } )
+
+		menuDefinition.append(
+			"/Move to Tab/New...",
+			{
+				"command" : functools.partial( Gaffer.WeakMethod( self.__addToNewTab ), cellPlug ),
+				"active" : not Gaffer.MetadataAlgo.readOnly( cellPlug ),
+			}
+		)
+
 		menuDefinition.append( "/DeleteDivider", { "divider" : True } )
 
 		menuDefinition.append(
@@ -716,6 +785,17 @@ class _PlugTableView( GafferUI.Widget ) :
 		rowsPlug = cellPlug.ancestor( Gaffer.Spreadsheet.RowsPlug )
 		with Gaffer.UndoScope( rowsPlug.ancestor( Gaffer.ScriptNode ) ) :
 			rowsPlug.removeColumn( cellPlug.parent().children().index( cellPlug ) )
+
+	def __addToNewTab( self, cellPlug ) :
+
+		tabName = GafferUI.TextInputDialogue(
+			initialText = "New tab",
+			title = "Move to Tab",
+			confirmLabel = "Move"
+		).waitForText( parentWindow = self.ancestor( GafferUI.Window ) )
+
+		if tabName :
+			_ColumnTabBar.assignTab( cellPlug, tabName )
 
 class _PlugTableModel( QtCore.QAbstractTableModel ) :
 
@@ -1214,6 +1294,135 @@ class _EditWindow( GafferUI.Window ) :
 			return GafferUI.PlugWidget.labelWidth() + w
 
 		return None
+
+# _ColumnTabBar
+# =============
+
+class _ColumnTabBar( GafferUI.Widget ) :
+
+	def __init__( self, rowsPlug, **kw ) :
+
+		tabBar = QtWidgets.QTabBar()
+		GafferUI.Widget.__init__( self, tabBar, **kw )
+
+		self.__rowsPlug = rowsPlug
+		self.__visibleColumnsChangedSignal = Gaffer.Signal1()
+
+		tabBar.setDrawBase( False )
+		tabBar.setMovable( True )
+		tabBar.setSizePolicy( QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed )
+
+		tabBar.currentChanged.connect( Gaffer.WeakMethod( self.__currentChanged ) )
+		self.__ignoreCurrentChanged = False
+		tabBar.tabMoved.connect( Gaffer.WeakMethod( self.__tabMoved ) )
+		self.__plugMetadataChangedConnection = Gaffer.Metadata.plugValueChangedSignal().connect( Gaffer.WeakMethod( self.__plugMetadataChanged ) )
+
+		self.__updateTabs()
+
+	def visibleColumns( self ) :
+
+		if not self._qtWidget().count() :
+			return set( self.__rowsPlug["default"]["cells"] )
+
+		result = set()
+		tabName = self._qtWidget().tabText( self._qtWidget().currentIndex() )
+		for cellPlug in self.__rowsPlug["default"]["cells"] :
+			m = Gaffer.Metadata.value( cellPlug, "spreadsheet:section" )
+			if m == tabName or ( not m and tabName == "Other" ) :
+				result.add( cellPlug )
+
+		return result
+
+	def visibleColumnsChangedSignal( self ) :
+
+		return self.__visibleColumnsChangedSignal
+
+	@classmethod
+	def tabNames( cls, rowsPlug ) :
+
+		names = set()
+		for cellPlug in rowsPlug["default"]["cells"] :
+			tabName = Gaffer.Metadata.value( cellPlug, "spreadsheet:section" ) or ""
+			names.add( tabName )
+
+		if "" in names :
+			if len( names ) == 1 :
+				return []
+			else :
+				names.remove( "" )
+				names.add( "Other" )
+
+		namesAndIndices = []
+		for name in sorted( list( names ) ) :
+			index = len( namesAndIndices ) if name != "Other" else sys.maxsize
+			metadataIndex = Gaffer.Metadata.value( rowsPlug, "spreadsheet:section:{}:index".format( name ) )
+			index = metadataIndex if metadataIndex is not None else index
+			namesAndIndices.append( ( name, index ) )
+
+		namesAndIndices.sort( key = lambda x : x[1] )
+		return [ x[0] for x in namesAndIndices ]
+
+	@classmethod
+	def assignTab( cls, cellPlug, tabName ) :
+
+		with Gaffer.UndoScope( cellPlug.ancestor( Gaffer.ScriptNode ) ) :
+			Gaffer.Metadata.registerValue( cellPlug, "spreadsheet:section", tabName )
+			# Remove any index metadata for tabs that are no longer in use.
+			rowsPlug = cellPlug.ancestor( Gaffer.Spreadsheet.RowsPlug )
+			tabNames = set( cls.tabNames( rowsPlug ) )
+			registeredValues = Gaffer.Metadata.registeredValues( rowsPlug, instanceOnly = True )
+			for key in registeredValues :
+				m = re.match( "spreadsheet:section:(.+):index", key )
+				if m and m.group( 1 ) not in tabNames :
+					Gaffer.Metadata.deregisterValue( rowsPlug, key )
+
+	def __plugMetadataChanged( self, nodeTypeId, plugPath, key, plug ) :
+
+		if plug is None :
+			return
+
+		if key == "spreadsheet:section" and self.__rowsPlug.isAncestorOf( plug ) :
+			self.__updateTabs()
+			self.visibleColumnsChangedSignal()( self )
+		elif re.match( "spreadsheet:section:.+:index", key ) and plug == self.__rowsPlug :
+			self.__updateTabs()
+
+	def __updateTabs( self ) :
+
+		oldTabNames = [ self._qtWidget().tabText( i ) for i in range( 0, self._qtWidget().count() ) ]
+		newTabNames = self.tabNames( self.__rowsPlug )
+
+		if oldTabNames == newTabNames :
+			return
+
+		currentTabName = self._qtWidget().tabText( self._qtWidget().currentIndex() )
+
+		self.__ignoreCurrentChanged = True
+		try :
+			while self._qtWidget().count() :
+				self._qtWidget().removeTab( 0 )
+			for tabName in newTabNames :
+				self._qtWidget().addTab( tabName )
+			if currentTabName in newTabNames :
+				self._qtWidget().setCurrentIndex( newTabNames.index( currentTabName ) )
+			else :
+				self.visibleColumnsChangedSignal()( self )
+		finally :
+			self.__ignoreCurrentChanged = False
+
+	def __currentChanged( self, index ) :
+
+		if not self.__ignoreCurrentChanged :
+			self.visibleColumnsChangedSignal()( self )
+
+	def __tabMoved( self, fromIndex, toIndex ) :
+
+		with Gaffer.BlockedConnection( self.__plugMetadataChangedConnection ) :
+			with Gaffer.UndoScope( self.__rowsPlug.ancestor( Gaffer.ScriptNode ) ) :
+				for i in range( 0, self._qtWidget().count() ) :
+					tabName = self._qtWidget().tabText( i )
+					Gaffer.Metadata.registerValue( self.__rowsPlug, "spreadsheet:section:{}:index".format( tabName ), i )
+
 
 # ScrolledContainer linking
 # =========================
