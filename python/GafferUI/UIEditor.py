@@ -126,6 +126,7 @@ class UIEditor( GafferUI.NodeSetEditor ) :
 
 				self.__plugListing = _PlugListing()
 				self.__plugListing.selectionChangedSignal().connect( Gaffer.WeakMethod( self.__plugListingSelectionChanged ), scoped = False )
+				self.__plugListing.sectionAddedSignal().connect( Gaffer.WeakMethod( self.__sectionAdded ), scoped = False )
 
 				with GafferUI.TabbedContainer() as self.__plugAndSectionEditorsContainer :
 
@@ -313,6 +314,13 @@ class UIEditor( GafferUI.NodeSetEditor ) :
 			self.__plugEditor.setPlug( None )
 			self.__sectionEditor.setSection( selection )
 			self.__plugAndSectionEditorsContainer.setCurrent( self.__sectionEditor )
+
+	#@GafferUI.LazyMethod()
+	def __sectionAdded( self, plugListing, sectionName ) :
+
+		self.__sectionEditor.nameWidget().setSelection( None, None ) # all text
+		self._qtWidget().activateWindow()
+		self.__sectionEditor.nameWidget().grabFocus()
 
 	def __sectionEditorNameChanged( self, sectionEditor, oldName, newName ) :
 
@@ -610,6 +618,7 @@ class _PlugListing( GafferUI.Widget ) :
 		self.__parent = None # the parent of the plugs we're listing
 		self.__dragItem = None
 		self.__selectionChangedSignal = Gaffer.Signal1()
+		self.__sectionAddedSignal = Gaffer.Signal2()
 
 		self.__pathListing.dragEnterSignal().connect( Gaffer.WeakMethod( self.__dragEnter ), scoped = False )
 		self.__pathListing.dragMoveSignal().connect( Gaffer.WeakMethod( self.__dragMove ), scoped = False )
@@ -688,6 +697,10 @@ class _PlugListing( GafferUI.Widget ) :
 	def selectionChangedSignal( self ) :
 
 		return self.__selectionChangedSignal
+
+	def sectionAddedSignal( self ) :
+
+		return self.__sectionAddedSignal
 
 	# Updates the path we show in the listing by building a layout based
 	# on the metadata.
@@ -1031,6 +1044,10 @@ class _PlugListing( GafferUI.Widget ) :
 
 		self.__pathListing.setSelectedPaths(
 			self.__pathListing.getPath().copy().setFromString( "/" + name )
+		)
+
+		GafferUI.EventLoop.addIdleCallback(
+			lambda : self.sectionAddedSignal()( self, name )
 		)
 
 	def __selectedItem( self ) :
@@ -1655,6 +1672,10 @@ class _SectionEditor( GafferUI.Widget ) :
 	def getSection( self ) :
 
 		return self.__section
+
+	def nameWidget( self ) :
+
+		return self.__nameWidget
 
 	def nameChangedSignal( self ) :
 
