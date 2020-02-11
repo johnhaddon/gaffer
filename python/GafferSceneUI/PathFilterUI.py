@@ -109,7 +109,7 @@ GafferUI.Pointer.registerPointer( "replaceObjects", GafferUI.Pointer( "replaceOb
 
 __DropMode = IECore.Enum.create( "None", "Add", "Remove", "Replace" )
 
-__originalDragPointer = None
+__dragState = { "enterCount" : 0, "originalPointer" : None }
 
 def __pathsPlug( node ) :
 
@@ -151,24 +151,28 @@ def __dragEnter( nodeGadget, event ) :
 	if __dropMode( nodeGadget, event ) == __DropMode.None :
 		return False
 
-	global __originalDragPointer
-	__originalDragPointer = GafferUI.Pointer.getCurrent()
+	global __dragState
+	if __dragState["enterCount"] == 0 :
+		__dragState["originalPointer"] = GafferUI.Pointer.getCurrent()
+	__dragState["enterCount"] += 1
 
 	return True
 
 def __dragLeave( nodeGadget, event ) :
 
-	global __originalDragPointer
-
-	GafferUI.Pointer.setCurrent( __originalDragPointer )
-	__originalDragPointer = None
-
-	return True
+	global __dragState
+	if __dragState["enterCount"] == 0 :
+		return False
+	else :
+		__dragState["enterCount"] -= 1
+		if __dragState["enterCount"] == 0 :
+			GafferUI.Pointer.setCurrent( __dragState["originalPointer"] )
+		return True
 
 def __dragMove( nodeGadget, event ) :
 
-	global __originalDragPointer
-	if __originalDragPointer is None :
+	global __dragState
+	if __dragState["enterCount"] == 0 :
 		return False
 
 	GafferUI.Pointer.setCurrent( str( __dropMode( nodeGadget, event ) ).lower() + "Objects" )
@@ -177,8 +181,8 @@ def __dragMove( nodeGadget, event ) :
 
 def __drop( nodeGadget, event ) :
 
-	global __originalDragPointer
-	if __originalDragPointer is None :
+	global __dragState
+	if __dragState["enterCount"] == 0 :
 		return False
 
 	pathsPlug = __pathsPlug( nodeGadget.node() )
@@ -212,8 +216,9 @@ def __drop( nodeGadget, event ) :
 
 		pathsPlug.setValue( IECore.StringVectorData( paths ) )
 
-	GafferUI.Pointer.setCurrent( __originalDragPointer )
-	__originalDragPointer = None
+	GafferUI.Pointer.setCurrent( __dragState["originalPointer"] )
+	assert( __dragState["enterCount"] == 1 )
+	__dragState["enterCount"] = 0
 
 	return True
 
