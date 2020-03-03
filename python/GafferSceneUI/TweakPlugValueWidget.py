@@ -96,16 +96,6 @@ class TweakPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		return None
 
-	def setReadOnly( self, readOnly ) :
-
-		if readOnly == self.getReadOnly() :
-			return
-
-		GafferUI.PlugValueWidget.setReadOnly( self, readOnly )
-
-		for w in self.__row :
-			w.setReadOnly( readOnly )
-
 	def _updateFromPlug( self ) :
 
 		with self.getContext() :
@@ -133,7 +123,7 @@ def __plugPopupMenu( menuDefinition, plugValueWidget ):
 		"/Delete",
 		{
 			"command" : functools.partial( __deletePlug, plug ),
-			"active" : not plugValueWidget.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( plug.parent() )
+			"active" : not Gaffer.MetadataAlgo.readOnly( plug.parent() )
 		}
 	)
 

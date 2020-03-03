@@ -336,7 +336,7 @@ def __plugPopupMenu( menuDefinition, plugValueWidget ) :
 			"/Delete",
 			{
 				"command" : functools.partial( __deletePlug, plug ),
-				"active" : not plugValueWidget.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( plug )
+				"active" : not Gaffer.MetadataAlgo.readOnly( plug )
 			}
 		)
 

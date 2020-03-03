@@ -102,7 +102,6 @@ class PlugLayout( GafferUI.Widget ) :
 		GafferUI.Widget.__init__( self, self.__layout, **kw )
 
 		self.__parent = parent
-		self.__readOnly = False
 		self.__layoutName = layoutName
 		# not to be confused with __rootSection, which holds an actual _Section object
 		self.__rootSectionName = rootSection
@@ -139,19 +138,6 @@ class PlugLayout( GafferUI.Widget ) :
 		# schedule our first update, which will take place when we become
 		# visible for the first time.
 		self.__updateLazily()
-
-	def getReadOnly( self ) :
-
-		return self.__readOnly
-
-	def setReadOnly( self, readOnly ) :
-
- 		if readOnly == self.getReadOnly() :
- 			return
-
- 		self.__readOnly = readOnly
-		for widget in self.__widgets.values() :
-			self.__applyReadOnly( widget, self.__readOnly )
 
 	def getContext( self ) :
 
@@ -393,7 +379,6 @@ class PlugLayout( GafferUI.Widget ) :
 				QWIDGETSIZE_MAX = 16777215 # qt #define not exposed by PyQt or PySide
 				result.labelPlugValueWidget().label()._qtWidget().setFixedWidth( QWIDGETSIZE_MAX )
 
-		self.__applyReadOnly( result, self.getReadOnly() )
 		self.__applyContext( result, self.getContext() )
 
 		# Store the metadata value that controlled the type created, so we can compare to it
@@ -464,19 +449,6 @@ class PlugLayout( GafferUI.Widget ) :
 		# upheaval is over.
 		self.__layoutDirty = True
 		self.__updateLazily()
-
-	def __applyReadOnly( self, widget, readOnly ) :
-
-		if widget is None :
-			return
-
-		if hasattr( widget, "setReadOnly" ) :
-			widget.setReadOnly( readOnly )
-		elif isinstance(  widget, GafferUI.PlugWidget ) :
-			widget.labelPlugValueWidget().setReadOnly( readOnly )
-			widget.plugValueWidget().setReadOnly( readOnly )
-		elif hasattr( widget, "plugValueWidget" ) :
-			widget.plugValueWidget().setReadOnly( readOnly )
 
 	def __applyContext( self, widget, context ) :
 

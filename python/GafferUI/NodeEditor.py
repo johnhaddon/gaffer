@@ -56,7 +56,6 @@ class NodeEditor( GafferUI.NodeSetEditor ) :
 
 		self.__nodeUI = None
 		self.__nameWidget = None
-		self.__readOnly = False
 
 		self._updateFromSet()
 
@@ -66,20 +65,6 @@ class NodeEditor( GafferUI.NodeSetEditor ) :
 
 		self._doPendingUpdate()
 		return self.__nodeUI
-
-	def setReadOnly( self, readOnly ) :
-
-		if readOnly == self.__readOnly :
-			return
-
-		self.__readOnly = readOnly
-		if self.__nodeUI is not None :
-			self.__nodeUI.setReadOnly( readOnly )
-			self.__nameWidget.setEditable( not readOnly )
-
-	def getReadOnly( self ) :
-
-		return self.__readOnly
 
 	__toolMenuSignal = Gaffer.Signal3()
 	## Returns a signal which is emitted to create the
@@ -125,12 +110,7 @@ class NodeEditor( GafferUI.NodeSetEditor ) :
 				GafferUI.Label( "<h4>Node Name</h4>" )
 				self.__nameWidget = GafferUI.NameWidget( node )
 				## \todo Make NameWidget support the readOnly metadata internally itself.
-				# We can't do that easily right now, because it would need to be managing
-				# the exact same `setEditable()` call that we're using here to propagate
-				# our Widget readonlyness. Really our Widget readonlyness mechanism is a
-				# bit lacking, and it should really be inherited automatically so we don't
-				# have to propagate it like this.
-				self.__nameWidget.setEditable( not self.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( node ) )
+				self.__nameWidget.setEditable( not Gaffer.MetadataAlgo.readOnly( node ) )
 
 				with GafferUI.ListContainer(
 					GafferUI.ListContainer.Orientation.Horizontal,
@@ -163,7 +143,6 @@ class NodeEditor( GafferUI.NodeSetEditor ) :
 		frame = GafferUI.Frame( borderStyle=GafferUI.Frame.BorderStyle.None, borderWidth=0 )
 		self.__column.append( frame, expand=True )
 		self.__nodeUI = GafferUI.NodeUI.create( node )
-		self.__nodeUI.setReadOnly( self.getReadOnly() )
 		frame.setChild( self.__nodeUI )
 
 	def _titleFormat( self ) :

@@ -240,17 +240,6 @@ class _FrameMaskPlugValueWidget( GafferUI.PlugValueWidget ) :
 		for i in range( 0, len( self.getPlug() ) ) :
 			self.__row[i].setHighlighted( highlighted )
 
-	def setReadOnly( self, readOnly ) :
-
-		if readOnly == self.getReadOnly() :
-			return
-
-		GafferUI.PlugValueWidget.setReadOnly( self, readOnly )
-
-		for w in self.__row :
-			if isinstance( w, GafferUI.PlugValueWidget ) :
-				w.setReadOnly( readOnly )
-
 	def childPlugValueWidget( self, childPlug, lazy=True ) :
 
 		for i, p in enumerate( self.getPlug().children() ) :

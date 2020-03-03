@@ -66,26 +66,5 @@ class CompoundPlugValueWidgetTest( GafferUITest.TestCase ) :
 		self.failUnless( isinstance( pw.childPlugValueWidget( n["c"]["i"] ), GafferUI.PlugValueWidget ) )
 		self.failUnless( isinstance( pw.childPlugValueWidget( n["c"]["s"] ), GafferUI.PlugValueWidget ) )
 
-	def testChildReadOnlyStatus( self ) :
-
-		n = Gaffer.Node()
-		n["c"] = Gaffer.Plug()
-		n["c"]["i"] = Gaffer.IntPlug()
-		n["c"]["s"] = Gaffer.StringPlug()
-
-		w = CompoundPlugValueWidget( n["c"] )
-		w.setReadOnly( True )
-
-		iw = w.childPlugValueWidget( n["c"]["i"], lazy=False )
-		sw = w.childPlugValueWidget( n["c"]["s"], lazy=False )
-
-		self.assertEqual( iw.getReadOnly(), True )
-		self.assertEqual( sw.getReadOnly(), True )
-
-		w.setReadOnly( False )
-
-		self.assertEqual( iw.getReadOnly(), False )
-		self.assertEqual( sw.getReadOnly(), False )
-
 if __name__ == "__main__":
 	unittest.main()

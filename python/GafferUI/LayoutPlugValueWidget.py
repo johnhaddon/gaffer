@@ -50,11 +50,6 @@ class LayoutPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		return True
 
-	def setReadOnly( self, readOnly ) :
-
-		GafferUI.PlugValueWidget.setReadOnly( self, readOnly )
-		self.__layout.setReadOnly( readOnly )
-
 	def childPlugValueWidget( self, childPlug, lazy=True ) :
 
 		return self.__layout.plugValueWidget( childPlug, lazy )

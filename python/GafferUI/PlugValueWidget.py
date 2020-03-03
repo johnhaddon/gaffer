@@ -63,8 +63,6 @@ class PlugValueWidget( GafferUI.Widget ) :
 		# upon completing construction.
 		self.__setPlugInternal( plug, callUpdateFromPlug=False )
 
-		self.__readOnly = False
-
 		self.dragEnterSignal().connect( Gaffer.WeakMethod( self.__dragEnter ), scoped = False )
 		self.dragLeaveSignal().connect( Gaffer.WeakMethod( self.__dragLeave ), scoped = False )
 		self.dropSignal().connect( Gaffer.WeakMethod( self.__drop ), scoped = False )
@@ -101,23 +99,6 @@ class PlugValueWidget( GafferUI.Widget ) :
 	def getContext( self ) :
 
 		return self.__context
-
-	## This method allows editing of the plug value
-	# to be disabled for this ui. Note that even when getReadOnly()
-	# is False, the ui may not allow editing due to the plug
-	# itself being read only for other reasons.
-	def setReadOnly( self, readOnly ) :
-
-		assert( isinstance( readOnly, bool ) )
-		if readOnly == self.__readOnly :
-			return
-
-		self.__readOnly = readOnly
-		self._updateFromPlug()
-
-	def getReadOnly( self ) :
-
-		return self.__readOnly
 
 	## Should be reimplemented to return True if this widget includes
 	# some sort of labelling for the plug. This is used to prevent
@@ -191,8 +172,8 @@ class PlugValueWidget( GafferUI.Widget ) :
 			self.__plugMetadataChangedConnection,
 		]
 
-	## Returns True if the plug value is editable as far as this ui is concerned
-	# - that plug.settable() is True and self.getReadOnly() is False. By default,
+	## Returns True if the plug value is editable as far as this UI is concerned
+	# - that `plug.settable()` is True and `MetadataAlgo.getReadOnly()` is False. By default,
 	# an animated plug is considered to be non-editable because it has an input
 	# connection. Subclasses which support animation editing may pass
 	# `canEditAnimation = True` to have animated plugs considered as editable.
@@ -201,9 +182,6 @@ class PlugValueWidget( GafferUI.Widget ) :
 		plug = self.getPlug()
 
 		if plug is None :
-			return False
-
-		if self.__readOnly :
 			return False
 
 		if hasattr( plug, "settable" ) and not plug.settable() :
@@ -301,7 +279,7 @@ class PlugValueWidget( GafferUI.Widget ) :
 			menuDefinition.append(
 				"/Remove input", {
 					"command" : Gaffer.WeakMethod( self.__removeInput ),
-					"active" : self.getPlug().acceptsInput( None ) and not self.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( self.getPlug() ),
+					"active" : self.getPlug().acceptsInput( None ) and not Gaffer.MetadataAlgo.readOnly( self.getPlug() ),
 				}
 			)
 		if hasattr( self.getPlug(), "defaultValue" ) and self.getPlug().direction() == Gaffer.Plug.Direction.In :
@@ -336,7 +314,7 @@ class PlugValueWidget( GafferUI.Widget ) :
 			"/Unlock" if readOnly else "/Lock",
 			{
 				"command" : functools.partial( Gaffer.WeakMethod( self.__applyReadOnly ), not readOnly ),
-				"active" : not self.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( self.getPlug().parent() ),
+				"active" : not Gaffer.MetadataAlgo.readOnly( self.getPlug().parent() ),
 			}
 		)
 
@@ -591,7 +569,7 @@ class PlugValueWidget( GafferUI.Widget ) :
 
 	def __dragEnter( self, widget, event ) :
 
-		if self.getReadOnly() or Gaffer.MetadataAlgo.readOnly( self.getPlug() ):
+		if Gaffer.MetadataAlgo.readOnly( self.getPlug() ):
 			return False
 
 		if isinstance( event.sourceWidget, GafferUI.PlugValueWidget ) :

@@ -209,7 +209,7 @@ def __unpromote( plug ) :
 	with Gaffer.UndoScope( plug.ancestor( Gaffer.ScriptNode ) ) :
 		Gaffer.PlugAlgo.unpromote( plug )
 
-def __appendPlugPromotionMenuItems( menuDefinition, plug, readOnly = False ) :
+def __appendPlugPromotionMenuItems( menuDefinition, plug ) :
 
 	node = plug.node()
 	if node is None :
@@ -218,6 +218,8 @@ def __appendPlugPromotionMenuItems( menuDefinition, plug, readOnly = False ) :
 	box = node.ancestor( Gaffer.Box )
 	if box is None :
 		return
+
+	readOnly = Gaffer.MetadataAlgo.readOnly( plug )
 
 	parentLabel = {
 		Gaffer.ArrayPlug : "Array",
@@ -267,7 +269,7 @@ def __appendPlugPromotionMenuItems( menuDefinition, plug, readOnly = False ) :
 
 def __plugPopupMenu( menuDefinition, plugValueWidget ) :
 
-	__appendPlugPromotionMenuItems( menuDefinition, plugValueWidget.getPlug(), readOnly = plugValueWidget.getReadOnly() )
+	__appendPlugPromotionMenuItems( menuDefinition, plugValueWidget.getPlug() )
 
 GafferUI.PlugValueWidget.popupMenuSignal().connect( __plugPopupMenu, scoped = False )
 
@@ -359,6 +361,6 @@ def __graphEditorPlugContextMenu( graphEditor, plug, menuDefinition ) :
 			}
 		)
 
-	__appendPlugPromotionMenuItems( menuDefinition, plug, readOnly )
+	__appendPlugPromotionMenuItems( menuDefinition, plug )
 
 GafferUI.GraphEditor.plugContextMenuSignal().connect( __graphEditorPlugContextMenu, scoped = False )

@@ -80,17 +80,6 @@ class CompoundNumericPlugValueWidget( GafferUI.PlugValueWidget ) :
 		for i in range( 0, len( self.getPlug() ) ) :
 			self.__row[i].setHighlighted( highlighted )
 
-	def setReadOnly( self, readOnly ) :
-
-		if readOnly == self.getReadOnly() :
-			return
-
-		GafferUI.PlugValueWidget.setReadOnly( self, readOnly )
-
-		for w in self.__row :
-			if isinstance( w, GafferUI.PlugValueWidget ) :
-				w.setReadOnly( readOnly )
-
 	def childPlugValueWidget( self, childPlug, lazy=True ) :
 
 		for i, p in enumerate( self.getPlug().children() ) :
@@ -169,14 +158,14 @@ class CompoundNumericPlugValueWidget( GafferUI.PlugValueWidget ) :
 			menuDefinition.append( "/Ungang", {
 				"command" : Gaffer.WeakMethod( compoundNumericPlugValueWidget.__ungang ),
 				"shortCut" : "Ctrl+G",
-				"active" : not plugValueWidget.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( compoundNumericPlugValueWidget.getPlug() ),
+				"active" : not Gaffer.MetadataAlgo.readOnly( compoundNumericPlugValueWidget.getPlug() ),
 			} )
 		elif compoundNumericPlugValueWidget.getPlug().canGang() :
 			menuDefinition.append( "/GangDivider", { "divider" : True } )
 			menuDefinition.append( "/Gang", {
 				"command" : Gaffer.WeakMethod( compoundNumericPlugValueWidget.__gang ),
 				"shortCut" : "Ctrl+G",
-				"active" : not plugValueWidget.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( compoundNumericPlugValueWidget.getPlug() ),
+				"active" : not Gaffer.MetadataAlgo.readOnly( compoundNumericPlugValueWidget.getPlug() ),
 			} )
 
 	def __applyVisibleDimensions( self ) :

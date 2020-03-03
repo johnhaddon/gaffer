@@ -112,7 +112,6 @@ class NodeUI( GafferUI.Widget ) :
 		GafferUI.Widget.__init__( self, topLevelWidget, **kw )
 
 		self.__node = node
-		self.__readOnly = False
 
 	## Returns the node the ui represents.
 	def node( self ) :
@@ -128,17 +127,6 @@ class NodeUI( GafferUI.Widget ) :
 	def plugValueWidget( self, plug, lazy=True ) :
 
 		return None
-
-	## Can be called to make the UI read only - must
-	# be implemented appropriately by derived classes.
-	def setReadOnly( self, readOnly ) :
-
-		assert( isinstance( readOnly, bool ) )
-		self.__readOnly = readOnly
-
-	def getReadOnly( self ) :
-
-		return self.__readOnly
 
 	## Creates a NodeUI instance for the specified node.
 	@classmethod
@@ -169,9 +157,7 @@ class NodeUI( GafferUI.Widget ) :
 	@staticmethod
 	def appendPlugDeletionMenuDefinitions( plugOrPlugValueWidget, menuDefinition ) :
 
-		readOnlyUI = False
 		if isinstance( plugOrPlugValueWidget, GafferUI.PlugValueWidget ) :
-			readOnlyUI = plugOrPlugValueWidget.getReadOnly()
 			plug = plugOrPlugValueWidget.getPlug()
 		else :
 			plug = plugOrPlugValueWidget
@@ -187,7 +173,7 @@ class NodeUI( GafferUI.Widget ) :
 		if len( menuDefinition.items() ) :
 			menuDefinition.append( "/DeleteDivider", { "divider" : True } )
 
-		menuDefinition.append( "/Delete", { "command" : functools.partial( NodeUI.__deletePlug, plug ), "active" : not readOnlyUI and not Gaffer.MetadataAlgo.readOnly( plug ) } )
+		menuDefinition.append( "/Delete", { "command" : functools.partial( NodeUI.__deletePlug, plug ), "active" : not Gaffer.MetadataAlgo.readOnly( plug ) } )
 
 	@staticmethod
 	def __deletePlug( plug ) :

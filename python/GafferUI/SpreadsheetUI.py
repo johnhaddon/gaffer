@@ -1773,7 +1773,7 @@ def __prependRowAndCellMenuItems( menuDefinition, plugValueWidget ) :
 			"/Delete Row",
 			{
 				"command" : functools.partial( __deleteRow, rowPlug ),
-				"active" : not plugValueWidget.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( rowPlug )
+				"active" : not Gaffer.MetadataAlgo.readOnly( rowPlug )
 
 			}
 		)
@@ -1790,7 +1790,7 @@ def __prependRowAndCellMenuItems( menuDefinition, plugValueWidget ) :
 				"/Width/{}".format( label ),
 				{
 					"command" : functools.partial( __setRowNameWidth, rowPlug, width ),
-					"active" : not plugValueWidget.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( rowPlug ),
+					"active" : not Gaffer.MetadataAlgo.readOnly( rowPlug ),
 					"checkBox" : width == currentWidth,
 				}
 			)
@@ -1810,7 +1810,7 @@ def __prependRowAndCellMenuItems( menuDefinition, plugValueWidget ) :
 			"/Disable Cell" if enabled else "/Enable Cell",
 			{
 				"command" : functools.partial( __setPlugValue, enabledPlug, not enabled ),
-				"active" : not plugValueWidget.getReadOnly() and not Gaffer.MetadataAlgo.readOnly( enabledPlug ) and enabledPlug.settable()
+				"active" : not Gaffer.MetadataAlgo.readOnly( enabledPlug ) and enabledPlug.settable()
 			}
 		)
 
@@ -2055,7 +2055,6 @@ def __nodeEditorToolMenu( nodeEditor, node, menuDefinition ) :
 		{
 			"command" : functools.partial( __createSpreadsheetForNode, node, activeRowNamesConnection, selectorContextVariablePlug, selectorValue ),
 			"active" : (
-				not nodeEditor.getReadOnly()
 				and not Gaffer.MetadataAlgo.readOnly( node )
 				and not Gaffer.MetadataAlgo.readOnly( activeRowNamesConnection )
 			)
