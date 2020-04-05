@@ -66,7 +66,7 @@ class GAFFERSCENE_API PrimitiveSampler : public Deformer
 
 		~PrimitiveSampler() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::PrimitiveSampler, PrimitiveSamplerTypeId, ObjectProcessor );
+		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::PrimitiveSampler, PrimitiveSamplerTypeId, Deformer );
 
 		ScenePlug *sourcePlug();
 		const ScenePlug *sourcePlug() const;
