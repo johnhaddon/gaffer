@@ -243,7 +243,8 @@ void PrimitiveSampler::hashProcessedObject( const ScenePath &path, const Gaffer:
 
 	const string sourceLocation = sourceLocationPlug()->getValue();
 	const string primitiveVariables = primitiveVariablesPlug()->getValue();
-	if( sourceLocation.empty() || primitiveVariables.empty() )
+	const string status = statusPlug()->getValue();
+	if( sourceLocation.empty() || ( primitiveVariables.empty() && status.empty() ) )
 	{
 		return;
 	}
@@ -258,7 +259,7 @@ void PrimitiveSampler::hashProcessedObject( const ScenePath &path, const Gaffer:
 	h.append( sourcePlug()->objectHash( sourcePath ) );
 	h.append( primitiveVariables );
 	prefixPlug()->hash( h );
-	statusPlug()->hash( h );
+	h.append( status );
 	h.append( inPlug()->fullTransformHash( path ) );
 	h.append( sourcePlug()->fullTransformHash( sourcePath ) );
 	hashSamplingFunction( h );
@@ -274,7 +275,8 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 
 	const string sourceLocation = sourceLocationPlug()->getValue();
 	const string primitiveVariables = primitiveVariablesPlug()->getValue();
-	if( sourceLocation.empty() || primitiveVariables.empty() )
+	const string status = statusPlug()->getValue();
+	if( sourceLocation.empty() || ( primitiveVariables.empty() && status.empty() ) )
 	{
 		return inputObject;
 	}
@@ -315,7 +317,6 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 	const size_t size = outputPrimitive->variableSize( outputInterpolation );
 
 	const string prefix = prefixPlug()->getValue();
-	const string status = statusPlug()->getValue();
 	const M44f transform = inPlug()->fullTransform( path );
 	const M44f sourceTransform = sourcePlug()->fullTransform( sourcePath );
 	const M44f primitiveVariableTransform = sourceTransform * transform.inverse();
