@@ -54,9 +54,10 @@ namespace GafferScene
 /// - Avoid transform stuff for non-transforming subclasses
 /// - Avoid bounds processing if not sampling P
 /// - UI
-///		- PathChooser
 ///		- Menus for primitive variable names
 ///		- Sections
+///			- Input/Output?
+///			- Source/Sampler/Output?
 /// - Threading (call samplingfunction once to initialise evaluator)
 class GAFFERSCENE_API PrimitiveSampler : public Deformer
 {
