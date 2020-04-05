@@ -81,6 +81,9 @@ class GAFFERSCENE_API PrimitiveSampler : public Deformer
 		Gaffer::StringPlug *prefixPlug();
 		const Gaffer::StringPlug *prefixPlug() const;
 
+		Gaffer::StringPlug *statusPlug();
+		const Gaffer::StringPlug *statusPlug() const;
+
 	protected :
 
 		PrimitiveSampler( const std::string &name = defaultName<PrimitiveSampler>() );

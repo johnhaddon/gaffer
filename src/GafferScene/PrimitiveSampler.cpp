@@ -164,6 +164,7 @@ PrimitiveSampler::PrimitiveSampler( const std::string &name )
 	addChild( new StringPlug( "sourceLocation" ) );
 	addChild( new StringPlug( "primitiveVariables" ) );
 	addChild( new StringPlug( "prefix" ) );
+	addChild( new StringPlug( "status" ) );
 }
 
 PrimitiveSampler::~PrimitiveSampler()
@@ -210,6 +211,16 @@ const Gaffer::StringPlug *PrimitiveSampler::prefixPlug() const
 	return getChild<StringPlug>( g_firstPlugIndex + 3 );
 }
 
+Gaffer::StringPlug *PrimitiveSampler::statusPlug()
+{
+	return getChild<StringPlug>( g_firstPlugIndex + 4 );
+}
+
+const Gaffer::StringPlug *PrimitiveSampler::statusPlug() const
+{
+	return getChild<StringPlug>( g_firstPlugIndex + 4 );
+}
+
 bool PrimitiveSampler::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
 	return
@@ -218,6 +229,7 @@ bool PrimitiveSampler::affectsProcessedObject( const Gaffer::Plug *input ) const
 		input == sourceLocationPlug() ||
 		input == primitiveVariablesPlug() ||
 		input == prefixPlug() ||
+		input == statusPlug() ||
 		input == sourcePlug()->objectPlug() ||
 		input == inPlug()->transformPlug() ||
 		input == sourcePlug()->transformPlug() ||
@@ -246,6 +258,7 @@ void PrimitiveSampler::hashProcessedObject( const ScenePath &path, const Gaffer:
 	h.append( sourcePlug()->objectHash( sourcePath ) );
 	h.append( primitiveVariables );
 	prefixPlug()->hash( h );
+	statusPlug()->hash( h );
 	h.append( inPlug()->fullTransformHash( path ) );
 	h.append( sourcePlug()->fullTransformHash( sourcePath ) );
 	hashSamplingFunction( h );
@@ -299,8 +312,10 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 	}
 
 	PrimitivePtr outputPrimitive = inputPrimitive->copy();
+	const size_t size = outputPrimitive->variableSize( outputInterpolation );
 
 	const string prefix = prefixPlug()->getValue();
+	const string status = statusPlug()->getValue();
 	const M44f transform = inPlug()->fullTransform( path );
 	const M44f sourceTransform = sourcePlug()->fullTransform( sourcePath );
 	const M44f primitiveVariableTransform = sourceTransform * transform.inverse();
@@ -319,9 +334,16 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 		}
 	}
 
+	BoolVectorDataPtr statusData;
+	if( !status.empty() )
+	{
+		statusData = new BoolVectorData();
+		statusData->writable().resize( size, false );
+		outputPrimitive->variables[status] = PrimitiveVariable( outputInterpolation, statusData );
+	}
+
 	PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();
 	const M44f samplingTransform = transform * sourceTransform.inverse();
-	const size_t size = outputPrimitive->variableSize( outputInterpolation );
 	for( size_t i = 0; i < size; ++i )
 	{
 		if( samplingFunction( *evaluator, i, samplingTransform, *evaluatorResult ) )
@@ -329,6 +351,10 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 			for( const auto &o : outputVariables )
 			{
 				o( i, *evaluatorResult );
+			}
+			if( statusData )
+			{
+				statusData->writable()[i] = true;
 			}
 		}
 	}
