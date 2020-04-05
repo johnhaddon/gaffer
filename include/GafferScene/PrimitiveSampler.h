@@ -50,11 +50,9 @@ namespace GafferScene
 /// to sample primitive variables from another object.
 ///
 /// \todo
-/// - Output variable for whether or not query succeeded
 /// - Better error messages for incorrect primvar types (include name)
 /// - Avoid transform stuff for non-transforming subclasses
 /// - Avoid bounds processing if not sampling P
-/// - Add statut output
 /// - UI
 ///		- PathChooser
 ///		- Menus for primitive variable names
