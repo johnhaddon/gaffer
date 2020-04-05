@@ -50,13 +50,31 @@ Gaffer.Metadata.registerNode(
 
 	plugs = {
 
-		"position" : [
+		"curveIndex" : [
 
 			"description",
 			"""
-			The primitive variable that provides the positions
-			to find the closest point to. This defaults to "P",
-			the vertex position of the sampling object.
+			The name of the primitive variable that specifies the index of
+			the curve to be sampled. If this is not specified, the first
+			curve will be sampled.
+			""",
+
+			"layout:section", "Settings.Input",
+
+		],
+
+		"v" : [
+
+			"description",
+			"""
+			The name of the primitive variable that specifies the parametric
+			position on the curve to be sampled. A value of 0 corresponds to
+			the start of the curve, and a value of 1 corresponds to the end.
+			If no value is provided for `v`, a value of 0 is used.
+
+			> Note : Values outside the `0-1` range are invalid and cannot
+			> be sampled. In this case, the `status` output primitive variable
+			> will contain `False` to indicate failure.
 			""",
 
 			"layout:section", "Settings.Input",
