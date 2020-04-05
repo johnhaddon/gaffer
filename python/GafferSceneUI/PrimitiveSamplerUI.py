@@ -43,18 +43,29 @@ Gaffer.Metadata.registerNode(
 
 	"description",
 	"""
-	Base class for nodes which sample variables from
+	Base class for nodes which sample primitive variables from
 	another primitive.
 	""",
 
 	plugs = {
 
+		"filter" : [
+
+			"description",
+			"""
+			The filter used to determine which objects in the
+			`in` scene will receive primitive variables sampled
+			from the `sourceLocation` in the `source` scene.
+			""",
+
+		],
+
 		"source" : [
 
 			"description",
 			"""
-			The scene that contains the primitive to be
-			sampled.
+			The scene that contains the source primitive that
+			primitive variables will be sampled from.
 			""",
 
 		],
@@ -63,8 +74,8 @@ Gaffer.Metadata.registerNode(
 
 			"description",
 			"""
-			The location of the primitive to be sampled within the
-			`source` scene.
+			The location of the primitive in the `source` scene that
+			will be sampled from.
 			""",
 
 			"plugValueWidget:type", "GafferSceneUI.ScenePathPlugValueWidget",
@@ -82,6 +93,8 @@ Gaffer.Metadata.registerNode(
 			are prefixed with `prefix` before being added to the sampling object.
 			""",
 
+			"layout:section", "Settings.Input",
+
 		],
 
 		"prefix" : [
@@ -94,6 +107,8 @@ Gaffer.Metadata.registerNode(
 			vertex positions of the sampling primitive.
 			""",
 
+			"layout:section", "Settings.Output",
+
 		],
 
 		"status" : [
@@ -103,6 +118,8 @@ Gaffer.Metadata.registerNode(
 			The name of a boolean primitive variable created to record the success or
 			failure of the sampling operation.
 			""",
+
+			"layout:section", "Settings.Output",
 
 		],
 
