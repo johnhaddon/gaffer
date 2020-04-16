@@ -11,6 +11,7 @@ Fixes
 -----
 
 - TranslateTool : Fixed problems translating an object with a downstream AimConstraint applied.
+- UI : Fixed appearance of button icons when disabled.
 
 API
 ---
