@@ -81,6 +81,24 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 		commonPrefix = os.path.commonprefix( completions )
 		if len( commonPrefix ) > len( line ) :
 			self.insertText( commonPrefix[len(line):] )
+		else :
+			menuDefinition = IECore.MenuDefinition()
+			for i, c in enumerate( completions ) :
+				menuDefinition.append(
+					"/{}".format( i ),
+					{
+						"label" : c,
+						"command" : functools.partial(
+							Gaffer.WeakMethod( self.insertText ), c[len(line):]
+						)
+					}
+				)
+			self.__completionMenu = GafferUI.Menu( menuDefinition )
+			self.__completionMenu.popup(
+				parent = self.ancestor( GafferUI.Window ),
+				position = self.cursorBound().max(),
+				grabFocus = False
+			)
 
 		return True
 
