@@ -8,6 +8,7 @@ Improvements
 - PointsType : Removed unnecessary bounds computation overhead.
 - OSLObject/ClosestPointSampler/CurveSampler : Improved performance for cases where multiple downstream computes require the same upstream object.
 - Stats app : Added `-location` argument, to allow profiling of a single location in a scene.
+- PythonEditor : Added syntax highlighting and tab completion.
 - UIEditor : Added syntax highlighting and tab completion to the code editor for button widgets.
 
 Fixes
