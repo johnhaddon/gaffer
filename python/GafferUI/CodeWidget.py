@@ -40,6 +40,7 @@ import functools
 import token
 import keyword
 import tokenize
+import collections
 import io
 
 import imath
@@ -58,6 +59,7 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 		GafferUI.MultiLineTextWidget.__init__( self, text, editable, fixedLineHeight = fixedLineHeight, wrapMode = self.WrapMode.None, role = self.Role.Code, **kw )
 
 		self.__completer = None
+		self.__highlighter = _QtHighlighter( self._qtWidget().document() )
 
 		self.keyPressSignal().connect( Gaffer.WeakMethod( self.__keyPress ), scoped = False )
 
@@ -68,6 +70,14 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 	def getCompleter( self ) :
 
 		return self.__completer
+
+	def setHighlighter( self, highlighter ) :
+
+		self.__highlighter.setHighlighter( highlighter )
+
+	def getHighlighter( self ) :
+
+		return self.__highlighter.getHighlighter()
 
 	# MAKE BASE CLASS
 	class PythonCompleter( object ) :
@@ -157,84 +167,6 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 
 			return sorted( result )
 
-	# HIDE IMPLEMENTATION
-	class PythonHighlighter( QtGui.QSyntaxHighlighter ) :
-
-		#@staticmethod
-		def __format( color ) :
-
-			f = QtGui.QTextCharFormat()
-			f.setForeground( GafferUI.Widget._qtColor( color ) )
-			return f
-
-		__keywordFormat = __format( imath.Color3f( 64 / 255., 156/255., 219/255. ) )
-		__stringFormat = __format( imath.Color3f( 216 / 255., 146/255., 115/255. ) )
-		__commentFormat = __format( imath.Color3f( 90 / 255., 156/255., 76/255. ) )
-		__controlFlowFormat = __format( imath.Color3f( 207 / 255., 128 / 255., 195 / 255. ) )
-		__numberFormat = __format( imath.Color3f( 174 / 255., 208 / 255., 164 / 255. ) )
-		__callFormat = __format( imath.Color3f( 219 / 255., 221 / 255., 164 / 255. ) )
-		__operatorFormat = __format( imath.Color3f( 201 / 255., 0, 28/255. ) )
-
-		__controlFlowKeywords = {
-			"if", "elif", "else",
-			"try", "except", "finally",
-			"for", "while",
-			"from", "import",
-			"return",
-		}
-
-		__parenthesis = {
-			"(", ")", "[", "]", "{", "}",
-		}
-
-		__operators = {
-			"=", "==", "!=",
-			"+", "+=", "-", "-=", "*", "*=", "/", "/=", "//", "//=", "%", "%=",
-			"|", "|=", "&", "&=", "^", "^=", "~",
-			">", ">=", "<", "<=", "**", "<<", ">>",
-		}
-
-		def highlightBlock( self, text ) :
-
-			f = QtGui.QTextCharFormat()
-			f.setForeground( QtGui.QColor( 255, 0, 0 ) )
-
-			g = QtGui.QTextCharFormat()
-			g.setForeground( QtGui.QColor( 0, 255, 0 ) )
-
-			print text
-			pendingName = None
-			with IECore.IgnoredExceptions( tokenize.TokenError ) :
-				for t in tokenize.generate_tokens( io.StringIO( text ).readline ) :
-					f = None
-					if t[0] == token.NAME :
-						if t[1] in self.__controlFlowKeywords :
-							f = self.__controlFlowFormat
-						elif keyword.iskeyword( t[1] ) or t[1] == "self" :
-							f = self.__keywordFormat
-						else :
-							pendingName = t
-							continue
-					elif t[0] == token.STRING :
-						f = self.__stringFormat
-					elif t[0] == tokenize.COMMENT :
-						f = self.__commentFormat
-					elif t[0] == token.NUMBER :
-						f = self.__numberFormat
-					elif t[0] == token.OP :
-						if t[1] in self.__parenthesis :
-							f = self.__callFormat
-							if t[1] == "(" :
-								if pendingName is not None :
-									self.setFormat( pendingName[2][1], pendingName[3][1] - pendingName[2][1], self.__callFormat )
-						elif t[1] in self.__operators :
-							f = self.__operatorFormat
-
-					if f is not None  :
-						self.setFormat( t[2][1], t[3][1] - t[2][1], f )
-
-					pendingName = None
-
 	def __keyPress( self, widget, event ) :
 
 		if self.__completer is None or event.key != "Tab" :
@@ -277,3 +209,136 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 		return True
 
 
+class Highlighter( object ) :
+
+	Type = IECore.Enum.create(
+		"String", "Number", "Comment",
+		"Keyword", "ControlFlow", "Braces",
+		"Operator", "Call",
+	)
+
+	# Specifies a highlight type to be used for the characters
+	# between `start` and `end`. End may be `None` to signal that
+	# the last highlight on the line continues to the next line.
+	Highlight = collections.namedtuple( "Highlight", [ "start", "end", "type" ] )
+
+	# Must be implemented to return a list of Highlight
+	# objects for the text in `line`. If the last highlight
+	# on the previous line had `end == None`, its type is passed
+	# as `previousType`, allowing the highlighting to be continued
+	# on this line.
+	def highlights( self, line, previousType ) :
+
+		raise NotImplementedError
+
+class PythonHighlighter( Highlighter ) :
+
+	__controlFlowKeywords = {
+		"if", "elif", "else",
+		"try", "except", "finally",
+		"for", "while",
+		"from", "import",
+		"return",
+	}
+
+	__parenthesis = {
+		"(", ")", "[", "]", "{", "}",
+	}
+
+	__operators = {
+		"=", "==", "!=",
+		"+", "+=", "-", "-=", "*", "*=", "/", "/=", "//", "//=", "%", "%=",
+		"|", "|=", "&", "&=", "^", "^=", "~",
+		">", ">=", "<", "<=", "**", "<<", ">>",
+	}
+
+	def highlights( self, line, previous ) :
+
+		result = []
+
+		print line
+		pendingName = None
+		with IECore.IgnoredExceptions( tokenize.TokenError ) :
+			for t in tokenize.generate_tokens( io.StringIO( line ).readline ) :
+				highlightType = None
+				if t[0] == token.NAME :
+					if t[1] in self.__controlFlowKeywords :
+						highlightType = self.Type.ControlFlow
+					elif keyword.iskeyword( t[1] ) or t[1] == "self" :
+						highlightType = self.Type.Keyword
+					else :
+						pendingName = t
+						continue
+				elif t[0] == token.STRING :
+					highlightType = self.Type.String
+				elif t[0] == tokenize.COMMENT :
+					highlightType = self.Type.Comment
+				elif t[0] == token.NUMBER :
+					highlightType = self.Type.Number
+				elif t[0] == token.OP :
+					if t[1] in self.__parenthesis :
+						highlightType = self.Type.Braces
+						if t[1] == "(" :
+							if pendingName is not None :
+								result.append( self.Highlight( pendingName[2][1], pendingName[3][1] - pendingName[2][1], self.Type.Call ) )
+					elif t[1] in self.__operators :
+						highlightType = self.Type.Operator
+
+				if highlightType is not None  :
+					result.append( self.Highlight( t[2][1], t[3][1] - t[2][1], highlightType ) )
+
+				pendingName = None
+
+		return result
+
+CodeWidget.Highlighter = Highlighter
+CodeWidget.PythonHighlighter = PythonHighlighter
+
+class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
+
+	def __init__( self, document ) :
+
+		QtGui.QSyntaxHighlighter.__init__( self, document )
+
+		self.__highlighter = None
+
+		def format( color ) :
+
+			f = QtGui.QTextCharFormat()
+			f.setForeground( color )
+			return f
+
+		self.__formats = {
+			Highlighter.Type.String : format( QtGui.QColor( 216, 146, 115 ) ),
+			Highlighter.Type.Number : format( QtGui.QColor( 174, 208, 164 ) ),
+			Highlighter.Type.Comment : format( QtGui.QColor( 90, 156, 76 ) ),
+			Highlighter.Type.Keyword : format( QtGui.QColor( 64, 156, 219 ) ),
+			Highlighter.Type.ControlFlow : format( QtGui.QColor( 207, 128, 195 ) ),
+			Highlighter.Type.Braces : format( QtGui.QColor( 255, 255, 0 ) ),
+			Highlighter.Type.Operator : format( QtGui.QColor( 201, 0, 28 ) ),
+			Highlighter.Type.Call : format( QtGui.QColor( 219, 221, 164 ) ),
+		}
+
+	# Our methods
+	# ===========
+
+	def setHighlighter( self, highlighter ) :
+
+		self.__highlighter = highlighter
+		self.rehighlight()
+
+	def getHighlighter( self ) :
+
+		return self.__highlighter
+
+	# Qt methods
+	# ==========
+
+	def highlightBlock( self, text ) :
+
+		if self.__highlighter is None :
+			return
+		
+		highlights = self.__highlighter.highlights( text, None )
+		for h in highlights :
+			self.setFormat( h.start, h.end, self.__formats[h.type] )
