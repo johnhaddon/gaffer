@@ -231,6 +231,7 @@ class Highlighter( object ) :
 
 		raise NotImplementedError
 
+## todo ; support single triple quotes multi-line
 class PythonHighlighter( Highlighter ) :
 
 	__controlFlowKeywords = {
@@ -252,13 +253,20 @@ class PythonHighlighter( Highlighter ) :
 		">", ">=", "<", "<=", "**", "<<", ">>",
 	}
 
-	def highlights( self, line, previous ) :
+	def highlights( self, line, previousType ) :
+
+		if previousType == self.Type.String :
+			# Continuation of multi-line string
+			highlights = self.highlights( '"""' + line, None )
+			return [
+				self.Highlight( max( 0, h.start - 3 ), h.end - 3 if h.end is not None else None, h.type )
+				for h in highlights
+			]
 
 		result = []
 
-		print line
 		pendingName = None
-		with IECore.IgnoredExceptions( tokenize.TokenError ) :
+		try :
 			for t in tokenize.generate_tokens( io.StringIO( line ).readline ) :
 				highlightType = None
 				if t[0] == token.NAME :
@@ -280,14 +288,17 @@ class PythonHighlighter( Highlighter ) :
 						highlightType = self.Type.Braces
 						if t[1] == "(" :
 							if pendingName is not None :
-								result.append( self.Highlight( pendingName[2][1], pendingName[3][1] - pendingName[2][1], self.Type.Call ) )
+								result.append( self.Highlight( pendingName[2][1], pendingName[3][1], self.Type.Call ) )
 					elif t[1] in self.__operators :
 						highlightType = self.Type.Operator
 
 				if highlightType is not None  :
-					result.append( self.Highlight( t[2][1], t[3][1] - t[2][1], highlightType ) )
+					result.append( self.Highlight( t[2][1], t[3][1], highlightType ) )
 
 				pendingName = None
+		except tokenize.TokenError as e :
+			if e.args[0] == "EOF in multi-line string" :
+				result.append( self.Highlight( e.args[1][1], end = None, type = self.Type.String ) )
 
 		return result
 
@@ -336,9 +347,19 @@ class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
 
 	def highlightBlock( self, text ) :
 
+		self.setCurrentBlockState( -1 )
 		if self.__highlighter is None :
 			return
 		
-		highlights = self.__highlighter.highlights( text, None )
+		previousType = None
+		if self.previousBlockState() != -1 :
+			previousType = Highlighter.Type( self.previousBlockState() )
+
+		highlights = self.__highlighter.highlights( text, previousType )
+
 		for h in highlights :
-			self.setFormat( h.start, h.end, self.__formats[h.type] )
+			end = h.end
+			if end is None :
+				self.setCurrentBlockState( int( h.type ) )
+				end = len( text )
+			self.setFormat( h.start, end - h.start, self.__formats[h.type] )
