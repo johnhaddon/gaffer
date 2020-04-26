@@ -231,7 +231,9 @@ class Highlighter( object ) :
 
 		raise NotImplementedError
 
-## todo ; support single triple quotes multi-line
+## todo :
+#  - support single triple quotes multi-line
+#  - drop pending name?
 class PythonHighlighter( Highlighter ) :
 
 	__controlFlowKeywords = {
@@ -267,33 +269,33 @@ class PythonHighlighter( Highlighter ) :
 
 		pendingName = None
 		try :
-			for t in tokenize.generate_tokens( io.StringIO( line ).readline ) :
+			for tokenType, string, start, end, _  in tokenize.generate_tokens( io.StringIO( line ).readline ) :
 				highlightType = None
-				if t[0] == token.NAME :
-					if t[1] in self.__controlFlowKeywords :
+				if tokenType == token.NAME :
+					if string in self.__controlFlowKeywords :
 						highlightType = self.Type.ControlFlow
-					elif keyword.iskeyword( t[1] ) or t[1] == "self" :
+					elif keyword.iskeyword( string ) or string == "self" :
 						highlightType = self.Type.Keyword
 					else :
-						pendingName = t
+						pendingName = self.Highlight( start[1], end[1], self.Type.Call )
 						continue
-				elif t[0] == token.STRING :
-					highlightType = self.Type.String
-				elif t[0] == tokenize.COMMENT :
-					highlightType = self.Type.Comment
-				elif t[0] == token.NUMBER :
-					highlightType = self.Type.Number
-				elif t[0] == token.OP :
-					if t[1] in self.__parenthesis :
+				elif tokenType == token.OP :
+					if string in self.__parenthesis :
 						highlightType = self.Type.Braces
-						if t[1] == "(" :
+						if string == "(" :
 							if pendingName is not None :
-								result.append( self.Highlight( pendingName[2][1], pendingName[3][1], self.Type.Call ) )
-					elif t[1] in self.__operators :
+								result.append( pendingName )
+					elif string in self.__operators :
 						highlightType = self.Type.Operator
+				elif tokenType == token.STRING :
+					highlightType = self.Type.String
+				elif tokenType == tokenize.COMMENT :
+					highlightType = self.Type.Comment
+				elif tokenType == token.NUMBER :
+					highlightType = self.Type.Number
 
 				if highlightType is not None  :
-					result.append( self.Highlight( t[2][1], t[3][1], highlightType ) )
+					result.append( self.Highlight( start[1], end[1], highlightType ) )
 
 				pendingName = None
 		except tokenize.TokenError as e :
