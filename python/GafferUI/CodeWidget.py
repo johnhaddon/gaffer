@@ -79,94 +79,6 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 
 		return self.__highlighter.getHighlighter()
 
-	# MAKE BASE CLASS
-	class PythonCompleter( object ) :
-
-		__searchPrefix = r"(?:^|(?<=[\s,(]))"
-
-		def __init__( self, namespace ) :
-
-			self.__namespace = namespace
-
-		def __call__( self, text ) :
-
-			return sorted( set(
-				self.__attrAndItemMatches( text ) +
-				self.__globalMatches( text )
-			) )
-
-		def __globalMatches( self, text ) :
-
-			globalVariable = r"{searchPrefix}([a-zA-Z0-9]+)$".format( searchPrefix = self.__searchPrefix )
-
-			match = re.search( globalVariable, text )
-			if not match :
-				return []
-
-			word = match.group( 0 )
-			prefix = text[:-len(word)]
-
-			namespace = __builtins__.copy()
-			namespace.update( self.__namespace )
-
-			result = []
-			for name in namespace.keys() :
-				if name.startswith( word ) and name != word :
-					result.append( prefix + name )
-
-			return result
-
-		def __attrAndItemMatches( self, text ) :
-
-			word = r"[a-zA-Z0-9]+"
-			optionalWord = r"[a-zA-Z0-9]*"
-			getAttr = r"\.{word}".format( word = word )
-			partialGetAttr = r"\.{optionalWord}".format( optionalWord = optionalWord )
-			quotedWord = r"""(?:'{word}'|"{word}")""".format( word = word )
-			getItem = r"\[{quotedWord}\]".format( quotedWord = quotedWord )
-			partialGetItem = r"\[(?:['\"]{optionalWord})?".format( optionalWord = optionalWord )
-			path = r"{searchPrefix}({word}(?:{getAttr}|{getItem})*)({partialGetAttr}|{partialGetItem})$".format(
-				searchPrefix = self.__searchPrefix, word = word, getAttr = getAttr, getItem = getItem,
-				partialGetAttr = partialGetAttr, partialGetItem = partialGetItem
-			)
-
-			pathMatch = re.search( path, text )
-			if not pathMatch :
-				return []
-
-			objectPath, partial = pathMatch.group( 1, 2 )
-			try :
-				rootObject = eval( objectPath, self.__namespace )
-			except :
-				return []
-
-			prefix = text[:-len(partial)]
-
-			names = []
-			if partial.startswith( "." ) :
-				# Attribute
-				names = set( dir( rootObject ) )
-				namePrefix = "."
-				nameSuffix = ""
-			else :
-				# Item
-				try :
-					names = rootObject.keys()
-				except :
-					return []
-				quote = partial[1] if len( partial ) > 1 else '"'
-				namePrefix = "[" + quote
-				nameSuffix = quote + "]"
-
-			partialName = partial[len(namePrefix):]
-
-			result = []
-			for name in names :
-				if name.startswith( partialName ) and ( name != partialName or nameSuffix ):
-					result.append( prefix + namePrefix + name + nameSuffix )
-
-			return sorted( result )
-
 	def __keyPress( self, widget, event ) :
 
 		if self.__completer is None or event.key != "Tab" :
@@ -180,7 +92,7 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 		if not line.strip() :
 			return False
 
-		completions = self.__completer( line )
+		completions = self.__completer.completions( line )
 		if not completions :
 			return False
 
@@ -208,6 +120,8 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 
 		return True
 
+# Highlighter classes
+# ===================
 
 class Highlighter( object ) :
 
@@ -231,9 +145,6 @@ class Highlighter( object ) :
 
 		raise NotImplementedError
 
-## todo :
-#  - support single triple quotes multi-line
-#  - drop pending name?
 class PythonHighlighter( Highlighter ) :
 
 	__controlFlowKeywords = {
@@ -315,6 +226,8 @@ class PythonHighlighter( Highlighter ) :
 CodeWidget.Highlighter = Highlighter
 CodeWidget.PythonHighlighter = PythonHighlighter
 
+# QSyntaxHighlighter used to adapt our Highlighter class
+# for use with a QTextDocument.
 class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
 
 	def __init__( self, document ) :
@@ -374,3 +287,106 @@ class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
 				self.setCurrentBlockState( int( h.type ) )
 				end = len( text )
 			self.setFormat( h.start, end - h.start, self.__formats[h.type] )
+
+# Completer classes
+# ===================
+
+class Completer( object ) :
+
+	## Must be implemented to return a list of possible
+	# completions for the specified text.
+	def completions( self, text ) :
+
+		raise NotImplementedError
+
+class PythonCompleter( Completer ) :
+
+	__searchPrefix = r"(?:^|(?<=[\s,(]))"
+
+	def __init__( self, namespace ) :
+
+		self.__namespace = namespace
+
+	def completions( self, text ) :
+
+		return sorted( set(
+			self.__attrAndItemMatches( text ) +
+			self.__globalMatches( text )
+		) )
+
+	def __globalMatches( self, text ) :
+
+		globalVariable = r"{searchPrefix}([a-zA-Z0-9]+)$".format( searchPrefix = self.__searchPrefix )
+
+		match = re.search( globalVariable, text )
+		if not match :
+			return []
+
+		word = match.group( 0 )
+		prefix = text[:-len(word)]
+
+		namespace = __builtins__.copy()
+		namespace.update( self.__namespace )
+
+		result = []
+		for name in namespace.keys() :
+			if name.startswith( word ) and name != word :
+				result.append( prefix + name )
+
+		return result
+
+	def __attrAndItemMatches( self, text ) :
+
+		word = r"[a-zA-Z0-9]+"
+		optionalWord = r"[a-zA-Z0-9]*"
+		getAttr = r"\.{word}".format( word = word )
+		partialGetAttr = r"\.{optionalWord}".format( optionalWord = optionalWord )
+		quotedWord = r"""(?:'{word}'|"{word}")""".format( word = word )
+		getItem = r"\[{quotedWord}\]".format( quotedWord = quotedWord )
+		partialGetItem = r"\[(?:['\"]{optionalWord})?".format( optionalWord = optionalWord )
+		path = r"{searchPrefix}({word}(?:{getAttr}|{getItem})*)({partialGetAttr}|{partialGetItem})$".format(
+			searchPrefix = self.__searchPrefix, word = word, getAttr = getAttr, getItem = getItem,
+			partialGetAttr = partialGetAttr, partialGetItem = partialGetItem
+		)
+
+		pathMatch = re.search( path, text )
+		if not pathMatch :
+			return []
+
+		objectPath, partial = pathMatch.group( 1, 2 )
+		try :
+			rootObject = eval( objectPath, self.__namespace )
+		except :
+			return []
+
+		prefix = text[:-len(partial)]
+
+		names = []
+		if partial.startswith( "." ) :
+			# Attribute
+			names = set( dir( rootObject ) )
+			namePrefix = "."
+			nameSuffix = ""
+		else :
+			# Item
+			try :
+				names = rootObject.keys()
+			except :
+				return []
+			quote = partial[1] if len( partial ) > 1 else '"'
+			namePrefix = "[" + quote
+			nameSuffix = quote + "]"
+
+		partialName = partial[len(namePrefix):]
+
+		result = []
+		for name in names :
+			if name.startswith( partialName ) and ( name != partialName or nameSuffix ):
+				result.append( prefix + namePrefix + name + nameSuffix )
+
+		return sorted( result )
+
+CodeWidget.Completer = Completer
+CodeWidget.PythonCompleter = PythonCompleter
+
+
