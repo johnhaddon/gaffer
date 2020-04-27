@@ -212,9 +212,9 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 class Highlighter( object ) :
 
 	Type = IECore.Enum.create(
-		"String", "Number", "Comment",
-		"Keyword", "ControlFlow", "Braces",
-		"Operator", "Call",
+		"SingleQuotedString", "DoubleQuotedString", "Number",
+		"Keyword", "ControlFlow", "Braces", "Operator", "Call",
+		"Comment",
 	)
 
 	# Specifies a highlight type to be used for the characters
@@ -225,9 +225,9 @@ class Highlighter( object ) :
 	# Must be implemented to return a list of Highlight
 	# objects for the text in `line`. If the last highlight
 	# on the previous line had `end == None`, its type is passed
-	# as `previousType`, allowing the highlighting to be continued
-	# on this line.
-	def highlights( self, line, previousType ) :
+	# as `previousHighlightType`, allowing the highlighting to be
+	# continued on this line.
+	def highlights( self, line, previousHighlightType ) :
 
 		raise NotImplementedError
 
@@ -255,11 +255,12 @@ class PythonHighlighter( Highlighter ) :
 		">", ">=", "<", "<=", "**", "<<", ">>",
 	}
 
-	def highlights( self, line, previousType ) :
+	def highlights( self, line, previousHighlightType ) :
 
-		if previousType == self.Type.String :
+		if previousHighlightType in ( self.Type.SingleQuotedString, self.Type.DoubleQuotedString ) :
 			# Continuation of multi-line string
-			highlights = self.highlights( '"""' + line, None )
+			openingQuote = '"""' if previousHighlightType == self.Type.DoubleQuotedString else "'''"
+			highlights = self.highlights( openingQuote + line, None )
 			return [
 				self.Highlight( max( 0, h.start - 3 ), h.end - 3 if h.end is not None else None, h.type )
 				for h in highlights
@@ -288,7 +289,7 @@ class PythonHighlighter( Highlighter ) :
 					elif string in self.__operators :
 						highlightType = self.Type.Operator
 				elif tokenType == token.STRING :
-					highlightType = self.Type.String
+					highlightType = self.__stringType( string[-1] )
 				elif tokenType == tokenize.COMMENT :
 					highlightType = self.Type.Comment
 				elif tokenType == token.NUMBER :
@@ -300,9 +301,16 @@ class PythonHighlighter( Highlighter ) :
 				pendingName = None
 		except tokenize.TokenError as e :
 			if e.args[0] == "EOF in multi-line string" :
-				result.append( self.Highlight( e.args[1][1], end = None, type = self.Type.String ) )
+				result.append( self.Highlight( e.args[1][1], None, self.__stringType( line[e.args[1][1]] ) ) )
 
 		return result
+
+	def __stringType( self, quote ) :
+
+		return {
+			"'" : self.Type.SingleQuotedString,
+			'"' : self.Type.DoubleQuotedString
+		}[quote]
 
 CodeWidget.Highlighter = Highlighter
 CodeWidget.PythonHighlighter = PythonHighlighter
@@ -322,14 +330,15 @@ class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
 			return f
 
 		self.__formats = {
-			Highlighter.Type.String : format( QtGui.QColor( 216, 146, 115 ) ),
+			Highlighter.Type.SingleQuotedString : format( QtGui.QColor( 216, 146, 115 ) ),
+			Highlighter.Type.DoubleQuotedString : format( QtGui.QColor( 216, 146, 115 ) ),
 			Highlighter.Type.Number : format( QtGui.QColor( 174, 208, 164 ) ),
-			Highlighter.Type.Comment : format( QtGui.QColor( 90, 156, 76 ) ),
 			Highlighter.Type.Keyword : format( QtGui.QColor( 64, 156, 219 ) ),
 			Highlighter.Type.ControlFlow : format( QtGui.QColor( 207, 128, 195 ) ),
 			Highlighter.Type.Braces : format( QtGui.QColor( 255, 255, 0 ) ),
 			Highlighter.Type.Operator : format( QtGui.QColor( 201, 0, 28 ) ),
 			Highlighter.Type.Call : format( QtGui.QColor( 219, 221, 164 ) ),
+			Highlighter.Type.Comment : format( QtGui.QColor( 90, 156, 76 ) ),
 		}
 
 	# Our methods
@@ -352,7 +361,7 @@ class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
 		self.setCurrentBlockState( -1 )
 		if self.__highlighter is None :
 			return
-		
+
 		previousType = None
 		if self.previousBlockState() != -1 :
 			previousType = Highlighter.Type( self.previousBlockState() )
