@@ -342,6 +342,7 @@ _styleSheet = string.Template(
 
 	QPlainTextEdit[gafferRole="Code"] {
 		font-family: monospace;
+		background-color: $backgroundDarker;
 	}
 
 	QLineEdit:focus, QPlainTextEdit[readOnly="false"]:focus, QLineEdit[gafferHighlighted="true"] {
@@ -1385,7 +1386,7 @@ _styleSheet = string.Template(
 		border-radius: 0;
 		border-top-left-radius: $widgetCornerRadius;
 		border-top-right-radius: $widgetCornerRadius;
-		background-color: rbg( 30, 30, 30 );
+		background-color: $backgroundDarker;
 	}
 
 	*[gafferClass="GafferUI.PythonEditor"] QPlainTextEdit[gafferTextRole="input"] {
