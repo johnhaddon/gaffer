@@ -23,6 +23,7 @@ API
   - Deprecated `hashOfTransformedChildBounds()`. Use `ScenePlug::childBoundsHash()` instead.
   - Deprecated `unionOfTransformedChildBounds()`. Use `ScenePlug::childBounds()` instead.
 - IECorePreview::Renderer : Added optional message handler to renderer construction to allow output message streams to be re-directed if required (#3419).
+- WidgetAlgo : `joinEdges()` now accepts an arbitrary list of widgets rather than requiring a `ListContainer`. In this case, the orientation must be passed as an additional argument.
 
 Breaking Changes
 ----------------
