@@ -9,6 +9,11 @@ Improvements
 - OSLObject/ClosestPointSampler/CurveSampler : Improved performance for cases where multiple downstream computes require the same upstream object.
 - Stats app : Added `-location` argument, to allow profiling of a single location in a scene.
 
+Fixes
+-----
+
+- Code editors : Fixed font on macOS.
+
 API
 ---
 

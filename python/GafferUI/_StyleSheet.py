@@ -120,7 +120,8 @@ _themeVariables = {
 	"roundedCornerRadius" : "6px",
 	"widgetCornerRadius" : "4px",
 	"controlCornerRadius" : "2px",
-	"toolOverlayInset" : "44px"
+	"toolOverlayInset" : "44px",
+	"fixedFont" : QtGui.QFontDatabase.systemFont( QtGui.QFontDatabase.FixedFont ).family(),
 }
 
 substitutions = {
@@ -341,7 +342,7 @@ _styleSheet = string.Template(
 	}
 
 	QPlainTextEdit[gafferRole="Code"] {
-		font-family: monospace;
+		font-family: $fixedFont;
 		background-color: $backgroundDarker;
 	}
 

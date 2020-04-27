@@ -127,6 +127,7 @@ from ._GafferUI import *
 # general ui stuff first
 
 from .Enums import *
+from .EventLoop import EventLoop
 from .Widget import Widget
 from .LazyMethod import LazyMethod
 from .Menu import Menu
@@ -136,7 +137,6 @@ from .SplitContainer import SplitContainer
 from .ListContainer import ListContainer
 from .GridContainer import GridContainer
 from .MenuBar import MenuBar
-from .EventLoop import EventLoop
 from .TabbedContainer import TabbedContainer
 from .TextWidget import TextWidget
 from .NumericWidget import NumericWidget
