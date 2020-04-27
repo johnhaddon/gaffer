@@ -81,7 +81,14 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 
 	def __keyPress( self, widget, event ) :
 
-		if self.__completer is None or event.key != "Tab" :
+		if event.key == "Tab" :
+			return self.__tabPress()
+
+		return False
+
+	def __tabPress( self ) :
+
+		if self.__completer is None :
 			return False
 
 		text = self.getText()
