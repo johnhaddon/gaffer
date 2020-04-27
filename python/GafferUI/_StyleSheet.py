@@ -343,6 +343,7 @@ _styleSheet = string.Template(
 
 	QPlainTextEdit[gafferRole="Code"] {
 		font-family: $fixedFont;
+		font-size: 11px;
 		background-color: $backgroundDarker;
 	}
 
@@ -1379,22 +1380,6 @@ _styleSheet = string.Template(
 
 	/* PythonEditor */
 
-	*[gafferClass="GafferUI.PythonEditor"] QSplitter {
-		background-color: $background;
-	}
-
-	*[gafferClass="GafferUI.PythonEditor"] QPlainTextEdit[gafferTextRole="output"] {
-		border-radius: 0;
-		border-top-left-radius: $widgetCornerRadius;
-		border-top-right-radius: $widgetCornerRadius;
-		background-color: $backgroundDarker;
-	}
-
-	*[gafferClass="GafferUI.PythonEditor"] QPlainTextEdit[gafferTextRole="input"] {
-		border-radius: 0;
-		border-bottom-left-radius: $widgetCornerRadius;
-		border-bottom-right-radius: $widgetCornerRadius;
-	}
 
 	/* PinningWidget */
 
