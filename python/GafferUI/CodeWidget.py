@@ -83,6 +83,10 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 
 		if event.key == "Tab" :
 			return self.__tabPress()
+		elif event.modifiers == event.Modifiers.Control and event.key == "BracketLeft" :
+			return self.__indentPress( -1 )
+		elif event.modifiers == event.Modifiers.Control and event.key == "BracketRight" :
+			return self.__indentPress( 1 )
 
 		return False
 
@@ -124,6 +128,41 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 				position = self.cursorBound().max(),
 				grabFocus = False
 			)
+
+		return True
+
+	def __indentPress( self, indent ) :
+
+		cursor = self._qtWidget().textCursor()
+		if not cursor.hasSelection() :
+			return False
+
+		startBlock = self._qtWidget().document().findBlock( cursor.position() )
+		endBlock = self._qtWidget().document().findBlock( cursor.anchor() )
+		if startBlock.blockNumber() > endBlock.blockNumber() :
+			startBlock, endBlock = endBlock, startBlock
+
+		try :
+
+			cursor.beginEditBlock()
+
+			while True :
+
+				cursor = QtGui.QTextCursor( startBlock )
+				if indent > 0 :
+					cursor.insertText( "\t" * indent )
+				else :
+					for i in range( 0, len( os.path.commonprefix( [ startBlock.text(), "\t" * -indent ] ) ) ) :
+						cursor.deleteChar()
+
+				if startBlock == endBlock :
+					break
+				else :
+					startBlock = startBlock.next()
+
+		finally :
+
+			cursor.endEditBlock()
 
 		return True
 
