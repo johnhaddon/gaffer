@@ -144,7 +144,7 @@ class ExpressionWidget( GafferUI.Widget ) :
 				self.__languageMenu = GafferUI.MenuButton( "", menu = GafferUI.Menu( Gaffer.WeakMethod( self.__languageMenuDefinition ) ) )
 				self.__languageMenu.setEnabled( not Gaffer.MetadataAlgo.readOnly( node ) )
 
-			self.__textWidget = GafferUI.MultiLineTextWidget( role = GafferUI.MultiLineTextWidget.Role.Code )
+			self.__textWidget = GafferUI.CodeWidget()
 			self.__textWidget.setEditable( not Gaffer.MetadataAlgo.readOnly( node ) )
 
 			self.__textWidget.activatedSignal().connect( Gaffer.WeakMethod( self.__activated ), scoped = False )
