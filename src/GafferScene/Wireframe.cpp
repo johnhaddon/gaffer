@@ -195,7 +195,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Wireframe );
 
 size_t Wireframe::g_firstPlugIndex = 0;
 
-Wireframe::Wireframe( const std::string &name )
+Wireframe::Wireframe( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

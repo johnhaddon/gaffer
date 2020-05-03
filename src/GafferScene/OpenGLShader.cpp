@@ -75,7 +75,7 @@ IECore::InternedString g_glNamespacedFragmentSource( "gl:fragmentSource" );
 
 } // namespace
 
-OpenGLShader::OpenGLShader( const std::string &name )
+OpenGLShader::OpenGLShader( IECore::InternedString name )
 	:	GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Plug::Out ) );

@@ -58,7 +58,7 @@ static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
 	{ ScenePlug::scenePathContextName, ScenePlug::setNameContextName }
 );
 
-ScenePlug::ScenePlug( const std::string &name, Direction direction, unsigned flags )
+ScenePlug::ScenePlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 	// we don't want the children to be serialised in any way - we always create
@@ -172,7 +172,7 @@ bool ScenePlug::acceptsChild( const GraphComponent *potentialChild ) const
 	return children().size() != 10;
 }
 
-Gaffer::PlugPtr ScenePlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr ScenePlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new ScenePlug( name, direction, getFlags() );
 }

@@ -59,7 +59,7 @@ class GAFFERSCENE_API PrimitiveVariableProcessor : public SceneElementProcessor
 
 	public :
 
-		PrimitiveVariableProcessor( const std::string &name=defaultName<PrimitiveVariableProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
+		PrimitiveVariableProcessor( IECore::InternedString name=defaultName<PrimitiveVariableProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
 		~PrimitiveVariableProcessor() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::PrimitiveVariableProcessor, PrimitiveVariableProcessorTypeId, SceneElementProcessor );

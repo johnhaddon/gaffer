@@ -58,7 +58,7 @@ class GAFFERSCENE_API Grid : public SceneNode
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Grid, GridTypeId, SceneNode );
 
-		Grid( const std::string &name=defaultName<Grid>() );
+		Grid( IECore::InternedString name=defaultName<Grid>() );
 		~Grid() override;
 
 		Gaffer::StringPlug *namePlug();

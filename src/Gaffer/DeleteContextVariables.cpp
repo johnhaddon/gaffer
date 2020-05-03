@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteContextVariables );
 
 size_t DeleteContextVariables::g_firstPlugIndex;
 
-DeleteContextVariables::DeleteContextVariables( const std::string &name )
+DeleteContextVariables::DeleteContextVariables( IECore::InternedString name )
 	:	ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

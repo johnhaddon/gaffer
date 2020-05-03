@@ -50,7 +50,7 @@ using namespace GafferCortex;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ExecutableOpHolder )
 
-ExecutableOpHolder::ExecutableOpHolder( const std::string &name )
+ExecutableOpHolder::ExecutableOpHolder( IECore::InternedString name )
 	:	ParameterisedHolderTaskNode( name )
 {
 }

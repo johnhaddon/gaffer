@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ExternalProcedural );
 
 size_t ExternalProcedural::g_firstPlugIndex = 0;
 
-ExternalProcedural::ExternalProcedural( const std::string &name )
+ExternalProcedural::ExternalProcedural( IECore::InternedString name )
 	:	ObjectSource( name, "procedural" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

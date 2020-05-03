@@ -77,7 +77,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Checkerboard );
 
 size_t Checkerboard::g_firstPlugIndex = 0;
 
-Checkerboard::Checkerboard( const std::string &name )
+Checkerboard::Checkerboard( IECore::InternedString name )
 	:	FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

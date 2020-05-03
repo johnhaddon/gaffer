@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteSets );
 
 size_t DeleteSets::g_firstPlugIndex(0);
 
-DeleteSets::DeleteSets( const std::string &name )
+DeleteSets::DeleteSets( IECore::InternedString name )
 	:	SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

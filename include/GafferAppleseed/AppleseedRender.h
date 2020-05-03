@@ -50,7 +50,7 @@ class GAFFERAPPLESEED_API AppleseedRender : public GafferScene::Render
 
 	public :
 
-		AppleseedRender( const std::string &name=defaultName<AppleseedRender>() );
+		AppleseedRender( IECore::InternedString name=defaultName<AppleseedRender>() );
 		~AppleseedRender() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferAppleseed::AppleseedRender, AppleseedRenderTypeId, GafferScene::Render );

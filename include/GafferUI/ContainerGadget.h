@@ -55,7 +55,7 @@ class GAFFERUI_API ContainerGadget : public Gadget
 
 	public :
 
-		ContainerGadget( const std::string &name=defaultName<ContainerGadget>() );
+		ContainerGadget( IECore::InternedString name=defaultName<ContainerGadget>() );
 		~ContainerGadget() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ContainerGadget, ContainerGadgetTypeId, Gadget );

@@ -44,7 +44,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( StandardOptions );
 
-StandardOptions::StandardOptions( const std::string &name )
+StandardOptions::StandardOptions( IECore::InternedString name )
 	:	Options( name )
 {
 	CompoundDataPlug *options = optionsPlug();

@@ -48,7 +48,7 @@ class GAFFERSCENE_API Seeds : public BranchCreator
 
 	public :
 
-		Seeds( const std::string &name=defaultName<Seeds>() );
+		Seeds( IECore::InternedString name=defaultName<Seeds>() );
 		~Seeds() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Seeds, SeedsTypeId, BranchCreator );

@@ -50,7 +50,7 @@ class GAFFERSCENE_API ArnoldAtmosphere : public GafferScene::GlobalShader
 
 	public :
 
-		ArnoldAtmosphere( const std::string &name=defaultName<ArnoldAtmosphere>() );
+		ArnoldAtmosphere( IECore::InternedString name=defaultName<ArnoldAtmosphere>() );
 		~ArnoldAtmosphere() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferArnold::ArnoldAtmosphere, ArnoldAtmosphereTypeId, GafferScene::GlobalShader );

@@ -59,7 +59,7 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 		NameValuePlug(
 			const std::string &nameDefault,
 			const IECore::Data *valueDefault,
-			const std::string &name=defaultName<NameValuePlug>(),
+			IECore::InternedString name=defaultName<NameValuePlug>(),
 			Direction direction=In,
 			unsigned flags=Default
 		);
@@ -70,13 +70,13 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 		NameValuePlug(
 			const std::string &nameDefault,
 			Gaffer::PlugPtr valuePlug,
-			const std::string &name=defaultName<NameValuePlug>()
+			IECore::InternedString name=defaultName<NameValuePlug>()
 		);
 
 		NameValuePlug(
 			const std::string &nameDefault,
 			Gaffer::PlugPtr valuePlug,
-			const std::string &name,
+			IECore::InternedString name,
 			unsigned flags
 		);
 
@@ -86,7 +86,7 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 			const std::string &nameDefault,
 			const IECore::Data *valueDefault,
 			bool defaultEnabled,
-			const std::string &name=defaultName<NameValuePlug>(),
+			IECore::InternedString name=defaultName<NameValuePlug>(),
 			Direction direction=In,
 			unsigned flags=Default
 		);
@@ -98,14 +98,14 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 			const std::string &nameDefault,
 			Gaffer::PlugPtr valuePlug,
 			bool defaultEnabled,
-			const std::string &name=defaultName<NameValuePlug>()
+			IECore::InternedString name=defaultName<NameValuePlug>()
 		);
 
 		NameValuePlug(
 			const std::string &nameDefault,
 			Gaffer::PlugPtr valuePlug,
 			bool defaultEnabled,
-			const std::string &name,
+			IECore::InternedString name,
 			unsigned flags
 		);
 
@@ -113,7 +113,7 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 		// Deprecated, and dangerous, since if you don't manually construct child plugs in the expected order of
 		// "name", "value", and optionally "enabled" then you will get a crash.
 		NameValuePlug(
-			const std::string &name=defaultName<NameValuePlug>(),
+			IECore::InternedString name=defaultName<NameValuePlug>(),
 			Direction direction=In,
 			unsigned flags=Default
 		);
@@ -130,7 +130,7 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 		const Gaffer::BoolPlug *enabledPlug() const;
 
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 };
 

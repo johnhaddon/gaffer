@@ -60,7 +60,7 @@ class GAFFERSCENEUI_API CropWindowTool : public GafferUI::Tool
 
 	public :
 
-		CropWindowTool( GafferUI::View *view, const std::string &name = defaultName<CropWindowTool>() );
+		CropWindowTool( GafferUI::View *view, IECore::InternedString name = defaultName<CropWindowTool>() );
 
 		~CropWindowTool() override;
 

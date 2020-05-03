@@ -111,7 +111,7 @@ typename T::ValuePtr defaultValue( typename T::Ptr p, bool copy )
 
 template<typename T>
 typename T::Ptr construct(
-	const char *name,
+	IECore::InternedString name,
 	Gaffer::Plug::Direction direction,
 	typename T::ValuePtr defaultValue,
 	unsigned flags

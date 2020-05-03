@@ -89,7 +89,7 @@ size_t first( const std::bitset<32> &inputs )
 // MergeScenes
 //////////////////////////////////////////////////////////////////////////
 
-MergeScenes::MergeScenes( const std::string &name )
+MergeScenes::MergeScenes( IECore::InternedString name )
 	:	SceneProcessor( name, /* minInputs = */ 2, /* maxInputs = */ InputMask().size() )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

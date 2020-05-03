@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ContextVariables );
 
 size_t ContextVariables::g_firstPlugIndex;
 
-ContextVariables::ContextVariables( const std::string &name )
+ContextVariables::ContextVariables( IECore::InternedString name )
 	:	ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

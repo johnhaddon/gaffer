@@ -108,7 +108,7 @@ bool allDescendantInputsAreNull( const Plug *plug )
 
 GAFFER_PLUG_DEFINE_TYPE( Plug );
 
-Plug::Plug( const std::string &name, Direction direction, unsigned flags )
+Plug::Plug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	GraphComponent( name ), m_direction( direction ), m_input( nullptr ), m_flags( None ), m_skipNextUpdateInputFromChildInputs( false )
 {
 	setFlags( flags );
@@ -580,7 +580,7 @@ const Plug::OutputContainer &Plug::outputs() const
 	return m_outputs;
 }
 
-PlugPtr Plug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr Plug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	PlugPtr result = new Plug( name, direction, getFlags() );
 	for( PlugIterator it( this ); !it.done(); ++it )

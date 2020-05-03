@@ -44,7 +44,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Backdrop );
 
 size_t Backdrop::g_firstPlugIndex = 0;
 
-Backdrop::Backdrop( const std::string &name )
+Backdrop::Backdrop( IECore::InternedString name )
 	:	Node( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

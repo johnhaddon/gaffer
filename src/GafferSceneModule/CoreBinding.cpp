@@ -331,7 +331,7 @@ void GafferSceneModule::bindCore()
 {
 
 	PlugClass<ScenePlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<ScenePlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,
@@ -379,7 +379,7 @@ void GafferSceneModule::bindCore()
 
 	typedef ComputeNodeWrapper<SceneProcessor> SceneProcessorWrapper;
 	GafferBindings::DependencyNodeClass<SceneProcessor, SceneProcessorWrapper>()
-	.def( init<const std::string &, size_t, size_t>(
+	.def( init<IECore::InternedString, size_t, size_t>(
 				(
 					arg( "name" ) = GraphComponent::defaultName<SceneProcessor>(),
 					arg( "minInputs" ),

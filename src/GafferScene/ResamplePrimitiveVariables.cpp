@@ -54,7 +54,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ResamplePrimitiveVariables );
 
 size_t ResamplePrimitiveVariables::g_firstPlugIndex = 0;
 
-ResamplePrimitiveVariables::ResamplePrimitiveVariables( const std::string &name ) : PrimitiveVariableProcessor( name, IECore::PathMatcher::NoMatch )
+ResamplePrimitiveVariables::ResamplePrimitiveVariables( IECore::InternedString name ) : PrimitiveVariableProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

@@ -45,7 +45,7 @@ using namespace Gaffer;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ApplicationRoot );
 
-ApplicationRoot::ApplicationRoot( const std::string &name )
+ApplicationRoot::ApplicationRoot( IECore::InternedString name )
 	:	GraphComponent( name )
 {
 	ScriptContainerPtr s = new ScriptContainer;

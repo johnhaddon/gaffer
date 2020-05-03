@@ -133,7 +133,7 @@ InternedString TaskNodeProcess::postTasksProcessType( "taskNode:postTasks" );
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TaskNode::TaskPlug );
 
-TaskNode::TaskPlug::TaskPlug( const std::string &name, Direction direction, unsigned flags )
+TaskNode::TaskPlug::TaskPlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	Plug( name, direction, flags )
 {
 }
@@ -185,7 +185,7 @@ bool TaskNode::TaskPlug::acceptsInput( const Plug *input ) const
 	return false;
 }
 
-PlugPtr TaskNode::TaskPlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr TaskNode::TaskPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new TaskPlug( name, direction, getFlags() );
 }
@@ -282,7 +282,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TaskNode )
 
 size_t TaskNode::g_firstPlugIndex;
 
-TaskNode::TaskNode( const std::string &name )
+TaskNode::TaskNode( IECore::InternedString name )
 	:	DependencyNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

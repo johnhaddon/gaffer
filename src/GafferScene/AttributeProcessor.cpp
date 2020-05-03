@@ -42,18 +42,18 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AttributeProcessor );
 
-AttributeProcessor::AttributeProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
+AttributeProcessor::AttributeProcessor( IECore::InternedString name, IECore::PathMatcher::Result filterDefault )
 	:	FilteredSceneProcessor( name, filterDefault )
 {
 	init();
 }
 
-AttributeProcessor::AttributeProcessor( const std::string &name )
+AttributeProcessor::AttributeProcessor( IECore::InternedString name )
 	:	AttributeProcessor( name, PathMatcher::NoMatch )
 {
 }
 
-AttributeProcessor::AttributeProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
+AttributeProcessor::AttributeProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs )
 	:	FilteredSceneProcessor( name, minInputs, maxInputs )
 {
 	init();

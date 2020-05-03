@@ -497,7 +497,7 @@ size_t Instancer::g_firstPlugIndex = 0;
 
 static const IECore::InternedString idContextName( "instancer:id" );
 
-Instancer::Instancer( const std::string &name )
+Instancer::Instancer( IECore::InternedString name )
 	:	BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

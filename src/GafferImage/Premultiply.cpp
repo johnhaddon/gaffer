@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Premultiply );
 
 size_t Premultiply::g_firstPlugIndex = 0;
 
-Premultiply::Premultiply( const std::string &name )
+Premultiply::Premultiply( IECore::InternedString name )
 	:	ChannelDataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

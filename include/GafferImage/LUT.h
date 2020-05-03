@@ -56,7 +56,7 @@ class GAFFERIMAGE_API LUT : public OpenColorIOTransform
 
 	public :
 
-		LUT( const std::string &name=defaultName<LUT>() );
+		LUT( IECore::InternedString name=defaultName<LUT>() );
 		~LUT() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::LUT, LUTTypeId, OpenColorIOTransform );

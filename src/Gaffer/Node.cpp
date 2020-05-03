@@ -47,7 +47,7 @@ size_t Node::g_firstPlugIndex;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Node );
 
-Node::Node( const std::string &name )
+Node::Node( IECore::InternedString name )
 	:	GraphComponent( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

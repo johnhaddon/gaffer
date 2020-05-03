@@ -59,11 +59,11 @@ class GAFFERSCENE_API SceneProcessor : public SceneNode
 
 		/// Constructs with a single input ScenePlug named "in". Use inPlug()
 		/// to access this plug.
-		SceneProcessor( const std::string &name=defaultName<SceneProcessor>() );
+		SceneProcessor( IECore::InternedString name=defaultName<SceneProcessor>() );
 		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 		/// convenience for accessing the first child in the array, and use
 		/// inPlugs() to access the array itself.
-		SceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
+		SceneProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
 
 		~SceneProcessor() override;
 

@@ -1248,7 +1248,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageWriter );
 
 size_t ImageWriter::g_firstPlugIndex = 0;
 
-ImageWriter::ImageWriter( const std::string &name )
+ImageWriter::ImageWriter( IECore::InternedString name )
 	:	TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -1638,7 +1638,7 @@ void ImageWriter::execute() const
 	}
 
 	// Write out the channel data
-	
+
 	const ColorSpace *appropriateColorSpaceNode = hasAlpha ? colorSpaceUnpremultedNode() : colorSpaceNode();
 
 	const Imath::Box2i extImageDataWindow( Imath::V2i( spec.x, spec.y ), Imath::V2i( spec.x + spec.width - 1, spec.y + spec.height - 1 ) );

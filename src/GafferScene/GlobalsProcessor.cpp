@@ -42,7 +42,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( GlobalsProcessor );
 
-GlobalsProcessor::GlobalsProcessor( const std::string &name )
+GlobalsProcessor::GlobalsProcessor( IECore::InternedString name )
 	:	SceneProcessor( name )
 {
 	// Fast pass-throughs for everything except the globals

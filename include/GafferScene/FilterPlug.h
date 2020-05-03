@@ -59,14 +59,14 @@ class GAFFERSCENE_API FilterPlug : public Gaffer::IntPlug
 	public :
 
 		FilterPlug(
-			const std::string &name = defaultName<FilterPlug>(),
+			IECore::InternedString name = defaultName<FilterPlug>(),
 			Direction direction = In,
 			unsigned flags = Default
 		);
 
 		/// \deprecated
 		FilterPlug(
-			const std::string &name,
+			IECore::InternedString name,
 			Direction direction ,
 			int defaultValue,
 			int minValue,
@@ -79,7 +79,7 @@ class GAFFERSCENE_API FilterPlug : public Gaffer::IntPlug
 		GAFFER_PLUG_DECLARE_TYPE( GafferScene::FilterPlug, FilterPlugTypeId, Gaffer::IntPlug );
 
 		bool acceptsInput( const Gaffer::Plug *input ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		bool sceneAffectsMatch( const ScenePlug *scene, const Gaffer::ValuePlug *child ) const;
 

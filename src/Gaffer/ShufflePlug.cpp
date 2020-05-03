@@ -56,7 +56,7 @@ ShufflePlug::ShufflePlug( const std::string &source, const std::string &destinat
 }
 
 /// Primarily used for serialisation.
-ShufflePlug::ShufflePlug( const std::string &name, Direction direction, unsigned flags )
+ShufflePlug::ShufflePlug( IECore::InternedString name, Direction direction, unsigned flags )
 	: ValuePlug( name, direction, flags )
 {
 	addChild( new StringPlug( "source", direction ) );
@@ -150,7 +150,7 @@ bool ShufflePlug::acceptsChild( const Gaffer::GraphComponent *potentialChild ) c
 	return false;
 }
 
-Gaffer::PlugPtr ShufflePlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr ShufflePlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new ShufflePlug( name, direction, getFlags() );
 }
@@ -161,7 +161,7 @@ Gaffer::PlugPtr ShufflePlug::createCounterpart( const std::string &name, Directi
 
 GAFFER_PLUG_DEFINE_TYPE( ShufflesPlug );
 
-ShufflesPlug::ShufflesPlug( const std::string &name, Direction direction, unsigned flags ) : ValuePlug( name, direction, flags )
+ShufflesPlug::ShufflesPlug( IECore::InternedString name, Direction direction, unsigned flags ) : ValuePlug( name, direction, flags )
 {
 }
 
@@ -190,7 +190,7 @@ bool ShufflesPlug::acceptsInput( const Plug *input ) const
 	return runTimeCast<const ShufflesPlug>( input );
 }
 
-Gaffer::PlugPtr ShufflesPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr ShufflesPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	PlugPtr result = new ShufflesPlug( name, direction, getFlags() );
 	for( PlugIterator it( this ); !it.done(); ++it )

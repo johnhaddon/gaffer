@@ -51,7 +51,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Duplicate );
 
 size_t Duplicate::g_firstPlugIndex = 0;
 
-Duplicate::Duplicate( const std::string &name )
+Duplicate::Duplicate( IECore::InternedString name )
 	:	BranchCreator( name )
 {
 

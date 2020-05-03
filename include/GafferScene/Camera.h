@@ -51,7 +51,7 @@ class GAFFERSCENE_API Camera : public ObjectSource
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Camera, CameraTypeId, ObjectSource );
 
-		Camera( const std::string &name=defaultName<Camera>() );
+		Camera( IECore::InternedString name=defaultName<Camera>() );
 		~Camera() override;
 
 		Gaffer::StringPlug *projectionPlug();

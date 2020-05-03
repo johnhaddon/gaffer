@@ -46,14 +46,14 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( FilterProcessor );
 
 size_t FilterProcessor::g_firstPlugIndex = 0;
 
-FilterProcessor::FilterProcessor( const std::string &name )
+FilterProcessor::FilterProcessor( IECore::InternedString name )
 	:	Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( outPlug()->createCounterpart( "in", Plug::In ) );
 }
 
-FilterProcessor::FilterProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
+FilterProcessor::FilterProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs )
 	:	Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

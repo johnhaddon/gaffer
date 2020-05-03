@@ -52,7 +52,7 @@ class GAFFERSCENE_API PathFilter : public Filter
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::PathFilter, PathFilterTypeId, Filter );
 
-		PathFilter( const std::string &name=defaultName<PathFilter>() );
+		PathFilter( IECore::InternedString name=defaultName<PathFilter>() );
 		~PathFilter() override;
 
 		Gaffer::StringVectorDataPlug *pathsPlug();

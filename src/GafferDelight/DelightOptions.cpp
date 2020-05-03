@@ -41,7 +41,7 @@ using namespace GafferDelight;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DelightOptions );
 
-DelightOptions::DelightOptions( const std::string &name )
+DelightOptions::DelightOptions( IECore::InternedString name )
 	:	GafferScene::Options( name )
 {
 	Gaffer::CompoundDataPlug *options = optionsPlug();

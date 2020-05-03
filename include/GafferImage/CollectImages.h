@@ -49,7 +49,7 @@ class GAFFERIMAGE_API CollectImages : public ImageProcessor
 
 	public :
 
-		CollectImages( const std::string &name=defaultName<CollectImages>() );
+		CollectImages( IECore::InternedString name=defaultName<CollectImages>() );
 		~CollectImages() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::CollectImages, CollectImagesTypeId, ImageProcessor );

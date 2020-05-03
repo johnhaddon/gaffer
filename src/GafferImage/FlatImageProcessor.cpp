@@ -44,12 +44,12 @@ using namespace GafferImage;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( FlatImageProcessor );
 
-FlatImageProcessor::FlatImageProcessor( const std::string &name )
+FlatImageProcessor::FlatImageProcessor( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 }
 
-FlatImageProcessor::FlatImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
+FlatImageProcessor::FlatImageProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs )
 	:	ImageProcessor( name, minInputs, maxInputs )
 {
 }

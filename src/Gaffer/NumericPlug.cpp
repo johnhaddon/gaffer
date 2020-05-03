@@ -58,7 +58,7 @@ GAFFER_PLUG_DEFINE_TEMPLATE_TYPE( Gaffer::FloatPlug, FloatPlugTypeId )
 
 template<class T>
 NumericPlug<T>::NumericPlug(
-	const std::string &name,
+	IECore::InternedString name,
 	Direction direction,
 	T defaultValue,
 	T minValue,
@@ -93,7 +93,7 @@ bool NumericPlug<T>::acceptsInput( const Plug *input ) const
 }
 
 template<class T>
-PlugPtr NumericPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr NumericPlug<T>::createCounterpart( InternedString name, Direction direction ) const
 {
 	return new NumericPlug<T>( name, direction, defaultValue(), minValue(), maxValue(), getFlags() );
 }

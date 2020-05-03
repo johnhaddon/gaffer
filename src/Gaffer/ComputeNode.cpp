@@ -43,7 +43,7 @@ using namespace Gaffer;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ComputeNode );
 
-ComputeNode::ComputeNode( const std::string &name )
+ComputeNode::ComputeNode( IECore::InternedString name )
 	:	DependencyNode( name )
 {
 }

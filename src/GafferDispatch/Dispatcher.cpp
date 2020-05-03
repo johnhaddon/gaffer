@@ -75,7 +75,7 @@ std::string Dispatcher::g_defaultDispatcherType = "";
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Dispatcher )
 
-Dispatcher::Dispatcher( const std::string &name )
+Dispatcher::Dispatcher( IECore::InternedString name )
 	: Node( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

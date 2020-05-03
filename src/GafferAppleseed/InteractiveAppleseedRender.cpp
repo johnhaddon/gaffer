@@ -41,7 +41,7 @@ using namespace GafferAppleseed;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( InteractiveAppleseedRender );
 
-InteractiveAppleseedRender::InteractiveAppleseedRender( const std::string &name )
+InteractiveAppleseedRender::InteractiveAppleseedRender( IECore::InternedString name )
 	:	InteractiveRender( "Appleseed", name )
 {
 }

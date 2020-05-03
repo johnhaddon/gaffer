@@ -49,7 +49,7 @@ class GAFFERSCENE_API ParentConstraint : public Constraint
 
 	public :
 
-		ParentConstraint( const std::string &name=defaultName<ParentConstraint>() );
+		ParentConstraint( IECore::InternedString name=defaultName<ParentConstraint>() );
 		~ParentConstraint() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::ParentConstraint, ParentConstraintTypeId, Constraint );

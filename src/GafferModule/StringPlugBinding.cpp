@@ -135,7 +135,7 @@ void GafferModule::bindStringPlug()
 
 	PlugClass<StringPlug>()
 		.def(
-			boost::python::init<const std::string &, Gaffer::Plug::Direction, const std::string &, unsigned, unsigned>(
+			boost::python::init<IECore::InternedString, Gaffer::Plug::Direction, const std::string &, unsigned, unsigned>(
 				(
 					boost::python::arg_( "name" )=Gaffer::GraphComponent::defaultName<StringPlug>(),
 					boost::python::arg_( "direction" )=Gaffer::Plug::In,

@@ -92,7 +92,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ScaleTool );
 
 ScaleTool::ToolDescription<ScaleTool, SceneView> ScaleTool::g_toolDescription;
 
-ScaleTool::ScaleTool( SceneView *view, const std::string &name )
+ScaleTool::ScaleTool( SceneView *view, IECore::InternedString name )
 	:	TransformTool( view, name )
 {
 	static Style::Axes axes[] = { Style::X, Style::Y, Style::Z, Style::XY, Style::XZ, Style::YZ, Style::XYZ };

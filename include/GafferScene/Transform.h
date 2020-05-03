@@ -49,7 +49,7 @@ class GAFFERSCENE_API Transform : public SceneElementProcessor
 
 	public :
 
-		Transform( const std::string &name=defaultName<Transform>() );
+		Transform( IECore::InternedString name=defaultName<Transform>() );
 		~Transform() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Transform, TransformTypeId, SceneElementProcessor );

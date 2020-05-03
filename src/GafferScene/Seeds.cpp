@@ -52,7 +52,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Seeds );
 
 size_t Seeds::g_firstPlugIndex = 0;
 
-Seeds::Seeds( const std::string &name )
+Seeds::Seeds( IECore::InternedString name )
 	:	BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

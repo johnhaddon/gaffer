@@ -72,7 +72,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OpenColorIOTransform );
 
 size_t OpenColorIOTransform::g_firstPlugIndex = 0;
 
-OpenColorIOTransform::OpenColorIOTransform( const std::string &name , bool withContextPlug )
+OpenColorIOTransform::OpenColorIOTransform( IECore::InternedString name , bool withContextPlug )
 	:	ColorProcessor( name ), m_hasContextPlug( withContextPlug )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

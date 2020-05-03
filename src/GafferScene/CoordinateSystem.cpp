@@ -48,7 +48,7 @@ static IECore::InternedString g_coordinateSystemsSetName( "__coordinateSystems" 
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CoordinateSystem );
 
-CoordinateSystem::CoordinateSystem( const std::string &name )
+CoordinateSystem::CoordinateSystem( IECore::InternedString name )
 	:	ObjectSource( name, "coordinateSystem" )
 {
 }

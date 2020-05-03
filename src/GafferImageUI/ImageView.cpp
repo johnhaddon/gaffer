@@ -196,7 +196,7 @@ class V2fContextVariable : public Gaffer::ComputeNode
 
 	public :
 
-		V2fContextVariable( const std::string &name = "V2fContextVariable" )
+		V2fContextVariable( IECore::InternedString name = "V2fContextVariable" )
 			:	ComputeNode( name )
 		{
 			storeIndexOfNextChild( g_firstPlugIndex );
@@ -355,7 +355,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageView );
 
 ImageView::ViewDescription<ImageView> ImageView::g_viewDescription( GafferImage::ImagePlug::staticTypeId() );
 
-ImageView::ImageView( const std::string &name )
+ImageView::ImageView( IECore::InternedString name )
 	:	View( name, new GafferImage::ImagePlug() ),
 		m_imageGadget( new ImageGadget() ),
 		m_framed( false )

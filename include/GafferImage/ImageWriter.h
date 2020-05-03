@@ -69,7 +69,7 @@ class GAFFERIMAGE_API ImageWriter : public GafferDispatch::TaskNode
 			Tile = 1
 		};
 
-		ImageWriter( const std::string &name=defaultName<ImageWriter>() );
+		ImageWriter( IECore::InternedString name=defaultName<ImageWriter>() );
 		~ImageWriter() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::ImageWriter, ImageWriterTypeId, TaskNode );

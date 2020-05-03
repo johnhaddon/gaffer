@@ -49,7 +49,7 @@ class GAFFERSCENE_API ShaderAssignment : public AttributeProcessor
 
 	public :
 
-		ShaderAssignment( const std::string &name=defaultName<ShaderAssignment>() );
+		ShaderAssignment( IECore::InternedString name=defaultName<ShaderAssignment>() );
 		~ShaderAssignment() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::ShaderAssignment, ShaderAssignmentTypeId, AttributeProcessor );

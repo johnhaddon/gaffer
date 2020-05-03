@@ -75,7 +75,7 @@ class GAFFERSCENE_API ObjectSource : public SceneNode
 
 	protected :
 
-		ObjectSource( const std::string &name, const std::string &namePlugDefaultValue );
+		ObjectSource( IECore::InternedString name, IECore::InternedString namePlugDefaultValue );
 
 		Gaffer::ObjectPlug *sourcePlug();
 		const Gaffer::ObjectPlug *sourcePlug() const;

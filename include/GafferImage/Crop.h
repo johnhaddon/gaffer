@@ -51,7 +51,7 @@ class GAFFERIMAGE_API Crop : public ImageProcessor
 {
 	public :
 
-		Crop( const std::string &name=defaultName<Crop>() );
+		Crop( IECore::InternedString name=defaultName<Crop>() );
 		~Crop() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Crop, CropTypeId, ImageProcessor );

@@ -175,7 +175,7 @@ void GafferSceneModule::bindTweaks()
 
 	PlugClass<TweaksPlug>()
 		.def(
-			init<const std::string &, Plug::Direction, unsigned>(
+			init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<TweaksPlug>(),
 					boost::python::arg_( "direction" )=Plug::In,

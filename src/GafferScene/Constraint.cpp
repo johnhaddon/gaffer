@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Constraint );
 
 size_t Constraint::g_firstPlugIndex = 0;
 
-Constraint::Constraint( const std::string &name )
+Constraint::Constraint( IECore::InternedString name )
 	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

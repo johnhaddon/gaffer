@@ -62,7 +62,7 @@ using namespace Gaffer;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldShader );
 
-ArnoldShader::ArnoldShader( const std::string &name )
+ArnoldShader::ArnoldShader( IECore::InternedString name )
 	:	GafferScene::Shader( name )
 {
 }

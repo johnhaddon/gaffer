@@ -55,7 +55,7 @@ class GAFFERSCENE_API Render : public GafferDispatch::TaskNode
 
 	public :
 
-		Render( const std::string &name=defaultName<Render>() );
+		Render( IECore::InternedString name=defaultName<Render>() );
 		~Render() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Render, GafferScene::RenderTypeId, GafferDispatch::TaskNode );
@@ -87,7 +87,7 @@ class GAFFERSCENE_API Render : public GafferDispatch::TaskNode
 		// at some point we won't even have derived classes, but instead will always use the
 		// base class? At the moment the main purpose of the derived classes is to force the
 		// loading of the module which registers the required renderer type.
-		Render( const IECore::InternedString &rendererType, const std::string &name );
+		Render( const IECore::InternedString &rendererType, IECore::InternedString name );
 
 		void preTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
 		void postTasks( const Gaffer::Context *context, Tasks &tasks ) const override;

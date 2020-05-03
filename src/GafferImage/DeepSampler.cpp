@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeepSampler );
 
 size_t DeepSampler::g_firstPlugIndex = 0;
 
-DeepSampler::DeepSampler( const std::string &name )
+DeepSampler::DeepSampler( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 

@@ -52,7 +52,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CopyPrimitiveVariables );
 
 size_t CopyPrimitiveVariables::g_firstPlugIndex = 0;
 
-CopyPrimitiveVariables::CopyPrimitiveVariables( const std::string &name )
+CopyPrimitiveVariables::CopyPrimitiveVariables( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

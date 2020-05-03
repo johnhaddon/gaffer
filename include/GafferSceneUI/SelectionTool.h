@@ -54,7 +54,7 @@ class GAFFERSCENEUI_API SelectionTool : public GafferUI::Tool
 
 	public :
 
-		SelectionTool( SceneView *view, const std::string &name = defaultName<SelectionTool>() );
+		SelectionTool( SceneView *view, IECore::InternedString name = defaultName<SelectionTool>() );
 
 		~SelectionTool() override;
 

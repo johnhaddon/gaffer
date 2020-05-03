@@ -50,7 +50,7 @@ class GAFFERSCENE_API GlobalsProcessor : public SceneProcessor
 
 	public :
 
-		GlobalsProcessor( const std::string &name=defaultName<GlobalsProcessor>() );
+		GlobalsProcessor( IECore::InternedString name=defaultName<GlobalsProcessor>() );
 		~GlobalsProcessor() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::GlobalsProcessor, GlobalsProcessorTypeId, SceneProcessor );

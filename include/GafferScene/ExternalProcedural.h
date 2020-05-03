@@ -51,7 +51,7 @@ class GAFFERSCENE_API ExternalProcedural : public ObjectSource
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::ExternalProcedural, ExternalProceduralTypeId, ObjectSource );
 
-		ExternalProcedural( const std::string &name=defaultName<ExternalProcedural>() );
+		ExternalProcedural( IECore::InternedString name=defaultName<ExternalProcedural>() );
 		~ExternalProcedural() override;
 
 		Gaffer::StringPlug *fileNamePlug();

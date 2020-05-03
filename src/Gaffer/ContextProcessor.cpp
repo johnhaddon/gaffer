@@ -67,7 +67,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ContextProcessor );
 
 size_t ContextProcessor::g_firstPlugIndex = 0;
 
-ContextProcessor::ContextProcessor( const std::string &name )
+ContextProcessor::ContextProcessor( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -50,7 +50,7 @@ class GAFFERIMAGE_API Blur : public FlatImageProcessor
 {
 	public :
 
-		Blur( const std::string &name=defaultName<Blur>() );
+		Blur( IECore::InternedString name=defaultName<Blur>() );
 		~Blur() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Blur, BlurTypeId, FlatImageProcessor );

@@ -49,7 +49,7 @@ class GAFFER_API Reference : public SubGraph
 
 	public :
 
-		Reference( const std::string &name=defaultName<Reference>() );
+		Reference( IECore::InternedString name=defaultName<Reference>() );
 		~Reference() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Reference, ReferenceTypeId, SubGraph );

@@ -67,7 +67,7 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Handle );
 
-Handle::Handle( const std::string &name )
+Handle::Handle( IECore::InternedString name )
 	:	Gadget( name ), m_hovering( false ), m_rasterScale( 0.0f ), m_visibleOnHover( false )
 {
 	enterSignal().connect( boost::bind( &Handle::enter, this ) );

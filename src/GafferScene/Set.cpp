@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Set );
 
 size_t Set::g_firstPlugIndex = 0;
 
-Set::Set( const std::string &name )
+Set::Set( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

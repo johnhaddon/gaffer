@@ -50,7 +50,7 @@ class GAFFERAPPLESEED_API AppleseedShaderAdaptor : public GafferScene::SceneProc
 
 	public :
 
-		AppleseedShaderAdaptor( const std::string &name=defaultName<AppleseedShaderAdaptor>() );
+		AppleseedShaderAdaptor( IECore::InternedString name=defaultName<AppleseedShaderAdaptor>() );
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferAppleseed::AppleseedShaderAdaptor, AppleseedShaderAdaptorTypeId, GafferScene::SceneProcessor );
 

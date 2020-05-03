@@ -61,7 +61,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CollectTransforms );
 
 size_t CollectTransforms::g_firstPlugIndex = 0;
 
-CollectTransforms::CollectTransforms( const std::string &name )
+CollectTransforms::CollectTransforms( IECore::InternedString name )
 	:	AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

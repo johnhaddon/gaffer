@@ -56,7 +56,7 @@ class GAFFER_API ShufflePlug : public ValuePlug
 
 		ShufflePlug( const std::string &source, const std::string &destination, bool deleteSource=false, bool enabled=true );
 		/// Primarily used for serialisation.
-		ShufflePlug( const std::string &name = defaultName<ShufflePlug>(), Direction direction=In, unsigned flags = Default );
+		ShufflePlug( IECore::InternedString name = defaultName<ShufflePlug>(), Direction direction=In, unsigned flags = Default );
 
 		StringPlug *sourcePlug();
 		const StringPlug *sourcePlug() const;
@@ -71,7 +71,7 @@ class GAFFER_API ShufflePlug : public ValuePlug
 		const BoolPlug *deleteSourcePlug() const;
 
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 };
 
@@ -88,11 +88,11 @@ class GAFFER_API ShufflesPlug : public ValuePlug
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflesPlug, ShufflesPlugTypeId, ValuePlug );
 
-		ShufflesPlug( const std::string &name=defaultName<ShufflesPlug>(), Direction direction=In, unsigned flags=Default );
+		ShufflesPlug( IECore::InternedString name=defaultName<ShufflesPlug>(), Direction direction=In, unsigned flags=Default );
 
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
 		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		/// Shuffles the sources into a destination container. The container type must have a std::pair value_type
 		/// and string-compatible keys (eg std::string, IECore::InternedString).

@@ -45,7 +45,7 @@ using namespace GafferArnold;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldAttributes );
 
-ArnoldAttributes::ArnoldAttributes( const std::string &name )
+ArnoldAttributes::ArnoldAttributes( IECore::InternedString name )
 	:	GafferScene::Attributes( name )
 {
 	Gaffer::CompoundDataPlug *attributes = attributesPlug();

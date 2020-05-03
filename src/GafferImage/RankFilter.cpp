@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( RankFilter );
 
 size_t RankFilter::g_firstPlugIndex = 0;
 
-RankFilter::RankFilter( const std::string &name, Mode mode )
+RankFilter::RankFilter( IECore::InternedString name, Mode mode )
 	:   FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

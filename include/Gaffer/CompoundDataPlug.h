@@ -58,7 +58,7 @@ class GAFFER_API CompoundDataPlug : public Gaffer::ValuePlug
 	public :
 
 		CompoundDataPlug(
-			const std::string &name = defaultName<CompoundDataPlug>(),
+			IECore::InternedString name = defaultName<CompoundDataPlug>(),
 			Direction direction=In,
 			unsigned flags = Default
 		);
@@ -68,7 +68,7 @@ class GAFFER_API CompoundDataPlug : public Gaffer::ValuePlug
 
 		/// Accepts only children that can generate values for the CompoundData.
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		/// Adds each member from the specified CompoundData.
 		void addMembers( const IECore::CompoundData *members, bool useNameAsPlugName = false );

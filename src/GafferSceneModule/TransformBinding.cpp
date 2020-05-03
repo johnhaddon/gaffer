@@ -57,14 +57,14 @@ void GafferSceneModule::bindTransform()
 
 	typedef ComputeNodeWrapper<FilteredSceneProcessor> Wrapper;
 	GafferBindings::DependencyNodeClass<FilteredSceneProcessor, Wrapper>()
-		.def( init<const std::string &, IECore::PathMatcher::Result>(
+		.def( init<IECore::InternedString, IECore::PathMatcher::Result>(
 				(
 					arg( "name" ) = GraphComponent::defaultName<FilteredSceneProcessor>(),
 					arg( "filterDefault" ) = IECore::PathMatcher::EveryMatch
 				)
 			)
 		)
-		.def( init<const std::string &, size_t, size_t>(
+		.def( init<IECore::InternedString, size_t, size_t>(
 				(
 					arg( "name" ),
 					arg( "minInputs" ),

@@ -56,7 +56,7 @@ class GAFFERIMAGE_API Catalogue : public ImageNode
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Catalogue, CatalogueTypeId, ImageNode );
 
-		Catalogue( const std::string &name = defaultName<Catalogue>() );
+		Catalogue( IECore::InternedString name = defaultName<Catalogue>() );
 		~Catalogue() override;
 
 		/// Plug type used to represent an image in the catalogue.
@@ -67,7 +67,7 @@ class GAFFERIMAGE_API Catalogue : public ImageNode
 
 				GAFFER_PLUG_DECLARE_TYPE( GafferImage::Catalogue::Image, CatalogueImageTypeId, Gaffer::Plug );
 
-				Image( const std::string &name = defaultName<Image>(), Direction direction = In, unsigned flags = Default );
+				Image( IECore::InternedString name = defaultName<Image>(), Direction direction = In, unsigned flags = Default );
 
 				Gaffer::StringPlug *fileNamePlug();
 				const Gaffer::StringPlug *fileNamePlug() const;
@@ -84,7 +84,7 @@ class GAFFERIMAGE_API Catalogue : public ImageNode
 				static Ptr load( const std::string &fileName );
 				void save( const std::string &fileName ) const;
 
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+				Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		};
 

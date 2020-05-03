@@ -59,7 +59,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LightFilter );
 
 size_t LightFilter::g_firstPlugIndex = 0;
 
-LightFilter::LightFilter( GafferScene::ShaderPtr shader, const std::string &name )
+LightFilter::LightFilter( GafferScene::ShaderPtr shader, IECore::InternedString name )
 	:	ObjectSource( name, "lightFilter" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -46,7 +46,7 @@ class GAFFERIMAGE_API VectorWarp : public Warp
 {
 	public :
 
-		VectorWarp( const std::string &name=defaultName<Warp>() );
+		VectorWarp( IECore::InternedString name=defaultName<Warp>() );
 		~VectorWarp() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::VectorWarp, VectorWarpTypeId, Warp );

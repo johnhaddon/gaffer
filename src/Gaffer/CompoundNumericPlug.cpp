@@ -44,7 +44,7 @@ const IECore::RunTimeTyped::TypeDescription<CompoundNumericPlug<T> > CompoundNum
 
 template<typename T>
 CompoundNumericPlug<T>::CompoundNumericPlug(
-	const std::string &name,
+	IECore::InternedString name,
 	Direction direction,
 	T defaultValue,
 	T minValue,
@@ -75,7 +75,7 @@ bool CompoundNumericPlug<T>::acceptsChild( const GraphComponent *potentialChild 
 }
 
 template<class T>
-PlugPtr CompoundNumericPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr CompoundNumericPlug<T>::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new CompoundNumericPlug<T>( name, direction, defaultValue(), minValue(), maxValue(), getFlags(), interpretation() );
 }

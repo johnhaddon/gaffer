@@ -66,11 +66,11 @@ class GAFFERSCENE_API Deformer : public ObjectProcessor
 
 		/// Constructs with a single input ScenePlug named "in". Use inPlug()
 		/// to access this plug.
-		Deformer( const std::string &name );
+		Deformer( IECore::InternedString name );
 		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 		/// convenience for accessing the first child in the array, and use
 		/// inPlugs() to access the array itself.
-		Deformer( const std::string &name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
+		Deformer( IECore::InternedString name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
 
 		/// Used to determine whether adjusted bounds need to be propagated up to
 		/// all ancestor locations. Default implementation checks the value of `adjustBoundsPlug()`
@@ -85,7 +85,7 @@ class GAFFERSCENE_API Deformer : public ObjectProcessor
 		/// Private constructor and friendship for old nodes which are filtered to everything
 		/// by default. This was a mistake, and we want to ensure that we don't repeat the mistake
 		/// for new nodes.
-		Deformer( const std::string &name, IECore::PathMatcher::Result filterDefault );
+		Deformer( IECore::InternedString name, IECore::PathMatcher::Result filterDefault );
 		friend class PointsType;
 
 		void init();

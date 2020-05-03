@@ -57,7 +57,7 @@ class GAFFERVDB_API PointsGridToPoints : public GafferScene::SceneElementProcess
 
 	public :
 
-		PointsGridToPoints( const std::string &name=defaultName<PointsGridToPoints>() );
+		PointsGridToPoints( IECore::InternedString name=defaultName<PointsGridToPoints>() );
 		~PointsGridToPoints() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferVDB::PointsGridToPoints, PointsGridToPointsId, GafferScene::SceneElementProcessor );

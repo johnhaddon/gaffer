@@ -41,7 +41,7 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ConnectionCreator );
 
-ConnectionCreator::ConnectionCreator( const std::string &name )
+ConnectionCreator::ConnectionCreator( IECore::InternedString name )
 	: Gadget( name )
 {
 }

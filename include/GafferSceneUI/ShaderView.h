@@ -56,7 +56,7 @@ class GAFFERSCENEUI_API ShaderView : public GafferImageUI::ImageView
 
 	public :
 
-		ShaderView( const std::string &name = defaultName<ShaderView>() );
+		ShaderView( IECore::InternedString name = defaultName<ShaderView>() );
 		~ShaderView() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneUI::ShaderView, ShaderViewTypeId, GafferImageUI::ImageView );

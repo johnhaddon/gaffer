@@ -134,7 +134,7 @@ class PlugWrapper : public GraphComponentWrapper<WrappedType>
 			WrappedType::setInput( input );
 		}
 
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Gaffer::Plug::Direction direction ) const override
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Gaffer::Plug::Direction direction ) const override
 		{
 			if( this->isSubclassed() )
 			{
@@ -144,7 +144,7 @@ class PlugWrapper : public GraphComponentWrapper<WrappedType>
 					boost::python::object f = this->methodOverride( "createCounterpart" );
 					if( f )
 					{
-						Gaffer::PlugPtr result = boost::python::extract<Gaffer::PlugPtr>( f( name, direction ) );
+						Gaffer::PlugPtr result = boost::python::extract<Gaffer::PlugPtr>( f( name.string(), direction ) );
 						return result;
 					}
 				}

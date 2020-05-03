@@ -58,7 +58,7 @@ class GAFFER_API ValuePlug : public Plug
 	public :
 
 		/// Constructs a ValuePlug which can be used as a parent for other ValuePlugs.
-		ValuePlug( const std::string &name=defaultName<ValuePlug>(), Direction direction=In, unsigned flags=Default );
+		ValuePlug( IECore::InternedString name=defaultName<ValuePlug>(), Direction direction=In, unsigned flags=Default );
 		~ValuePlug() override;
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::ValuePlug, ValuePlugTypeId, Plug );
@@ -72,7 +72,7 @@ class GAFFER_API ValuePlug : public Plug
 		/// Reimplemented so that values can be propagated from inputs.
 		void setInput( PlugPtr input ) override;
 
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		/// Returns true if it is valid to call setFrom(), setToDefault(),
 		/// or setValue() on this plug. False will be returned if the plug
@@ -168,7 +168,7 @@ class GAFFER_API ValuePlug : public Plug
 		/// after passing to the constructor. The defaultValue must be non-null.
 		/// When this constructor is used, the ValuePlug does not accept child
 		/// plugs - values are always stored on leaf plugs.
-		ValuePlug( const std::string &name, Direction direction,
+		ValuePlug( IECore::InternedString name, Direction direction,
 			IECore::ConstObjectPtr defaultValue, unsigned flags );
 
 		/// Returns the default value that was passed to the constructor.

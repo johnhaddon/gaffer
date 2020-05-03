@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeepRecolor );
 
 size_t DeepRecolor::g_firstPlugIndex = 0;
 
-DeepRecolor::DeepRecolor( const std::string &name )
+DeepRecolor::DeepRecolor( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

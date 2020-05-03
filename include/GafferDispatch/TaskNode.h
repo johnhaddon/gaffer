@@ -115,7 +115,7 @@ class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferDispatch::TaskNode, TaskNodeTypeId, Gaffer::DependencyNode );
 
-		TaskNode( const std::string &name=defaultName<TaskNode>() );
+		TaskNode( IECore::InternedString name=defaultName<TaskNode>() );
 		~TaskNode() override;
 
 		/// Plug type used to represent tasks within the
@@ -128,11 +128,11 @@ class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 
 				GAFFER_PLUG_DECLARE_TYPE( GafferDispatch::TaskNode::TaskPlug, TaskNodeTaskPlugTypeId, Gaffer::Plug );
 
-				TaskPlug( const std::string &name=defaultName<TaskPlug>(), Direction direction=In, unsigned flags=Default );
+				TaskPlug( IECore::InternedString name=defaultName<TaskPlug>(), Direction direction=In, unsigned flags=Default );
 
 				bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
 				bool acceptsInput( const Gaffer::Plug *input ) const override;
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+				Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 				/// Returns a hash representing the side effects of
 				/// calling `execute()` in the current context.

@@ -72,7 +72,7 @@ class GAFFERSCENE_API BranchCreator : public FilteredSceneProcessor
 
 	protected :
 
-		BranchCreator( const std::string &name=defaultName<BranchCreator>() );
+		BranchCreator( IECore::InternedString name=defaultName<BranchCreator>() );
 
 		/// Implemented for mappingPlug().
 		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;

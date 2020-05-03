@@ -48,7 +48,7 @@ static IECore::InternedString g_clippingPlanesSetName( "__clippingPlanes" );
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ClippingPlane );
 
-ClippingPlane::ClippingPlane( const std::string &name )
+ClippingPlane::ClippingPlane( IECore::InternedString name )
 	:	ObjectSource( name, "clippingPlane" )
 {
 }

@@ -49,7 +49,7 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LinearContainer );
 
-LinearContainer::LinearContainer( const std::string &name, Orientation orientation,
+LinearContainer::LinearContainer( IECore::InternedString name, Orientation orientation,
 	Alignment alignment, float spacing, Direction direction )
 	:	ContainerGadget( name ), m_orientation( orientation ), m_alignment( alignment ), m_spacing( spacing ), m_direction( direction ), m_clean( true )
 {

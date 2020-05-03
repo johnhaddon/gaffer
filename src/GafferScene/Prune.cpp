@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Prune );
 
 size_t Prune::g_firstPlugIndex = 0;
 
-Prune::Prune( const std::string &name )
+Prune::Prune( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

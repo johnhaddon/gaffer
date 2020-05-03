@@ -174,7 +174,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LevelSetToMesh );
 
 size_t LevelSetToMesh::g_firstPlugIndex = 0;
 
-LevelSetToMesh::LevelSetToMesh( const std::string &name )
+LevelSetToMesh::LevelSetToMesh( IECore::InternedString name )
 	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

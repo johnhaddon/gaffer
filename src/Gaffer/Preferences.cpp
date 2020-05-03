@@ -41,7 +41,7 @@ using namespace Gaffer;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Preferences );
 
-Preferences::Preferences( const std::string &name )
+Preferences::Preferences( IECore::InternedString name )
 	:	Node( name )
 {
 }

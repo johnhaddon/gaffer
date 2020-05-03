@@ -50,7 +50,7 @@ class GAFFERSCENE_API Outputs : public GlobalsProcessor
 
 	public :
 
-		Outputs( const std::string &name=defaultName<Outputs>() );
+		Outputs( IECore::InternedString name=defaultName<Outputs>() );
 		~Outputs() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Outputs, OutputsTypeId, GlobalsProcessor );

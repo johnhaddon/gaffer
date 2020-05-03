@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Transform );
 
 size_t Transform::g_firstPlugIndex = 0;
 
-Transform::Transform( const std::string &name )
+Transform::Transform( IECore::InternedString name )
 	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -43,7 +43,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ParentConstraint );
 
 size_t ParentConstraint::g_firstPlugIndex = 0;
 
-ParentConstraint::ParentConstraint( const std::string &name )
+ParentConstraint::ParentConstraint( IECore::InternedString name )
 	:	Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

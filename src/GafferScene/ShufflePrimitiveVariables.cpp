@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ShufflePrimitiveVariables );
 
 size_t ShufflePrimitiveVariables::g_firstPlugIndex = 0;
 
-ShufflePrimitiveVariables::ShufflePrimitiveVariables( const std::string &name ) : Deformer( name )
+ShufflePrimitiveVariables::ShufflePrimitiveVariables( IECore::InternedString name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );

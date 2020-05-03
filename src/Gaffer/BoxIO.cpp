@@ -171,7 +171,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( BoxIO );
 
 size_t BoxIO::g_firstPlugIndex = 0;
 
-BoxIO::BoxIO( Plug::Direction direction, const std::string &name )
+BoxIO::BoxIO( Plug::Direction direction, IECore::InternedString name )
 	:	Node( name ), m_direction( direction )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -45,7 +45,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SubGraph );
 
 static IECore::InternedString g_enabledName( "enabled" );
 
-SubGraph::SubGraph( const std::string &name )
+SubGraph::SubGraph( IECore::InternedString name )
 	:	DependencyNode( name )
 {
 }

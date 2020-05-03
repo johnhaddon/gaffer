@@ -451,7 +451,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PointsGridToPoints );
 
 size_t PointsGridToPoints::g_firstPlugIndex = 0;
 
-PointsGridToPoints::PointsGridToPoints( const std::string &name ) : SceneElementProcessor( name )
+PointsGridToPoints::PointsGridToPoints( IECore::InternedString name ) : SceneElementProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

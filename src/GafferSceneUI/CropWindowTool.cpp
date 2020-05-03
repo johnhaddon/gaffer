@@ -492,7 +492,7 @@ size_t CropWindowTool::g_firstPlugIndex = 0;
 CropWindowTool::ToolDescription<CropWindowTool, SceneView> CropWindowTool::g_sceneToolDescription;
 CropWindowTool::ToolDescription<CropWindowTool, ImageView> CropWindowTool::g_imageToolDescription;
 
-CropWindowTool::CropWindowTool( View *view, const std::string &name )
+CropWindowTool::CropWindowTool( View *view, IECore::InternedString name )
 	:	Tool( view, name ), m_needScenePlugSearch( true ), m_needCropWindowPlugSearch( true ), m_overlayDirty( true )
 {
 	const bool rasterSpace = runTimeCast<SceneView>( view );

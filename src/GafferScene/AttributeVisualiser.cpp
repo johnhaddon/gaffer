@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AttributeVisualiser );
 
 size_t AttributeVisualiser::g_firstPlugIndex = 0;
 
-AttributeVisualiser::AttributeVisualiser( const std::string &name )
+AttributeVisualiser::AttributeVisualiser( IECore::InternedString name )
 	:	AttributeProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

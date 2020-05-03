@@ -55,7 +55,7 @@ static InternedString g_gridLinesName( "gridLines" );
 static InternedString g_centerLinesName( "centerLines" );
 static InternedString g_borderLinesName( "borderLines" );
 
-Grid::Grid( const std::string &name )
+Grid::Grid( IECore::InternedString name )
 	:	SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

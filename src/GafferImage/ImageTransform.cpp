@@ -201,7 +201,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageTransform );
 
 size_t ImageTransform::g_firstPlugIndex = 0;
 
-ImageTransform::ImageTransform( const std::string &name )
+ImageTransform::ImageTransform( IECore::InternedString name )
 	:	FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

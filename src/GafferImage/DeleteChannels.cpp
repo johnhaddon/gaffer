@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteChannels );
 
 size_t DeleteChannels::g_firstPlugIndex = 0;
 
-DeleteChannels::DeleteChannels( const std::string &name )
+DeleteChannels::DeleteChannels( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

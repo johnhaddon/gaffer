@@ -54,7 +54,7 @@ class GAFFERSCENE_API CollectScenes : public SceneProcessor
 
 	public :
 
-		CollectScenes( const std::string &name=defaultName<CollectScenes>() );
+		CollectScenes( IECore::InternedString name=defaultName<CollectScenes>() );
 		~CollectScenes() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::CollectScenes, CollectScenesTypeId, SceneProcessor );

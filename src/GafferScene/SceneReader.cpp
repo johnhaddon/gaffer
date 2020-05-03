@@ -67,7 +67,7 @@ size_t SceneReader::g_firstPlugIndex = 0;
 
 static IECore::BoolDataPtr g_trueBoolData = new IECore::BoolData( true );
 
-SceneReader::SceneReader( const std::string &name )
+SceneReader::SceneReader( IECore::InternedString name )
 	:	SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

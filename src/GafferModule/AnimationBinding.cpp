@@ -172,7 +172,7 @@ void GafferModule::bindAnimation()
 	;
 
 	PlugClass<Animation::CurvePlug>()
-		.def( init<const char *, Plug::Direction, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<Animation::CurvePlug>(),
 					boost::python::arg_( "direction" )=Plug::In,

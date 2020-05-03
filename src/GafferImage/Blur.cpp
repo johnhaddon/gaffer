@@ -51,7 +51,7 @@ const char *g_blurFilterName = "smoothGaussian";
 
 size_t Blur::g_firstPlugIndex = 0;
 
-Blur::Blur( const std::string &name )
+Blur::Blur( IECore::InternedString name )
 	:   FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

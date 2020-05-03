@@ -39,7 +39,7 @@ using namespace GafferImage;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Median );
 
-Median::Median( const std::string &name )
+Median::Median( IECore::InternedString name )
 	:   RankFilter( name, MedianRank )
 {
 }

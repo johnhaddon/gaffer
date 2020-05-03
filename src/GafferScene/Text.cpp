@@ -95,7 +95,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Text );
 
 size_t Text::g_firstPlugIndex = 0;
 
-Text::Text( const std::string &name )
+Text::Text( IECore::InternedString name )
 	:	ObjectSource( name, "text" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

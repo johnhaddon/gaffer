@@ -50,7 +50,7 @@ using namespace GafferUIBindings;
 void GafferUIModule::bindImageGadget()
 {
 	GadgetClass<ImageGadget>()
-		.def( init<const std::string &>() )
+		.def( init<IECore::InternedString>() )
 		.def( init<IECoreImage::ConstImagePrimitivePtr>() )
 		.def( "textureLoader", &ImageGadget::textureLoader, return_value_policy<CastToIntrusivePtr>() )
 		.staticmethod( "textureLoader" )

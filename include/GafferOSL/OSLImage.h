@@ -55,7 +55,7 @@ class GAFFEROSL_API OSLImage : public GafferImage::ImageProcessor
 
 	public :
 
-		OSLImage( const std::string &name=defaultName<OSLImage>() );
+		OSLImage( IECore::InternedString name=defaultName<OSLImage>() );
 		~OSLImage() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferOSL::OSLImage, OSLImageTypeId, GafferImage::ImageProcessor );

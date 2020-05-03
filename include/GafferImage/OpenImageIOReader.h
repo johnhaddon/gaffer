@@ -57,7 +57,7 @@ class GAFFERIMAGE_API OpenImageIOReader : public ImageNode
 
 	public :
 
-		OpenImageIOReader( const std::string &name=defaultName<OpenImageIOReader>() );
+		OpenImageIOReader( IECore::InternedString name=defaultName<OpenImageIOReader>() );
 		~OpenImageIOReader() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::OpenImageIOReader, OpenImageIOReaderTypeId, ImageNode );

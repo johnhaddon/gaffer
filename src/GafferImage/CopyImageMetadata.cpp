@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CopyImageMetadata );
 
 size_t CopyImageMetadata::g_firstPlugIndex = 0;
 
-CopyImageMetadata::CopyImageMetadata( const std::string &name )
+CopyImageMetadata::CopyImageMetadata( IECore::InternedString name )
 	:	MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

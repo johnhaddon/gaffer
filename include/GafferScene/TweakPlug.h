@@ -68,7 +68,7 @@ class GAFFERSCENE_API TweakPlug : public Gaffer::ValuePlug
 		TweakPlug( const std::string &tweakName, Gaffer::ValuePlugPtr valuePlug, Mode mode = Replace, bool enabled = true );
 		TweakPlug( const std::string &tweakName, const IECore::Data *value, Mode mode = Replace, bool enabled = true );
 		/// Primarily used for serialisation.
-		TweakPlug( Gaffer::ValuePlugPtr valuePlug, const std::string &name=defaultName<TweakPlug>(), Direction direction=In, unsigned flags=Default );
+		TweakPlug( Gaffer::ValuePlugPtr valuePlug, IECore::InternedString name=defaultName<TweakPlug>(), Direction direction=In, unsigned flags=Default );
 
 		Gaffer::StringPlug *namePlug();
 		const Gaffer::StringPlug *namePlug() const;
@@ -85,7 +85,7 @@ class GAFFERSCENE_API TweakPlug : public Gaffer::ValuePlug
 		const T *valuePlug() const;
 
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 		IECore::MurmurHash hash() const override;
 		/// Ensures the method above doesn't mask
 		/// ValuePlug::hash( h )
@@ -134,11 +134,11 @@ class GAFFERSCENE_API TweaksPlug : public Gaffer::ValuePlug
 
 		GAFFER_PLUG_DECLARE_TYPE( GafferScene::TweaksPlug, TweaksPlugTypeId, Gaffer::ValuePlug );
 
-		TweaksPlug( const std::string &name=defaultName<TweaksPlug>(), Direction direction=In, unsigned flags=Default );
+		TweaksPlug( IECore::InternedString name=defaultName<TweaksPlug>(), Direction direction=In, unsigned flags=Default );
 
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
 		bool acceptsInput( const Plug *input ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		/// Tweak application
 		/// =================

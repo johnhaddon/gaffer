@@ -53,7 +53,7 @@ using namespace Gaffer;
 namespace
 {
 
-CompoundDataPlugPtr compoundDataPlugConstructor( const char *name, Plug::Direction direction, unsigned flags, tuple children )
+CompoundDataPlugPtr compoundDataPlugConstructor( IECore::InternedString name, Plug::Direction direction, unsigned flags, tuple children )
 {
 	CompoundDataPlugPtr result = new CompoundDataPlug( name, direction, flags );
 	size_t s = extract<size_t>( children.attr( "__len__" )() );

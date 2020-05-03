@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LUT );
 
 size_t LUT::g_firstPlugIndex = 0;
 
-LUT::LUT( const std::string &name )
+LUT::LUT( IECore::InternedString name )
 	:	OpenColorIOTransform( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PointConstraint );
 
 size_t PointConstraint::g_firstPlugIndex = 0;
 
-PointConstraint::PointConstraint( const std::string &name )
+PointConstraint::PointConstraint( IECore::InternedString name )
 	:	Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

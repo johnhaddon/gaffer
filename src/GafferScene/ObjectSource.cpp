@@ -54,7 +54,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ObjectSource );
 
 size_t ObjectSource::g_firstPlugIndex = 0;
 
-ObjectSource::ObjectSource( const std::string &name, const std::string &namePlugDefaultValue )
+ObjectSource::ObjectSource( IECore::InternedString name, IECore::InternedString namePlugDefaultValue )
 	:	SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

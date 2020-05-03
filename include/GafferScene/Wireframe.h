@@ -54,7 +54,7 @@ class GAFFERSCENE_API Wireframe : public Deformer
 
 	public :
 
-		Wireframe( const std::string &name=defaultName<Wireframe>() );
+		Wireframe( IECore::InternedString name=defaultName<Wireframe>() );
 		~Wireframe() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Wireframe, WireframeTypeId, Deformer );

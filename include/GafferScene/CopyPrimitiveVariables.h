@@ -49,7 +49,7 @@ class GAFFERSCENE_API CopyPrimitiveVariables : public Deformer
 
 	public :
 
-		CopyPrimitiveVariables( const std::string &name=defaultName<CopyPrimitiveVariables>() );
+		CopyPrimitiveVariables( IECore::InternedString name=defaultName<CopyPrimitiveVariables>() );
 		~CopyPrimitiveVariables() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::CopyPrimitiveVariables, CopyPrimitiveVariablesTypeId, Deformer );

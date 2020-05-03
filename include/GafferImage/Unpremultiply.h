@@ -50,7 +50,7 @@ class GAFFERIMAGE_API Unpremultiply : public ChannelDataProcessor
 
 	public :
 
-		Unpremultiply( const std::string &name=defaultName<Unpremultiply>() );
+		Unpremultiply( IECore::InternedString name=defaultName<Unpremultiply>() );
 		~Unpremultiply() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Unpremultiply, UnpremultiplyTypeId, ChannelDataProcessor );

@@ -60,7 +60,7 @@ class GAFFERSCENE_API Filter : public Gaffer::ComputeNode
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Filter, FilterTypeId, Gaffer::ComputeNode );
 
-		Filter( const std::string &name=defaultName<Filter>() );
+		Filter( IECore::InternedString name=defaultName<Filter>() );
 		~Filter() override;
 
 		Gaffer::BoolPlug *enabledPlug() override;

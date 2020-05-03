@@ -49,7 +49,7 @@ class GAFFERSCENE_API Duplicate : public BranchCreator
 
 	public :
 
-		Duplicate( const std::string &name=defaultName<Duplicate>() );
+		Duplicate( IECore::InternedString name=defaultName<Duplicate>() );
 		~Duplicate() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Duplicate, DuplicateTypeId, BranchCreator );

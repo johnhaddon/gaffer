@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ObjectToScene );
 
 size_t ObjectToScene::g_firstPlugIndex = 0;
 
-ObjectToScene::ObjectToScene( const std::string &name )
+ObjectToScene::ObjectToScene( IECore::InternedString name )
 	:	ObjectSource( name, "object" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

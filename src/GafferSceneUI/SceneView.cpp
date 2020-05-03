@@ -1540,7 +1540,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SceneView );
 size_t SceneView::g_firstPlugIndex = 0;
 SceneView::ViewDescription<SceneView> SceneView::g_viewDescription( GafferScene::ScenePlug::staticTypeId() );
 
-SceneView::SceneView( const std::string &name )
+SceneView::SceneView( IECore::InternedString name )
 	:	View( name, new GafferScene::ScenePlug() ),
 		m_sceneGadget( new SceneGadget )
 {

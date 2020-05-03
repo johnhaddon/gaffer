@@ -59,7 +59,7 @@ class ParameterisedHolderWrapper : public BaseType
 
 	public :
 
-		ParameterisedHolderWrapper( PyObject *self, const std::string &name )
+		ParameterisedHolderWrapper( PyObject *self, IECore::InternedString name )
 			:	BaseType( self, name )
 		{
 		}

@@ -51,7 +51,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SetFilter );
 
 size_t SetFilter::g_firstPlugIndex = 0;
 
-SetFilter::SetFilter( const std::string &name )
+SetFilter::SetFilter( IECore::InternedString name )
 	:	Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

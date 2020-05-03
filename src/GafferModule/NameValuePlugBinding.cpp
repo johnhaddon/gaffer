@@ -101,12 +101,12 @@ std::string repr( const NameValuePlug *plug )
 	return NameValuePlugSerialiser::repr( plug, &tempSerialisation );
 }
 
-NameValuePlugPtr nameValuePlugConstructor1( const std::string &nameDefault, const IECore::DataPtr valueDefault, const std::string &name, Plug::Direction direction, unsigned flags )
+NameValuePlugPtr nameValuePlugConstructor1( const std::string &nameDefault, const IECore::DataPtr valueDefault, IECore::InternedString name, Plug::Direction direction, unsigned flags )
 {
 	return new NameValuePlug( nameDefault, valueDefault.get(), name, direction, flags );
 }
 
-NameValuePlugPtr nameValuePlugConstructor2( const std::string &nameDefault, const Gaffer::PlugPtr valuePlug, const std::string &name, object flags )
+NameValuePlugPtr nameValuePlugConstructor2( const std::string &nameDefault, const Gaffer::PlugPtr valuePlug, IECore::InternedString name, object flags )
 {
 	if( flags == object() )
 	{
@@ -118,12 +118,12 @@ NameValuePlugPtr nameValuePlugConstructor2( const std::string &nameDefault, cons
 	}
 }
 
-NameValuePlugPtr nameValuePlugConstructor3( const std::string &nameDefault, const IECore::DataPtr valueDefault, bool defaultEnabled, const std::string &name, Plug::Direction direction, unsigned flags )
+NameValuePlugPtr nameValuePlugConstructor3( const std::string &nameDefault, const IECore::DataPtr valueDefault, bool defaultEnabled, IECore::InternedString name, Plug::Direction direction, unsigned flags )
 {
 	return new NameValuePlug( nameDefault, valueDefault.get(), defaultEnabled, name, direction, flags );
 }
 
-NameValuePlugPtr nameValuePlugConstructor4( const std::string &nameDefault, const Gaffer::PlugPtr valuePlug, bool defaultEnabled, const std::string &name, object flags )
+NameValuePlugPtr nameValuePlugConstructor4( const std::string &nameDefault, const Gaffer::PlugPtr valuePlug, bool defaultEnabled, IECore::InternedString name, object flags )
 {
 	if( flags == object() )
 	{
@@ -141,7 +141,7 @@ void GafferModule::bindNameValuePlug()
 {
 
 	PlugClass<NameValuePlug>()
-		.def( init<const char *, Plug::Direction, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<NameValuePlug>(),
 					boost::python::arg_( "direction" )=Plug::In,

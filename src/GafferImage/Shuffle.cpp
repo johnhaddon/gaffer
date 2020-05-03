@@ -49,7 +49,7 @@ using namespace GafferImage;
 
 GAFFER_PLUG_DEFINE_TYPE( Shuffle::ChannelPlug );
 
-Shuffle::ChannelPlug::ChannelPlug( const std::string &name, Direction direction, unsigned flags)
+Shuffle::ChannelPlug::ChannelPlug( IECore::InternedString name, Direction direction, unsigned flags)
 	:	ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
@@ -91,7 +91,7 @@ bool Shuffle::ChannelPlug::acceptsChild( const Gaffer::GraphComponent *potential
 	return children().size() < 2;
 }
 
-PlugPtr Shuffle::ChannelPlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr Shuffle::ChannelPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new ChannelPlug( name, direction, getFlags() );
 }
@@ -104,7 +104,7 @@ size_t Shuffle::g_firstPlugIndex = 0;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Shuffle );
 
-Shuffle::Shuffle( const std::string &name )
+Shuffle::Shuffle( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -66,12 +66,12 @@ size_t InteractiveRender::g_firstPlugIndex = 0;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( InteractiveRender );
 
-InteractiveRender::InteractiveRender( const std::string &name )
+InteractiveRender::InteractiveRender( IECore::InternedString name )
 	:	InteractiveRender( /* rendererType = */ InternedString(), name )
 {
 }
 
-InteractiveRender::InteractiveRender( const IECore::InternedString &rendererType, const std::string &name )
+InteractiveRender::InteractiveRender( const IECore::InternedString &rendererType, IECore::InternedString name )
 	:	Node( name ),
 		m_state( Stopped )
 {

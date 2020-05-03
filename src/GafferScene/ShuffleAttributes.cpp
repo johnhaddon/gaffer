@@ -44,7 +44,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ShuffleAttributes );
 
 size_t ShuffleAttributes::g_firstPlugIndex = 0;
 
-ShuffleAttributes::ShuffleAttributes( const std::string &name )
+ShuffleAttributes::ShuffleAttributes( IECore::InternedString name )
 	:	AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

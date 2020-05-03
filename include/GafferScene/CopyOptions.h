@@ -50,7 +50,7 @@ class GAFFERSCENE_API CopyOptions : public GafferScene::GlobalsProcessor
 
 	public :
 
-		CopyOptions( const std::string &name=defaultName<CopyOptions>() );
+		CopyOptions( IECore::InternedString name=defaultName<CopyOptions>() );
 		~CopyOptions() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::CopyOptions, CopyOptionsTypeId, GlobalsProcessor );

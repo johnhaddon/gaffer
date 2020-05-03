@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( GlobalShader );
 
 size_t GlobalShader::g_firstPlugIndex = 0;
 
-GlobalShader::GlobalShader( const std::string &name )
+GlobalShader::GlobalShader( IECore::InternedString name )
 	:	GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

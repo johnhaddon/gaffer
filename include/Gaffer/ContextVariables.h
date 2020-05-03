@@ -51,7 +51,7 @@ class IECORE_EXPORT ContextVariables : public ContextProcessor
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::ContextVariables, ContextVariablesTypeId, ContextProcessor );
 
-		ContextVariables( const std::string &name=GraphComponent::defaultName<ContextVariables>() );
+		ContextVariables( IECore::InternedString name=GraphComponent::defaultName<ContextVariables>() );
 		~ContextVariables() override;
 
 		CompoundDataPlug *variablesPlug();

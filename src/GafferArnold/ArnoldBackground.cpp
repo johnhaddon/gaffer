@@ -40,7 +40,7 @@ using namespace GafferArnold;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldBackground );
 
-ArnoldBackground::ArnoldBackground( const std::string &name )
+ArnoldBackground::ArnoldBackground( IECore::InternedString name )
 	:	GlobalShader( name )
 {
 }

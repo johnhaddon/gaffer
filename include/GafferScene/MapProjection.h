@@ -55,7 +55,7 @@ class GAFFERSCENE_API MapProjection : public ObjectProcessor
 
 	public :
 
-		MapProjection( const std::string &name=defaultName<MapProjection>() );
+		MapProjection( IECore::InternedString name=defaultName<MapProjection>() );
 		~MapProjection() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::MapProjection, MapProjectionTypeId, ObjectProcessor );

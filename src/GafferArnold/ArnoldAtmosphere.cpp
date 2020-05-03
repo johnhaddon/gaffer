@@ -40,7 +40,7 @@ using namespace GafferArnold;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldAtmosphere );
 
-ArnoldAtmosphere::ArnoldAtmosphere( const std::string &name )
+ArnoldAtmosphere::ArnoldAtmosphere( IECore::InternedString name )
 	:	GlobalShader( name )
 {
 }

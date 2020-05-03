@@ -46,7 +46,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OpenGLRender );
 
-OpenGLRender::OpenGLRender( const std::string &name )
+OpenGLRender::OpenGLRender( IECore::InternedString name )
 	:	Render( "OpenGL", name )
 {
 }

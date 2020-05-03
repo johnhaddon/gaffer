@@ -70,7 +70,7 @@ class IECORE_EXPORT TypedObjectPlug : public ValuePlug
 
 		/// A copy of defaultValue is taken - it must not be null.
 		TypedObjectPlug(
-			const std::string &name,
+			IECore::InternedString name,
 			Direction direction,
 			ConstValuePtr defaultValue,
 			unsigned flags = Default
@@ -79,7 +79,7 @@ class IECORE_EXPORT TypedObjectPlug : public ValuePlug
 
 		/// Accepts only instances of TypedObjectPlug<T>, or derived classes.
 		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		const ValueType *defaultValue() const;
 

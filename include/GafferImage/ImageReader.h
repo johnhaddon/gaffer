@@ -61,7 +61,7 @@ class GAFFERIMAGE_API ImageReader : public ImageNode
 
 	public :
 
-		ImageReader( const std::string &name=defaultName<ImageReader>() );
+		ImageReader( IECore::InternedString name=defaultName<ImageReader>() );
 		~ImageReader() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::ImageReader, ImageReaderTypeId, ImageNode );

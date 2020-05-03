@@ -45,7 +45,7 @@ using namespace GafferSceneTest;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TestLight )
 
-TestLight::TestLight( const std::string &name )
+TestLight::TestLight( IECore::InternedString name )
 	:	Light( name )
 {
 	parametersPlug()->addChild( new Color3fPlug( "intensity" ) );

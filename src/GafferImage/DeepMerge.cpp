@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeepMerge );
 
 size_t DeepMerge::g_firstPlugIndex = 0;
 
-DeepMerge::DeepMerge( const std::string &name )
+DeepMerge::DeepMerge( IECore::InternedString name )
 	:	ImageProcessor( name, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

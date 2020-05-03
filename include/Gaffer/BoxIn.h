@@ -47,7 +47,7 @@ class GAFFER_API BoxIn : public BoxIO
 
 	public :
 
-		BoxIn( const std::string &name=defaultName<BoxIn>() );
+		BoxIn( IECore::InternedString name=defaultName<BoxIn>() );
 		~BoxIn() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::BoxIn, BoxInTypeId, BoxIO );

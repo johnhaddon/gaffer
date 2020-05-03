@@ -48,7 +48,7 @@ class GAFFER_API Preferences : public Node
 
 	public :
 
-		Preferences( const std::string &name=defaultName<Preferences>() );
+		Preferences( IECore::InternedString name=defaultName<Preferences>() );
 		~Preferences() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Preferences, PreferencesTypeId, Node );

@@ -51,7 +51,7 @@ class GAFFERIMAGE_API DeepHoldout : public ImageProcessor
 
 	public :
 
-		DeepHoldout( const std::string &name=defaultName<DeepHoldout>() );
+		DeepHoldout( IECore::InternedString name=defaultName<DeepHoldout>() );
 		~DeepHoldout() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::DeepHoldout, DeepHoldoutTypeId, ImageProcessor );

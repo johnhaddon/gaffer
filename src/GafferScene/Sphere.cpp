@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Sphere );
 
 size_t Sphere::g_firstPlugIndex = 0;
 
-Sphere::Sphere( const std::string &name )
+Sphere::Sphere( IECore::InternedString name )
 	:	ObjectSource( name, "sphere" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

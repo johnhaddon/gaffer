@@ -51,7 +51,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 
 	public :
 
-		Spreadsheet( const std::string &name=defaultName<Spreadsheet>() );
+		Spreadsheet( IECore::InternedString name=defaultName<Spreadsheet>() );
 		~Spreadsheet() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Spreadsheet, SpreadsheetTypeId, ComputeNode );
@@ -75,7 +75,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 
 			public :
 
-				RowsPlug( const std::string &name = defaultName<RowsPlug>(), Direction direction = In, unsigned flags = Default );
+				RowsPlug( IECore::InternedString name = defaultName<RowsPlug>(), Direction direction = In, unsigned flags = Default );
 				virtual ~RowsPlug();
 
 				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowsPlug, Gaffer::SpreadsheetRowsPlugTypeId, Gaffer::ValuePlug );
@@ -118,7 +118,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 				/// =========
 
 				bool acceptsChild( const GraphComponent *potentialChild ) const override;
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+				Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 			private :
 
@@ -150,11 +150,11 @@ class GAFFER_API Spreadsheet : public ComputeNode
 				ValuePlug *cellsPlug();
 				const ValuePlug *cellsPlug() const;
 
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+				Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 			private :
 
-				RowPlug( const std::string &name, Plug::Direction direction = Plug::In, unsigned flags = Default );
+				RowPlug( IECore::InternedString name, Plug::Direction direction = Plug::In, unsigned flags = Default );
 				friend class Spreadsheet;
 
 		};
@@ -178,11 +178,11 @@ class GAFFER_API Spreadsheet : public ComputeNode
 				template<typename T = Gaffer::ValuePlug>
 				const T *valuePlug() const;
 
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+				Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 			private :
 
-				CellPlug( const std::string &name, const Gaffer::Plug *value, Plug::Direction direction = Plug::In );
+				CellPlug( IECore::InternedString name, const Gaffer::Plug *value, Plug::Direction direction = Plug::In );
 				friend class Spreadsheet;
 
 		};

@@ -53,12 +53,12 @@ class GAFFERIMAGE_API FlatImageProcessor : public ImageProcessor
 
 		/// Constructs with a single input ImagePlug named "in". Use inPlug()
 		/// to access this plug.
-		FlatImageProcessor( const std::string &name=defaultName<FlatImageProcessor>() );
+		FlatImageProcessor( IECore::InternedString name=defaultName<FlatImageProcessor>() );
 
 		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 		/// convenience for accessing the first child in the array, and use
 		/// inPlugs() to access the array itself.
-		FlatImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
+		FlatImageProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
 		~FlatImageProcessor() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::FlatImageProcessor, FlatImageProcessorTypeId, ImageProcessor );

@@ -80,7 +80,7 @@ class StandardNodeGadget::ErrorGadget : public Gadget
 
 	public :
 
-		ErrorGadget( const std::string &name = defaultName<ErrorGadget>() )
+		ErrorGadget( IECore::InternedString name = defaultName<ErrorGadget>() )
 			:	Gadget( name ), m_image( new ImageGadget( "gadgetError.png" ) )
 		{
 			m_image->setTransform( M44f().scale( V3f( .025 ) ) );

@@ -50,7 +50,7 @@ class GAFFERDELIGHT_API InteractiveDelightRender : public GafferScene::Interacti
 
 	public :
 
-		InteractiveDelightRender( const std::string &name=defaultName<InteractiveDelightRender>() );
+		InteractiveDelightRender( IECore::InternedString name=defaultName<InteractiveDelightRender>() );
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferDelight::InteractiveDelightRender, InteractiveDelightRenderTypeId, GafferScene::InteractiveRender );
 

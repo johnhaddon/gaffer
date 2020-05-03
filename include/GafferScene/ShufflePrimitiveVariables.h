@@ -49,7 +49,7 @@ class GAFFERSCENE_API ShufflePrimitiveVariables : public Deformer
 
 	public :
 
-		ShufflePrimitiveVariables( const std::string &name=defaultName<ShufflePrimitiveVariables>() );
+		ShufflePrimitiveVariables( IECore::InternedString name=defaultName<ShufflePrimitiveVariables>() );
 		~ShufflePrimitiveVariables() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::ShufflePrimitiveVariables, ShufflePrimitiveVariablesTypeId, Deformer );

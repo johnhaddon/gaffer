@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteGlobals );
 
 size_t DeleteGlobals::g_firstPlugIndex = 0;
 
-DeleteGlobals::DeleteGlobals( const std::string &name )
+DeleteGlobals::DeleteGlobals( IECore::InternedString name )
 	:	GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

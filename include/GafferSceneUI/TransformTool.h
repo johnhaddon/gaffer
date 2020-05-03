@@ -206,7 +206,7 @@ class GAFFERSCENEUI_API TransformTool : public GafferSceneUI::SelectionTool
 
 	protected :
 
-		TransformTool( SceneView *view, const std::string &name );
+		TransformTool( SceneView *view, IECore::InternedString name );
 
 		/// The scene being edited.
 		GafferScene::ScenePlug *scenePlug();

@@ -82,7 +82,7 @@ class GAFFERIMAGEUI_API ImageView : public GafferUI::View
 
 	public :
 
-		ImageView( const std::string &name = defaultName<ImageView>() );
+		ImageView( IECore::InternedString name = defaultName<ImageView>() );
 		~ImageView() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImageUI::ImageView, ImageViewTypeId, GafferUI::View );

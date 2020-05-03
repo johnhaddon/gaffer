@@ -241,7 +241,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Resample );
 
 size_t Resample::g_firstPlugIndex = 0;
 
-Resample::Resample( const std::string &name )
+Resample::Resample( IECore::InternedString name )
 	:   FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

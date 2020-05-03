@@ -60,7 +60,7 @@ class GAFFER_API ArrayPlug : public Plug
 		/// recommended that ArrayPlug children are only accessed
 		/// through numeric indexing and never via names.
 		ArrayPlug(
-			const std::string &name = defaultName<ArrayPlug>(),
+			IECore::InternedString name = defaultName<ArrayPlug>(),
 			Direction direction = In,
 			PlugPtr element = nullptr,
 			size_t minSize = 1,
@@ -76,7 +76,7 @@ class GAFFER_API ArrayPlug : public Plug
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
 		bool acceptsInput( const Plug *input ) const override;
 		void setInput( PlugPtr input ) override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		size_t minSize() const;
 		size_t maxSize() const;

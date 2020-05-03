@@ -41,7 +41,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeletePrimitiveVariables );
 
-DeletePrimitiveVariables::DeletePrimitiveVariables( const std::string &name )
+DeletePrimitiveVariables::DeletePrimitiveVariables( IECore::InternedString name )
 	:	PrimitiveVariableProcessor( name )
 {
 }

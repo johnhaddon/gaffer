@@ -69,7 +69,7 @@ bool hasInput( const Plug *p )
 
 GAFFER_PLUG_DEFINE_TYPE( ArrayPlug )
 
-ArrayPlug::ArrayPlug( const std::string &name, Direction direction, PlugPtr element, size_t minSize, size_t maxSize, unsigned flags, bool resizeWhenInputsChange )
+ArrayPlug::ArrayPlug( IECore::InternedString name, Direction direction, PlugPtr element, size_t minSize, size_t maxSize, unsigned flags, bool resizeWhenInputsChange )
 	:	Plug( name, direction, flags ), m_minSize( std::max( minSize, size_t( 1 ) ) ), m_maxSize( std::max( maxSize, m_minSize ) ), m_resizeWhenInputsChange( resizeWhenInputsChange )
 {
 	if( element )
@@ -124,7 +124,7 @@ void ArrayPlug::setInput( PlugPtr input )
 	Plug::setInput( input );
 }
 
-PlugPtr ArrayPlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr ArrayPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	ArrayPlugPtr result = new ArrayPlug( name, direction, nullptr, m_minSize, m_maxSize, getFlags(), resizeWhenInputsChange() );
 	for( PlugIterator it( this ); !it.done(); ++it )

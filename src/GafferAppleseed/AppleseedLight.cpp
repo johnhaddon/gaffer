@@ -60,7 +60,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AppleseedLight );
 
 size_t AppleseedLight::g_firstPlugIndex = 0;
 
-AppleseedLight::AppleseedLight( const std::string &name )
+AppleseedLight::AppleseedLight( IECore::InternedString name )
 	:	GafferScene::Light( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

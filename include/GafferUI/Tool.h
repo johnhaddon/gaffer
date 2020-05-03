@@ -103,7 +103,7 @@ class GAFFERUI_API Tool : public Gaffer::Node
 
 	protected :
 
-		Tool( View *view, const std::string &name = defaultName<Tool>() );
+		Tool( View *view, IECore::InternedString name = defaultName<Tool>() );
 
 		template<typename ToolType, typename ViewType>
 		struct ToolDescription

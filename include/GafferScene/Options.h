@@ -50,7 +50,7 @@ class GAFFERSCENE_API Options : public GlobalsProcessor
 
 	public :
 
-		Options( const std::string &name=defaultName<Options>() );
+		Options( IECore::InternedString name=defaultName<Options>() );
 		~Options() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Options, OptionsTypeId, GlobalsProcessor );

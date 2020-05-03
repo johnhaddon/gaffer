@@ -59,7 +59,7 @@ static void setInput( T &p, Gaffer::PlugPtr input )
 }
 
 template<typename T>
-static Gaffer::PlugPtr createCounterpart( T &p, const std::string &name, Gaffer::Plug::Direction direction )
+static Gaffer::PlugPtr createCounterpart( T &p, IECore::InternedString name, Gaffer::Plug::Direction direction )
 {
 	return p.T::createCounterpart( name, direction );
 }

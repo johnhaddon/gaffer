@@ -48,7 +48,7 @@ class GAFFERIMAGE_API Empty : public ImageNode
 
 	public :
 
-		Empty( const std::string &name=defaultName<Empty>() );
+		Empty( IECore::InternedString name=defaultName<Empty>() );
 		~Empty() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Empty, EmptyTypeId, ImageNode );

@@ -50,7 +50,7 @@ class GAFFERSCENETEST_API TestLight : public GafferScene::Light
 
 	public :
 
-		TestLight( const std::string &name=defaultName<TestLight>() );
+		TestLight( IECore::InternedString name=defaultName<TestLight>() );
 		~TestLight() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneTest::TestLight, TestLightTypeId, GafferScene::Light );

@@ -47,7 +47,7 @@ class GAFFERSCENE_API LightToCamera : public SceneElementProcessor
 
 	public :
 
-		LightToCamera( const std::string &name=defaultName<LightToCamera>() );
+		LightToCamera( IECore::InternedString name=defaultName<LightToCamera>() );
 		~LightToCamera() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::LightToCamera, LightToCameraTypeId, SceneElementProcessor );

@@ -49,7 +49,7 @@ class GAFFER_API BoxOut : public BoxIO
 
 	public :
 
-		BoxOut( const std::string &name=defaultName<BoxOut>() );
+		BoxOut( IECore::InternedString name=defaultName<BoxOut>() );
 		~BoxOut() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::BoxOut, BoxOutTypeId, BoxIO );

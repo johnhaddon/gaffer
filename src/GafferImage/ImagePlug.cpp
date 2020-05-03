@@ -69,7 +69,7 @@ static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
 
 size_t ImagePlug::g_firstPlugIndex = 0;
 
-ImagePlug::ImagePlug( const std::string &name, Direction direction, unsigned flags )
+ImagePlug::ImagePlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -208,7 +208,7 @@ bool ImagePlug::acceptsInput( const Gaffer::Plug *input ) const
 	return true;
 }
 
-Gaffer::PlugPtr ImagePlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr ImagePlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new ImagePlug( name, direction, getFlags() );
 }

@@ -145,7 +145,7 @@ void GafferImageModule::bindCatalogue()
 
 		GafferBindings::PlugClass<Catalogue::Image>()
 			.def(
-				init<const std::string &, Plug::Direction, unsigned>(
+				init<IECore::InternedString, Plug::Direction, unsigned>(
 					(
 						boost::python::arg_( "name" ) = GraphComponent::defaultName<Catalogue::Image>(),
 						boost::python::arg_( "direction" ) = Plug::In,

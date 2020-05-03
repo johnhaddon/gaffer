@@ -194,7 +194,7 @@ const Animation::CurvePlug *Animation::Key::parent() const
 
 GAFFER_PLUG_DEFINE_TYPE( Animation::CurvePlug );
 
-Animation::CurvePlug::CurvePlug( const std::string &name, Direction direction, unsigned flags )
+Animation::CurvePlug::CurvePlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags & ~Plug::AcceptsInputs )
 {
 	addChild( new FloatPlug( "out", Plug::Out ) );
@@ -431,7 +431,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Animation );
 
 size_t Animation::g_firstPlugIndex = 0;
 
-Animation::Animation( const std::string &name )
+Animation::Animation( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

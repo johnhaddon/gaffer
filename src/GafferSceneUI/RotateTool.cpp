@@ -69,7 +69,7 @@ RotateTool::ToolDescription<RotateTool, SceneView> RotateTool::g_toolDescription
 
 size_t RotateTool::g_firstPlugIndex = 0;
 
-RotateTool::RotateTool( SceneView *view, const std::string &name )
+RotateTool::RotateTool( SceneView *view, IECore::InternedString name )
 	:	TransformTool( view, name )
 {
 	static Style::Axes axes[] = { Style::XYZ, Style::X, Style::Y, Style::Z, };

@@ -107,7 +107,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CollectImages );
 
 size_t CollectImages::g_firstPlugIndex = 0;
 
-CollectImages::CollectImages( const std::string &name )
+CollectImages::CollectImages( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

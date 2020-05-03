@@ -56,7 +56,7 @@ class GAFFERIMAGE_API Clamp : public ChannelDataProcessor
 
 	public :
 
-		Clamp( const std::string &name=defaultName<Clamp>() );
+		Clamp( IECore::InternedString name=defaultName<Clamp>() );
 		~Clamp() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Clamp, ClampTypeId, ChannelDataProcessor );

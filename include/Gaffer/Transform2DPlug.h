@@ -47,13 +47,13 @@ class GAFFER_API Transform2DPlug : public ValuePlug
 
 	public :
 
-		Transform2DPlug( const std::string &name = defaultName<Transform2DPlug>(), Direction direction=In, unsigned flags = Default );
+		Transform2DPlug( IECore::InternedString name = defaultName<Transform2DPlug>(), Direction direction=In, unsigned flags = Default );
 		~Transform2DPlug() override;
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Transform2DPlug, Transform2DPlugTypeId, ValuePlug );
 
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		V2fPlug *pivotPlug();
 		const V2fPlug *pivotPlug() const;

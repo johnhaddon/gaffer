@@ -49,7 +49,7 @@ class GAFFERSCENE_API Parameters : public ObjectProcessor
 
 	public :
 
-		Parameters( const std::string &name=defaultName<Parameters>() );
+		Parameters( IECore::InternedString name=defaultName<Parameters>() );
 		~Parameters() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Parameters, ParametersTypeId, ObjectProcessor );

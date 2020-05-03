@@ -55,7 +55,7 @@ class GAFFERSCENE_API DeleteCurves : public Deformer
 
 	public :
 
-		DeleteCurves( const std::string &name = defaultName<DeleteCurves>() );
+		DeleteCurves( IECore::InternedString name = defaultName<DeleteCurves>() );
 		~DeleteCurves() override;
 
 		Gaffer::StringPlug *curvesPlug();

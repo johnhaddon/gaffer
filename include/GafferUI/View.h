@@ -137,7 +137,7 @@ class GAFFERUI_API View : public Gaffer::Node
 		/// class should construct a plug of a suitable type and pass it
 		/// to the View constructor. For instance, the SceneView will pass
 		/// a ScenePlug so that only scenes may be viewed.
-		View( const std::string &name, Gaffer::PlugPtr input );
+		View( IECore::InternedString name, Gaffer::PlugPtr input );
 
 		/// The View may want to perform preprocessing of the input before
 		/// displaying it, for instance by applying a LUT to an image. This

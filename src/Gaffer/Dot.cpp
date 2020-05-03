@@ -51,7 +51,7 @@ static InternedString g_sectionName( "noduleLayout:section" );
 
 size_t Dot::g_firstPlugIndex = 0;
 
-Dot::Dot( const std::string &name )
+Dot::Dot( IECore::InternedString name )
 	:	DependencyNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

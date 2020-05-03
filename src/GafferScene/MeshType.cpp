@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MeshType );
 
 size_t MeshType::g_firstPlugIndex = 0;
 
-MeshType::MeshType( const std::string &name )
+MeshType::MeshType( IECore::InternedString name )
 	:	ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

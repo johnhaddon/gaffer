@@ -54,7 +54,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LevelSetOffset );
 
 size_t LevelSetOffset::g_firstPlugIndex = 0;
 
-LevelSetOffset::LevelSetOffset( const std::string &name )
+LevelSetOffset::LevelSetOffset( IECore::InternedString name )
 	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

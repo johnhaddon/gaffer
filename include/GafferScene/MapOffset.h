@@ -55,7 +55,7 @@ class GAFFERSCENE_API MapOffset : public ObjectProcessor
 
 	public :
 
-		MapOffset( const std::string &name=defaultName<MapOffset>() );
+		MapOffset( IECore::InternedString name=defaultName<MapOffset>() );
 		~MapOffset() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::MapOffset, MapOffsetTypeId, ObjectProcessor );

@@ -73,7 +73,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Merge );
 
 size_t Merge::g_firstPlugIndex = 0;
 
-Merge::Merge( const std::string &name )
+Merge::Merge( IECore::InternedString name )
 	:	FlatImageProcessor( name, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

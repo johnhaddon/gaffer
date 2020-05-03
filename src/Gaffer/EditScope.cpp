@@ -72,7 +72,7 @@ std::vector<std::string> &processorNames()
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( EditScope );
 
-EditScope::EditScope( const std::string &name )
+EditScope::EditScope( IECore::InternedString name )
 	:	Box( name )
 {
 }

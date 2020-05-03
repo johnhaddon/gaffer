@@ -41,7 +41,7 @@ using namespace GafferAppleseed;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AppleseedRender );
 
-AppleseedRender::AppleseedRender( const std::string &name )
+AppleseedRender::AppleseedRender( IECore::InternedString name )
 	:	Render( "Appleseed", name )
 {
 }

@@ -59,7 +59,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldCameraShaders );
 
 size_t ArnoldCameraShaders::g_firstPlugIndex = 0;
 
-ArnoldCameraShaders::ArnoldCameraShaders( const std::string &name )
+ArnoldCameraShaders::ArnoldCameraShaders( IECore::InternedString name )
 	:	Shader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

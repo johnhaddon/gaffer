@@ -58,7 +58,7 @@ class GAFFERCORTEX_API OpHolder : public ParameterisedHolderComputeNode
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferCortex::OpHolder, OpHolderTypeId, ParameterisedHolderComputeNode );
 
-		OpHolder( const std::string &name=defaultName<OpHolder>() );
+		OpHolder( IECore::InternedString name=defaultName<OpHolder>() );
 
 		void setParameterised( IECore::RunTimeTypedPtr parameterised, bool keepExistingValues=false ) override;
 

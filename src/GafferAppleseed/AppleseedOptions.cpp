@@ -41,7 +41,7 @@ using namespace GafferAppleseed;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AppleseedOptions );
 
-AppleseedOptions::AppleseedOptions( const std::string &name )
+AppleseedOptions::AppleseedOptions( IECore::InternedString name )
 	:	GafferScene::Options( name )
 {
 	Gaffer::CompoundDataPlug *options = optionsPlug();

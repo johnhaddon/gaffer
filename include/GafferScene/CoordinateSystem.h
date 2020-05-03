@@ -49,7 +49,7 @@ class GAFFERSCENE_API CoordinateSystem : public ObjectSource
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::CoordinateSystem, CoordinateSystemTypeId, ObjectSource );
 
-		CoordinateSystem( const std::string &name=defaultName<CoordinateSystem>() );
+		CoordinateSystem( IECore::InternedString name=defaultName<CoordinateSystem>() );
 		~CoordinateSystem() override;
 
 	protected :

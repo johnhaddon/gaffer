@@ -52,7 +52,7 @@ class IECORE_EXPORT Loop : public ComputeNode
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Loop, LoopTypeId, ComputeNode );
 
-		Loop( const std::string &name=GraphComponent::defaultName<Loop>() );
+		Loop( IECore::InternedString name=GraphComponent::defaultName<Loop>() );
 		~Loop() override;
 
 		/// \undoable

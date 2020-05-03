@@ -59,7 +59,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OSLLight );
 
 size_t OSLLight::g_firstPlugIndex = 0;
 
-OSLLight::OSLLight( const std::string &name )
+OSLLight::OSLLight( IECore::InternedString name )
 	:	GafferScene::Light( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

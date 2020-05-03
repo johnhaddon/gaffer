@@ -61,7 +61,7 @@ class GAFFERIMAGE_API Warp : public FlatImageProcessor
 {
 	public :
 
-		Warp( const std::string &name=defaultName<Warp>() );
+		Warp( IECore::InternedString name=defaultName<Warp>() );
 		~Warp() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Warp, WarpTypeId, FlatImageProcessor );

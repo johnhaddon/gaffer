@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteObject );
 
 size_t DeleteObject::g_firstPlugIndex = 0;
 
-DeleteObject::DeleteObject( const std::string &name )
+DeleteObject::DeleteObject( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

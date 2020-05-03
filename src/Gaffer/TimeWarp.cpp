@@ -45,7 +45,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TimeWarp );
 
 size_t TimeWarp::g_firstPlugIndex;
 
-TimeWarp::TimeWarp( const std::string &name )
+TimeWarp::TimeWarp( IECore::InternedString name )
 	:	ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

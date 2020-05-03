@@ -49,7 +49,7 @@ class GAFFERSCENE_API MergeScenes : public SceneProcessor
 
 	public :
 
-		MergeScenes( const std::string &name=defaultName<MergeScenes>() );
+		MergeScenes( IECore::InternedString name=defaultName<MergeScenes>() );
 		~MergeScenes() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::MergeScenes, MergeScenesTypeId, SceneProcessor );

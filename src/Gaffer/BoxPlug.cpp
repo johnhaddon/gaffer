@@ -44,7 +44,7 @@ const IECore::RunTimeTyped::TypeDescription<BoxPlug<T> > BoxPlug<T>::g_typeDescr
 
 template<typename T>
 BoxPlug<T>::BoxPlug(
-	const std::string &name,
+	IECore::InternedString name,
 	Direction direction,
 	T defaultValue,
 	unsigned flags
@@ -75,7 +75,7 @@ BoxPlug<T>::BoxPlug(
 
 template<typename T>
 BoxPlug<T>::BoxPlug(
-	const std::string &name,
+	IECore::InternedString name,
 	Direction direction,
 	T defaultValue,
 	const PointType &minValue,
@@ -118,7 +118,7 @@ bool BoxPlug<T>::acceptsChild( const GraphComponent *potentialChild ) const
 }
 
 template<typename T>
-PlugPtr BoxPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr BoxPlug<T>::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new BoxPlug<T>( name, direction, defaultValue(), minValue(), maxValue(), getFlags() );
 }

@@ -49,7 +49,7 @@ class GAFFERSCENE_API CopyAttributes : public FilteredSceneProcessor
 
 	public :
 
-		CopyAttributes( const std::string &name=defaultName<CopyAttributes>() );
+		CopyAttributes( IECore::InternedString name=defaultName<CopyAttributes>() );
 		~CopyAttributes() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::CopyAttributes, CopyAttributesTypeId, FilteredSceneProcessor );

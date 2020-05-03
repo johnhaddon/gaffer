@@ -63,7 +63,7 @@ class GAFFERIMAGE_API FlatToDeep : public ImageProcessor
 			Channel,
 		};
 
-		FlatToDeep( const std::string &name=defaultName<FlatToDeep>() );
+		FlatToDeep( IECore::InternedString name=defaultName<FlatToDeep>() );
 		~FlatToDeep() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::FlatToDeep, FlatToDeepTypeId, ImageProcessor );

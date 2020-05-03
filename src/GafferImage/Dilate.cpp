@@ -39,7 +39,7 @@ using namespace GafferImage;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Dilate );
 
-Dilate::Dilate( const std::string &name )
+Dilate::Dilate( IECore::InternedString name )
 	:   RankFilter( name, DilateRank )
 {
 }

@@ -51,7 +51,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MapOffset );
 
 size_t MapOffset::g_firstPlugIndex = 0;
 
-MapOffset::MapOffset( const std::string &name )
+MapOffset::MapOffset( IECore::InternedString name )
 	:	ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

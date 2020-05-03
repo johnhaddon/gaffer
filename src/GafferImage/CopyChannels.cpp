@@ -84,7 +84,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CopyChannels );
 
 size_t CopyChannels::g_firstPlugIndex = 0;
 
-CopyChannels::CopyChannels( const std::string &name )
+CopyChannels::CopyChannels( IECore::InternedString name )
 	:	FlatImageProcessor( name, /* minInputs = */ 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

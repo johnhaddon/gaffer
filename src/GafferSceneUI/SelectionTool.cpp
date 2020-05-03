@@ -143,7 +143,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SelectionTool );
 SelectionTool::ToolDescription<SelectionTool, SceneView> SelectionTool::g_toolDescription;
 static IECore::InternedString g_dragOverlayName( "__selectionToolDragOverlay" );
 
-SelectionTool::SelectionTool( SceneView *view, const std::string &name )
+SelectionTool::SelectionTool( SceneView *view, IECore::InternedString name )
 	:	Tool( view, name )
 {
 	SceneGadget *sg = sceneGadget();

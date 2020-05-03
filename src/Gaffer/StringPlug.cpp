@@ -46,7 +46,7 @@ using namespace Gaffer;
 GAFFER_PLUG_DEFINE_TYPE( StringPlug );
 
 StringPlug::StringPlug(
-	const std::string &name,
+	IECore::InternedString name,
 	Direction direction,
 	const std::string &defaultValue,
 	unsigned flags,
@@ -78,7 +78,7 @@ bool StringPlug::acceptsInput( const Plug *input ) const
 	return true;
 }
 
-PlugPtr StringPlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr StringPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new StringPlug( name, direction, defaultValue(), getFlags(), substitutions() );
 }

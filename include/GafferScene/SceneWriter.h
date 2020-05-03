@@ -55,7 +55,7 @@ class GAFFERSCENE_API SceneWriter : public GafferDispatch::TaskNode
 
 	public :
 
-		SceneWriter( const std::string &name=defaultName<SceneWriter>() );
+		SceneWriter( IECore::InternedString name=defaultName<SceneWriter>() );
 		~SceneWriter() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::SceneWriter, SceneWriterTypeId, GafferDispatch::TaskNode );

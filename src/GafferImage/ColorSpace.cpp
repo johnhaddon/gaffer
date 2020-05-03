@@ -52,7 +52,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ColorSpace );
 
 size_t ColorSpace::g_firstPlugIndex = 0;
 
-ColorSpace::ColorSpace( const std::string &name )
+ColorSpace::ColorSpace( IECore::InternedString name )
 	:	OpenColorIOTransform( name, true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

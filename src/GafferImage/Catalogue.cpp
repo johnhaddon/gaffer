@@ -93,7 +93,7 @@ class Catalogue::InternalImage : public ImageNode
 
 	public :
 
-		InternalImage( const std::string &name = "InternalImage" )
+		InternalImage( IECore::InternedString name = "InternalImage" )
 			:	ImageNode( name ), m_clientPID( -1 ), m_numDriversClosed( 0 )
 		{
 			storeIndexOfNextChild( g_firstChildIndex );
@@ -581,7 +581,7 @@ size_t Catalogue::InternalImage::g_firstChildIndex = 0;
 
 GAFFER_PLUG_DEFINE_TYPE( Catalogue::Image );
 
-Catalogue::Image::Image( const std::string &name, Direction direction, unsigned flags )
+Catalogue::Image::Image( IECore::InternedString name, Direction direction, unsigned flags )
 	:	Plug( name, direction, flags )
 {
 	addChild( new StringPlug( "fileName" ) );
@@ -644,7 +644,7 @@ void Catalogue::Image::save( const std::string &fileName ) const
 	Catalogue::imageNode( this )->save( fileName );
 }
 
-Gaffer::PlugPtr Catalogue::Image::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr Catalogue::Image::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new Image( name, direction, getFlags() );
 }
@@ -676,7 +676,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Catalogue );
 
 size_t Catalogue::g_firstPlugIndex = 0;
 
-Catalogue::Catalogue( const std::string &name )
+Catalogue::Catalogue( IECore::InternedString name )
 	:   ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

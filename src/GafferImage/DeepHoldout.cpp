@@ -55,7 +55,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeepHoldout );
 
 size_t DeepHoldout::g_firstPlugIndex = 0;
 
-DeepHoldout::DeepHoldout( const std::string &name )
+DeepHoldout::DeepHoldout( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

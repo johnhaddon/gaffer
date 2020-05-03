@@ -54,7 +54,7 @@ class GAFFERSCENE_API PointsType : public Deformer
 
 	public :
 
-		PointsType( const std::string &name=defaultName<PointsType>() );
+		PointsType( IECore::InternedString name=defaultName<PointsType>() );
 		~PointsType() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::PointsType, PointsTypeTypeId, Deformer );

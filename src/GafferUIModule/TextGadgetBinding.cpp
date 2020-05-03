@@ -50,7 +50,7 @@ using namespace GafferUI;
 void GafferUIModule::bindTextGadget()
 {
 	GadgetClass<TextGadget>()
-		.def( init<const std::string &>() )
+		.def( init<IECore::InternedString>() )
 		.def( "getText", &TextGadget::getText, return_value_policy<copy_const_reference>() )
 		.def( "setText", &TextGadget::setText )
 	;

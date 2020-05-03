@@ -55,7 +55,7 @@ class GAFFERSCENE_API UDIMQuery : public Gaffer::ComputeNode
 
 	public :
 
-		UDIMQuery( const std::string &name=defaultName<UDIMQuery>() );
+		UDIMQuery( IECore::InternedString name=defaultName<UDIMQuery>() );
 		~UDIMQuery() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::UDIMQuery, UDIMQueryTypeId, Gaffer::ComputeNode );

@@ -57,7 +57,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Light );
 
 size_t Light::g_firstPlugIndex = 0;
 
-Light::Light( const std::string &name )
+Light::Light( IECore::InternedString name )
 	:	ObjectSource( name, "light" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

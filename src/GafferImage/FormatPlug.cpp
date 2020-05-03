@@ -53,7 +53,7 @@ const IECore::InternedString g_defaultFormatContextName( "image:defaultFormat" )
 static const IECore::InternedString g_defaultFormatPlugName( "defaultFormat" );
 static const Format g_defaultFormatFallback( 1920, 1080 );
 
-FormatPlug::FormatPlug( const std::string &name, Direction direction, Format defaultValue, unsigned flags )
+FormatPlug::FormatPlug( IECore::InternedString name, Direction direction, Format defaultValue, unsigned flags )
 	:	ValuePlug( name, direction, flags ), m_defaultValue( defaultValue )
 {
 	const unsigned childFlags = flags & ~Dynamic;
@@ -70,7 +70,7 @@ bool FormatPlug::acceptsChild( const GraphComponent *potentialChild ) const
 	return children().size() < 2;
 }
 
-Gaffer::PlugPtr FormatPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr FormatPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new FormatPlug( name, direction, defaultValue(), getFlags() );
 }

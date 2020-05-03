@@ -49,7 +49,7 @@ class GAFFERSCENE_API LocaliseAttributes : public AttributeProcessor
 
 	public :
 
-		LocaliseAttributes( const std::string &name=defaultName<LocaliseAttributes>() );
+		LocaliseAttributes( IECore::InternedString name=defaultName<LocaliseAttributes>() );
 		~LocaliseAttributes() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::LocaliseAttributes, LocaliseAttributesTypeId, AttributeProcessor );

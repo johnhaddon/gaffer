@@ -86,7 +86,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Outputs );
 
 size_t Outputs::g_firstPlugIndex = 0;
 
-Outputs::Outputs( const std::string &name )
+Outputs::Outputs( IECore::InternedString name )
 	:	GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

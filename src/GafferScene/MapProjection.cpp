@@ -56,7 +56,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MapProjection );
 
 size_t MapProjection::g_firstPlugIndex = 0;
 
-MapProjection::MapProjection( const std::string &name )
+MapProjection::MapProjection( IECore::InternedString name )
 	:	ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

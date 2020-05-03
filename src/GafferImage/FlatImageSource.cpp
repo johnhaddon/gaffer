@@ -44,7 +44,7 @@ using namespace GafferImage;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( FlatImageSource );
 
-FlatImageSource::FlatImageSource( const std::string &name )
+FlatImageSource::FlatImageSource( IECore::InternedString name )
 	:	ImageNode( name )
 {
 }

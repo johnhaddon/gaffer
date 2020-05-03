@@ -105,7 +105,7 @@ void hash2( ValuePlug *plug, IECore::MurmurHash &h )
 void GafferModule::bindValuePlug()
 {
 	scope s = PlugClass<ValuePlug, PlugWrapper<ValuePlug> >()
-		.def( boost::python::init<const std::string &, Plug::Direction, unsigned>(
+		.def( boost::python::init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					boost::python::arg_( "name" ) = GraphComponent::defaultName<ValuePlug>(),
 					boost::python::arg_( "direction" ) = Plug::In,

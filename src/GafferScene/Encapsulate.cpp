@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Encapsulate );
 
 size_t Encapsulate::g_firstPlugIndex = 0;
 
-Encapsulate::Encapsulate( const std::string &name )
+Encapsulate::Encapsulate( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch ), m_dirtyCount( 0 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

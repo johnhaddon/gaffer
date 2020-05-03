@@ -167,7 +167,7 @@ BOOST_PYTHON_MODULE( _GafferOSL )
 	GafferBindings::DependencyNodeClass<OSLObject>();
 
 	PlugClass<ClosurePlug>()
-		.def( init<const std::string &, Gaffer::Plug::Direction, unsigned>(
+		.def( init<IECore::InternedString, Gaffer::Plug::Direction, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<ClosurePlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,

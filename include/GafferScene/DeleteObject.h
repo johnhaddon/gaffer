@@ -47,7 +47,7 @@ class GAFFERSCENE_API DeleteObject : public FilteredSceneProcessor
 
 	public :
 
-		DeleteObject( const std::string &name=defaultName<DeleteObject>() );
+		DeleteObject( IECore::InternedString name=defaultName<DeleteObject>() );
 		~DeleteObject() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::DeleteObject, DeleteObjectTypeId, FilteredSceneProcessor );

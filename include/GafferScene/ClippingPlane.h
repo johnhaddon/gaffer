@@ -49,7 +49,7 @@ class GAFFERSCENE_API ClippingPlane : public ObjectSource
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::ClippingPlane, ClippingPlaneTypeId, ObjectSource );
 
-		ClippingPlane( const std::string &name=defaultName<ClippingPlane>() );
+		ClippingPlane( IECore::InternedString name=defaultName<ClippingPlane>() );
 		~ClippingPlane() override;
 
 	protected :

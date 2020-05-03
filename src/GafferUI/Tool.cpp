@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Tool );
 
 size_t Tool::g_firstPlugIndex = 0;
 
-Tool::Tool( View *view, const std::string &name )
+Tool::Tool( View *view, IECore::InternedString name )
 	:	Node( name ), m_view( view )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

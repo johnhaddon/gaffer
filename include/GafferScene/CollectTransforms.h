@@ -54,7 +54,7 @@ class GAFFERSCENE_API CollectTransforms : public AttributeProcessor
 
 	public :
 
-		CollectTransforms( const std::string &name=defaultName<CollectTransforms>() );
+		CollectTransforms( IECore::InternedString name=defaultName<CollectTransforms>() );
 		~CollectTransforms() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::CollectTransforms, CollectTransformsTypeId, AttributeProcessor );

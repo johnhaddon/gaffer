@@ -57,7 +57,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Shape );
 size_t Shape::g_firstPlugIndex = 0;
 static std::string g_shapeChannelName( "__shape" );
 
-Shape::Shape( const std::string &name )
+Shape::Shape( IECore::InternedString name )
 	:	FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

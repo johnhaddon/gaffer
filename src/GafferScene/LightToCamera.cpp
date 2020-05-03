@@ -246,7 +246,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LightToCamera );
 
 size_t LightToCamera::g_firstPlugIndex = 0;
 
-LightToCamera::LightToCamera( const std::string &name )
+LightToCamera::LightToCamera( IECore::InternedString name )
 	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

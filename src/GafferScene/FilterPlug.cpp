@@ -59,12 +59,12 @@ static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
 	{ FilterPlug::inputSceneContextName }
 );
 
-FilterPlug::FilterPlug( const std::string &name, Direction direction, unsigned flags )
+FilterPlug::FilterPlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	IntPlug( name, direction, IECore::PathMatcher::NoMatch, IECore::PathMatcher::NoMatch, IECore::PathMatcher::EveryMatch, flags )
 {
 }
 
-FilterPlug::FilterPlug( const std::string &name, Direction direction, int defaultValue, int minValue, int maxValue, unsigned flags )
+FilterPlug::FilterPlug( IECore::InternedString name, Direction direction, int defaultValue, int minValue, int maxValue, unsigned flags )
 	:	IntPlug( name, direction, defaultValue, minValue, maxValue, flags )
 {
 }
@@ -122,7 +122,7 @@ bool FilterPlug::acceptsInput( const Gaffer::Plug *input ) const
 	return false;
 }
 
-Gaffer::PlugPtr FilterPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr FilterPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new FilterPlug( name, direction, defaultValue(), minValue(), maxValue(), getFlags() );
 }

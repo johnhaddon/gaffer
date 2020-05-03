@@ -59,12 +59,12 @@ class GAFFERIMAGE_API ImageProcessor : public ImageNode
 
 		/// Constructs with a single input ImagePlug named "in". Use inPlug()
 		/// to access this plug.
-		ImageProcessor( const std::string &name=defaultName<ImageProcessor>() );
+		ImageProcessor( IECore::InternedString name=defaultName<ImageProcessor>() );
 
 		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 		/// convenience for accessing the first child in the array, and use
 		/// inPlugs() to access the array itself.
-		ImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
+		ImageProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
 		~ImageProcessor() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::ImageProcessor, ImageProcessorTypeId, ImageNode );

@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Plane );
 
 size_t Plane::g_firstPlugIndex = 0;
 
-Plane::Plane( const std::string &name )
+Plane::Plane( IECore::InternedString name )
 	:	ObjectSource( name, "plane" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

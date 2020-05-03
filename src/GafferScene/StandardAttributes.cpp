@@ -44,7 +44,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( StandardAttributes );
 
-StandardAttributes::StandardAttributes( const std::string &name )
+StandardAttributes::StandardAttributes( IECore::InternedString name )
 	:	Attributes( name )
 {
 

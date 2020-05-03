@@ -56,7 +56,7 @@ class IECORE_EXPORT TypedPlug : public ValuePlug
 		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( TypedPlug<T>, ValuePlug );
 
 		TypedPlug(
-			const std::string &name = defaultName<TypedPlug>(),
+			IECore::InternedString name = defaultName<TypedPlug>(),
 			Direction direction=In,
 			const T &defaultValue = T(),
 			unsigned flags = Default
@@ -66,7 +66,7 @@ class IECORE_EXPORT TypedPlug : public ValuePlug
 		/// Accepts only instances of TypedPlug<T> or derived classes.
 		/// In addition, BoolPlug accepts inputs from NumericPlug.
 		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		const T &defaultValue() const;
 

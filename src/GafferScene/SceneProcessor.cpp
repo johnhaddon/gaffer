@@ -46,14 +46,14 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SceneProcessor );
 
 size_t SceneProcessor::g_firstPlugIndex = 0;
 
-SceneProcessor::SceneProcessor( const std::string &name )
+SceneProcessor::SceneProcessor( IECore::InternedString name )
 	:	SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Gaffer::Plug::In ) );
 }
 
-SceneProcessor::SceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
+SceneProcessor::SceneProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs )
 	:	SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

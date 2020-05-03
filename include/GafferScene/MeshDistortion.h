@@ -50,7 +50,7 @@ class GAFFERSCENE_API MeshDistortion : public ObjectProcessor
 
 	public :
 
-		MeshDistortion( const std::string &name=defaultName<MeshDistortion>() );
+		MeshDistortion( IECore::InternedString name=defaultName<MeshDistortion>() );
 		~MeshDistortion() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::MeshDistortion, MeshDistortionTypeId, ObjectProcessor );

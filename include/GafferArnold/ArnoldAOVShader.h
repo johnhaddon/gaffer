@@ -52,7 +52,7 @@ class GAFFERARNOLD_API ArnoldAOVShader : public GafferScene::GlobalShader
 
 	public :
 
-		ArnoldAOVShader( const std::string &name=defaultName<ArnoldAOVShader>() );
+		ArnoldAOVShader( IECore::InternedString name=defaultName<ArnoldAOVShader>() );
 		~ArnoldAOVShader() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferArnold::ArnoldAOVShader, ArnoldAOVShaderTypeId, GafferScene::GlobalShader );

@@ -56,7 +56,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ShaderTweaks );
 
 size_t ShaderTweaks::g_firstPlugIndex = 0;
 
-ShaderTweaks::ShaderTweaks( const std::string &name )
+ShaderTweaks::ShaderTweaks( IECore::InternedString name )
 	:	AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

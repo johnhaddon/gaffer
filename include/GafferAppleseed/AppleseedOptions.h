@@ -50,7 +50,7 @@ class GAFFERAPPLESEED_API AppleseedOptions : public GafferScene::Options
 
 	public :
 
-		AppleseedOptions( const std::string &name=defaultName<AppleseedOptions>() );
+		AppleseedOptions( IECore::InternedString name=defaultName<AppleseedOptions>() );
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferAppleseed::AppleseedOptions, AppleseedOptionsTypeId, GafferScene::Options );
 

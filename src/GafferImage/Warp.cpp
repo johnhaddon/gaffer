@@ -183,7 +183,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Warp );
 
 size_t Warp::g_firstPlugIndex = 0;
 
-Warp::Warp( const std::string &name )
+Warp::Warp( IECore::InternedString name )
 	:	FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -107,7 +107,7 @@ CameraTool::ToolDescription<CameraTool, SceneView> CameraTool::g_toolDescription
 
 size_t CameraTool::g_firstPlugIndex = 0;
 
-CameraTool::CameraTool( SceneView *view, const std::string &name )
+CameraTool::CameraTool( SceneView *view, IECore::InternedString name )
 	:	SelectionTool( view, name ), m_dragId( 0 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

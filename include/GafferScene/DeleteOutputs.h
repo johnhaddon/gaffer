@@ -47,7 +47,7 @@ class GAFFERSCENE_API DeleteOutputs : public DeleteGlobals
 
 	public :
 
-		DeleteOutputs( const std::string &name=defaultName<DeleteOutputs>() );
+		DeleteOutputs( IECore::InternedString name=defaultName<DeleteOutputs>() );
 		~DeleteOutputs() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::DeleteOutputs, DeleteOutputsTypeId, DeleteGlobals );

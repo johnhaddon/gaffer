@@ -67,7 +67,7 @@ class GAFFERCORTEX_API ParameterisedHolder : public BaseType
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( ParameterisedHolder<BaseType>, BaseType );
 		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( ParameterisedHolder<BaseType> );
 
-		ParameterisedHolder( const std::string &name=Gaffer::GraphComponent::defaultName<ParameterisedHolder>() );
+		ParameterisedHolder( IECore::InternedString name=Gaffer::GraphComponent::defaultName<ParameterisedHolder>() );
 		~ParameterisedHolder() override;
 
 		/// May be overridden by derived classes, but they must call the base class implementation

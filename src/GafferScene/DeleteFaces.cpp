@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteFaces );
 
 size_t DeleteFaces::g_firstPlugIndex = 0;
 
-DeleteFaces::DeleteFaces( const std::string &name )
+DeleteFaces::DeleteFaces( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

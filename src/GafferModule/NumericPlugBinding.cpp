@@ -80,7 +80,7 @@ void bind()
 	typedef typename T::ValueType V;
 
 	PlugClass<T>()
-		.def( init<const char *, Plug::Direction, typename T::ValueType, typename T::ValueType, typename T::ValueType, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, typename T::ValueType, typename T::ValueType, typename T::ValueType, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<T>(),
 					boost::python::arg_( "direction" )=Plug::In,

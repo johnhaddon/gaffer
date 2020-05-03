@@ -92,7 +92,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Rectangle );
 
 size_t Rectangle::g_firstPlugIndex = 0;
 
-Rectangle::Rectangle( const std::string &name )
+Rectangle::Rectangle( IECore::InternedString name )
 	:	Shape( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -63,7 +63,7 @@ class GAFFER_API CompoundNumericPlug : public ValuePlug
 		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( CompoundNumericPlug<T>, ValuePlug );
 
 		CompoundNumericPlug(
-			const std::string &name = defaultName<CompoundNumericPlug>(),
+			IECore::InternedString name = defaultName<CompoundNumericPlug>(),
 			Direction direction=In,
 			T defaultValue = T( 0 ),
 			T minValue = T( Imath::limits<typename T::BaseType>::min() ),
@@ -74,7 +74,7 @@ class GAFFER_API CompoundNumericPlug : public ValuePlug
 		~CompoundNumericPlug() override;
 		/// Accepts no children following construction.
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		using GraphComponent::getChild;
 		ChildType *getChild( size_t index );

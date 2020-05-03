@@ -49,7 +49,7 @@ class GAFFERIMAGE_API DeepRecolor : public ImageProcessor
 
 	public :
 
-		DeepRecolor( const std::string &name=defaultName<DeepRecolor>() );
+		DeepRecolor( IECore::InternedString name=defaultName<DeepRecolor>() );
 		~DeepRecolor() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::DeepRecolor, DeepRecolorTypeId, ImageProcessor );

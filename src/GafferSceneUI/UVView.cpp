@@ -94,7 +94,7 @@ class UVView::UVScene : public SceneProcessor
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneUI::UVView::UVScene, UVSceneTypeId, SceneProcessor );
 
-		UVScene( const std::string &name = defaultName<UVScene>() )
+		UVScene( IECore::InternedString name = defaultName<UVScene>() )
 			:	SceneProcessor( name )
 		{
 			storeIndexOfNextChild( g_firstPlugIndex );
@@ -598,7 +598,7 @@ static InternedString g_gridGadgetName( "gridGadget" );
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( UVView )
 
-UVView::UVView( const std::string &name )
+UVView::UVView( IECore::InternedString name )
 	:	View( name, new ScenePlug ), m_textureGadgetsDirty( true ), m_framed( false )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

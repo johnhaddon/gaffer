@@ -82,7 +82,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageStats );
 
 size_t ImageStats::g_firstPlugIndex = 0;
 
-ImageStats::ImageStats( const std::string &name )
+ImageStats::ImageStats( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

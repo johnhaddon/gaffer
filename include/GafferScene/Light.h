@@ -53,7 +53,7 @@ class GAFFERSCENE_API Light : public ObjectSource
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Light, LightTypeId, ObjectSource );
 
-		Light( const std::string &name=defaultName<Light>() );
+		Light( IECore::InternedString name=defaultName<Light>() );
 		~Light() override;
 
 		Gaffer::Plug *parametersPlug();

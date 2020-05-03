@@ -51,7 +51,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( View );
 
 size_t View::g_firstPlugIndex = 0;
 
-View::View( const std::string &name, Gaffer::PlugPtr inPlug )
+View::View( IECore::InternedString name, Gaffer::PlugPtr inPlug )
 	:	Node( name ),
 		m_viewportGadget( new ViewportGadget )
 {

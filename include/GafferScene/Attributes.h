@@ -51,7 +51,7 @@ class GAFFERSCENE_API Attributes : public AttributeProcessor
 
 	public :
 
-		Attributes( const std::string &name=defaultName<Attributes>() );
+		Attributes( IECore::InternedString name=defaultName<Attributes>() );
 		~Attributes() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Attributes, AttributesTypeId, AttributeProcessor );

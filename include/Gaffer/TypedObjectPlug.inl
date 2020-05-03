@@ -49,7 +49,7 @@ const IECore::RunTimeTyped::TypeDescription<TypedObjectPlug<T> > TypedObjectPlug
 
 template<class T>
 TypedObjectPlug<T>::TypedObjectPlug(
-	const std::string &name,
+	IECore::InternedString name,
 	Direction direction,
 	ConstValuePtr defaultValue,
 	unsigned flags
@@ -78,7 +78,7 @@ bool TypedObjectPlug<T>::acceptsInput( const Plug *input ) const
 }
 
 template<class T>
-PlugPtr TypedObjectPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr TypedObjectPlug<T>::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new TypedObjectPlug<T>( name, direction, defaultValue(), getFlags() );
 }

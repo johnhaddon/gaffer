@@ -50,7 +50,7 @@ class GAFFERIMAGE_API Shuffle : public ImageProcessor
 
 	public :
 
-		Shuffle( const std::string &name=defaultName<Shuffle>() );
+		Shuffle( IECore::InternedString name=defaultName<Shuffle>() );
 		~Shuffle() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Shuffle, ShuffleTypeId, ImageProcessor );
@@ -67,7 +67,7 @@ class GAFFERIMAGE_API Shuffle : public ImageProcessor
 
 				// Standard constructor. This is needed for serialisation.
 				ChannelPlug(
-					const std::string &name = defaultName<ChannelPlug>(),
+					IECore::InternedString name = defaultName<ChannelPlug>(),
 					Direction direction=In,
 					unsigned flags = Default
 				);
@@ -82,7 +82,7 @@ class GAFFERIMAGE_API Shuffle : public ImageProcessor
 				const Gaffer::StringPlug *inPlug() const;
 
 				bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+				Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		};
 

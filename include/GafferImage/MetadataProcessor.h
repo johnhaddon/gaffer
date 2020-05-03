@@ -51,7 +51,7 @@ class GAFFERIMAGE_API MetadataProcessor : public ImageProcessor
 
 	public :
 
-		MetadataProcessor( const std::string &name=defaultName<MetadataProcessor>() );
+		MetadataProcessor( IECore::InternedString name=defaultName<MetadataProcessor>() );
 		~MetadataProcessor() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::MetadataProcessor, MetadataProcessorTypeId, ImageProcessor );

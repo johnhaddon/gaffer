@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DisplayTransform );
 
 size_t DisplayTransform::g_firstPlugIndex = 0;
 
-DisplayTransform::DisplayTransform( const std::string &name )
+DisplayTransform::DisplayTransform( IECore::InternedString name )
 	:	OpenColorIOTransform( name, true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

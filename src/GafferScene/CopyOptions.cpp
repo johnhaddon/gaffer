@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CopyOptions );
 
 size_t CopyOptions::g_firstPlugIndex = 0;
 
-CopyOptions::CopyOptions( const std::string &name )
+CopyOptions::CopyOptions( IECore::InternedString name )
 	:	GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

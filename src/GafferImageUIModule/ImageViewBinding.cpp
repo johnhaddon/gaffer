@@ -59,7 +59,7 @@ class ImageViewWrapper : public NodeWrapper<ImageView>
 
 	public :
 
-		ImageViewWrapper( PyObject *self, const std::string &name )
+		ImageViewWrapper( PyObject *self, IECore::InternedString name )
 			:	NodeWrapper<ImageView>( self, name )
 		{
 		}
@@ -121,7 +121,7 @@ void GafferImageUIModule::bindImageView()
 {
 
 	GafferBindings::NodeClass<ImageView, ImageViewWrapper>()
-		.def( init<const std::string &>() )
+		.def( init<IECore::InternedString>() )
 		.def( "_insertConverter", &ImageViewWrapper::insertConverter )
 		.def( "registerDisplayTransform", &registerDisplayTransform )
 		.staticmethod( "registerDisplayTransform" )

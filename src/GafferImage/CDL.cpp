@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CDL );
 
 size_t CDL::g_firstPlugIndex = 0;
 
-CDL::CDL( const std::string &name )
+CDL::CDL( IECore::InternedString name )
 	:	OpenColorIOTransform( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

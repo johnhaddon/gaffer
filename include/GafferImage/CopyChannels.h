@@ -49,7 +49,7 @@ class GAFFERIMAGE_API CopyChannels : public FlatImageProcessor
 
 	public :
 
-		CopyChannels( const std::string &name=defaultName<CopyChannels>() );
+		CopyChannels( IECore::InternedString name=defaultName<CopyChannels>() );
 		~CopyChannels() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::CopyChannels, CopyChannelsTypeId, FlatImageProcessor );

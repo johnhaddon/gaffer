@@ -52,7 +52,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SubTree );
 
 size_t SubTree::g_firstPlugIndex = 0;
 
-SubTree::SubTree( const std::string &name )
+SubTree::SubTree( IECore::InternedString name )
 	:	SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

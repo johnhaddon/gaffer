@@ -65,7 +65,7 @@ TranslateTool::ToolDescription<TranslateTool, SceneView> TranslateTool::g_toolDe
 
 size_t TranslateTool::g_firstPlugIndex = 0;
 
-TranslateTool::TranslateTool( SceneView *view, const std::string &name )
+TranslateTool::TranslateTool( SceneView *view, IECore::InternedString name )
 	:	TransformTool( view, name )
 {
 

@@ -45,7 +45,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ReverseWinding );
 
-ReverseWinding::ReverseWinding( const std::string &name )
+ReverseWinding::ReverseWinding( IECore::InternedString name )
 	:	ObjectProcessor( name )
 {
 }

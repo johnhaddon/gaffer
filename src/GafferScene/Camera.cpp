@@ -56,7 +56,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Camera );
 
 size_t Camera::g_firstPlugIndex = 0;
 
-Camera::Camera( const std::string &name )
+Camera::Camera( IECore::InternedString name )
 	:	ObjectSource( name, "camera" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

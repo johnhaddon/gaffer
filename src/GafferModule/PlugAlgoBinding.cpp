@@ -57,7 +57,7 @@ void replacePlug( GraphComponent &parent, Plug &plug )
 	PlugAlgo::replacePlug( &parent, &plug );
 }
 
-ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value )
+ValuePlugPtr createPlugFromData( IECore::InternedString name, Plug::Direction direction, unsigned flags, const IECore::Data *value )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return PlugAlgo::createPlugFromData( name, direction, flags, value );

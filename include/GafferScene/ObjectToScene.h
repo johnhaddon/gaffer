@@ -49,7 +49,7 @@ class GAFFERSCENE_API ObjectToScene : public ObjectSource
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::ObjectToScene, ObjectToSceneTypeId, ObjectSource );
 
-		ObjectToScene( const std::string &name=defaultName<ObjectToScene>() );
+		ObjectToScene( IECore::InternedString name=defaultName<ObjectToScene>() );
 		~ObjectToScene() override;
 
 		Gaffer::ObjectPlug *objectPlug();

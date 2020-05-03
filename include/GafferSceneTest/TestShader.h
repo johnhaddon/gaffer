@@ -50,7 +50,7 @@ class GAFFERSCENETEST_API TestShader : public GafferScene::Shader
 
 	public :
 
-		TestShader( const std::string &name=defaultName<TestShader>() );
+		TestShader( IECore::InternedString name=defaultName<TestShader>() );
 		~TestShader() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneTest::TestShader, TestShaderTypeId, GafferScene::Shader );

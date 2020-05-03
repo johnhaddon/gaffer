@@ -49,7 +49,7 @@ class GAFFERIMAGE_API Mirror : public FlatImageProcessor
 
 	public :
 
-		Mirror( const std::string &name=defaultName<Mirror>() );
+		Mirror( IECore::InternedString name=defaultName<Mirror>() );
 		~Mirror() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Mirror, MirrorTypeId, FlatImageProcessor );

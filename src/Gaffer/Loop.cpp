@@ -46,7 +46,7 @@ namespace Gaffer
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Loop );
 
-Loop::Loop( const std::string &name )
+Loop::Loop( IECore::InternedString name )
 	:	ComputeNode( name ), m_inPlugIndex( 0 ), m_outPlugIndex( 0 ), m_firstPlugIndex( 0 )
 {
 	// Connect to `childAddedSignal()` so we can set ourselves up later when the

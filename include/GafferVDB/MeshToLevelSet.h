@@ -57,7 +57,7 @@ class GAFFERVDB_API MeshToLevelSet : public GafferScene::SceneElementProcessor
 
 	public :
 
-		MeshToLevelSet( const std::string &name=defaultName<MeshToLevelSet>() );
+		MeshToLevelSet( IECore::InternedString name=defaultName<MeshToLevelSet>() );
 		~MeshToLevelSet() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferVDB::MeshToLevelSet, MeshToLevelSetTypeId, GafferScene::SceneElementProcessor );

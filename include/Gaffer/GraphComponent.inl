@@ -153,7 +153,7 @@ const T *GraphComponent::commonAncestor( const GraphComponent *other ) const
 }
 
 template<typename T>
-std::string GraphComponent::defaultName()
+IECore::InternedString GraphComponent::defaultName()
 {
 	return unprefixedTypeName( T::staticTypeName() );
 }

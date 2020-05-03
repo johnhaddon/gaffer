@@ -56,7 +56,7 @@ using namespace std;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Gadget );
 
-Gadget::Gadget( const std::string &name )
+Gadget::Gadget( IECore::InternedString name )
 	:	GraphComponent( name ), m_style( nullptr ), m_visible( true ), m_enabled( true ), m_highlighted( false ), m_toolTip( "" )
 {
 	std::string n = "__Gaffer::Gadget::" + boost::lexical_cast<std::string>( (size_t)this );

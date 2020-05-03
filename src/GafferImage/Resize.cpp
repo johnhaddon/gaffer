@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Resize );
 
 size_t Resize::g_firstPlugIndex = 0;
 
-Resize::Resize( const std::string &name )
+Resize::Resize( IECore::InternedString name )
 	:   FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

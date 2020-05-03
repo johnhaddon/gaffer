@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Switch );
 
 size_t Switch::g_firstPlugIndex = 0;
 
-Switch::Switch( const std::string &name)
+Switch::Switch( IECore::InternedString name)
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

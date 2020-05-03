@@ -57,7 +57,7 @@ class GAFFERARNOLD_API ArnoldDisplacement : public GafferScene::Shader
 
 	public :
 
-		ArnoldDisplacement( const std::string &name=defaultName<ArnoldDisplacement>() );
+		ArnoldDisplacement( IECore::InternedString name=defaultName<ArnoldDisplacement>() );
 		~ArnoldDisplacement() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferArnold::ArnoldDisplacement, ArnoldDisplacementTypeId, GafferScene::Shader );

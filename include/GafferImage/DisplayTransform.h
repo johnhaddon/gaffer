@@ -54,7 +54,7 @@ class GAFFERIMAGE_API DisplayTransform : public OpenColorIOTransform
 
 	public :
 
-		DisplayTransform( const std::string &name=defaultName<DisplayTransform>() );
+		DisplayTransform( IECore::InternedString name=defaultName<DisplayTransform>() );
 		~DisplayTransform() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::DisplayTransform, DisplayTransformTypeId, OpenColorIOTransform );

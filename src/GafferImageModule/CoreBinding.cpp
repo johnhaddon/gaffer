@@ -375,7 +375,7 @@ void GafferImageModule::bindCore()
 
 	PlugClass<FormatPlug>()
 		.def(
-			boost::python::init<const std::string &, Gaffer::Plug::Direction, const Format &, unsigned>(
+			boost::python::init<IECore::InternedString, Gaffer::Plug::Direction, const Format &, unsigned>(
 				(
 					boost::python::arg_( "name" ) = GraphComponent::defaultName<FormatPlug>(),
 					boost::python::arg_( "direction" ) = Plug::In,

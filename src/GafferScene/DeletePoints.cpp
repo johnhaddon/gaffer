@@ -54,7 +54,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeletePoints );
 
 size_t DeletePoints::g_firstPlugIndex = 0;
 
-DeletePoints::DeletePoints( const std::string &name )
+DeletePoints::DeletePoints( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

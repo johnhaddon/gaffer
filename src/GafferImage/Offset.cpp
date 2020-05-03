@@ -55,7 +55,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Offset );
 
 size_t Offset::g_firstPlugIndex = 0;
 
-Offset::Offset( const std::string &name )
+Offset::Offset( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

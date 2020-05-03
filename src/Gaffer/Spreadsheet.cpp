@@ -527,7 +527,7 @@ class Spreadsheet::RowsPlug::RowNameMap
 
 };
 
-Spreadsheet::RowsPlug::RowsPlug( const std::string &name, Direction direction, unsigned flags )
+Spreadsheet::RowsPlug::RowsPlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags ), m_rowNameMap( new RowNameMap( this ) )
 {
 	RowPlugPtr defaultRow = new RowPlug( "default" );
@@ -684,7 +684,7 @@ bool Spreadsheet::RowsPlug::acceptsChild( const GraphComponent *potentialChild )
 	return runTimeCast<const RowPlug>( potentialChild );
 }
 
-Gaffer::PlugPtr Spreadsheet::RowsPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr Spreadsheet::RowsPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	RowsPlugPtr result = new RowsPlug( name, direction, getFlags() );
 	for( const auto &row : RowPlug::Range( *this ) )
@@ -703,7 +703,7 @@ Gaffer::PlugPtr Spreadsheet::RowsPlug::createCounterpart( const std::string &nam
 
 GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::RowPlug );
 
-Spreadsheet::RowPlug::RowPlug( const std::string &name, Plug::Direction direction, unsigned flags )
+Spreadsheet::RowPlug::RowPlug( IECore::InternedString name, Plug::Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 	addChild( new StringPlug( "name", direction ) );
@@ -741,7 +741,7 @@ const ValuePlug *Spreadsheet::RowPlug::cellsPlug() const
 	return getChild<ValuePlug>( 2 );
 }
 
-Gaffer::PlugPtr Spreadsheet::RowPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr Spreadsheet::RowPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	RowPlugPtr result = new RowPlug( name, direction );
 	for( const auto &cell : CellPlug::Range( *cellsPlug() ) )
@@ -757,7 +757,7 @@ Gaffer::PlugPtr Spreadsheet::RowPlug::createCounterpart( const std::string &name
 
 GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::CellPlug );
 
-Spreadsheet::CellPlug::CellPlug( const std::string &name, const Gaffer::Plug *value, Plug::Direction direction )
+Spreadsheet::CellPlug::CellPlug( IECore::InternedString name, const Gaffer::Plug *value, Plug::Direction direction )
 	:	ValuePlug( name, direction )
 {
 	addChild( new BoolPlug( "enabled", direction, true ) );
@@ -775,7 +775,7 @@ const BoolPlug *Spreadsheet::CellPlug::enabledPlug() const
 	return getChild<BoolPlug>( 0 );
 }
 
-Gaffer::PlugPtr Spreadsheet::CellPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr Spreadsheet::CellPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new CellPlug( name, valuePlug(), direction );
 }
@@ -787,7 +787,7 @@ Gaffer::PlugPtr Spreadsheet::CellPlug::createCounterpart( const std::string &nam
 size_t Spreadsheet::g_firstPlugIndex = 0;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Spreadsheet );
 
-Spreadsheet::Spreadsheet( const std::string &name )
+Spreadsheet::Spreadsheet( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SceneElementProcessor );
 
 size_t SceneElementProcessor::g_firstPlugIndex = 0;
 
-SceneElementProcessor::SceneElementProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
+SceneElementProcessor::SceneElementProcessor( IECore::InternedString name, IECore::PathMatcher::Result filterDefault )
 	:	FilteredSceneProcessor( name, filterDefault )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

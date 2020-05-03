@@ -52,7 +52,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CollectPrimitiveVariables );
 
 size_t CollectPrimitiveVariables::g_firstPlugIndex = 0;
 
-CollectPrimitiveVariables::CollectPrimitiveVariables( const std::string &name )
+CollectPrimitiveVariables::CollectPrimitiveVariables( IECore::InternedString name )
 	:	ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

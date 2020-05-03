@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Cube );
 
 size_t Cube::g_firstPlugIndex = 0;
 
-Cube::Cube( const std::string &name )
+Cube::Cube( IECore::InternedString name )
 	:	ObjectSource( name, "cube" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

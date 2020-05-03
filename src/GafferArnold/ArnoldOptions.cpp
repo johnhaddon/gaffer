@@ -42,7 +42,7 @@ using namespace GafferArnold;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldOptions );
 
-ArnoldOptions::ArnoldOptions( const std::string &name )
+ArnoldOptions::ArnoldOptions( IECore::InternedString name )
 	:	GafferScene::Options( name )
 {
 	Gaffer::CompoundDataPlug *options = optionsPlug();

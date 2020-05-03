@@ -66,7 +66,7 @@ class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 		GAFFER_PLUG_DECLARE_TYPE( GafferImage::FormatPlug, FormatPlugTypeId, Gaffer::ValuePlug );
 
 		FormatPlug(
-			const std::string &name = defaultName<FormatPlug>(),
+			IECore::InternedString name = defaultName<FormatPlug>(),
 			Direction direction=In,
 			Format defaultValue = Format(),
 			unsigned flags = Default
@@ -76,7 +76,7 @@ class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 
 		/// Accepts no children following construction.
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		Gaffer::Box2iPlug *displayWindowPlug();
 		const Gaffer::Box2iPlug *displayWindowPlug() const;

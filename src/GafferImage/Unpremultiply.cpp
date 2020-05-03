@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Unpremultiply );
 
 size_t Unpremultiply::g_firstPlugIndex = 0;
 
-Unpremultiply::Unpremultiply( const std::string &name )
+Unpremultiply::Unpremultiply( IECore::InternedString name )
 	:	ChannelDataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

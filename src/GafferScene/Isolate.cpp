@@ -109,7 +109,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Isolate );
 
 size_t Isolate::g_firstPlugIndex = 0;
 
-Isolate::Isolate( const std::string &name )
+Isolate::Isolate( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

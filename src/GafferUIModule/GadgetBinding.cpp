@@ -184,7 +184,7 @@ void GafferUIModule::bindGadget()
 
 	scope s = GadgetClass<Gadget, Wrapper>()
 		.def( init<>() )
-		.def( init<const std::string &>() )
+		.def( init<IECore::InternedString>() )
 		.def( "setStyle", &Gadget::setStyle )
 		.def( "getStyle", &getStyle )
 		.def( "style", &style )

@@ -44,7 +44,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( UnionFilter );
 
-UnionFilter::UnionFilter( const std::string &name )
+UnionFilter::UnionFilter( IECore::InternedString name )
 	:	FilterProcessor( name, 1 )
 {
 }

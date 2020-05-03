@@ -61,7 +61,7 @@ class GAFFERIMAGE_API Merge : public FlatImageProcessor
 
 	public :
 
-		Merge( const std::string &name=defaultName<Merge>() );
+		Merge( IECore::InternedString name=defaultName<Merge>() );
 		~Merge() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Merge, MergeTypeId, FlatImageProcessor );

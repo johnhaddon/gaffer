@@ -53,7 +53,7 @@ class GAFFER_API Animation : public ComputeNode
 
 	public :
 
-		Animation( const std::string &name=defaultName<Animation>() );
+		Animation( IECore::InternedString name=defaultName<Animation>() );
 		~Animation() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Animation, AnimationTypeId, ComputeNode );
@@ -128,7 +128,7 @@ class GAFFER_API Animation : public ComputeNode
 
 				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Animation::CurvePlug, AnimationCurvePlugTypeId, Gaffer::ValuePlug );
 
-				CurvePlug( const std::string &name = defaultName<CurvePlug>(), Direction direction = Plug::In, unsigned flags = Plug::Default );
+				CurvePlug( IECore::InternedString name = defaultName<CurvePlug>(), Direction direction = Plug::In, unsigned flags = Plug::Default );
 
 				/// \undoable
 				void addKey( const KeyPtr &key );

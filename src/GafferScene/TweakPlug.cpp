@@ -78,7 +78,7 @@ TweakPlug::TweakPlug( const std::string &tweakName, const IECore::Data *value, M
 {
 }
 
-TweakPlug::TweakPlug( Gaffer::ValuePlugPtr valuePlug, const std::string &name, Direction direction, unsigned flags )
+TweakPlug::TweakPlug( Gaffer::ValuePlugPtr valuePlug, IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 	addChild( new StringPlug( "name" ) );
@@ -185,7 +185,7 @@ bool TweakPlug::acceptsChild( const Gaffer::GraphComponent *potentialChild ) con
 	return false;
 }
 
-Gaffer::PlugPtr TweakPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr TweakPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	const Plug *p = valuePlug();
 	PlugPtr plugCounterpart = p->createCounterpart( p->getName(), direction );
@@ -478,7 +478,7 @@ std::pair<const GafferScene::Shader *, const Gaffer::Plug *> TweakPlug::shaderOu
 
 GAFFER_PLUG_DEFINE_TYPE( TweaksPlug );
 
-TweaksPlug::TweaksPlug( const std::string &name, Direction direction, unsigned flags )
+TweaksPlug::TweaksPlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 }
@@ -522,7 +522,7 @@ bool TweaksPlug::acceptsInput( const Plug *input ) const
 	return runTimeCast<const TweaksPlug>( input );
 }
 
-Gaffer::PlugPtr TweaksPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr TweaksPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	PlugPtr result = new TweaksPlug( name, direction, getFlags() );
 	for( PlugIterator it( this ); !it.done(); ++it )

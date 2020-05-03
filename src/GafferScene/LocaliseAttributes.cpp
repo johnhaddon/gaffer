@@ -45,7 +45,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LocaliseAttributes );
 
 size_t LocaliseAttributes::g_firstPlugIndex = 0;
 
-LocaliseAttributes::LocaliseAttributes( const std::string &name )
+LocaliseAttributes::LocaliseAttributes( IECore::InternedString name )
 	:	AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

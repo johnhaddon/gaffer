@@ -357,7 +357,7 @@ class ScriptNodeWrapper : public NodeWrapper<ScriptNode>
 
 	public :
 
-		ScriptNodeWrapper( PyObject *self, const std::string &name )
+		ScriptNodeWrapper( PyObject *self, IECore::InternedString name )
 			:	NodeWrapper<ScriptNode>( self, name )
 		{
 		}

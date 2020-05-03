@@ -140,7 +140,7 @@ class GAFFER_API Plug : public GraphComponent
 			All = Dynamic | Serialisable | AcceptsInputs | Cacheable | AcceptsDependencyCycles
 		};
 
-		Plug( const std::string &name=defaultName<Plug>(), Direction direction=In, unsigned flags=Default );
+		Plug( IECore::InternedString name=defaultName<Plug>(), Direction direction=In, unsigned flags=Default );
 		~Plug() override;
 
 		template<typename T=Plug, Plug::Direction D=Plug::Invalid>
@@ -222,7 +222,7 @@ class GAFFER_API Plug : public GraphComponent
 		//@}
 
 		/// Creates a new Plug which is a copy of this, but with a specified name and direction.
-		virtual PlugPtr createCounterpart( const std::string &name, Direction direction ) const;
+		virtual PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const;
 
 	protected :
 

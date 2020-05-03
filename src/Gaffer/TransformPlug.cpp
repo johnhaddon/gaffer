@@ -46,7 +46,7 @@ GAFFER_PLUG_DEFINE_TYPE( TransformPlug );
 
 size_t TransformPlug::g_firstPlugIndex = 0;
 
-TransformPlug::TransformPlug( const std::string &name, Direction direction, unsigned flags )
+TransformPlug::TransformPlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -108,7 +108,7 @@ bool TransformPlug::acceptsChild( const GraphComponent *potentialChild ) const
 	return children().size() != 4;
 }
 
-PlugPtr TransformPlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr TransformPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new TransformPlug( name, direction, getFlags() );
 }

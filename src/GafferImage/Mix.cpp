@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Mix );
 
 size_t Mix::g_firstPlugIndex = 0;
 
-Mix::Mix( const std::string &name )
+Mix::Mix( IECore::InternedString name )
 	:	ImageProcessor( name, 2, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

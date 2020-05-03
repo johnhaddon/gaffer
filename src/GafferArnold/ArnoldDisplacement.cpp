@@ -53,7 +53,7 @@ static IECore::InternedString g_zeroValueAttributeName = "ai:disp_zero_value";
 static IECore::InternedString g_autoBumpAttributeName = "ai:disp_autobump";
 static IECore::InternedString g_mapInputAttributeNames[] = { "ai:surface", "osl:shader", "" } ;
 
-ArnoldDisplacement::ArnoldDisplacement( const std::string &name )
+ArnoldDisplacement::ArnoldDisplacement( IECore::InternedString name )
 	:	Shader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -133,7 +133,7 @@ CompoundDataPtr prepareShadingPoints( const Primitive *primitive, const ShadingE
 
 } // namespace
 
-OSLObject::OSLObject( const std::string &name )
+OSLObject::OSLObject( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

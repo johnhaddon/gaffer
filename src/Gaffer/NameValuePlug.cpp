@@ -45,22 +45,22 @@ using namespace Gaffer;
 
 GAFFER_PLUG_DEFINE_TYPE( NameValuePlug );
 
-NameValuePlug::NameValuePlug( const std::string &name, Direction direction, unsigned flags )
+NameValuePlug::NameValuePlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, const IECore::Data *valueDefault, const std::string &name, Direction direction, unsigned flags )
+NameValuePlug::NameValuePlug( const std::string &nameDefault, const IECore::Data *valueDefault, IECore::InternedString name, Direction direction, unsigned flags )
 	:	NameValuePlug( nameDefault, PlugAlgo::createPlugFromData( "value", direction, flags, valueDefault ).get(), name )
 {
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, const std::string &name )
+NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, IECore::InternedString name )
 	:	NameValuePlug( nameDefault, valuePlug, name, valuePlug->getFlags() )
 {
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, const std::string &name, unsigned flags )
+NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, IECore::InternedString name, unsigned flags )
 	:	NameValuePlug( name, valuePlug->direction(), flags )
 {
 	addChild( new StringPlug( "name", valuePlug->direction(), nameDefault ) );
@@ -68,18 +68,18 @@ NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr va
 	addChild( valuePlug );
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, const IECore::Data *valueDefault, bool enabled, const std::string &name, Direction direction, unsigned flags )
+NameValuePlug::NameValuePlug( const std::string &nameDefault, const IECore::Data *valueDefault, bool enabled, IECore::InternedString name, Direction direction, unsigned flags )
 	:	NameValuePlug( nameDefault, valueDefault, name, direction, flags )
 {
 	addChild( new BoolPlug( "enabled", direction, enabled ) );
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool enabled, const std::string &name )
+NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool enabled, IECore::InternedString name )
 	:	NameValuePlug( nameDefault, valuePlug, enabled, name, valuePlug->getFlags() )
 {
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool defaultEnabled, const std::string &name, unsigned flags )
+NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool defaultEnabled, IECore::InternedString name, unsigned flags )
 	:	NameValuePlug( nameDefault, valuePlug, name, flags )
 {
 	addChild( new BoolPlug( "enabled", direction(), defaultEnabled ) );
@@ -151,7 +151,7 @@ bool NameValuePlug::acceptsChild( const Gaffer::GraphComponent *potentialChild )
 	return false;
 }
 
-PlugPtr NameValuePlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr NameValuePlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	if( !namePlug() && !valuePlug() )
 	{

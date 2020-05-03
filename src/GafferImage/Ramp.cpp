@@ -54,7 +54,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Ramp );
 
 size_t Ramp::g_firstPlugIndex = 0;
 
-Ramp::Ramp( const std::string &name )
+Ramp::Ramp( IECore::InternedString name )
 	:	FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

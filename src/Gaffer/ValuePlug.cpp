@@ -794,7 +794,7 @@ GAFFER_PLUG_DEFINE_TYPE( ValuePlug );
 /// passed to this function. Perhaps by having a central map of unique values here,
 /// or by doing it more intelligently in the derived classes (where we could avoid
 /// even creating the values before figuring out if we've already got them somewhere).
-ValuePlug::ValuePlug( const std::string &name, Direction direction,
+ValuePlug::ValuePlug( IECore::InternedString name, Direction direction,
 	IECore::ConstObjectPtr defaultValue, unsigned flags )
 	:	Plug( name, direction, flags ), m_defaultValue( defaultValue ), m_staticValue( defaultValue )
 {
@@ -802,7 +802,7 @@ ValuePlug::ValuePlug( const std::string &name, Direction direction,
 	assert( m_staticValue );
 }
 
-ValuePlug::ValuePlug( const std::string &name, Direction direction, unsigned flags )
+ValuePlug::ValuePlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	Plug( name, direction, flags ), m_defaultValue( nullptr ), m_staticValue( nullptr )
 {
 }
@@ -861,7 +861,7 @@ void ValuePlug::setInput( PlugPtr input )
 	Plug::setInput( input );
 }
 
-PlugPtr ValuePlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr ValuePlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	PlugPtr result = new ValuePlug( name, direction, getFlags() );
 	for( PlugIterator it( this ); !it.done(); ++it )

@@ -143,7 +143,7 @@ class HandlesGadget : public Gadget
 
 	public :
 
-		HandlesGadget( const std::string &name="HandlesGadget" )
+		HandlesGadget( IECore::InternedString name="HandlesGadget" )
 			:	Gadget( name )
 		{
 		}
@@ -644,7 +644,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TransformTool );
 
 size_t TransformTool::g_firstPlugIndex = 0;
 
-TransformTool::TransformTool( SceneView *view, const std::string &name )
+TransformTool::TransformTool( SceneView *view, IECore::InternedString name )
 	:	SelectionTool( view, name ),
 		m_handles( new HandlesGadget() ),
 		m_handlesDirty( true ),

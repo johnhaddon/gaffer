@@ -83,7 +83,7 @@ void GafferModule::bindShuffles()
 {
 	PlugClass<ShufflePlug>()
 		.def(
-			init<const std::string &, Plug::Direction, unsigned>(
+			init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					arg_( "name" ) = GraphComponent::defaultName<ShufflePlug>(),
 					arg_( "direction" ) = Plug::In,
@@ -107,7 +107,7 @@ void GafferModule::bindShuffles()
 
 	PlugClass<ShufflesPlug>()
 		.def(
-			init<const std::string &, Plug::Direction, unsigned>(
+			init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					arg_( "name" ) = GraphComponent::defaultName<ShufflesPlug>(),
 					arg_( "direction" ) = Plug::In,

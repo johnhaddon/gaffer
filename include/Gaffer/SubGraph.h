@@ -47,7 +47,7 @@ class GAFFER_API SubGraph : public DependencyNode
 
 	public :
 
-		SubGraph( const std::string &name=defaultName<SubGraph>() );
+		SubGraph( IECore::InternedString name=defaultName<SubGraph>() );
 		~SubGraph() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::SubGraph, SubGraphTypeId, DependencyNode );

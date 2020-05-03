@@ -150,7 +150,7 @@ struct GraphComponent::Signals : boost::noncopyable
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( GraphComponent );
 
-GraphComponent::GraphComponent( const std::string &name )
+GraphComponent::GraphComponent( IECore::InternedString name )
 	: m_name( name ), m_parent( nullptr )
 {
 	validateName( m_name );
@@ -585,15 +585,16 @@ void GraphComponent::storeIndexOfNextChild( size_t &index ) const
 	}
 }
 
-std::string GraphComponent::unprefixedTypeName( const char *typeName )
+IECore::InternedString GraphComponent::unprefixedTypeName( const char *typeName )
 {
-	string result( typeName );
-	string::size_type colonPos = result.find_last_of( ':' );
-	if( colonPos != string::npos )
+	if( const char *lastColon = strrchr( typeName, ':' ) )
 	{
-		result.erase( 0, colonPos + 1 );
+		return InternedString( lastColon + 1 );
 	}
-	return result;
+	else
+	{
+		return InternedString( typeName );
+	}
 }
 
 GraphComponent::Signals *GraphComponent::signals()

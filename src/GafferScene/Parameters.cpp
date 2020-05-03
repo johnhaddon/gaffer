@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Parameters );
 
 size_t Parameters::g_firstPlugIndex = 0;
 
-Parameters::Parameters( const std::string &name )
+Parameters::Parameters( IECore::InternedString name )
 	:	ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

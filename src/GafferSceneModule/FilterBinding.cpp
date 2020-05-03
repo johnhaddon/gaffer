@@ -76,7 +76,7 @@ void GafferSceneModule::bindFilter()
 	;
 
 	PlugClass<FilterPlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<FilterPlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,
@@ -84,7 +84,7 @@ void GafferSceneModule::bindFilter()
 				)
 			)
 		)
-		.def( init<const std::string &, Plug::Direction, int, int, int, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, int, int, int, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<FilterPlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,

@@ -45,7 +45,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldAOVShader );
 
 size_t ArnoldAOVShader::g_firstPlugIndex = 0;
 
-ArnoldAOVShader::ArnoldAOVShader( const std::string &name )
+ArnoldAOVShader::ArnoldAOVShader( IECore::InternedString name )
 	:	GlobalShader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CurveSampler );
 
 size_t CurveSampler::g_firstPlugIndex = 0;
 
-CurveSampler::CurveSampler( const std::string &name )
+CurveSampler::CurveSampler( IECore::InternedString name )
 	:	PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

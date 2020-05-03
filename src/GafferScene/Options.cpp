@@ -45,7 +45,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Options );
 
 size_t Options::g_firstPlugIndex = 0;
 
-Options::Options( const std::string &name )
+Options::Options( IECore::InternedString name )
 	:	GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

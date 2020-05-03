@@ -52,7 +52,7 @@ class GAFFEROSL_API OSLShader : public GafferScene::Shader
 
 	public :
 
-		OSLShader( const std::string &name=defaultName<OSLShader>() );
+		OSLShader( IECore::InternedString name=defaultName<OSLShader>() );
 		~OSLShader() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferOSL::OSLShader, OSLShaderTypeId, GafferScene::Shader );

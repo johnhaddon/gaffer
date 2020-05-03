@@ -56,13 +56,13 @@ class GAFFERSCENE_API ScenePlug : public Gaffer::ValuePlug
 
 	public :
 
-		ScenePlug( const std::string &name=defaultName<ScenePlug>(), Direction direction=In, unsigned flags=Default );
+		ScenePlug( IECore::InternedString name=defaultName<ScenePlug>(), Direction direction=In, unsigned flags=Default );
 		~ScenePlug() override;
 
 		GAFFER_PLUG_DECLARE_TYPE( GafferScene::ScenePlug, ScenePlugTypeId, ValuePlug );
 
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 		/// Only accepts ScenePlug inputs.
 		bool acceptsInput( const Gaffer::Plug *input ) const override;
 

@@ -113,7 +113,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageReader );
 
 size_t ImageReader::g_firstChildIndex = 0;
 
-ImageReader::ImageReader( const std::string &name )
+ImageReader::ImageReader( IECore::InternedString name )
 	:	ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstChildIndex );

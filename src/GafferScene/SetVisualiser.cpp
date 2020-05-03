@@ -171,7 +171,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SetVisualiser );
 
 size_t SetVisualiser::g_firstPlugIndex = 0;
 
-SetVisualiser::SetVisualiser( const std::string &name )
+SetVisualiser::SetVisualiser( IECore::InternedString name )
 	: AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

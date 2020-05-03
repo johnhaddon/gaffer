@@ -60,7 +60,7 @@ void GafferImageModule::bindImageProcessor()
 
 	typedef ComputeNodeWrapper<ImageProcessor> ImageProcessorWrapper;
 	GafferBindings::DependencyNodeClass<ImageProcessor, ImageProcessorWrapper>()
-		.def( init<const std::string &, size_t, size_t>(
+		.def( init<IECore::InternedString, size_t, size_t>(
 				(
 					arg( "name" ) = GraphComponent::defaultName<ImageProcessor>(),
 					arg( "minInputs" ),
@@ -110,7 +110,7 @@ void GafferImageModule::bindImageProcessor()
 		scope s = DependencyNodeClass<Shuffle>();
 
 		PlugClass<Shuffle::ChannelPlug>()
-			.def( init<const char *, Plug::Direction, unsigned>(
+			.def( init<IECore::InternedString, Plug::Direction, unsigned>(
 					(
 						boost::python::arg_( "name" )=GraphComponent::defaultName<Shuffle::ChannelPlug>(),
 						boost::python::arg_( "direction" )=Plug::In,
@@ -118,7 +118,7 @@ void GafferImageModule::bindImageProcessor()
 					)
 				)
 			)
-			.def( init<const std::string &, const std::string &>() )
+			.def( init<IECore::InternedString, const std::string &>() )
 			.attr( "__qualname__" ) = "Shuffle.ChannelPlug"
 		;
 	}

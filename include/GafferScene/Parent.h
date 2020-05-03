@@ -49,7 +49,7 @@ class GAFFERSCENE_API Parent : public BranchCreator
 
 	public :
 
-		Parent( const std::string &name=defaultName<Parent>() );
+		Parent( IECore::InternedString name=defaultName<Parent>() );
 		~Parent() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Parent, ParentTypeId, BranchCreator );

@@ -127,7 +127,7 @@ class GAFFER_API SplinePlug : public ValuePlug
 		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( SplinePlug<T>, ValuePlug );
 
 		SplinePlug(
-			const std::string &name = defaultName<SplinePlug>(),
+			IECore::InternedString name = defaultName<SplinePlug>(),
 			Direction direction=In,
 			const T &defaultValue = T(),
 			unsigned flags = Default
@@ -137,7 +137,7 @@ class GAFFER_API SplinePlug : public ValuePlug
 		/// Implemented to only accept children which are suitable for use as points
 		/// in the spline.
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		const T &defaultValue() const;
 		void setToDefault() override;

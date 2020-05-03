@@ -58,7 +58,7 @@ namespace PlugAlgo
 GAFFER_API void replacePlug( GraphComponent *parent, PlugPtr plug );
 
 /// Creates an appropriate plug to hold the specified data.
-GAFFER_API ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value );
+GAFFER_API ValuePlugPtr createPlugFromData( IECore::InternedString name, Plug::Direction direction, unsigned flags, const IECore::Data *value );
 
 /// Extracts a Data value from a plug previously created with createPlugFromData().
 GAFFER_API IECore::DataPtr extractDataFromPlug( const ValuePlug *plug );

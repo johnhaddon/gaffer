@@ -44,7 +44,7 @@ namespace GafferImage
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MetadataProcessor );
 
-MetadataProcessor::MetadataProcessor( const std::string &name )
+MetadataProcessor::MetadataProcessor( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	// Direct pass-through for the things we don't ever change.

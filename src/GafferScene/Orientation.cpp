@@ -508,7 +508,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Orientation );
 
 size_t Orientation::g_firstPlugIndex = 0;
 
-Orientation::Orientation( const std::string &name )
+Orientation::Orientation( IECore::InternedString name )
 	:	ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

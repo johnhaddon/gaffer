@@ -50,7 +50,7 @@ class GAFFERARNOLD_API ArnoldRender : public GafferScene::Render
 
 	public :
 
-		ArnoldRender( const std::string &name=defaultName<ArnoldRender>() );
+		ArnoldRender( IECore::InternedString name=defaultName<ArnoldRender>() );
 		~ArnoldRender() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferArnold::ArnoldRender, ArnoldRenderTypeId, GafferScene::Render );

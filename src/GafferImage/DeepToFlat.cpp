@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeepToFlat );
 
 size_t DeepToFlat::g_firstPlugIndex = 0;
 
-DeepToFlat::DeepToFlat( const std::string &name )
+DeepToFlat::DeepToFlat( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

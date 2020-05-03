@@ -109,7 +109,7 @@ bool isParameterType( const Plug *plug )
 
 GAFFER_PLUG_DEFINE_TYPE( ShaderPlug );
 
-ShaderPlug::ShaderPlug( const std::string &name, Direction direction, unsigned flags )
+ShaderPlug::ShaderPlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	Plug( name, direction, flags )
 {
 }
@@ -123,7 +123,7 @@ bool ShaderPlug::acceptsChild( const GraphComponent *potentialChild ) const
 	return false;
 }
 
-Gaffer::PlugPtr ShaderPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr ShaderPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new ShaderPlug( name, direction, getFlags() );
 }

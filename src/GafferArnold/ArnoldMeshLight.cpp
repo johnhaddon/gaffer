@@ -53,7 +53,7 @@ using namespace GafferArnold;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldMeshLight );
 
-ArnoldMeshLight::ArnoldMeshLight( const std::string &name )
+ArnoldMeshLight::ArnoldMeshLight( IECore::InternedString name )
 	:	GafferScene::FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 

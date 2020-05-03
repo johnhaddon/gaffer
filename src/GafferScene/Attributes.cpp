@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Attributes );
 
 size_t Attributes::g_firstPlugIndex = 0;
 
-Attributes::Attributes( const std::string &name )
+Attributes::Attributes( IECore::InternedString name )
 	:	AttributeProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

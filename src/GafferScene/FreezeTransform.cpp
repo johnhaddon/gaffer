@@ -55,7 +55,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( FreezeTransform );
 
 size_t FreezeTransform::g_firstPlugIndex = 0;
 
-FreezeTransform::FreezeTransform( const std::string &name )
+FreezeTransform::FreezeTransform( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

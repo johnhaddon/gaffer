@@ -55,7 +55,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Constant );
 
 size_t Constant::g_firstPlugIndex = 0;
 
-Constant::Constant( const std::string &name )
+Constant::Constant( IECore::InternedString name )
 	:	FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

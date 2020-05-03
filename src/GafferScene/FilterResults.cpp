@@ -48,7 +48,7 @@ size_t FilterResults::g_firstPlugIndex = 0;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( FilterResults )
 
-FilterResults::FilterResults( const std::string &name )
+FilterResults::FilterResults( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

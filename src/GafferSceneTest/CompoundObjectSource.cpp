@@ -45,7 +45,7 @@ using namespace GafferSceneTest;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CompoundObjectSource )
 
-CompoundObjectSource::CompoundObjectSource( const std::string &name )
+CompoundObjectSource::CompoundObjectSource( IECore::InternedString name )
 	:	SceneNode( name )
 {
 	addChild( new ObjectPlug( "in", Plug::In, new CompoundObject() ) );

@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MeshTangents );
 
 size_t MeshTangents::g_firstPlugIndex = 0;
 
-MeshTangents::MeshTangents( const std::string &name )
+MeshTangents::MeshTangents( IECore::InternedString name )
 	:	ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

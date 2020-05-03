@@ -47,14 +47,14 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageProcessor );
 
 size_t ImageProcessor::g_firstPlugIndex = 0;
 
-ImageProcessor::ImageProcessor( const std::string &name )
+ImageProcessor::ImageProcessor( IECore::InternedString name )
 	:	ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "in", Gaffer::Plug::In ) );
 }
 
-ImageProcessor::ImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
+ImageProcessor::ImageProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs )
 	:	ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

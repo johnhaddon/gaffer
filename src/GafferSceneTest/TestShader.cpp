@@ -45,7 +45,7 @@ using namespace GafferSceneTest;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TestShader )
 
-TestShader::TestShader( const std::string &name )
+TestShader::TestShader( IECore::InternedString name )
 	:	Shader( name )
 {
 	// The base class expects us to serialise a `loadShader()`

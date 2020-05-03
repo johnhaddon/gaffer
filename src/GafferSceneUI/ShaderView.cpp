@@ -115,7 +115,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ShaderView );
 
 ShaderView::ViewDescription<ShaderView> ShaderView::g_viewDescription( GafferScene::Shader::staticTypeId(), "out" );
 
-ShaderView::ShaderView( const std::string &name )
+ShaderView::ShaderView( IECore::InternedString name )
 	:	ImageView( name ), m_framed( false )
 {
 	// Create a converter to generate an image

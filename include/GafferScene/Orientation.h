@@ -54,7 +54,7 @@ class GAFFERSCENE_API Orientation : public ObjectProcessor
 
 	public :
 
-		Orientation( const std::string &name=defaultName<Orientation>() );
+		Orientation( IECore::InternedString name=defaultName<Orientation>() );
 		~Orientation() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::Orientation, OrientationTypeId, ObjectProcessor );

@@ -42,7 +42,7 @@ using namespace GafferAppleseed;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AppleseedAttributes );
 
-AppleseedAttributes::AppleseedAttributes( const std::string &name )
+AppleseedAttributes::AppleseedAttributes( IECore::InternedString name )
 	:	GafferScene::Attributes( name )
 {
 	Gaffer::CompoundDataPlug *attributes = attributesPlug();

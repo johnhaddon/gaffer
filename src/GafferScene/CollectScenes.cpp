@@ -103,7 +103,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CollectScenes );
 
 size_t CollectScenes::g_firstPlugIndex = 0;
 
-CollectScenes::CollectScenes( const std::string &name )
+CollectScenes::CollectScenes( IECore::InternedString name )
 	:	SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

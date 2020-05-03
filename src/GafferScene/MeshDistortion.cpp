@@ -48,7 +48,7 @@ size_t MeshDistortion::g_firstPlugIndex = 0;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MeshDistortion );
 
-MeshDistortion::MeshDistortion( const std::string &name )
+MeshDistortion::MeshDistortion( IECore::InternedString name )
 	:	ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

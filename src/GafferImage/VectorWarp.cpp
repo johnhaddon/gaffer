@@ -130,7 +130,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( VectorWarp );
 
 size_t VectorWarp::g_firstPlugIndex = 0;
 
-VectorWarp::VectorWarp( const std::string &name )
+VectorWarp::VectorWarp( IECore::InternedString name )
 	:	Warp( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

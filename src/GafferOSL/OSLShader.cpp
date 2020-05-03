@@ -139,7 +139,7 @@ ShadingEngineCache g_shadingEngineCache( getter, 10000 );
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OSLShader );
 
-OSLShader::OSLShader( const std::string &name )
+OSLShader::OSLShader( IECore::InternedString name )
 	:	GafferScene::Shader( name )
 {
 }

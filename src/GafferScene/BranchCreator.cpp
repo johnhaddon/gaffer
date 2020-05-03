@@ -92,7 +92,7 @@ size_t BranchCreator::g_firstPlugIndex = 0;
 static InternedString g_childNamesKey( "__BranchCreatorChildNames" );
 static InternedString g_forwardMappingKey( "__BranchCreatorForwardMappings" );
 
-BranchCreator::BranchCreator( const std::string &name )
+BranchCreator::BranchCreator( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -65,7 +65,7 @@ class GAFFERSCENE_API SetVisualiser : public AttributeProcessor
 
 	public :
 
-		SetVisualiser( const std::string &name=defaultName<SetVisualiser>() );
+		SetVisualiser( IECore::InternedString name=defaultName<SetVisualiser>() );
 		~SetVisualiser() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::SetVisualiser, SetVisualiserTypeId, AttributeProcessor );

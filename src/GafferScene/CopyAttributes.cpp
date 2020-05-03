@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CopyAttributes );
 
 size_t CopyAttributes::g_firstPlugIndex = 0;
 
-CopyAttributes::CopyAttributes( const std::string &name )
+CopyAttributes::CopyAttributes( IECore::InternedString name )
 	:	FilteredSceneProcessor( name, PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

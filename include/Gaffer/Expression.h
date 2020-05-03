@@ -53,7 +53,7 @@ class GAFFER_API Expression : public ComputeNode
 
 	public :
 
-		Expression( const std::string &name=defaultName<Expression>() );
+		Expression( IECore::InternedString name=defaultName<Expression>() );
 		~Expression() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Expression, ExpressionTypeId, ComputeNode );

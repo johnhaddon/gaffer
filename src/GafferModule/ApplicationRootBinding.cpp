@@ -65,7 +65,7 @@ class ApplicationRootWrapper : public IECorePython::RunTimeTypedWrapper<Applicat
 
 	public :
 
-		ApplicationRootWrapper( PyObject *self, const std::string &name = defaultName<ApplicationRoot>() )
+		ApplicationRootWrapper( PyObject *self, IECore::InternedString name = defaultName<ApplicationRoot>() )
 			:	IECorePython::RunTimeTypedWrapper<ApplicationRoot>( self, name )
 		{
 		}
@@ -135,7 +135,7 @@ void GafferModule::bindApplicationRoot()
 	{
 		scope s = IECorePython::RunTimeTypedClass<ApplicationRoot, ApplicationRootWrapper>()
 			.def( init<>() )
-			.def( init<const std::string &>() )
+			.def( init<IECore::InternedString>() )
 			.def( "getClipboardContents", &getClipboardContents )
 			.def( "setClipboardContents", &ApplicationRoot::setClipboardContents )
 			.def( "clipboardContentsChangedSignal", &ApplicationRoot::clipboardContentsChangedSignal, return_internal_reference<1>() )

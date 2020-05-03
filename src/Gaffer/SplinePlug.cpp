@@ -289,7 +289,7 @@ int SplineDefinition<T>::endPointMultiplicity() const
 
 
 template<typename T>
-SplinePlug<T>::SplinePlug( const std::string &name, Direction direction, const ValueType &defaultValue, unsigned flags )
+SplinePlug<T>::SplinePlug( IECore::InternedString name, Direction direction, const ValueType &defaultValue, unsigned flags )
 	:	ValuePlug( name, direction, flags ), m_defaultValue( defaultValue )
 {
 	addChild( new IntPlug( "interpolation", direction, SplineDefinitionInterpolationCatmullRom,
@@ -342,7 +342,7 @@ bool SplinePlug<T>::acceptsChild( const GraphComponent *potentialChild ) const
 }
 
 template<typename T>
-PlugPtr SplinePlug<T>::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr SplinePlug<T>::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	Ptr result = new SplinePlug<T>( name, direction, m_defaultValue, getFlags() );
 	return result;

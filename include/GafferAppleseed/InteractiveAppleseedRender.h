@@ -50,7 +50,7 @@ class GAFFERAPPLESEED_API InteractiveAppleseedRender : public GafferScene::Inter
 
 	public :
 
-		InteractiveAppleseedRender( const std::string &name=defaultName<InteractiveAppleseedRender>() );
+		InteractiveAppleseedRender( IECore::InternedString name=defaultName<InteractiveAppleseedRender>() );
 		~InteractiveAppleseedRender() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferAppleseed::InteractiveAppleseedRender, InteractiveAppleseedRenderTypeId, GafferScene::InteractiveRender );

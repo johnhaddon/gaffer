@@ -49,7 +49,7 @@ class GAFFERSCENE_API Text : public ObjectSource
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::Text, TextTypeId, ObjectSource );
 
-		Text( const std::string &name=defaultName<Text>() );
+		Text( IECore::InternedString name=defaultName<Text>() );
 		~Text() override;
 
 		Gaffer::StringPlug *textPlug();

@@ -52,7 +52,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Random );
 
 size_t Random::g_firstPlugIndex = 0;
 
-Random::Random( const std::string &name )
+Random::Random( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 

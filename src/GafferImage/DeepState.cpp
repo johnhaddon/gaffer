@@ -805,7 +805,7 @@ void checkState( const std::vector<int> &offsets,
 
 size_t DeepState::g_firstPlugIndex = 0;
 
-DeepState::DeepState( const std::string &name )
+DeepState::DeepState( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

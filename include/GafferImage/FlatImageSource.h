@@ -51,7 +51,7 @@ class GAFFERIMAGE_API FlatImageSource : public ImageNode
 
 	public :
 
-		FlatImageSource( const std::string &name=defaultName<FlatImageSource>() );
+		FlatImageSource( IECore::InternedString name=defaultName<FlatImageSource>() );
 
 		~FlatImageSource() override;
 

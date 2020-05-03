@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageSampler );
 
 size_t ImageSampler::g_firstPlugIndex = 0;
 
-ImageSampler::ImageSampler( const std::string &name )
+ImageSampler::ImageSampler( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 

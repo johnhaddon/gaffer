@@ -44,7 +44,7 @@ using namespace GafferArnold;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldLightFilter );
 
-ArnoldLightFilter::ArnoldLightFilter( const std::string &name )
+ArnoldLightFilter::ArnoldLightFilter( IECore::InternedString name )
 	:	GafferScene::LightFilter( new ArnoldShader(), name )
 {
 }

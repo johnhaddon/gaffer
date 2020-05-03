@@ -45,7 +45,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MultiplyNode )
 
 size_t MultiplyNode::g_firstPlugIndex = 0;
 
-MultiplyNode::MultiplyNode( const std::string &name )
+MultiplyNode::MultiplyNode( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

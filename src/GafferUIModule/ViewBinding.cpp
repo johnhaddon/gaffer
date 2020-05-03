@@ -62,7 +62,7 @@ class ViewWrapper : public GafferBindings::NodeWrapper<View>
 
 	public :
 
-		ViewWrapper( PyObject *self, const std::string &name, PlugPtr input )
+		ViewWrapper( PyObject *self, IECore::InternedString name, PlugPtr input )
 			:	GafferBindings::NodeWrapper<View>( self, name, input )
 		{
 		}
@@ -118,7 +118,7 @@ Gaffer::NodePtr getPreprocessor( View &v )
 void bindView()
 {
 	GafferBindings::NodeClass<View, ViewWrapper>( nullptr, no_init )
-		.def( init<const std::string &, PlugPtr>() )
+		.def( init<IECore::InternedString, PlugPtr>() )
 		.def( "editScope", (EditScope *(View::*)())&View::editScope, return_value_policy<IECorePython::CastToIntrusivePtr>() )
 		.def( "getContext", (Context *(View::*)())&View::getContext, return_value_policy<IECorePython::CastToIntrusivePtr>() )
 		.def( "setContext", &View::setContext )

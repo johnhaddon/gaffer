@@ -62,7 +62,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PathFilter );
 
 size_t PathFilter::g_firstPlugIndex = 0;
 
-PathFilter::PathFilter( const std::string &name )
+PathFilter::PathFilter( IECore::InternedString name )
 	:	Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

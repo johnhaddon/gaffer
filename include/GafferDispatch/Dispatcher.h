@@ -102,7 +102,7 @@ class GAFFERDISPATCH_API Dispatcher : public Gaffer::Node
 {
 	public :
 
-		Dispatcher( const std::string &name=defaultName<Dispatcher>() );
+		Dispatcher( IECore::InternedString name=defaultName<Dispatcher>() );
 		~Dispatcher() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferDispatch::Dispatcher, DispatcherTypeId, Gaffer::Node );

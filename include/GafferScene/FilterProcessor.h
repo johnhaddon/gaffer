@@ -58,11 +58,11 @@ class GAFFERSCENE_API FilterProcessor : public Filter
 
 		/// Constructs with a single input filter plug named "in". Use inPlug()
 		/// to access this plug.
-		FilterProcessor( const std::string &name=defaultName<FilterProcessor>() );
+		FilterProcessor( IECore::InternedString name=defaultName<FilterProcessor>() );
 		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 		/// convenience for accessing the first child in the array, and use
 		/// inPlugs() to access the array itself.
-		FilterProcessor( const std::string &name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
+		FilterProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
 
 		~FilterProcessor() override;
 

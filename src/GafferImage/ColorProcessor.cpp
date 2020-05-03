@@ -58,7 +58,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ColorProcessor );
 
 size_t ColorProcessor::g_firstPlugIndex = 0;
 
-ColorProcessor::ColorProcessor( const std::string &name )
+ColorProcessor::ColorProcessor( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

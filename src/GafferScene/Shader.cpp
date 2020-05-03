@@ -540,7 +540,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Shader );
 size_t Shader::g_firstPlugIndex = 0;
 const IECore::InternedString Shader::g_outputParameterContextName( "scene:shader:outputParameter" );
 
-Shader::Shader( const std::string &name )
+Shader::Shader( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

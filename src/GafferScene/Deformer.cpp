@@ -47,19 +47,19 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Deformer );
 
 size_t Deformer::g_firstPlugIndex = 0;
 
-Deformer::Deformer( const std::string &name )
+Deformer::Deformer( IECore::InternedString name )
 	:	ObjectProcessor( name )
 {
 	init();
 }
 
-Deformer::Deformer( const std::string &name, size_t minInputs, size_t maxInputs )
+Deformer::Deformer( IECore::InternedString name, size_t minInputs, size_t maxInputs )
 	:	ObjectProcessor( name, minInputs, maxInputs )
 {
 	init();
 }
 
-Deformer::Deformer( const std::string &name, IECore::PathMatcher::Result filterDefault )
+Deformer::Deformer( IECore::InternedString name, IECore::PathMatcher::Result filterDefault )
 	:	ObjectProcessor( name, filterDefault )
 {
 	init();

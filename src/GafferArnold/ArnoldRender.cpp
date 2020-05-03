@@ -41,7 +41,7 @@ using namespace GafferArnold;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldRender );
 
-ArnoldRender::ArnoldRender( const std::string &name )
+ArnoldRender::ArnoldRender( IECore::InternedString name )
 	:	Render( "Arnold", name )
 {
 }

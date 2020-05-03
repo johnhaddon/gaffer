@@ -53,7 +53,7 @@ class GAFFERVDB_API LevelSetOffset : public GafferScene::SceneElementProcessor
 
 	public :
 
-		LevelSetOffset(const std::string &name = defaultName<LevelSetOffset>() );
+		LevelSetOffset(IECore::InternedString name = defaultName<LevelSetOffset>() );
 		~LevelSetOffset() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferVDB::LevelSetOffset, LevelSetOffsetTypeId, GafferScene::SceneElementProcessor );

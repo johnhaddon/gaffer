@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AimConstraint );
 
 size_t AimConstraint::g_firstPlugIndex = 0;
 
-AimConstraint::AimConstraint( const std::string &name )
+AimConstraint::AimConstraint( IECore::InternedString name )
 	:	Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

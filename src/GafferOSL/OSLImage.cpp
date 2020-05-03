@@ -63,7 +63,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OSLImage );
 
 size_t OSLImage::g_firstPlugIndex = 0;
 
-OSLImage::OSLImage( const std::string &name )
+OSLImage::OSLImage( IECore::InternedString name )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

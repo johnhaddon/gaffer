@@ -54,7 +54,7 @@ class GAFFERSCENE_API SceneElementProcessor : public FilteredSceneProcessor
 
 	public :
 
-		SceneElementProcessor( const std::string &name=defaultName<SceneElementProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
+		SceneElementProcessor( IECore::InternedString name=defaultName<SceneElementProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
 		~SceneElementProcessor() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::SceneElementProcessor, SceneElementProcessorTypeId, FilteredSceneProcessor );

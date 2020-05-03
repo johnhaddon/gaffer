@@ -48,7 +48,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ChannelDataProcessor );
 
 size_t ChannelDataProcessor::g_firstPlugIndex = 0;
 
-ChannelDataProcessor::ChannelDataProcessor( const std::string &name, bool hasUnpremultPlug )
+ChannelDataProcessor::ChannelDataProcessor( IECore::InternedString name, bool hasUnpremultPlug )
 	:	ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

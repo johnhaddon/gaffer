@@ -58,7 +58,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Group );
 
 size_t Group::g_firstPlugIndex = 0;
 
-Group::Group( const std::string &name )
+Group::Group( IECore::InternedString name )
 	:	SceneProcessor( name, 1 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

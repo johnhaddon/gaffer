@@ -47,7 +47,7 @@ class GAFFERIMAGE_API CopyImageMetadata : public MetadataProcessor
 
 	public :
 
-		CopyImageMetadata( const std::string &name=defaultName<CopyImageMetadata>() );
+		CopyImageMetadata( IECore::InternedString name=defaultName<CopyImageMetadata>() );
 		~CopyImageMetadata() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::CopyImageMetadata, CopyImageMetadataTypeId, MetadataProcessor );

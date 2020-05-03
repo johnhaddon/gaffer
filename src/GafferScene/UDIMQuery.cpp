@@ -56,7 +56,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( UDIMQuery );
 
 size_t UDIMQuery::g_firstPlugIndex = 0;
 
-UDIMQuery::UDIMQuery( const std::string &name )
+UDIMQuery::UDIMQuery( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

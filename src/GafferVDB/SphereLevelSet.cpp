@@ -55,7 +55,7 @@ IE_CORE_DEFINERUNTIMETYPED( SphereLevelSet );
 
 size_t SphereLevelSet::g_firstPlugIndex = 0;
 
-SphereLevelSet::SphereLevelSet( const std::string &name )
+SphereLevelSet::SphereLevelSet( IECore::InternedString name )
 : ObjectSource( name, "sphere" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PrimitiveVariableProcessor );
 
 size_t PrimitiveVariableProcessor::g_firstPlugIndex = 0;
 
-PrimitiveVariableProcessor::PrimitiveVariableProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
+PrimitiveVariableProcessor::PrimitiveVariableProcessor( IECore::InternedString name, IECore::PathMatcher::Result filterDefault )
 	:	SceneElementProcessor( name, filterDefault )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

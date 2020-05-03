@@ -161,7 +161,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PrimitiveSampler );
 
 size_t PrimitiveSampler::g_firstPlugIndex = 0;
 
-PrimitiveSampler::PrimitiveSampler( const std::string &name )
+PrimitiveSampler::PrimitiveSampler( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

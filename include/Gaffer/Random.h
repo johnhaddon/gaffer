@@ -52,7 +52,7 @@ class GAFFER_API Random : public ComputeNode
 
 	public :
 
-		Random( const std::string &name=defaultName<Random>() );
+		Random( IECore::InternedString name=defaultName<Random>() );
 		~Random() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Random, RandomTypeId, ComputeNode );

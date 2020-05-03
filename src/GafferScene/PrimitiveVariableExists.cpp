@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PrimitiveVariableExists );
 
 size_t PrimitiveVariableExists::g_firstPlugIndex = 0;
 
-PrimitiveVariableExists::PrimitiveVariableExists( const std::string &name )
+PrimitiveVariableExists::PrimitiveVariableExists( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -54,13 +54,13 @@ class GAFFERSCENE_API ShaderPlug : public Gaffer::Plug
 
 	public :
 
-		ShaderPlug( const std::string &name=defaultName<ShaderPlug>(), Direction direction=In, unsigned flags=Default );
+		ShaderPlug( IECore::InternedString name=defaultName<ShaderPlug>(), Direction direction=In, unsigned flags=Default );
 		~ShaderPlug() override;
 
 		GAFFER_PLUG_DECLARE_TYPE( GafferScene::ShaderPlug, ShaderPlugTypeId, Plug );
 
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 		bool acceptsInput( const Gaffer::Plug *input ) const override;
 
 		/// Returns a hash representing the shading network generated

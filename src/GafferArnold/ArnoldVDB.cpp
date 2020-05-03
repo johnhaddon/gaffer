@@ -102,7 +102,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldVDB );
 
 size_t ArnoldVDB::g_firstPlugIndex = 0;
 
-ArnoldVDB::ArnoldVDB( const std::string &name )
+ArnoldVDB::ArnoldVDB( IECore::InternedString name )
 	:	ObjectSource( name, "volume" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

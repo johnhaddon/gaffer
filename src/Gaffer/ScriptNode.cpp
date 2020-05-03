@@ -246,7 +246,7 @@ size_t ScriptNode::g_firstPlugIndex = 0;
 ScriptNode::SerialiseFunction ScriptNode::g_serialiseFunction;
 ScriptNode::ExecuteFunction ScriptNode::g_executeFunction;
 
-ScriptNode::ScriptNode( const std::string &name )
+ScriptNode::ScriptNode( IECore::InternedString name )
 	:
 	Node( name ),
 	m_selection( new StandardSet( /* removeOrphans = */ true ) ),

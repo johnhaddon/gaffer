@@ -77,7 +77,7 @@ class GAFFER_API ScriptNode : public Node
 
 	public :
 
-		ScriptNode( const std::string &name=defaultName<Node>() );
+		ScriptNode( IECore::InternedString name=defaultName<ScriptNode>() );
 		~ScriptNode() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::ScriptNode, ScriptNodeTypeId, Node );

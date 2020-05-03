@@ -53,7 +53,7 @@ using namespace GafferOSL;
 
 GAFFER_PLUG_DEFINE_TYPE( ClosurePlug );
 
-ClosurePlug::ClosurePlug( const std::string &name, Direction direction, unsigned flags )
+ClosurePlug::ClosurePlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	Plug( name, direction, flags )
 {
 }
@@ -67,7 +67,7 @@ bool ClosurePlug::acceptsChild( const GraphComponent *potentialChild ) const
 	return false;
 }
 
-Gaffer::PlugPtr ClosurePlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr ClosurePlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	return new ClosurePlug( name, direction, getFlags() );
 }

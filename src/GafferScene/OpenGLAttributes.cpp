@@ -43,7 +43,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OpenGLAttributes );
 
-OpenGLAttributes::OpenGLAttributes( const std::string &name )
+OpenGLAttributes::OpenGLAttributes( IECore::InternedString name )
 	:	Attributes( name )
 {
 	Gaffer::CompoundDataPlug *attributes = attributesPlug();

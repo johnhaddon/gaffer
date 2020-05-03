@@ -69,7 +69,7 @@ const ValuePlug *valuePlug( const NameValuePlug *p )
 
 GAFFER_PLUG_DEFINE_TYPE( CompoundDataPlug )
 
-CompoundDataPlug::CompoundDataPlug( const std::string &name, Direction direction, unsigned flags )
+CompoundDataPlug::CompoundDataPlug( IECore::InternedString name, Direction direction, unsigned flags )
 	:	ValuePlug( name, direction, flags )
 {
 }
@@ -88,7 +88,7 @@ bool CompoundDataPlug::acceptsChild( const GraphComponent *potentialChild ) cons
 	return potentialChild->isInstanceOf( NameValuePlug::staticTypeId() );
 }
 
-PlugPtr CompoundDataPlug::createCounterpart( const std::string &name, Direction direction ) const
+PlugPtr CompoundDataPlug::createCounterpart( IECore::InternedString name, Direction direction ) const
 {
 	CompoundDataPlugPtr result = new CompoundDataPlug( name, direction, getFlags() );
 	for( PlugIterator it( this ); !it.done(); ++it )
@@ -108,7 +108,7 @@ void CompoundDataPlug::addMembers( const IECore::CompoundData *parameters, bool 
 			plugName = it->first;
 			std::replace_if( plugName.begin(), plugName.end(), []( char c ) { return !::isalnum( c ); }, '_' );
 		}
-		addChild( new NameValuePlug( it->first.string(), it->second.get(), plugName, Plug::In, Plug::Default | Plug::Dynamic ) );
+		addChild( new NameValuePlug( it->first, it->second.get(), plugName, Plug::In, Plug::Default | Plug::Dynamic ) );
 	}
 }
 

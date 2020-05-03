@@ -49,7 +49,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PointsType );
 
 size_t PointsType::g_firstPlugIndex = 0;
 
-PointsType::PointsType( const std::string &name )
+PointsType::PointsType( IECore::InternedString name )
 	:	Deformer( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

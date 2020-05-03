@@ -51,7 +51,7 @@ class IECORE_EXPORT Switch : public ComputeNode
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::Switch, SwitchTypeId, ComputeNode );
 
-		Switch( const std::string &name=GraphComponent::defaultName<Switch>() );
+		Switch( IECore::InternedString name=GraphComponent::defaultName<Switch>() );
 		~Switch() override;
 
 		/// Sets up the switch to work with the specified plug type.

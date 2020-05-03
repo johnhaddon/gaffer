@@ -284,7 +284,7 @@ void GafferModule::bindGraphComponent()
 
 	scope s = GraphComponentClass<GraphComponent, Wrapper>()
 		.def( init<>() )
-		.def( init<const std::string &>() )
+		.def( init<IECore::InternedString>() )
 		.def( "setName", &setName )
 		.def( "getName", &getName )
 		.def( "fullName", &GraphComponent::fullName )

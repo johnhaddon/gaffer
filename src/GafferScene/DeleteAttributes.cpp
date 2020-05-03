@@ -44,7 +44,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteAttributes );
 
 size_t DeleteAttributes::g_firstPlugIndex = 0;
 
-DeleteAttributes::DeleteAttributes( const std::string &name )
+DeleteAttributes::DeleteAttributes( IECore::InternedString name )
 	:	AttributeProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

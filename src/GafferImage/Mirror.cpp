@@ -94,7 +94,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Mirror );
 
 size_t Mirror::g_firstPlugIndex = 0;
 
-Mirror::Mirror( const std::string &name )
+Mirror::Mirror( IECore::InternedString name )
 	:	FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

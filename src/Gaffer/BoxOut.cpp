@@ -74,7 +74,7 @@ const Dot *dotChainSource( const Plug *plug )
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( BoxOut )
 
-BoxOut::BoxOut( const std::string &name )
+BoxOut::BoxOut( IECore::InternedString name )
 	:	BoxIO( Plug::Out, name )
 {
 }

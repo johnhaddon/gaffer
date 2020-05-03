@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PrimitiveVariables );
 
 size_t PrimitiveVariables::g_firstPlugIndex = 0;
 
-PrimitiveVariables::PrimitiveVariables( const std::string &name )
+PrimitiveVariables::PrimitiveVariables( IECore::InternedString name )
 	:	ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -48,13 +48,13 @@ class GAFFER_API TransformPlug : public ValuePlug
 
 	public :
 
-		TransformPlug( const std::string &name = defaultName<TransformPlug>(), Direction direction=In, unsigned flags = Default );
+		TransformPlug( IECore::InternedString name = defaultName<TransformPlug>(), Direction direction=In, unsigned flags = Default );
 		~TransformPlug() override;
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::TransformPlug, TransformPlugTypeId, ValuePlug );
 
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		V3fPlug *translatePlug();
 		const V3fPlug *translatePlug() const;

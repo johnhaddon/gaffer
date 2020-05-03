@@ -68,7 +68,7 @@ typedef std::pair<IntPlug *, InteractiveRender::State> Interrupted;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( InteractiveArnoldRender );
 
-InteractiveArnoldRender::InteractiveArnoldRender( const std::string &name )
+InteractiveArnoldRender::InteractiveArnoldRender( IECore::InternedString name )
 	:	InteractiveRender( "Arnold", name )
 {
 	instances().insert( this );

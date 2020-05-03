@@ -91,7 +91,7 @@ std::unordered_set<const Node *> boxOutPassThroughSources( const Node *parent )
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Box );
 
-Box::Box( const std::string &name )
+Box::Box( IECore::InternedString name )
 	:	SubGraph( name )
 {
 }

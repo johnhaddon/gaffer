@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ClosestPointSampler );
 
 size_t ClosestPointSampler::g_firstPlugIndex = 0;
 
-ClosestPointSampler::ClosestPointSampler( const std::string &name )
+ClosestPointSampler::ClosestPointSampler( IECore::InternedString name )
 	:	PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

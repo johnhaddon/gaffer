@@ -51,7 +51,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SceneNode );
 
 size_t SceneNode::g_firstPlugIndex = 0;
 
-SceneNode::SceneNode( const std::string &name )
+SceneNode::SceneNode( IECore::InternedString name )
 	:	ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

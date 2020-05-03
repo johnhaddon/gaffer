@@ -55,7 +55,7 @@ class GAFFERSCENETEST_API CompoundObjectSource : public GafferScene::SceneNode
 
 	public :
 
-		CompoundObjectSource( const std::string &name=defaultName<CompoundObjectSource>() );
+		CompoundObjectSource( IECore::InternedString name=defaultName<CompoundObjectSource>() );
 		~CompoundObjectSource() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneTest::CompoundObjectSource, CompoundObjectSourceTypeId, GafferScene::SceneNode );

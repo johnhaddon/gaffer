@@ -58,7 +58,7 @@ class GAFFER_API NumericPlug : public ValuePlug
 		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( NumericPlug<T>, ValuePlug );
 
 		NumericPlug(
-			const std::string &name = defaultName<NumericPlug>(),
+			IECore::InternedString name = defaultName<NumericPlug>(),
 			Direction direction=In,
 			T defaultValue = T(),
 			T minValue = Imath::limits<T>::min(),
@@ -69,7 +69,7 @@ class GAFFER_API NumericPlug : public ValuePlug
 
 		/// Accepts other NumericPlugs, including those of different types, and BoolPlugs.
 		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		T defaultValue() const;
 

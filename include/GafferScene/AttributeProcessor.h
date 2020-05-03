@@ -58,11 +58,11 @@ class GAFFERSCENE_API AttributeProcessor : public FilteredSceneProcessor
 
 		/// Constructs with a single input ScenePlug named "in". Use inPlug()
 		/// to access this plug.
-		AttributeProcessor( const std::string &name );
+		AttributeProcessor( IECore::InternedString name );
 		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 		/// convenience for accessing the first child in the array, and use
 		/// inPlugs() to access the array itself.
-		AttributeProcessor( const std::string &name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
+		AttributeProcessor( IECore::InternedString name, size_t minInputs, size_t maxInputs = Imath::limits<size_t>::max() );
 
 		/// Must be implemented by derived classes to return true if `input` is used
 		/// by `computeProcessedAttributes()`. Overrides must start by calling the base
@@ -89,7 +89,7 @@ class GAFFERSCENE_API AttributeProcessor : public FilteredSceneProcessor
 		/// Private constructor and friendship for old nodes which are filtered to everything
 		/// by default. This was a mistake, and we want to ensure that we don't repeat the mistake
 		/// for new nodes.
-		AttributeProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault );
+		AttributeProcessor( IECore::InternedString name, IECore::PathMatcher::Result filterDefault );
 		friend class DeleteAttributes;
 		friend class ShaderAssignment;
 		friend class Attributes;

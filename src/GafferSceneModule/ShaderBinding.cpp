@@ -154,7 +154,7 @@ void GafferSceneModule::bindShader()
 	GafferBindings::Serialisation::registerSerialiser( Shader::staticTypeId(), new ShaderSerialiser() );
 
 	PlugClass<ShaderPlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<ShaderPlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,

@@ -351,7 +351,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OSLCode );
 
 size_t OSLCode::g_firstPlugIndex;
 
-OSLCode::OSLCode( const std::string &name )
+OSLCode::OSLCode( IECore::InternedString name )
 	:	OSLShader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

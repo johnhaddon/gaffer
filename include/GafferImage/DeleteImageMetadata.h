@@ -47,7 +47,7 @@ class GAFFERIMAGE_API DeleteImageMetadata : public MetadataProcessor
 
 	public :
 
-		DeleteImageMetadata( const std::string &name=defaultName<DeleteImageMetadata>() );
+		DeleteImageMetadata( IECore::InternedString name=defaultName<DeleteImageMetadata>() );
 		~DeleteImageMetadata() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::DeleteImageMetadata, DeleteImageMetadataTypeId, MetadataProcessor );

@@ -53,7 +53,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteCurves );
 
 size_t DeleteCurves::g_firstPlugIndex = 0;
 
-DeleteCurves::DeleteCurves( const std::string &name )
+DeleteCurves::DeleteCurves( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

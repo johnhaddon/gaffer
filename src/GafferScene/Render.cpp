@@ -96,12 +96,12 @@ static IECore::InternedString g_rendererContextName( "scene:renderer" );
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Render );
 
-Render::Render( const std::string &name )
+Render::Render( IECore::InternedString name )
 	:	Render( /* rendererType = */ InternedString(), name )
 {
 }
 
-Render::Render( const IECore::InternedString &rendererType, const std::string &name )
+Render::Render( const IECore::InternedString &rendererType, IECore::InternedString name )
 	:	TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

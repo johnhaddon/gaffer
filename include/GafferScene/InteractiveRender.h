@@ -59,7 +59,7 @@ class GAFFERSCENE_API InteractiveRender : public Gaffer::Node
 
 	public :
 
-		InteractiveRender( const std::string &name=defaultName<InteractiveRender>() );
+		InteractiveRender( IECore::InternedString name=defaultName<InteractiveRender>() );
 		~InteractiveRender() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::InteractiveRender, GafferScene::InteractiveRenderTypeId, Gaffer::Node );
@@ -96,7 +96,7 @@ class GAFFERSCENE_API InteractiveRender : public Gaffer::Node
 		// at some point we won't even have derived classes, but instead will always use the
 		// base class? At the moment the main purpose of the derived classes is to force the
 		// loading of the module which registers the required renderer type.
-		InteractiveRender( const IECore::InternedString &rendererType, const std::string &name );
+		InteractiveRender( const IECore::InternedString &rendererType, IECore::InternedString name );
 
 	private :
 

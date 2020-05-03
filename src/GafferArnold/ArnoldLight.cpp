@@ -62,7 +62,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ArnoldLight );
 
 size_t ArnoldLight::g_firstPlugIndex = 0;
 
-ArnoldLight::ArnoldLight( const std::string &name )
+ArnoldLight::ArnoldLight( IECore::InternedString name )
 	:	GafferScene::Light( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -170,7 +170,7 @@ namespace
 {
 
 template<typename T>
-ValuePlugPtr boxValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
+ValuePlugPtr boxValuePlug( IECore::InternedString name, Plug::Direction direction, unsigned flags, const T *value )
 {
 	return new BoxPlug<typename T::ValueType>(
 		name,
@@ -181,7 +181,7 @@ ValuePlugPtr boxValuePlug( const std::string &name, Plug::Direction direction, u
 }
 
 template<typename T>
-ValuePlugPtr compoundNumericValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
+ValuePlugPtr compoundNumericValuePlug( IECore::InternedString name, Plug::Direction direction, unsigned flags, const T *value )
 {
 	typedef typename T::ValueType ValueType;
 	typedef typename ValueType::BaseType BaseType;
@@ -200,7 +200,7 @@ ValuePlugPtr compoundNumericValuePlug( const std::string &name, Plug::Direction 
 }
 
 template<typename T>
-ValuePlugPtr geometricCompoundNumericValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
+ValuePlugPtr geometricCompoundNumericValuePlug( IECore::InternedString name, Plug::Direction direction, unsigned flags, const T *value )
 {
 	typedef typename T::ValueType ValueType;
 	typedef typename ValueType::BaseType BaseType;
@@ -220,7 +220,7 @@ ValuePlugPtr geometricCompoundNumericValuePlug( const std::string &name, Plug::D
 }
 
 template<typename T>
-ValuePlugPtr typedObjectValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
+ValuePlugPtr typedObjectValuePlug( IECore::InternedString name, Plug::Direction direction, unsigned flags, const T *value )
 {
 	typename TypedObjectPlug<T>::Ptr result = new TypedObjectPlug<T>(
 		name,
@@ -240,7 +240,7 @@ namespace Gaffer
 namespace PlugAlgo
 {
 
-ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value )
+ValuePlugPtr createPlugFromData( IECore::InternedString name, Plug::Direction direction, unsigned flags, const IECore::Data *value )
 {
 	switch( value->typeId() )
 	{

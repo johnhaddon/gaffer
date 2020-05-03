@@ -65,7 +65,7 @@ class DispatcherWrapper : public NodeWrapper<Dispatcher>
 {
 	public :
 
-		DispatcherWrapper( PyObject *self, const std::string &name )
+		DispatcherWrapper( PyObject *self, IECore::InternedString name )
 			: NodeWrapper<Dispatcher>( self, name )
 		{
 		}

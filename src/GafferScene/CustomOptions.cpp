@@ -43,7 +43,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CustomOptions );
 
 size_t CustomOptions::g_firstPlugIndex = 0;
 
-CustomOptions::CustomOptions( const std::string &name )
+CustomOptions::CustomOptions( IECore::InternedString name )
 	:	Options( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

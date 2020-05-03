@@ -72,7 +72,7 @@ TypedPlugClass<T, TWrapper>::TypedPlugClass( const char *docString )
 	typedef typename T::ValueType V;
 
 	this->def(
-		boost::python::init<const std::string &, Gaffer::Plug::Direction, const V &, unsigned>(
+		boost::python::init<IECore::InternedString, Gaffer::Plug::Direction, const V &, unsigned>(
 			(
 				boost::python::arg_( "name" )=Gaffer::GraphComponent::defaultName<T>(),
 				boost::python::arg_( "direction" )=Gaffer::Plug::In,

@@ -49,7 +49,7 @@ class GAFFERSCENE_API GlobalShader : public GlobalsProcessor
 
 	public :
 
-		GlobalShader( const std::string &name=defaultName<GlobalShader>() );
+		GlobalShader( IECore::InternedString name=defaultName<GlobalShader>() );
 		~GlobalShader() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferScene::GlobalShader, GlobalShaderTypeId, GlobalsProcessor );

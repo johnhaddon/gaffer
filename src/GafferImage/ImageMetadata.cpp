@@ -46,7 +46,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageMetadata );
 
 size_t ImageMetadata::g_firstPlugIndex = 0;
 
-ImageMetadata::ImageMetadata( const std::string &name )
+ImageMetadata::ImageMetadata( IECore::InternedString name )
 	:	MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

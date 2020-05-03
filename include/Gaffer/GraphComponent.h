@@ -83,7 +83,7 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public boost::sig
 
 	public :
 
-		GraphComponent( const std::string &name=GraphComponent::defaultName<GraphComponent>() );
+		GraphComponent( IECore::InternedString name=GraphComponent::defaultName<GraphComponent>() );
 		~GraphComponent() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::GraphComponent, GraphComponentTypeId, IECore::RunTimeTyped );
@@ -115,7 +115,7 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public boost::sig
 		/// Returns T::staticTypeName() without namespace prefixes, for use as the
 		/// default name in GraphComponent constructors.
 		template<typename T>
-		static std::string defaultName();
+		static IECore::InternedString defaultName();
 		//@}
 
 		/// @name Parent-child relationships
@@ -274,7 +274,7 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public boost::sig
 
 	private :
 
-		static std::string unprefixedTypeName( const char *typeName );
+		static IECore::InternedString unprefixedTypeName( const char *typeName );
 
 		void throwIfChildRejected( const GraphComponent *potentialChild ) const;
 		void setNameInternal( const IECore::InternedString &name );

@@ -56,13 +56,13 @@ class GAFFEROSL_API ClosurePlug : public Gaffer::Plug
 
 	public :
 
-		ClosurePlug( const std::string &name=defaultName<ClosurePlug>(), Direction direction=In, unsigned flags=Default );
+		ClosurePlug( IECore::InternedString name=defaultName<ClosurePlug>(), Direction direction=In, unsigned flags=Default );
 		~ClosurePlug() override;
 
 		GAFFER_PLUG_DECLARE_TYPE( GafferOSL::ClosurePlug, ClosurePlugTypeId, Plug );
 
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 		bool acceptsInput( const Gaffer::Plug *input ) const override;
 
 	private:

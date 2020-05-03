@@ -327,7 +327,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Display );
 
 size_t Display::g_firstPlugIndex = 0;
 
-Display::Display( const std::string &name )
+Display::Display( IECore::InternedString name )
 	:	ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

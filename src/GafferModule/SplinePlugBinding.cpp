@@ -207,7 +207,7 @@ template<typename T>
 void bind()
 {
 	PlugClass<T>()
-		.def( init<const std::string &, Plug::Direction, const typename T::ValueType &, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, const typename T::ValueType &, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<T>(),
 					boost::python::arg_( "direction" )=Plug::In,

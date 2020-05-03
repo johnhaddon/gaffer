@@ -91,7 +91,7 @@ class GAFFER_API StringPlug : public ValuePlug
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::StringPlug, StringPlugTypeId, ValuePlug );
 
 		StringPlug(
-			const std::string &name = defaultName<StringPlug>(),
+			IECore::InternedString name = defaultName<StringPlug>(),
 			Direction direction=In,
 			const std::string &defaultValue = "",
 			unsigned flags = Default,
@@ -103,7 +103,7 @@ class GAFFER_API StringPlug : public ValuePlug
 
 		/// Accepts only instances of StringPlug or derived classes.
 		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		const std::string &defaultValue() const;
 

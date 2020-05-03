@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CameraTweaks );
 
 size_t CameraTweaks::g_firstPlugIndex = 0;
 
-CameraTweaks::CameraTweaks( const std::string &name )
+CameraTweaks::CameraTweaks( IECore::InternedString name )
 	:	ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

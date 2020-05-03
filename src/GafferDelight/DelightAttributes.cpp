@@ -43,7 +43,7 @@ using namespace GafferDelight;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DelightAttributes );
 
-DelightAttributes::DelightAttributes( const std::string &name )
+DelightAttributes::DelightAttributes( IECore::InternedString name )
 	:	GafferScene::Attributes( name )
 {
 	Gaffer::CompoundDataPlug *attributes = attributesPlug();

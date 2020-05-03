@@ -40,7 +40,7 @@ using namespace Gaffer;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( BoxIn )
 
-BoxIn::BoxIn( const std::string &name )
+BoxIn::BoxIn( IECore::InternedString name )
 	:	BoxIO( Plug::In, name )
 {
 }

@@ -54,7 +54,7 @@ class GAFFERAPPLESEED_API AppleseedLight : public GafferScene::Light
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferAppleseed::AppleseedLight, AppleseedLightTypeId, GafferScene::Light );
 
-		AppleseedLight( const std::string &name=defaultName<AppleseedLight>() );
+		AppleseedLight( IECore::InternedString name=defaultName<AppleseedLight>() );
 		~AppleseedLight() override;
 
 		void loadShader( const std::string &shaderName );

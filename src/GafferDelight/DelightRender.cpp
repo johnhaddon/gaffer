@@ -41,7 +41,7 @@ using namespace GafferDelight;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DelightRender );
 
-DelightRender::DelightRender( const std::string &name )
+DelightRender::DelightRender( IECore::InternedString name )
 	:	Render( "3Delight", name )
 {
 }

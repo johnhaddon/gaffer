@@ -50,7 +50,7 @@ class GAFFERSCENE_API ArnoldBackground : public GafferScene::GlobalShader
 
 	public :
 
-		ArnoldBackground( const std::string &name=defaultName<ArnoldBackground>() );
+		ArnoldBackground( IECore::InternedString name=defaultName<ArnoldBackground>() );
 		~ArnoldBackground() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferArnold::ArnoldBackground, ArnoldBackgroundTypeId, GafferScene::GlobalShader );

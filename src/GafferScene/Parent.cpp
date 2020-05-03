@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Parent );
 
 size_t Parent::g_firstPlugIndex = 0;
 
-Parent::Parent( const std::string &name )
+Parent::Parent( IECore::InternedString name )
 	:	BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

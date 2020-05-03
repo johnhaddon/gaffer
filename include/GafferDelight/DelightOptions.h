@@ -50,7 +50,7 @@ class GAFFERDELIGHT_API DelightOptions : public GafferScene::Options
 
 	public :
 
-		DelightOptions( const std::string &name=defaultName<DelightOptions>() );
+		DelightOptions( IECore::InternedString name=defaultName<DelightOptions>() );
 		~DelightOptions() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferDelight::DelightOptions, DelightOptionsTypeId, GafferScene::Options );

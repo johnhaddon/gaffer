@@ -756,7 +756,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( OpenImageIOReader );
 
 size_t OpenImageIOReader::g_firstPlugIndex = 0;
 
-OpenImageIOReader::OpenImageIOReader( const std::string &name )
+OpenImageIOReader::OpenImageIOReader( IECore::InternedString name )
 	:	ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

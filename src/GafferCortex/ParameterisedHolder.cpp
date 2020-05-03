@@ -55,7 +55,7 @@ template<typename BaseType>
 const IECore::RunTimeTyped::TypeDescription<ParameterisedHolder<BaseType> > ParameterisedHolder<BaseType>::g_typeDescription;
 
 template<typename BaseType>
-ParameterisedHolder<BaseType>::ParameterisedHolder( const std::string &name )
+ParameterisedHolder<BaseType>::ParameterisedHolder( IECore::InternedString name )
 	:	BaseType( name ), m_parameterised( nullptr ), m_parameterHandler( nullptr )
 {
 	BaseType::addChild( new Gaffer::StringPlug( "__className" ) );

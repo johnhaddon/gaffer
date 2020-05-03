@@ -147,7 +147,7 @@ void GafferDispatchModule::bindTaskNode()
 	;
 
 	PlugClass<TaskNode::TaskPlug>()
-		.def( init<const char *, Plug::Direction, unsigned>(
+		.def( init<InternedString, Plug::Direction, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<TaskNode::TaskPlug>(),
 					boost::python::arg_( "direction" )=Plug::In,

@@ -41,7 +41,7 @@ using namespace GafferScene;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DeleteOutputs );
 
-DeleteOutputs::DeleteOutputs( const std::string &name )
+DeleteOutputs::DeleteOutputs( IECore::InternedString name )
 	:	DeleteGlobals( name )
 {
 }

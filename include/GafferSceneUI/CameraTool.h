@@ -56,7 +56,7 @@ class GAFFERSCENEUI_API CameraTool : public GafferSceneUI::SelectionTool
 
 	public :
 
-		CameraTool( SceneView *view, const std::string &name = defaultName<CameraTool>() );
+		CameraTool( SceneView *view, IECore::InternedString name = defaultName<CameraTool>() );
 		~CameraTool() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneUI::CameraTool, CameraToolTypeId, GafferSceneUI::SelectionTool );

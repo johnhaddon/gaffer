@@ -42,7 +42,7 @@ using namespace GafferDelight;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( InteractiveDelightRender );
 
-InteractiveDelightRender::InteractiveDelightRender( const std::string &name )
+InteractiveDelightRender::InteractiveDelightRender( IECore::InternedString name )
 	:	InteractiveRender( "3Delight", name )
 {
 }

@@ -54,7 +54,7 @@ class GAFFERIMAGE_API Mix : public ImageProcessor
 
 	public :
 
-		Mix( const std::string &name=defaultName<Mix>() );
+		Mix( IECore::InternedString name=defaultName<Mix>() );
 		~Mix() override;
 
 		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferImage::Mix, MixTypeId, ImageProcessor );

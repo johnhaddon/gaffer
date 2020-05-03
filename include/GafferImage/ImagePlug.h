@@ -83,13 +83,13 @@ class GAFFERIMAGE_API ImagePlug : public Gaffer::ValuePlug
 
 	public :
 
-		ImagePlug( const std::string &name=defaultName<ImagePlug>(), Direction direction=In, unsigned flags=Default );
+		ImagePlug( IECore::InternedString name=defaultName<ImagePlug>(), Direction direction=In, unsigned flags=Default );
 		~ImagePlug() override;
 
 		GAFFER_PLUG_DECLARE_TYPE( GafferImage::ImagePlug, ImagePlugTypeId, ValuePlug );
 
 		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 		/// Only accepts ImagePlug inputs.
 		bool acceptsInput( const Gaffer::Plug *input ) const override;
 

@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( MeshToPoints );
 
 size_t MeshToPoints::g_firstPlugIndex = 0;
 
-MeshToPoints::MeshToPoints( const std::string &name )
+MeshToPoints::MeshToPoints( IECore::InternedString name )
 	:	Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

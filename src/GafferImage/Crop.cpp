@@ -50,7 +50,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Crop );
 
 size_t Crop::g_firstPlugIndex = 0;
 
-Crop::Crop( const std::string &name )
+Crop::Crop( IECore::InternedString name )
 	:   ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -155,7 +155,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SceneWriter );
 
 size_t SceneWriter::g_firstPlugIndex = 0;
 
-SceneWriter::SceneWriter( const std::string &name )
+SceneWriter::SceneWriter( IECore::InternedString name )
 	: TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );

@@ -63,14 +63,14 @@ class GAFFER_API BoxPlug : public ValuePlug
 		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( BoxPlug<T>, ValuePlug );
 
 		BoxPlug(
-			const std::string &name = defaultName<BoxPlug>(),
+			IECore::InternedString name = defaultName<BoxPlug>(),
 			Direction direction=In,
 			T defaultValue = T(),
 			unsigned flags = Default
 		);
 
 		BoxPlug(
-			const std::string &name,
+			IECore::InternedString name,
 			Direction direction,
 			T defaultValue,
 			const PointType &minValue,
@@ -82,7 +82,7 @@ class GAFFER_API BoxPlug : public ValuePlug
 
 		/// Accepts no children following construction.
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		PlugPtr createCounterpart( IECore::InternedString name, Direction direction ) const override;
 
 		ChildType *minPlug();
 		const ChildType *minPlug() const;

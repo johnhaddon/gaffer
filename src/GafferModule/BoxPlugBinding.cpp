@@ -76,7 +76,7 @@ void bind()
 	typedef typename P::BaseType B;
 
 	PlugClass<T>()
-		.def( init<const std::string &, Plug::Direction, const V&, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, const V&, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<T>(),
 					boost::python::arg_( "direction" )=Plug::In,
@@ -85,7 +85,7 @@ void bind()
 				)
 			)
 		)
-		.def( init<const std::string &, Plug::Direction, const V&, const P&, const P&, unsigned>(
+		.def( init<IECore::InternedString, Plug::Direction, const V&, const P&, const P&, unsigned>(
 				(
 					boost::python::arg_( "name" )=GraphComponent::defaultName<T>(),
 					boost::python::arg_( "direction" )=Plug::In,
