@@ -45,6 +45,7 @@ import GafferUI
 import GafferOSL
 
 from . import _CodeMenu
+from . import _CodeWidget
 
 Gaffer.Metadata.registerNode(
 
@@ -148,7 +149,6 @@ Gaffer.Metadata.registerNode(
 
 			"nodule:type", "",
 			"plugValueWidget:type", "GafferOSLUI.OSLCodeUI._CodePlugValueWidget",
-			"multiLineStringPlugValueWidget:role", "code",
 			"layout:label", "",
 			"layout:section", "Settings.Code",
 
@@ -254,30 +254,47 @@ class _ParametersFooter( GafferUI.PlugValueWidget ) :
 # _CodePlugValueWidget
 ##########################################################################
 
-class _CodePlugValueWidget( GafferUI.MultiLineStringPlugValueWidget ) :
+class _CodePlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plug, **kw ) :
 
-		GafferUI.MultiLineStringPlugValueWidget.__init__( self, plug, **kw )
+		self.__codeWidget = GafferUI.CodeWidget()
 
-		self.textWidget().setRole( GafferUI.MultiLineTextWidget.Role.Code )
+		GafferUI.PlugValueWidget.__init__( self, self.__codeWidget, plug, **kw )
 
-		self.textWidget().dropTextSignal().connect( Gaffer.WeakMethod( self.__dropText ), scoped = False )
+		self.__codeWidget.setHighlighter( _CodeWidget._Highlighter() )
 
-	def __dropText( self, widget, dragData ) :
+		self._addPopupMenu( self.__codeWidget )
 
-		if not isinstance( dragData, Gaffer.Plug ) :
-			return None
+		self.__codeWidget.activatedSignal().connect( Gaffer.WeakMethod( self.__setPlugValue ), scoped = False )
+		self.__codeWidget.editingFinishedSignal().connect( Gaffer.WeakMethod( self.__setPlugValue ), scoped = False )
 
-		plug = dragData
-		node = plug.node()
-		if plug.parent() not in ( node["parameters"], node["out"] ) :
-			return None
+		self._updateFromPlug()
 
-		if isinstance( plug, Gaffer.SplinefColor3fPlug ) :
-			return "colorSpline( {0}Positions, {0}Values, {0}Basis, u )".format( plug.getName() )
+	def _updateFromPlug( self ) :
 
-		return plug.getName()
+		if self.getPlug() is not None :
+			with self.getContext() :
+				try :
+					value = self.getPlug().getValue()
+				except :
+					value = None
+
+			if value is not None :
+				self.__codeWidget.setText( value )
+
+			self.__codeWidget.setErrored( value is None )
+
+		self.__codeWidget.setEditable( self._editable() )
+
+	def __setPlugValue( self, *unused ) :
+
+		if not self._editable() :
+			return
+
+		text = self.__codeWidget.getText()
+		with Gaffer.UndoScope( self.getPlug().ancestor( Gaffer.ScriptNode ) ) :
+			self.getPlug().setValue( text )
 
 ##########################################################################
 # _ErrorWidget
