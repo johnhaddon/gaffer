@@ -129,9 +129,47 @@ class HighlighterTest( GafferOSLTest.OSLTestCase ) :
 				Highlight( 14, 18, Type.Number ),
 			],
 
-		 }.items() :
+			"""
+			/* multi
+			 * line
+			 * comment
+			 */
+			""" :
+			[
+				Highlight( 0, None, Type.Comment ),
+				Highlight( 0, None, Type.Comment ),
+				Highlight( 0, None, Type.Comment ),
+				Highlight( 0, 3, Type.Comment ),
+			],
 
-			print code
+			"""
+			/* multi
+			 * line
+			 * comment
+			 * 3.4
+			 */ int, string
+			""" :
+			[
+				Highlight( 0, None, Type.Comment ),
+				Highlight( 0, None, Type.Comment ),
+				Highlight( 0, None, Type.Comment ),
+				Highlight( 0, None, Type.Comment ),
+				Highlight( 0, 3, Type.Comment ),
+				Highlight( 4, 7, Type.Keyword ),
+				Highlight( 9, 15, Type.Keyword ),
+			],
+
+			"a += b" :
+			[
+				Highlight( 2, 4, Type.Operator ),
+			],
+
+			"a << b" :
+			[
+				Highlight( 2, 4, Type.Operator ),
+			]
+
+		 }.items() :
 
 			self.assertEqual(
 				self.__highlights( inspect.cleandoc( code ) ),

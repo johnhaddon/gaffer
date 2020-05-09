@@ -46,10 +46,22 @@ import GafferUI
 class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 
 	__keywords = [
-		"and", "break", "closure", "color", "continue", "do", "else", "emit", "float",
-		"for", "if", "illuminance", "illuminate", "int", "matrix", "normal", "not",
-		"or", "output", "point", "public", "return", "string", "struct", "vector",
-		"void", "while",
+		"closure", "color", "emit", "float",
+		"illuminance", "illuminate", "int", "matrix", "normal",
+		"output", "point", "public", "string", "struct", "vector",
+		"void",
+	]
+
+	__controlFlow = [
+		"break", "continue", "do", "else", "for", "if", "return", "while",
+	]
+
+	__operators = [
+		"*", "/", "%", "+", "-", "<<", ">>", "<", "<=", ">", ">=",
+		"==", "!=", "&", "^", "|", "&&", "and", "||", "or",
+		"-", "~", "!", "not",
+		"++", "--",
+		"=", "*=", "/=", "+=", "-=", "&=", "|=", "^=", "<<=", ">>=",
 	]
 
 	__reservedWords = [
@@ -103,38 +115,30 @@ class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 	]
 
 	__keywordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in __keywords ) )
+	__controlFlowRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in __controlFlow ) )
+	# Sorting places longer operators like `++` before shorter like `+``. This is needed because
+	# regex `|` takes the first match it finds, not looking for longer alternatives.
+	__operatorsRE = re.compile( "|".join( re.escape( k ) for k in reversed( sorted( __operators ) ) ) )
+	__reservedWordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in __reservedWords ) )
 	__stringsRE = re.compile( r'"[^"]*"' )
-	
-	__hex = r"\b[+-]?0x[a-fA-F0-9]+\b
-	__float = 
-	r"[+-]?[0-9]*(\.[0-9]+)?([Ee][+-]?[0-9]+)?"
 
-	__numbersRE = re.compile( r"\b[+-]?0x[a-fA-F0-9]+\b|\b[+-]?[0-9]+\b" )
-	
+	__hex = r"[+-]?0x[a-fA-F0-9]+"
+	__float =r"[+-]?(\d*\.\d+|\d+\.?)([Ee][+-]?[0-9]+)?"
+
+	__numbersRE = re.compile( r"{hex}|{float}".format( hex = __hex, float = __float ) )
+
 	__singleCommentRE = re.compile( r"//.*$|/\*.*\*/" )
-	__multiCommentStartRE = re.compile( r"/\*.*$" )
+	__multiCommentStartRE = re.compile( r"/\*((?!\*/).)*$" )
 	__multiCommentEndRE = re.compile( r"^.*\*/")
 
 	def highlights( self, line, previousHighlightType ) :
 
 		result = []
-
-		for m in self.__keywordsRE.finditer( line ) :
-			result.append( self.Highlight( m.start(), m.end(), self.Type.Keyword ) )
-
-		for m in self.__stringsRE.finditer( line ) :
-			result.append( self.Highlight( m.start(), m.end(), self.Type.SingleQuotedString ) )
-
-		for m in self.__numbersRE.finditer( line ) :
-			result.append( self.Highlight( m.start(), m.end(), self.Type.Number ) )
-
-		m = self.__singleCommentRE.search( line )
-		if m is not None :
-			result.append( self.Highlight( m.start(), m.end(), self.Type.Comment ) )
+		stringsAndComments = set()
 
 		m = self.__multiCommentStartRE.search( line )
 		if m is not None :
-			result.append( self.Highlight( m.start(), None, self.Type.Comment ) )		
+			result.append( self.Highlight( m.start(), None, self.Type.Comment ) )
 			return result
 
 		if previousHighlightType == self.Type.Comment :
@@ -144,7 +148,27 @@ class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 				return result
 			else :
 				result.append( self.Highlight( m.start(), m.end(), self.Type.Comment ) )
-				## \todo need to look for other things in the rest of the line
-				return result
+				stringsAndComments.update( range( m.start(), m.end() ) )
+
+		for m in self.__stringsRE.finditer( line ) :
+			result.append( self.Highlight( m.start(), m.end(), self.Type.DoubleQuotedString ) )
+			stringsAndComments.update( range( m.start(), m.end() ) )
+
+		m = self.__singleCommentRE.search( line )
+		if m is not None and m.start() not in stringsAndComments :
+			result.append( self.Highlight( m.start(), m.end(), self.Type.Comment ) )
+			stringsAndComments.update( range( m.start(), m.end() ) )
+
+		for regex, highlightType in {
+			self.__keywordsRE : self.Type.Keyword,
+			self.__controlFlowRE : self.Type.ControlFlow,
+			self.__operatorsRE : self.Type.Operator,
+			self.__reservedWordsRE : self.Type.ReservedWord,
+			self.__numbersRE : self.Type.Number,
+
+		}.items() :
+			for m in regex.finditer( line ) :
+				if m.start() not in stringsAndComments :
+					result.append( self.Highlight( m.start(), m.end(), highlightType ) )
 
 		return result
