@@ -179,6 +179,24 @@ class ExpressionWidget( GafferUI.Widget ) :
 
 		return cls.__expressionContextMenuSignal
 
+	__highlighters = {}
+	## Registers a function to return a `CodeWidget.Highlighter`
+	# for a particular engine type. `highlighter` will be passed
+	# an Expression node and must return a Completer.
+	@classmethod
+	def registerHighlighter( cls, language, highlighter ) :
+
+		cls.__highlighters[language] = highlighter
+
+	__completers = {}
+	## Registers a function to return a `CodeWidget.Completer`
+	# for a particular engine type. `completer` will be passed
+	# an Expression node and must return a Completer.
+	@classmethod
+	def registerCompleter( cls, language, completer ) :
+
+		cls.__completers[language] = completer
+
 	def __expressionContextMenuDefinition( self ) :
 
 		menuDefinition = IECore.MenuDefinition()
@@ -250,6 +268,12 @@ class ExpressionWidget( GafferUI.Widget ) :
 		self.__textWidget.setText( expression )
 		self.__textWidget.setEnabled( bool( language ) )
 		self.__languageMenu.setText( IECore.CamelCase.toSpaced( language ) if language else "Choose..." )
+
+		completer = self.__completers.get( language )
+		self.__textWidget.setCompleter( completer( self.__node ) if completer is not None else None )
+
+		highlighter = self.__highlighters.get( language )
+		self.__textWidget.setHighlighter( highlighter( self.__node ) if highlighter is not None else None )
 
 		self.__messageWidget.clear()
 		self.__messageWidget.setVisible( False )
@@ -332,3 +356,19 @@ class ExpressionWidget( GafferUI.Widget ) :
 
 		self.__messageWidget.setVisible( True )
 		self.__messageWidget.messageHandler().handle( IECore.Msg.Level.Error, "Execution error", error )
+
+# Python Language Support
+##########################################################################
+
+def __pythonCompleter( node ) :
+
+	namespace = {
+		"imath" : imath,
+		"IECore" : IECore,
+		"parent" : node.parent(),
+	}
+
+	return GafferUI.CodeWidget.PythonCompleter( namespace )
+
+ExpressionWidget.registerCompleter( "python", __pythonCompleter )
+ExpressionWidget.registerHighlighter( "python", lambda node : GafferUI.CodeWidget.PythonHighlighter() )
