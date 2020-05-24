@@ -174,7 +174,7 @@ class Highlighter( object ) :
 	Type = IECore.Enum.create(
 		"SingleQuotedString", "DoubleQuotedString", "Number",
 		"Keyword", "ControlFlow", "Braces", "Operator", "Call",
-		"Comment", "ReservedWord",
+		"Comment", "ReservedWord", "Preprocessor"
 	)
 
 	# Specifies a highlight type to be used for the characters
@@ -299,6 +299,7 @@ class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
 			Highlighter.Type.Call : format( QtGui.QColor( 219, 221, 164 ) ),
 			Highlighter.Type.Comment : format( QtGui.QColor( 90, 156, 76 ) ),
 			Highlighter.Type.ReservedWord : format( QtGui.QColor( 200, 0, 0 ) ),
+			Highlighter.Type.Preprocessor : format( QtGui.QColor( 207, 128, 195 ) ),
 		}
 
 	# Our methods
