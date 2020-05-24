@@ -38,11 +38,6 @@ import re
 
 import GafferUI
 
-## todo :
-#
-# - operators
-# - braces
-# - metadata
 class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 
 	__keywords = [
@@ -114,12 +109,15 @@ class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 		"dict_value", "trace", "arraylength", "exit",
 	]
 
-	__keywordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in __keywords ) )
-	__controlFlowRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in __controlFlow ) )
-	# Sorting places longer operators like `++` before shorter like `+``. This is needed because
+	# Sorting places longer strings like `++` before shorter like `+``. This is needed because
 	# regex `|` takes the first match it finds, not looking for longer alternatives.
+
+	__keywordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __keywords ) ) ) )
+	__controlFlowRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __controlFlow ) ) ) )
+	__preprocessorRE = re.compile( "|".join( r"^\s*{}\b".format( k ) for k in reversed( sorted( __preprocessor ) ) ) )
+	__preprocessorVariablesRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __preprocessorVariables ) ) ) )
 	__operatorsRE = re.compile( "|".join( re.escape( k ) for k in reversed( sorted( __operators ) ) ) )
-	__reservedWordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in __reservedWords ) )
+	__reservedWordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __reservedWords ) ) ))
 	__stringsRE = re.compile( r'"[^"]*"' )
 
 	__hex = r"[+-]?0x[a-fA-F0-9]+"
@@ -162,6 +160,8 @@ class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 		for regex, highlightType in {
 			self.__keywordsRE : self.Type.Keyword,
 			self.__controlFlowRE : self.Type.ControlFlow,
+			self.__preprocessorRE : self.Type.Preprocessor,
+			self.__preprocessorVariablesRE : self.Type.Preprocessor,
 			self.__operatorsRE : self.Type.Operator,
 			self.__reservedWordsRE : self.Type.ReservedWord,
 			self.__numbersRE : self.Type.Number,

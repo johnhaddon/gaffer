@@ -167,7 +167,18 @@ class HighlighterTest( GafferOSLTest.OSLTestCase ) :
 			"a << b" :
 			[
 				Highlight( 2, 4, Type.Operator ),
-			]
+			],
+
+			"#ifdef 100" :
+			[
+				Highlight( 0, 6, Type.Preprocessor ),
+				Highlight( 7, 10, Type.Number ),
+			],
+
+			"OSL_VERSION_MAJOR" :
+			[
+				Highlight( 0, 17, Type.Preprocessor ),
+			],
 
 		 }.items() :
 
