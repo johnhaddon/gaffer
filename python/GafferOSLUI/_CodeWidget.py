@@ -53,11 +53,13 @@ class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 
 	__operators = [
 		"*", "/", "%", "+", "-", "<<", ">>", "<", "<=", ">", ">=",
-		"==", "!=", "&", "^", "|", "&&", "and", "||", "or",
-		"-", "~", "!", "not",
+		"==", "!=", "&", "^", "|", "&&", "||",
+		"-", "~", "!",
 		"++", "--",
 		"=", "*=", "/=", "+=", "-=", "&=", "|=", "^=", "<<=", ">>=",
 	]
+
+	__operatorWords = [ "and", "or", "not" ]
 
 	__reservedWords = [
 		"bool", "case", "catch", "char", "class", "const", "delete", "default",
@@ -117,7 +119,8 @@ class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 	__preprocessorRE = re.compile( "|".join( r"^\s*{}\b".format( k ) for k in reversed( sorted( __preprocessor ) ) ) )
 	__preprocessorVariablesRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __preprocessorVariables ) ) ) )
 	__operatorsRE = re.compile( "|".join( re.escape( k ) for k in reversed( sorted( __operators ) ) ) )
-	__reservedWordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __reservedWords ) ) ))
+	__operatorWordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __operatorWords ) ) ) )
+	__reservedWordsRE = re.compile( "|".join( r"\b{}\b".format( k ) for k in reversed( sorted( __reservedWords ) ) ) )
 	__stringsRE = re.compile( r'"[^"]*"' )
 
 	__hex = r"[+-]?0x[a-fA-F0-9]+"
@@ -163,6 +166,7 @@ class _Highlighter( GafferUI.CodeWidget.Highlighter ) :
 			self.__preprocessorRE : self.Type.Preprocessor,
 			self.__preprocessorVariablesRE : self.Type.Preprocessor,
 			self.__operatorsRE : self.Type.Operator,
+			self.__operatorWordsRE : self.Type.Operator,
 			self.__reservedWordsRE : self.Type.ReservedWord,
 			self.__numbersRE : self.Type.Number,
 

@@ -180,6 +180,11 @@ class HighlighterTest( GafferOSLTest.OSLTestCase ) :
 				Highlight( 0, 17, Type.Preprocessor ),
 			],
 
+			"color" :
+			[
+				Highlight( 0, 5, Type.Keyword ),
+			],
+
 		 }.items() :
 
 			self.assertEqual(
