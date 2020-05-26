@@ -49,6 +49,7 @@ from .ScenePathPlugValueWidget import ScenePathPlugValueWidget
 from .TweakPlugValueWidget import TweakPlugValueWidget
 from . import SceneHistoryUI
 from . import EditScopeUI
+from . PropertyEditor import PropertyEditor
 
 from . import SceneNodeUI
 from . import SceneReaderUI
