@@ -37,6 +37,7 @@
 		'deleteSmall',
 		'drawingStyles',
 		'duplicate',
+		'edit',
 		'editScopeNode',
 		'editScopeProcessorNode',
 		'errorNotification',
