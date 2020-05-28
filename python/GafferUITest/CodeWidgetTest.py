@@ -33,7 +33,7 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
- 
+
 import unittest
 
 import GafferUI
@@ -59,7 +59,7 @@ class CodeWidgetTest( GafferUITest.TestCase ) :
 		}
 
 		completer = GafferUI.CodeWidget.PythonCompleter( namespace )
-		
+
 		for partial, completions in {
 			"dic" : [ "dict", "dictionary" ],
 			"dicti" : [ "dictionary" ],
@@ -70,7 +70,7 @@ class CodeWidgetTest( GafferUITest.TestCase ) :
 			"dictionary['ca" : [ "dictionary['cat']" ],
 			"dictionary['dog']" : [],
 			"dictionary['dog'].st" : [ "dictionary['dog'].startswith", "dictionary['dog'].strip" ],
-			"dictionary['dog']." : sorted( "dictionary['dog']." + a for a in dir( namespace["dictionary"]["dog"] ) ),
+			"dictionary['dog']." : sorted( "dictionary['dog']." + a for a in dir( namespace["dictionary"]["dog"] ) if not a.startswith( "_" ) ),
 			"dictionary['subDictionary'][" : sorted( "dictionary['subDictionary'][\"" + k + "\"]" for k in ( "fish", "bird" ) ),
 			"dictionary['subDictionary']['bird'].star" : [ "dictionary['subDictionary']['bird'].startswith" ],
 			"ope" : [ "open" ],
@@ -83,8 +83,12 @@ class CodeWidgetTest( GafferUITest.TestCase ) :
 			"someFunction(dicti" : [ "someFunction(dictionary" ],
 			"func(dictionary['ca" : [ "func(dictionary['cat']" ],
 			"dictionary" : [],
+			"dictionary.__seti" : [ "dictionary.__setitem__" ],
 		}.items() :
-			self.assertEqual( completer( partial ), completions )
+			self.assertEqual(
+				[ c.text for c in completer.completions( partial ) ],
+				completions
+			)
 
 if __name__ == "__main__":
 	unittest.main()

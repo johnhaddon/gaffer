@@ -107,7 +107,7 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 		if not completions :
 			return False
 
-		commonPrefix = os.path.commonprefix( completions )
+		commonPrefix = os.path.commonprefix( [ c.text for c in completions ] )
 		if len( commonPrefix ) > len( line ) :
 			self.insertText( commonPrefix[len(line):] )
 		else :
@@ -116,9 +116,9 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 				menuDefinition.append(
 					"/{}".format( i ),
 					{
-						"label" : c,
+						"label" : c.label,
 						"command" : functools.partial(
-							Gaffer.WeakMethod( self.insertText ), c[len(line):]
+							Gaffer.WeakMethod( self.insertText ), c.text[len(line):]
 						)
 					}
 				)
@@ -341,6 +341,10 @@ class _QtHighlighter( QtGui.QSyntaxHighlighter ) :
 
 class Completer( object ) :
 
+	## Specifies completed text and a label suitable
+	# for referring to it
+	Completion = collections.namedtuple( "Completion", [ "text", "label" ] )
+
 	## Must be implemented to return a list of possible
 	# completions for the specified text.
 	def completions( self, text ) :
@@ -379,14 +383,14 @@ class PythonCompleter( Completer ) :
 		result = []
 		for name in namespace.keys() :
 			if name.startswith( word ) and name != word :
-				result.append( prefix + name )
+				result.append( self.Completion( prefix + name, name ) )
 
 		return result
 
 	def __attrAndItemMatches( self, text ) :
 
-		word = r"[a-zA-Z0-9]+"
-		optionalWord = r"[a-zA-Z0-9]*"
+		word = r"[a-zA-Z0-9_]+"
+		optionalWord = r"[a-zA-Z0-9_]*"
 		getAttr = r"\.{word}".format( word = word )
 		partialGetAttr = r"\.{optionalWord}".format( optionalWord = optionalWord )
 		quotedWord = r"""(?:'{word}'|"{word}")""".format( word = word )
@@ -412,7 +416,9 @@ class PythonCompleter( Completer ) :
 		names = []
 		if partial.startswith( "." ) :
 			# Attribute
-			names = set( dir( rootObject ) )
+			names = dir( rootObject )
+			if len( partial ) < 2 or partial[1] != "_" :
+				names = [ n for n in names if not n.startswith( "_" ) ]
 			namePrefix = "."
 			nameSuffix = ""
 		else :
@@ -430,7 +436,12 @@ class PythonCompleter( Completer ) :
 		result = []
 		for name in names :
 			if name.startswith( partialName ) and ( name != partialName or nameSuffix ):
-				result.append( prefix + namePrefix + name + nameSuffix )
+				result.append(
+					self.Completion(
+						prefix + namePrefix + name + nameSuffix,
+						namePrefix + name + nameSuffix
+					)
+				)
 
 		return sorted( result )
 
