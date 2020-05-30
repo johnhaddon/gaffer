@@ -355,9 +355,10 @@ class PythonCompleter( Completer ) :
 
 	__searchPrefix = r"(?:^|(?<=[\s,(]))"
 
-	def __init__( self, namespace ) :
+	def __init__( self, namespace, includeGraphComponentAttributes = True ) :
 
 		self.__namespace = namespace
+		self.__includeGraphComponentAttributes = includeGraphComponentAttributes
 
 	def completions( self, text ) :
 
@@ -410,6 +411,8 @@ class PythonCompleter( Completer ) :
 		names = []
 		if partial.startswith( "." ) :
 			# Attribute
+			if isinstance( rootObject, Gaffer.GraphComponent ) and not self.__includeGraphComponentAttributes :
+				return []
 			names = dir( rootObject )
 			return self.__completions(
 				items = [ ( n, getattr( rootObject, n ) ) for n in names ],

@@ -36,6 +36,7 @@
 
 import unittest
 
+import Gaffer
 import GafferUI
 import GafferUITest
 
@@ -88,6 +89,17 @@ class CodeWidgetTest( GafferUITest.TestCase ) :
 				[ c.text for c in completer.completions( partial ) ],
 				completions
 			)
+
+	def testDisabledGraphComponentAttributeCompletions( self ) :
+
+		completer = GafferUI.CodeWidget.PythonCompleter(
+			namespace = {
+				"node" : Gaffer.Node()
+			},
+			includeGraphComponentAttributes = False
+		)
+
+		self.assertEqual( completer.completions( "node." ), [] )
 
 if __name__ == "__main__":
 	unittest.main()
