@@ -61,19 +61,18 @@ class CodeWidgetTest( GafferUITest.TestCase ) :
 		completer = GafferUI.CodeWidget.PythonCompleter( namespace )
 
 		for partial, completions in {
-			"dic" : [ "dict", "dictionary" ],
+			"dic" : [ "dict(", "dictionary" ],
 			"dicti" : [ "dictionary" ],
-			"dictionary.ke" : [ "dictionary.keys" ],
+			"dictionary.ke" : [ "dictionary.keys(" ],
 			"dictionary['" : sorted( "dictionary['" + k + "']" for k in namespace["dictionary"].keys() ),
 			'dictionary["' : sorted( 'dictionary["' + k + '"]' for k in namespace["dictionary"].keys() ),
 			"dictionary['c" : [ "dictionary['cat']" ],
 			"dictionary['ca" : [ "dictionary['cat']" ],
 			"dictionary['dog']" : [],
-			"dictionary['dog'].st" : [ "dictionary['dog'].startswith", "dictionary['dog'].strip" ],
-			"dictionary['dog']." : sorted( "dictionary['dog']." + a for a in dir( namespace["dictionary"]["dog"] ) if not a.startswith( "_" ) ),
+			"dictionary['dog'].st" : [ "dictionary['dog'].startswith(", "dictionary['dog'].strip(" ],
 			"dictionary['subDictionary'][" : sorted( "dictionary['subDictionary'][\"" + k + "\"]" for k in ( "fish", "bird" ) ),
-			"dictionary['subDictionary']['bird'].star" : [ "dictionary['subDictionary']['bird'].startswith" ],
-			"ope" : [ "open" ],
+			"dictionary['subDictionary']['bird'].star" : [ "dictionary['subDictionary']['bird'].startswith(" ],
+			"ope" : [ "open(" ],
 			"luth" : [ "luther" ],
 			"someFunction( luth" : [ "someFunction( luther" ],
 			"something.ope" : [],
@@ -83,7 +82,7 @@ class CodeWidgetTest( GafferUITest.TestCase ) :
 			"someFunction(dicti" : [ "someFunction(dictionary" ],
 			"func(dictionary['ca" : [ "func(dictionary['cat']" ],
 			"dictionary" : [],
-			"dictionary.__seti" : [ "dictionary.__setitem__" ],
+			"dictionary.__seti" : [ "dictionary.__setitem__(" ],
 		}.items() :
 			self.assertEqual(
 				[ c.text for c in completer.completions( partial ) ],

@@ -411,9 +411,11 @@ class PythonCompleter( Completer ) :
 		if partial.startswith( "." ) :
 			# Attribute
 			names = dir( rootObject )
-			items = [ ( n, getattr( rootObject, n ) ) for n in names ]
-			namePrefix = "."
-			nameSuffix = ""
+			return self.__completions(
+				items = [ ( n, getattr( rootObject, n ) ) for n in names ],
+				prefix = prefix, partialName = partial[1:],
+				namePrefix = "."
+			)
 		else :
 			# Item
 			try :
@@ -421,15 +423,13 @@ class PythonCompleter( Completer ) :
 			except :
 				return []
 			quote = partial[1] if len( partial ) > 1 else '"'
-			namePrefix = "[" + quote
-			nameSuffix = quote + "]"
+			return self.__completions(
+				items = items,
+				prefix = prefix, partialName = partial[2:],
+				namePrefix = "[" + quote,
+				nameSuffix = quote + "]"
+			)
 
-		partialName = partial[len(namePrefix):]
-
-		return self.__completions( items, prefix, partialName, namePrefix, nameSuffix )
-
-	## SHOULD BE ABLE TO DROP NAMEPREFIX?
-	## NEED TO ADD FUNCTION CALLS
 	def __completions( self, items, prefix, partialName, namePrefix = "", nameSuffix = "" ) :
 
 		result = []
@@ -438,13 +438,21 @@ class PythonCompleter( Completer ) :
 				# We only provide completions for protected and private
 				# names if they have been explicitly started by the user.
 				continue
-			if name.startswith( partialName ) and ( name != partialName or nameSuffix ):
-				result.append(
-					self.Completion(
-						prefix + namePrefix + name + nameSuffix,
-						namePrefix + name + nameSuffix
+			if name.startswith( partialName ) and ( name != partialName or nameSuffix ) :
+				if hasattr( value, "__call__" ) :
+					result.append(
+						self.Completion(
+							prefix + namePrefix + name + nameSuffix + "(",
+							namePrefix + name + nameSuffix + "()"
+						)
 					)
-				)
+				else :
+					result.append(
+						self.Completion(
+							prefix + namePrefix + name + nameSuffix,
+							namePrefix + name + nameSuffix
+						)
+					)
 
 		return sorted( result )
 
