@@ -105,7 +105,7 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 
 		completions = self.__completer.completions( line )
 		if not completions :
-			return False
+			return True
 
 		commonPrefix = os.path.commonprefix( [ c.text for c in completions ] )
 		if len( commonPrefix ) > len( line ) :
