@@ -368,7 +368,7 @@ def __pythonCompleter( node ) :
 		"parent" : node.parent(),
 	}
 
-	return GafferUI.CodeWidget.PythonCompleter( namespace )
+	return GafferUI.CodeWidget.PythonCompleter( namespace, includeGraphComponentAttributes = False )
 
 ExpressionWidget.registerCompleter( "python", __pythonCompleter )
 ExpressionWidget.registerHighlighter( "python", lambda node : GafferUI.CodeWidget.PythonHighlighter() )
