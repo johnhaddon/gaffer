@@ -56,7 +56,7 @@ class CodeWidget( GafferUI.MultiLineTextWidget ) :
 
 	def __init__( self, text="", editable=True, fixedLineHeight=None, **kw ) :
 
-		GafferUI.MultiLineTextWidget.__init__( self, text, editable, fixedLineHeight = fixedLineHeight, wrapMode = self.WrapMode.None, role = self.Role.Code, **kw )
+		GafferUI.MultiLineTextWidget.__init__( self, text, editable, fixedLineHeight = fixedLineHeight, wrapMode = self.WrapMode.None_, role = self.Role.Code, **kw )
 
 		self.__completer = None
 		self.__highlighter = _QtHighlighter( self._qtWidget().document() )
@@ -411,8 +411,6 @@ class PythonCompleter( Completer ) :
 		if partial.startswith( "." ) :
 			# Attribute
 			names = dir( rootObject )
-			if len( partial ) < 2 or partial[1] != "_" :
-				names = [ n for n in names if not n.startswith( "_" ) ] # MOVE TO __COMPLETIONS
 			items = [ ( n, getattr( rootObject, n ) ) for n in names ]
 			namePrefix = "."
 			nameSuffix = ""
@@ -436,6 +434,10 @@ class PythonCompleter( Completer ) :
 
 		result = []
 		for name, value in items :
+			if name.startswith( "_" ) and not partialName :
+				# We only provide completions for protected and private
+				# names if they have been explicitly started by the user.
+				continue
 			if name.startswith( partialName ) and ( name != partialName or nameSuffix ):
 				result.append(
 					self.Completion(
