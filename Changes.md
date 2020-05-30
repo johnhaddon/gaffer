@@ -15,6 +15,7 @@ Fixes
 -----
 
 - Code editors : Fixed font on macOS.
+- GraphComponent : Fixed return value for `items()` method. The returned keys are now regular `str()` objects rather than `InternedString`.
 
 API
 ---
