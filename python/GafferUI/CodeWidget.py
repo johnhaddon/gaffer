@@ -362,11 +362,11 @@ class PythonCompleter( Completer ) :
 	def completions( self, text ) :
 
 		return sorted( set(
-			self.__attrAndItemMatches( text ) +
-			self.__globalMatches( text )
+			self.__attrAndItemCompletions( text ) +
+			self.__globalCompletions( text )
 		) )
 
-	def __globalMatches( self, text ) :
+	def __globalCompletions( self, text ) :
 
 		globalVariable = r"{searchPrefix}([a-zA-Z0-9]+)$".format( searchPrefix = self.__searchPrefix )
 
@@ -375,19 +375,13 @@ class PythonCompleter( Completer ) :
 			return []
 
 		word = match.group( 0 )
-		prefix = text[:-len(word)]
 
 		namespace = __builtins__.copy()
 		namespace.update( self.__namespace )
 
-		result = []
-		for name in namespace.keys() :
-			if name.startswith( word ) and name != word :
-				result.append( self.Completion( prefix + name, name ) )
+		return self.__completions( namespace.items(), text[:-len(word)], word )
 
-		return result
-
-	def __attrAndItemMatches( self, text ) :
+	def __attrAndItemCompletions( self, text ) :
 
 		word = r"[a-zA-Z0-9_]+"
 		optionalWord = r"[a-zA-Z0-9_]*"
@@ -418,13 +412,14 @@ class PythonCompleter( Completer ) :
 			# Attribute
 			names = dir( rootObject )
 			if len( partial ) < 2 or partial[1] != "_" :
-				names = [ n for n in names if not n.startswith( "_" ) ]
+				names = [ n for n in names if not n.startswith( "_" ) ] # MOVE TO __COMPLETIONS
+			items = [ ( n, getattr( rootObject, n ) ) for n in names ]
 			namePrefix = "."
 			nameSuffix = ""
 		else :
 			# Item
 			try :
-				names = rootObject.keys()
+				items = rootObject.items()
 			except :
 				return []
 			quote = partial[1] if len( partial ) > 1 else '"'
@@ -433,8 +428,14 @@ class PythonCompleter( Completer ) :
 
 		partialName = partial[len(namePrefix):]
 
+		return self.__completions( items, prefix, partialName, namePrefix, nameSuffix )
+
+	## SHOULD BE ABLE TO DROP NAMEPREFIX?
+	## NEED TO ADD FUNCTION CALLS
+	def __completions( self, items, prefix, partialName, namePrefix = "", nameSuffix = "" ) :
+
 		result = []
-		for name in names :
+		for name, value in items :
 			if name.startswith( partialName ) and ( name != partialName or nameSuffix ):
 				result.append(
 					self.Completion(
