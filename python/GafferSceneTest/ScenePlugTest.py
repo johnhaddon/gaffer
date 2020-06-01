@@ -35,6 +35,7 @@
 #
 ##########################################################################
 
+import inspect
 import unittest
 import imath
 
@@ -240,6 +241,41 @@ class ScenePlugTest( GafferSceneTest.SceneTestCase ) :
 
 		self.assertEqual( p.globalsHash(), p["globals"].hash() )
 		self.assertEqual( p.setNamesHash(), p["setNames"].hash() )
+
+	def testSerialiseChildConnections( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["b"] = Gaffer.Box()
+		script["b"]["in"] = GafferScene.ScenePlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["b"]["out"] = GafferScene.ScenePlug( direction = Gaffer.Plug.Direction.Out, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["b"]["out"].setInput( script["b"]["in"] )
+		script["b"]["e"] = Gaffer.Expression()
+		script["b"]["e"].setExpression( inspect.cleandoc(
+			"""
+			g = parent["in"]["globals"]
+			g["test"] = IECore.IntData( 10 )
+			parent["out"]["globals"] = g
+			"""
+		) )
+
+		self.assertEqual(
+			script["b"]["out"].globals(),
+			IECore.CompoundObject( { "test" : IECore.IntData( 10 ) } )
+		)
+
+		script2 = Gaffer.ScriptNode()
+		script2.execute( script.serialise() )
+
+		for name, plug in script2["b"]["out"].items() :
+			if name == "globals" :
+				self.assertEqual( plug.getInput().node(), script2["b"]["e"] )
+			else :
+				self.assertEqual( plug.getInput(), script2["b"]["in"][name] )
+
+		self.assertEqual(
+			script2["b"]["out"].globals(),
+			IECore.CompoundObject( { "test" : IECore.IntData( 10 ) } )
+		)
 
 if __name__ == "__main__":
 	unittest.main()
