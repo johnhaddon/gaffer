@@ -60,20 +60,7 @@ using namespace Gaffer;
 namespace
 {
 
-bool shouldResetPlugDefault( const Gaffer::Plug *plug, const Serialisation *serialisation )
-{
-	if( !serialisation )
-	{
-		return false;
-	}
-
-	if( plug->node() != serialisation->parent() || plug->getInput() )
-	{
-		return false;
-	}
-
-	return Context::current()->get<bool>( "valuePlugSerialiser:resetParentPlugDefaults", false );
-}
+const IECore::InternedString g_resetParentPlugDefaults( "valuePlugSerialiser:resetParentPlugDefaults" );
 
 bool shouldOmitDefaultValue( const Gaffer::ValuePlug *plug )
 {
@@ -293,4 +280,19 @@ std::string ValuePlugSerialiser::postHierarchy( const Gaffer::GraphComponent *gr
 	}
 
 	return result;
+}
+
+bool ValuePlugSerialiser::shouldResetPlugDefault( const Gaffer::Plug *plug, const Serialisation *serialisation )
+{
+	if( !serialisation )
+	{
+		return false;
+	}
+
+	if( plug->node() != serialisation->parent() || plug->getInput() )
+	{
+		return false;
+	}
+
+	return Context::current()->get<bool>( g_resetParentPlugDefaults, false );
 }
