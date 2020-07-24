@@ -150,6 +150,9 @@ class GAFFER_API Spreadsheet : public ComputeNode
 
 				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowPlug, Gaffer::SpreadsheetRowPlugTypeId, Gaffer::ValuePlug );
 
+				/// For internal use only. Use `RowsPlug::addRow()` or `RowsPlug::addRows()` instead.
+				RowPlug( const std::string &name, Plug::Direction direction = Plug::In, unsigned flags = Default );
+
 				StringPlug *namePlug();
 				const StringPlug *namePlug() const;
 
@@ -160,11 +163,6 @@ class GAFFER_API Spreadsheet : public ComputeNode
 				const ValuePlug *cellsPlug() const;
 
 				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
-
-			private :
-
-				RowPlug( const std::string &name, Plug::Direction direction = Plug::In, unsigned flags = Default );
-				friend class Spreadsheet;
 
 		};
 
@@ -177,6 +175,9 @@ class GAFFER_API Spreadsheet : public ComputeNode
 			public :
 
 				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::CellPlug, Gaffer::SpreadsheetCellPlugTypeId, Gaffer::ValuePlug );
+
+				/// For internal use only. Use `RowsPlug::addColumn()` instead.
+				CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug = false, Plug::Direction direction = Plug::In, unsigned flags = Default );
 
 				/// Returns the plug used to enable or disable this cell.
 				/// Note : If `addColumn( adoptEnabledPlug = true )` was
@@ -192,11 +193,6 @@ class GAFFER_API Spreadsheet : public ComputeNode
 				const T *valuePlug() const;
 
 				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
-
-			private :
-
-				CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug = false, Plug::Direction direction = Plug::In );
-				friend class Spreadsheet;
 
 		};
 

@@ -569,7 +569,7 @@ size_t Spreadsheet::RowsPlug::addColumn( const ValuePlug *value, IECore::Interne
 
 	for( auto &row : RowPlug::Range( *this ) )
 	{
-		CellPlugPtr cellPlug = new CellPlug( name, value, adoptEnabledPlug );
+		CellPlugPtr cellPlug = new CellPlug( name, value, adoptEnabledPlug, Plug::In );
 		cellPlug->valuePlug()->setFrom( value );
 		row->cellsPlug()->addChild( cellPlug );
 	}
@@ -763,8 +763,8 @@ Gaffer::PlugPtr Spreadsheet::RowPlug::createCounterpart( const std::string &name
 
 GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::CellPlug );
 
-Spreadsheet::CellPlug::CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug, Plug::Direction direction )
-	:	ValuePlug( name, direction )
+Spreadsheet::CellPlug::CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug, Plug::Direction direction, unsigned flags )
+	:	ValuePlug( name, direction, flags )
 {
 	if( adoptEnabledPlug )
 	{
