@@ -102,56 +102,6 @@ ValuePlugPtr activeInPlug( Spreadsheet &s, const ValuePlug &outPlug )
 	return s.activeInPlug( &outPlug );
 }
 
-class CellPlugSerialiser : public ValuePlugSerialiser
-{
-
-	public :
-
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, const Serialisation &serialisation ) const override
-		{
-			auto cell = static_cast<const Spreadsheet::CellPlug *>( graphComponent );
-			return repr( cell, &serialisation );
-		}
-
-		static std::string repr( const Spreadsheet::CellPlug *cell, const Serialisation *serialisation = nullptr )
-		{
-			std::string args = "value = " + ValuePlugSerialiser::repr( cell->valuePlug(), "", serialisation );
-			if( cell->enabledPlug()->parent() == cell->valuePlug() )
-			{
-				args += ", adoptEnabledPlug = True";
-			}
-			return ValuePlugSerialiser::repr( cell, args, serialisation );
-		}
-
-};
-
-std::string cellPlugRepr( const Spreadsheet::CellPlug &cell )
-{
-	return CellPlugSerialiser::repr( &cell );
-}
-
-class RowPlugSerialiser : public ValuePlugSerialiser
-{
-
-	public :
-
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, const Serialisation &serialisation ) const override
-		{
-			return "";
-		}
-
-		static std::string repr( const Spreadsheet::RowPlug *row, const Serialisation *serialisation = nullptr )
-		{
-			return "";
-		}
-
-};
-
-std::string rowPlugRepr( const Spreadsheet::RowPlug &row )
-{
-	return RowPlugSerialiser::repr( &row );
-}
-
 class RowsPlugSerialiser : public ValuePlugSerialiser
 {
 
@@ -162,28 +112,6 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 			std::string result = ValuePlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
 			const auto *plug = static_cast<const Spreadsheet::RowsPlug *>( graphComponent );
-			if( shouldResetPlugDefault( plug, &serialisation ) )
-			{
-				// Each cell will potentially be receiving different default values.
-				// Fall back to the exhaustive serialisation of constructors for all
-				// rows/cells.
-				for( const auto &row : Spreadsheet::RowPlug::Range( *plug ) )
-				{
-					if( row != plug->defaultRow() )
-					{
-						result += identifier + ".addChild( " + RowPlugSerialiser::repr( row.get(), &serialisation ) + " )\n";
-					}
-					const std::string cellsIdentifier = serialisation.identifier( row->cellsPlug() );
-					for( const auto &cell : Spreadsheet::CellPlug::Range( *row->cellsPlug() ) )
-					{
-						result += cellsIdentifier + ".addChild( " + CellPlugSerialiser::repr( cell.get(), &serialisation ) + " )\n";
-					}
-				}
-				return result;
-			}
-
-			// We can serialise much more compactly via calls to `addRows()` and `addColumn()`.
-
 			for( const auto &cell : Spreadsheet::CellPlug::Range( *plug->getChild<Spreadsheet::RowPlug>( 0 )->cellsPlug() ) )
 			{
 				PlugPtr p = cell->valuePlug()->createCounterpart( cell->getName(), Plug::In );
@@ -241,36 +169,14 @@ void GafferModule::bindSpreadsheet()
 	;
 
 	PlugClass<Spreadsheet::RowPlug>()
-		.def( init<std::string, Plug::Direction, unsigned>(
-				(
-					arg( "name" )=GraphComponent::defaultName<Spreadsheet::RowPlug>(),
-					arg( "direction" )=Plug::In,
-					arg( "flags" )=Plug::Default
-				)
-			)
-		)
-		.def( "__repr__", &rowPlugRepr )
 		.attr( "__qualname__" ) = "Spreadsheet.RowPlug"
 	;
 
 	PlugClass<Spreadsheet::CellPlug>()
-		.def( init<std::string, const Gaffer::Plug *, bool, Plug::Direction, unsigned>(
-				(
-					arg( "name" ),
-					arg( "value" ),
-					arg( "adoptEnabledPlug" ) = false,
-					arg( "direction" ) = Plug::In,
-					arg( "flags" )=Plug::Default
-				)
-			)
-		)
 		.def( "enabledPlug", &cellPlugEnabledPlug )
-		.def( "__repr__", &cellPlugRepr )
 		.attr( "__qualname__" ) = "Spreadsheet.CellPlug"
 	;
 
 	Serialisation::registerSerialiser( Gaffer::Spreadsheet::RowsPlug::staticTypeId(), new RowsPlugSerialiser );
-	Serialisation::registerSerialiser( Gaffer::Spreadsheet::RowPlug::staticTypeId(), new RowPlugSerialiser );
-	Serialisation::registerSerialiser( Gaffer::Spreadsheet::CellPlug::staticTypeId(), new CellPlugSerialiser );
 
 }
