@@ -37,6 +37,7 @@
 
 import gc
 import inspect
+import imath
 
 import IECore
 
@@ -698,6 +699,56 @@ class ValuePlugTest( GafferTest.TestCase ) :
 		with Gaffer.PerformanceMonitor() as m :
 			node["sum"].getValue()
 		self.assertEqual( m.plugStatistics( node["sum"] ).hashCount, 1 )
+
+	def testResetDefault( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		script["node"] = Gaffer.Node()
+		script["node"]["user"]["i"] = Gaffer.IntPlug( defaultValue = 1 )
+		script["node"]["user"]["v"] = Gaffer.V3iPlug( defaultValue = imath.V3i( 1, 2, 3 ) )
+
+		def assertPreconditions() :
+
+			self.assertTrue( script["node"]["user"]["i"].isSetToDefault() )
+			self.assertEqual( script["node"]["user"]["i"].defaultValue(), 1 )
+			self.assertEqual( script["node"]["user"]["i"].getValue(), 1 )
+
+			self.assertTrue( script["node"]["user"]["v"].isSetToDefault() )
+			self.assertEqual( script["node"]["user"]["v"].defaultValue(), imath.V3i( 1, 2, 3 ) )
+			self.assertEqual( script["node"]["user"]["v"].getValue(), imath.V3i( 1, 2, 3 ) )
+
+		assertPreconditions()
+
+		with Gaffer.UndoScope( script ) :
+
+			script["node"]["user"]["i"].setValue( 2 )
+			script["node"]["user"]["i"].resetDefault()
+
+			script["node"]["user"]["v"].setValue( imath.V3i( 10, 11, 12 ) )
+			script["node"]["user"]["v"].resetDefault()
+
+		def assertPostconditions() :
+
+			self.assertTrue( script["node"]["user"]["i"].isSetToDefault() )
+			self.assertEqual( script["node"]["user"]["i"].defaultValue(), 2 )
+			self.assertEqual( script["node"]["user"]["i"].getValue(), 2 )
+
+			self.assertTrue( script["node"]["user"]["v"].isSetToDefault() )
+			self.assertEqual( script["node"]["user"]["v"].defaultValue(), imath.V3i( 10, 11, 12 ) )
+			self.assertEqual( script["node"]["user"]["v"].getValue(), imath.V3i( 10, 11, 12 ) )
+
+		script.undo()
+		assertPreconditions()
+
+		script.redo()
+		assertPostconditions()
+
+		script.undo()
+		assertPreconditions()
+
+		script.redo()
+		assertPostconditions()
 
 	def setUp( self ) :
 
