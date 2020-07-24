@@ -138,6 +138,7 @@ Breaking Changes
 - InteractiveRender : Changed base class from Node to ComputeNode, added members.
 - MessageWidget : Removed deprecated `appendMessage` method, use `messageHandler().handle()` instead.
 - Shader : Added virtual method.
+- FormatPlug : Removed private member.
 
 Build
 -----
