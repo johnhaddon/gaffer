@@ -63,10 +63,6 @@ class GAFFERBINDINGS_API ValuePlugSerialiser : public PlugSerialiser
 
 		static std::string repr( const Gaffer::ValuePlug *plug, const std::string &extraArguments = "", const Serialisation *serialisation = nullptr );
 
-	protected :
-
-		static bool shouldResetPlugDefault( const Gaffer::Plug *plug, const Serialisation *serialisation );
-
 };
 
 } // namespace GafferBindings
