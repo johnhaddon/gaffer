@@ -1397,9 +1397,6 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		script["box"].exportForReference( self.temporaryDirectory() + "/test.grf" )
 
-		#with open( self.temporaryDirectory() + "/test.grf" ) as f :
-		#	print( "".join( "{} {}".format( *a ) for a in enumerate( f.readlines() ) ) )
-
 		script["reference"] = Gaffer.Reference()
 		script["reference"].load( self.temporaryDirectory() + "/test.grf" )
 
@@ -1422,11 +1419,12 @@ class ReferenceTest( GafferTest.TestCase ) :
 					script["reference"]["rows"][row]["cells"][column]["value"].getValue(),
 					script["box"]["rows"][row]["cells"][column]["value"].getValue(),
 				)
-				# self.assertTrue(
-				# 	script["reference"]["rows"][row]["cells"][column].isSetToDefault()
-				# )
+				self.assertEqual(
+					script["reference"]["rows"][row]["cells"][column]["enabled"].getValue(),
+					script["box"]["rows"][row]["cells"][column]["enabled"].getValue(),
+				)
 
-		self.assertEqual( script["reference"]["rows"].isSetToDefault() )
+		self.assertTrue( script["reference"]["rows"].isSetToDefault() )
 
 	def tearDown( self ) :
 
