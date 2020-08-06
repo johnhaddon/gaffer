@@ -89,12 +89,11 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 			const V2i dataWindowMinTileIndex = ImagePlug::tileOrigin( m_gafferDataWindow.min ) / ImagePlug::tileSize();
 			const V2i dataWindowMaxTileIndex = ImagePlug::tileOrigin( m_gafferDataWindow.max - Imath::V2i( 1 ) ) / ImagePlug::tileSize();
 
-			m_tiles.resize(
-				TileArray::extent_gen()
-					[TileArray::extent_range( dataWindowMinTileIndex.x, dataWindowMaxTileIndex.x + 1 )]
-					[TileArray::extent_range( dataWindowMinTileIndex.y, dataWindowMaxTileIndex.y + 1 )]
-					[channelNames.size()]
+			m_tileRange = Box3i(
+				V3i( dataWindowMinTileIndex.x, dataWindowMinTileIndex.y, 0 ),
+				V3i( dataWindowMaxTileIndex.x + 1, dataWindowMaxTileIndex.y + 1, channelNames.size() )
 			);
+			m_tiles.resize( m_tileRange.size().x * m_tileRange.size().y * m_tileRange.size().z );
 
 			m_parameters = parameters ? parameters->copy() : CompoundDataPtr( new CompoundData );
 			CompoundDataPtr metadata = new CompoundData;
@@ -125,17 +124,15 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 				m_gafferFormat( other.m_gafferFormat ), m_gafferDataWindow( other.m_gafferDataWindow ),
 				m_parameters( other.m_parameters ), m_metadata( other.m_metadata )
 		{
-			// boost::multi_array has a joke assignment operator that only works
-			// if you first resize the target of the assignment to match the
-			// destination.
-			m_tiles.resize(
-				TileArray::extent_gen()
-					[TileArray::extent_range( other.m_tiles.index_bases()[0], other.m_tiles.index_bases()[0] + other.m_tiles.shape()[0] )]
-					[TileArray::extent_range( other.m_tiles.index_bases()[1], other.m_tiles.index_bases()[1] + other.m_tiles.shape()[1] )]
-					[other.m_tiles.shape()[2]]
-			);
-			tbb::spin_rw_mutex::scoped_lock tileLock( other.m_tileMutex, /* write = */ false );
-			m_tiles = other.m_tiles;
+			m_tileRange = other.m_tileRange;
+
+			m_tiles.resize( other.m_tiles.size() );
+
+			for( unsigned int i = 0; i < other.m_tiles.size(); i++ )
+			{
+				tbb::spin_rw_mutex::scoped_lock tileLock( other.m_tiles[i].mutex, /* write = */ false );
+				m_tiles[i] = other.m_tiles[i];
+			}
 		}
 
 		~GafferDisplayDriver() override
@@ -175,18 +172,18 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 					for( int channelIndex = 0, numChannels = channelNames().size(); channelIndex < numChannels; ++channelIndex )
 					{
 						const V2i tileOrigin( tileOriginX, tileOriginY );
-						ConstFloatVectorDataPtr tileData = getTile( tileOrigin, channelIndex );
-						if( !tileData )
+						Tile * tile = getTile( tileOrigin, channelIndex );
+						if( !tile )
 						{
 							// we've been sent data outside of the data window
 							continue;
 						}
 
+
 						// we must create a new object to hold the updated tile data,
 						// because the old one might well have been returned from
 						// computeChannelData and be being held in the cache.
-						FloatVectorDataPtr updatedTileData = tileData->copy();
-						vector<float> &updatedTile = updatedTileData->writable();
+						vector<float> &buffer = tile->backBuffer;
 
 						const Box2i tileBound( tileOrigin, tileOrigin + Imath::V2i( GafferImage::ImagePlug::tileSize() ) );
 						const Box2i transferBound = IECore::boxIntersection( tileBound, gafferBox );
@@ -199,13 +196,13 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 							const size_t srcEndIndex = srcIndex + transferBound.size().x * numChannels;
 							while( srcIndex < srcEndIndex )
 							{
-								updatedTile[dstIndex] = data[srcIndex];
+								buffer[dstIndex] = data[srcIndex];
 								srcIndex += numChannels;
 								dstIndex++;
 							}
 						}
 
-						setTile( tileOrigin, channelIndex, updatedTileData );
+						tile->dirty = true;
 					}
 				}
 			}
@@ -228,7 +225,7 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 			return true;
 		}
 
-		ConstFloatVectorDataPtr channelData( const Imath::V2i &tileOrigin, const std::string &channelName )
+		ConstFloatVectorDataPtr channelData( const Imath::V2i &tileOrigin, const std::string &channelName, int dataCount )
 		{
 			vector<string>::const_iterator cIt = find( channelNames().begin(), channelNames().end(), channelName );
 			if( cIt == channelNames().end() )
@@ -236,15 +233,58 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 				return ImagePlug::blackTile();
 			}
 
-			ConstFloatVectorDataPtr tile = getTile( tileOrigin, cIt - channelNames().begin() );
-			if( tile )
-			{
-				return tile;
-			}
-			else
+			Tile *tile = getTile( tileOrigin, cIt - channelNames().begin() );
+			if( !tile )
 			{
 				return ImagePlug::blackTile();
 			}
+
+			tbb::spin_rw_mutex::scoped_lock tileLock( tile->mutex, /* write = */ false );
+			if( tile->cachedForDataCount == dataCount || !tile->dirty)
+			{
+				// In order to ensure hashes and computes are consistent, once we have
+				// bound a version of the tile for this dataCount, we don't change it,
+				// even if it has been dirtied in the meantime.
+				return tile->cachedTile;
+			}
+
+			int previousDataCount = tile->cachedForDataCount;
+			tileLock.release();
+
+			// Copying the data from the backbuffer takes time, and holding a write lock while
+			// we do it would risk stalling the render thread.  So instead, we just copy
+			// whatever is currently in the backbuffer.  This does risk catching the
+			// backbuffer in a half written state, but in that case, we will still get
+			// some sort of data, and we should be able to process any possible floating point
+			// to produce some visual result.  In the scenario where the value we get is half
+			// written, that means imageData() is about to call dataReceivedSignal() to trigger
+			// us again, and the incorrect value will be soon overwritten with a correct one.
+			//
+			// Because we drop the lock to allow imageData to proceed, it's also possible
+			// two channelData() calls on separate threads could both perform this work ...
+			// but this shouldn't happen too often, and doesn't seem significantly more wasteful
+			// than having one thread wait while the other performs the copy
+			FloatVectorDataPtr newCache = new FloatVectorData();
+			newCache->writable() = tile->backBuffer;
+
+			tileLock.acquire( tile->mutex, /* write = */ true );
+
+			if( tile->cachedForDataCount != previousDataCount && tile->cachedForDataCount >= dataCount )
+			{
+				// Another process has beaten us to write the cache, and their data count was >= ours,
+				// so we discard our update and just use theirs.
+				// Note that there is a miniscule chance that this could be wrong, if we hit this weird race
+				// condition right at the moment when the dataCount wraps around, but since this is
+				// exceedingly unlikely, and the symptom of this error is just a tile that's one update out of
+				// date until we receive the next update, this doesn't seem too concerning.
+			}
+			else
+			{
+				tile->cachedTile = newCache;
+				tile->dirty = false;
+			}
+
+			return tile->cachedTile;
 		}
 
 		typedef boost::signal<void ( GafferDisplayDriver *, const Imath::Box2i & )> DataReceivedSignal;
@@ -268,43 +308,57 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 			Display::driverCreatedSignal()( driver.get(), parameters.get() );
 		}
 
-		ConstFloatVectorDataPtr getTile( const V2i &tileOrigin, size_t channelIndex )
+		struct Tile
 		{
-			V2i tileIndex = tileOrigin / ImagePlug::tileSize();
+			Tile(): backBuffer( ImagePlug::blackTile()->readable() ), dirty( false ), cachedTile( ImagePlug::blackTile() ), cachedForDataCount( 0 )
+			{
+			}
 
-			if(
-				tileIndex.x < m_tiles.index_bases()[0] ||
-				tileIndex.x >= (int)(m_tiles.index_bases()[0] + m_tiles.shape()[0] ) ||
-				tileIndex.y < m_tiles.index_bases()[1] ||
-				tileIndex.y >= (int)(m_tiles.index_bases()[1] + m_tiles.shape()[1] )
-			)
+			Tile( const Tile& other ) : Tile()
+			{
+				*this = other;
+			}
+
+			Tile& operator=( const Tile& other )
+			{
+				memcpy( &backBuffer[0], &other.backBuffer[0], backBuffer.size() * sizeof( float ) );
+				dirty = (bool)other.dirty;
+				cachedTile = other.cachedTile;
+				// cachedForDataCount is only really relevant to a particular Display, but we use
+				// this assignment when transferring tiles to a different driver used with a different
+				// display, so just reset it
+				cachedForDataCount = 0;
+				return *this;
+			}
+
+			std::vector<float> backBuffer;
+			std::atomic<bool> dirty;
+			tbb::spin_rw_mutex mutex;
+
+			// Use mutex to access these 2
+			ConstFloatVectorDataPtr cachedTile;
+			int cachedForDataCount;
+		};
+
+		Tile *getTile( const V2i &tileOrigin, unsigned int channelIndex )
+		{
+			V3i tileCoord( tileOrigin.x / ImagePlug::tileSize(), tileOrigin.y / ImagePlug::tileSize(), channelIndex );
+
+
+			if( !( m_tileRange.intersects( tileCoord ) && m_tileRange.intersects( tileCoord + V3i( 1 ) ) ) )
 			{
 				// outside data window
 				return nullptr;
 			}
 
-			tbb::spin_rw_mutex::scoped_lock tileLock( m_tileMutex, false /* read */ );
-
-			ConstFloatVectorDataPtr result = m_tiles[tileIndex.x][tileIndex.y][channelIndex];
-			if( !result )
-			{
-				result = ImagePlug::blackTile();
-			}
-
-			return result;
+			V3i s = m_tileRange.size();
+			V3i offset = tileCoord - m_tileRange.min;
+			return &m_tiles[offset.x + offset.y * s.x + offset.z * s.x * s.y];
 		}
 
-		void setTile( const V2i &tileOrigin, size_t channelIndex, ConstFloatVectorDataPtr tile )
-		{
-			V2i tileIndex = tileOrigin / ImagePlug::tileSize();
-			tbb::spin_rw_mutex::scoped_lock tileLock( m_tileMutex, true /* write */ );
-			m_tiles[tileIndex.x][tileIndex.y][channelIndex] = tile;
-		}
-
-		// indexed by tileIndexX, tileIndexY, channelIndex.
-		typedef boost::multi_array<ConstFloatVectorDataPtr, 3> TileArray;
-		TileArray m_tiles;
-		tbb::spin_rw_mutex m_tileMutex;
+		// indexed by tileIndexX, tileIndexY, channelIndex, with y and then z wrapped around into a flat vector
+		Box3i m_tileRange;
+		std::vector<Tile> m_tiles;
 
 		Format m_gafferFormat;
 		Imath::Box2i m_gafferDataWindow;
@@ -423,6 +477,9 @@ void Display::setDriver( IECoreImage::DisplayDriverPtr driver, bool copy )
 	setupDriver( copy ? new GafferDisplayDriver( *gafferDisplayDriver ) : gafferDisplayDriver );
 
 	driverCountPlug()->setValue( driverCountPlug()->getValue() + 1 );
+
+	// The copied driver will have it's tile channelDataCounts reset, so we need to force a refresh
+	channelDataCountPlug()->setValue( 1 );
 }
 
 IECoreImage::DisplayDriver *Display::getDriver()
@@ -548,7 +605,8 @@ void Display::hashChannelData( const GafferImage::ImagePlug *output, const Gaffe
 	{
 		channelData = m_driver->channelData(
 			context->get<Imath::V2i>( ImagePlug::tileOriginContextName ),
-			context->get<std::string>( ImagePlug::channelNameContextName )
+			context->get<std::string>( ImagePlug::channelNameContextName ),
+			channelDataCountPlug()->getValue()
 		);
 	}
 	h = channelData->Object::hash();
@@ -561,7 +619,8 @@ IECore::ConstFloatVectorDataPtr Display::computeChannelData( const std::string &
 	{
 		channelData = m_driver->channelData(
 			context->get<Imath::V2i>( ImagePlug::tileOriginContextName ),
-			context->get<std::string>( ImagePlug::channelNameContextName )
+			context->get<std::string>( ImagePlug::channelNameContextName ),
+			channelDataCountPlug()->getValue()
 		);
 	}
 	return channelData;
@@ -614,6 +673,11 @@ PendingUpdates &pendingUpdates()
 // be performed on the UI thread, so we can't do it directly.
 void Display::dataReceived()
 {
+	if( !outPlug()->node() )
+	{
+		return;
+	}
+
 	bool scheduleUpdate = false;
 	{
 		// To minimise overhead we perform updates in batches by storing
