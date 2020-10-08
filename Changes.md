@@ -1,3 +1,11 @@
+0.59.x.x (relative to 0.59.0.0b3)
+========
+
+Improvements
+------------
+
+- SceneReader : Improved loading performance of shared resources such as sets and instanced objects.
+
 0.59.0.0b3 (relative to 0.59.0.0b2)
 ==========
 
