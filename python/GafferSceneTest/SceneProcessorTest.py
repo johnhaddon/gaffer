@@ -34,6 +34,7 @@
 #
 ##########################################################################
 
+import inspect
 import unittest
 import imath
 
@@ -42,8 +43,9 @@ import IECore
 import Gaffer
 import GafferTest
 import GafferScene
+import GafferSceneTest
 
-class SceneProcessorTest( GafferTest.TestCase ) :
+class SceneProcessorTest( GafferSceneTest.SceneTestCase ) :
 
 	def testNumberOfInputs( self ) :
 
@@ -145,6 +147,27 @@ class SceneProcessorTest( GafferTest.TestCase ) :
 		self.assertEqual( s2["processor"]["out"].attributes( "/plane" )["scene:visible"].value, False )
 		s2["processor"]["visibility"].setValue( True )
 		self.assertEqual( s2["processor"]["out"].attributes( "/plane" )["scene:visible"].value, True )
+
+	def testEnabledEvaluationUsesGlobalContext( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["plane"] = GafferScene.Plane()
+		script["processor"] = GafferScene.StandardAttributes()
+		script["processor"]["in"].setInput( script["plane"]["out"] )
+
+		script["expression"] = Gaffer.Expression()
+		script["expression"].setExpression( inspect.cleandoc(
+			"""
+			path = context.get("scene:path", None )
+			assert( path is None )
+			parent["processor"]["enabled"] = True
+			"""
+		) )
+
+		with Gaffer.ContextMonitor( script["expression"] ) as monitor :
+			self.assertSceneValid( script["processor"]["out"] )
+
+		self.assertEqual( monitor.combinedStatistics().numUniqueValues( "scene:path" ), 0 )
 
 if __name__ == "__main__":
 	unittest.main()

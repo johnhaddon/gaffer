@@ -1,3 +1,11 @@
+0.58.x.x (relative to 0.58.3.0)
+========
+
+Improvements
+------------
+
+- SceneNode/SceneProcessor : Enforced that the value of the `enabled` plug may not be varied using the `scene:path` context variable. Attempts to do so could result in the generation of invalid scenes, and could also cause poor performance. Filters are the appropriate way to enable/disable a node on a per-location basis.
+
 0.58.3.0 (relative to 0.58.2.0)
 ========
 
