@@ -132,72 +132,91 @@ class InteractiveArnoldRenderPerformanceTest( GafferUITest.TestCase ) :
 
 		watchNode = script["Blur"] if useBlur else script["Catalogue"]
 
-		if useUI:
+		originalMessageHandler = IECore.MessageHandler.getDefaultHandler()
+		mh = IECore.CapturingMessageHandler()
+		IECore.MessageHandler.setDefaultHandler(
+			IECore.LevelFilteredMessageHandler( mh, IECore.LevelFilteredMessageHandler.defaultLevel() )
+		)
+		try:
+			if useUI:
 
-			with GafferUI.Window() as window :
-				window.setFullScreen( True )
-				viewer = GafferUI.Viewer( script )
+				with GafferUI.Window() as window :
+					window.setFullScreen( True )
+					viewer = GafferUI.Viewer( script )
 
-			window.setVisible( True )
-			viewer.setNodeSet( Gaffer.StandardSet( [ watchNode ] ) )
+				window.setVisible( True )
+				viewer.setNodeSet( Gaffer.StandardSet( [ watchNode ] ) )
 
 
-			script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Running )
-			self.waitForIdle( 10 )
+				script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Running )
+				self.waitForIdle( 10 )
 
-			viewer.view().viewportGadget().frame( viewer.view().viewportGadget().getPrimaryChild().bound(), imath.V3f( 0, 0, 1 ) )
+				viewer.view().viewportGadget().frame( viewer.view().viewportGadget().getPrimaryChild().bound(), imath.V3f( 0, 0, 1 ) )
 
-			frameCounter = {'i' : 0}
-			def testFunc():
-				frameCounter['i'] += 1
-				script["Camera"]["transform"]["translate"]["x"].setValue( math.sin( frameCounter['i'] * 0.1 ) )
-				if frameCounter['i'] >= 50:
-					GafferUI.EventLoop.mainEventLoop().stop()
+				frameCounter = {'i' : 0}
+				def testFunc():
+					frameCounter['i'] += 1
+					script["Camera"]["transform"]["translate"]["x"].setValue( math.sin( frameCounter['i'] * 0.1 ) )
+					if frameCounter['i'] >= 50:
+						GafferUI.EventLoop.mainEventLoop().stop()
 
-			timer = QtCore.QTimer()
-			timer.setInterval( 20 )
-			timer.timeout.connect( testFunc )
-
-			startTime = 0
-
-			GafferImageUI.ImageGadget.resetTileUpdateCount()
-			startTime = time.time()
-			timer.start()
-
-			with GafferTest.TestRunner.PerformanceScope() as ps:
-				GafferUI.EventLoop.mainEventLoop().start()
-				ps.setNumIterations( GafferImageUI.ImageGadget.tileUpdateCount() )
-
-			script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Stopped )
-
-			del window, viewer, timer
-			self.waitForIdle( 10 )
-
-		else:
-			with GafferTest.ParallelAlgoTest.UIThreadCallHandler() as h :
-
-				with IECore.CapturingMessageHandler() as mh :
-					script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Running )
-					h.waitFor( 2 )
-				arnoldStartupErrors = mh.messages
+				timer = QtCore.QTimer()
+				timer.setInterval( 20 )
+				timer.timeout.connect( testFunc )
 
 				startTime = 0
 
-				tc = Gaffer.ScopedConnection( GafferImageTest.connectProcessTilesToPlugDirtiedSignal( watchNode["out"] ) )
+				GafferImageUI.ImageGadget.resetTileUpdateCount()
+				startTime = time.time()
+				timer.start()
 
 				with GafferTest.TestRunner.PerformanceScope() as ps:
-					with Gaffer.PerformanceMonitor() as m:
-						startTime = time.time()
-						for i in range( 250 ):
-							script["Camera"]["transform"]["translate"]["x"].setValue( math.sin( ( i + 1 ) * 0.1 ) )
-							h.waitFor( 0.02 )
-						endTime = time.time()
-
-					ps.setNumIterations( m.plugStatistics( watchNode["out"]["channelData"].source() ).computeCount )
-
+					GafferUI.EventLoop.mainEventLoop().start()
+					ps.setNumIterations( GafferImageUI.ImageGadget.tileUpdateCount() )
 
 				script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Stopped )
 
+				del window, viewer, timer
+				self.waitForIdle( 10 )
+
+			else:
+				with GafferTest.ParallelAlgoTest.UIThreadCallHandler() as h :
+
+					with IECore.CapturingMessageHandler() as mh :
+						script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Running )
+						h.waitFor( 2 )
+					arnoldStartupErrors = mh.messages
+
+					startTime = 0
+
+					tc = Gaffer.ScopedConnection( GafferImageTest.connectProcessTilesToPlugDirtiedSignal( watchNode["out"] ) )
+
+					with GafferTest.TestRunner.PerformanceScope() as ps:
+						with Gaffer.PerformanceMonitor() as m:
+							startTime = time.time()
+							for i in range( 250 ):
+								script["Camera"]["transform"]["translate"]["x"].setValue( math.sin( ( i + 1 ) * 0.1 ) )
+								h.waitFor( 0.02 )
+							endTime = time.time()
+
+						ps.setNumIterations( m.plugStatistics( watchNode["out"]["channelData"].source() ).computeCount )
+
+
+					script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Stopped )
+
+		finally:
+			IECore.MessageHandler.setDefaultHandler( originalMessageHandler )
+
+		for m in mh.messages:
+			if (
+					m.message.endswith( "rendering with watermarks because ARNOLD_LICENSE_ORDER = none" ) or
+					m.message == "Could not find supported floating point texture format in OpenGL.  GPU image viewer path will be low quality, recommend switching to CPU display transform, or resolving graphics driver issue." or
+					m.message.endswith( "test_profile.json: No such file or directory" )
+					):
+				pass
+			else:
+				# Unexpected message
+				self.assertEqual(  m.message, "" )
 
 	# NOTE: These tests should be a lot more effective in terms of measuring exact performance
 	# if the "repeat" parameter is turned up, but I've currently set it to just 1 because:
