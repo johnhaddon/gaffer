@@ -15,12 +15,12 @@ API
 ---
 
 - ValuePlug : Added `defaultHash()` virtual method.
-- TransformPlug : Added constructor arguments for specifying child plug default values.
+- TransformPlug/Transform2DPlug : Added constructor arguments for specifying child plug default values.
 
 Breaking Changes
 ----------------
 
-- TransformPlug : Added constructor arguments.
+- TransformPlug/Transform2DPlug : Added constructor arguments.
 
 0.59.0.0b3 (relative to 0.59.0.0b2)
 ==========
