@@ -20,6 +20,7 @@ API
 Breaking Changes
 ----------------
 
+- Reference : Removed support for boxes exported prior to version 0.9.0.0.
 - TransformPlug/Transform2DPlug : Added constructor arguments.
 
 0.59.0.0b3 (relative to 0.59.0.0b2)
