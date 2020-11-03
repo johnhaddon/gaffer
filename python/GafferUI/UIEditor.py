@@ -1066,6 +1066,93 @@ class _PlugListing( GafferUI.Widget ) :
 			self.__updateMetadata()
 
 ##########################################################################
+# _DefaultValueEditor. A ui for editing the default value of a plug.
+##########################################################################
+
+class _DefaultValueEditor( GafferUI.Widget ) :
+
+	def __init__( self, **kw ) :
+
+		self.__row = _Row()
+		GafferUI.Widget.__init__( self, self.__row, **kw )
+
+		with self.__row :
+			_Label( "Default Value" )
+
+		self.__plug = None
+		self.__defaultValueNode = Gaffer.Node()
+		self.__defaultValuePlugSetConnection = self.__defaultValueNode.plugSetSignal().connect(
+			Gaffer.WeakMethod( self.__defaultValuePlugSet ), scoped = False
+		)
+
+		Gaffer.Metadata.plugValueChangedSignal().connect(
+			Gaffer.WeakMethod( self.__plugMetadataChanged ), scoped = False
+		)
+
+	def setPlug( self, plug ) :
+
+		self.__plug = plug
+		if self.__plug is not None :
+			self.__defaultValueNode["defaultValue"] = plug.createCounterpart( "defaultValue", Gaffer.Plug.Direction.In )
+			self.__plugDirtiedConnection = self.__plug.node().plugDirtiedSignal().connect(
+				Gaffer.WeakMethod( self.__plugDirtied ), scoped = True
+			)
+		else :
+			self.__plugDirtiedConnection = None
+
+		self.__updateDefaultValueWidget()
+
+	def getPlug( self ) :
+
+		return self.__plug
+
+	def __plugDirtied( self, plug ) :
+
+		# TEST ME!!! (using undo)
+		if plug == self.__plug :
+			self.__defaultValueNode["defaultValue"].setValue( self.__plug.defaultValue() )
+
+	def __defaultValuePlugSet( self, plug ) :
+
+		if plug != self.__defaultValueNode["defaultValue"] :
+			return
+
+		print "DEFAULT VALUE", plug.defaultValue()
+
+	def __plugMetadataChanged( self, nodeTypeId, plugPath, key, plug ) :
+
+		if self.__plug is None or not Gaffer.MetadataAlgo.affectedByChange( self.__plug, nodeTypeId, plugPath, plug ) :
+			return
+
+		if key == "plugValueWidget:type" :
+			self.__updateDefaultValueWidget()
+
+	def __updateDefaultValueWidget( self ) :
+
+		print "UPDATING"
+
+		del self.__row[1:]
+		if self.__plug is None :
+			return
+
+		if hasattr( self.__plug, "defaultValue" ) :
+			widgetType = Gaffer.Metadata.value( self.__defaultValueNode["defaultValue"], "plugValueWidget:type" )
+			self.__row.append(
+				GafferUI.PlugValueWidget.create(
+					self.__defaultValueNode["defaultValue"],
+					# Don't use widgets which are known to not allow editing of
+					# the value.
+					useTypeOnly = widgetType in (
+						"GafferUI.ButtonPlugValueWidget",
+						"GafferUI.ConnectionPlugValueWidget",
+						""
+					),
+				)
+			)
+		else :
+			self.__row.append( GafferUI.Button( "MAKE ME WORK" ) )
+
+##########################################################################
 # _PresetsEditor. This provides a ui for editing the presets for a plug.
 ##########################################################################
 
@@ -1348,6 +1435,8 @@ class _PlugEditor( GafferUI.Widget ) :
 				self.__metadataWidgets["description"] = MetadataWidget.MultiLineStringMetadataWidget( key = "description" )
 				self.__metadataWidgets["description"].textWidget().setFixedLineHeight( 10 )
 
+			self.__defaultValueEditor = _DefaultValueEditor()
+
 			with _Row() :
 
 				_Label( "Widget" )
@@ -1416,6 +1505,7 @@ class _PlugEditor( GafferUI.Widget ) :
 		for widget in self.__metadataWidgets.values() :
 			widget.setTarget( self.__plug )
 
+		self.__defaultValueEditor.setPlug( plug )
 		self.__updateWidgetMenuText()
 		self.__updateWidgetSettings()
 		self.__updateGadgetMenuText()
