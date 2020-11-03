@@ -1359,6 +1359,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		script["box"]["spreadsheet"]["rows"][1]["enabled"].setValue( False )
 
 		Gaffer.PlugAlgo.promote( script["box"]["spreadsheet"]["rows"] )
+		script["box"]["rows"].resetDefault()
 
 		script["box"].exportForReference( self.temporaryDirectory() + "/test.grf" )
 
@@ -1371,22 +1372,23 @@ class ReferenceTest( GafferTest.TestCase ) :
 		for row in range( 0, len( script["box"]["rows"] ) ) :
 
 			self.assertEqual(
-				script["reference"]["rows"][row]["name"].getValue(),
-				script["box"]["rows"][row]["name"].getValue()
+				script["reference"]["rows"][row]["name"].defaultValue(),
+				script["box"]["rows"][row]["name"].defaultValue()
 			)
 			self.assertEqual(
-				script["reference"]["rows"][row]["enabled"].getValue(),
-				script["box"]["rows"][row]["enabled"].getValue()
+				script["reference"]["rows"][row]["enabled"].defaultValue(),
+				script["box"]["rows"][row]["enabled"].defaultValue()
 			)
 
 			for column in range( 0, len( script["box"]["rows"][0]["cells"].keys() ) ) :
+
 				self.assertEqual(
-					script["reference"]["rows"][row]["cells"][column]["value"].getValue(),
-					script["box"]["rows"][row]["cells"][column]["value"].getValue(),
+					script["reference"]["rows"][row]["cells"][column]["value"].defaultValue(),
+					script["box"]["rows"][row]["cells"][column]["value"].defaultValue(),
 				)
 				self.assertEqual(
-					script["reference"]["rows"][row]["cells"][column]["enabled"].getValue(),
-					script["box"]["rows"][row]["cells"][column]["enabled"].getValue(),
+					script["reference"]["rows"][row]["cells"][column]["enabled"].defaultValue(),
+					script["box"]["rows"][row]["cells"][column]["enabled"].defaultValue(),
 				)
 
 		self.assertTrue( script["reference"]["rows"].isSetToDefault() )
