@@ -61,7 +61,7 @@ class InteractiveArnoldRenderPerformanceTest( GafferUITest.TestCase ) :
 	# Arnold outputs licensing warnings that would cause failures
 	failureMessageLevel = IECore.MessageHandler.Level.Error
 
-	def runInteractive( self, useUI, useBlur, resolution ):
+	def runInteractive( self, useUI, useBlur, useMerge, resolution ):
 
 		script = Gaffer.ScriptNode()
 
@@ -123,12 +123,29 @@ class InteractiveArnoldRenderPerformanceTest( GafferUITest.TestCase ) :
 		script["Catalogue"] = GafferImage.Catalogue( "Catalogue" )
 		script["Catalogue"]["directory"].setValue( self.temporaryDirectory() + "/catalogues/test" )
 
-		script["Blur"] = GafferImage.Blur( "Blur" )
-		script["Blur"]["in"].setInput( script["Catalogue"]["out"] )
-		script["Blur"]["radius"]["x"].setValue( 1.0 )
-		script["Blur"]["radius"]["y"].setValue( 1.0 )
+		watchNode = script["Catalogue"]
 
-		watchNode = script["Blur"] if useBlur else script["Catalogue"]
+		if useMerge :
+
+			script["Background"] = GafferImage.Constant()
+			script["Background"]["format"].setValue(
+				GafferImage.Format( int( resolution * 1.5 ), int( resolution * 1.5 ) )
+			)
+			script["Background"]["color"].setValue( imath.Color4f( 1, 0.5, 0.25, 1 ) )
+
+			script["Merge"] = GafferImage.Merge()
+			script["Merge"]["in"][0].setInput(script["Background"]["out"] )
+			script["Merge"]["in"][1].setInput( watchNode["out"] )
+			script["Merge"]["operation"].setValue( script["Merge"].Operation.Over )
+			watchNode = script["Merge"]
+
+		if useBlur :
+
+			script["Blur"] = GafferImage.Blur()
+			script["Blur"]["in"].setInput( watchNode["out"] )
+			script["Blur"]["radius"]["x"].setValue( 1.0 )
+			script["Blur"]["radius"]["y"].setValue( 1.0 )
+			watchNode = script["Blur"]
 
 		if useUI:
 
@@ -138,7 +155,6 @@ class InteractiveArnoldRenderPerformanceTest( GafferUITest.TestCase ) :
 
 			window.setVisible( True )
 			viewer.setNodeSet( Gaffer.StandardSet( [ watchNode ] ) )
-
 
 			script['InteractiveArnoldRender']['state'].setValue( GafferScene.InteractiveRender.State.Running )
 			self.waitForIdle( 10 )
@@ -199,21 +215,32 @@ class InteractiveArnoldRenderPerformanceTest( GafferUITest.TestCase ) :
 	@GafferTest.TestRunner.PerformanceTestMethod( repeat = 1 )
 	def testPerf( self ) :
 
-		self.runInteractive( False, False, 2000 )
+		self.runInteractive( False, False, False, 2000 )
 
 	@GafferTest.TestRunner.PerformanceTestMethod( repeat = 1 )
 	def testPerfWithBlur( self ) :
-		self.runInteractive( False, True, 1000 )
+
+		self.runInteractive( False, True, False, 1000 )
+
+	@GafferTest.TestRunner.PerformanceTestMethod( repeat = 1 )
+	def testPerfWithMerge( self ) :
+
+		self.runInteractive( False, False, True, 2000 )
 
 	@GafferTest.TestRunner.PerformanceTestMethod( repeat = 1 )
 	def testUIPerf( self ) :
 
-		self.runInteractive( True, False, 2000 )
+		self.runInteractive( True, False, False, 2000 )
 
 	@GafferTest.TestRunner.PerformanceTestMethod( repeat = 1 )
 	def testUIPerfWithBlur( self ) :
-		self.runInteractive( True, True, 1000 )
 
+		self.runInteractive( True, True, False, 1000 )
+
+	@GafferTest.TestRunner.PerformanceTestMethod( repeat = 1 )
+	def testUIPerfWithMerge( self ) :
+
+		self.runInteractive( True, False, True, 2000 )
 
 if __name__ == "__main__":
 	unittest.main()
