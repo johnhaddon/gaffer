@@ -156,7 +156,7 @@ T BoxPlug<T>::defaultValue() const
 template<typename T>
 T BoxPlug<T>::getDefaultValue() const
 {
-	return T( this->minPlug()->defaultValue(), this->maxPlug()->defaultValue() );
+	return T( this->minPlug()->getDefaultValue(), this->maxPlug()->getDefaultValue() );
 }
 
 template<typename T>

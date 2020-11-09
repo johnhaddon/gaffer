@@ -102,7 +102,7 @@ Format FormatPlug::defaultValue() const
 
 Format FormatPlug::getDefaultValue() const
 {
-	return Format( displayWindowPlug()->defaultValue(), pixelAspectPlug()->defaultValue() );
+	return Format( displayWindowPlug()->getDefaultValue(), pixelAspectPlug()->getDefaultValue() );
 }
 
 void FormatPlug::setDefaultValue( const Format &defaultValue )
