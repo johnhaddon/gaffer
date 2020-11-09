@@ -85,7 +85,17 @@ PlugPtr StringPlug::createCounterpart( const std::string &name, Direction direct
 
 const std::string &StringPlug::defaultValue() const
 {
-	return static_cast<const StringData *>( defaultObjectValue() )->readable();
+	return getDefaultValue();
+}
+
+const std::string &StringPlug::getDefaultValue() const
+{
+	return static_cast<const StringData *>( getDefaultObjectValue() )->readable();
+}
+
+void StringPlug::setDefaultValue( const std::string &defaultValue )
+{
+	setDefaultObjectValue( new StringData( defaultValue ) );
 }
 
 void StringPlug::setValue( const std::string &value )

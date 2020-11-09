@@ -351,7 +351,30 @@ PlugPtr SplinePlug<T>::createCounterpart( const std::string &name, Direction dir
 template<typename T>
 const T &SplinePlug<T>::defaultValue() const
 {
+	return getDefaultValue();
+}
+
+template<typename T>
+const T &SplinePlug<T>::getDefaultValue() const
+{
 	return m_defaultValue;
+}
+
+template<typename T>
+void SplinePlug<T>::setDefaultValue( const T &defaultValue )
+{
+	const T oldDefault = m_defaultValue;
+	Action::enact(
+		this,
+		[this, defaultValue] () {
+			this->m_defaultValue = defaultValue;
+			propagateDirtiness( this );
+		},
+		[this, oldDefault] () {
+			this->m_defaultValue = oldDefault;
+			propagateDirtiness( this );
+		}
+	);
 }
 
 template<typename T>

@@ -86,7 +86,19 @@ PlugPtr TypedObjectPlug<T>::createCounterpart( const std::string &name, Directio
 template<class T>
 const typename TypedObjectPlug<T>::ValueType *TypedObjectPlug<T>::defaultValue() const
 {
-	return static_cast<const ValueType *>( defaultObjectValue() );
+	return getDefaultValue();
+}
+
+template<class T>
+const typename TypedObjectPlug<T>::ValueType *TypedObjectPlug<T>::getDefaultValue() const
+{
+	return static_cast<const ValueType *>( getDefaultObjectValue() );
+}
+
+template<class T>
+void TypedObjectPlug<T>::setDefaultValue( ConstValuePtr defaultValue )
+{
+	setDefaultObjectValue( defaultValue );
 }
 
 template<class T>

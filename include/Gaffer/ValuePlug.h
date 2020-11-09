@@ -217,9 +217,15 @@ class GAFFER_API ValuePlug : public Plug
 		ValuePlug( const std::string &name, Direction direction,
 			IECore::ConstObjectPtr defaultValue, unsigned flags );
 
+		/// \deprecated
+		const IECore::Object *defaultObjectValue() const;
 		/// Returns the default value. It is imperative that this object is not
 		/// modified.
-		const IECore::Object *defaultObjectValue() const;
+		const IECore::Object *getDefaultObjectValue() const;
+		/// Should be called by derived classes when they wish to change the
+		/// default value. The value is referenced rather than copied, so must
+		/// not be modified following the call.
+		void setDefaultObjectValue( IECore::ConstObjectPtr defaultValue );
 
 		/// Internally all values are stored as instances of classes derived
 		/// from IECore::Object, although this isn't necessarily visible to the user.

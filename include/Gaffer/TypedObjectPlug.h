@@ -81,7 +81,13 @@ class IECORE_EXPORT TypedObjectPlug : public ValuePlug
 		bool acceptsInput( const Plug *input ) const override;
 		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		const ValueType *defaultValue() const;
+		const ValueType *getDefaultValue() const;
+		/// The same considerations regarding modifications as are documented for
+		/// `setValue()` apply here too.
+		/// \undoable
+		void setDefaultValue( ConstValuePtr defaultValue );
 
 		/// Sets the value, which must be non-null. The value is referenced directly
 		/// and may be shared internally with other Plugs and the cache - under no

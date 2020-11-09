@@ -86,7 +86,19 @@ PlugPtr TypedPlug<T>::createCounterpart( const std::string &name, Direction dire
 template<class T>
 const T &TypedPlug<T>::defaultValue() const
 {
-	return static_cast<const DataType *>( defaultObjectValue() )->readable();
+	return getDefaultValue();
+}
+
+template<class T>
+const T &TypedPlug<T>::getDefaultValue() const
+{
+	return static_cast<const DataType *>( getDefaultObjectValue() )->readable();
+}
+
+template<class T>
+void TypedPlug<T>::setDefaultValue( const T &value )
+{
+	setDefaultObjectValue( new DataType( value ) );
 }
 
 template<class T>

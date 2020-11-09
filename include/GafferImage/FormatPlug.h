@@ -84,7 +84,10 @@ class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 		Gaffer::FloatPlug *pixelAspectPlug();
 		const Gaffer::FloatPlug *pixelAspectPlug() const;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		Format defaultValue() const;
+		Format getDefaultValue() const;
+		void setDefaultValue( const Format &defaultValue );
 
 		/// \undoable
 		void setValue( const Format &value );

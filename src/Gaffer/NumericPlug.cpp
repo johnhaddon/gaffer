@@ -101,7 +101,19 @@ PlugPtr NumericPlug<T>::createCounterpart( const std::string &name, Direction di
 template<class T>
 T NumericPlug<T>::defaultValue() const
 {
-	return static_cast<const DataType *>( defaultObjectValue() )->readable();
+	return getDefaultValue();
+}
+
+template<class T>
+T NumericPlug<T>::getDefaultValue() const
+{
+	return static_cast<const DataType *>( getDefaultObjectValue() )->readable();
+}
+
+template<class T>
+void NumericPlug<T>::setDefaultValue( T defaultValue )
+{
+	setDefaultObjectValue( new DataType( defaultValue ) );
 }
 
 template<class T>

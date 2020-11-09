@@ -150,7 +150,20 @@ const typename BoxPlug<T>::ChildType *BoxPlug<T>::maxPlug() const
 template<typename T>
 T BoxPlug<T>::defaultValue() const
 {
+	return getDefaultValue();
+}
+
+template<typename T>
+T BoxPlug<T>::getDefaultValue() const
+{
 	return T( this->minPlug()->defaultValue(), this->maxPlug()->defaultValue() );
+}
+
+template<typename T>
+void BoxPlug<T>::setDefaultValue( const T &defaultValue )
+{
+	minPlug()->setDefaultValue( defaultValue.min );
+	maxPlug()->setDefaultValue( defaultValue.max );
 }
 
 template<typename T>

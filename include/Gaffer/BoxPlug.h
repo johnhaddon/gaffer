@@ -90,7 +90,11 @@ class GAFFER_API BoxPlug : public ValuePlug
 		ChildType *maxPlug();
 		const ChildType *maxPlug() const;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		T defaultValue() const;
+		T getDefaultValue() const;
+		/// \undoable
+		void setDefaultValue( const T &defaultValue );
 
 		bool hasMinValue() const;
 		bool hasMaxValue() const;

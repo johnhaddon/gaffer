@@ -14,7 +14,10 @@ Fixes
 API
 ---
 
-- ValuePlug : Added `defaultHash()` virtual method.
+- ValuePlug :
+  - Added `defaultHash()` virtual method.
+  - Added `setDefaultValue()/getDefaultValue()` accessors to subclasses.
+  - Deprecated `defaultValue()` method on subclasses. Use `getDefaultValue()` instead.
 - TransformPlug/Transform2DPlug : Added constructor arguments for specifying child plug default values.
 
 Breaking Changes

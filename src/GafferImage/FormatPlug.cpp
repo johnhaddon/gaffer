@@ -97,7 +97,18 @@ const Gaffer::FloatPlug *FormatPlug::pixelAspectPlug() const
 
 Format FormatPlug::defaultValue() const
 {
+	return getDefaultValue();
+}
+
+Format FormatPlug::getDefaultValue() const
+{
 	return Format( displayWindowPlug()->defaultValue(), pixelAspectPlug()->defaultValue() );
+}
+
+void FormatPlug::setDefaultValue( const Format &defaultValue )
+{
+	displayWindowPlug()->setDefaultValue( defaultValue.getDisplayWindow() );
+	pixelAspectPlug()->setDefaultValue( defaultValue.getPixelAspect() );
 }
 
 void FormatPlug::setValue( const Format &value )

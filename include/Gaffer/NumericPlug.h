@@ -71,7 +71,11 @@ class GAFFER_API NumericPlug : public ValuePlug
 		bool acceptsInput( const Plug *input ) const override;
 		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		T defaultValue() const;
+		T getDefaultValue() const;
+		/// \undoable
+		void setDefaultValue( T value );
 
 		bool hasMinValue() const;
 		bool hasMaxValue() const;

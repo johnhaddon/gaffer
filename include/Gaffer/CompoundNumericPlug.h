@@ -80,7 +80,11 @@ class GAFFER_API CompoundNumericPlug : public ValuePlug
 		ChildType *getChild( size_t index );
 		const ChildType *getChild( size_t index ) const;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		T defaultValue() const;
+		T getDefaultValue() const;
+		/// \undoable
+		void setDefaultValue( const T &defaultValue );
 
 		bool hasMinValue() const;
 		bool hasMaxValue() const;

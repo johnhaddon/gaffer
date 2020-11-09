@@ -1055,21 +1055,10 @@ bool ValuePlug::isSetToDefault() const
 
 void ValuePlug::resetDefault()
 {
-	if( m_defaultValue != nullptr )
+	if( m_staticValue != nullptr )
 	{
-		IECore::ConstObjectPtr newDefault = getObjectValue();
-		IECore::ConstObjectPtr oldDefault = m_defaultValue;
-		Action::enact(
-			this,
-			[this, newDefault] () {
-				this->m_defaultValue = newDefault;
-				propagateDirtiness( this );
-			},
-			[this, oldDefault] () {
-				this->m_defaultValue = oldDefault;
-				propagateDirtiness( this );
-			}
-		);
+		assert( m_defaultValue );
+		setDefaultObjectValue( getObjectValue() );
 	}
 	else
 	{
@@ -1122,7 +1111,28 @@ void ValuePlug::hash( IECore::MurmurHash &h ) const
 
 const IECore::Object *ValuePlug::defaultObjectValue() const
 {
+	return getDefaultObjectValue();
+}
+
+const IECore::Object *ValuePlug::getDefaultObjectValue() const
+{
 	return m_defaultValue.get();
+}
+
+void ValuePlug::setDefaultObjectValue( IECore::ConstObjectPtr defaultValue )
+{
+	IECore::ConstObjectPtr oldDefault = m_defaultValue;
+	Action::enact(
+		this,
+		[this, defaultValue] () {
+			this->m_defaultValue = defaultValue;
+			propagateDirtiness( this );
+		},
+		[this, oldDefault] () {
+			this->m_defaultValue = oldDefault;
+			propagateDirtiness( this );
+		}
+	);
 }
 
 IECore::ConstObjectPtr ValuePlug::getValueInternal( const IECore::MurmurHash *precomputedHash ) const

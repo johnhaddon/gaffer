@@ -68,7 +68,11 @@ class IECORE_EXPORT TypedPlug : public ValuePlug
 		bool acceptsInput( const Plug *input ) const override;
 		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		const T &defaultValue() const;
+		const T &getDefaultValue() const;
+		/// \undoable
+		void setDefaultValue( const T &value );
 
 		/// \undoable
 		void setValue( const T &value );

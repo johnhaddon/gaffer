@@ -95,12 +95,27 @@ const typename CompoundNumericPlug<T>::ChildType *CompoundNumericPlug<T>::getChi
 template<typename T>
 T CompoundNumericPlug<T>::defaultValue() const
 {
+	return getDefaultValue();
+}
+
+template<typename T>
+T CompoundNumericPlug<T>::getDefaultValue() const
+{
 	T result;
 	for( unsigned i=0; i<T::dimensions(); i++ )
 	{
-		result[i] = getChild( i )->defaultValue();
+		result[i] = getChild( i )->getDefaultValue();
 	}
 	return result;
+}
+
+template<typename T>
+void CompoundNumericPlug<T>::setDefaultValue( const T &defaultValue )
+{
+	for( unsigned i=0; i<T::dimensions(); i++ )
+	{
+		getChild( i )->setDefaultValue( defaultValue[i] );
+	}
 }
 
 template<typename T>

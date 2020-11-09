@@ -105,7 +105,11 @@ class GAFFER_API StringPlug : public ValuePlug
 		bool acceptsInput( const Plug *input ) const override;
 		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		const std::string &defaultValue() const;
+		const std::string &getDefaultValue() const;
+		/// undoable
+		void setDefaultValue( const std::string &defaultValue );
 
 		/// \undoable
 		void setValue( const std::string &value );

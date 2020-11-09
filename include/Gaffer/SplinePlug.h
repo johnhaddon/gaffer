@@ -139,7 +139,11 @@ class GAFFER_API SplinePlug : public ValuePlug
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
 		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
+		/// \deprecated Use `getDefaultValue()` instead.
 		const T &defaultValue() const;
+		const T &getDefaultValue() const;
+		/// \undoable
+		void setDefaultValue( const T &defaultValue );
 		void setToDefault() override;
 		bool isSetToDefault() const override;
 		void resetDefault() override;
