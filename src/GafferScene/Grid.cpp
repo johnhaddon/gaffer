@@ -267,7 +267,7 @@ Imath::M44f Grid::computeTransform( const SceneNode::ScenePath &path, const Gaff
 	{
 		return transformPlug()->matrix();
 	}
-	return outPlug()->transformPlug()->defaultValue();
+	return outPlug()->transformPlug()->getDefaultValue();
 }
 
 void Grid::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -294,7 +294,7 @@ void Grid::hashAttributes( const ScenePath &path, const Gaffer::Context *context
 		}
 		return;
 	}
-	h = outPlug()->attributesPlug()->defaultValue()->Object::hash();
+	h = outPlug()->attributesPlug()->getDefaultValue()->Object::hash();
 }
 
 IECore::ConstCompoundObjectPtr Grid::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
@@ -335,7 +335,7 @@ IECore::ConstCompoundObjectPtr Grid::computeAttributes( const SceneNode::ScenePa
 
 		return result;
 	}
-	return outPlug()->attributesPlug()->defaultValue();
+	return outPlug()->attributesPlug()->getDefaultValue();
 }
 
 void Grid::hashObject( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -361,7 +361,7 @@ void Grid::hashObject( const SceneNode::ScenePath &path, const Gaffer::Context *
 	}
 	else
 	{
-		h = outPlug()->objectPlug()->defaultValue()->hash();
+		h = outPlug()->objectPlug()->getDefaultValue()->hash();
 	}
 }
 
@@ -430,7 +430,7 @@ IECore::ConstObjectPtr Grid::computeObject( const SceneNode::ScenePath &path, co
 		result->variables["Cs"] = PrimitiveVariable( PrimitiveVariable::Constant, new Color3fData( cs ) );
 		return result;
 	}
-	return outPlug()->objectPlug()->defaultValue();
+	return outPlug()->objectPlug()->getDefaultValue();
 }
 
 void Grid::hashChildNames( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -463,36 +463,36 @@ IECore::ConstInternedStringVectorDataPtr Grid::computeChildNames( const SceneNod
 		return resultData;
 	}
 
-	return outPlug()->childNamesPlug()->defaultValue();
+	return outPlug()->childNamesPlug()->getDefaultValue();
 }
 
 void Grid::hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	h = outPlug()->globalsPlug()->defaultValue()->Object::hash();
+	h = outPlug()->globalsPlug()->getDefaultValue()->Object::hash();
 }
 
 IECore::ConstCompoundObjectPtr Grid::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
 {
-	return outPlug()->globalsPlug()->defaultValue();
+	return outPlug()->globalsPlug()->getDefaultValue();
 }
 
 void Grid::hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	h = outPlug()->setNamesPlug()->defaultValue()->Object::hash();
+	h = outPlug()->setNamesPlug()->getDefaultValue()->Object::hash();
 
 }
 
 IECore::ConstInternedStringVectorDataPtr Grid::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
 {
-	return outPlug()->setNamesPlug()->defaultValue();
+	return outPlug()->setNamesPlug()->getDefaultValue();
 }
 
 void Grid::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	h = outPlug()->setPlug()->defaultValue()->Object::hash();
+	h = outPlug()->setPlug()->getDefaultValue()->Object::hash();
 }
 
 IECore::ConstPathMatcherDataPtr Grid::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
 {
-	return outPlug()->setPlug()->defaultValue();
+	return outPlug()->setPlug()->getDefaultValue();
 }

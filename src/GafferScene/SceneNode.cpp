@@ -173,7 +173,7 @@ void SceneNode::hash( const ValuePlug *output, const Context *context, IECore::M
 			{
 				// the result of compute() will actually be different if we're at the root, so
 				// we just hash the default value:
-				scenePlug->attributesPlug()->defaultValue()->hash( h );
+				scenePlug->attributesPlug()->getDefaultValue()->hash( h );
 			}
 			else
 			{
@@ -187,7 +187,7 @@ void SceneNode::hash( const ValuePlug *output, const Context *context, IECore::M
 			{
 				// the result of compute() will actually be different if we're at the root, so
 				// we just hash the default value:
-				scenePlug->objectPlug()->defaultValue()->hash( h );
+				scenePlug->objectPlug()->getDefaultValue()->hash( h );
 			}
 			else
 			{
@@ -305,7 +305,7 @@ void SceneNode::compute( ValuePlug *output, const Context *context ) const
 				}
 				else
 				{
-					attributesPlug->setValue( attributesPlug->defaultValue() );
+					attributesPlug->setValue( attributesPlug->getDefaultValue() );
 				}
 			}
 			else if( output == scenePlug->objectPlug() )
@@ -318,7 +318,7 @@ void SceneNode::compute( ValuePlug *output, const Context *context ) const
 				}
 				else
 				{
-					objectPlug->setValue( objectPlug->defaultValue() );
+					objectPlug->setValue( objectPlug->getDefaultValue() );
 				}
 			}
 			else if( output == scenePlug->childNamesPlug() )

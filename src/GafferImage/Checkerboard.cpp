@@ -208,7 +208,7 @@ Imath::Box2i Checkerboard::computeDataWindow( const Gaffer::Context *context, co
 
 IECore::ConstCompoundDataPtr Checkerboard::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	return outPlug()->metadataPlug()->defaultValue();
+	return outPlug()->metadataPlug()->getDefaultValue();
 }
 
 void Checkerboard::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

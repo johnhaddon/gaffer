@@ -95,7 +95,7 @@ bool NumericPlug<T>::acceptsInput( const Plug *input ) const
 template<class T>
 PlugPtr NumericPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new NumericPlug<T>( name, direction, defaultValue(), minValue(), maxValue(), getFlags() );
+	return new NumericPlug<T>( name, direction, getDefaultValue(), minValue(), maxValue(), getFlags() );
 }
 
 template<class T>

@@ -1034,7 +1034,7 @@ Imath::Box2i OpenImageIOReader::computeDataWindow( const Gaffer::Context *contex
 	FilePtr file = retrieveFile( fileName, (MissingFrameMode)missingFrameModePlug()->getValue(), this, context );
 	if( !file )
 	{
-		return parent->dataWindowPlug()->defaultValue();
+		return parent->dataWindowPlug()->getDefaultValue();
 	}
 
 	const ImageSpec &spec = file->imageSpec();
@@ -1057,7 +1057,7 @@ IECore::ConstCompoundDataPtr OpenImageIOReader::computeMetadata( const Gaffer::C
 	FilePtr file = retrieveFile( fileName, (MissingFrameMode)missingFrameModePlug()->getValue(), this, context );
 	if( !file )
 	{
-		return parent->metadataPlug()->defaultValue();
+		return parent->metadataPlug()->getDefaultValue();
 	}
 	const ImageSpec &spec = file->imageSpec();
 
@@ -1113,7 +1113,7 @@ IECore::ConstStringVectorDataPtr OpenImageIOReader::computeChannelNames( const G
 	FilePtr file = retrieveFile( fileName, (MissingFrameMode)missingFrameModePlug()->getValue(), this, context );
 	if( !file )
 	{
-		return parent->channelNamesPlug()->defaultValue();
+		return parent->channelNamesPlug()->getDefaultValue();
 	}
 	return file->channelNamesData();
 }
@@ -1211,7 +1211,7 @@ IECore::ConstFloatVectorDataPtr OpenImageIOReader::computeChannelData( const std
 
 	if( !file )
 	{
-		return parent->channelDataPlug()->defaultValue();
+		return parent->channelDataPlug()->getDefaultValue();
 	}
 
 	Box2i dataWindow = outPlug()->dataWindowPlug()->getValue();

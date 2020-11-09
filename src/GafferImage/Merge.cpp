@@ -729,7 +729,7 @@ IECore::ConstStringVectorDataPtr Merge::computeChannelNames( const Gaffer::Conte
 		return outChannelStrVectorData;
 	}
 
-	return inPlug()->channelNamesPlug()->defaultValue();
+	return inPlug()->channelNamesPlug()->getDefaultValue();
 }
 
 void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

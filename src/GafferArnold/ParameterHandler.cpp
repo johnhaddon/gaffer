@@ -125,7 +125,7 @@ Gaffer::Plug *setupNumericPlug( const AtNodeEntry *node, const AtParamEntry *par
 	if(
 		existingPlug &&
 		existingPlug->direction() == direction &&
-		existingPlug->defaultValue() == defaultValue &&
+		existingPlug->getDefaultValue() == defaultValue &&
 		existingPlug->minValue() == minValue &&
 		existingPlug->maxValue() == maxValue
 	)
@@ -166,7 +166,7 @@ Gaffer::Plug *setupTypedPlug( const IECore::InternedString &parameterName, Gaffe
 	if(
 		existingPlug &&
 		existingPlug->direction() == direction &&
-		existingPlug->defaultValue() == defaultValue
+		existingPlug->getDefaultValue() == defaultValue
 	)
 	{
 		existingPlug->setFlags( Gaffer::Plug::Dynamic, false );
@@ -244,7 +244,7 @@ Gaffer::Plug *setupColorPlug( const AtNodeEntry *node, const AtParamEntry *param
 	if(
 		existingPlug &&
 		existingPlug->direction() == direction &&
-		existingPlug->defaultValue() == defaultValue &&
+		existingPlug->getDefaultValue() == defaultValue &&
 		existingPlug->minValue() == minValue &&
 		existingPlug->maxValue() == maxValue
 	)

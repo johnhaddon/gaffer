@@ -1433,7 +1433,7 @@ void RenderController::updateDefaultCamera()
 
 	CameraPtr defaultCamera = new IECoreScene::Camera;
 	RendererAlgo::applyCameraGlobals( defaultCamera.get(), m_globals.get(), m_scene.get() );
-	IECoreScenePreview::Renderer::AttributesInterfacePtr defaultAttributes = m_renderer->attributes( m_scene->attributesPlug()->defaultValue() );
+	IECoreScenePreview::Renderer::AttributesInterfacePtr defaultAttributes = m_renderer->attributes( m_scene->attributesPlug()->getDefaultValue() );
 	ConstStringDataPtr name = new StringData( "gaffer:defaultCamera" );
 	m_defaultCamera = m_renderer->camera( name->readable(), defaultCamera.get(), defaultAttributes.get() );
 	m_renderer->option( "camera", name.get() );

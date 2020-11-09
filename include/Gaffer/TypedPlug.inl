@@ -80,7 +80,7 @@ bool TypedPlug<T>::acceptsInput( const Plug *input ) const
 template<class T>
 PlugPtr TypedPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new TypedPlug<T>( name, direction, defaultValue(), getFlags() );
+	return new TypedPlug<T>( name, direction, getDefaultValue(), getFlags() );
 }
 
 template<class T>

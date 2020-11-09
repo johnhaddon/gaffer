@@ -120,7 +120,7 @@ bool BoxPlug<T>::acceptsChild( const GraphComponent *potentialChild ) const
 template<typename T>
 PlugPtr BoxPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new BoxPlug<T>( name, direction, defaultValue(), minValue(), maxValue(), getFlags() );
+	return new BoxPlug<T>( name, direction, getDefaultValue(), minValue(), maxValue(), getFlags() );
 }
 
 template<typename T>

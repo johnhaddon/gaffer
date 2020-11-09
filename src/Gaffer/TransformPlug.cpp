@@ -116,10 +116,10 @@ PlugPtr TransformPlug::createCounterpart( const std::string &name, Direction dir
 {
 	return new TransformPlug(
 		name, direction,
-		translatePlug()->defaultValue(),
-		rotatePlug()->defaultValue(),
-		scalePlug()->defaultValue(),
-		pivotPlug()->defaultValue(),
+		translatePlug()->getDefaultValue(),
+		rotatePlug()->getDefaultValue(),
+		scalePlug()->getDefaultValue(),
+		pivotPlug()->getDefaultValue(),
 		getFlags()
 	);
 }

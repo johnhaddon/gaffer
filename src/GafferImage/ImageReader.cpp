@@ -416,7 +416,7 @@ void ImageReader::hashMetadata( const GafferImage::ImagePlug *parent, const Gaff
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		h = intermediateImagePlug()->metadataPlug()->defaultValue()->Object::hash();
+		h = intermediateImagePlug()->metadataPlug()->getDefaultValue()->Object::hash();
 	}
 	else
 	{
@@ -429,7 +429,7 @@ IECore::ConstCompoundDataPtr ImageReader::computeMetadata( const Gaffer::Context
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		return intermediateImagePlug()->metadataPlug()->defaultValue();
+		return intermediateImagePlug()->metadataPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -455,7 +455,7 @@ bool ImageReader::computeDeep( const Gaffer::Context *context, const ImagePlug *
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		return intermediateImagePlug()->deepPlug()->defaultValue();
+		return intermediateImagePlug()->deepPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -468,7 +468,7 @@ void ImageReader::hashSampleOffsets( const GafferImage::ImagePlug *parent, const
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		h = intermediateImagePlug()->sampleOffsetsPlug()->defaultValue()->Object::hash();
+		h = intermediateImagePlug()->sampleOffsetsPlug()->getDefaultValue()->Object::hash();
 	}
 	else
 	{
@@ -481,7 +481,7 @@ IECore::ConstIntVectorDataPtr ImageReader::computeSampleOffsets( const Imath::V2
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		return intermediateImagePlug()->sampleOffsetsPlug()->defaultValue();
+		return intermediateImagePlug()->sampleOffsetsPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -496,7 +496,7 @@ void ImageReader::hashChannelNames( const GafferImage::ImagePlug *parent, const 
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		h = intermediateImagePlug()->channelNamesPlug()->defaultValue()->Object::hash();
+		h = intermediateImagePlug()->channelNamesPlug()->getDefaultValue()->Object::hash();
 	}
 	else
 	{
@@ -509,7 +509,7 @@ IECore::ConstStringVectorDataPtr ImageReader::computeChannelNames( const Gaffer:
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		return intermediateImagePlug()->channelNamesPlug()->defaultValue();
+		return intermediateImagePlug()->channelNamesPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -522,7 +522,7 @@ void ImageReader::hashChannelData( const GafferImage::ImagePlug *parent, const G
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		h = intermediateImagePlug()->channelDataPlug()->defaultValue()->Object::hash();
+		h = intermediateImagePlug()->channelDataPlug()->getDefaultValue()->Object::hash();
 	}
 	else
 	{
@@ -535,7 +535,7 @@ IECore::ConstFloatVectorDataPtr ImageReader::computeChannelData( const std::stri
 	FrameMaskScope scope( context, this );
 	if( scope.mode() == BlackOutside )
 	{
-		return intermediateImagePlug()->channelDataPlug()->defaultValue();
+		return intermediateImagePlug()->channelDataPlug()->getDefaultValue();
 	}
 	else
 	{

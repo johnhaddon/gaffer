@@ -80,7 +80,7 @@ bool StringPlug::acceptsInput( const Plug *input ) const
 
 PlugPtr StringPlug::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new StringPlug( name, direction, defaultValue(), getFlags(), substitutions() );
+	return new StringPlug( name, direction, getDefaultValue(), getFlags(), substitutions() );
 }
 
 const std::string &StringPlug::defaultValue() const

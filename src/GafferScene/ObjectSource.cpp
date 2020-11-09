@@ -158,12 +158,12 @@ void ObjectSource::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 
 void ObjectSource::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	h = parent->attributesPlug()->defaultValue()->Object::hash();
+	h = parent->attributesPlug()->getDefaultValue()->Object::hash();
 }
 
 IECore::ConstCompoundObjectPtr ObjectSource::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
 {
-	return parent->attributesPlug()->defaultValue();
+	return parent->attributesPlug()->getDefaultValue();
 }
 
 void ObjectSource::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -210,7 +210,7 @@ void ObjectSource::hashObject( const SceneNode::ScenePath &path, const Gaffer::C
 {
 	if( path.size() != 1 )
 	{
-		h = parent->objectPlug()->defaultValue()->hash();
+		h = parent->objectPlug()->getDefaultValue()->hash();
 		return;
 	}
 
@@ -222,7 +222,7 @@ IECore::ConstObjectPtr ObjectSource::computeObject( const SceneNode::ScenePath &
 {
 	if( path.size() != 1 )
 	{
-		return parent->objectPlug()->defaultValue();
+		return parent->objectPlug()->getDefaultValue();
 	}
 
 	return sourcePlug()->getValue();
@@ -236,7 +236,7 @@ void ObjectSource::hashChildNames( const SceneNode::ScenePath &path, const Gaffe
 		namePlug()->hash( h );
 		return;
 	}
-	h = parent->childNamesPlug()->defaultValue()->Object::hash();
+	h = parent->childNamesPlug()->getDefaultValue()->Object::hash();
 }
 
 void ObjectSource::hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -259,17 +259,17 @@ IECore::ConstInternedStringVectorDataPtr ObjectSource::computeChildNames( const 
 		}
 		return result;
 	}
-	return parent->childNamesPlug()->defaultValue();
+	return parent->childNamesPlug()->getDefaultValue();
 }
 
 void ObjectSource::hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	h = parent->globalsPlug()->defaultValue()->Object::hash();
+	h = parent->globalsPlug()->getDefaultValue()->Object::hash();
 }
 
 IECore::ConstCompoundObjectPtr ObjectSource::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
 {
-	return parent->globalsPlug()->defaultValue();
+	return parent->globalsPlug()->getDefaultValue();
 }
 
 void ObjectSource::hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -300,7 +300,7 @@ void ObjectSource::hashSet( const IECore::InternedString &setName, const Gaffer:
 	}
 	else
 	{
-		h = outPlug()->setPlug()->defaultValue()->Object::hash();
+		h = outPlug()->setPlug()->getDefaultValue()->Object::hash();
 	}
 }
 
@@ -314,7 +314,7 @@ IECore::ConstPathMatcherDataPtr ObjectSource::computeSet( const IECore::Interned
 	}
 	else
 	{
-		return outPlug()->setPlug()->defaultValue();
+		return outPlug()->setPlug()->getDefaultValue();
 	}
 }
 

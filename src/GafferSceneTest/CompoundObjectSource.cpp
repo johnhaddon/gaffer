@@ -122,7 +122,7 @@ IECore::ConstCompoundObjectPtr CompoundObjectSource::computeAttributes( const Sc
 	}
 	else
 	{
-		return outPlug()->attributesPlug()->defaultValue();
+		return outPlug()->attributesPlug()->getDefaultValue();
 	}
 }
 
@@ -142,7 +142,7 @@ IECore::ConstObjectPtr CompoundObjectSource::computeObject( const ScenePath &pat
 	}
 	else
 	{
-		return outPlug()->objectPlug()->defaultValue();
+		return outPlug()->objectPlug()->getDefaultValue();
 	}
 }
 
@@ -159,7 +159,7 @@ IECore::ConstInternedStringVectorDataPtr CompoundObjectSource::computeChildNames
 	ConstCompoundObjectPtr children = entry->member<CompoundObject>( "children" );
 	if( !children )
 	{
-		return outPlug()->childNamesPlug()->defaultValue();
+		return outPlug()->childNamesPlug()->getDefaultValue();
 	}
 	InternedStringVectorDataPtr result = new InternedStringVectorData;
 	for( CompoundObject::ObjectMap::const_iterator it = children->members().begin(); it!=children->members().end(); it++ )
@@ -183,7 +183,7 @@ IECore::ConstCompoundObjectPtr CompoundObjectSource::computeGlobals( const Gaffe
 	{
 		return globals;
 	}
-	return outPlug()->globalsPlug()->defaultValue();
+	return outPlug()->globalsPlug()->getDefaultValue();
 }
 
 void CompoundObjectSource::hashSetNames( const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -207,7 +207,7 @@ IECore::ConstInternedStringVectorDataPtr CompoundObjectSource::computeSetNames( 
 		return resultData;
 	}
 
-	return outPlug()->setNamesPlug()->defaultValue();
+	return outPlug()->setNamesPlug()->getDefaultValue();
 }
 
 void CompoundObjectSource::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -233,7 +233,7 @@ IECore::ConstPathMatcherDataPtr CompoundObjectSource::computeSet( const IECore::
 		}
 	}
 
-	return outPlug()->setPlug()->defaultValue();
+	return outPlug()->setPlug()->getDefaultValue();
 }
 
 IECore::ConstCompoundObjectPtr CompoundObjectSource::inObject() const

@@ -108,7 +108,7 @@ void DeleteObject::hashObject( const ScenePath &path, const Gaffer::Context *con
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
-		h = outPlug()->objectPlug()->defaultValue()->hash();
+		h = outPlug()->objectPlug()->getDefaultValue()->hash();
 	}
 	else
 	{
@@ -120,7 +120,7 @@ IECore::ConstObjectPtr DeleteObject::computeObject( const ScenePath &path, const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
-		return outPlug()->objectPlug()->defaultValue();
+		return outPlug()->objectPlug()->getDefaultValue();
 	}
 	else
 	{

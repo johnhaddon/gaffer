@@ -144,7 +144,7 @@ void Encapsulate::hashChildNames( const ScenePath &path, const Gaffer::Context *
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
-		h = outPlug()->childNamesPlug()->defaultValue()->Object::hash();
+		h = outPlug()->childNamesPlug()->getDefaultValue()->Object::hash();
 	}
 	else
 	{
@@ -156,7 +156,7 @@ IECore::ConstInternedStringVectorDataPtr Encapsulate::computeChildNames( const S
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
-		return outPlug()->childNamesPlug()->defaultValue();
+		return outPlug()->childNamesPlug()->getDefaultValue();
 	}
 	else
 	{

@@ -226,7 +226,7 @@ GafferImage::Format CollectImages::computeFormat( const Gaffer::Context *context
 	}
 	else
 	{
-		return outPlug()->formatPlug()->defaultValue();
+		return outPlug()->formatPlug()->getDefaultValue();
 	}
 }
 
@@ -351,7 +351,7 @@ IECore::ConstCompoundDataPtr CollectImages::computeMetadata( const Gaffer::Conte
 	}
 	else
 	{
-		return outPlug()->metadataPlug()->defaultValue();
+		return outPlug()->metadataPlug()->getDefaultValue();
 	}
 }
 

@@ -364,7 +364,7 @@ void OSLImage::hashShading( const Gaffer::Context *context, IECore::MurmurHash &
 
 	if( !shadingEngine )
 	{
-		h = shadingPlug()->defaultValue()->hash();
+		h = shadingPlug()->getDefaultValue()->hash();
 		return;
 	}
 
@@ -411,7 +411,7 @@ IECore::ConstCompoundDataPtr OSLImage::computeShading( const Gaffer::Context *co
 
 	if( !shadingEngine )
 	{
-		return static_cast<const CompoundData *>( shadingPlug()->defaultValue() );
+		return static_cast<const CompoundData *>( shadingPlug()->getDefaultValue() );
 	}
 
 	const V2i tileOrigin = context->get<V2i>( ImagePlug::tileOriginContextName );

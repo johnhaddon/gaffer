@@ -230,7 +230,7 @@ void SubTree::hashChildNames( const ScenePath &path, const Gaffer::Context *cont
 			h.append( *(source.rbegin()) );
 			break;
 		case EmptyRoot :
-			h = inPlug()->childNamesPlug()->defaultValue()->Object::hash();
+			h = inPlug()->childNamesPlug()->getDefaultValue()->Object::hash();
 			break;
 	}
 }
@@ -249,7 +249,7 @@ IECore::ConstInternedStringVectorDataPtr SubTree::computeChildNames( const Scene
 			return result;
 		}
 		default : // EmptyRoot
-			return inPlug()->childNamesPlug()->defaultValue();
+			return inPlug()->childNamesPlug()->getDefaultValue();
 	}
 }
 

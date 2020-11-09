@@ -476,7 +476,7 @@ IECore::ConstCompoundObjectPtr CollectScenes::computeAttributes( const ScenePath
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
 	{
-		return outPlug()->attributesPlug()->defaultValue();
+		return outPlug()->attributesPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -502,7 +502,7 @@ IECore::ConstObjectPtr CollectScenes::computeObject( const ScenePath &path, cons
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
 	{
-		return outPlug()->objectPlug()->defaultValue();
+		return outPlug()->objectPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -523,7 +523,7 @@ void CollectScenes::hashChildNames( const ScenePath &path, const Gaffer::Context
 		{
 			if( !inPlug()->existsPlug()->getValue() )
 			{
-				h = inPlug()->childNamesPlug()->defaultValue()->Object::hash();
+				h = inPlug()->childNamesPlug()->getDefaultValue()->Object::hash();
 				return;
 			}
 		}
@@ -544,7 +544,7 @@ IECore::ConstInternedStringVectorDataPtr CollectScenes::computeChildNames( const
 		{
 			if( !inPlug()->existsPlug()->getValue() )
 			{
-				return inPlug()->childNamesPlug()->defaultValue();
+				return inPlug()->childNamesPlug()->getDefaultValue();
 			}
 		}
 		return inPlug()->childNamesPlug()->getValue();
@@ -562,7 +562,7 @@ void CollectScenes::hashGlobals( const Gaffer::Context *context, const ScenePlug
 	}
 	else
 	{
-		h = inPlug()->globalsPlug()->defaultValue()->Object::hash();
+		h = inPlug()->globalsPlug()->getDefaultValue()->Object::hash();
 	}
 }
 
@@ -577,7 +577,7 @@ IECore::ConstCompoundObjectPtr CollectScenes::computeGlobals( const Gaffer::Cont
 	}
 	else
 	{
-		return inPlug()->globalsPlug()->defaultValue();
+		return inPlug()->globalsPlug()->getDefaultValue();
 	}
 }
 

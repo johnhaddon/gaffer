@@ -149,7 +149,7 @@ IECore::ConstObjectPtr Text::computeSource( const Context *context ) const
 	std::string text = textPlug()->getValue();
 	if( !text.size() || !fontFileName.size() )
 	{
-		return outPlug()->objectPlug()->defaultValue();
+		return outPlug()->objectPlug()->getDefaultValue();
 	}
 
 	FontPtr font = Detail::fontCache()->get( fontFileName );

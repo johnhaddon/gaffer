@@ -571,13 +571,13 @@ Imath::Box2i Display::computeDataWindow( const Gaffer::Context *context, const I
 
 void Display::hashMetadata( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
 {
-	const CompoundData *d = m_driver ? m_driver->metadata() : outPlug()->metadataPlug()->defaultValue();
+	const CompoundData *d = m_driver ? m_driver->metadata() : outPlug()->metadataPlug()->getDefaultValue();
 	h = d->Object::hash();
 }
 
 IECore::ConstCompoundDataPtr Display::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	return m_driver ? m_driver->metadata() : outPlug()->metadataPlug()->defaultValue();
+	return m_driver ? m_driver->metadata() : outPlug()->metadataPlug()->getDefaultValue();
 }
 
 void Display::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const

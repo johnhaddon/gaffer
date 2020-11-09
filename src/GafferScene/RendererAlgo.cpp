@@ -1489,7 +1489,7 @@ void outputCameras( const ScenePlug *scene, const IECore::CompoundObject *global
 	{
 		CameraPtr defaultCamera = new IECoreScene::Camera;
 		RendererAlgo::applyCameraGlobals( defaultCamera.get(), globals, scene );
-		IECoreScenePreview::Renderer::AttributesInterfacePtr defaultAttributes = renderer->attributes( scene->attributesPlug()->defaultValue() );
+		IECoreScenePreview::Renderer::AttributesInterfacePtr defaultAttributes = renderer->attributes( scene->attributesPlug()->getDefaultValue() );
 		ConstStringDataPtr name = new StringData( "gaffer:defaultCamera" );
 		renderer->camera( name->readable(), defaultCamera.get(), defaultAttributes.get() );
 		renderer->option( "camera", name.get() );

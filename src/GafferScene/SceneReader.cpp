@@ -273,7 +273,7 @@ void SceneReader::hashAttributes( const ScenePath &path, const Gaffer::Context *
 	ConstSceneInterfacePtr s = scene( path );
 	if( !s )
 	{
-		h = parent->attributesPlug()->defaultValue()->Object::hash();
+		h = parent->attributesPlug()->getDefaultValue()->Object::hash();
 		return;
 	}
 
@@ -288,7 +288,7 @@ IECore::ConstCompoundObjectPtr SceneReader::computeAttributes( const ScenePath &
 	ConstSceneInterfacePtr s = scene( path );
 	if( !s )
 	{
-		return parent->attributesPlug()->defaultValue();
+		return parent->attributesPlug()->getDefaultValue();
 	}
 
 	// read attributes
@@ -324,7 +324,7 @@ void SceneReader::hashObject( const ScenePath &path, const Gaffer::Context *cont
 	if( !s || !s->hasObject() )
 	{
 		// no object
-		h = parent->objectPlug()->defaultValue()->hash();
+		h = parent->objectPlug()->getDefaultValue()->hash();
 		return;
 	}
 
@@ -339,7 +339,7 @@ IECore::ConstObjectPtr SceneReader::computeObject( const ScenePath &path, const 
 	ConstSceneInterfacePtr s = scene( path );
 	if( !s || !s->hasObject() )
 	{
-		return parent->objectPlug()->defaultValue();
+		return parent->objectPlug()->getDefaultValue();
 	}
 
 	return s->readObject( context->getTime() );
@@ -350,7 +350,7 @@ void SceneReader::hashChildNames( const ScenePath &path, const Gaffer::Context *
 	ConstSceneInterfacePtr s = scene( path );
 	if( !s )
 	{
-		h = parent->childNamesPlug()->defaultValue()->Object::hash();
+		h = parent->childNamesPlug()->getDefaultValue()->Object::hash();
 		return;
 	}
 
@@ -369,7 +369,7 @@ IECore::ConstInternedStringVectorDataPtr SceneReader::computeChildNames( const S
 	ConstSceneInterfacePtr s = scene( path );
 	if( !s )
 	{
-		return parent->childNamesPlug()->defaultValue();
+		return parent->childNamesPlug()->getDefaultValue();
 	}
 
 	// get the child names
@@ -420,12 +420,12 @@ IECore::ConstInternedStringVectorDataPtr SceneReader::computeChildNames( const S
 
 void SceneReader::hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	h = outPlug()->globalsPlug()->defaultValue()->Object::hash();
+	h = outPlug()->globalsPlug()->getDefaultValue()->Object::hash();
 }
 
 IECore::ConstCompoundObjectPtr SceneReader::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
 {
-	return outPlug()->globalsPlug()->defaultValue();
+	return outPlug()->globalsPlug()->getDefaultValue();
 }
 
 void SceneReader::hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -440,7 +440,7 @@ IECore::ConstInternedStringVectorDataPtr SceneReader::computeSetNames( const Gaf
 	ConstSceneInterfacePtr s = scene( ScenePath() );
 	if( !s )
 	{
-		return parent->setNamesPlug()->defaultValue();
+		return parent->setNamesPlug()->getDefaultValue();
 	}
 
 	InternedStringVectorDataPtr result = new InternedStringVectorData();

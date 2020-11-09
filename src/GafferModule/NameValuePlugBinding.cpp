@@ -77,13 +77,13 @@ class NameValuePlugSerialiser : public ValuePlugSerialiser
 			}
 
 			std::string result = "Gaffer.NameValuePlug( ";
-			result += "\"" + plug->namePlug()->defaultValue() + "\", ";
+			result += "\"" + plug->namePlug()->getDefaultValue() + "\", ";
 
 			result += Serialisation::acquireSerialiser( plug->valuePlug() )->constructor( plug->valuePlug(), *serialisation ) + ", ";
 
 			if( plug->enabledPlug() )
 			{
-				result += std::string( plug->enabledPlug()->defaultValue() ? "True" : "False" ) + ", ";
+				result += std::string( plug->enabledPlug()->getDefaultValue() ? "True" : "False" ) + ", ";
 			}
 
 			result += "\"" + plug->getName().string() + "\", ";

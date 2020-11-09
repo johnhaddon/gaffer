@@ -84,10 +84,10 @@ class TransformPlugSerialiser : public ValuePlugSerialiser
 					result += boost::str( formatter % name % d.x % d.y % d.z );
 				}
 			};
-			appendDefault( plug->translatePlug()->defaultValue(), V3f( 0 ), "defaultTranslate" );
-			appendDefault( plug->rotatePlug()->defaultValue(), V3f( 0 ), "defaultRotate" );
-			appendDefault( plug->scalePlug()->defaultValue(), V3f( 1 ), "defaultScale" );
-			appendDefault( plug->pivotPlug()->defaultValue(), V3f( 0 ), "defaultPivot" );
+			appendDefault( plug->translatePlug()->getDefaultValue(), V3f( 0 ), "defaultTranslate" );
+			appendDefault( plug->rotatePlug()->getDefaultValue(), V3f( 0 ), "defaultRotate" );
+			appendDefault( plug->scalePlug()->getDefaultValue(), V3f( 1 ), "defaultScale" );
+			appendDefault( plug->pivotPlug()->getDefaultValue(), V3f( 0 ), "defaultPivot" );
 
 			const unsigned flags = plug->getFlags();
 			if( flags != Plug::Default )

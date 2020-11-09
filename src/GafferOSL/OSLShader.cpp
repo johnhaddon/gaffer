@@ -243,7 +243,7 @@ Plug *loadStringParameter( const OSLQuery::Parameter *parameter, const InternedS
 	}
 
 	StringPlug *existingPlug = parent->getChild<StringPlug>( name );
-	if(	existingPlug && existingPlug->defaultValue() == defaultValue )
+	if(	existingPlug && existingPlug->getDefaultValue() == defaultValue )
 	{
 		return existingPlug;
 	}
@@ -276,7 +276,7 @@ Plug *loadStringArrayParameter( const OSLQuery::Parameter *parameter, const Inte
 	}
 
 	StringVectorDataPlug *existingPlug = parent->getChild<StringVectorDataPlug>( name );
-	if(	existingPlug && *existingPlug->defaultValue() == *defaultValueData )
+	if(	existingPlug && *existingPlug->getDefaultValue() == *defaultValueData )
 	{
 		return existingPlug;
 	}
@@ -329,7 +329,7 @@ Plug *loadNumericParameter( const OSLQuery::Parameter *parameter, const Interned
 	PlugType *existingPlug = parent->getChild<PlugType>( name );
 	if(
 		existingPlug &&
-		existingPlug->defaultValue() == defaultValue &&
+		existingPlug->getDefaultValue() == defaultValue &&
 		existingPlug->minValue() == minValue &&
 		existingPlug->maxValue() == maxValue
 	)
@@ -380,7 +380,7 @@ Plug *loadNumericArrayParameter( const OSLQuery::Parameter *parameter, const Int
 	PlugType *existingPlug = parent->getChild<PlugType>( name );
 	if(
 		existingPlug &&
-		*existingPlug->defaultValue() == *defaultValueData
+		*existingPlug->getDefaultValue() == *defaultValueData
 	)
 	{
 		return existingPlug;
@@ -450,7 +450,7 @@ Plug *loadCompoundNumericParameter( const OSLQuery::Parameter *parameter, const 
 	PlugType *existingPlug = parent->getChild<PlugType>( name );
 	if(
 		existingPlug &&
-		existingPlug->defaultValue() == defaultValue &&
+		existingPlug->getDefaultValue() == defaultValue &&
 		existingPlug->minValue() == minValue &&
 		existingPlug->maxValue() == maxValue &&
 		existingPlug->interpretation() == interpretation
@@ -511,7 +511,7 @@ Plug *loadCompoundNumericArrayParameter( const OSLQuery::Parameter *parameter, c
 	PlugType *existingPlug = parent->getChild<PlugType>( name );
 	if(
 		existingPlug &&
-		*existingPlug->defaultValue() == *defaultValueData
+		*existingPlug->getDefaultValue() == *defaultValueData
 	)
 	{
 		return existingPlug;
@@ -542,7 +542,7 @@ Plug *loadMatrixParameter( const OSLQuery::Parameter *parameter, const InternedS
 	);
 
 	M44fPlug *existingPlug = parent->getChild<M44fPlug>( name );
-	if( existingPlug && existingPlug->defaultValue() == defaultValue )
+	if( existingPlug && existingPlug->getDefaultValue() == defaultValue )
 	{
 		return existingPlug;
 	}
@@ -581,7 +581,7 @@ Plug *loadMatrixArrayParameter( const OSLQuery::Parameter *parameter, const Inte
 	}
 
 	M44fVectorDataPlug *existingPlug = parent->getChild<M44fVectorDataPlug>( name );
-	if( existingPlug && *existingPlug->defaultValue() == *defaultValueData )
+	if( existingPlug && *existingPlug->getDefaultValue() == *defaultValueData )
 	{
 		return existingPlug;
 	}
@@ -682,7 +682,7 @@ Plug *loadSplineParameters( const OSLQuery::Parameter *positionsParameter, const
 	}
 
 	PlugType *existingPlug = parent->getChild<PlugType>( name );
-	if( existingPlug && existingPlug->defaultValue() == defaultValue )
+	if( existingPlug && existingPlug->getDefaultValue() == defaultValue )
 	{
 		return existingPlug;
 	}

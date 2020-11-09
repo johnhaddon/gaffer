@@ -143,7 +143,7 @@ Imath::Box2i Constant::computeDataWindow( const Gaffer::Context *context, const 
 
 IECore::ConstCompoundDataPtr Constant::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	return outPlug()->metadataPlug()->defaultValue();
+	return outPlug()->metadataPlug()->getDefaultValue();
 }
 
 void Constant::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

@@ -173,13 +173,13 @@ PlugPtr NameValuePlug::createCounterpart( const std::string &name, Direction dir
 	if( enabledPlug() )
 	{
 		return new NameValuePlug(
-			namePlug()->defaultValue(), valueCounterpart, enabledPlug()->defaultValue(), name, getFlags()
+			namePlug()->getDefaultValue(), valueCounterpart, enabledPlug()->getDefaultValue(), name, getFlags()
 		);
 	}
 	else
 	{
 		return new NameValuePlug(
-			namePlug()->defaultValue(), valueCounterpart, name, getFlags()
+			namePlug()->getDefaultValue(), valueCounterpart, name, getFlags()
 		);
 	}
 }

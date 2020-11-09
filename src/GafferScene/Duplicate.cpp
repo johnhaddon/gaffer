@@ -62,7 +62,7 @@ Duplicate::Duplicate( const std::string &name )
 	addChild( new StringPlug( "name" ) );
 	addChild( new TransformPlug( "transform" ) );
 	addChild( new StringPlug( "__outParent", Plug::Out ) );
-	addChild( new InternedStringVectorDataPlug( "__outChildNames", Plug::Out, inPlug()->childNamesPlug()->defaultValue() ) );
+	addChild( new InternedStringVectorDataPlug( "__outChildNames", Plug::Out, inPlug()->childNamesPlug()->getDefaultValue() ) );
 
 	parentPlug()->setInput( outParentPlug() );
 	parentPlug()->setFlags( Plug::Serialisable, false );
@@ -178,7 +178,7 @@ void Duplicate::hash( const ValuePlug *output, const Context *context, IECore::M
 		ScenePlug::stringToPath( targetPlug()->getValue(), target );
 		if( !inPlug()->exists( target ) )
 		{
-			h = childNamesPlug()->defaultValue()->Object::hash();
+			h = childNamesPlug()->getDefaultValue()->Object::hash();
 			return;
 		}
 		h.append( target.data(), target.size() );
@@ -440,13 +440,13 @@ IECore::ConstPathMatcherDataPtr Duplicate::computeBranchSet( const ScenePath &pa
 	const PathMatcher &inputSet = inputSetData->readable();
 	if( inputSet.isEmpty() )
 	{
-		return outPlug()->setPlug()->defaultValue();
+		return outPlug()->setPlug()->getDefaultValue();
 	}
 
 	PathMatcher subTree = inputSet.subTree( targetPlug()->getValue() );
 	if( subTree.isEmpty() )
 	{
-		return outPlug()->setPlug()->defaultValue();
+		return outPlug()->setPlug()->getDefaultValue();
 	}
 
 	ConstInternedStringVectorDataPtr childNamesData = childNamesPlug()->getValue();

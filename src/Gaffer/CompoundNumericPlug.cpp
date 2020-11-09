@@ -77,7 +77,7 @@ bool CompoundNumericPlug<T>::acceptsChild( const GraphComponent *potentialChild 
 template<class T>
 PlugPtr CompoundNumericPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new CompoundNumericPlug<T>( name, direction, defaultValue(), minValue(), maxValue(), getFlags(), interpretation() );
+	return new CompoundNumericPlug<T>( name, direction, getDefaultValue(), minValue(), maxValue(), getFlags(), interpretation() );
 }
 
 template<typename T>

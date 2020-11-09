@@ -318,7 +318,7 @@ IECore::ConstStringVectorDataPtr DeepMerge::computeChannelNames( const Gaffer::C
 		return outChannelStrVectorData;
 	}
 
-	return inPlug()->channelNamesPlug()->defaultValue();
+	return inPlug()->channelNamesPlug()->getDefaultValue();
 }
 
 void DeepMerge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

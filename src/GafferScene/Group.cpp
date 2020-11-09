@@ -299,7 +299,7 @@ IECore::ConstCompoundObjectPtr Group::computeAttributes( const ScenePath &path, 
 {
 	if( path.size() <= 1 )
 	{
-		return parent->attributesPlug()->defaultValue();
+		return parent->attributesPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -328,7 +328,7 @@ IECore::ConstObjectPtr Group::computeObject( const ScenePath &path, const Gaffer
 {
 	if( path.size() <= 1 )
 	{
-		return parent->objectPlug()->defaultValue();
+		return parent->objectPlug()->getDefaultValue();
 	}
 	else
 	{

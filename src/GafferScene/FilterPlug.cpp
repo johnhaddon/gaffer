@@ -124,7 +124,7 @@ bool FilterPlug::acceptsInput( const Gaffer::Plug *input ) const
 
 Gaffer::PlugPtr FilterPlug::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new FilterPlug( name, direction, defaultValue(), minValue(), maxValue(), getFlags() );
+	return new FilterPlug( name, direction, getDefaultValue(), minValue(), maxValue(), getFlags() );
 }
 
 void FilterPlug::sceneAffects( const Gaffer::Plug *scenePlugChild, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const

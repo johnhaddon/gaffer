@@ -237,7 +237,7 @@ IECore::ConstStringVectorDataPtr Mix::computeChannelNames( const Gaffer::Context
 		return outChannelStrVectorData;
 	}
 
-	return inPlug()->channelNamesPlug()->defaultValue();
+	return inPlug()->channelNamesPlug()->getDefaultValue();
 }
 
 void Mix::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

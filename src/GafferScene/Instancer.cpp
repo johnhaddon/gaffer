@@ -997,7 +997,7 @@ void Instancer::hashBranchAttributes( const ScenePath &parentPath, const ScenePa
 	if( branchPath.size() <= 1 )
 	{
 		// "/" or "/instances"
-		h = outPlug()->attributesPlug()->defaultValue()->Object::hash();
+		h = outPlug()->attributesPlug()->getDefaultValue()->Object::hash();
 	}
 	else if( branchPath.size() == 2 )
 	{
@@ -1030,7 +1030,7 @@ IECore::ConstCompoundObjectPtr Instancer::computeBranchAttributes( const ScenePa
 	if( branchPath.size() <= 1 )
 	{
 		// "/" or "/instances"
-		return outPlug()->attributesPlug()->defaultValue();
+		return outPlug()->attributesPlug()->getDefaultValue();
 	}
 	else if( branchPath.size() == 2 )
 	{
@@ -1048,7 +1048,7 @@ IECore::ConstCompoundObjectPtr Instancer::computeBranchAttributes( const ScenePa
 		}
 		else
 		{
-			return outPlug()->attributesPlug()->defaultValue();
+			return outPlug()->attributesPlug()->getDefaultValue();
 		}
 	}
 	else
@@ -1077,7 +1077,7 @@ void Instancer::hashBranchObject( const ScenePath &parentPath, const ScenePath &
 	if( branchPath.size() <= 2 )
 	{
 		// "/" or "/instances" or "/instances/<prototypeName>"
-		h = outPlug()->objectPlug()->defaultValue()->Object::hash();
+		h = outPlug()->objectPlug()->getDefaultValue()->Object::hash();
 	}
 	else
 	{
@@ -1092,7 +1092,7 @@ IECore::ConstObjectPtr Instancer::computeBranchObject( const ScenePath &parentPa
 	if( branchPath.size() <= 2 )
 	{
 		// "/" or "/instances" or "/instances/<prototypeName>"
-		return outPlug()->objectPlug()->defaultValue();
+		return outPlug()->objectPlug()->getDefaultValue();
 	}
 	else
 	{
@@ -1148,7 +1148,7 @@ IECore::ConstInternedStringVectorDataPtr Instancer::computeBranchChildNames( con
 		std::string name = namePlug()->getValue();
 		if( name.empty() )
 		{
-			return outPlug()->childNamesPlug()->defaultValue();
+			return outPlug()->childNamesPlug()->getDefaultValue();
 		}
 		InternedStringVectorDataPtr result = new InternedStringVectorData();
 		result->writable().push_back( name );

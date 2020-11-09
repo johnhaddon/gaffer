@@ -188,7 +188,7 @@ Imath::Box2i Ramp::computeDataWindow( const Gaffer::Context *context, const Imag
 
 IECore::ConstCompoundDataPtr Ramp::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	return outPlug()->metadataPlug()->defaultValue();
+	return outPlug()->metadataPlug()->getDefaultValue();
 }
 
 void Ramp::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

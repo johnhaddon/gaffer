@@ -157,7 +157,7 @@ void Seeds::hashBranchAttributes( const ScenePath &parentPath, const ScenePath &
 
 IECore::ConstCompoundObjectPtr Seeds::computeBranchAttributes( const ScenePath &parentPath, const ScenePath &branchPath, const Gaffer::Context *context ) const
 {
-	return outPlug()->attributesPlug()->defaultValue();
+	return outPlug()->attributesPlug()->getDefaultValue();
 }
 
 bool Seeds::affectsBranchObject( const Gaffer::Plug *input ) const
@@ -182,7 +182,7 @@ void Seeds::hashBranchObject( const ScenePath &parentPath, const ScenePath &bran
 		return;
 	}
 
-	h = outPlug()->objectPlug()->defaultValue()->Object::hash();
+	h = outPlug()->objectPlug()->getDefaultValue()->Object::hash();
 }
 
 IECore::ConstObjectPtr Seeds::computeBranchObject( const ScenePath &parentPath, const ScenePath &branchPath, const Gaffer::Context *context ) const
@@ -193,7 +193,7 @@ IECore::ConstObjectPtr Seeds::computeBranchObject( const ScenePath &parentPath, 
 		ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( inPlug()->object( parentPath ) );
 		if( !mesh )
 		{
-			return outPlug()->objectPlug()->defaultValue();
+			return outPlug()->objectPlug()->getDefaultValue();
 		}
 
 		PointsPrimitivePtr result = MeshAlgo::distributePoints(
@@ -206,7 +206,7 @@ IECore::ConstObjectPtr Seeds::computeBranchObject( const ScenePath &parentPath, 
 
 		return result;
 	}
-	return outPlug()->objectPlug()->defaultValue();
+	return outPlug()->objectPlug()->getDefaultValue();
 }
 
 bool Seeds::affectsBranchChildNames( const Gaffer::Plug *input ) const
@@ -223,7 +223,7 @@ void Seeds::hashBranchChildNames( const ScenePath &parentPath, const ScenePath &
 	}
 	else
 	{
-		h = outPlug()->childNamesPlug()->defaultValue()->Object::hash();
+		h = outPlug()->childNamesPlug()->getDefaultValue()->Object::hash();
 	}
 }
 
@@ -234,7 +234,7 @@ IECore::ConstInternedStringVectorDataPtr Seeds::computeBranchChildNames( const S
 		std::string name = namePlug()->getValue();
 		if( name.empty() )
 		{
-			return outPlug()->childNamesPlug()->defaultValue();
+			return outPlug()->childNamesPlug()->getDefaultValue();
 		}
 		InternedStringVectorDataPtr result = new InternedStringVectorData();
 		result->writable().push_back( name );
@@ -242,6 +242,6 @@ IECore::ConstInternedStringVectorDataPtr Seeds::computeBranchChildNames( const S
 	}
 	else
 	{
-		return outPlug()->childNamesPlug()->defaultValue();
+		return outPlug()->childNamesPlug()->getDefaultValue();
 	}
 }

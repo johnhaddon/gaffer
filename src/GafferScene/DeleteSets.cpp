@@ -171,7 +171,7 @@ void DeleteSets::hashSet( const IECore::InternedString &setName, const Gaffer::C
 	}
 	else
 	{
-		h = inPlug()->setPlug()->defaultValue()->Object::hash();
+		h = inPlug()->setPlug()->getDefaultValue()->Object::hash();
 	}
 }
 
@@ -185,6 +185,6 @@ IECore::ConstPathMatcherDataPtr DeleteSets::computeSet( const IECore::InternedSt
 	}
 	else
 	{
-		return inPlug()->setPlug()->defaultValue();
+		return inPlug()->setPlug()->getDefaultValue();
 	}
 }

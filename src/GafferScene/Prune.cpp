@@ -145,7 +145,7 @@ void Prune::hashChildNames( const ScenePath &path, const Gaffer::Context *contex
 
 	if( m & IECore::PathMatcher::ExactMatch )
 	{
-		h = inPlug()->childNamesPlug()->defaultValue()->Object::hash();
+		h = inPlug()->childNamesPlug()->getDefaultValue()->Object::hash();
 	}
 	else if( m & IECore::PathMatcher::DescendantMatch )
 	{
@@ -179,7 +179,7 @@ IECore::ConstInternedStringVectorDataPtr Prune::computeChildNames( const ScenePa
 
 	if( m & IECore::PathMatcher::ExactMatch  )
 	{
-		return inPlug()->childNamesPlug()->defaultValue();
+		return inPlug()->childNamesPlug()->getDefaultValue();
 	}
 	else if( m & IECore::PathMatcher::DescendantMatch )
 	{
