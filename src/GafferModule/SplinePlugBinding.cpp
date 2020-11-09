@@ -167,6 +167,13 @@ typename T::YPlugType::Ptr pointYPlug( T &s, size_t index )
 }
 
 template<typename T>
+void setDefaultValue( T &plug, const typename T::ValueType &defaultValue )
+{
+	IECorePython::ScopedGILRelease r;
+	return plug.setDefaultValue( defaultValue );
+}
+
+template<typename T>
 void setValue( T &plug, const typename T::ValueType &value )
 {
 	IECorePython::ScopedGILRelease r;
@@ -217,6 +224,8 @@ void bind()
 			)
 		)
 		.def( "defaultValue", &T::defaultValue, return_value_policy<copy_const_reference>() )
+		.def( "getDefaultValue", &T::getDefaultValue, return_value_policy<copy_const_reference>() )
+		.def( "setDefaultValue", &setDefaultValue<T> )
 		.def( "setValue", &setValue<T> )
 		.def( "getValue", &getValue<T> )
 		.def( "numPoints", &T::numPoints )

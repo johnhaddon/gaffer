@@ -235,6 +235,12 @@ class AtomicFormatPlugSerialiser : public GafferBindings::ValuePlugSerialiser
 
 };
 
+void setDefaultValue( FormatPlug &plug, const Format &defaultValue )
+{
+	IECorePython::ScopedGILRelease r;
+	plug.setDefaultValue( defaultValue );
+}
+
 void setValue( FormatPlug *plug, const Format &value )
 {
 	// we use a GIL release here to prevent a lock in the case where this triggers a graph
@@ -385,6 +391,8 @@ void GafferImageModule::bindCore()
 			)
 		)
 		.def( "defaultValue", &FormatPlug::defaultValue )
+		.def( "setDefaultValue", &setDefaultValue )
+		.def( "getDefaultValue", &FormatPlug::getDefaultValue )
 		.def( "setValue", &setValue )
 		.def( "getValue", &getValue )
 		.def( "setDefaultFormat", &FormatPlug::setDefaultFormat )

@@ -99,9 +99,24 @@ IECore::ObjectPtr getValue( typename T::Ptr p, const IECore::MurmurHash *precomp
 }
 
 template<typename T>
-typename T::ValuePtr defaultValue( typename T::Ptr p, bool copy )
+void setDefaultValue( typename T::Ptr p, typename T::ValuePtr defaultValue, bool copy )
 {
-	typename T::ConstValuePtr v = p->defaultValue();
+	IECorePython::ScopedGILRelease r;
+	if( !defaultValue )
+	{
+		throw std::invalid_argument( "Default value must not be None." );
+	}
+	if( copy )
+	{
+		defaultValue = defaultValue->copy();
+	}
+	p->setDefaultValue( defaultValue );
+}
+
+template<typename T>
+typename T::ValuePtr getDefaultValue( typename T::Ptr p, bool copy )
+{
+	typename T::ConstValuePtr v = p->getDefaultValue();
 	if( v )
 	{
 		return copy ? v->copy() : boost::const_pointer_cast<typename T::ValueType>( v );
@@ -141,7 +156,9 @@ TypedObjectPlugClass<T, TWrapper>::TypedObjectPlugClass( const char *docString )
 			)
 		)
 	);
-	this->def( "defaultValue", &Detail::defaultValue<T>, ( boost::python::arg_( "_copy" ) = true ) );
+	this->def( "defaultValue", &Detail::getDefaultValue<T>, ( boost::python::arg_( "_copy" ) = true ) );
+	this->def( "setDefaultValue", &Detail::setDefaultValue<T>, ( boost::python::arg_( "_copy" ) = true ) );
+	this->def( "getDefaultValue", &Detail::getDefaultValue<T>, ( boost::python::arg_( "_copy" ) = true ) );
 	this->def( "setValue", Detail::setValue<T>, ( boost::python::arg_( "value" ), boost::python::arg_( "_copy" ) = true ) );
 	this->def( "getValue", Detail::getValue<T>, ( boost::python::arg_( "_precomputedHash" ) = boost::python::object(), boost::python::arg_( "_copy" ) = true ) );
 

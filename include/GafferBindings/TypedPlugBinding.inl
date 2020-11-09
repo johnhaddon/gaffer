@@ -46,6 +46,13 @@ namespace Detail
 {
 
 template<typename T>
+static void setDefaultValue( T &plug, const typename T::ValueType defaultValue )
+{
+	IECorePython::ScopedGILRelease r;
+	plug.setDefaultValue( defaultValue );
+}
+
+template<typename T>
 static void setValue( T *plug, const typename T::ValueType value )
 {
 	// we use a GIL release here to prevent a lock in the case where this triggers a graph
@@ -82,6 +89,8 @@ TypedPlugClass<T, TWrapper>::TypedPlugClass( const char *docString )
 		)
 	);
 	this->def( "defaultValue", &T::defaultValue, boost::python::return_value_policy<boost::python::copy_const_reference>() );
+	this->def( "getDefaultValue", &T::getDefaultValue, boost::python::return_value_policy<boost::python::copy_const_reference>() );
+	this->def( "setDefaultValue", &Detail::setDefaultValue<T> );
 	this->def( "setValue", &Detail::setValue<T> );
 	this->def( "getValue", &Detail::getValue<T>, ( boost::python::arg( "_precomputedHash" ) = boost::python::object() ) );
 }

@@ -49,6 +49,12 @@ using namespace GafferBindings;
 namespace
 {
 
+void setDefaultValue( StringPlug &plug, const std::string &defaultValue )
+{
+	IECorePython::ScopedGILRelease r;
+	plug.setDefaultValue( defaultValue );
+}
+
 void setValue( StringPlug *plug, const std::string& value )
 {
 	// we use a GIL release here to prevent a lock in the case where this triggers a graph
@@ -148,6 +154,8 @@ void GafferModule::bindStringPlug()
 		.def( "__repr__", &repr )
 		.def( "substitutions", &StringPlug::substitutions )
 		.def( "defaultValue", &StringPlug::defaultValue, return_value_policy<boost::python::copy_const_reference>() )
+		.def( "getDefaultValue", &StringPlug::getDefaultValue, return_value_policy<boost::python::copy_const_reference>() )
+		.def( "setDefaultValue", &setDefaultValue )
 		.def( "setValue", &setValue )
 		.def( "getValue", &getValue, ( boost::python::arg( "_precomputedHash" ) = object() ) )
 	;

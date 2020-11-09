@@ -57,6 +57,13 @@ namespace
 {
 
 template<typename T>
+void setDefaultValue( T &plug, const typename T::ValueType defaultValue )
+{
+	IECorePython::ScopedGILRelease r;
+	plug.setDefaultValue( defaultValue );
+}
+
+template<typename T>
 void setValue( T *plug, const typename T::ValueType value )
 {
 	// we use a GIL release here to prevent a lock in the case where this triggers a graph
@@ -92,6 +99,8 @@ void bind()
 			)
 		)
 		.def( "defaultValue", &T::defaultValue )
+		.def( "getDefaultValue", &T::getDefaultValue )
+		.def( "setDefaultValue", &setDefaultValue<T> )
 		.def( "hasMinValue", &T::hasMinValue )
 		.def( "hasMaxValue", &T::hasMaxValue )
 		.def( "minValue", &T::minValue )
