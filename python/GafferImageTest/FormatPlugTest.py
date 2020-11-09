@@ -264,5 +264,34 @@ class FormatPlugTest( GafferImageTest.ImageTestCase ) :
 		self.assertEqual( p.defaultValue(), f2 )
 		self.assertTrue( p.isSetToDefault() )
 
+	def testSetDefaultValue( self ) :
+
+		f1 = GafferImage.Format( 2000, 1000, 2.0 )
+		f2 = GafferImage.Format( 64, 128, 1.0 )
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = GafferImage.FormatPlug( defaultValue = f1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), f1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), f1 )
+
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( f2 )
+			self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), f2 )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), f1 )
+
+		s.undo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), f1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), f1 )
+
+		s.redo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), f2 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), f1 )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( s2["n"]["user"]["p"].getDefaultValue(), f2 )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), f1 )
+
 if __name__ == "__main__":
 	unittest.main()

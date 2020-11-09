@@ -171,5 +171,34 @@ class BoxPlugTest( GafferTest.TestCase ) :
 		s["n"]["user"]["b2"].setInput( s["n"]["user"]["b1"] )
 		assertExpectedInputs( 1 )
 
+	def testDefaultValue( self ) :
+
+		box1 = imath.Box2i( imath.V2i( 1, 2 ), imath.V2i( 3, 4 ) )
+		box2 = imath.Box2i( imath.V2i( 5, 6 ), imath.V2i( 7, 8 ) )
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = Gaffer.Box2iPlug( defaultValue = box1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), box1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), box1 )
+
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( box2 )
+			self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), box2 )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), box1 )
+
+		s.undo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), box1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), box1 )
+
+		s.redo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), box2 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), box1 )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( s2["n"]["user"]["p"].getDefaultValue(), box2 )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), box1 )
+
 if __name__ == "__main__":
 	unittest.main()

@@ -183,28 +183,29 @@ class NumericPlugTest( GafferTest.TestCase ) :
 
 	def testDefaultValue( self ) :
 
-		p = Gaffer.IntPlug(
-			"p",
-			Gaffer.Plug.Direction.In,
-			10,
-			0,
-			20
-		)
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = Gaffer.IntPlug( defaultValue = 1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), 1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), 1 )
 
-		self.assertEqual( p.defaultValue(), 10 )
-		self.assertEqual( p.getValue(), 10 )
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( 2 )
+			self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), 2 )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), 1 )
 
-		p.setValue( 5 )
-		self.assertEqual( p.getValue(), 5 )
-		self.assertEqual( p.defaultValue(), 10 )
+		s.undo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), 1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), 1 )
 
-		p.setToDefault()
-		self.assertEqual( p.defaultValue(), 10 )
-		self.assertEqual( p.getValue(), 10 )
+		s.redo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), 2 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), 1 )
 
-		p.setValue( 5 )
-		self.assertEqual( p.getValue(), 5 )
-		self.assertEqual( p.defaultValue(), 10 )
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( s2["n"]["user"]["p"].getDefaultValue(), 2 )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), 1 )
 
 	def testDefaultValueHash( self ) :
 

@@ -102,11 +102,39 @@ class CompoundNumericPlugTest( GafferTest.TestCase ) :
 
 	def testDefaultValue( self ) :
 
-		p = Gaffer.V3fPlug( defaultValue = imath.V3f( 1, 2, 3 ) )
-		self.assertEqual( p.defaultValue(), imath.V3f( 1, 2, 3 ) )
-		self.assertEqual( p["x"].defaultValue(), 1 )
-		self.assertEqual( p["y"].defaultValue(), 2 )
-		self.assertEqual( p["z"].defaultValue(), 3 )
+		defaultValue1 = imath.V3i( 1, 2, 3 )
+		defaultValue2 = imath.V3i( 4, 5, 6 )
+
+		def assertDefaultValue( p, v ) :
+
+			self.assertEqual( p.getDefaultValue(), v )
+			self.assertEqual( p["x"].getDefaultValue(), v.x )
+			self.assertEqual( p["y"].getDefaultValue(), v.y )
+			self.assertEqual( p["z"].getDefaultValue(), v.z )
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = Gaffer.V3iPlug( defaultValue = defaultValue1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		assertDefaultValue( s["n"]["user"]["p"], defaultValue1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), defaultValue1 )
+
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( defaultValue2 )
+			assertDefaultValue( s["n"]["user"]["p"], defaultValue2 )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), defaultValue1 )
+
+		s.undo()
+		assertDefaultValue( s["n"]["user"]["p"], defaultValue1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), defaultValue1 )
+
+		s.redo()
+		assertDefaultValue( s["n"]["user"]["p"], defaultValue2 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), defaultValue1 )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		assertDefaultValue( s["n"]["user"]["p"], defaultValue2 )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), defaultValue1 )
 
 	def testSerialisation( self ) :
 

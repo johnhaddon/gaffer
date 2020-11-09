@@ -78,11 +78,47 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 
 	def testDefaultValue( self ) :
 
+		v1 = IECore.IntVectorData( [ 1, 2, 3 ] )
+		v2 = IECore.IntVectorData( [ 4, 5, 6 ] )
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = Gaffer.ObjectPlug( defaultValue = v1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( v2 )
+			self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v2 )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		s.undo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		s.redo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v2 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( s2["n"]["user"]["p"].getDefaultValue(), v2 )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), v1 )
+
+	def testDefaultValueIdentity( self ) :
+
 		p = Gaffer.ObjectPlug( "p", defaultValue = IECore.IntVectorData( [ 1, 2, 3 ] ) )
 		self.assertEqual( p.defaultValue(), IECore.IntVectorData( [ 1, 2, 3 ] ) )
 
 		self.assertFalse( p.defaultValue().isSame( p.defaultValue() ) )
 		self.assertTrue( p.defaultValue( _copy = False ).isSame( p.defaultValue( _copy = False ) ) )
+
+		v = IECore.IntVectorData( [ 4, 5, 6 ] )
+		p.setDefaultValue( v ) # Should be copied here
+		self.assertFalse( p.getDefaultValue( _copy = False ).isSame( v ) )
+		p.setDefaultValue( v, _copy = False )
+		self.assertFalse( p.getDefaultValue().isSame( v ) ) # Should be copied in `getDefaultValue()`
+		self.assertTrue( p.getDefaultValue( _copy = False ).isSame( v ) )
 
 	def testRunTimeTyped( self ) :
 

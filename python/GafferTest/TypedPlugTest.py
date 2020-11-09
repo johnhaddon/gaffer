@@ -244,5 +244,31 @@ class TypedPlugTest( GafferTest.TestCase ) :
 			c["test"] = ""
 			self.assertEqual( n["sum"].getValue(), 0 )
 
+	def testDefaultValue( self ) :
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = Gaffer.BoolPlug( defaultValue = True, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), True )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), True )
+
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( False )
+			self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), False )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), True )
+
+		s.undo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), True )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), True )
+
+		s.redo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), False )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), True )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( s2["n"]["user"]["p"].getDefaultValue(), False )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), True )
+
 if __name__ == "__main__":
 	unittest.main()

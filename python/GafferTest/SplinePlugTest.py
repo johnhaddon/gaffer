@@ -328,6 +328,50 @@ class SplinePlugTest( GafferTest.TestCase ) :
 		self.assertEqual( p.getValue(), s2 )
 		self.assertTrue( p.isSetToDefault() )
 
+	def testSetDefaultValue( self ) :
+
+		v1 = Gaffer.SplineDefinitionff(
+			(
+				( 0, 0 ),
+				( 0.2, 0.3 ),
+				( 0.4, 0.9 ),
+				( 1, 1 ),
+			),
+			Gaffer.SplineDefinitionInterpolation.CatmullRom
+		)
+
+		v2 = Gaffer.SplineDefinitionff(
+			(
+				( 1, 1 ),
+				( 0, 0 ),
+			),
+			Gaffer.SplineDefinitionInterpolation.CatmullRom
+		)
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = Gaffer.SplineffPlug( defaultValue = v1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( v2 )
+			self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v2 )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		s.undo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v1 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		s.redo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), v2 )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), v1 )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( s2["n"]["user"]["p"].getDefaultValue(), v2 )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), v1 )
+
 	def testPlugFlags( self ) :
 
 		s = Gaffer.SplineDefinitionff(

@@ -357,5 +357,31 @@ class StringPlugTest( GafferTest.TestCase ) :
 			self.assertEqual( s["substitionsOnIndirectly"]["out"].getValue( _precomputedHash = substitionsOnIndirectlyHash2 ), "test.#.exr" )
 			self.assertEqual( substitionsOnIndirectlyHash2, substitionsOnIndirectlyHash1 )
 
+	def testDefaultValue( self ) :
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["user"]["p"] = Gaffer.StringPlug( defaultValue = "a", flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), "a" )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), "a" )
+
+		with Gaffer.UndoScope( s ) :
+			s["n"]["user"]["p"].setDefaultValue( "b" )
+			self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), "b" )
+			self.assertEqual( s["n"]["user"]["p"].getValue(), "a" )
+
+		s.undo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), "a" )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), "a" )
+
+		s.redo()
+		self.assertEqual( s["n"]["user"]["p"].getDefaultValue(), "b" )
+		self.assertEqual( s["n"]["user"]["p"].getValue(), "a" )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( s2["n"]["user"]["p"].getDefaultValue(), "b" )
+		self.assertEqual( s2["n"]["user"]["p"].getValue(), "a" )
+
 if __name__ == "__main__":
 	unittest.main()
