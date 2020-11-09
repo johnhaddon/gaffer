@@ -96,11 +96,8 @@ class GAFFER_API ValuePlug : public Plug
 		/// > we always consider it to be non-default, because it may vary
 		/// > by context. `isSetToDefault()` does not trigger computes.
 		virtual bool isSetToDefault() const;
-		/// Modifies the default value of this plug to match the current
-		/// value. The default implementation is sufficient for all
-		/// subclasses except those where the number of child plugs varies
-		/// based on the value.
-		/// \undoable
+		/// \deprecated Use the `setDefaultValue()` methods provided by
+		/// subclasses instead.
 		virtual void resetDefault();
 		/// Returns a hash representing the default value. The default
 		/// implementation is sufficient for all subclasses except those
