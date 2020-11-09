@@ -488,15 +488,15 @@ class ArnoldShaderTest( GafferSceneTest.SceneTestCase ) :
 		n = GafferArnold.ArnoldShader()
 		n.loadShader( "image" )
 
-		self.assertEqual( n["parameters"]["single_channel"].defaultValue(), False )
-		self.assertEqual( n["parameters"]["mipmap_bias"].defaultValue(), 0 )
-		self.assertEqual( n["parameters"]["start_channel"].defaultValue(), 0 )
-		self.assertEqual( n["parameters"]["sscale"].defaultValue(), 1.0 )
-		self.assertEqual( n["parameters"]["multiply"].defaultValue(), imath.Color3f( 1.0 ) )
-		self.assertEqual( n["parameters"]["missing_texture_color"].defaultValue(), imath.Color4f( 0.0 ) )
-		self.assertEqual( n["parameters"]["uvcoords"].defaultValue(), imath.V2f( 0.0 ) )
-		self.assertEqual( n["parameters"]["filename"].defaultValue(), "" )
-		self.assertEqual( n["parameters"]["filter"].defaultValue(), "smart_bicubic" )
+		self.assertEqual( n["parameters"]["single_channel"].getDefaultValue(), False )
+		self.assertEqual( n["parameters"]["mipmap_bias"].getDefaultValue(), 0 )
+		self.assertEqual( n["parameters"]["start_channel"].getDefaultValue(), 0 )
+		self.assertEqual( n["parameters"]["sscale"].getDefaultValue(), 1.0 )
+		self.assertEqual( n["parameters"]["multiply"].getDefaultValue(), imath.Color3f( 1.0 ) )
+		self.assertEqual( n["parameters"]["missing_texture_color"].getDefaultValue(), imath.Color4f( 0.0 ) )
+		self.assertEqual( n["parameters"]["uvcoords"].getDefaultValue(), imath.V2f( 0.0 ) )
+		self.assertEqual( n["parameters"]["filename"].getDefaultValue(), "" )
+		self.assertEqual( n["parameters"]["filter"].getDefaultValue(), "smart_bicubic" )
 
 		self.addCleanup( os.environ.__setitem__, "ARNOLD_PLUGIN_PATH", os.environ["ARNOLD_PLUGIN_PATH"] )
 		os.environ["ARNOLD_PLUGIN_PATH"] = os.environ["ARNOLD_PLUGIN_PATH"] + ":" + os.path.join( os.path.dirname( __file__ ), "metadata" )
@@ -504,17 +504,17 @@ class ArnoldShaderTest( GafferSceneTest.SceneTestCase ) :
 		self.__forceArnoldRestart()
 
 		n.loadShader( "image" )
-		self.assertEqual( n["parameters"]["single_channel"].defaultValue(), True )
-		self.assertEqual( n["parameters"]["mipmap_bias"].defaultValue(), 42 )
-		self.assertEqual( n["parameters"]["start_channel"].defaultValue(), 42 )
-		self.assertAlmostEqual( n["parameters"]["sscale"].defaultValue(), 42.42, places = 5 )
-		self.assertEqual( n["parameters"]["multiply"].defaultValue(), imath.Color3f( 1.2, 3.4, 5.6 ) )
+		self.assertEqual( n["parameters"]["single_channel"].getDefaultValue(), True )
+		self.assertEqual( n["parameters"]["mipmap_bias"].getDefaultValue(), 42 )
+		self.assertEqual( n["parameters"]["start_channel"].getDefaultValue(), 42 )
+		self.assertAlmostEqual( n["parameters"]["sscale"].getDefaultValue(), 42.42, places = 5 )
+		self.assertEqual( n["parameters"]["multiply"].getDefaultValue(), imath.Color3f( 1.2, 3.4, 5.6 ) )
 		# RGBA metadata support added in Arnold 5.3.  Need to wait until we standardise on that
 		# to add this declaration to the test metadata
-		#self.assertEqual( n["parameters"]["missing_texture_color"].defaultValue(), imath.Color4f( 1.2, 3.4, 5.6, 7.8 ) )
-		self.assertEqual( n["parameters"]["uvcoords"].defaultValue(), imath.V2f( 1.2, 3.4 ) )
-		self.assertEqual( n["parameters"]["filename"].defaultValue(), "overrideDefault" )
-		self.assertEqual( n["parameters"]["filter"].defaultValue(), "closest" )
+		#self.assertEqual( n["parameters"]["missing_texture_color"].getDefaultValue(), imath.Color4f( 1.2, 3.4, 5.6, 7.8 ) )
+		self.assertEqual( n["parameters"]["uvcoords"].getDefaultValue(), imath.V2f( 1.2, 3.4 ) )
+		self.assertEqual( n["parameters"]["filename"].getDefaultValue(), "overrideDefault" )
+		self.assertEqual( n["parameters"]["filter"].getDefaultValue(), "closest" )
 
 	def testMixAndMatchWithOSLShaders( self ) :
 
@@ -643,7 +643,7 @@ class ArnoldShaderTest( GafferSceneTest.SceneTestCase ) :
 
 			n = GafferArnold.ArnoldShader()
 			n.loadShader( "flat" )
-			self.assertEqual( n["out"].defaultValue(), imath.Color3f( 0 ) )
+			self.assertEqual( n["out"].getDefaultValue(), imath.Color3f( 0 ) )
 
 	def testRecoverFromIncorrectSerialisedDefaultValue( self ) :
 
@@ -677,7 +677,7 @@ class ArnoldShaderTest( GafferSceneTest.SceneTestCase ) :
 		s2 = Gaffer.ScriptNode()
 		s2.execute( s.serialise() )
 
-		self.assertEqual( s2["n1"]["out"].defaultValue(), imath.Color3f( 0 ) )
+		self.assertEqual( s2["n1"]["out"].getDefaultValue(), imath.Color3f( 0 ) )
 		self.assertTrue( s2["n2"]["parameters"]["color"].getInput().isSame( s2["n1"]["out"] ) )
 		self.assertTrue( s2["a"]["shader"].getInput().isSame( s2["n2"]["out"] ) )
 

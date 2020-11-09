@@ -175,7 +175,7 @@ class PathFilterTest( GafferSceneTest.SceneTestCase ) :
 		f = GafferScene.PathFilter()
 		self.assertTrue( f.enabledPlug().isSame( f["enabled"] ) )
 		self.assertTrue( isinstance( f.enabledPlug(), Gaffer.BoolPlug ) )
-		self.assertEqual( f.enabledPlug().defaultValue(), True )
+		self.assertEqual( f.enabledPlug().getDefaultValue(), True )
 		self.assertEqual( f.enabledPlug().getValue(), True )
 		self.assertEqual( f.correspondingInput( f["out"] ), None )
 

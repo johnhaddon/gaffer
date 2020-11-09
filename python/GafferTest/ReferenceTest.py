@@ -584,13 +584,13 @@ class ReferenceTest( GafferTest.TestCase ) :
 		# process.
 
 		self.assertEqual( s["r"]["p"].getValue(), 1 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 1 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 1 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 1 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 1 )
 		self.assertEqual( s["b"]["p"].getValue(), 2 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 1 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 1 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 1 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 1 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 1 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 0.5 ) )
 
 		# And we should be able to save and reload the script
@@ -601,14 +601,14 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s.load()
 
 		self.assertEqual( s["r"]["p"].getValue(), 1 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 1 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 1 )
 		self.assertEqual( s["b"]["p"].getValue(), 2 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 1 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 1 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 1 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 1 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 1 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 0.5 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 1 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 1 ) )
 
 		# If we change the default value on the box and reexport,
 		# then the reference should pick up the new default, and
@@ -623,28 +623,28 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s["r"].load( self.temporaryDirectory() + "/test.grf" )
 
 		self.assertEqual( s["r"]["p"].getValue(), 3 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 3 )
 		self.assertEqual( s["b"]["p"].getValue(), 3 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 3 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 0.25 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 0.25 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 
 		# And that should still hold after saving and reloading the script.
 
 		s.save()
 		s.load()
 		self.assertEqual( s["r"]["p"].getValue(), 3 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 3 )
 		self.assertEqual( s["b"]["p"].getValue(), 3 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 3 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 0.25 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 0.25 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 
 		# But if the user changes the value on the reference node,
 		# it should be kept.
@@ -653,14 +653,14 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s["r"]["c"].setValue( imath.Color3f( 100 ) )
 
 		self.assertEqual( s["r"]["p"].getValue(), 100 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 3 )
 		self.assertEqual( s["b"]["p"].getValue(), 3 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 3 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 100 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 0.25 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 
 		# And a save and load shouldn't change that.
 
@@ -668,14 +668,14 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s.load()
 
 		self.assertEqual( s["r"]["p"].getValue(), 100 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 3 )
 		self.assertEqual( s["b"]["p"].getValue(), 3 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 3 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 3 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 100 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 0.25 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 0.25 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 0.25 ) )
 
 		# And now the user has changed a value, only the
 		# default value should be updated if we load a new
@@ -689,14 +689,14 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s["r"].load( self.temporaryDirectory() + "/test.grf" )
 
 		self.assertEqual( s["r"]["p"].getValue(), 100 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 4 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 4 )
 		self.assertEqual( s["b"]["p"].getValue(), 4 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 4 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 4 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 100 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 4 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 4 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 4 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 4 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 4 ) )
 
 		# And a save and load shouldn't change anything.
 
@@ -704,14 +704,14 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s.load()
 
 		self.assertEqual( s["r"]["p"].getValue(), 100 )
-		self.assertEqual( s["r"]["p"].defaultValue(), 4 )
+		self.assertEqual( s["r"]["p"].getDefaultValue(), 4 )
 		self.assertEqual( s["b"]["p"].getValue(), 4 )
-		self.assertEqual( s["b"]["p"].defaultValue(), 4 )
+		self.assertEqual( s["b"]["p"].getDefaultValue(), 4 )
 
 		self.assertEqual( s["r"]["c"].getValue(), imath.Color3f( 100 ) )
-		self.assertEqual( s["r"]["c"].defaultValue(), imath.Color3f( 4 ) )
+		self.assertEqual( s["r"]["c"].getDefaultValue(), imath.Color3f( 4 ) )
 		self.assertEqual( s["b"]["c"].getValue(), imath.Color3f( 4 ) )
-		self.assertEqual( s["b"]["c"].defaultValue(), imath.Color3f( 4 ) )
+		self.assertEqual( s["b"]["c"].getDefaultValue(), imath.Color3f( 4 ) )
 
 		# And there shouldn't be a single setValue() call in the exported file.
 
@@ -734,7 +734,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		# values and defaults on the internal nodes.
 
 		self.assertEqual( s["r"]["n"]["p"].getValue(), 2 )
-		self.assertEqual( s["r"]["n"]["p"].defaultValue(), 1 )
+		self.assertEqual( s["r"]["n"]["p"].getDefaultValue(), 1 )
 
 		# And we should be able to save and reload the script
 		# and have that still be the case.
@@ -744,7 +744,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s.load()
 
 		self.assertEqual( s["r"]["n"]["p"].getValue(), 2 )
-		self.assertEqual( s["r"]["n"]["p"].defaultValue(), 1 )
+		self.assertEqual( s["r"]["n"]["p"].getDefaultValue(), 1 )
 
 	def testNodeMetadata( self ) :
 
@@ -1372,23 +1372,23 @@ class ReferenceTest( GafferTest.TestCase ) :
 		for row in range( 0, len( script["box"]["rows"] ) ) :
 
 			self.assertEqual(
-				script["reference"]["rows"][row]["name"].defaultValue(),
-				script["box"]["rows"][row]["name"].defaultValue()
+				script["reference"]["rows"][row]["name"].getDefaultValue(),
+				script["box"]["rows"][row]["name"].getDefaultValue()
 			)
 			self.assertEqual(
-				script["reference"]["rows"][row]["enabled"].defaultValue(),
-				script["box"]["rows"][row]["enabled"].defaultValue()
+				script["reference"]["rows"][row]["enabled"].getDefaultValue(),
+				script["box"]["rows"][row]["enabled"].getDefaultValue()
 			)
 
 			for column in range( 0, len( script["box"]["rows"][0]["cells"].keys() ) ) :
 
 				self.assertEqual(
-					script["reference"]["rows"][row]["cells"][column]["value"].defaultValue(),
-					script["box"]["rows"][row]["cells"][column]["value"].defaultValue(),
+					script["reference"]["rows"][row]["cells"][column]["value"].getDefaultValue(),
+					script["box"]["rows"][row]["cells"][column]["value"].getDefaultValue(),
 				)
 				self.assertEqual(
-					script["reference"]["rows"][row]["cells"][column]["enabled"].defaultValue(),
-					script["box"]["rows"][row]["cells"][column]["enabled"].defaultValue(),
+					script["reference"]["rows"][row]["cells"][column]["enabled"].getDefaultValue(),
+					script["box"]["rows"][row]["cells"][column]["enabled"].getDefaultValue(),
 				)
 
 		self.assertTrue( script["reference"]["rows"].isSetToDefault() )
@@ -1432,11 +1432,11 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		self.assertTrue( script["reference"]["t2"].isSetToDefault() )
 		for name in script["reference"]["t2"].keys() :
-			self.assertEqual( script["reference"]["t2"][name].defaultValue(), script["box"]["t2"][name].defaultValue() )
+			self.assertEqual( script["reference"]["t2"][name].getDefaultValue(), script["box"]["t2"][name].getDefaultValue() )
 
 		self.assertTrue( script["reference"]["t3"].isSetToDefault() )
 		for name in script["reference"]["t3"].keys() :
-			self.assertEqual( script["reference"]["t3"][name].defaultValue(), script["box"]["t3"][name].defaultValue() )
+			self.assertEqual( script["reference"]["t3"][name].getDefaultValue(), script["box"]["t3"][name].getDefaultValue() )
 
 	def testCompoundDataPlugs( self ) :
 
@@ -1445,9 +1445,9 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		script["box"]["p"] = Gaffer.CompoundDataPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
 		script["box"]["p"]["m"] = Gaffer.NameValuePlug( "a", 10, defaultEnabled = True, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-		self.assertEqual( script["box"]["p"]["m"]["name"].defaultValue(), "a" )
-		self.assertEqual( script["box"]["p"]["m"]["value"].defaultValue(), 10 )
-		self.assertEqual( script["box"]["p"]["m"]["enabled"].defaultValue(), True )
+		self.assertEqual( script["box"]["p"]["m"]["name"].getDefaultValue(), "a" )
+		self.assertEqual( script["box"]["p"]["m"]["value"].getDefaultValue(), 10 )
+		self.assertEqual( script["box"]["p"]["m"]["enabled"].getDefaultValue(), True )
 		script["box"]["p"]["m"]["name"].setValue( "b" )
 		script["box"]["p"]["m"]["value"].setValue( 11 )
 		script["box"]["p"]["m"]["enabled"].setValue( False )
@@ -1484,13 +1484,13 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		script["duplicate"] = Gaffer.Box()
 		script.executeFile( script["reference"].fileName(), parent = script["duplicate"] )
-		self.assertEqual( script["duplicate"]["rows"][1]["name"].defaultValue(), "test" )
+		self.assertEqual( script["duplicate"]["rows"][1]["name"].getDefaultValue(), "test" )
 		self.assertEqual( script["duplicate"]["rows"][1]["name"].getValue(), "test" )
 
 		# Now copy/paste the duplicated box. The row should have retained its name.
 
 		script.execute( script.serialise( filter = Gaffer.StandardSet( [ script["duplicate"] ] ) ) )
-		self.assertEqual( script["duplicate1"]["rows"][1]["name"].defaultValue(), "test" )
+		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getDefaultValue(), "test" )
 		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getValue(), "test" )
 
 	def tearDown( self ) :

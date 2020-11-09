@@ -137,7 +137,7 @@ class DeleteChannelsTest( GafferImageTest.ImageTestCase ) :
 	def testModePlug( self ) :
 
 		n = GafferImage.DeleteChannels()
-		self.assertEqual( n["mode"].defaultValue(), n.Mode.Delete )
+		self.assertEqual( n["mode"].getDefaultValue(), n.Mode.Delete )
 		self.assertEqual( n["mode"].getValue(), n.Mode.Delete )
 
 		n["mode"].setValue( n.Mode.Keep )

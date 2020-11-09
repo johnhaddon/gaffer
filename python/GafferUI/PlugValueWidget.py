@@ -331,7 +331,7 @@ class PlugValueWidget( GafferUI.Widget ) :
 	def _convertValue( self, value ) :
 
 		plugValueType = sole(
-			type( p.defaultValue() ) if hasattr( p, "defaultValue" ) else None
+			type( p.getDefaultValue() ) if hasattr( p, "getDefaultValue" ) else None
 			for p in self.getPlugs()
 		)
 		if plugValueType is None :
@@ -414,10 +414,10 @@ class PlugValueWidget( GafferUI.Widget ) :
 					"active" : not self.getReadOnly() and all( p.acceptsInput( None ) and not Gaffer.MetadataAlgo.readOnly( p ) for p in self.getPlugs() ),
 				}
 			)
-		if all( hasattr( p, "defaultValue" ) and p.direction() == Gaffer.Plug.Direction.In for p in self.getPlugs() ) :
+		if all( hasattr( p, "getDefaultValue" ) and p.direction() == Gaffer.Plug.Direction.In for p in self.getPlugs() ) :
 			menuDefinition.append(
 				"/Default", {
-					"command" : functools.partial( Gaffer.WeakMethod( self.__setValues ), [ p.defaultValue() for p in self.getPlugs() ] ),
+					"command" : functools.partial( Gaffer.WeakMethod( self.__setValues ), [ p.getDefaultValue() for p in self.getPlugs() ] ),
 					"active" : self._editable()
 				}
 			)

@@ -51,7 +51,7 @@ class BoxOutTest( GafferTest.TestCase ) :
 
 		s["b"]["o"] = Gaffer.BoxOut()
 		self.assertEqual( s["b"]["o"]["name"].getValue(), "out" )
-		self.assertEqual( s["b"]["o"]["name"].defaultValue(), "out" )
+		self.assertEqual( s["b"]["o"]["name"].getDefaultValue(), "out" )
 
 		s["b"]["o"]["name"].setValue( "sum" )
 		s["b"]["o"].setup( s["b"]["n"]["sum"] )

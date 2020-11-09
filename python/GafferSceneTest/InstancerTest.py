@@ -172,7 +172,7 @@ class InstancerTest( GafferSceneTest.SceneTestCase ) :
 	def testNamePlugDefaultValue( self ) :
 
 		n = GafferScene.Instancer()
-		self.assertEqual( n["name"].defaultValue(), "instances" )
+		self.assertEqual( n["name"].getDefaultValue(), "instances" )
 		self.assertEqual( n["name"].getValue(), "instances" )
 
 	def testAffects( self ) :

@@ -176,8 +176,8 @@ class ValuePlugTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 
 		s["n"] = GafferTest.AddNode()
-		self.assertEqual( s["n"]["op1"].getValue(), s["n"]["op1"].defaultValue() )
-		self.assertEqual( s["n"]["op2"].getValue(), s["n"]["op2"].defaultValue() )
+		self.assertEqual( s["n"]["op1"].getValue(), s["n"]["op1"].getDefaultValue() )
+		self.assertEqual( s["n"]["op2"].getValue(), s["n"]["op2"].getDefaultValue() )
 
 		self.assertFalse( "setValue" in s.serialise() )
 
@@ -650,7 +650,7 @@ class ValuePlugTest( GafferTest.TestCase ) :
 		# it can have only one value for all contexts,
 		# and can be confident that it is set to the default.
 		self.assertTrue( n2["op1"].isSetToDefault() )
-		self.assertEqual( n2["op1"].getValue(), n2["op1"].defaultValue() )
+		self.assertEqual( n2["op1"].getValue(), n2["op1"].getDefaultValue() )
 		n1["op1"].setValue( 1 )
 		# Until it provides a non-default value, that is.
 		self.assertFalse( n2["op1"].isSetToDefault() )
@@ -661,7 +661,7 @@ class ValuePlugTest( GafferTest.TestCase ) :
 		# at the default, even if it the result happens
 		# to be equal in this context.
 		self.assertFalse( n2["op2"].isSetToDefault() )
-		self.assertEqual( n2["op2"].getValue(), n2["op2"].defaultValue() )
+		self.assertEqual( n2["op2"].getValue(), n2["op2"].getDefaultValue() )
 
 	def testCancellationDuringCompute( self ) :
 
@@ -713,11 +713,11 @@ class ValuePlugTest( GafferTest.TestCase ) :
 		def assertPreconditions( script ) :
 
 			self.assertTrue( script["node"]["user"]["i"].isSetToDefault() )
-			self.assertEqual( script["node"]["user"]["i"].defaultValue(), 1 )
+			self.assertEqual( script["node"]["user"]["i"].getDefaultValue(), 1 )
 			self.assertEqual( script["node"]["user"]["i"].getValue(), 1 )
 
 			self.assertTrue( script["node"]["user"]["v"].isSetToDefault() )
-			self.assertEqual( script["node"]["user"]["v"].defaultValue(), imath.V3i( 1, 2, 3 ) )
+			self.assertEqual( script["node"]["user"]["v"].getDefaultValue(), imath.V3i( 1, 2, 3 ) )
 			self.assertEqual( script["node"]["user"]["v"].getValue(), imath.V3i( 1, 2, 3 ) )
 
 		assertPreconditions( script )
@@ -733,11 +733,11 @@ class ValuePlugTest( GafferTest.TestCase ) :
 		def assertPostconditions( script ) :
 
 			self.assertTrue( script["node"]["user"]["i"].isSetToDefault() )
-			self.assertEqual( script["node"]["user"]["i"].defaultValue(), 2 )
+			self.assertEqual( script["node"]["user"]["i"].getDefaultValue(), 2 )
 			self.assertEqual( script["node"]["user"]["i"].getValue(), 2 )
 
 			self.assertTrue( script["node"]["user"]["v"].isSetToDefault() )
-			self.assertEqual( script["node"]["user"]["v"].defaultValue(), imath.V3i( 10, 11, 12 ) )
+			self.assertEqual( script["node"]["user"]["v"].getDefaultValue(), imath.V3i( 10, 11, 12 ) )
 			self.assertEqual( script["node"]["user"]["v"].getValue(), imath.V3i( 10, 11, 12 ) )
 
 		script.undo()

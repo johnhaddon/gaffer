@@ -52,17 +52,17 @@ class TweakPlugTest( GafferSceneTest.SceneTestCase ) :
 
 		p = GafferScene.TweakPlug( "test", 10.0, GafferScene.TweakPlug.Mode.Multiply, enabled = False )
 
-		self.assertEqual( p["name"].defaultValue(), "" )
+		self.assertEqual( p["name"].getDefaultValue(), "" )
 		self.assertEqual( p["name"].getValue(), "test" )
 
 		self.assertIsInstance( p["value"], Gaffer.FloatPlug )
-		self.assertEqual( p["value"].defaultValue(), 10 )
+		self.assertEqual( p["value"].getDefaultValue(), 10 )
 		self.assertEqual( p["value"].getValue(), 10 )
 
-		self.assertEqual( p["mode"].defaultValue(), p.Mode.Replace )
+		self.assertEqual( p["mode"].getDefaultValue(), p.Mode.Replace )
 		self.assertEqual( p["mode"].getValue(), p.Mode.Multiply )
 
-		self.assertEqual( p["enabled"].defaultValue(), True )
+		self.assertEqual( p["enabled"].getDefaultValue(), True )
 		self.assertEqual( p["enabled"].getValue(), False )
 
 	def testCreateCounterpart( self ) :

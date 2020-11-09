@@ -133,7 +133,7 @@ class NodeTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 		s.execute( ss )
 
-		self.assertEqual( s["n"]["p1"].defaultValue(), "default" )
+		self.assertEqual( s["n"]["p1"].getDefaultValue(), "default" )
 		self.assertEqual( s["n"]["p1"].getValue(), "value" )
 
 	def testSerialiseDynamicBoolPlugs( self ) :
@@ -151,7 +151,7 @@ class NodeTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 		s.execute( ss )
 
-		self.assertEqual( s["n"]["p1"].defaultValue(), True )
+		self.assertEqual( s["n"]["p1"].getDefaultValue(), True )
 		self.assertEqual( s["n"]["p1"].getValue(), False )
 
 	def testUnparentingRemovesConnections( self ) :

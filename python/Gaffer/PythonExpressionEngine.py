@@ -127,7 +127,7 @@ class PythonExpressionEngine( Gaffer.Expression.Engine ) :
 				replacement = self.identifier( node, newPlug )
 			else :
 				if oldPlug.direction() == Gaffer.Plug.Direction.In :
-					replacement = repr( oldPlug.defaultValue() )
+					replacement = repr( oldPlug.getDefaultValue() )
 				else :
 					replacement = "__disconnected"
 

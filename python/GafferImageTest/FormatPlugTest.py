@@ -51,7 +51,7 @@ class FormatPlugTest( GafferImageTest.ImageTestCase ) :
 		p = GafferImage.FormatPlug()
 		self.assertEqual( p.getName(), "FormatPlug" )
 		self.assertEqual( p.direction(), Gaffer.Plug.Direction.In )
-		self.assertEqual( p.defaultValue(), GafferImage.Format() )
+		self.assertEqual( p.getDefaultValue(), GafferImage.Format() )
 		self.assertEqual( p.getValue(), GafferImage.Format() )
 		self.assertEqual( p.getFlags(), Gaffer.Plug.Flags.Default )
 
@@ -63,7 +63,7 @@ class FormatPlugTest( GafferImageTest.ImageTestCase ) :
 		)
 		self.assertEqual( p.getName(), "p" )
 		self.assertEqual( p.direction(), Gaffer.Plug.Direction.Out )
-		self.assertEqual( p.defaultValue(), GafferImage.Format( 100, 200, 2 ) )
+		self.assertEqual( p.getDefaultValue(), GafferImage.Format( 100, 200, 2 ) )
 		self.assertEqual( p.getValue(), GafferImage.Format( 100, 200, 2 ) )
 		self.assertEqual( p.getFlags(), Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
 
@@ -251,17 +251,17 @@ class FormatPlugTest( GafferImageTest.ImageTestCase ) :
 
 		p = GafferImage.FormatPlug( defaultValue = f1 )
 		self.assertEqual( p.getValue(), f1 )
-		self.assertEqual( p.defaultValue(), f1 )
+		self.assertEqual( p.getDefaultValue(), f1 )
 		self.assertTrue( p.isSetToDefault() )
 
 		p.setValue( f2 )
 		self.assertEqual( p.getValue(), f2 )
-		self.assertEqual( p.defaultValue(), f1 )
+		self.assertEqual( p.getDefaultValue(), f1 )
 		self.assertFalse( p.isSetToDefault() )
 
 		p.resetDefault()
 		self.assertEqual( p.getValue(), f2 )
-		self.assertEqual( p.defaultValue(), f2 )
+		self.assertEqual( p.getDefaultValue(), f2 )
 		self.assertTrue( p.isSetToDefault() )
 
 	def testSetDefaultValue( self ) :

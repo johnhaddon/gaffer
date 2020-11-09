@@ -108,9 +108,9 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 	def testDefaultValueIdentity( self ) :
 
 		p = Gaffer.ObjectPlug( "p", defaultValue = IECore.IntVectorData( [ 1, 2, 3 ] ) )
-		self.assertEqual( p.defaultValue(), IECore.IntVectorData( [ 1, 2, 3 ] ) )
+		self.assertEqual( p.getDefaultValue(), IECore.IntVectorData( [ 1, 2, 3 ] ) )
 
-		self.assertFalse( p.defaultValue().isSame( p.defaultValue() ) )
+		self.assertFalse( p.getDefaultValue().isSame( p.getDefaultValue() ) )
 		self.assertTrue( p.defaultValue( _copy = False ).isSame( p.defaultValue( _copy = False ) ) )
 
 		v = IECore.IntVectorData( [ 4, 5, 6 ] )
@@ -133,7 +133,7 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 
 		p = Gaffer.BoolVectorDataPlug( "p", defaultValue = IECore.BoolVectorData( [ True, False ] ) )
 
-		self.assertEqual( p.defaultValue(), IECore.BoolVectorData( [ True, False ] ) )
+		self.assertEqual( p.getDefaultValue(), IECore.BoolVectorData( [ True, False ] ) )
 		self.assertEqual( p.getValue(), IECore.BoolVectorData( [ True, False ] ) )
 
 		p.setValue( IECore.BoolVectorData( [ False ] ) )
@@ -163,7 +163,7 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 		s2.execute( se )
 
 		self.assertTrue( s2["n"]["t"].isInstanceOf( Gaffer.ObjectPlug.staticTypeId() ) )
-		self.assertEqual( s2["n"]["t"].defaultValue(), IECore.IntData( 10 ) )
+		self.assertEqual( s2["n"]["t"].getDefaultValue(), IECore.IntData( 10 ) )
 		self.assertEqual( s2["n"]["t"].getValue(), IECore.CompoundObject( { "a" : IECore.IntData( 20 ) } ) )
 
 	def testConstructCantSpecifyBothInputAndValue( self ) :
@@ -242,7 +242,7 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( p2.getName(), "c" )
 		self.assertEqual( p2.direction(), Gaffer.Plug.Direction.Out )
-		self.assertEqual( p2.defaultValue(), p.defaultValue() )
+		self.assertEqual( p2.getDefaultValue(), p.getDefaultValue() )
 		self.assertEqual( p2.getFlags(), p.getFlags() )
 
 	def testNoChildrenAccepted( self ) :
@@ -285,8 +285,8 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 
 		s2 = Gaffer.ScriptNode()
 		s2.execute( s.serialise() )
-		self.assertEqual( s2["n"]["user"]["p1"].defaultValue(), v1 )
-		self.assertEqual( s2["n"]["user"]["p2"].defaultValue(), v2 )
+		self.assertEqual( s2["n"]["user"]["p1"].getDefaultValue(), v1 )
+		self.assertEqual( s2["n"]["user"]["p2"].getDefaultValue(), v2 )
 		self.assertEqual( s2["n"]["user"]["p1"].getValue(), v1 )
 		self.assertEqual( s2["n"]["user"]["p2"].getValue(), v2 )
 
@@ -295,8 +295,8 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 
 		s2 = Gaffer.ScriptNode()
 		s2.execute( s.serialise() )
-		self.assertEqual( s2["n"]["user"]["p1"].defaultValue(), v1 )
-		self.assertEqual( s2["n"]["user"]["p2"].defaultValue(), v2 )
+		self.assertEqual( s2["n"]["user"]["p1"].getDefaultValue(), v1 )
+		self.assertEqual( s2["n"]["user"]["p2"].getDefaultValue(), v2 )
 		self.assertEqual( s2["n"]["user"]["p1"].getValue(), v2 )
 		self.assertEqual( s2["n"]["user"]["p2"].getValue(), v1 )
 

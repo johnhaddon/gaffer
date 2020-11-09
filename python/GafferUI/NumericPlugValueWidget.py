@@ -115,7 +115,7 @@ class NumericPlugValueWidget( GafferUI.PlugValueWidget ) :
 			if value is not None :
 				self.__numericWidget.setValue( value )
 			elif self.getPlugs() :
-				self.__numericWidget.setValue( next( iter( self.getPlugs() ) ).defaultValue() )
+				self.__numericWidget.setValue( next( iter( self.getPlugs() ) ).getDefaultValue() )
 
 			# But if there are multiple values or an error, clear the actual
 			# display so we don't show anything misleading.

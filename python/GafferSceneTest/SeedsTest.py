@@ -116,7 +116,7 @@ class SeedsTest( GafferSceneTest.SceneTestCase ) :
 	def testNamePlugDefaultValue( self ) :
 
 		s = GafferScene.Seeds()
-		self.assertEqual( s["name"].defaultValue(), "seeds" )
+		self.assertEqual( s["name"].getDefaultValue(), "seeds" )
 		self.assertEqual( s["name"].getValue(), "seeds" )
 
 	def testAffects( self ) :

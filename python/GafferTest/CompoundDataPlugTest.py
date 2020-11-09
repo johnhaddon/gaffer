@@ -454,7 +454,7 @@ class CompoundDataPlugTest( GafferTest.TestCase ) :
 		m = Gaffer.NameValuePlug( "test", d )
 		p.addChild( m )
 		self.assertTrue( isinstance( m["value"], Gaffer.InternedStringVectorDataPlug ) )
-		self.assertEqual( m["value"].defaultValue(), d )
+		self.assertEqual( m["value"].getDefaultValue(), d )
 		self.assertEqual( m["value"].getValue(), d )
 
 		v, n = p.memberDataAndName( m )

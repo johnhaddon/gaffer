@@ -90,10 +90,10 @@ class ParameterisedHolderTest( GafferTest.TestCase ) :
 		self.assertIsInstance( n["parameters"]["multiply"], Gaffer.IntPlug )
 		self.assertIsInstance( n["parameters"]["offset"], Gaffer.IntPlug )
 
-		self.assertEqual( n["parameters"]["src"].defaultValue(), "" )
-		self.assertEqual( n["parameters"]["dst"].defaultValue(), "" )
-		self.assertEqual( n["parameters"]["multiply"].defaultValue(), 1 )
-		self.assertEqual( n["parameters"]["offset"].defaultValue(), 0 )
+		self.assertEqual( n["parameters"]["src"].getDefaultValue(), "" )
+		self.assertEqual( n["parameters"]["dst"].getDefaultValue(), "" )
+		self.assertEqual( n["parameters"]["multiply"].getDefaultValue(), 1 )
+		self.assertEqual( n["parameters"]["offset"].getDefaultValue(), 0 )
 
 		self.assertEqual( n["parameters"]["src"].getValue(), "" )
 		self.assertEqual( n["parameters"]["dst"].getValue(), "" )
@@ -101,7 +101,7 @@ class ParameterisedHolderTest( GafferTest.TestCase ) :
 		self.assertEqual( n["parameters"]["offset"].getValue(), 0 )
 
 		for k in op.parameters().keys() :
-			self.assertEqual( n["parameters"][k].defaultValue(), op.parameters()[k].defaultValue.value )
+			self.assertEqual( n["parameters"][k].getDefaultValue(), op.parameters()[k].defaultValue.value )
 
 		with n.parameterModificationContext() as parameters :
 
@@ -140,11 +140,11 @@ class ParameterisedHolderTest( GafferTest.TestCase ) :
 		ph = GafferCortex.ParameterisedHolderNode()
 		ph.setParameterised( p )
 
-		self.assertEqual( ph["parameters"]["bv"].defaultValue(), IECore.BoolVectorData() )
-		self.assertEqual( ph["parameters"]["iv"].defaultValue(), IECore.IntVectorData() )
-		self.assertEqual( ph["parameters"]["fv"].defaultValue(), IECore.FloatVectorData() )
-		self.assertEqual( ph["parameters"]["sv"].defaultValue(), IECore.StringVectorData() )
-		self.assertEqual( ph["parameters"]["vv"].defaultValue(), IECore.V3fVectorData() )
+		self.assertEqual( ph["parameters"]["bv"].getDefaultValue(), IECore.BoolVectorData() )
+		self.assertEqual( ph["parameters"]["iv"].getDefaultValue(), IECore.IntVectorData() )
+		self.assertEqual( ph["parameters"]["fv"].getDefaultValue(), IECore.FloatVectorData() )
+		self.assertEqual( ph["parameters"]["sv"].getDefaultValue(), IECore.StringVectorData() )
+		self.assertEqual( ph["parameters"]["vv"].getDefaultValue(), IECore.V3fVectorData() )
 
 		self.assertEqual( ph["parameters"]["bv"].getValue(), IECore.BoolVectorData() )
 		self.assertEqual( ph["parameters"]["iv"].getValue(), IECore.IntVectorData() )
@@ -213,7 +213,7 @@ class ParameterisedHolderTest( GafferTest.TestCase ) :
 		ph = GafferCortex.ParameterisedHolderNode()
 		ph.setParameterised( p )
 
-		self.assertEqual( ph["parameters"]["i1"].defaultValue(), 1 )
+		self.assertEqual( ph["parameters"]["i1"].getDefaultValue(), 1 )
 		self.assertEqual( ph["parameters"]["i1"].getValue(), 10 )
 
 	def testCompoundNumericTypes( self ) :
@@ -233,9 +233,9 @@ class ParameterisedHolderTest( GafferTest.TestCase ) :
 		ph = GafferCortex.ParameterisedHolderNode()
 		ph.setParameterised( p )
 
-		self.assertEqual( ph["parameters"]["v2i"].defaultValue(), imath.V2i( 1, 2 ) )
-		self.assertEqual( ph["parameters"]["v3f"].defaultValue(), imath.V3f( 1, 2, 3 ) )
-		self.assertEqual( ph["parameters"]["color4f"].defaultValue(), imath.Color4f( 0.25, 0.5, 0.75, 1 ) )
+		self.assertEqual( ph["parameters"]["v2i"].getDefaultValue(), imath.V2i( 1, 2 ) )
+		self.assertEqual( ph["parameters"]["v3f"].getDefaultValue(), imath.V3f( 1, 2, 3 ) )
+		self.assertEqual( ph["parameters"]["color4f"].getDefaultValue(), imath.Color4f( 0.25, 0.5, 0.75, 1 ) )
 
 		self.assertEqual( ph["parameters"]["v2i"].getValue(), imath.V2i( 1, 2 ) )
 		self.assertEqual( ph["parameters"]["v3f"].getValue(), imath.V3f( 1, 2, 3 ) )

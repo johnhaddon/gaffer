@@ -242,7 +242,7 @@ class _TogglePlugValueWidget( GafferUI.PlugValueWidget ) :
 		with self.getContext() :
 			value = self.getPlug().getValue()
 
-		if value != self.getPlug().defaultValue() :
+		if value != self.getPlug().getDefaultValue() :
 			self.__toggleValue = value
 			self.__button.setImage( self.__imagePrefix + "On.png" )
 		else :
@@ -255,7 +255,7 @@ class _TogglePlugValueWidget( GafferUI.PlugValueWidget ) :
 		with self.getContext() :
 			value = self.getPlug().getValue()
 
-		if value == self.getPlug().defaultValue() and self.__toggleValue is not None :
+		if value == self.getPlug().getDefaultValue() and self.__toggleValue is not None :
 			self.getPlug().setValue( self.__toggleValue )
 		else :
 			self.getPlug().setToDefault()

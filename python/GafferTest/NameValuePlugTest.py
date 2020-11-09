@@ -59,13 +59,13 @@ class NameValuePlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( s2["n"]["p"].keys(), plug.keys() )
 		self.assertEqual( s2["n"]["p"]["value"].getValue(), plug["value"].getValue() )
-		self.assertEqual( s2["n"]["p"]["value"].defaultValue(), plug["value"].defaultValue() )
+		self.assertEqual( s2["n"]["p"]["value"].getDefaultValue(), plug["value"].getDefaultValue() )
 		self.assertEqual( s2["n"]["p"]["name"].getValue(), plug["name"].getValue() )
-		self.assertEqual( s2["n"]["p"]["name"].defaultValue(), plug["name"].defaultValue() )
+		self.assertEqual( s2["n"]["p"]["name"].getDefaultValue(), plug["name"].getDefaultValue() )
 
 		if "enable" in plug.keys():
 			self.assertEqual( s2["n"]["p"]["enable"].getValue(), plug["enable"].getValue() )
-			self.assertEqual( s2["n"]["p"]["enable"].defaultValue(), plug["enable"].defaultValue() )
+			self.assertEqual( s2["n"]["p"]["enable"].getDefaultValue(), plug["enable"].getDefaultValue() )
 
 		if isinstance( plug, Gaffer.IntPlug ):
 			self.assertEqual( s2["n"]["p"]["value"].minValue(), plug.minValue() )
@@ -82,15 +82,15 @@ class NameValuePlugTest( GafferTest.TestCase ) :
 		self.assertEqual( p2.keys(), plug.keys() )
 		if "value" in plug.keys():
 			self.assertEqual( p2["value"].getValue(), plug["value"].getValue() )
-			self.assertEqual( p2["value"].defaultValue(), plug["value"].defaultValue() )
+			self.assertEqual( p2["value"].getDefaultValue(), plug["value"].getDefaultValue() )
 
 		if "name" in plug.keys():
 			self.assertEqual( p2["name"].getValue(), plug["name"].getValue() )
-			self.assertEqual( p2["name"].defaultValue(), plug["name"].defaultValue() )
+			self.assertEqual( p2["name"].getDefaultValue(), plug["name"].getDefaultValue() )
 
 		if "enable" in plug.keys():
 			self.assertEqual( p2["enable"].getValue(), plug["enable"].getValue() )
-			self.assertEqual( p2["enable"].defaultValue(), plug["enable"].defaultValue() )
+			self.assertEqual( p2["enable"].getDefaultValue(), plug["enable"].getDefaultValue() )
 
 		if isinstance( plug, Gaffer.IntPlug ):
 			self.assertEqual( p2.minValue(), plug.minValue() )
@@ -237,21 +237,21 @@ class NameValuePlugTest( GafferTest.TestCase ) :
 	def testDefaultValues( self ) :
 
 		m = Gaffer.NameValuePlug( "a", IECore.IntData( 10 ) )
-		self.assertTrue( m["value"].defaultValue(), 10 )
+		self.assertTrue( m["value"].getDefaultValue(), 10 )
 		self.assertTrue( m["value"].getValue(), 10 )
-		self.assertTrue( m["name"].defaultValue(), "a" )
+		self.assertTrue( m["name"].getDefaultValue(), "a" )
 		self.assertTrue( m["name"].getValue(), "a" )
 
 		m = Gaffer.NameValuePlug( "b", IECore.FloatData( 20 ) )
-		self.assertTrue( m["value"].defaultValue(), 20 )
+		self.assertTrue( m["value"].getDefaultValue(), 20 )
 		self.assertTrue( m["value"].getValue(), 20 )
-		self.assertTrue( m["name"].defaultValue(), "b" )
+		self.assertTrue( m["name"].getDefaultValue(), "b" )
 		self.assertTrue( m["name"].getValue(), "b" )
 
 		m = Gaffer.NameValuePlug( "c", IECore.StringData( "abc" ) )
-		self.assertTrue( m["value"].defaultValue(), "abc" )
+		self.assertTrue( m["value"].getDefaultValue(), "abc" )
 		self.assertTrue( m["value"].getValue(), "abc" )
-		self.assertTrue( m["name"].defaultValue(), "c" )
+		self.assertTrue( m["name"].getDefaultValue(), "c" )
 		self.assertTrue( m["name"].getValue(), "c" )
 
 	def testNonValuePlugs( self ) :

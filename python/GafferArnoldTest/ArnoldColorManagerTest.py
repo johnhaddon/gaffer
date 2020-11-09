@@ -63,7 +63,7 @@ class ArnoldColorManagerTest( GafferSceneTest.SceneTestCase ) :
 			self.assertIn( "config", colorManager["parameters"] )
 			self.assertIsInstance( colorManager["parameters"][name], plugType )
 			self.assertEqual( colorManager["parameters"][name].getValue(), defaultValue )
-			self.assertEqual( colorManager["parameters"][name].defaultValue(), defaultValue )
+			self.assertEqual( colorManager["parameters"][name].getDefaultValue(), defaultValue )
 
 		# Affects
 

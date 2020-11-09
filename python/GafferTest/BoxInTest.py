@@ -53,7 +53,7 @@ class BoxInTest( GafferTest.TestCase ) :
 
 		s["b"]["i"] = Gaffer.BoxIn()
 		self.assertEqual( s["b"]["i"]["name"].getValue(), "in" )
-		self.assertEqual( s["b"]["i"]["name"].defaultValue(), "in" )
+		self.assertEqual( s["b"]["i"]["name"].getDefaultValue(), "in" )
 
 		s["b"]["i"]["name"].setValue( "op1" )
 		s["b"]["i"].setup( s["b"]["n"]["op1"] )

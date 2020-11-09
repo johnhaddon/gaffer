@@ -49,19 +49,19 @@ class ShufflePlugTest( GafferTest.TestCase ) :
 	def testBasics( self ) :
 
 		p = Gaffer.ShufflePlug( "test" )
-		self.assertEqual( p["source"].defaultValue(), "" )
-		self.assertEqual( p["enabled"].defaultValue(), True )
-		self.assertEqual( p["destination"].defaultValue(), "" )
-		self.assertEqual( p["deleteSource"].defaultValue(), False )
+		self.assertEqual( p["source"].getDefaultValue(), "" )
+		self.assertEqual( p["enabled"].getDefaultValue(), True )
+		self.assertEqual( p["destination"].getDefaultValue(), "" )
+		self.assertEqual( p["deleteSource"].getDefaultValue(), False )
 
 		p = Gaffer.ShufflePlug( source = "foo", destination = "bar", deleteSource = True, enabled = False )
-		self.assertEqual( p["source"].defaultValue(), "" )
+		self.assertEqual( p["source"].getDefaultValue(), "" )
 		self.assertEqual( p["source"].getValue(), "foo" )
-		self.assertEqual( p["enabled"].defaultValue(), True )
+		self.assertEqual( p["enabled"].getDefaultValue(), True )
 		self.assertEqual( p["enabled"].getValue(), False )
-		self.assertEqual( p["destination"].defaultValue(), "" )
+		self.assertEqual( p["destination"].getDefaultValue(), "" )
 		self.assertEqual( p["destination"].getValue(), "bar" )
-		self.assertEqual( p["deleteSource"].defaultValue(), False )
+		self.assertEqual( p["deleteSource"].getDefaultValue(), False )
 		self.assertEqual( p["deleteSource"].getValue(), True )
 
 		p2 = Gaffer.ShufflesPlug()

@@ -87,7 +87,7 @@ class ImagePlugTest( GafferImageTest.ImageTestCase ) :
 	def testDefaultChannelNames( self ) :
 
 		self.assertEqual(
-			GafferImage.ImagePlug()['channelNames'].defaultValue(),
+			GafferImage.ImagePlug()['channelNames'].getDefaultValue(),
 			IECore.StringVectorData()
 		)
 

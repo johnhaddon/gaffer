@@ -60,7 +60,7 @@ class BoxPlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( p2.getName(), "c" )
 		self.assertEqual( p2.direction(), Gaffer.Plug.Direction.In )
-		self.assertEqual( p2.defaultValue(), p1.defaultValue() )
+		self.assertEqual( p2.getDefaultValue(), p1.getDefaultValue() )
 
 	def testDynamicSerialisation( self ) :
 

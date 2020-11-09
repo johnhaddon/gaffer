@@ -173,13 +173,13 @@ class ShuffleAttributesTest( GafferSceneTest.SceneTestCase ) :
 
 		self.assertEqual( len(s2["a"]["shuffles"].children()), 1 )
 		self.assertEqual( s2["a"]["shuffles"][0]["source"].getValue(), "foo" )
-		self.assertEqual( s2["a"]["shuffles"][0]["source"].defaultValue(), "" )
+		self.assertEqual( s2["a"]["shuffles"][0]["source"].getDefaultValue(), "" )
 		self.assertEqual( s2["a"]["shuffles"][0]["destination"].getValue(), "bar" )
-		self.assertEqual( s2["a"]["shuffles"][0]["destination"].defaultValue(), "" )
+		self.assertEqual( s2["a"]["shuffles"][0]["destination"].getDefaultValue(), "" )
 		self.assertEqual( s2["a"]["shuffles"][0]["enabled"].getValue(), False )
-		self.assertEqual( s2["a"]["shuffles"][0]["enabled"].defaultValue(), True )
+		self.assertEqual( s2["a"]["shuffles"][0]["enabled"].getDefaultValue(), True )
 		self.assertEqual( s2["a"]["shuffles"][0]["deleteSource"].getValue(), True )
-		self.assertEqual( s2["a"]["shuffles"][0]["deleteSource"].defaultValue(), False )
+		self.assertEqual( s2["a"]["shuffles"][0]["deleteSource"].getDefaultValue(), False )
 
 	def testPassThroughs( self ) :
 
@@ -243,7 +243,7 @@ class ShuffleAttributesTest( GafferSceneTest.SceneTestCase ) :
 	def testFilterDefault( self ) :
 
 		s = GafferScene.ShuffleAttributes()
-		self.assertEqual( s["filter"].defaultValue(), IECore.PathMatcher.Result.NoMatch )
+		self.assertEqual( s["filter"].getDefaultValue(), IECore.PathMatcher.Result.NoMatch )
 
 if __name__ == "__main__":
 	unittest.main()

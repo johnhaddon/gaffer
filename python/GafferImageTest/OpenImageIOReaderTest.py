@@ -336,9 +336,9 @@ class OpenImageIOReaderTest( GafferImageTest.ImageTestCase ) :
 		with context :
 			self.assertNotEqual( GafferImage.ImageAlgo.image( reader["out"] ), f1Image )
 			self.assertEqual( reader["out"]["format"].getValue(), f1Format )
-			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].defaultValue() )
-			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].defaultValue() )
-			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].defaultValue() )
+			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].getDefaultValue() )
+			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].getDefaultValue() )
+			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].getDefaultValue() )
 			self.assertEqual( reader["out"].channelData( "R", imath.V2i( 0 ) ), blackTile )
 
 		# get frame 3 data for comparison
@@ -376,9 +376,9 @@ class OpenImageIOReaderTest( GafferImageTest.ImageTestCase ) :
 		with context :
 			self.assertNotEqual( reader["out"]["format"].getValue(), f1Format )
 			self.assertEqual( reader["out"]["format"].getValue(), f3Format )
-			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].defaultValue() )
-			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].defaultValue() )
-			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].defaultValue() )
+			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].getDefaultValue() )
+			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].getDefaultValue() )
+			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].getDefaultValue() )
 			self.assertEqual( reader["out"].channelData( "R", imath.V2i( 0 ) ), blackTile )
 
 		# set to a missing frame before the start of the sequence
@@ -397,9 +397,9 @@ class OpenImageIOReaderTest( GafferImageTest.ImageTestCase ) :
 		reader["missingFrameMode"].setValue( GafferImage.OpenImageIOReader.MissingFrameMode.Black )
 		with context :
 			self.assertEqual( reader["out"]["format"].getValue(), f1Format )
-			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].defaultValue() )
-			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].defaultValue() )
-			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].defaultValue() )
+			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].getDefaultValue() )
+			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].getDefaultValue() )
+			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].getDefaultValue() )
 			self.assertEqual( reader["out"].channelData( "R", imath.V2i( 0 ) ), blackTile )
 
 		# explicit fileNames do not support MissingFrameMode
@@ -417,9 +417,9 @@ class OpenImageIOReaderTest( GafferImageTest.ImageTestCase ) :
 		with context :
 			six.assertRaisesRegex( self, RuntimeError, ".*incompleteSequence.*.exr.*", GafferImage.ImageAlgo.image, reader["out"] )
 			six.assertRaisesRegex( self, RuntimeError, ".*incompleteSequence.*.exr.*", reader["out"]["format"].getValue )
-			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].defaultValue() )
-			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].defaultValue() )
-			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].defaultValue() )
+			self.assertEqual( reader["out"]["dataWindow"].getValue(), reader["out"]["dataWindow"].getDefaultValue() )
+			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].getDefaultValue() )
+			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].getDefaultValue() )
 			self.assertEqual( reader["out"].channelData( "R", imath.V2i( 0 ) ), blackTile )
 
 	def testHashesFrame( self ) :

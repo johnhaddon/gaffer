@@ -508,7 +508,7 @@ class SpreadsheetTest( GafferTest.TestCase ) :
 		s["rows"].addColumn( p )
 
 		for row in s["rows"] :
-			self.assertEqual( row["cells"][0]["value"].defaultValue(), p.defaultValue() )
+			self.assertEqual( row["cells"][0]["value"].getDefaultValue(), p.getDefaultValue() )
 			self.assertEqual( row["cells"][0]["value"].minValue(), p.minValue() )
 			self.assertEqual( row["cells"][0]["value"].maxValue(), p.maxValue() )
 			self.assertEqual( row["cells"][0]["value"].getValue(), p.getValue() )

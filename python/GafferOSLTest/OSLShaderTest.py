@@ -69,11 +69,11 @@ class OSLShaderTest( GafferOSLTest.OSLTestCase ) :
 		self.assertTrue( isinstance( n["parameters"]["s"], Gaffer.StringPlug ) )
 		self.assertTrue( isinstance( n["parameters"]["m"], Gaffer.M44fPlug ) )
 
-		self.assertEqual( n["parameters"]["i"].defaultValue(), 10 )
-		self.assertEqual( n["parameters"]["f"].defaultValue(), 1 )
-		self.assertEqual( n["parameters"]["c"].defaultValue(), imath.Color3f( 1, 2, 3 ) )
-		self.assertEqual( n["parameters"]["s"].defaultValue(), "s" )
-		self.assertEqual( n["parameters"]["m"].defaultValue(), imath.M44f() )
+		self.assertEqual( n["parameters"]["i"].getDefaultValue(), 10 )
+		self.assertEqual( n["parameters"]["f"].getDefaultValue(), 1 )
+		self.assertEqual( n["parameters"]["c"].getDefaultValue(), imath.Color3f( 1, 2, 3 ) )
+		self.assertEqual( n["parameters"]["s"].getDefaultValue(), "s" )
+		self.assertEqual( n["parameters"]["m"].getDefaultValue(), imath.M44f() )
 
 		self.assertEqual( n["out"].typeId(), Gaffer.Plug.staticTypeId() )
 
@@ -204,15 +204,15 @@ class OSLShaderTest( GafferOSLTest.OSLTestCase ) :
 		n.loadShader( s )
 
 		self.assertEqual( n["parameters"].keys(), [ "i", "f", "s", "ss" ] )
-		self.assertEqual( n["parameters"]["i"].defaultValue(), 2 )
-		self.assertEqual( n["parameters"]["f"].defaultValue(), 3 )
-		self.assertEqual( n["parameters"]["ss"].defaultValue(), "ss" )
+		self.assertEqual( n["parameters"]["i"].getDefaultValue(), 2 )
+		self.assertEqual( n["parameters"]["f"].getDefaultValue(), 3 )
+		self.assertEqual( n["parameters"]["ss"].getDefaultValue(), "ss" )
 
 		self.assertEqual( n["parameters"]["s"].keys(), [ "i", "f", "c", "s" ] )
-		self.assertEqual( n["parameters"]["s"]["i"].defaultValue(), 1 )
-		self.assertEqual( n["parameters"]["s"]["f"].defaultValue(), 2 )
-		self.assertEqual( n["parameters"]["s"]["c"].defaultValue(), imath.Color3f( 1, 2, 3 ) )
-		self.assertEqual( n["parameters"]["s"]["s"].defaultValue(), "s" )
+		self.assertEqual( n["parameters"]["s"]["i"].getDefaultValue(), 1 )
+		self.assertEqual( n["parameters"]["s"]["f"].getDefaultValue(), 2 )
+		self.assertEqual( n["parameters"]["s"]["c"].getDefaultValue(), imath.Color3f( 1, 2, 3 ) )
+		self.assertEqual( n["parameters"]["s"]["s"].getDefaultValue(), "s" )
 
 		n["parameters"]["s"]["i"].setValue( 10 )
 		n["parameters"]["s"]["f"].setValue( 21 )
@@ -806,16 +806,16 @@ class OSLShaderTest( GafferOSLTest.OSLTestCase ) :
 		self.assertTrue( isinstance( n["parameters"]["s"], Gaffer.StringVectorDataPlug ) )
 		self.assertTrue( isinstance( n["parameters"]["m"], Gaffer.M44fVectorDataPlug ) )
 
-		self.assertEqual( n["parameters"]["i"].defaultValue(), IECore.IntVectorData( [ 10, 11, 12 ] ) )
-		self.assertEqual( n["parameters"]["f"].defaultValue(), IECore.FloatVectorData( [ 1, 2 ] ) )
-		self.assertEqual( n["parameters"]["c"].defaultValue(), IECore.Color3fVectorData(
+		self.assertEqual( n["parameters"]["i"].getDefaultValue(), IECore.IntVectorData( [ 10, 11, 12 ] ) )
+		self.assertEqual( n["parameters"]["f"].getDefaultValue(), IECore.FloatVectorData( [ 1, 2 ] ) )
+		self.assertEqual( n["parameters"]["c"].getDefaultValue(), IECore.Color3fVectorData(
 			[ imath.Color3f( 1, 2, 3 ), imath.Color3f( 4, 5, 6 ) ] ) )
-		self.assertEqual( n["parameters"]["p"].defaultValue(), IECore.V3fVectorData(
+		self.assertEqual( n["parameters"]["p"].getDefaultValue(), IECore.V3fVectorData(
 			[ imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ) ] ) )
-		self.assertEqual( n["parameters"]["q"].defaultValue(), IECore.V3fVectorData(
+		self.assertEqual( n["parameters"]["q"].getDefaultValue(), IECore.V3fVectorData(
 			[ imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ) ] ) )
-		self.assertEqual( n["parameters"]["s"].defaultValue(), IECore.StringVectorData( [ "s", "t", "u", "v", "word" ] ) )
-		self.assertEqual( n["parameters"]["m"].defaultValue(), IECore.M44fVectorData(
+		self.assertEqual( n["parameters"]["s"].getDefaultValue(), IECore.StringVectorData( [ "s", "t", "u", "v", "word" ] ) )
+		self.assertEqual( n["parameters"]["m"].getDefaultValue(), IECore.M44fVectorData(
 			[ imath.M44f() * 1, imath.M44f() * 0, imath.M44f() * 1 ] ) )
 
 		self.assertEqual( n["out"].typeId(), Gaffer.Plug.staticTypeId() )

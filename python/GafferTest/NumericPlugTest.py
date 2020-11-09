@@ -47,7 +47,7 @@ class NumericPlugTest( GafferTest.TestCase ) :
 	def testConstructor( self ) :
 
 		f = Gaffer.FloatPlug()
-		self.assertEqual( f.defaultValue(), 0 )
+		self.assertEqual( f.getDefaultValue(), 0 )
 		self.assertEqual( f.getName(), "FloatPlug" )
 		self.assertEqual( f.getValue(), 0 )
 
@@ -55,12 +55,12 @@ class NumericPlugTest( GafferTest.TestCase ) :
 			minValue = -1, maxValue = 10 )
 
 		self.assertEqual( f.direction(), Gaffer.Plug.Direction.Out )
-		self.assertEqual( f.defaultValue(), 1 )
+		self.assertEqual( f.getDefaultValue(), 1 )
 		self.assertEqual( f.minValue(), -1 )
 		self.assertEqual( f.maxValue(), 10 )
 
 		f = Gaffer.FloatPlug( defaultValue=10, name="a" )
-		self.assertEqual( f.defaultValue(), 10 )
+		self.assertEqual( f.getDefaultValue(), 10 )
 		self.assertEqual( f.getName(), "a" )
 		self.assertEqual( f.typeName(), "Gaffer::FloatPlug" )
 		self.assertEqual( f.getValue(), 10 )
@@ -245,7 +245,7 @@ class NumericPlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( p1.getName(), p2.getName() )
 		self.assertEqual( p1.direction(), p2.direction() )
-		self.assertEqual( p1.defaultValue(), p2.defaultValue() )
+		self.assertEqual( p1.getDefaultValue(), p2.getDefaultValue() )
 		self.assertEqual( p1.minValue(), p2.minValue() )
 		self.assertEqual( p1.maxValue(), p2.maxValue() )
 		self.assertEqual( p1.getFlags(), p2.getFlags() )
@@ -266,7 +266,7 @@ class NumericPlugTest( GafferTest.TestCase ) :
 		self.assertEqual( p2.getName(), "c" )
 		self.assertEqual( p2.direction(), Gaffer.Plug.Direction.In )
 		self.assertEqual( p2.getFlags(), p1.getFlags() )
-		self.assertEqual( p2.defaultValue(), p1.defaultValue() )
+		self.assertEqual( p2.getDefaultValue(), p1.getDefaultValue() )
 		self.assertEqual( p2.minValue(), p1.minValue() )
 		self.assertEqual( p2.maxValue(), p1.maxValue() )
 
@@ -478,7 +478,7 @@ class NumericPlugTest( GafferTest.TestCase ) :
 		n["op1"].setValue( 1000 )
 		self.assertFalse( n["op1"].isSetToDefault() )
 
-		n["op1"].setValue( n["op1"].defaultValue() )
+		n["op1"].setValue( n["op1"].getDefaultValue() )
 		self.assertTrue( n["op1"].isSetToDefault() )
 
 	def testSerialiser( self ) :

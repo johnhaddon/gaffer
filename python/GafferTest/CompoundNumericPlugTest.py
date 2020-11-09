@@ -283,7 +283,7 @@ class CompoundNumericPlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( p1.getName(), p2.getName() )
 		self.assertEqual( p1.direction(), p2.direction() )
-		self.assertEqual( p1.defaultValue(), p2.defaultValue() )
+		self.assertEqual( p1.getDefaultValue(), p2.getDefaultValue() )
 		self.assertEqual( p1.minValue(), p2.minValue() )
 		self.assertEqual( p1.maxValue(), p2.maxValue() )
 		self.assertEqual( p1.getFlags(), p2.getFlags() )
@@ -309,7 +309,7 @@ class CompoundNumericPlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( p2.getName(), "a" )
 		self.assertEqual( p2.direction(), Gaffer.Plug.Direction.In )
-		self.assertEqual( p2.defaultValue(), p1.defaultValue() )
+		self.assertEqual( p2.getDefaultValue(), p1.getDefaultValue() )
 		self.assertEqual( p2.minValue(), p1.minValue() )
 		self.assertEqual( p2.maxValue(), p1.maxValue() )
 
@@ -493,7 +493,7 @@ class CompoundNumericPlugTest( GafferTest.TestCase ) :
 		n["p"].setValue( imath.V3f( 4, 5, 6 ) )
 		self.assertFalse( n["p"].isSetToDefault() )
 
-		n["p"].setValue( n["p"].defaultValue() )
+		n["p"].setValue( n["p"].getDefaultValue() )
 		self.assertTrue( n["p"].isSetToDefault() )
 
 if __name__ == "__main__":

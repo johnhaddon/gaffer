@@ -114,7 +114,7 @@ class CDLTest( GafferImageTest.ImageTestCase ) :
 		self.assertEqual( n["out"]['channelNames'].hash(), o["out"]['channelNames'].hash() )
 
 		o["enabled"].setValue( True )
-		o['slope'].setValue( o['slope'].defaultValue() )
+		o['slope'].setValue( o['slope'].getDefaultValue() )
 		self.assertEqual( GafferImage.ImageAlgo.image( n["out"] ), GafferImage.ImageAlgo.image( o["out"] ) )
 		self.assertEqual( n["out"]['format'].hash(), o["out"]['format'].hash() )
 		self.assertEqual( n["out"]['dataWindow'].hash(), o["out"]['dataWindow'].hash() )

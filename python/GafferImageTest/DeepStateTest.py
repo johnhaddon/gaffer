@@ -66,7 +66,7 @@ class DeepStateTest( GafferImageTest.ImageTestCase ) :
 
 		deepState = GafferImage.DeepState()
 
-		self.assertEqual( deepState["deepState"].defaultValue(), GafferImage.DeepState.TargetState.Tidy )
+		self.assertEqual( deepState["deepState"].getDefaultValue(), GafferImage.DeepState.TargetState.Tidy )
 
 	@staticmethod
 	def __createDepthGrade():

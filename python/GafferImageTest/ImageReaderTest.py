@@ -291,8 +291,8 @@ class ImageReaderTest( GafferImageTest.ImageTestCase ) :
 			self.assertEqual( reader["out"]["dataWindow"].getValue(), oiio["out"]["dataWindow"].getValue() )
 			self.assertNotEqual( GafferImage.ImageAlgo.image( reader["out"] ), GafferImage.ImageAlgo.image( oiio["out"] ) )
 			# the metadata and channel names are at the defaults
-			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].defaultValue() )
-			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].defaultValue() )
+			self.assertEqual( reader["out"]["metadata"].getValue(), reader["out"]["metadata"].getDefaultValue() )
+			self.assertEqual( reader["out"]["channelNames"].getValue(), reader["out"]["channelNames"].getDefaultValue() )
 			# channel data is black
 			self.assertEqual( reader["out"].channelData( "R", imath.V2i( 0 ) ), blackTile )
 

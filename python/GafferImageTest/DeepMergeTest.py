@@ -84,7 +84,7 @@ class DeepMergeTest( GafferImageTest.ImageTestCase ) :
 
 		# Test default deep state when no inputs connected
 		merge1 = GafferImage.DeepMerge()
-		self.assertEqual( merge1["out"]["deep"].getValue(), merge1["out"]["deep"].defaultValue() )
+		self.assertEqual( merge1["out"]["deep"].getValue(), merge1["out"]["deep"].getDefaultValue() )
 
 		# Test that deep state passes through Flat value when one input connected
 		constant1 = GafferImage.Constant()

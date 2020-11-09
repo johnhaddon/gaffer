@@ -92,7 +92,7 @@ class ObjectReaderTest( GafferTest.TestCase ) :
 	def testReadNoFilename( self ) :
 
 		r = GafferCortex.ObjectReader()
-		self.assertEqual( r["out"].getValue(), r["out"].defaultValue() )
+		self.assertEqual( r["out"].getValue(), r["out"].getDefaultValue() )
 
 if __name__ == "__main__":
 	unittest.main()

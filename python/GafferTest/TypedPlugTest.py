@@ -47,16 +47,16 @@ class TypedPlugTest( GafferTest.TestCase ) :
 	def testConstructor( self ) :
 
 		s = Gaffer.StringPlug()
-		self.assertEqual( s.defaultValue(), "" )
+		self.assertEqual( s.getDefaultValue(), "" )
 		self.assertEqual( s.getName(), "StringPlug" )
 
 		s = Gaffer.StringPlug( direction=Gaffer.Plug.Direction.Out, defaultValue = "a" )
 
 		self.assertEqual( s.direction(), Gaffer.Plug.Direction.Out )
-		self.assertEqual( s.defaultValue(), "a" )
+		self.assertEqual( s.getDefaultValue(), "a" )
 
 		s = Gaffer.StringPlug( defaultValue="b", name="a" )
-		self.assertEqual( s.defaultValue(), "b" )
+		self.assertEqual( s.getDefaultValue(), "b" )
 		self.assertEqual( s.getName(), "a" )
 
 	def testDisconnection( self ) :
@@ -151,7 +151,7 @@ class TypedPlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( p2.getName(), "a" )
 		self.assertEqual( p2.direction(), Gaffer.Plug.Direction.Out )
-		self.assertEqual( p2.defaultValue(), p1.defaultValue() )
+		self.assertEqual( p2.getDefaultValue(), p1.getDefaultValue() )
 		self.assertEqual( p2.getFlags(), p1.getFlags() )
 
 	def testRepr( self ) :
@@ -167,7 +167,7 @@ class TypedPlugTest( GafferTest.TestCase ) :
 
 		self.assertEqual( p2.getName(), p1.getName() )
 		self.assertEqual( p2.direction(), p1.direction() )
-		self.assertEqual( p2.defaultValue(), p1.defaultValue() )
+		self.assertEqual( p2.getDefaultValue(), p1.getDefaultValue() )
 		self.assertEqual( p2.getFlags(), p1.getFlags() )
 
 	def testBoolPlugNumericConnections( self ) :

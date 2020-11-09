@@ -72,6 +72,6 @@ class ObjectReader( Gaffer.ComputeNode ) :
 		with IECore.IgnoredExceptions( RuntimeError ) :
 			reader = IECore.Reader.create( self["fileName"].getValue() )
 
-		plug.setValue( reader.read() if reader else plug.defaultValue() )
+		plug.setValue( reader.read() if reader else plug.getDefaultValue() )
 
 IECore.registerRunTimeTyped( ObjectReader, typeName = "GafferCortex::ObjectReader" )

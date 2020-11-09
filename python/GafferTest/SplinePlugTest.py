@@ -308,23 +308,23 @@ class SplinePlugTest( GafferTest.TestCase ) :
 
 		p = Gaffer.SplineffPlug( "a", defaultValue=s1, flags=Gaffer.Plug.Flags.Dynamic )
 
-		self.assertEqual( p.defaultValue(), s1 )
+		self.assertEqual( p.getDefaultValue(), s1 )
 		self.assertEqual( p.getValue(), s1 )
 		self.assertTrue( p.isSetToDefault() )
 
 		p.setValue( s2 )
-		self.assertEqual( p.defaultValue(), s1 )
+		self.assertEqual( p.getDefaultValue(), s1 )
 		self.assertEqual( p.getValue(), s2 )
 		self.assertFalse( p.isSetToDefault() )
 
 		p.setToDefault()
-		self.assertEqual( p.defaultValue(), s1 )
+		self.assertEqual( p.getDefaultValue(), s1 )
 		self.assertEqual( p.getValue(), s1 )
 		self.assertTrue( p.isSetToDefault() )
 
 		p.setValue( s2 )
 		p.resetDefault()
-		self.assertEqual( p.defaultValue(), s2 )
+		self.assertEqual( p.getDefaultValue(), s2 )
 		self.assertEqual( p.getValue(), s2 )
 		self.assertTrue( p.isSetToDefault() )
 
@@ -429,7 +429,7 @@ class SplinePlugTest( GafferTest.TestCase ) :
 		self.assertTrue( isinstance( p2, Gaffer.SplineffPlug ) )
 		self.assertEqual( p2.numPoints(), p1.numPoints() )
 		self.assertTrue( p2.getValue(), p1.getValue() )
-		self.assertTrue( p2.defaultValue(), p1.defaultValue() )
+		self.assertTrue( p2.getDefaultValue(), p1.getDefaultValue() )
 
 	def testPromoteToBox( self ) :
 
@@ -450,7 +450,7 @@ class SplinePlugTest( GafferTest.TestCase ) :
 		b = Gaffer.Box.create( s, Gaffer.StandardSet( [ s["n"] ] ) )
 		p = Gaffer.PlugAlgo.promote( b["n"]["p"] )
 
-		self.assertEqual( p.defaultValue(), b["n"]["p"].defaultValue() )
+		self.assertEqual( p.getDefaultValue(), b["n"]["p"].getDefaultValue() )
 		self.assertEqual( p.numPoints(), b["n"]["p"].numPoints() )
 		self.assertEqual( p.getValue().interpolation, b["n"]["p"].getValue().interpolation )
 		self.assertEqual( len( p.getValue().points() ), len( b["n"]["p"].getValue().points() ) )
@@ -553,7 +553,7 @@ class SplinePlugTest( GafferTest.TestCase ) :
 		p = Gaffer.SplineffPlug( "a", defaultValue=defaultValue, flags=Gaffer.Plug.Flags.Dynamic )
 
 		p.setValue( truncatedDefaultValue )
-		self.assertEqual( p.defaultValue(), defaultValue )
+		self.assertEqual( p.getDefaultValue(), defaultValue )
 		self.assertEqual( p.getValue(), truncatedDefaultValue )
 		self.assertFalse( p.isSetToDefault() )
 
