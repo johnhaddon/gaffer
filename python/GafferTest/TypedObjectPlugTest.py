@@ -111,7 +111,7 @@ class TypedObjectPlugTest( GafferTest.TestCase ) :
 		self.assertEqual( p.getDefaultValue(), IECore.IntVectorData( [ 1, 2, 3 ] ) )
 
 		self.assertFalse( p.getDefaultValue().isSame( p.getDefaultValue() ) )
-		self.assertTrue( p.defaultValue( _copy = False ).isSame( p.defaultValue( _copy = False ) ) )
+		self.assertTrue( p.getDefaultValue( _copy = False ).isSame( p.getDefaultValue( _copy = False ) ) )
 
 		v = IECore.IntVectorData( [ 4, 5, 6 ] )
 		p.setDefaultValue( v ) # Should be copied here

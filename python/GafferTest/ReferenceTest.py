@@ -1489,6 +1489,8 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		# Now copy/paste the duplicated box. The row should have retained its name.
 
+		print script.serialise( filter = Gaffer.StandardSet( [ script["duplicate"] ] ) )
+
 		script.execute( script.serialise( filter = Gaffer.StandardSet( [ script["duplicate"] ] ) ) )
 		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getDefaultValue(), "test" )
 		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getValue(), "test" )

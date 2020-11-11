@@ -848,6 +848,30 @@ class SpreadsheetTest( GafferTest.TestCase ) :
 			self.assertEqual( row["cells"]["c1"].enabledPlug(), row["cells"]["c1"]["value"]["enabled"] )
 			self.assertEqual( row["cells"]["c1"].enabledPlug().getValue(), True )
 
+	def testDefaultValueSerialisation( self ) :
+
+		s = Gaffer.ScriptNode()
+		s["s"] = Gaffer.Spreadsheet()
+		s["s"]["rows"].addColumn( Gaffer.V3iPlug( "c1", defaultValue = imath.V3i( 1, 2, 3 ) ) )
+		s["s"]["rows"].addColumn( Gaffer.Box2iPlug( "c2", defaultValue = imath.Box2i( imath.V2i( 0 ), imath.V2i( 1 ) ) ) )
+		s["s"]["rows"].addRows( 3 )
+		s["s"]["rows"][1]["name"].setDefaultValue( "testName" )
+		s["s"]["rows"][1]["cells"]["c1"]["value"].setDefaultValue( imath.V3i( 4, 5, 6 ) )
+		s["s"]["rows"][2]["enabled"].setDefaultValue( False )
+		s["s"]["rows"][2]["cells"]["c1"]["value"]["x"].setDefaultValue( 10 )
+		s["s"]["rows"][3]["cells"]["c1"]["enabled"].setDefaultValue( False )
+		s["s"]["rows"][3]["cells"]["c2"]["value"].setDefaultValue( imath.Box2i( imath.V2i( 10 ), imath.V2i( 11 ) ) )
+
+		serialisation = s.serialise()
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( serialisation )
+
+		self.assertEqual( s["s"]["rows"].defaultHash(), s2["s"]["rows"].defaultHash() )
+		# Check that default values are serialised as high in the hierarchy as is possible,
+		# rather than serialise `defaultValue.x, defaultValue.y, defaultValue.z` separately.
+		self.assertEqual( serialisation.count( "setDefaultValue" ), 6 )
+
 	@GafferTest.TestRunner.PerformanceTestMethod()
 	def testAddRowPerformance( self ) :
 

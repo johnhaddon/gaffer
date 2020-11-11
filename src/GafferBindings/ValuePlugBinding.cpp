@@ -63,33 +63,6 @@ namespace
 
 const IECore::InternedString g_omitParentNodePlugValues( "valuePlugSerialiser:omitParentNodePlugValues" );
 
-std::string valueRepr( boost::python::object &o )
-{
-	// We use IECore.repr() because it correctly prefixes the imath
-	// types with the module name, and also works around problems
-	// when round-tripping empty Box2fs.
-	object repr = boost::python::import( "IECore" ).attr( "repr" );
-	std::string result = extract<std::string>( repr( o ) );
-	if( result.size() && result[0] != '<' )
-	{
-		return result;
-	}
-
-	extract<IECore::ConstObjectPtr> objectExtractor( o );
-	if( objectExtractor.check() )
-	{
-		// Fall back to base64 encoding
-		IECore::ConstObjectPtr object = objectExtractor();
-		return
-			"Gaffer.Serialisation.objectFromBase64( \"" +
-			Serialisation::objectToBase64( object.get() ) +
-			"\" )"
-		;
-	}
-
-	return "";
-}
-
 std::string valueSerialisationWalk( const Gaffer::ValuePlug *plug, const std::string &identifier, const Serialisation &serialisation, bool &canCondense )
 {
 	// There's nothing to do if the plug isn't serialisable.
@@ -156,7 +129,7 @@ std::string valueSerialisationWalk( const Gaffer::ValuePlug *plug, const std::st
 		}
 	}
 
-	return identifier + ".setValue( " + valueRepr( pythonValue ) + " )\n";
+	return identifier + ".setValue( " + ValuePlugSerialiser::valueRepr( pythonValue ) + " )\n";
 }
 
 } // namespace
@@ -265,4 +238,31 @@ std::string ValuePlugSerialiser::postHierarchy( const Gaffer::GraphComponent *gr
 	}
 
 	return result;
+}
+
+std::string ValuePlugSerialiser::valueRepr( const boost::python::object &o )
+{
+	// We use IECore.repr() because it correctly prefixes the imath
+	// types with the module name, and also works around problems
+	// when round-tripping empty Box2fs.
+	object repr = boost::python::import( "IECore" ).attr( "repr" );
+	std::string result = extract<std::string>( repr( o ) );
+	if( result.size() && result[0] != '<' )
+	{
+		return result;
+	}
+
+	extract<IECore::ConstObjectPtr> objectExtractor( o );
+	if( objectExtractor.check() )
+	{
+		// Fall back to base64 encoding
+		IECore::ConstObjectPtr object = objectExtractor();
+		return
+			"Gaffer.Serialisation.objectFromBase64( \"" +
+			Serialisation::objectToBase64( object.get() ) +
+			"\" )"
+		;
+	}
+
+	return "";
 }

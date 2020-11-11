@@ -104,6 +104,8 @@ ValuePlugPtr activeInPlug( Spreadsheet &s, const ValuePlug &outPlug )
 	return s.activeInPlug( &outPlug );
 }
 
+const IECore::InternedString g_omitParentNodePlugValues( "valuePlugSerialiser:omitParentNodePlugValues" );
+
 class RowsPlugSerialiser : public ValuePlugSerialiser
 {
 
@@ -125,6 +127,8 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 				return result;
 			}
 
+			// Serialise columns
+
 			for( const auto &cell : Spreadsheet::CellPlug::Range( *plug->getChild<Spreadsheet::RowPlug>( 0 )->cellsPlug() ) )
 			{
 				PlugPtr p = cell->valuePlug()->createCounterpart( cell->getName(), Plug::In );
@@ -137,17 +141,83 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 				result += " )\n";
 			}
 
+			// Serialise rows. We do this as an `addRows()` call because it is much faster
+			// than serialising a constructor for every single cell. It also shows people the
+			// API they should use for making their own spreadsheets.
+
 			const size_t numRows = plug->children().size();
 			if( numRows > 1 )
 			{
 				result += identifier + ".addRows( " + std::to_string( numRows - 1 ) + " )\n";
 			}
+
+			// If the default values for any cells have been modified, then we need to serialise
+			// those separately as `setDefaultValue()` calls. We want to do this as at high a level
+			// as possible in the hierarchy, so that we don't serialise separate defaults for every
+			// child of a V3fPlug for instance.
+
+			for( size_t rowIndex = 1; rowIndex < numRows; ++rowIndex )
+			{
+				const auto *row = plug->getChild<Spreadsheet::RowPlug>( rowIndex );
+				defaultValueSerialisationsWalk( row, plug->defaultRow(), serialisation, result );
+			}
+
+			if( plug->node() == serialisation.parent() && Context::current()->get<bool>( g_omitParentNodePlugValues, false ) )
+			{
+				result += identifier + ".setToDefault()\n";
+			}
+
 			return result;
 		}
 
 		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
 		{
 			// We can serialise much more compactly via the `addRows()` call made by `postConstructor()`.
+			return false;
+		}
+
+	private :
+
+		bool defaultValueSerialisationsWalk( const ValuePlug *plug, const ValuePlug *defaultPlug, const Serialisation &serialisation, std::string &result ) const
+		{
+			const size_t numChildren = plug->children().size();
+			assert( defaultPlug->children().size() == numChildren );
+			if( !numChildren )
+			{
+				// Leaf plug.
+				return plug->defaultHash() != defaultPlug->defaultHash();
+			}
+
+			// Compound plug
+
+			bool checkedForAccessor = false;
+			for( size_t childIndex = 0; childIndex < numChildren; ++childIndex )
+			{
+				const auto *childPlug = plug->getChild<ValuePlug>( childIndex );
+				const bool childRequiresSerialisation = defaultValueSerialisationsWalk(
+					childPlug, defaultPlug->getChild<ValuePlug>( childIndex ), serialisation, result
+				);
+				if( !childRequiresSerialisation )
+				{
+					continue;
+				}
+
+				if( !checkedForAccessor )
+				{
+					object pythonPlug( PlugPtr( const_cast<ValuePlug *>( plug ) ) );
+					if( PyObject_HasAttrString( pythonPlug.ptr(), "getDefaultValue" ) )
+					{
+						return true;
+					}
+				}
+
+				object pythonChildPlug( PlugPtr( const_cast<ValuePlug *>( childPlug ) ) );
+				object pythonDefaultValue = pythonChildPlug.attr( "getDefaultValue" )();
+				/// \todo Build identifier recursively (but lazily) and making sure to use the faster
+				/// version of `childIdentifier()`.
+				result += serialisation.identifier( childPlug ) + ".setDefaultValue( " + valueRepr( pythonDefaultValue ) + " )\n";
+			}
+
 			return false;
 		}
 
