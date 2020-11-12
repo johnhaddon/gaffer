@@ -1495,6 +1495,36 @@ class ReferenceTest( GafferTest.TestCase ) :
 		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getDefaultValue(), "test" )
 		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getValue(), "test" )
 
+	def testSpreadsheetWithMixedDefaultAndValueEdits( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		# Make box and promoted spreadsheet
+
+		script["box"] = Gaffer.Box()
+
+		script["box"]["spreadsheet"] = Gaffer.Spreadsheet()
+		script["box"]["spreadsheet"]["rows"].addColumn( Gaffer.V3iPlug( "c1", defaultValue = imath.V3i( 1, 2, 3 ) ) )
+		script["box"]["spreadsheet"]["rows"].addRow()
+		promoted = Gaffer.PlugAlgo.promote( script["box"]["spreadsheet"]["rows"] )
+
+		# Mess with cell values and defaults
+
+		promoted[1]["cells"]["c1"]["value"]["x"].setValue( 2 ) # Non-default value. Should be ignored on export.
+		promoted[1]["cells"]["c1"]["value"]["y"].setDefaultValue( 3 ) # Modified default. Should be preserved on export.
+		promoted[1]["cells"]["c1"]["value"]["z"].setDefaultValue( 4 ) # Modified default. Should be preserved on export.
+		promoted[1]["cells"]["c1"]["value"]["z"].setValue( 4 ) # Value matches new default. Should be preserved on export.
+
+		script["box"].exportForReference( self.temporaryDirectory() + "/test.grf" )
+
+		script["reference"] = Gaffer.Reference()
+		script["reference"].load( self.temporaryDirectory() + "/test.grf" )
+
+		self.assertTrue( script["reference"]["rows"].isSetToDefault() )
+		self.assertEqual( script["reference"]["rows"][1]["cells"]["value"]["x"].getValue(), 1 )
+		self.assertEqual( script["reference"]["rows"][1]["cells"]["value"]["y"].getValue(), 3 )
+		self.assertEqual( script["reference"]["rows"][1]["cells"]["value"]["y"].getValue(), 4 )
+
 	def tearDown( self ) :
 
 		GafferTest.TestCase.tearDown( self )
