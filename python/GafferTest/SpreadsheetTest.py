@@ -862,6 +862,8 @@ class SpreadsheetTest( GafferTest.TestCase ) :
 		s["s"]["rows"][3]["cells"]["c1"]["enabled"].setDefaultValue( False )
 		s["s"]["rows"][3]["cells"]["c2"]["value"].setDefaultValue( imath.Box2i( imath.V2i( 10 ), imath.V2i( 11 ) ) )
 
+		## TEST MIXED VALUE CHANGES TOO
+
 		serialisation = s.serialise()
 
 		s2 = Gaffer.ScriptNode()

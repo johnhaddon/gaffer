@@ -162,10 +162,10 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 				defaultValueSerialisationsWalk( row, plug->defaultRow(), serialisation, result );
 			}
 
-			if( plug->node() == serialisation.parent() && Context::current()->get<bool>( g_omitParentNodePlugValues, false ) )
-			{
-				result += identifier + ".setToDefault()\n";
-			}
+			// if( plug->node() == serialisation.parent() && Context::current()->get<bool>( g_omitParentNodePlugValues, false ) )
+			// {
+			// 	result += identifier + ".setToDefault()\n";
+			// }
 
 			return result;
 		}
@@ -215,7 +215,8 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 				object pythonDefaultValue = pythonChildPlug.attr( "getDefaultValue" )();
 				/// \todo Build identifier recursively (but lazily) and making sure to use the faster
 				/// version of `childIdentifier()`.
-				result += serialisation.identifier( childPlug ) + ".setDefaultValue( " + valueRepr( pythonDefaultValue ) + " )\n";
+				const std::string childPlugIdentifier = serialisation.identifier( childPlug );
+				result += childPlugIdentifier + ".setDefaultValue( " + valueRepr( pythonDefaultValue ) + " )\n";
 			}
 
 			return false;
