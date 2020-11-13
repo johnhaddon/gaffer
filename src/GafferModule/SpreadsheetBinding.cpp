@@ -156,16 +156,17 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 			// as possible in the hierarchy, so that we don't serialise separate defaults for every
 			// child of a V3fPlug for instance.
 
+			std::string defaultValueSerialisation;
 			for( size_t rowIndex = 1; rowIndex < numRows; ++rowIndex )
 			{
 				const auto *row = plug->getChild<Spreadsheet::RowPlug>( rowIndex );
-				defaultValueSerialisationsWalk( row, plug->defaultRow(), serialisation, result );
+				defaultValueSerialisationsWalk( row, plug->defaultRow(), serialisation, defaultValueSerialisation );
 			}
 
-			// if( plug->node() == serialisation.parent() && Context::current()->get<bool>( g_omitParentNodePlugValues, false ) )
-			// {
-			// 	result += identifier + ".setToDefault()\n";
-			// }
+			if( defaultValueSerialisation.size() )
+			{
+				result += defaultValueSerialisation + identifier + ".resetDefault()\n";
+			}
 
 			return result;
 		}
@@ -188,35 +189,49 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 				return plug->defaultHash() != defaultPlug->defaultHash();
 			}
 
-			// Compound plug
+			// Compound plug. See if the children need their default values to be serialised.
 
-			bool checkedForAccessor = false;
+			std::vector<const ValuePlug *> childrenToSerialise;
 			for( size_t childIndex = 0; childIndex < numChildren; ++childIndex )
 			{
 				const auto *childPlug = plug->getChild<ValuePlug>( childIndex );
 				const bool childRequiresSerialisation = defaultValueSerialisationsWalk(
 					childPlug, defaultPlug->getChild<ValuePlug>( childIndex ), serialisation, result
 				);
-				if( !childRequiresSerialisation )
+				if( childRequiresSerialisation )
 				{
-					continue;
+					childrenToSerialise.push_back( childPlug );
 				}
+			}
 
-				if( !checkedForAccessor )
+			if( !childrenToSerialise.size() )
+			{
+				return false;
+			}
+
+			if( childrenToSerialise.size() == numChildren )
+			{
+				// All children want serialisation. As long as we have the appropriate
+				// methods, we can delegate all the work to our parent.
+				object pythonPlug( PlugPtr( const_cast<ValuePlug *>( plug ) ) );
+				if( PyObject_HasAttrString( pythonPlug.ptr(), "setValue" ) )
 				{
-					object pythonPlug( PlugPtr( const_cast<ValuePlug *>( plug ) ) );
-					if( PyObject_HasAttrString( pythonPlug.ptr(), "getDefaultValue" ) )
-					{
-						return true;
-					}
+					return true;
 				}
+			}
 
+			// Only a subset of children want to change their default value, or
+			// it's not possible to change the default at this level. Add serialisations
+			// for each child.
+
+			for( auto childPlug : childrenToSerialise )
+			{
 				object pythonChildPlug( PlugPtr( const_cast<ValuePlug *>( childPlug ) ) );
-				object pythonDefaultValue = pythonChildPlug.attr( "getDefaultValue" )();
+				object pythonDefaultValue = pythonChildPlug.attr( "defaultValue" )();
 				/// \todo Build identifier recursively (but lazily) and making sure to use the faster
 				/// version of `childIdentifier()`.
 				const std::string childPlugIdentifier = serialisation.identifier( childPlug );
-				result += childPlugIdentifier + ".setDefaultValue( " + valueRepr( pythonDefaultValue ) + " )\n";
+				result += childPlugIdentifier + ".setValue( " + valueRepr( pythonDefaultValue ) + " )\n";
 			}
 
 			return false;
