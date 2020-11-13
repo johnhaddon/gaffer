@@ -1080,6 +1080,11 @@ class _DefaultValueEditor( GafferUI.Widget ) :
 			_Label( "Default Value" )
 
 		self.__plug = None
+
+		# We implement editing of the default value by holding a copy of
+		# the target plug on this node. When the user edits the value of
+		# the copy, we transfer it back as the default value for the original
+		# plug.
 		self.__defaultValueNode = Gaffer.Node()
 		self.__defaultValuePlugSetConnection = self.__defaultValueNode.plugSetSignal().connect(
 			Gaffer.WeakMethod( self.__defaultValuePlugSet ), scoped = False
@@ -1108,16 +1113,20 @@ class _DefaultValueEditor( GafferUI.Widget ) :
 
 	def __plugDirtied( self, plug ) :
 
-		# TEST ME!!! (using undo)
-		if plug == self.__plug :
-			self.__defaultValueNode["defaultValue"].setValue( self.__plug.defaultValue() )
+		pass
+		# if plug == self.__plug :
+		# 	# The default value may have been changed.
+		# 	self.__defaultValueNode["defaultValue"].setValue( self.__plug.defaultValue() )
 
 	def __defaultValuePlugSet( self, plug ) :
 
 		if plug != self.__defaultValueNode["defaultValue"] :
 			return
 
-		print "DEFAULT VALUE", plug.defaultValue()
+		print "DEFAULT VALUE : ", plug.getValue(), plug.fullName()
+		with Gaffer.UndoScope( self.__plug.ancestor( Gaffer.ScriptNode ) ) :
+			print "SETTING DEFAULT VALUE"
+			self.__plug.setDefaultValue( plug.getValue() )
 
 	def __plugMetadataChanged( self, nodeTypeId, plugPath, key, plug ) :
 
@@ -1135,7 +1144,7 @@ class _DefaultValueEditor( GafferUI.Widget ) :
 		if self.__plug is None :
 			return
 
-		if hasattr( self.__plug, "defaultValue" ) :
+		if hasattr( self.__plug, "setDefaultValue" ) :
 			widgetType = Gaffer.Metadata.value( self.__defaultValueNode["defaultValue"], "plugValueWidget:type" )
 			self.__row.append(
 				GafferUI.PlugValueWidget.create(
