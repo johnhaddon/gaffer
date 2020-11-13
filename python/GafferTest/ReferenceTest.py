@@ -1489,8 +1489,6 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		# Now copy/paste the duplicated box. The row should have retained its name.
 
-		print script.serialise( filter = Gaffer.StandardSet( [ script["duplicate"] ] ) )
-
 		script.execute( script.serialise( filter = Gaffer.StandardSet( [ script["duplicate"] ] ) ) )
 		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getDefaultValue(), "test" )
 		self.assertEqual( script["duplicate1"]["rows"][1]["name"].getValue(), "test" )
@@ -1521,9 +1519,9 @@ class ReferenceTest( GafferTest.TestCase ) :
 		script["reference"].load( self.temporaryDirectory() + "/test.grf" )
 
 		self.assertTrue( script["reference"]["rows"].isSetToDefault() )
-		self.assertEqual( script["reference"]["rows"][1]["cells"]["value"]["x"].getValue(), 1 )
-		self.assertEqual( script["reference"]["rows"][1]["cells"]["value"]["y"].getValue(), 3 )
-		self.assertEqual( script["reference"]["rows"][1]["cells"]["value"]["y"].getValue(), 4 )
+		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["x"].getValue(), 1 )
+		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["y"].getValue(), 3 )
+		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["z"].getValue(), 4 )
 
 	def tearDown( self ) :
 
