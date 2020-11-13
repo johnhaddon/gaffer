@@ -870,9 +870,6 @@ class SpreadsheetTest( GafferTest.TestCase ) :
 		s2.execute( serialisation )
 
 		self.assertEqual( s["s"]["rows"].defaultHash(), s2["s"]["rows"].defaultHash() )
-		# Check that default values are serialised as high in the hierarchy as is possible,
-		# rather than serialise `defaultValue.x, defaultValue.y, defaultValue.z` separately.
-		self.assertEqual( serialisation.count( "setDefaultValue" ), 6 )
 
 	@GafferTest.TestRunner.PerformanceTestMethod()
 	def testAddRowPerformance( self ) :
