@@ -139,6 +139,14 @@ class UIEditor( GafferUI.NodeSetEditor ) :
 
 			self.__plugTab.setSizes( [ 0.3, 0.7 ] )
 
+		self.__tabbedContainer.setCornerWidget(
+			GafferUI.MenuButton(
+				image = "gear.png",
+				hasFrame = False,
+				menu = GafferUI.Menu( Gaffer.WeakMethod( self.__menuDefinition ) )
+			)
+		)
+
 		# initialise our selection to nothing
 
 		self.__node = None
@@ -344,6 +352,45 @@ class UIEditor( GafferUI.NodeSetEditor ) :
 				node, "nodeGadget:type",
 				"GafferUI::StandardNodeGadget" if nameVisible else "GafferUI::AuxiliaryNodeGadget"
 			)
+
+	def __nonDefaultPlugs( self ) :
+
+		if self.__node is None :
+			return []
+
+		result = []
+		for p in Gaffer.Plug.Range( self.__plugListing.getPlugParent() ) :
+			if p.getName().startswith( "__" ) :
+				continue
+			if isinstance( p, Gaffer.ValuePlug ) and not p.isSetToDefault() :
+				result.append( p )
+			result.extend( [
+				v for v in Gaffer.ValuePlug.RecursiveRange( p )
+				if not v.isSetToDefault()
+			] )
+
+		return result
+
+	def __menuDefinition( self ) :
+
+		result = IECore.MenuDefinition()
+
+		nonDefaultPlugs = self.__nonDefaultPlugs()
+		result.append(
+			"/Set Defaults From Current Values",
+			{
+				"command" : functools.partial( Gaffer.WeakMethod( self.__setDefaultsFromCurrentValues ), nonDefaultPlugs ),
+				"active" : len( nonDefaultPlugs ) and not any( Gaffer.MetadataAlgo.readOnly( p ) for p in nonDefaultPlugs )
+			}
+		)
+
+		return result
+
+	def __setDefaultsFromCurrentValues( self, plugs ) :
+
+		with Gaffer.UndoScope( self.__node.ancestor( Gaffer.ScriptNode ) ) :
+			for plug in plugs :
+				plug.resetDefault()
 
 GafferUI.Editor.registerType( "UIEditor", UIEditor )
 
