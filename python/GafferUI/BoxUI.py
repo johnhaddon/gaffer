@@ -161,23 +161,30 @@ def __showContents( graphEditor, box ) :
 
 def __nonDefaultPlugs( box ) :
 
-		result = []
+		result = set()
 		def walk( parent ) :
 
 			for p in Gaffer.Plug.Range( parent ) :
+
 				if p.getName().startswith( "__" ) and parent == box :
 					# Plug won't be exported for referencing, so we
 					# can ignore it.
 					continue
-				if p.getInput() is not None :
-					# Plug will say it is not set to default, but
-					# we don't care as we don't export connections.
-					continue
-				if len( p ) == 0 and isinstance( p, Gaffer.ValuePlug ) :
-					if not p.isSetToDefault() :
-						result.append( p )
-				else :
-					walk( p )
+
+				if isinstance( p, Gaffer.ValuePlug ) :
+
+					if not p.isSetToDefault()  :
+						if p.getInput() is None :
+							result.add( p )
+						else :
+							# Plug will always say it is not set to default, but
+							# we don't care as we don't export connections.
+							pass
+
+					if Gaffer.Metadata.value( p, "userDefault", instanceOnly = True ) is not None :
+						result.add( p )
+
+				walk( p )
 
 		walk( box )
 		return result
@@ -187,6 +194,14 @@ def __setDefaultValues( plugs ) :
 	with Gaffer.UndoScope( plugs[0].ancestor( Gaffer.ScriptNode ) ) :
 		for p in plugs :
 			p.resetDefault()
+			# If someone is going to the trouble of authoring a
+			# default, they don't want a pre-existing userDefault
+			# to ruin things.
+			# THIS DOESN'T WORK FOR DEFAULTS ON COMPOUND PLUGS
+			# BECAUSE WE ARE RESETTING AT THE CHILD LEVEL!!!!!
+			# MAYBE WE NEED TO INCLUDE ANY PLUGS WITH A USER DEFAULT
+			# IN THE LIST, SO THEY CAN BE REMOVED?
+			Gaffer.Metadata.deregisterValue( p, "userDefault" )
 
 def __exportForReferencing( menu, node ) :
 
@@ -202,6 +217,7 @@ def __exportForReferencing( menu, node ) :
 				or for individual plugs using their context menus.
 				"""
 			),
+			#details = "DSFDFSDFSDF, FFDFDSFSD, FDSDFSFDF",
 			confirmLabel = "Export"
 		)
 		if not dialogue.waitForConfirmation() :
@@ -330,11 +346,6 @@ def __appendPlugPromotionMenuItems( menuDefinition, plug, readOnlyUI = False ) :
 # PlugValueWidget menu
 ##########################################################################
 
-def __setDefaultValue( plug ) :
-
-	with Gaffer.UndoScope( plug.ancestor( Gaffer.ScriptNode ) ) :
-		plug.resetDefault()
-
 def __appendPlugResetDefaultMenuItems( menuDefinition, plug, readOnlyUI ) :
 
 	if not isinstance( plug.node(), Gaffer.Box ) :
@@ -345,7 +356,7 @@ def __appendPlugResetDefaultMenuItems( menuDefinition, plug, readOnlyUI ) :
 	menuDefinition.append(
 		"/Set Default Value",
 		{
-			"command" : functools.partial( __setDefaultValue, plug ),
+			"command" : functools.partial( __setDefaultValues, [ plug ] ),
 			"active" : isinstance( plug, Gaffer.ValuePlug ) and not plug.isSetToDefault() and not readOnly,
 		}
 	)
