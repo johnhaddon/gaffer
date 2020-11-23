@@ -1524,6 +1524,71 @@ class ReferenceTest( GafferTest.TestCase ) :
 		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["y"].getValue(), 3 )
 		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["z"].getValue(), 4 )
 
+	def testSplineExport( self ) :
+
+		splines = [
+			Gaffer.SplineDefinitionff(
+				(
+					( 0, 0 ),
+					( 0.2, 0.3 ),
+					( 0.4, 0.9 ),
+					( 1, 1 ),
+				),
+				Gaffer.SplineDefinitionInterpolation.CatmullRom
+			),
+			Gaffer.SplineDefinitionff(
+				(
+					( 1, 1 ),
+					( 1, 1 ),
+					( 0.2, 0.3 ),
+					( 0.4, 0.9 ),
+					( 0, 0 ),
+					( 0, 0 ),
+				),
+				Gaffer.SplineDefinitionInterpolation.Linear
+			)
+		]
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.grf" )
+
+		for i in range( 0, 2 ) :
+
+			defaultValue = splines[i]
+			otherValue = splines[(i+1)%2]
+
+			script = Gaffer.ScriptNode()
+
+			# Create Box with SplinePlug at default value
+
+			script["box"] = Gaffer.Box()
+			script["box"]["spline"] = Gaffer.SplineffPlug( defaultValue = defaultValue, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+			script["box"].exportForReference( fileName )
+
+			# Reference it and check we get what we want
+
+			script["reference"] = Gaffer.Reference()
+			script["reference"].load( fileName )
+
+			self.assertEqual( script["reference"]["spline"].getValue(), defaultValue )
+			self.assertEqual( script["reference"]["spline"].defaultValue(), defaultValue )
+			self.assertTrue( script["reference"]["spline"].isSetToDefault() )
+
+			# Set value and save and reload file with reference
+
+			script["reference"]["spline"].setValue( otherValue )
+
+			script2 = Gaffer.ScriptNode()
+
+			print script["reference"]["spline"].keys(), "!!!!!!!!!!!!!!!!!"
+
+			print script.serialise()
+
+			script2.execute( script.serialise() )
+
+			self.assertEqual( script["reference"]["spline"].getValue(), otherValue )
+			self.assertEqual( script["reference"]["spline"].defaultValue(), defaultValue )
+			self.assertFalse( script["reference"]["spline"].isSetToDefault() )
+
 	def tearDown( self ) :
 
 		GafferTest.TestCase.tearDown( self )
