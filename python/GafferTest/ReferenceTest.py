@@ -1524,7 +1524,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["y"].getValue(), 3 )
 		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["z"].getValue(), 4 )
 
-	def testSplineExport( self ) :
+	def testSplinePlug( self ) :
 
 		splines = [
 			Gaffer.SplineDefinitionff(
@@ -1551,43 +1551,46 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		fileName = os.path.join( self.temporaryDirectory(), "test.grf" )
 
-		for i in range( 0, 2 ) :
+		for nonDefaultAtExport in ( False, True ) :
 
-			defaultValue = splines[i]
-			otherValue = splines[(i+1)%2]
+			for i in range( 0, 2 ) :
 
-			script = Gaffer.ScriptNode()
+				# On one iteration `defaultValue` has more points,
+				# and on the other iteration `otherValue` has more
+				# points. This is useful for catching bugs because
+				# SplinePlugs must add plugs to represent points.
+				defaultValue = splines[i]
+				otherValue = splines[(i+1)%2]
 
-			# Create Box with SplinePlug at default value
+				script = Gaffer.ScriptNode()
 
-			script["box"] = Gaffer.Box()
-			script["box"]["spline"] = Gaffer.SplineffPlug( defaultValue = defaultValue, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-			script["box"].exportForReference( fileName )
+				# Create Box with SplinePlug
 
-			# Reference it and check we get what we want
+				script["box"] = Gaffer.Box()
+				script["box"]["spline"] = Gaffer.SplineffPlug( defaultValue = defaultValue, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+				if nonDefaultAtExport :
+					script["box"]["spline"].setValue( otherValue )
+				script["box"].exportForReference( fileName )
 
-			script["reference"] = Gaffer.Reference()
-			script["reference"].load( fileName )
+				# Reference it and check we get what we want
 
-			self.assertEqual( script["reference"]["spline"].getValue(), defaultValue )
-			self.assertEqual( script["reference"]["spline"].defaultValue(), defaultValue )
-			self.assertTrue( script["reference"]["spline"].isSetToDefault() )
+				script["reference"] = Gaffer.Reference()
+				script["reference"].load( fileName )
 
-			# Set value and save and reload file with reference
+				self.assertEqual( script["reference"]["spline"].getValue(), defaultValue )
+				self.assertEqual( script["reference"]["spline"].defaultValue(), defaultValue )
+				self.assertTrue( script["reference"]["spline"].isSetToDefault() )
 
-			script["reference"]["spline"].setValue( otherValue )
+				# Set value on reference and save and reload it
 
-			script2 = Gaffer.ScriptNode()
+				script["reference"]["spline"].setValue( otherValue )
 
-			print script["reference"]["spline"].keys(), "!!!!!!!!!!!!!!!!!"
+				script2 = Gaffer.ScriptNode()
+				script2.execute( script.serialise() )
 
-			print script.serialise()
-
-			script2.execute( script.serialise() )
-
-			self.assertEqual( script["reference"]["spline"].getValue(), otherValue )
-			self.assertEqual( script["reference"]["spline"].defaultValue(), defaultValue )
-			self.assertFalse( script["reference"]["spline"].isSetToDefault() )
+				self.assertEqual( script2["reference"]["spline"].getValue(), otherValue )
+				self.assertEqual( script2["reference"]["spline"].defaultValue(), defaultValue )
+				self.assertFalse( script2["reference"]["spline"].isSetToDefault() )
 
 	def tearDown( self ) :
 

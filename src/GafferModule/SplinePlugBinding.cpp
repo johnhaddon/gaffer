@@ -153,15 +153,14 @@ class SplinePlugSerialiser : public ValuePlugSerialiser
 			return result;
 		}
 
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+		bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
 		{
 			if( child->getName() == g_interpolation )
 			{
-				return false;
+				return ValuePlugSerialiser::childNeedsSerialisation( child, serialisation );
 			}
 			// Plug representing a point. These are added dynamically so we need to serialise them
 			// if we want to serialise the value.
-			//std::cerr << "TESTING " << child->fullName() << std::endl;
 			return !omitValue( child, serialisation );
 		}
 
@@ -169,8 +168,14 @@ class SplinePlugSerialiser : public ValuePlugSerialiser
 
 		bool omitValue( const Gaffer::GraphComponent *plug, const Serialisation &serialisation ) const
 		{
+			const auto valuePlug = static_cast<const ValuePlug *>( plug );
+			if( valuePlug->isSetToDefault() )
+			{
+				return true;
+			}
+
 			return
-				plug->ancestor<const Node>() == serialisation.parent() &&
+				valuePlug->node() == serialisation.parent() &&
 				Context::current()->get<bool>( g_omitParentNodePlugValues, false )
 			;
 		}
