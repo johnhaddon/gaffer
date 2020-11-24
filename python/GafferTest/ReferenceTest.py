@@ -1592,6 +1592,72 @@ class ReferenceTest( GafferTest.TestCase ) :
 				self.assertEqual( script2["reference"]["spline"].defaultValue(), defaultValue )
 				self.assertFalse( script2["reference"]["spline"].isSetToDefault() )
 
+	def testSplinePlugUpgradeDefault( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		defaultOne = Gaffer.SplineDefinitionff(
+			(
+				( 0, 0 ),
+				( 0.2, 0.3 ),
+				( 0.4, 0.9 ),
+				( 1, 1 ),
+			),
+			Gaffer.SplineDefinitionInterpolation.CatmullRom
+		)
+
+		defaultTwo = Gaffer.SplineDefinitionff(
+			(
+				( 1, 1 ),
+				( 1, 1 ),
+				( 0.2, 0.3 ),
+				( 0.4, 0.9 ),
+				( 0, 0 ),
+				( 0, 0 ),
+			),
+			Gaffer.SplineDefinitionInterpolation.Linear
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.grf" )
+		script = Gaffer.ScriptNode()
+
+		# Export a box with a spline on it
+
+		script["box"] = Gaffer.Box()
+		script["box"]["spline"] = Gaffer.SplineffPlug( defaultValue = defaultOne, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"].exportForReference( fileName )
+
+		# Make reference1 at default spline value, reference2 with modified spline value
+
+		script["reference1"] = Gaffer.Reference()
+		script["reference1"].load( fileName )
+		self.assertEqual( script["reference1"]["spline"].defaultValue(), script["box"]["spline"].defaultValue() )
+		self.assertTrue( script["reference1"]["spline"].isSetToDefault() )
+
+		script["reference2"] = Gaffer.Reference()
+		script["reference2"].load( fileName )
+		self.assertEqual( script["reference2"]["spline"].defaultValue(), script["box"]["spline"].defaultValue() )
+		self.assertTrue( script["reference2"]["spline"].isSetToDefault() )
+		script["reference2"]["spline"].pointPlug( 0 )["y"].setValue( 100 )
+		self.assertFalse( script["reference2"]["spline"].isSetToDefault() )
+		reference2Value = script["reference2"]["spline"].getValue()
+
+		# Export a new version with a different default. This should
+		# be inherited by reference1 and overridden by reference2.
+
+		script["box"]["spline"].setValue( defaultTwo )
+		script["box"]["spline"].resetDefault()
+		script["box"].exportForReference( fileName )
+
+		script["reference1"].load( fileName )
+		self.assertEqual( script["reference1"]["spline"].defaultValue(), script["box"]["spline"].defaultValue() )
+		self.assertTrue( script["reference1"]["spline"].isSetToDefault() )
+
+		script["reference2"].load( fileName )
+		self.assertEqual( script["reference2"]["spline"].defaultValue(), script["box"]["spline"].defaultValue() )
+		self.assertFalse( script["reference2"]["spline"].isSetToDefault() )
+		self.assertEqual( script["reference2"]["spline"].getValue(), reference2Value )
+
 	def tearDown( self ) :
 
 		GafferTest.TestCase.tearDown( self )
