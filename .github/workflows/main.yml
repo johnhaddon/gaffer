@@ -103,56 +103,56 @@ jobs:
         sudo pip3 install scons==3.1.2
         sudo pip3 install sphinx==1.8.1 sphinx_rtd_theme==0.4.3 recommonmark==0.5.0 docutils==0.12
         # Force inkscape < 1.0 until SConstruct is updated
-        brew cask install xquartz https://raw.githubusercontent.com/Homebrew/homebrew-cask/5eafe6e9877c5524100b9ac1c5375fe8a2d039be/Casks/inkscape.rb
+        #brew cask install xquartz https://raw.githubusercontent.com/Homebrew/homebrew-cask/5eafe6e9877c5524100b9ac1c5375fe8a2d039be/Casks/inkscape.rb
       if: runner.os == 'macOS'
 
-    - name: Install toolchain (Linux)
-      run: |
-        echo /opt/rh/devtoolset-6/root/bin >> $GITHUB_PATH
-        Xvfb :99 -screen 0 1280x1024x24 &
-        metacity&
-        useradd -m testUser
-        # Works around issues with earlier Python versions, remove once the Docker image is updated
-        pip install --user sphinx==1.8.1
-      if: runner.os == 'Linux'
+    # - name: Install toolchain (Linux)
+    #   run: |
+    #     echo /opt/rh/devtoolset-6/root/bin >> $GITHUB_PATH
+    #     Xvfb :99 -screen 0 1280x1024x24 &
+    #     metacity&
+    #     useradd -m testUser
+    #     # Works around issues with earlier Python versions, remove once the Docker image is updated
+    #     pip install --user sphinx==1.8.1
+    #   if: runner.os == 'Linux'
 
-    - name: 'Install Python Modules'
-      run: |
-        python --version
-        pip install PyGitHub==1.45
+    # - name: 'Install Python Modules'
+    #   run: |
+    #     python --version
+    #     pip install PyGitHub==1.45
 
-    - name: Set Custom Variables
-      run: |
-        .github/workflows/main/setBuildVars.py
-        echo GAFFER_SPHINX=`which sphinx-build` >> $GITHUB_ENV
-      env:
-       GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       GAFFER_BUILD_VARIANT: ${{ matrix.variant }}
+    # - name: Set Custom Variables
+    #   run: |
+    #     .github/workflows/main/setBuildVars.py
+    #     echo GAFFER_SPHINX=`which sphinx-build` >> $GITHUB_ENV
+    #   env:
+    #    GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #    GAFFER_BUILD_VARIANT: ${{ matrix.variant }}
 
-    - name: Disable macOS PR Docs
-      run: |
-        echo GAFFER_SPHINX=doesNotExist >> $GITHUB_ENV
-        echo GAFFER_VALIDATE_EXTRA_FLAGS=--skipDocs >> $GITHUB_ENV
-      if: runner.os == 'macOS' && env.GAFFER_GITHUB_RELEASEID == ''
+    # - name: Disable macOS PR Docs
+    #   run: |
+    #     echo GAFFER_SPHINX=doesNotExist >> $GITHUB_ENV
+    #     echo GAFFER_VALIDATE_EXTRA_FLAGS=--skipDocs >> $GITHUB_ENV
+    #   if: runner.os == 'macOS' && env.GAFFER_GITHUB_RELEASEID == ''
 
-    - name: Install dependencies
-      # The `$GITHUB_ENV` shenanigans creates an environment variable
-      # containing the hash of the archive, for use in the cache key
-      # below.
-      run: |
-        echo GAFFER_DEPENDENCIES_HASH=`python .github/workflows/main/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ${{ env.GAFFER_BUILD_DIR }} --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
-        ./config/installArnold.sh
-        ./config/installDelight.sh
-        echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
-        echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
+    # - name: Install dependencies
+    #   # The `$GITHUB_ENV` shenanigans creates an environment variable
+    #   # containing the hash of the archive, for use in the cache key
+    #   # below.
+    #   run: |
+    #     echo GAFFER_DEPENDENCIES_HASH=`python .github/workflows/main/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ${{ env.GAFFER_BUILD_DIR }} --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
+    #     ./config/installArnold.sh
+    #     ./config/installDelight.sh
+    #     echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
+    #     echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
 
-    - name: Cache
-      uses: actions/cache@v1
-      with:
-        path: ${{ env.GAFFER_CACHE_DIR }}
-        key: ${{ runner.os }}-${{ matrix.containerImage }}-${{env.GAFFER_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.containerImage }}-${{env.GAFFER_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-
+    # - name: Cache
+    #   uses: actions/cache@v1
+    #   with:
+    #     path: ${{ env.GAFFER_CACHE_DIR }}
+    #     key: ${{ runner.os }}-${{ matrix.containerImage }}-${{env.GAFFER_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-${{ github.sha }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-${{ matrix.containerImage }}-${{env.GAFFER_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-
 
     - name: Build Gaffer
       run: |
