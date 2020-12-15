@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - '*_maintenance'
+      - macScons # REMOVE ME!!!
   pull_request:
     branches:
       - master
