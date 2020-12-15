@@ -100,8 +100,8 @@ jobs:
       # Prefer `pip install` where possible because it is faster
       # than `brew install`.
       run: |
-        sudo pip3 install scons==3.1.2
-        sudo pip3 install sphinx==1.8.1 sphinx_rtd_theme==0.4.3 recommonmark==0.5.0 docutils==0.12
+        sudo pip install scons==3.1.2
+        sudo pip install sphinx==1.8.1 sphinx_rtd_theme==0.4.3 recommonmark==0.5.0 docutils==0.12
         # Force inkscape < 1.0 until SConstruct is updated
         #brew cask install xquartz https://raw.githubusercontent.com/Homebrew/homebrew-cask/5eafe6e9877c5524100b9ac1c5375fe8a2d039be/Casks/inkscape.rb
       if: runner.os == 'macOS'
@@ -156,6 +156,8 @@ jobs:
 
     - name: Build Gaffer
       run: |
+       cat /usr/local/bin/scons
+       python --version
        scons -j 2 build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
 
     - name: Test
