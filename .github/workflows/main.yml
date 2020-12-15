@@ -135,16 +135,16 @@ jobs:
     #     echo GAFFER_VALIDATE_EXTRA_FLAGS=--skipDocs >> $GITHUB_ENV
     #   if: runner.os == 'macOS' && env.GAFFER_GITHUB_RELEASEID == ''
 
-    # - name: Install dependencies
-    #   # The `$GITHUB_ENV` shenanigans creates an environment variable
-    #   # containing the hash of the archive, for use in the cache key
-    #   # below.
-    #   run: |
-    #     echo GAFFER_DEPENDENCIES_HASH=`python .github/workflows/main/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ${{ env.GAFFER_BUILD_DIR }} --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
-    #     ./config/installArnold.sh
-    #     ./config/installDelight.sh
-    #     echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
-    #     echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
+    - name: Install dependencies
+      # The `$GITHUB_ENV` shenanigans creates an environment variable
+      # containing the hash of the archive, for use in the cache key
+      # below.
+      run: |
+        #echo GAFFER_DEPENDENCIES_HASH=`python .github/workflows/main/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ${{ env.GAFFER_BUILD_DIR }} --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
+        # ./config/installArnold.sh
+        # ./config/installDelight.sh
+        echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
+        echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
 
     # - name: Cache
     #   uses: actions/cache@v1
