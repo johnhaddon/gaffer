@@ -662,6 +662,11 @@ else :
 	basePythonEnv.Append(
 		CPPPATH = [ "$BUILD_DIR/include/python$PYTHON_ABI_VERSION" ]
 	)
+	# BULLSHIT FOR USD
+	baseLibEnv["PYTHON_ABI_VERSION"] = basePythonEnv["PYTHON_ABI_VERSION"]
+	baseLibEnv.Append(
+		CPPPATH = [ "$BUILD_DIR/include/python$PYTHON_ABI_VERSION" ]
+	)
 
 ###############################################################################################
 # Definitions for the libraries we wish to build
@@ -785,7 +790,7 @@ libraries = {
 
 	"GafferSceneUI" : {
 		"envAppends" : {
-			"LIBS" : [ "Gaffer", "GafferUI", "GafferImage", "GafferImageUI", "GafferScene", "Iex$OPENEXR_LIB_SUFFIX", "IECoreGL$CORTEX_LIB_SUFFIX", "IECoreImage$CORTEX_LIB_SUFFIX", "IECoreScene$CORTEX_LIB_SUFFIX" ],
+			"LIBS" : [ "Gaffer", "GafferUI", "GafferImage", "GafferImageUI", "GafferScene", "Iex$OPENEXR_LIB_SUFFIX", "IECoreGL$CORTEX_LIB_SUFFIX", "IECoreImage$CORTEX_LIB_SUFFIX", "IECoreScene$CORTEX_LIB_SUFFIX", "hd", "hdx", "hdSt", "hgi" ],
 		},
 		"pythonEnvAppends" : {
 			"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "GafferBindings", "GafferScene", "GafferUI", "GafferImageUI", "GafferSceneUI" ],

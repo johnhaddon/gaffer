@@ -50,6 +50,35 @@
 
 #include "IECoreGL/State.h"
 
+#define _GLIBCXX_PERMIT_BACKWARD_HASH // Ugh
+
+#include "pxr/pxr.h"
+
+#include "pxr/imaging/glf/glew.h"
+#include "pxr/imaging/glf/contextCaps.h"
+#include "pxr/imaging/glf/diagnostic.h"
+#include "pxr/imaging/glf/drawTarget.h"
+#include "pxr/imaging/glf/glContext.h"
+#include "pxr/imaging/garch/glDebugWindow.h"
+#include "pxr/base/gf/frustum.h"
+
+#include "pxr/imaging/hd/driver.h"
+#include "pxr/imaging/hd/engine.h"
+
+#include "pxr/imaging/hdSt/renderDelegate.h"
+#include "pxr/imaging/hdSt/light.h"
+
+#include "pxr/imaging/hdx/simpleLightTask.h"
+#include "pxr/imaging/hdx/shadowTask.h"
+#include "pxr/imaging/hdx/renderSetupTask.h"
+#include "pxr/imaging/hdx/renderTask.h"
+#include "unitTestDelegate.h" // Copied temporarily to this project
+
+#include "pxr/imaging/hgi/hgi.h"
+#include "pxr/imaging/hgi/tokens.h"
+
+using namespace pxr; // REMOVE ME!
+
 namespace GafferSceneUI
 {
 
@@ -193,6 +222,14 @@ class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 		IECore::PathMatcher m_selection;
 
 		IECore::StringVectorDataPtr m_selectionMask;
+
+		mutable HgiUniquePtr m_hgi;
+    	mutable HdDriver m_driver;
+		mutable HdStRenderDelegate m_renderDelegate;
+		mutable std::unique_ptr<Hdx_UnitTestDelegate> m_sceneDelegate;
+		mutable	std::unique_ptr<HdRenderIndex> m_renderIndex;
+		mutable HdEngine m_engine;
+		mutable HdTaskSharedPtrVector m_tasks;
 
 };
 

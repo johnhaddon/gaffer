@@ -472,8 +472,63 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 		return;
 	}
 
-	const_cast<SceneGadget *>( this )->updateRenderer();
-	renderScene();
+	if( !m_hgi )
+	{
+		static GlfGLContextSharedPtr g_ctx = GlfGLContext::GetCurrentGLContext();
+   		GlfContextCaps::InitInstance();
+
+		m_hgi = Hgi::CreatePlatformDefaultHgi(); // Maybe just GL?
+		m_driver = HdDriver{HgiTokens->renderDriver, VtValue( m_hgi.get() ) };
+		m_renderIndex.reset(
+			HdRenderIndex::New( &m_renderDelegate, { &m_driver } )
+		);
+
+		m_sceneDelegate.reset(
+			new Hdx_UnitTestDelegate( m_renderIndex.get() )
+		);
+
+		SdfPath renderSetupTask("/renderSetupTask");
+		SdfPath renderTask("/renderTask");
+
+		m_sceneDelegate->AddRenderSetupTask(renderSetupTask);
+		m_sceneDelegate->AddRenderTask(renderTask);
+
+		m_tasks.push_back(m_renderIndex->GetTask(renderSetupTask));
+		m_tasks.push_back(m_renderIndex->GetTask(renderTask));
+
+		//m_sceneDelegate->AddCube( SdfPath( "/cube" ), GfMatrix4d() );
+m_sceneDelegate->AddCube(SdfPath("/cube"),
+                     GfMatrix4d( 1,0,0,0, 0,1,0,0,  0,0,1,0, -3,0,5,1));
+
+		GfFrustum frustum;
+    frustum.SetNearFar(GfRange1d(0.1, 1000.0));
+    frustum.SetPosition(GfVec3d(0, -5, 10));
+    frustum.SetRotation(GfRotation(GfVec3d(1, 0, 0), 45));
+    m_sceneDelegate->SetCamera(frustum.ComputeViewMatrix(),
+                       frustum.ComputeProjectionMatrix());
+
+
+		m_sceneDelegate->SetTaskParam(
+      	  renderTask, HdTokens->collection,
+        VtValue(HdRprimCollection(HdTokens->geometry,
+                HdReprSelector(HdReprTokens->refined))));
+
+    // set render setup param
+    VtValue vParam = m_sceneDelegate->GetTaskParam(renderSetupTask, HdTokens->params);
+    HdxRenderTaskParams param = vParam.Get<HdxRenderTaskParams>();
+    param.enableLighting = true;
+    m_sceneDelegate->SetTaskParam(renderSetupTask, HdTokens->params, VtValue(param));
+
+
+	}
+
+	m_engine.Execute( m_renderIndex.get(), &m_tasks );
+
+	//const_cast<SceneGadget *>( this )->updateRenderer();
+	//renderScene();
+
+
+
 }
 
 void SceneGadget::updateRenderer()
