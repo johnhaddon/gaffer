@@ -41,6 +41,8 @@
 #include "pxr/base/vt/array.h"
 #include "pxr/base/tf/staticTokens.h"
 
+#include "OpenEXR/ImathMatrix.h"
+
 PXR_NAMESPACE_OPEN_SCOPE
 
 template <typename T>
@@ -56,6 +58,8 @@ class Hdx_UnitTestDelegate : public HdSceneDelegate
 {
 public:
     Hdx_UnitTestDelegate(HdRenderIndex *renderIndex);
+
+    Imath::M44d m_worldToViewMatrix;
 
     void SetRefineLevel(int level);
 

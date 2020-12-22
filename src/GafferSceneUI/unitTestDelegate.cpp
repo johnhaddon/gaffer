@@ -24,6 +24,8 @@
 
 #include "GafferSceneUI/unitTestDelegate.h"
 
+#include "IECoreUSD/DataAlgo.h"
+
 #include "pxr/base/gf/frustum.h"
 
 #include "pxr/imaging/hd/engine.h"
@@ -45,6 +47,8 @@
 #include "pxr/imaging/hdx/shadowMatrixComputation.h"
 
 #include "pxr/imaging/pxOsd/tokens.h"
+
+#include <iostream>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -885,6 +889,14 @@ VtValue
 Hdx_UnitTestDelegate::GetCameraParamValue(SdfPath const &cameraId,
                                           TfToken const &paramName)
 {
+    std::cerr << "GetCameraParamValue " << cameraId << " " << paramName << std::endl;
+
+    if( paramName == HdCameraTokens->worldToViewMatrix )
+    {
+        std::cerr << "RETURNING CUSTOM" << std::endl;
+        return VtValue( IECoreUSD::DataAlgo::toUSD( m_worldToViewMatrix ) );
+    }
+
     _ValueCache *vcache = TfMapLookupPtr(_valueCacheMap, cameraId);
     VtValue ret;
     if (vcache && TfMapLookup(*vcache, paramName, &ret)) {
