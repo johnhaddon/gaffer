@@ -72,6 +72,8 @@
 #include "pxr/imaging/hdx/shadowTask.h"
 #include "pxr/imaging/hdx/renderSetupTask.h"
 #include "pxr/imaging/hdx/renderTask.h"
+#include "pxr/imaging/hdx/taskController.h"
+
 #include "unitTestDelegate.h" // Copied temporarily to this project
 
 #include "pxr/imaging/hgi/hgi.h"
@@ -230,6 +232,9 @@ class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 		mutable	std::unique_ptr<HdRenderIndex> m_renderIndex;
 		mutable HdEngine m_engine;
 		mutable HdTaskSharedPtrVector m_tasks;
+
+		mutable std::shared_ptr<HdxSelectionTracker> m_selectionTracker;
+		mutable std::unique_ptr<HdxTaskController> m_taskController;
 
 };
 
