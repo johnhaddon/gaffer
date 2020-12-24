@@ -486,10 +486,8 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 		);
 
 		m_sceneDelegate.reset(
-			new Hdx_UnitTestDelegate( m_renderIndex.get() )
+			new SceneDelegate( getScene(), m_renderIndex.get() )
 		);
-
-		m_sceneDelegate->AddCube( SdfPath( "/cube" ), GfMatrix4d( 1 ) );
 	
 		m_taskController.reset( new HdxTaskController( m_renderIndex.get(), SdfPath( "/__controllerId" ) ) );
 		m_taskController->SetEnableSelection( false );
