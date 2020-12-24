@@ -105,7 +105,6 @@ SceneGadget::~SceneGadget()
 void SceneGadget::setScene( GafferScene::ConstScenePlugPtr scene )
 {
 	m_controller.setScene( scene );
-	//m_sceneDelegate->setScene();
 }
 
 const GafferScene::ScenePlug *SceneGadget::getScene() const
@@ -487,7 +486,7 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 		);
 
 		m_sceneDelegate.reset(
-			new SceneDelegate( getScene(), m_renderIndex.get() )
+			new Hdx_UnitTestDelegate( m_renderIndex.get() )
 		);
 
 		// SdfPath renderSetupTask("/renderSetupTask");
@@ -499,10 +498,10 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 		// m_tasks.push_back(m_renderIndex->GetTask(renderSetupTask));
 		// m_tasks.push_back(m_renderIndex->GetTask(renderTask));
 
-		// m_sceneDelegate->AddCube( SdfPath( "/cube" ), GfMatrix4d( 1 ) );
+		m_sceneDelegate->AddCube( SdfPath( "/cube" ), GfMatrix4d( 1 ) );
 
-		// m_sceneDelegate->AddCube(SdfPath("/cube2"),
-        //              GfMatrix4d( 1,0,0,0, 0,1,0,0,  0,0,1,0, -3,0,5,1));
+		m_sceneDelegate->AddCube(SdfPath("/cube2"),
+                     GfMatrix4d( 1,0,0,0, 0,1,0,0,  0,0,1,0, -3,0,5,1));
 		
 	// 	GfFrustum frustum;
     // frustum.SetNearFar(GfRange1d(0.1, 1000.0));
