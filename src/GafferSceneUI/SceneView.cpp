@@ -444,7 +444,7 @@ class SceneView::Grid : public boost::signals::trackable
 			m_gadget->setMinimumExpansionDepth( 1 );
 			m_gadget->setScene( m_node->outPlug() );
 
-			view->viewportGadget()->setChild( "__grid", m_gadget );
+			//view->viewportGadget()->setChild( "__grid", m_gadget );
 
 			view->plugDirtiedSignal().connect( boost::bind( &Grid::plugDirtied, this, ::_1 ) );
 
