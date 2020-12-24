@@ -489,39 +489,8 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 			new Hdx_UnitTestDelegate( m_renderIndex.get() )
 		);
 
-		// SdfPath renderSetupTask("/renderSetupTask");
-		// SdfPath renderTask("/renderTask");
-
-		// m_sceneDelegate->AddRenderSetupTask(renderSetupTask);
-		// m_sceneDelegate->AddRenderTask(renderTask);
-
-		// m_tasks.push_back(m_renderIndex->GetTask(renderSetupTask));
-		// m_tasks.push_back(m_renderIndex->GetTask(renderTask));
-
 		m_sceneDelegate->AddCube( SdfPath( "/cube" ), GfMatrix4d( 1 ) );
-
-		m_sceneDelegate->AddCube(SdfPath("/cube2"),
-                     GfMatrix4d( 1,0,0,0, 0,1,0,0,  0,0,1,0, -3,0,5,1));
-		
-	// 	GfFrustum frustum;
-    // frustum.SetNearFar(GfRange1d(0.1, 1000.0));
-    // frustum.SetPosition(GfVec3d(0, -5, 10));
-    // frustum.SetRotation(GfRotation(GfVec3d(1, 0, 0), 45));
-    // m_sceneDelegate->SetCamera(frustum.ComputeViewMatrix(),
-    //                    frustum.ComputeProjectionMatrix());
-
-
-		// m_sceneDelegate->SetTaskParam(
-      	//   renderTask, HdTokens->collection,
-        // VtValue(HdRprimCollection(HdTokens->geometry,
-        //         HdReprSelector(HdReprTokens->refined))));
-
-    // set render setup param
-    // VtValue vParam = m_sceneDelegate->GetTaskParam(renderSetupTask, HdTokens->params);
-    // HdxRenderTaskParams param = vParam.Get<HdxRenderTaskParams>();
-    // param.enableLighting = true;
-    // m_sceneDelegate->SetTaskParam(renderSetupTask, HdTokens->params, VtValue(param));
-
+	
 		m_taskController.reset( new HdxTaskController( m_renderIndex.get(), SdfPath( "/__controllerId" ) ) );
 		m_taskController->SetEnableSelection( false );
 
@@ -532,50 +501,20 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
     	m_engine.SetTaskContextData( HdxTokens->selectionState, selectionValue );
 	}
 
-
-	// how hdxtaskcontroller inserts a camera referencing its own delegate
-	//GetRenderIndex()->InsertSprim(HdPrimTypeTokens->camera,
-    //   &_delegate, _freeCamId);
-
-
 	// how does hydra know which camera to use?
 	// HdxRenderTaskParams.camera specifies it
 
-	// THIS WILL BE VERY HANDY!!!
+	GfMatrix4d viewMatrix, projectionMatrix;
+	GfVec4d viewport;
+	glGetDoublev(GL_MODELVIEW_MATRIX, viewMatrix.GetArray());
+	glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix.GetArray());
+	glGetDoublev(GL_VIEWPORT, &viewport[0]);
 
-// UsdImagingGLEngine::SetCameraStateFromOpenGL()
-// {
-    GfMatrix4d viewMatrix, projectionMatrix;
-    GfVec4d viewport;
-    glGetDoublev(GL_MODELVIEW_MATRIX, viewMatrix.GetArray());
-    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix.GetArray());
-    glGetDoublev(GL_VIEWPORT, &viewport[0]);
-
-    	m_taskController->SetFreeCameraMatrices(viewMatrix, projectionMatrix);
-
-		m_taskController->SetRenderViewport(viewport);
-// }
-
-	// m_sceneDelegate->m_worldToViewMatrix = Imath::M44d( ancestor<ViewportGadget>()->getCameraTransform().inverse() );
-	// m_sceneDelegate->GetRenderIndex().GetChangeTracker().MarkSprimDirty(
-	// 	pxr::SdfPath( "/camera" ),
-    //     HdCamera::AllDirty
-	// );
-
-	// USDView uses `renderer.Render()` here, where `renderer` is a UsdImagingGL.Engine and
-	// they are rendering direct into the current GL state using `paintGL()` (as far as I can
-	// see). Internally, UsdImagingGL.Engine is using HdxTaskController, so I think that implies
-	// that we should be able to as well.
-
-	//m_engine.Execute( m_renderIndex.get(), &m_tasks );
-
-	//const_cast<SceneGadget *>( this )->updateRenderer();
-	//renderScene();
+	m_taskController->SetFreeCameraMatrices( viewMatrix, projectionMatrix );
+	m_taskController->SetRenderViewport( viewport );
 
 	auto tasks = m_taskController->GetRenderingTasks();
    	m_engine.Execute( m_renderIndex.get(), &tasks );
-
-
 }
 
 void SceneGadget::updateRenderer()
