@@ -200,6 +200,12 @@ pxr::SdfPath SceneDelegate::GetMaterialId( const pxr::SdfPath &rprimId )
 	return SdfPath(); 
 }
 
+pxr::VtValue SceneDelegate::GetCameraParamValue( const pxr::SdfPath &cameraId, const pxr::TfToken &paramName )
+{
+	std::cerr << "GetCameraParamValue " << cameraId << paramName << std::endl;
+	return HdSceneDelegate::GetCameraParamValue( cameraId, paramName );
+}
+
 pxr::HdPrimvarDescriptorVector SceneDelegate::GetPrimvarDescriptors( const pxr::SdfPath &id, pxr::HdInterpolation interpolation )
 {
 	std::cerr << "GetPrimvarDescriptors " << id << " " << interpolation << std::endl;

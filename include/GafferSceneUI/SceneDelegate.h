@@ -394,8 +394,7 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 /// Returns a single value for a given camera and parameter.
 //	 /// See HdCameraTokens for the list of paramters.
 	
-//	 virtual VtValue GetCameraParamValue(SdfPath const& cameraId,
-//	 TfToken const& paramName);
+		pxr::VtValue GetCameraParamValue( const pxr::SdfPath &cameraId, const pxr::TfToken &paramName ) override;
 
 //	 // -----------------------------------------------------------------------//
 //	 /// \name Volume Aspects
