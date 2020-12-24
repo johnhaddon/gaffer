@@ -40,6 +40,8 @@
 #include "GafferSceneUI/Export.h"
 #include "GafferSceneUI/TypeIds.h"
 
+#include "SceneDelegate.h"
+
 #include "GafferScene/RenderController.h"
 #include "GafferScene/ScenePlug.h"
 
@@ -71,8 +73,6 @@
 #include "pxr/imaging/hdx/renderSetupTask.h"
 #include "pxr/imaging/hdx/renderTask.h"
 #include "pxr/imaging/hdx/taskController.h"
-
-#include "unitTestDelegate.h" // Copied temporarily to this project
 
 #include "pxr/imaging/hgi/hgi.h"
 #include "pxr/imaging/hgi/tokens.h"
@@ -226,7 +226,7 @@ class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 		mutable HgiUniquePtr m_hgi;
     	mutable HdDriver m_driver;
 		mutable HdStRenderDelegate m_renderDelegate;
-		mutable std::unique_ptr<Hdx_UnitTestDelegate> m_sceneDelegate;
+		mutable std::unique_ptr<SceneDelegate> m_sceneDelegate;
 		mutable	std::unique_ptr<HdRenderIndex> m_renderIndex;
 		mutable HdEngine m_engine;
 		mutable HdTaskSharedPtrVector m_tasks;
