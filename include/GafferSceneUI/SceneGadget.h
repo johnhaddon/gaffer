@@ -72,7 +72,7 @@
 #include "pxr/imaging/hdx/renderTask.h"
 #include "pxr/imaging/hdx/taskController.h"
 
-#include "unitTestDelegate.h" // Copied temporarily to this project
+#include "GafferSceneUI/unitTestDelegate.h" // Copied temporarily to this project
 
 #include "pxr/imaging/hgi/hgi.h"
 #include "pxr/imaging/hgi/tokens.h"
