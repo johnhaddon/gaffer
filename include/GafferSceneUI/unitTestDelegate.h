@@ -24,8 +24,6 @@
 #ifndef PXR_IMAGING_HDX_UNIT_TEST_DELEGATE_H
 #define PXR_IMAGING_HDX_UNIT_TEST_DELEGATE_H
 
-#define _GLIBCXX_PERMIT_BACKWARD_HASH // Ugh
-
 #include "pxr/pxr.h"
 #include "pxr/imaging/hd/sceneDelegate.h"
 #include "pxr/imaging/hd/tokens.h"
