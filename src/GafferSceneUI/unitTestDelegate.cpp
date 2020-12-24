@@ -696,6 +696,8 @@ Hdx_UnitTestDelegate::SetReprName(SdfPath const &id, TfToken const &reprName)
 GfRange3d
 Hdx_UnitTestDelegate::GetExtent(SdfPath const & id)
 {
+    std::cerr << "GetExtent " << id << std::endl;
+
     GfRange3d range;
     VtVec3fArray points;
     if(_meshes.find(id) != _meshes.end()) {
@@ -710,6 +712,8 @@ Hdx_UnitTestDelegate::GetExtent(SdfPath const & id)
 GfMatrix4d
 Hdx_UnitTestDelegate::GetTransform(SdfPath const & id)
 {
+    std::cerr << "GetTransform " << id << std::endl;
+
     if(_meshes.find(id) != _meshes.end()) {
         return _meshes[id].transform;
     }
@@ -719,12 +723,14 @@ Hdx_UnitTestDelegate::GetTransform(SdfPath const & id)
 bool
 Hdx_UnitTestDelegate::GetVisible(SdfPath const& id)
 {
-    return true;
+     std::cerr << "GetVisible " << id << std::endl;
+   return true;
 }
 
 HdMeshTopology
 Hdx_UnitTestDelegate::GetMeshTopology(SdfPath const& id)
 {
+     std::cerr << "GetMeshTopology " << id << std::endl;
     HdMeshTopology topology;
     const _Mesh &mesh = _meshes[id];
 
@@ -737,6 +743,7 @@ Hdx_UnitTestDelegate::GetMeshTopology(SdfPath const& id)
 VtValue
 Hdx_UnitTestDelegate::Get(SdfPath const& id, TfToken const& key)
 {
+     std::cerr << "Get " << id << " " << key << std::endl;
     // tasks
     _ValueCache *vcache = TfMapLookupPtr(_valueCacheMap, id);
     VtValue ret;
@@ -778,6 +785,10 @@ VtIntArray
 Hdx_UnitTestDelegate::GetInstanceIndices(SdfPath const& instancerId,
                                         SdfPath const& prototypeId)
 {
+
+     std::cerr << "GetInstanceIndices " << instancerId << " " << prototypeId << std::endl;
+
+
     HD_TRACE_FUNCTION();
     VtIntArray indices(0);
     //
@@ -805,7 +816,9 @@ Hdx_UnitTestDelegate::GetInstanceIndices(SdfPath const& instancerId,
 GfMatrix4d
 Hdx_UnitTestDelegate::GetInstancerTransform(SdfPath const& instancerId)
 {
-    HD_TRACE_FUNCTION();
+      std::cerr << "GetInstancerTransform " << instancerId << " " << std::endl;
+
+   HD_TRACE_FUNCTION();
     if (_Instancer *instancer = TfMapLookupPtr(_instancers, instancerId)) {
         return GfMatrix4d(instancer->rootTransform);
     }
@@ -816,7 +829,8 @@ Hdx_UnitTestDelegate::GetInstancerTransform(SdfPath const& instancerId)
 HdDisplayStyle
 Hdx_UnitTestDelegate::GetDisplayStyle(SdfPath const& id)
 {
-    if (_refineLevels.find(id) != _refineLevels.end()) {
+       std::cerr << "GetDisplayStyle " << id << " " << std::endl;
+   if (_refineLevels.find(id) != _refineLevels.end()) {
         return HdDisplayStyle(_refineLevels[id]);
     }
     return HdDisplayStyle(_refineLevel);
@@ -826,6 +840,7 @@ HdPrimvarDescriptorVector
 Hdx_UnitTestDelegate::GetPrimvarDescriptors(SdfPath const& id,
                                             HdInterpolation interpolation)
 {
+       std::cerr << "GetPrimvarDescriptors " << id << " " << interpolation << std::endl;
     HdPrimvarDescriptorVector primvars;
     if (interpolation == HdInterpolationVertex) {
         primvars.emplace_back(HdTokens->points, interpolation,
@@ -871,6 +886,7 @@ Hdx_UnitTestDelegate::GetMaterialId(SdfPath const &rprimId)
 {
     SdfPath materialId;
     TfMapLookup(_materialBindings, rprimId, &materialId);
+       std::cerr << "GetMaterialId " << rprimId << " " << materialId << std::endl;
     return materialId;
 }
 
@@ -878,6 +894,7 @@ Hdx_UnitTestDelegate::GetMaterialId(SdfPath const &rprimId)
 VtValue
 Hdx_UnitTestDelegate::GetMaterialResource(SdfPath const &materialId)
 {
+       std::cerr << "GetMaterialResource " << materialId << std::endl;
     if (VtValue *material = TfMapLookupPtr(_materials, materialId)){
         return *material;
     }
