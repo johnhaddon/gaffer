@@ -187,33 +187,17 @@ Hdx_UnitTestDelegate::GetExtent(SdfPath const & id)
 {
     std::cerr << "GetExtent " << id << std::endl;
 
-    GfRange3d range;
-    VtVec3fArray points;
-    if(_meshes.find(id) != _meshes.end()) {
-        points = _meshes[id].points;
-    }
-    TF_FOR_ALL(it, points) {
-        range.UnionWith(*it);
-    }
-    return range;
+    return GfRange3d(
+        GfVec3d( -1, -1, -1 ),
+        GfVec3d( 1, 1, 1 )
+    );
 }
 
 GfMatrix4d
 Hdx_UnitTestDelegate::GetTransform(SdfPath const & id)
 {
     std::cerr << "GetTransform " << id << std::endl;
-
-    if(_meshes.find(id) != _meshes.end()) {
-        return _meshes[id].transform;
-    }
     return GfMatrix4d(1);
-}
-
-bool
-Hdx_UnitTestDelegate::GetVisible(SdfPath const& id)
-{
-     std::cerr << "GetVisible " << id << std::endl;
-   return true;
 }
 
 HdMeshTopology
@@ -240,64 +224,8 @@ Hdx_UnitTestDelegate::Get(SdfPath const& id, TfToken const& key)
             return VtValue(_meshes[id].points);
         }
     }
-    
+
     return VtValue();
-}
-
-/*virtual*/
-VtIntArray
-Hdx_UnitTestDelegate::GetInstanceIndices(SdfPath const& instancerId,
-                                        SdfPath const& prototypeId)
-{
-
-     std::cerr << "GetInstanceIndices " << instancerId << " " << prototypeId << std::endl;
-
-
-    HD_TRACE_FUNCTION();
-    VtIntArray indices(0);
-    //
-    // XXX: this is very naive implementation for unit test.
-    //
-    //   transpose prototypeIndices/instances to instanceIndices/prototype
-    if (_Instancer *instancer = TfMapLookupPtr(_instancers, instancerId)) {
-        size_t prototypeIndex = 0;
-        for (; prototypeIndex < instancer->prototypes.size(); ++prototypeIndex) {
-            if (instancer->prototypes[prototypeIndex] == prototypeId) break;
-        }
-        if (prototypeIndex == instancer->prototypes.size()) return indices;
-
-        // XXX use const_ptr
-        for (size_t i = 0; i < instancer->prototypeIndices.size(); ++i) {
-            if (static_cast<size_t>(instancer->prototypeIndices[i]) == prototypeIndex) {
-                indices.push_back(i);
-            }
-        }
-    }
-    return indices;
-}
-
-/*virtual*/
-GfMatrix4d
-Hdx_UnitTestDelegate::GetInstancerTransform(SdfPath const& instancerId)
-{
-      std::cerr << "GetInstancerTransform " << instancerId << " " << std::endl;
-
-   HD_TRACE_FUNCTION();
-    if (_Instancer *instancer = TfMapLookupPtr(_instancers, instancerId)) {
-        return GfMatrix4d(instancer->rootTransform);
-    }
-    return GfMatrix4d(1);
-}
-
-/*virtual*/
-HdDisplayStyle
-Hdx_UnitTestDelegate::GetDisplayStyle(SdfPath const& id)
-{
-       std::cerr << "GetDisplayStyle " << id << " " << std::endl;
-   if (_refineLevels.find(id) != _refineLevels.end()) {
-        return HdDisplayStyle(_refineLevels[id]);
-    }
-    return HdDisplayStyle(_refineLevel);
 }
 
 HdPrimvarDescriptorVector
@@ -310,109 +238,9 @@ Hdx_UnitTestDelegate::GetPrimvarDescriptors(SdfPath const& id,
         primvars.emplace_back(HdTokens->points, interpolation,
                               HdPrimvarRoleTokens->point);
     }
-    if(_meshes.find(id) != _meshes.end()) {
-        if (_meshes[id].colorInterpolation == interpolation) {
-            primvars.emplace_back(HdTokens->displayColor, interpolation,
-                                  HdPrimvarRoleTokens->color);
-        }
-        if (_meshes[id].opacityInterpolation == interpolation) {
-            primvars.emplace_back(HdTokens->displayOpacity, interpolation);
-        }
-    }
-    if (interpolation == HdInterpolationInstance &&
-        _instancers.find(id) != _instancers.end()) {
-        primvars.emplace_back(HdInstancerTokens->scale, interpolation);
-        primvars.emplace_back(HdInstancerTokens->rotate, interpolation);
-        primvars.emplace_back(HdInstancerTokens->translate, interpolation);
-    }
+   
     return primvars;
 }
-
-/*virtual*/
-SdfPath
-Hdx_UnitTestDelegate::GetMaterialId(SdfPath const &rprimId)
-{
-    SdfPath materialId;
-    TfMapLookup(_materialBindings, rprimId, &materialId);
-       std::cerr << "GetMaterialId " << rprimId << " " << materialId << std::endl;
-    return materialId;
-}
-
-/*virtual*/
-VtValue
-Hdx_UnitTestDelegate::GetMaterialResource(SdfPath const &materialId)
-{
-       std::cerr << "GetMaterialResource " << materialId << std::endl;
-    if (VtValue *material = TfMapLookupPtr(_materials, materialId)){
-        return *material;
-    }
-    return VtValue();
-}
-
-/*virtual*/
-VtValue
-Hdx_UnitTestDelegate::GetCameraParamValue(SdfPath const &cameraId,
-                                          TfToken const &paramName)
-{
-    std::cerr << "GetCameraParamValue " << cameraId << " " << paramName << std::endl;
-
-    _ValueCache *vcache = TfMapLookupPtr(_valueCacheMap, cameraId);
-    VtValue ret;
-    if (vcache && TfMapLookup(*vcache, paramName, &ret)) {
-        return ret;
-    }
-
-    return VtValue();
-}
-
-// HdRenderBufferDescriptor
-// Hdx_UnitTestDelegate::GetRenderBufferDescriptor(SdfPath const &id)
-// {
-//     _ValueCache *vcache = TfMapLookupPtr(_valueCacheMap, id);
-//     if (!vcache) {
-//         return HdRenderBufferDescriptor();
-//     }
-
-//     VtValue ret;
-//     if (!TfMapLookup(*vcache, _tokens->renderBufferDescriptor, &ret)) {
-//         return HdRenderBufferDescriptor();
-//     }
-
-//     if (!ret.IsHolding<HdRenderBufferDescriptor>()) {
-//         return HdRenderBufferDescriptor();
-//     }
-
-//     return ret.UncheckedGet<HdRenderBufferDescriptor>();
-// }
-
-// HdTextureResourceSharedPtr
-// Hdx_UnitTestDelegate::GetTextureResource(SdfPath const& textureId)
-// {
-//     return HdTextureResourceSharedPtr();
-// }
-
-// HdTextureResource::ID
-// Hdx_UnitTestDelegate::GetTextureResourceID(SdfPath const& textureId)
-// {
-//     return SdfPath::Hash()(textureId);
-// }
-
-// TfTokenVector
-// Hdx_UnitTestDelegate::GetTaskRenderTags(SdfPath const& taskId)
-// {
-//     const auto it1 = _valueCacheMap.find(taskId);
-//     if (it1 == _valueCacheMap.end()) {
-//         return {};
-//     }
-
-//     const auto it2 = it1->second.find(HdTokens->renderTags);
-//     if (it2 == it1->second.end()) {
-//         return {};
-//     }
-
-//     return it2->second.Get<TfTokenVector>();
-// }
-
 
 PXR_NAMESPACE_CLOSE_SCOPE
 

@@ -97,32 +97,12 @@ public:
     // delegate methods
     GfRange3d GetExtent(SdfPath const & id) override;
     GfMatrix4d GetTransform(SdfPath const & id) override;
-    bool GetVisible(SdfPath const& id) override;
     HdMeshTopology GetMeshTopology(SdfPath const& id) override;
     VtValue Get(SdfPath const& id, TfToken const& key) override;
     HdPrimvarDescriptorVector GetPrimvarDescriptors(
         SdfPath const& id,
         HdInterpolation interpolation) override;
-    VtIntArray GetInstanceIndices(
-        SdfPath const& instancerId,
-        SdfPath const& prototypeId) override;
-
-    GfMatrix4d GetInstancerTransform(SdfPath const& instancerId) override;
-    HdDisplayStyle GetDisplayStyle(SdfPath const& id) override;
-
-    SdfPath GetMaterialId(SdfPath const &rprimId) override;
-    VtValue GetMaterialResource(SdfPath const &materialId) override;
-
-    VtValue GetCameraParamValue(
-        SdfPath const &cameraId,
-        TfToken const &paramName) override;
-    HdTextureResource::ID GetTextureResourceID(SdfPath const& textureId)
-        override;
-    HdTextureResourceSharedPtr GetTextureResource(SdfPath const& textureId)
-        override;
-
-    TfTokenVector GetTaskRenderTags(SdfPath const& taskId) override;
-
+  
 private:
     struct _Mesh {
         _Mesh() { }
