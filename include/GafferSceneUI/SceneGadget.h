@@ -50,8 +50,6 @@
 
 #include "IECoreGL/State.h"
 
-#define _GLIBCXX_PERMIT_BACKWARD_HASH // Ugh
-
 #include "pxr/pxr.h"
 
 #include "pxr/imaging/glf/glew.h"

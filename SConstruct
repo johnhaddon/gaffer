@@ -791,9 +791,13 @@ libraries = {
 	"GafferSceneUI" : {
 		"envAppends" : {
 			"LIBS" : [ "Gaffer", "GafferUI", "GafferImage", "GafferImageUI", "GafferScene", "Iex$OPENEXR_LIB_SUFFIX", "IECoreGL$CORTEX_LIB_SUFFIX", "IECoreImage$CORTEX_LIB_SUFFIX", "IECoreScene$CORTEX_LIB_SUFFIX", "hd", "hdx", "hdSt", "hgi" ],
+			# USD requires this to use legacy stuff
+			"CXXFLAGS" : [ "-D_GLIBCXX_PERMIT_BACKWARD_HASH" ],
 		},
 		"pythonEnvAppends" : {
 			"LIBS" : [ "IECoreGL$CORTEX_LIB_SUFFIX", "GafferBindings", "GafferScene", "GafferUI", "GafferImageUI", "GafferSceneUI" ],
+			# USD requires this to use legacy stuff
+			"CXXFLAGS" : [ "-D_GLIBCXX_PERMIT_BACKWARD_HASH" ],
 		},
 	},
 
