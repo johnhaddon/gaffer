@@ -231,7 +231,8 @@ class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 		mutable HdEngine m_engine;
 		mutable HdTaskSharedPtrVector m_tasks;
 
-		mutable std::shared_ptr<HdxSelectionTracker> m_selectionTracker;
+		mutable HdxSelectionTrackerSharedPtr m_selectionTracker;
+		mutable bool m_selectionTrackerDirty;
 		mutable std::unique_ptr<HdxTaskController> m_taskController;
 
 };

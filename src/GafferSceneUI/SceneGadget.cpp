@@ -69,6 +69,17 @@ float lineariseDepthBufferSample( float bufferDepth, float *m )
 	return ( 2.0f * n * f ) / ( f + n - ( bufferDepth * 2.0f - 1.0f ) * ( f - n ) );
 }
 
+/// \todo Move to Cortex
+pxr::SdfPath toUSD( const ScenePlug::ScenePath &path, const bool relative = false )
+{
+	pxr::SdfPath result = relative ? pxr::SdfPath::ReflexiveRelativePath() : pxr::SdfPath::AbsoluteRootPath();
+	for( const auto &name : path )
+	{
+		result = result.AppendElementString( name.string() );
+	}
+	return result;
+}
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -81,7 +92,9 @@ SceneGadget::SceneGadget()
 		m_renderer( IECoreScenePreview::Renderer::create( "OpenGL", IECoreScenePreview::Renderer::Interactive ) ),
 		m_controller( nullptr, nullptr, m_renderer ),
 		m_updateErrored( false ),
-		m_renderRequestPending( false )
+		m_renderRequestPending( false ),
+		m_selectionTracker( std::make_shared<HdxSelectionTracker>() ),
+		m_selectionTrackerDirty( true )
 {
 	typedef CompoundObject::ObjectMap::value_type Option;
 	CompoundObjectPtr openGLOptions = new CompoundObject;
@@ -430,9 +443,8 @@ const IECore::PathMatcher &SceneGadget::getSelection() const
 void SceneGadget::setSelection( const IECore::PathMatcher &selection )
 {
 	m_selection = selection;
-	ConstDataPtr d = new IECore::PathMatcherData( selection );
-	m_renderer->option( "gl:selection", d.get() );
-	dirty( DirtyType::Render );
+	m_selectionTrackerDirty = true;
+	Gadget::dirty( DirtyType::Render );
 }
 
 Imath::Box3f SceneGadget::selectionBound() const
@@ -485,6 +497,10 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 		static GlfGLContextSharedPtr g_ctx = GlfGLContext::GetCurrentGLContext();
    		GlfContextCaps::InitInstance();
 
+		// This sucks. We can't create the scene delegate until we've created
+		// the render index, and we can't create the render index until we have
+		// Hgi, and we need a GL context for that. Can we somehow initialise the
+		// render index on construction instead?
 		m_hgi = Hgi::CreatePlatformDefaultHgi(); // Maybe just GL?
 		m_driver = HdDriver{HgiTokens->renderDriver, VtValue( m_hgi.get() ) };
 		m_renderIndex.reset(
@@ -494,28 +510,38 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 		m_sceneDelegate.reset(
 			new SceneDelegate( getScene(), m_renderIndex.get() )
 		);
-	
+
 		m_taskController.reset( new HdxTaskController( m_renderIndex.get(), SdfPath( "/__controllerId" ) ) );
-		m_taskController->SetEnableSelection( false );
-
-		/// STORE THIS AS MEMBER DATA
-	    m_selectionTracker = std::make_shared<HdxSelectionTracker>();
-
-		VtValue selectionValue( m_selectionTracker );
-    	m_engine.SetTaskContextData( HdxTokens->selectionState, selectionValue );
+		m_taskController->SetSelectionColor( GfVec4f( 0.466f, 0.612f, 0.741f, 1.0f ) );
+		m_engine.SetTaskContextData( HdxTokens->selectionState, VtValue( m_selectionTracker ) );
 	}
 
-	// how does hydra know which camera to use?
-	// HdxRenderTaskParams.camera specifies it
+	// Transfer current GL camera and viewport into task controller.
 
 	GfMatrix4d viewMatrix, projectionMatrix;
 	GfVec4d viewport;
-	glGetDoublev(GL_MODELVIEW_MATRIX, viewMatrix.GetArray());
-	glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix.GetArray());
-	glGetDoublev(GL_VIEWPORT, &viewport[0]);
+	glGetDoublev( GL_MODELVIEW_MATRIX, viewMatrix.GetArray() );
+	glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix.GetArray() );
+	glGetDoublev( GL_VIEWPORT, &viewport[0] );
 
 	m_taskController->SetFreeCameraMatrices( viewMatrix, projectionMatrix );
 	m_taskController->SetRenderViewport( viewport );
+
+	// Transfer selection if necessary
+
+	if( m_selectionTrackerDirty )
+	{
+		auto hdSelection = std::make_shared<HdSelection>();
+		for( PathMatcher::Iterator it = m_selection.begin(), eIt = m_selection.end(); it != eIt; ++it )
+		{
+			std::cerr << "ADDING RPRIM " << *it << std::endl;
+			hdSelection->AddRprim( HdSelection::HighlightModeSelect, toUSD( *it ) );
+		}
+		m_selectionTracker->SetSelection( hdSelection );
+		m_selectionTrackerDirty = false;
+	}
+
+	// Render
 
 	auto tasks = m_taskController->GetRenderingTasks();
    	m_engine.Execute( m_renderIndex.get(), &tasks );
