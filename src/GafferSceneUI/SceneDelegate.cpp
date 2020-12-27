@@ -106,10 +106,30 @@ SceneDelegate::~SceneDelegate()
 // 	return m_scene.get();
 // }
 
+// const IECore::PathMatcher &SceneDelegate::getSelection() const
+// {
+// 	return m_selection;
+// }
+
+// void SceneDelegate::setSelection( const IECore::PathMatcher &selection )
+// {
+// 	m_selection = selection;
+
+// }
+
+void SceneDelegate::Sync( pxr::HdSyncRequestVector *request )
+{
+	std::cerr << "Sync" << std::endl;
+	for( size_t i = 0; i < request->IDs.size(); ++i )
+	{
+		std::cerr << "   " << request->IDs[i] << " " << request->dirtyBits[i] << std::endl;
+	}
+}
+
 pxr::VtValue SceneDelegate::Get( const pxr::SdfPath &id, const pxr::TfToken &key )
 {
 	std::cerr << "Get " << id << " " << key << std::endl;
- 
+
     // // tasks
     // _ValueCache *vcache = TfMapLookupPtr(_valueCacheMap, id);
     // VtValue ret;
@@ -118,11 +138,16 @@ pxr::VtValue SceneDelegate::Get( const pxr::SdfPath &id, const pxr::TfToken &key
     // }
 
     // // prims
-    // if (key == HdTokens->points) {
-    //     if(_meshes.find(id) != _meshes.end()) {
-    //         return VtValue(_meshes[id].points);
-    //     }
-    // } else if (key == HdTokens->displayColor) {
+	if( key == HdTokens->points )
+	{
+		ConstObjectPtr object = m_scene->object( fromUSD( id ) );
+		if( auto mesh = runTimeCast<const IECoreScene::MeshPrimitive>( object.get() ) )
+		{
+			return IECoreUSD::DataAlgo::toUSD( mesh->variables.find( "P" )->second.data.get()  );
+		}
+	}
+
+	// else if (key == HdTokens->displayColor) {
     //     if(_meshes.find(id) != _meshes.end()) {
     //         return VtValue(_meshes[id].color);
     //     }
@@ -168,7 +193,7 @@ pxr::HdMeshTopology SceneDelegate::GetMeshTopology( const pxr::SdfPath &id )
 			VtIntArray( verticesPerFace.begin(), verticesPerFace.end() ),
 			VtIntArray( vertexIds.begin(), vertexIds.end() ),
 			/* refineLevel = */ 0
-		);	
+		);
 	}
 
 	std::cerr << "    no mesh" << std::endl;
@@ -197,7 +222,7 @@ pxr::GfMatrix4d SceneDelegate::GetTransform( const pxr::SdfPath &id )
 pxr::SdfPath SceneDelegate::GetMaterialId( const pxr::SdfPath &rprimId )
 {
 	std::cerr << "GetMaterialId " << rprimId << std::endl;
-	return SdfPath(); 
+	return SdfPath();
 }
 
 pxr::VtValue SceneDelegate::GetCameraParamValue( const pxr::SdfPath &cameraId, const pxr::TfToken &paramName )

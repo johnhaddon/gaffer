@@ -56,14 +56,17 @@ class SceneDelegate : public pxr::HdSceneDelegate
 		// Our methods
 		// ===========
 
-		//void setScene( const GafferScene::ConstScenePlugPtr &scene );
-		//const GafferScene::ScenePlug *getScene() const;
+		void setScene( const GafferScene::ConstScenePlugPtr &scene );
+		const GafferScene::ScenePlug *getScene() const;
+
+		void setContext( Gaffer::ConstContextPtr context );
+		const Gaffer::Context *getContext() const;
 
 		// HdSceneDelegate overrides
 		// =========================
 
 		/// Synchronizes the delegate state for the given request vector.
-		//virtual void Sync(HdSyncRequestVector* request);
+		void Sync( pxr::HdSyncRequestVector *request ) override;
 
 // /// Opportunity for the delegate to clean itself up after
 // /// performing parrellel work during sync phase
@@ -74,7 +77,7 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 // -----------------------------------------------------------------------//
 
 //	 /// Returns true if the named option is enabled by the delegate.
-	
+
 //	 virtual bool IsEnabled(TfToken const& option) const;
 
 
@@ -83,15 +86,15 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 // -----------------------------------------------------------------------//
 
 //	 /// Gets the topological mesh data for a given prim.
-	
+
 		pxr::HdMeshTopology GetMeshTopology( const pxr::SdfPath &id ) override;
 
 //	 /// Gets the topological curve data for a given prim.
-	
+
 //	 virtual HdBasisCurvesTopology GetBasisCurvesTopology(SdfPath const& id);
 
 //	 /// Gets the subdivision surface tags (sharpness, holes, etc).
-	
+
 //	 virtual PxOsdSubdivTags GetSubdivTags(SdfPath const& id);
 
 
@@ -102,60 +105,60 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 ///
 //	 /// The returned bounds does not include any displacement that
 //	 /// might occur as the result of running shaders on the prim.
-	
+
 		pxr::GfRange3d GetExtent( const pxr::SdfPath &id ) override;
 
 //	 /// Returns the object space transform, including all parent transforms.
-	
+
 		pxr::GfMatrix4d GetTransform( const pxr::SdfPath &id ) override;
 
 //	 /// Returns the authored visible state of the prim.
-	
+
 //	 virtual bool GetVisible(SdfPath const & id);
 
 //	 /// Returns the doubleSided state for the given prim.
-	
+
 //	 virtual bool GetDoubleSided(SdfPath const & id);
 
 //	 /// Returns the cullstyle for the given prim.
-	
+
 //	 virtual HdCullStyle GetCullStyle(SdfPath const &id);
 
 //	 /// Returns the shading style for the given prim.
-	
+
 //	 virtual VtValue GetShadingStyle(SdfPath const &id);
 
 //	 /// Returns the refinement level for the given prim in the range [0,8].
 //	 ///
 //	 /// The refinement level indicates how many iterations to apply when
 //	 /// subdividing subdivision surfaces or other refinable primitives.
-	
+
 //	 virtual HdDisplayStyle GetDisplayStyle(SdfPath const& id);
 
 //	 /// Returns a named value.
-	
+
 	pxr::VtValue Get( const pxr::SdfPath &id, const pxr::TfToken &key ) override;
 
 //	 /// Returns the authored repr (if any) for the given prim.
-	
+
 	pxr::HdReprSelector GetReprSelector( const pxr::SdfPath &id ) override;
 
 //	 /// Returns the render tag that will be used to bucket prims during
 //	 /// render pass bucketing.
-	
+
 //	 virtual TfToken GetRenderTag(SdfPath const& id);
 
 //	 /// Returns the prim categories.
-	
+
 //	 virtual VtArray<TfToken> GetCategories(SdfPath const& id);
 
 //	 /// Returns the categories for all instances in the instancer.
-	
+
 //	 virtual std::vector<VtArray<TfToken>>
 //	 GetInstanceCategories(SdfPath const &instancerId);
 
 //	 /// Returns the coordinate system bindings, or a nullptr if none are bound.
-	
+
 //	 virtual HdIdVectorSharedPtr GetCoordSysBindings(SdfPath const& id);
 
 //	 // -----------------------------------------------------------------------//
@@ -163,35 +166,35 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 // -----------------------------------------------------------------------//
 
 //	 /// Store up to \a maxSampleCount transform samples in \a *sampleValues.
-//	 /// Returns the union of the authored samples and the boundaries 
+//	 /// Returns the union of the authored samples and the boundaries
 //	 /// of the current camera shutter interval. If this number is greater
-//	 /// than maxSampleCount, you might want to call this function again 
+//	 /// than maxSampleCount, you might want to call this function again
 //	 /// to get all the authored data.
 //	 /// Sample times are relative to the scene delegate's current time.
 //	 /// \see GetTransform()
-	
+
 //	 virtual size_t
-//	 SampleTransform(SdfPath const & id, 
+//	 SampleTransform(SdfPath const & id,
 //	 size_t maxSampleCount,
-//	 float *sampleTimes, 
+//	 float *sampleTimes,
 //	 GfMatrix4d *sampleValues);
 
 //	 /// Convenience form of SampleTransform() that takes an HdTimeSampleArray.
-//	 /// This function returns the union of the authored transform samples 
+//	 /// This function returns the union of the authored transform samples
 //	 /// and the boundaries of the current camera shutter interval.
 //	 template <unsigned int CAPACITY>
-//	 void 
+//	 void
 //	 SampleTransform(SdfPath const & id,
 //	 HdTimeSampleArray<GfMatrix4d, CAPACITY> *sa) {
-//	 size_t authoredSamples = 
+//	 size_t authoredSamples =
 //	 SampleTransform(id, CAPACITY, sa->times.data(), sa->values.data());
 //	 if (authoredSamples > CAPACITY) {
 //	 sa->Resize(authoredSamples);
-//	 size_t authoredSamplesSecondAttempt = 
+//	 size_t authoredSamplesSecondAttempt =
 //	 SampleTransform(
-//	 id, 
-//	 authoredSamples, 
-//	 sa->times.data(), 
+//	 id,
+//	 authoredSamples,
+//	 sa->times.data(),
 //	 sa->values.data());
 //	 // Number of samples should be consisntent through multiple
 //	 // invokations of the sampling function.
@@ -201,40 +204,40 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 }
 
 //	 /// Store up to \a maxSampleCount transform samples in \a *sampleValues.
-//	 /// Returns the union of the authored samples and the boundaries 
+//	 /// Returns the union of the authored samples and the boundaries
 //	 /// of the current camera shutter interval. If this number is greater
-//	 /// than maxSampleCount, you might want to call this function again 
+//	 /// than maxSampleCount, you might want to call this function again
 //	 /// to get all the authored data.
 //	 /// Sample times are relative to the scene delegate's current time.
 //	 /// \see GetInstancerTransform()
-	
+
 //	 virtual size_t
 //	 SampleInstancerTransform(SdfPath const &instancerId,
-//	 size_t maxSampleCount, 
+//	 size_t maxSampleCount,
 //	 float *sampleTimes,
 //	 GfMatrix4d *sampleValues);
 
 //	 /// Convenience form of SampleInstancerTransform()
 //	 /// that takes an HdTimeSampleArray.
-//	 /// This function returns the union of the authored samples 
+//	 /// This function returns the union of the authored samples
 //	 /// and the boundaries of the current camera shutter interval.
 //	 template <unsigned int CAPACITY>
 //	 void
 //	 SampleInstancerTransform(SdfPath const &instancerId,
 //	 HdTimeSampleArray<GfMatrix4d, CAPACITY> *sa) {
-//	 size_t authoredSamples = 
+//	 size_t authoredSamples =
 //	 SampleInstancerTransform(
-//	 instancerId, 
-//	 CAPACITY, 
-//	 sa->times.data(), 
+//	 instancerId,
+//	 CAPACITY,
+//	 sa->times.data(),
 //	 sa->values.data());
 //	 if (authoredSamples > CAPACITY) {
 //	 sa->Resize(authoredSamples);
-//	 size_t authoredSamplesSecondAttempt = 
+//	 size_t authoredSamplesSecondAttempt =
 //	 SampleInstancerTransform(
-//	 instancerId, 
-//	 authoredSamples, 
-//	 sa->times.data(), 
+//	 instancerId,
+//	 authoredSamples,
+//	 sa->times.data(),
 //	 sa->values.data());
 //	 // Number of samples should be consisntent through multiple
 //	 // invokations of the sampling function.
@@ -244,9 +247,9 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 }
 
 //	 /// Store up to \a maxSampleCount primvar samples in \a *samplesValues.
-//	 /// Returns the union of the authored samples and the boundaries 
+//	 /// Returns the union of the authored samples and the boundaries
 //	 /// of the current camera shutter interval. If this number is greater
-//	 /// than maxSampleCount, you might want to call this function again 
+//	 /// than maxSampleCount, you might want to call this function again
 //	 /// to get all the authored data.
 //	 ///
 //	 /// Sample values that are array-valued will have a size described
@@ -260,37 +263,37 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 /// Sample times are relative to the scene delegate's current time.
 //	 ///
 //	 /// \see Get()
-	
+
 //	 virtual size_t
-//	 SamplePrimvar(SdfPath const& id, 
+//	 SamplePrimvar(SdfPath const& id,
 //	 TfToken const& key,
-//	 size_t maxSampleCount, 
-//	 float *sampleTimes, 
+//	 size_t maxSampleCount,
+//	 float *sampleTimes,
 //	 VtValue *sampleValues);
 
 //	 /// Convenience form of SamplePrimvar() that takes an HdTimeSampleArray.
-//	 /// This function returns the union of the authored samples 
+//	 /// This function returns the union of the authored samples
 //	 /// and the boundaries of the current camera shutter interval.
 //	 template <unsigned int CAPACITY>
-//	 void 
-//	 SamplePrimvar(SdfPath const &id, 
+//	 void
+//	 SamplePrimvar(SdfPath const &id,
 //	 TfToken const& key,
 //	 HdTimeSampleArray<VtValue, CAPACITY> *sa) {
-//	 size_t authoredSamples = 
+//	 size_t authoredSamples =
 //	 SamplePrimvar(
-//	 id, 
-//	 key, 
-//	 CAPACITY, 
-//	 sa->times.data(), 
+//	 id,
+//	 key,
+//	 CAPACITY,
+//	 sa->times.data(),
 //	 sa->values.data());
 //	 if (authoredSamples > CAPACITY) {
 //	 sa->Resize(authoredSamples);
-//	 size_t authoredSamplesSecondAttempt = 
+//	 size_t authoredSamplesSecondAttempt =
 //	 SamplePrimvar(
-//	 id, 
-//	 key, 
-//	 authoredSamples, 
-//	 sa->times.data(), 
+//	 id,
+//	 key,
+//	 authoredSamples,
+//	 sa->times.data(),
 //	 sa->values.data());
 //	 // Number of samples should be consisntent through multiple
 //	 // invokations of the sampling function.
@@ -315,12 +318,12 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 ///	GetInstanceIndices(C) : [5]
 //	 ///	GetInstanceIndices(D) : []
 //	 ///
-	
+
 //	 virtual VtIntArray GetInstanceIndices(SdfPath const &instancerId,
 //	 SdfPath const &prototypeId);
 
 //	 /// Returns the instancer transform.
-	
+
 //	 virtual GfMatrix4d GetInstancerTransform(SdfPath const &instancerId);
 
 //	 // -----------------------------------------------------------------------//
@@ -330,7 +333,7 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 /// Returns the scene address of the prim corresponding to the given
 //	 /// rprim/instance index. This is designed to give paths in scene namespace,
 //	 /// rather than hydra namespace, so it always strips the delegate ID.
-	
+
 //	 virtual SdfPath GetScenePrimPath(SdfPath const& rprimId,
 //	 int instanceIndex,
 //	 HdInstancerContext *instancerContext = nullptr);
@@ -340,12 +343,12 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 // -----------------------------------------------------------------------//
 
 //	 /// Returns the material ID bound to the rprim \p rprimId.
-	
+
 		pxr::SdfPath GetMaterialId( const pxr::SdfPath &rprimId ) override;
 
-//	 // Returns a material resource which contains the information 
+//	 // Returns a material resource which contains the information
 //	 // needed to create a material.
-	 
+
 //	 virtual VtValue GetMaterialResource(SdfPath const &materialId);
 
 //	 // -----------------------------------------------------------------------//
@@ -358,7 +361,7 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 /// material network).
 //	 ///
 //	 /// Returns the texture resource ID for a given texture ID.
-	
+
 //	 virtual HdTextureResource::ID GetTextureResourceID(SdfPath const& textureId);
 
 //	 ///
@@ -367,7 +370,7 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 /// material network).
 //	 ///
 //	 /// Returns the texture resource for a given texture ID.
-	
+
 //	 virtual HdTextureResourceSharedPtr GetTextureResource(SdfPath const& textureId);
 
 //	 // -----------------------------------------------------------------------//
@@ -375,7 +378,7 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 // -----------------------------------------------------------------------//
 
 //	 /// Returns the allocation descriptor for a given render buffer prim.
-	
+
 //	 virtual HdRenderBufferDescriptor GetRenderBufferDescriptor(SdfPath const& id);
 
 //	 // -----------------------------------------------------------------------//
@@ -383,8 +386,8 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 // -----------------------------------------------------------------------//
 
 //	 // Returns a single value for a given light and parameter.
-	
-//	 virtual VtValue GetLightParamValue(SdfPath const &id, 
+
+//	 virtual VtValue GetLightParamValue(SdfPath const &id,
 //	 TfToken const &paramName);
 
 //	 // -----------------------------------------------------------------------//
@@ -393,13 +396,13 @@ class SceneDelegate : public pxr::HdSceneDelegate
 
 //	 /// Returns a single value for a given camera and parameter.
 //	 /// See HdCameraTokens for the list of paramters.
-	
+
 		pxr::VtValue GetCameraParamValue( const pxr::SdfPath &cameraId, const pxr::TfToken &paramName ) override;
 
 //	 // -----------------------------------------------------------------------//
 //	 /// \name Volume Aspects
 //	 // -----------------------------------------------------------------------//
-	
+
 //	 virtual HdVolumeFieldDescriptorVector
 //	 GetVolumeFieldDescriptors(SdfPath const &volumeId);
 
@@ -408,17 +411,17 @@ class SceneDelegate : public pxr::HdSceneDelegate
 //	 // -----------------------------------------------------------------------//
 
 //	 /// Returns descriptors for all primvars of the given interpolation type.
-	
+
 		pxr::HdPrimvarDescriptorVector GetPrimvarDescriptors( const pxr::SdfPath &id, pxr::HdInterpolation interpolation ) override;
 
 //	 // -----------------------------------------------------------------------//
 //	 /// \name Task Aspects
 //	 // -----------------------------------------------------------------------//
-	
+
 //	 virtual TfTokenVector GetTaskRenderTags(SdfPath const& taskId);
 
 	private :
-	
+
 		GafferScene::ConstScenePlugPtr m_scene;
 
 };
