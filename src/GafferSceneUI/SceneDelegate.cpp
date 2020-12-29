@@ -36,6 +36,10 @@
 
 #include "GafferSceneUI/SceneDelegate.h"
 
+#include "GafferScene/SceneAlgo.h"
+
+#include "Gaffer/Node.h"
+
 #include "IECoreUSD/DataAlgo.h"
 
 #include "IECoreScene/MeshPrimitive.h"
@@ -44,6 +48,8 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/base/gf/matrix4f.h"
 IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/bind.hpp"
 
 #include <iostream> // REMOVE ME
 
@@ -79,6 +85,16 @@ ScenePlug::ScenePath fromUSD( const pxr::SdfPath &path )
 	return fromUSDWithoutPrefix( path, 0 );
 }
 
+pxr::SdfPath toUSD( const ScenePlug::ScenePath &path, const bool relative = false )
+{
+	pxr::SdfPath result = relative ? pxr::SdfPath::ReflexiveRelativePath() : pxr::SdfPath::AbsoluteRootPath();
+	for( const auto &name : path )
+	{
+		result = result.AppendElementString( name.string() );
+	}
+	return result;
+}
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -86,9 +102,9 @@ ScenePlug::ScenePath fromUSD( const pxr::SdfPath &path )
 //////////////////////////////////////////////////////////////////////////
 
 SceneDelegate::SceneDelegate( const GafferScene::ConstScenePlugPtr &scene, pxr::HdRenderIndex *parentIndex, const pxr::SdfPath &delegateID )
-	:	HdSceneDelegate( parentIndex, delegateID ), m_scene( scene )
+	:	HdSceneDelegate( parentIndex, delegateID ), m_scene( nullptr ), m_dirtyComponents( (int)Component::All )
 {
-	GetRenderIndex().InsertRprim( HdPrimTypeTokens->mesh, this, SdfPath( "/plane" ) );
+	setScene( scene );
 }
 
 SceneDelegate::~SceneDelegate()
@@ -96,39 +112,68 @@ SceneDelegate::~SceneDelegate()
 
 }
 
-// void SceneDelegate::setScene( const GafferScene::ConstScenePlugPtr &scene )
-// {
-// 	m_scene = scene;
-// }
+void SceneDelegate::updateRenderIndex()
+{
+	if( !m_dirtyComponents )
+	{
+		return;
+	}
+
+	/// \todo Do this smartly based on dirtiness and hashes, and figure
+	/// out how we can do it asynchronously.
+
+	GetRenderIndex().RemoveSubtree( SdfPath::AbsoluteRootPath(), this );
+
+	tbb::spin_mutex renderIndexMutex;
+	auto locationProcessor = [this, &renderIndexMutex] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
+		ConstObjectPtr object = scene->objectPlug()->getValue();
+		if( runTimeCast<const IECoreScene::MeshPrimitive>( object.get() ) )
+		{
+			SdfPath renderIndexPath = toUSD( path );
+			tbb::spin_mutex::scoped_lock renderIndexLock( renderIndexMutex );
+			GetRenderIndex().InsertRprim( HdPrimTypeTokens->mesh, this, renderIndexPath );
+		}
+		return true;
+	};
+
+	SceneAlgo::parallelProcessLocations( m_scene.get(),	locationProcessor );
+
+	m_dirtyComponents = (int)Component::None;
+}
+
+void SceneDelegate::setScene( const GafferScene::ConstScenePlugPtr &scene )
+{
+	m_plugDirtiedConnection.disconnect();
+	m_scene = scene;
+	m_dirtyComponents = (int)Component::All;
+	if( m_scene )
+	{
+		if( auto *n = m_scene->node() )
+		{
+			m_plugDirtiedConnection = const_cast<Gaffer::Node *>( n )->plugDirtiedSignal().connect(
+				boost::bind( &SceneDelegate::plugDirtied, this, ::_1 )
+			);
+		}
+	}
+}
 
 // const GafferScene::ScenePlug *SceneDelegate::getScene() const
 // {
 // 	return m_scene.get();
 // }
 
-// const IECore::PathMatcher &SceneDelegate::getSelection() const
-// {
-// 	return m_selection;
-// }
-
-// void SceneDelegate::setSelection( const IECore::PathMatcher &selection )
-// {
-// 	m_selection = selection;
-
-// }
-
 void SceneDelegate::Sync( pxr::HdSyncRequestVector *request )
 {
-	std::cerr << "Sync" << std::endl;
+	//std::cerr << "Sync" << std::endl;
 	for( size_t i = 0; i < request->IDs.size(); ++i )
 	{
-		std::cerr << "   " << request->IDs[i] << " " << request->dirtyBits[i] << std::endl;
+		//std::cerr << "   " << request->IDs[i] << " " << request->dirtyBits[i] << std::endl;
 	}
 }
 
 pxr::VtValue SceneDelegate::Get( const pxr::SdfPath &id, const pxr::TfToken &key )
 {
-	std::cerr << "Get " << id << " " << key << std::endl;
+	//std::cerr << "Get " << id << " " << key << std::endl;
 
     // // tasks
     // _ValueCache *vcache = TfMapLookupPtr(_valueCacheMap, id);
@@ -173,20 +218,20 @@ pxr::VtValue SceneDelegate::Get( const pxr::SdfPath &id, const pxr::TfToken &key
 
 pxr::HdReprSelector SceneDelegate::GetReprSelector( const pxr::SdfPath &id )
 {
-	std::cerr << "GetReprSelector " << id << std::endl;
+	//std::cerr << "GetReprSelector " << id << std::endl;
 	return HdSceneDelegate::GetReprSelector( id );
 }
 
 pxr::HdMeshTopology SceneDelegate::GetMeshTopology( const pxr::SdfPath &id )
 {
-	std::cerr << "get mesh topology " << id << std::endl;
+	//std::cerr << "get mesh topology " << id << std::endl;
 
 	ConstObjectPtr object = m_scene->object( fromUSD( id ) );
 	if( auto mesh = runTimeCast<const IECoreScene::MeshPrimitive>( object.get() ) )
 	{
 		auto &verticesPerFace = mesh->verticesPerFace()->readable();
 		auto &vertexIds = mesh->vertexIds()->readable();
-		std::cerr << "    got faces " << verticesPerFace.size() << std::endl;
+		//std::cerr << "    got faces " << verticesPerFace.size() << std::endl;
 		return HdMeshTopology(
 			PxOsdOpenSubdivTokens->catmullClark,
 			HdTokens->rightHanded,
@@ -196,7 +241,7 @@ pxr::HdMeshTopology SceneDelegate::GetMeshTopology( const pxr::SdfPath &id )
 		);
 	}
 
-	std::cerr << "    no mesh" << std::endl;
+	//std::cerr << "    no mesh" << std::endl;
 	return HdMeshTopology();
 }
 
@@ -204,7 +249,7 @@ pxr::GfRange3d SceneDelegate::GetExtent( const pxr::SdfPath &id )
 {
 	// Would it be better to query this from the object?
 	const Imath::Box3f bound = m_scene->bound( fromUSD( id ) );
-	std::cerr << "GetExtent " << id << " " << bound.min << " - " << bound.max << std::endl;
+	//std::cerr << "GetExtent " << id << " " << bound.min << " - " << bound.max << std::endl;
 	return GfRange3d(
 		IECoreUSD::DataAlgo::toUSD( bound.min ),
 		IECoreUSD::DataAlgo::toUSD( bound.max )
@@ -215,30 +260,42 @@ pxr::GfMatrix4d SceneDelegate::GetTransform( const pxr::SdfPath &id )
 {
 	const Imath::M44f matrix = m_scene->fullTransform( fromUSD( id ) );
 	auto r = GfMatrix4d( IECoreUSD::DataAlgo::toUSD( matrix ) );
-	std::cerr << "GetTransform " << id << " " << r << std::endl;
+	//std::cerr << "GetTransform " << id << " " << r << std::endl;
 	return r;
 }
 
 pxr::SdfPath SceneDelegate::GetMaterialId( const pxr::SdfPath &rprimId )
 {
-	std::cerr << "GetMaterialId " << rprimId << std::endl;
+	//std::cerr << "GetMaterialId " << rprimId << std::endl;
 	return SdfPath();
 }
 
 pxr::VtValue SceneDelegate::GetCameraParamValue( const pxr::SdfPath &cameraId, const pxr::TfToken &paramName )
 {
-	std::cerr << "GetCameraParamValue " << cameraId << paramName << std::endl;
+	//std::cerr << "GetCameraParamValue " << cameraId << paramName << std::endl;
 	return HdSceneDelegate::GetCameraParamValue( cameraId, paramName );
 }
 
 pxr::HdPrimvarDescriptorVector SceneDelegate::GetPrimvarDescriptors( const pxr::SdfPath &id, pxr::HdInterpolation interpolation )
 {
-	std::cerr << "GetPrimvarDescriptors " << id << " " << interpolation << std::endl;
+	//std::cerr << "GetPrimvarDescriptors " << id << " " << interpolation << std::endl;
 	HdPrimvarDescriptorVector result;
 	if( interpolation == HdInterpolationVertex )
 	{
-		std::cerr << "  adding points" << std::endl;
+		//std::cerr << "  adding points" << std::endl;
 		result.emplace_back( HdTokens->points, interpolation, HdPrimvarRoleTokens->point );
 	}
 	return result;
+}
+
+void SceneDelegate::plugDirtied( const Gaffer::Plug *plug )
+{
+	if( plug == m_scene->childNamesPlug() )
+	{
+		m_dirtyComponents |= (int)Component::ChildNames;
+	}
+	else if( plug == m_scene->objectPlug() )
+	{
+		m_dirtyComponents |= (int)Component::Object;
+	}
 }

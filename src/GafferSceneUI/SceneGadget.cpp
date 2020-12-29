@@ -516,6 +516,10 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 		m_engine.SetTaskContextData( HdxTokens->selectionState, VtValue( m_selectionTracker ) );
 	}
 
+	// Update render index
+
+	m_sceneDelegate->updateRenderIndex();
+
 	// Transfer current GL camera and viewport into task controller.
 
 	GfMatrix4d viewMatrix, projectionMatrix;

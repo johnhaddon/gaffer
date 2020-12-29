@@ -62,6 +62,8 @@ class SceneDelegate : public pxr::HdSceneDelegate
 		void setContext( Gaffer::ConstContextPtr context );
 		const Gaffer::Context *getContext() const;
 
+		void updateRenderIndex();
+
 		// HdSceneDelegate overrides
 		// =========================
 
@@ -422,7 +424,23 @@ class SceneDelegate : public pxr::HdSceneDelegate
 
 	private :
 
+		void plugDirtied( const Gaffer::Plug *plug );
+
+		enum class Component
+		{
+			None = 0,
+			Bound = 1,
+			Transform = 2,
+			Attributes = 4,
+			Object = 8,
+			ChildNames = 16,
+			//ExpansionComponent = 32,
+			All = Bound | Transform | Attributes | Object | ChildNames //| ExpansionComponent,
+		};
+
 		GafferScene::ConstScenePlugPtr m_scene;
+		boost::signals::scoped_connection m_plugDirtiedConnection;
+		unsigned m_dirtyComponents;
 
 };
 
