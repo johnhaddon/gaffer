@@ -513,6 +513,11 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 
 		m_taskController.reset( new HdxTaskController( m_renderIndex.get(), SdfPath( "/__controllerId" ) ) );
 		m_taskController->SetSelectionColor( GfVec4f( 0.466f, 0.612f, 0.741f, 1.0f ) );
+
+		HdxRenderTaskParams renderParams;
+		renderParams.wireframeColor = GfVec4f( 0.2, 0.2, 0.2, 1 );
+		m_taskController->SetRenderParams( renderParams );
+
 		m_engine.SetTaskContextData( HdxTokens->selectionState, VtValue( m_selectionTracker ) );
 	}
 
@@ -547,8 +552,9 @@ void SceneGadget::doRenderLayer( Layer layer, const GafferUI::Style *style ) con
 
 	// Render
 
+	glEnable(GL_DEPTH_TEST);
 	auto tasks = m_taskController->GetRenderingTasks();
-   	m_engine.Execute( m_renderIndex.get(), &tasks );
+	m_engine.Execute( m_renderIndex.get(), &tasks );
 }
 
 void SceneGadget::updateRenderer()
