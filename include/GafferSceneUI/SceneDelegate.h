@@ -120,7 +120,7 @@ class SceneDelegate : public pxr::HdSceneDelegate
 
 //	 /// Returns the doubleSided state for the given prim.
 
-//	 virtual bool GetDoubleSided(SdfPath const & id);
+		bool GetDoubleSided( const pxr::SdfPath &id ) override;
 
 //	 /// Returns the cullstyle for the given prim.
 
@@ -128,22 +128,17 @@ class SceneDelegate : public pxr::HdSceneDelegate
 
 //	 /// Returns the shading style for the given prim.
 
-//	 virtual VtValue GetShadingStyle(SdfPath const &id);
+		//pxr::VtValue GetShadingStyle( pxr::SdfPath const &id ) override;
 
-//	 /// Returns the refinement level for the given prim in the range [0,8].
-//	 ///
-//	 /// The refinement level indicates how many iterations to apply when
-//	 /// subdividing subdivision surfaces or other refinable primitives.
-
-//	 virtual HdDisplayStyle GetDisplayStyle(SdfPath const& id);
+		pxr::HdDisplayStyle GetDisplayStyle( const pxr::SdfPath &id ) override;
 
 //	 /// Returns a named value.
 
-	pxr::VtValue Get( const pxr::SdfPath &id, const pxr::TfToken &key ) override;
+		pxr::VtValue Get( const pxr::SdfPath &id, const pxr::TfToken &key ) override;
 
 //	 /// Returns the authored repr (if any) for the given prim.
 
-	pxr::HdReprSelector GetReprSelector( const pxr::SdfPath &id ) override;
+		pxr::HdReprSelector GetReprSelector( const pxr::SdfPath &id ) override;
 
 //	 /// Returns the render tag that will be used to bucket prims during
 //	 /// render pass bucketing.

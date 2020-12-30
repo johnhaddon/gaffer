@@ -95,6 +95,15 @@ pxr::SdfPath toUSD( const ScenePlug::ScenePath &path, const bool relative = fals
 	return result;
 }
 
+template<typename T>
+T attributeValue( const CompoundObject *attributes, InternedString name, const T &defaultValue )
+{
+	const auto d = attributes->member<TypedData<T>>( name );
+	return d ? d->readable() : defaultValue;
+}
+
+InternedString g_doubleSidedAttributeName( "doubleSided" );
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -171,18 +180,63 @@ void SceneDelegate::Sync( pxr::HdSyncRequestVector *request )
 	}
 }
 
+pxr::HdMeshTopology SceneDelegate::GetMeshTopology( const pxr::SdfPath &id )
+{
+	//std::cerr << "get mesh topology " << id << std::endl;
+
+	ConstObjectPtr object = m_scene->object( fromUSD( id ) );
+	if( auto mesh = runTimeCast<const IECoreScene::MeshPrimitive>( object.get() ) )
+	{
+		auto &verticesPerFace = mesh->verticesPerFace()->readable();
+		auto &vertexIds = mesh->vertexIds()->readable();
+		//std::cerr << "    got faces " << verticesPerFace.size() << std::endl;
+		return HdMeshTopology(
+			PxOsdOpenSubdivTokens->catmullClark,
+			HdTokens->rightHanded,
+			VtIntArray( verticesPerFace.begin(), verticesPerFace.end() ),
+			VtIntArray( vertexIds.begin(), vertexIds.end() )
+		);
+	}
+
+	//std::cerr << "    no mesh" << std::endl;
+	return HdMeshTopology();
+}
+
+pxr::GfRange3d SceneDelegate::GetExtent( const pxr::SdfPath &id )
+{
+	// Would it be better to query this from the object?
+	const Imath::Box3f bound = m_scene->bound( fromUSD( id ) );
+	//std::cerr << "GetExtent " << id << " " << bound.min << " - " << bound.max << std::endl;
+	return GfRange3d(
+		IECoreUSD::DataAlgo::toUSD( bound.min ),
+		IECoreUSD::DataAlgo::toUSD( bound.max )
+	);
+}
+
+pxr::GfMatrix4d SceneDelegate::GetTransform( const pxr::SdfPath &id )
+{
+	const Imath::M44f matrix = m_scene->fullTransform( fromUSD( id ) );
+	auto r = GfMatrix4d( IECoreUSD::DataAlgo::toUSD( matrix ) );
+	//std::cerr << "GetTransform " << id << " " << r << std::endl;
+	return r;
+}
+
+bool SceneDelegate::GetDoubleSided( const pxr::SdfPath &id )
+{
+	ConstCompoundObjectPtr attributes = m_scene->fullAttributes( fromUSD( id ) );
+	return attributeValue( attributes.get(), g_doubleSidedAttributeName, true );
+}
+
+pxr::HdDisplayStyle SceneDelegate::GetDisplayStyle( const pxr::SdfPath &id )
+{
+	std::cerr << "GetDisplayStyle " << id << std::endl;
+	return HdDisplayStyle( /* refineLevel = */ 2 );
+}
+
 pxr::VtValue SceneDelegate::Get( const pxr::SdfPath &id, const pxr::TfToken &key )
 {
-	//std::cerr << "Get " << id << " " << key << std::endl;
+	std::cerr << "Get " << id << " " << key << std::endl;
 
-    // // tasks
-    // _ValueCache *vcache = TfMapLookupPtr(_valueCacheMap, id);
-    // VtValue ret;
-    // if (vcache && TfMapLookup(*vcache, key, &ret)) {
-    //     return ret;
-    // }
-
-    // // prims
 	if( key == HdTokens->points )
 	{
 		ConstObjectPtr object = m_scene->object( fromUSD( id ) );
@@ -218,50 +272,21 @@ pxr::VtValue SceneDelegate::Get( const pxr::SdfPath &id, const pxr::TfToken &key
 
 pxr::HdReprSelector SceneDelegate::GetReprSelector( const pxr::SdfPath &id )
 {
-	//std::cerr << "GetReprSelector " << id << std::endl;
-	return HdSceneDelegate::GetReprSelector( id );
-}
+	std::cerr << "GetReprSelector " << id << std::endl;
+	//return HdSceneDelegate::GetReprSelector( id );
 
-pxr::HdMeshTopology SceneDelegate::GetMeshTopology( const pxr::SdfPath &id )
-{
-	//std::cerr << "get mesh topology " << id << std::endl;
+	/// THIS IS WHAT LETS US GET SUBDIVISION!!
 
-	ConstObjectPtr object = m_scene->object( fromUSD( id ) );
-	if( auto mesh = runTimeCast<const IECoreScene::MeshPrimitive>( object.get() ) )
-	{
-		auto &verticesPerFace = mesh->verticesPerFace()->readable();
-		auto &vertexIds = mesh->vertexIds()->readable();
-		//std::cerr << "    got faces " << verticesPerFace.size() << std::endl;
-		return HdMeshTopology(
-			PxOsdOpenSubdivTokens->catmullClark,
-			HdTokens->rightHanded,
-			VtIntArray( verticesPerFace.begin(), verticesPerFace.end() ),
-			VtIntArray( vertexIds.begin(), vertexIds.end() ),
-			/* refineLevel = */ 0
-		);
-	}
+	// (hull)
+    // (points)
+    // (smoothHull)
+    // (refined)
+    // (refinedWire)
+    // (refinedWireOnSurf)
+    // (wire)
+    // (wireOnSurf)
 
-	//std::cerr << "    no mesh" << std::endl;
-	return HdMeshTopology();
-}
-
-pxr::GfRange3d SceneDelegate::GetExtent( const pxr::SdfPath &id )
-{
-	// Would it be better to query this from the object?
-	const Imath::Box3f bound = m_scene->bound( fromUSD( id ) );
-	//std::cerr << "GetExtent " << id << " " << bound.min << " - " << bound.max << std::endl;
-	return GfRange3d(
-		IECoreUSD::DataAlgo::toUSD( bound.min ),
-		IECoreUSD::DataAlgo::toUSD( bound.max )
-	);
-}
-
-pxr::GfMatrix4d SceneDelegate::GetTransform( const pxr::SdfPath &id )
-{
-	const Imath::M44f matrix = m_scene->fullTransform( fromUSD( id ) );
-	auto r = GfMatrix4d( IECoreUSD::DataAlgo::toUSD( matrix ) );
-	//std::cerr << "GetTransform " << id << " " << r << std::endl;
-	return r;
+	return HdReprSelector( HdReprTokens->refinedWireOnSurf );
 }
 
 pxr::SdfPath SceneDelegate::GetMaterialId( const pxr::SdfPath &rprimId )
@@ -297,5 +322,9 @@ void SceneDelegate::plugDirtied( const Gaffer::Plug *plug )
 	else if( plug == m_scene->objectPlug() )
 	{
 		m_dirtyComponents |= (int)Component::Object;
+	}
+	else if( plug == m_scene->attributesPlug() )
+	{
+		m_dirtyComponents |= (int)Component::Attributes;
 	}
 }
