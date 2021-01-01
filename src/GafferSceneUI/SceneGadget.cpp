@@ -40,9 +40,12 @@
 
 #include "Gaffer/BackgroundTask.h"
 
-#include "boost/bind.hpp"
+#include "IECoreUSD/DataAlgo.h"
 
 #include "pxr/imaging/hd/camera.h"
+#include "pxr/imaging/hdx/pickTask.h"
+
+#include "boost/bind.hpp"
 
 using namespace std;
 using namespace Imath;
@@ -59,15 +62,15 @@ using namespace GafferSceneUI;
 namespace
 {
 
-float lineariseDepthBufferSample( float bufferDepth, float *m )
-{
-	// Heavily optimised extraction that works with our orthogonal clipping planes
-	//   Fast Extraction of Viewing Frustum Planes from the WorldView-Projection Matrix
-	//   http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf
-	const float n = - ( m[15] + m[14] ) / ( m[11] + m[10] );
-	const float f = - ( m[15] - m[14] ) / ( m[11] - m[10] );
-	return ( 2.0f * n * f ) / ( f + n - ( bufferDepth * 2.0f - 1.0f ) * ( f - n ) );
-}
+// float lineariseDepthBufferSample( float bufferDepth, float *m )
+// {
+// 	// Heavily optimised extraction that works with our orthogonal clipping planes
+// 	//   Fast Extraction of Viewing Frustum Planes from the WorldView-Projection Matrix
+// 	//   http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf
+// 	const float n = - ( m[15] + m[14] ) / ( m[11] + m[10] );
+// 	const float f = - ( m[15] - m[14] ) / ( m[11] - m[10] );
+// 	return ( 2.0f * n * f ) / ( f + n - ( bufferDepth * 2.0f - 1.0f ) * ( f - n ) );
+// }
 
 /// \todo Move to Cortex
 pxr::SdfPath toUSD( const ScenePlug::ScenePath &path, const bool relative = false )
@@ -78,6 +81,24 @@ pxr::SdfPath toUSD( const ScenePlug::ScenePath &path, const bool relative = fals
 		result = result.AppendElementString( name.string() );
 	}
 	return result;
+}
+
+ScenePlug::ScenePath fromUSDWithoutPrefix( const pxr::SdfPath &path, size_t prefixSize )
+{
+	size_t i = path.GetPathElementCount() - prefixSize;
+	ScenePlug::ScenePath result( i );
+	pxr::SdfPath p = path;
+	while( i )
+	{
+		result[--i] = p.GetElementString();
+		p = p.GetParentPath();
+	}
+	return result;
+}
+
+ScenePlug::ScenePath fromUSD( const pxr::SdfPath &path )
+{
+	return fromUSDWithoutPrefix( path, 0 );
 }
 
 } // namespace
@@ -310,60 +331,33 @@ bool SceneGadget::objectAt( const IECore::LineSegment3f &lineInGadgetSpace, Gaff
 
 bool SceneGadget::objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, V3f &hitPoint ) const
 {
-	float projectionMatrix[16];
+	HdxPickTaskContextParams pickParams;
 
-	std::vector<IECoreGL::HitRecord> selection;
 	{
+		/// \todo Get this without mucking about with SelectionScope
+		std::vector<IECoreGL::HitRecord> selection;
 		ViewportGadget::SelectionScope selectionScope( lineInGadgetSpace, this, selection, IECoreGL::Selector::IDRender );
-		//  Fetch the matrix so we can work out our clipping planes to extract
-		//  a real-world depth from the buffer. We do this here in case
-		//  SelectionScope ever affects the matrix/planes.
-		glGetFloatv( GL_PROJECTION_MATRIX, projectionMatrix );
-		renderScene();
+		glGetDoublev( GL_MODELVIEW_MATRIX, pickParams.viewMatrix.GetArray() );
+		glGetDoublev( GL_PROJECTION_MATRIX, pickParams.projectionMatrix.GetArray() );
 	}
 
-	if( !selection.size() )
+	HdxPickHitVector hits;
+	pickParams.resolveMode = HdxPickTokens->resolveNearestToCenter;
+	//pickParams.clipPlanes = params.clipPlanes; /// \todo Fill me in
+	//pickParams.collection = _intersectCollection; /// \todo Fill me in
+	pickParams.outHits = &hits;
+	m_engine.SetTaskContextData( HdxPickTokens->pickParams, VtValue( pickParams ) );
+
+	auto tasks = m_taskController->GetPickingTasks();
+	m_engine.Execute( m_renderIndex.get(), &tasks );
+
+	if( hits.size() != 1 )
 	{
 		return false;
 	}
 
-	float depthMin = selection[0].depthMin;
-	unsigned int name = selection[0].name;
-	for( const auto &i : selection )
-	{
-		if( i.depthMin < depthMin )
-		{
-			depthMin = i.depthMin;
-			name = i.name;
-		}
-	}
-
-	PathMatcher paths = convertSelection( new UIntVectorData( { name } ) );
-	if( paths.isEmpty() )
-	{
-		return false;
-	}
-
-	path = *PathMatcher::Iterator( paths.begin() );
-
-	// Notes:
-	//  - depthMin is in respect to +ve z, we're looking down -z, so we need to invert it.
-	//  - depthMin is orthogonal to the camera's xy plane not from its origin.
-	//  - There may be intermediate transforms between us and the ViewportGadget.
-
-	V3f viewDir;
-	const M44f cameraWorldTransform = ancestor<ViewportGadget>()->getCameraTransform();
-	const M44f cameraTransform = cameraWorldTransform * fullTransform().inverse();
-	cameraTransform.multDirMatrix( V3f( 0.0f, 0.0f, -1.0f ), viewDir );
-
-	const V3f traceDir = lineInGadgetSpace.normalizedDirection();
-
-	float hitDepth = - lineariseDepthBufferSample( depthMin, projectionMatrix );
-	hitDepth /= max( 0.00001f, viewDir.dot( traceDir ) );
-
-	const V3f origin = V3f( 0.0f ) * cameraTransform;
-	hitPoint = origin + ( traceDir * hitDepth );
-
+	path = fromUSD( m_sceneDelegate->GetScenePrimPath( hits[0].objectId, hits[0].instanceIndex ) );
+	hitPoint = IECoreUSD::DataAlgo::fromUSD( hits[0].worldSpaceHitPoint );
 	return true;
 }
 
