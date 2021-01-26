@@ -104,10 +104,47 @@ ValuePlugPtr activeInPlug( Spreadsheet &s, const ValuePlug &outPlug )
 	return s.activeInPlug( &outPlug );
 }
 
+
+std::string repr( const Spreadsheet::RowsPlug *plug )
+{
+	std::string result = Serialisation::classPath( plug ) + "( \"" + plug->getName().string() + "\", ";
+
+	if( plug->direction()!=Plug::In )
+	{
+		result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
+	}
+
+	if( plug->minRows() != 1 )
+	{
+		result += boost::str( boost::format( "minRows = %d, " ) % plug->minRows() );
+	}
+
+	if( plug->maxRows() != Imath::limits<size_t>::max() )
+	{
+		result += boost::str( boost::format( "maxRows = %d, " ) % plug->maxRows() );
+	}
+
+	const unsigned flags = plug->getFlags();
+	if( flags != Plug::Default )
+	{
+		result += "flags = " + PlugSerialiser::flagsRepr( flags ) + ", ";
+	}
+
+	result += ")";
+
+	return result;
+
+}
+
 class RowsPlugSerialiser : public ValuePlugSerialiser
 {
 
 	public :
+
+		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+		{
+			return ::repr( static_cast<const Spreadsheet::RowsPlug *>( graphComponent ) );
+		}
 
 		std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
 		{
@@ -141,12 +178,14 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 
 			// Serialise rows. We do this as an `addRows()` call because it is much faster
 			// than serialising a constructor for every single cell. It also shows people the
-			// API they should use for making their own spreadsheets.
+			// API they should use for making their own spreadsheets. The minimum number of rows
+			// will have been created in the constructor, so we are just responsible for adding
+			// on any others.
 
 			const size_t numRows = plug->children().size();
-			if( numRows > 1 )
+			if( numRows > plug->minRows() )
 			{
-				result += identifier + ".addRows( " + std::to_string( numRows - 1 ) + " )\n";
+				result += identifier + ".addRows( " + std::to_string( numRows - plug->minRows() ) + " )\n";
 			}
 
 			// If the default values for any cells have been modified, then we need to serialise
@@ -261,10 +300,12 @@ void GafferModule::bindSpreadsheet()
 	;
 
 	PlugClass<Spreadsheet::RowsPlug>()
-		.def( init<std::string, Plug::Direction, unsigned>(
+		.def( init<std::string, Plug::Direction, size_t, size_t, unsigned>(
 				(
 					arg( "name" )=GraphComponent::defaultName<Spreadsheet::RowsPlug>(),
 					arg( "direction" )=Plug::In,
+					arg( "minRows" )=1,
+					arg( "maxRows" )=std::numeric_limits<size_t>::max(),
 					arg( "flags" )=Plug::Default
 				)
 			)
@@ -276,6 +317,9 @@ void GafferModule::bindSpreadsheet()
 		.def( "addRow", &addRow )
 		.def( "addRows", &addRows )
 		.def( "removeRow", &removeRow )
+		.def( "minRows", &Spreadsheet::RowsPlug::minRows )
+		.def( "maxRows", &Spreadsheet::RowsPlug::maxRows )
+		.def( "__repr__", &::repr )
 		.attr( "__qualname__" ) = "Spreadsheet.RowsPlug"
 	;
 

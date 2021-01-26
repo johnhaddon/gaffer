@@ -18,6 +18,7 @@ API
 ---
 
 - Serialisation : Added `addModule()` method, for adding imports to the serialisation.
+- Spreadsheet : Added `minRows` and `maxRows` properties to `RowsPlug`, to constrain the number of rows.
 
 Breaking Changes
 ----------------
@@ -44,6 +45,9 @@ Breaking Changes
 - Editors : Removed the 'Follow Scene Selection' mode from the Node Editor Focus menu (#4074).
 - GafferSceneUI : Removed `SourceSet`.
 - ScriptNode : Added private member data.
+- Spreadsheet :
+  - Changed signature of RowsPlug constructor.
+  - Added private member data to RowsPlug.
 
 Build
 -----

@@ -956,5 +956,49 @@ class SpreadsheetTest( GafferTest.TestCase ) :
 			r["name"].setValue( name )
 			self.assertEqual( rows.row( name ), r )
 
+	def testMinMaxRows( self ) :
+
+		p = Gaffer.Spreadsheet.RowsPlug()
+		self.assertEqual( p.minRows(), 1 )
+		self.assertEqual( p.maxRows(), 2 ** 64 - 1 )
+
+		p = Gaffer.Spreadsheet.RowsPlug( minRows = 2, maxRows = 4 )
+		self.assertEqual( p.minRows(), 2 )
+		self.assertEqual( p.maxRows(), 4 )
+		self.assertEqual( len( p ), p.minRows() )
+
+		p1 = eval( repr( p ) )
+		self.assertEqual( p1.minRows(), 2 )
+		self.assertEqual( p1.maxRows(), 4 )
+		self.assertEqual( len( p1 ), p1.minRows() )
+
+		p2 = p.createCounterpart( "p2", Gaffer.Plug.Direction.In )
+		self.assertEqual( p2.minRows(), 2 )
+		self.assertEqual( p2.maxRows(), 4 )
+		self.assertEqual( len( p2 ), p2.minRows() )
+
+		with six.assertRaisesRegex( self, RuntimeError, "Minimum rows must be at least 1" ) :
+			Gaffer.Spreadsheet.RowsPlug( minRows = 0 )
+
+		with six.assertRaisesRegex( self, RuntimeError, "Maximum rows must be greater than or equal to minimum rows" ) :
+			Gaffer.Spreadsheet.RowsPlug( minRows = 2, maxRows = 1 )
+
+		p = Gaffer.Spreadsheet.RowsPlug( minRows = 2, maxRows = 2 )
+		self.assertEqual( len( p ), 2 )
+
+		with six.assertRaisesRegex( self, RuntimeError, "Parent .* rejects child" ) :
+			p.addRow()
+
+	def testMinRowsSerialisation( self ) :
+
+		s = Gaffer.ScriptNode()
+		s["n"] = Gaffer.Node()
+		s["n"]["r"] = Gaffer.Spreadsheet.RowsPlug( minRows = 10, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+
+		s2 = Gaffer.ScriptNode()
+		s2.execute( s.serialise() )
+		self.assertEqual( len( s2["n"]["r"] ), 10 )
+		self.assertEqual( s2["n"]["r"].minRows(), 10 )
+
 if __name__ == "__main__":
 	unittest.main()

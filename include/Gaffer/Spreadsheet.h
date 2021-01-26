@@ -75,7 +75,13 @@ class GAFFER_API Spreadsheet : public ComputeNode
 
 			public :
 
-				RowsPlug( const std::string &name = defaultName<RowsPlug>(), Direction direction = In, unsigned flags = Default );
+				RowsPlug(
+					const std::string &name = defaultName<RowsPlug>(),
+					Direction direction = In,
+					size_t minRows = 1, // 1 for the default row
+					size_t maxRows = std::numeric_limits<size_t>::max(),
+					unsigned flags = Default
+				);
 				virtual ~RowsPlug();
 
 				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowsPlug, Gaffer::SpreadsheetRowsPlugTypeId, Gaffer::ValuePlug );
@@ -123,6 +129,9 @@ class GAFFER_API Spreadsheet : public ComputeNode
 				void addRows( size_t numRows );
 				void removeRow( RowPlugPtr row );
 
+				size_t minRows() const;
+				size_t maxRows() const;
+
 				/// Overrides
 				/// =========
 
@@ -136,6 +145,9 @@ class GAFFER_API Spreadsheet : public ComputeNode
 				// Used to implement the `row()` accessor.
 				class RowNameMap;
 				std::unique_ptr<RowNameMap> m_rowNameMap;
+
+				size_t m_minRows;
+				size_t m_maxRows;
 
 		};
 

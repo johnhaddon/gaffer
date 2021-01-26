@@ -529,11 +529,21 @@ class Spreadsheet::RowsPlug::RowNameMap
 
 };
 
-Spreadsheet::RowsPlug::RowsPlug( const std::string &name, Direction direction, unsigned flags )
-	:	ValuePlug( name, direction, flags ), m_rowNameMap( new RowNameMap( this ) )
+Spreadsheet::RowsPlug::RowsPlug( const std::string &name, Direction direction, size_t minRows, size_t maxRows, unsigned flags )
+	:	ValuePlug( name, direction, flags ), m_rowNameMap( new RowNameMap( this ) ), m_minRows( minRows ), m_maxRows( maxRows )
 {
+	if( m_minRows < 1 )
+	{
+		throw IECore::InvalidArgumentException( "Minimum rows must be at least 1" );
+	}
+	if( m_maxRows < m_minRows )
+	{
+		throw IECore::InvalidArgumentException( "Maximum rows must be greater than or equal to minimum rows" );
+	}
+
 	RowPlugPtr defaultRow = new RowPlug( "default" );
 	addChild( defaultRow );
+	addRows( m_minRows - 1 );
 }
 
 Spreadsheet::RowsPlug::~RowsPlug()
@@ -646,6 +656,16 @@ void Spreadsheet::RowsPlug::removeRow( Spreadsheet::RowPlugPtr row )
 	removeChild( row );
 }
 
+size_t Spreadsheet::RowsPlug::minRows() const
+{
+	return m_minRows;
+}
+
+size_t Spreadsheet::RowsPlug::maxRows() const
+{
+	return m_maxRows;
+}
+
 std::vector<Gaffer::ValuePlug *> Spreadsheet::RowsPlug::outPlugs()
 {
 	// Find `Spreadsheet::outPlug()` on all the Spreadsheet nodes
@@ -685,12 +705,12 @@ std::vector<Gaffer::ValuePlug *> Spreadsheet::RowsPlug::outPlugs()
 
 bool Spreadsheet::RowsPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
-	return runTimeCast<const RowPlug>( potentialChild );
+	return children().size() < maxRows() && runTimeCast<const RowPlug>( potentialChild );
 }
 
 Gaffer::PlugPtr Spreadsheet::RowsPlug::createCounterpart( const std::string &name, Direction direction ) const
 {
-	RowsPlugPtr result = new RowsPlug( name, direction, getFlags() );
+	RowsPlugPtr result = new RowsPlug( name, direction, minRows(), maxRows(), getFlags() );
 	for( const auto &row : RowPlug::Range( *this ) )
 	{
 		// Using `setChild()` rather than `addChild()` because we want to replace
