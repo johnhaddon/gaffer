@@ -185,10 +185,23 @@ class Reference::PlugEdits : public boost::signals::trackable
 			return g_emptyContainer;
 		}
 
-		boost::signals::scoped_connection &connection()
+		// Used to allow PlugEdits to track reference loading.
+		struct LoadingScope : boost::noncopyable
 		{
-			return m_connection;
-		}
+			LoadingScope( PlugEdits *plugEdits )
+				:	m_plugEdits( plugEdits )
+			{
+				// Changes made during loading aren't user edits and mustn't be
+				// tracked.
+				m_plugEdits->m_connection.block();
+			}
+			~LoadingScope()
+			{
+				m_plugEdits->m_connection.unblock();
+			}
+			private :
+				PlugEdits *m_plugEdits;
+		};
 
 	private :
 
@@ -404,9 +417,7 @@ void Reference::loadInternal( const std::string &fileName )
 	boost::filesystem::path path = sp.find( fileName );
 	if( !path.empty() )
 	{
-		// Changes made here aren't user edits and mustn't be tracked.
-		BlockedConnection blockedConnection( m_plugEdits->connection() );
-
+		PlugEdits::LoadingScope loadingScope( m_plugEdits.get() );
 		errors = script->executeFile( path.string(), this, /* continueOnError = */ true );
 	}
 
