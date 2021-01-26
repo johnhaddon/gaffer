@@ -37,12 +37,14 @@
 #include "Gaffer/Reference.h"
 
 #include "Gaffer/BlockedConnection.h"
+#include "Gaffer/CompoundDataPlug.h"
 #include "Gaffer/Metadata.h"
 #include "Gaffer/MetadataAlgo.h"
 #include "Gaffer/PlugAlgo.h"
 #include "Gaffer/ScriptNode.h"
 #include "Gaffer/StandardSet.h"
 #include "Gaffer/SplinePlug.h"
+#include "Gaffer/Spreadsheet.h"
 #include "Gaffer/StringPlug.h"
 
 #include "IECore/Exception.h"
@@ -142,6 +144,31 @@ void transferOutputs( Gaffer::Plug *srcPlug, Gaffer::Plug *dstPlug )
 	}
 }
 
+void transferChildren( Gaffer::Plug *srcPlug, Gaffer::Plug *dstPlug )
+{
+	if( srcPlug->typeId() != dstPlug->typeId() )
+	{
+		return;
+	}
+
+	int64_t startIndex = -1;
+	if( runTimeCast<Spreadsheet::RowsPlug>( dstPlug ) )
+	{
+		startIndex = 1;
+	}
+
+	if( startIndex < 0 || dstPlug->children().size() != (size_t)startIndex )
+	{
+		return;
+	}
+
+	GraphComponent::ChildContainer children = srcPlug->children(); // Copy, because moving children will modify original
+	for( size_t i = startIndex; i < children.size(); ++i )
+	{
+		dstPlug->addChild( children[i] );
+	}
+}
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -158,6 +185,7 @@ class Reference::PlugEdits : public boost::signals::trackable
 			:	m_reference( reference )
 		{
 			m_connection = Metadata::plugValueChangedSignal().connect( boost::bind( &PlugEdits::plugValueChanged, this, ::_1, ::_2, ::_3, ::_4 ) );
+			//m_reference->childAddedSignal().connect( boost::bind( &PlugEdits::childAdded, this, ::_1, ::_2 ) );
 			m_reference->childRemovedSignal().connect( boost::bind( &PlugEdits::childRemoved, this, ::_1, ::_2 ) );
 		}
 
@@ -171,6 +199,39 @@ class Reference::PlugEdits : public boost::signals::trackable
 			}
 
 			return edit->m_metadataEdits.find( key ) != edit->m_metadataEdits.end();
+		}
+
+		bool isChildEdit( const Plug *plug ) const
+		{
+			const Plug *parent = plug->parent<Plug>();
+			if( !parent )
+			{
+				return false;
+			}
+
+			const PlugEdit *edit = plugEdit( plug );
+			if( !edit )
+			{
+				return false;
+			}
+
+			if( edit->sizeAfterLoad == -1 || parent->children().size() <= (size_t)edit->sizeAfterLoad )
+			{
+				return false;
+			}
+
+			// Conceptually we want to compare the index of `plug` against
+			// `sizeAfterLoad`. But finding the index currently requires linear
+			// search. We expect the UI to only allow creation of new plugs in
+			// originally-empty containers (to avoid merge hell on reload),
+			// meaning that `sizeAfterLoad` can be expected to be either 0 or 1
+			// (the latter for RowsPlug with a default row). So it is quicker to
+			// reverse the test and search for plug in the range `[0,
+			// sizeAfterLoad)`.
+			return !std::any_of(
+				parent->children().begin(), parent->children().begin() + edit->sizeAfterLoad,
+				[plug]( auto x ) { return x == plug; }
+			);
 		}
 
 		const boost::container::flat_set<InternedString> &metadataEdits( const Plug *plug )
@@ -189,18 +250,18 @@ class Reference::PlugEdits : public boost::signals::trackable
 		struct LoadingScope : boost::noncopyable
 		{
 			LoadingScope( PlugEdits *plugEdits )
-				:	m_plugEdits( plugEdits )
+				:	m_plugEdits( plugEdits ), m_blockedConnection( plugEdits->m_connection )
 			{
-				// Changes made during loading aren't user edits and mustn't be
-				// tracked.
-				m_plugEdits->m_connection.block();
 			}
 			~LoadingScope()
 			{
-				m_plugEdits->m_connection.unblock();
+				m_plugEdits->loadingFinished();
 			}
 			private :
 				PlugEdits *m_plugEdits;
+				// Changes made during loading aren't user edits and mustn't be
+				// tracked, so we block the connection.
+				Gaffer::BlockedConnection m_blockedConnection;
 		};
 
 	private :
@@ -211,6 +272,7 @@ class Reference::PlugEdits : public boost::signals::trackable
 		struct PlugEdit
 		{
 			boost::container::flat_set<InternedString> m_metadataEdits;
+			int64_t sizeAfterLoad = -1; // Default value means size not tracked
 		};
 
 		std::unordered_map<const Plug*, PlugEdit> m_plugEdits;
@@ -296,6 +358,31 @@ class Reference::PlugEdits : public boost::signals::trackable
 			}
 
 			m_plugEdits.erase( plug );
+		}
+
+		void loadingFinished()
+		{
+			for( auto &plug : Plug::Range( *m_reference ) )
+			{
+				const IECore::TypeId plugType = plug->typeId();
+				if(
+					plugType != Spreadsheet::RowsPlug::staticTypeId() &&
+					plugType != CompoundDataPlug::staticTypeId()
+				)
+				{
+					// We only support child edits for RowsPlugs and
+					// CompoundDataPlugs at present. It would be trivial
+					// to do the tracking for everything, but most types
+					// don't have dynamic numbers of children, and we
+					// probably don't want the overhead of a PlugEdit for
+					// _everything_.
+					continue;
+				}
+				if( auto *edit = plugEdit( plug.get(), /* createIfMissing = */ true ) )
+				{
+					edit->sizeAfterLoad = plug->children().size();
+				}
+			}
 		}
 
 };
@@ -469,8 +556,8 @@ void Reference::loadInternal( const std::string &fileName )
 					copyInputsAndValues( oldPlug, newPlug, /* ignoreDefaultValues = */ true );
 				}
 				transferOutputs( oldPlug, newPlug );
-
 				transferEditedMetadata( oldPlug, newPlug );
+				transferChildren( oldPlug, newPlug );
 			}
 			catch( const std::exception &e )
 			{
@@ -502,6 +589,11 @@ void Reference::loadInternal( const std::string &fileName )
 bool Reference::hasMetadataEdit( const Plug *plug, const IECore::InternedString key ) const
 {
 	return m_plugEdits->hasMetadataEdit( plug, key );
+}
+
+bool Reference::isChildEdit( const Plug *plug ) const
+{
+	return false;
 }
 
 bool Reference::isReferencePlug( const Plug *plug ) const

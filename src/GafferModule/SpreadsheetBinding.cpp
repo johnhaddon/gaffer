@@ -105,7 +105,7 @@ ValuePlugPtr activeInPlug( Spreadsheet &s, const ValuePlug &outPlug )
 }
 
 
-std::string repr( const Spreadsheet::RowsPlug *plug )
+std::string reprWithFixedNumRows( const Spreadsheet::RowsPlug *plug, size_t fixedNumRows )
 {
 	std::string result = Serialisation::classPath( plug ) + "( \"" + plug->getName().string() + "\", ";
 
@@ -114,14 +114,14 @@ std::string repr( const Spreadsheet::RowsPlug *plug )
 		result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
 	}
 
-	if( plug->minRows() != 1 )
+	if( plug->minRows() != 1 || fixedNumRows )
 	{
-		result += boost::str( boost::format( "minRows = %d, " ) % plug->minRows() );
+		result += boost::str( boost::format( "minRows = %d, " ) % ( fixedNumRows ? fixedNumRows : plug->minRows() ) );
 	}
 
-	if( plug->maxRows() != Imath::limits<size_t>::max() )
+	if( plug->maxRows() != Imath::limits<size_t>::max() || fixedNumRows )
 	{
-		result += boost::str( boost::format( "maxRows = %d, " ) % plug->maxRows() );
+		result += boost::str( boost::format( "maxRows = %d, " ) % ( fixedNumRows ? fixedNumRows : plug->maxRows() ) );
 	}
 
 	const unsigned flags = plug->getFlags();
@@ -136,6 +136,13 @@ std::string repr( const Spreadsheet::RowsPlug *plug )
 
 }
 
+std::string repr( const Spreadsheet::RowsPlug *plug )
+{
+	return reprWithFixedNumRows( plug, 0 );
+}
+
+const IECore::InternedString g_omitParentNodePlugValues( "valuePlugSerialiser:omitParentNodePlugValues" );
+
 class RowsPlugSerialiser : public ValuePlugSerialiser
 {
 
@@ -143,14 +150,32 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 
 		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
 		{
-			return ::repr( static_cast<const Spreadsheet::RowsPlug *>( graphComponent ) );
+			const auto *plug = static_cast<const Spreadsheet::RowsPlug *>( graphComponent );
+			return ::reprWithFixedNumRows( plug, fixedNumRows( plug ) );
 		}
 
 		std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
 		{
 			std::string result = ValuePlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
 			const auto *plug = static_cast<const Spreadsheet::RowsPlug *>( graphComponent );
-			if( IECore::runTimeCast<const Reference>( plug->node() ) )
+
+			// Serialise columns
+
+			if( !IECore::runTimeCast<const Reference>( plug->node() ) )
+			{
+				for( const auto &cell : Spreadsheet::CellPlug::Range( *plug->getChild<Spreadsheet::RowPlug>( 0 )->cellsPlug() ) )
+				{
+					PlugPtr p = cell->valuePlug()->createCounterpart( cell->getName(), Plug::In );
+					const Serialiser *plugSerialiser = Serialisation::acquireSerialiser( p.get() );
+					result += identifier + ".addColumn( " + plugSerialiser->constructor( p.get(), serialisation );
+					if( !cell->getChild<BoolPlug>( "enabled" ) )
+					{
+						result += ", adoptEnabledPlug = True";
+					}
+					result += " )\n";
+				}
+			}
+			else
 			{
 				// References add all their plugs in `loadReference()`, so we don't need to serialise
 				// the rows and columns ourselves.
@@ -159,21 +184,6 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 				/// flag though, so haven't exposed it via the `addColumn()/addRow()` API. In future
 				/// we need to improve the serialisation API so that Reference nodes can directly
 				/// request what they want without using flags.
-				return result;
-			}
-
-			// Serialise columns
-
-			for( const auto &cell : Spreadsheet::CellPlug::Range( *plug->getChild<Spreadsheet::RowPlug>( 0 )->cellsPlug() ) )
-			{
-				PlugPtr p = cell->valuePlug()->createCounterpart( cell->getName(), Plug::In );
-				const Serialiser *plugSerialiser = Serialisation::acquireSerialiser( p.get() );
-				result += identifier + ".addColumn( " + plugSerialiser->constructor( p.get(), serialisation );
-				if( !cell->getChild<BoolPlug>( "enabled" ) )
-				{
-					result += ", adoptEnabledPlug = True";
-				}
-				result += " )\n";
 			}
 
 			// Serialise rows. We do this as an `addRows()` call because it is much faster
@@ -183,7 +193,7 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 			// on any others.
 
 			const size_t numRows = plug->children().size();
-			if( numRows > plug->minRows() )
+			if( numRows > plug->minRows() && !fixedNumRows( plug ) )
 			{
 				result += identifier + ".addRows( " + std::to_string( numRows - plug->minRows() ) + " )\n";
 			}
@@ -286,6 +296,29 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 			}
 
 			return false;
+		}
+
+		// When exporting to a reference or extension, we want to fix the number
+		// of rows so that users can't add or remove rows in the published
+		// spreadsheet. If we allowed row addition and removal, we would soon
+		// end up in merge hell while trying to maintain the edits when
+		// versioning up the reference . The one exception is when the
+		// spreadsheet is published with only a default row, in which case the
+		// assumption is that the downstream user will be solely in charge of
+		// row management.
+		size_t fixedNumRows( const Spreadsheet::RowsPlug *plug ) const
+		{
+			if(
+				plug->children().size() > 1 &&
+				// Strictly speaking this context variable only controls value serialisation,
+				// but it serves as a reliable indicator that we are exporting a
+				// reference or extension.
+				Context::current()->get<bool>( g_omitParentNodePlugValues, false )
+			)
+			{
+				return plug->children().size();
+			}
+			return 0;
 		}
 
 };

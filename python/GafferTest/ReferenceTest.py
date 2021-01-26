@@ -1524,6 +1524,79 @@ class ReferenceTest( GafferTest.TestCase ) :
 		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["y"].getValue(), 3 )
 		self.assertEqual( script["reference"]["rows"][1]["cells"]["c1"]["value"]["z"].getValue(), 4 )
 
+	def testSpreadsheetRowMinMax( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		# Make box and promoted spreadsheets. One has no rows other than the
+		# default, and the other is pre-populated with rows.
+
+		script["box"] = Gaffer.Box()
+
+		script["box"]["empty"] = Gaffer.Spreadsheet()
+		script["box"]["empty"]["rows"].addColumn( Gaffer.V3iPlug( "c1", defaultValue = imath.V3i( 1, 2, 3 ) ) )
+
+		script["box"]["populated"] = Gaffer.Spreadsheet()
+		script["box"]["populated"]["rows"].addColumn( Gaffer.V3iPlug( "c1", defaultValue = imath.V3i( 1, 2, 3 ) ) )
+		script["box"]["populated"]["rows"].addRows( 2 )
+
+		Gaffer.PlugAlgo.promoteWithName( script["box"]["empty"]["rows"], name = "emptyRows" )
+		Gaffer.PlugAlgo.promoteWithName( script["box"]["populated"]["rows"], name = "populatedRows" )
+
+		# Reference it in.
+
+		script["box"].exportForReference( self.temporaryDirectory() + "/test.grf" )
+
+		script["reference"] = Gaffer.Reference()
+		script["reference"].load( self.temporaryDirectory() + "/test.grf" )
+
+		# The prepopulated spreadsheet should now have a fixed number of rows,
+		# to prevent row addition/removal in the reference. We don't want to
+		# get into the merge hell that would entail. The empty spreadsheet should
+		# happily accept new rows.
+
+		self.assertEqual( script["reference"]["populatedRows"].minRows(), 3 )
+		self.assertEqual( script["reference"]["populatedRows"].maxRows(), 3 )
+		self.assertEqual( len( script["reference"]["populatedRows"] ), 3 )
+		self.assertEqual( script["reference"]["emptyRows"].minRows(), 1 )
+		self.assertEqual( script["reference"]["emptyRows"].maxRows(), 2 ** 64 - 1 )
+		self.assertEqual( len( script["reference"]["emptyRows"] ), 1 )
+
+		# Check that we can edit the rows and reload the reference.
+
+		script["add"] = GafferTest.AddNode()
+
+		script["reference"]["emptyRows"].addRows( 2 )
+
+		for i in range( 0, 3 ) :
+			for p in [ "emptyRows", "populatedRows" ] :
+				script["reference"][p][i]["cells"]["c1"]["value"]["x"].setValue( i )
+				script["reference"][p][i]["cells"]["c1"]["value"]["y"].setInput( script["add"]["sum"] )
+
+		script["reference"].load( self.temporaryDirectory() + "/test.grf" )
+
+		def assertExpectedRows( script ) :
+
+			self.assertEqual( script["reference"]["populatedRows"].minRows(), 3 )
+			self.assertEqual( script["reference"]["populatedRows"].maxRows(), 3 )
+			self.assertEqual( len( script["reference"]["populatedRows"] ), 3 )
+			self.assertEqual( script["reference"]["emptyRows"].minRows(), 1 )
+			self.assertEqual( script["reference"]["emptyRows"].maxRows(), 2 ** 64 - 1 )
+			self.assertEqual( len( script["reference"]["emptyRows"] ), 3 )
+
+			for i in range( 0, 3 ) :
+				for p in [ "emptyRows", "populatedRows" ] :
+					self.assertEqual( script["reference"][p][i]["cells"]["c1"]["value"]["x"].getValue(), i )
+					self.assertEqual( script["reference"][p][i]["cells"]["c1"]["value"]["y"].getInput(), script["add"]["sum"] )
+
+		assertExpectedRows( script )
+
+		# And that we can save and load the script.
+
+		script2 = Gaffer.ScriptNode()
+		script2.execute( script.serialise() )
+		assertExpectedRows( script2 )
+
 	def testSplinePlug( self ) :
 
 		splines = [

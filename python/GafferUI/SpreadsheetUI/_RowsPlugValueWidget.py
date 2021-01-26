@@ -135,6 +135,8 @@ class _RowsPlugValueWidget( GafferUI.PlugValueWidget ) :
 			addRowButton.dragLeaveSignal().connect( Gaffer.WeakMethod( self.__addRowButtonDragLeave ), scoped = False )
 			addRowButton.dropSignal().connect( Gaffer.WeakMethod( self.__addRowButtonDrop ), scoped = False )
 
+			# WE WANT TO TEST AGAINST `MAXROWS()` HERE, BUT WE DON'T KNOW IF
+			# THE REFERENCE WAS SERIALISED BEFORE WE STARTED TRACKING THAT.
 			addRowButton.setVisible( _Algo.dimensionsEditable( plug ) )
 
 			self.__statusLabel = GafferUI.Label(
