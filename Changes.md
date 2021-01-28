@@ -5,11 +5,15 @@ Improvements
 ------------
 
 - ImageWriter : Added `openexr.dwaCompressionLevel` plug. This controls the size/quality tradeoff when using DWAA or DWAB compression.
-- ArnoldOptions : Added sensible min/max limits to `options.progressiveMinAASamples`.
+- ArnoldOptions :
+  - Added `options.enableProgressiveRender` to allow progressive rendering to be disabled completely.
+  - Added sensible min/max limits to `options.progressiveMinAASamples`.
+  - Grouped interactive rendering options in a new section.
 
 Fixes
 -----
 
+- InteractiveArnoldRender : Fixed interactive updates to `ArnoldOptions.progressiveMinAASamples`.
 - UIEditor : Fixed Python 3 compatibility in plug presets editor.
 - NodeGadget : Fixed intermittent shutdown crash.
 - Expression : Fixed handling of expressions which assign CompoundData to `Attributes.extraAttributes`.
