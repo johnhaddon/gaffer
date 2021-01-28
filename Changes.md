@@ -5,6 +5,7 @@ Improvements
 ------------
 
 - ImageWriter : Added `openexr.dwaCompressionLevel` plug. This controls the size/quality tradeoff when using DWAA or DWAB compression.
+- ArnoldOptions : Added sensible min/max limits to `options.progressiveMinAASamples`.
 
 Fixes
 -----
