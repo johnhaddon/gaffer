@@ -12,6 +12,7 @@ Fixes
 - UIEditor : Fixed Python 3 compatibility in plug presets editor.
 - NodeGadget : Fixed intermittent shutdown crash.
 - Expression : Fixed handling of expressions which assign CompoundData to `Attributes.extraAttributes`.
+- NodeEditor : Fixed width of widgets for integer plugs with minimum values that require more space than maximum values.
 
 API
 ---
