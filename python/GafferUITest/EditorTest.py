@@ -47,20 +47,35 @@ class EditorTest( GafferUITest.TestCase ) :
 
 	def testLifetime( self ) :
 
-		application = Gaffer.Application( "Layout tester" )
-		scriptNode = Gaffer.ScriptNode()
-		application.root()["scripts"].addChild( scriptNode )
-
-		scriptNode["random"] = Gaffer.Random()
-		scriptNode.selection().add( scriptNode["random"] )
-
 		for type in GafferUI.Editor.types() :
-			editor = GafferUI.Editor.create( type, scriptNode )
+
+			application = Gaffer.Application( "Layout tester" )
+			scriptNode = Gaffer.ScriptNode()
+			application.root()["scripts"].addChild( scriptNode )
+			originalScriptRefCount = scriptNode.refCount()
+
+			scriptNode["random"] = Gaffer.Random()
+			scriptNode.selection().add( scriptNode["random"] )
+
+			# Create the editor and get it on screen so that any
+			# deferred updates are done.
+
+			with GafferUI.Window() as window :
+				editor = GafferUI.Editor.create( type, scriptNode )
+			window.setVisible( True )
+			self.waitForIdle( 10000 )
+
+			# Check the editor has no circular references to itself
+			# and can be deleted cleanly.
+
 			w = weakref.ref( editor )
-			del editor
+			del editor, window
 			self.assertEqual( w(), None )
 
-		self.assertEqual( w(), None )
+			# Check that the editor has not left anything behind with
+			# a reference to the script.
+
+			self.assertEqual( scriptNode.refCount(), originalScriptRefCount )
 
 	def testContext( self ) :
 
