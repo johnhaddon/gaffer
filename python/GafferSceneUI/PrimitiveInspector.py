@@ -283,17 +283,17 @@ class PrimitiveInspector( GafferUI.NodeSetEditor ) :
 		with self.getContext() :
 
 			if not self.__scenePlug :
-				return ( None, None )
+				return None
 
 			targetPath = GafferSceneUI.ContextAlgo.getLastSelectedPath( self.getContext() )
 
 			if not targetPath :
-				return ( "Select a location to inspect", None )
+				return None
 
 			if not self.__scenePlug.exists( targetPath ) :
-				return ( 'Location %s does not exist' % targetPath, None )
+				return None
 
-			return( targetPath, self.__scenePlug.object( targetPath ) )
+			return self.__scenePlug.object( targetPath )
 
 	@__backgroundUpdate.preCall
 	def __backgroundUpdatePreCall( self ) :
@@ -301,16 +301,6 @@ class PrimitiveInspector( GafferUI.NodeSetEditor ) :
 		self.__busyWidget.setBusy( True )
 		for (k,widget) in self.__dataWidgets.items():
 			widget.setEnabled( False )
-
-	@__backgroundUpdate.postCall
-	def __backgroundUpdatePostCall( self, backgroundResult ) :
-
-		( backgroundTarget, backgroundObject ) = backgroundResult
-
-		for (k,widget) in self.__dataWidgets.items():
-			widget.setEnabled( True )
-
-		self.__busyWidget.setBusy( False )
 
 		if self.__scenePlug :
 			self.__nodeLabel.setFormatter( _nodeLabelFormatter )
@@ -321,17 +311,42 @@ class PrimitiveInspector( GafferUI.NodeSetEditor ) :
 			self.__nodeFrame._qtWidget().setProperty( "gafferDiff", "Other" )
 		self.__nodeFrame._repolish()
 
-		self.__locationLabel.setText( backgroundTarget )
-		self.__locationFrame._qtWidget().setProperty( "gafferDiff", "AB" if backgroundObject else "Other" )
+		if not self.__scenePlug:
+			self.__locationLabel.setText( "" )
+		else:
+			targetPath = GafferSceneUI.ContextAlgo.getLastSelectedPath( self.getContext() )
+			if targetPath :
+				self.__locationLabel.setText( "Evaluating " + targetPath + " ... " )
+			else:
+				self.__locationLabel.setText( "Select a location to inspect" )
+		self.__locationFrame._qtWidget().setProperty( "gafferDiff", "Other" )
 		self.__locationFrame._repolish()
 
-		if isinstance( backgroundObject, IECoreScene.Primitive ) :
+	@__backgroundUpdate.postCall
+	def __backgroundUpdatePostCall( self, backgroundResult ) :
+
+		for (k,widget) in self.__dataWidgets.items():
+			widget.setEnabled( True )
+
+		self.__busyWidget.setBusy( False )
+
+		if self.__scenePlug:
+			targetPath = GafferSceneUI.ContextAlgo.getLastSelectedPath( self.getContext() )
+			if targetPath:
+				if backgroundResult:
+					self.__locationLabel.setText( targetPath )
+					self.__locationFrame._qtWidget().setProperty( "gafferDiff", "AB" )
+					self.__locationFrame._repolish()
+				else:
+					self.__locationLabel.setText( "Location %s does not exist" % targetPath )
+
+		if isinstance( backgroundResult, IECoreScene.Primitive ) :
 			headers = collections.OrderedDict()
 			primVars = collections.OrderedDict()
 			toolTips = collections.OrderedDict()
 
-			for primvarName in _orderPrimitiveVariables( backgroundObject.keys() ) :
-				primvar = backgroundObject[primvarName]
+			for primvarName in _orderPrimitiveVariables( backgroundResult.keys() ) :
+				primvar = backgroundResult[primvarName]
 				if not primvar.interpolation in primVars :
 					headers[primvar.interpolation] = []
 					primVars[primvar.interpolation] = []
@@ -356,9 +371,7 @@ class PrimitiveInspector( GafferUI.NodeSetEditor ) :
 
 		else:
 
-			for interpolation in [IECoreScene.PrimitiveVariable.Interpolation.Constant, IECoreScene.PrimitiveVariable.Interpolation.Uniform,
-				IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECoreScene.PrimitiveVariable.Interpolation.Varying,
-				IECoreScene.PrimitiveVariable.Interpolation.FaceVarying] :
+			for interpolation in self.__dataWidgets.keys():
 
 				self.__dataWidgets[interpolation].setData( None )
 				self.__dataWidgets[interpolation].setToolTips( [] )
