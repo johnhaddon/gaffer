@@ -127,6 +127,22 @@ struct ThreadablePathAccumulator
 
 };
 
+struct ThreadablePathHashAccumulator
+{
+	ThreadablePathHashAccumulator(): m_h1Accum( 0 ), m_h2Accum( 0 ){}
+
+	bool operator()( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
+	{
+		IECore::MurmurHash h;
+		h.append( &path.front(), path.size() );
+		m_h1Accum += h.h1();
+		m_h2Accum += h.h2();
+		return true;
+	}
+
+	std::atomic<uint64_t> m_h1Accum, m_h2Accum;
+};
+
 } // namespace
 
 std::unordered_set<FilteredSceneProcessor *> GafferScene::SceneAlgo::filteredNodes( Filter *filter )
@@ -151,6 +167,25 @@ void GafferScene::SceneAlgo::matchingPaths( const PathMatcher &filter, const Sce
 {
 	ThreadablePathAccumulator f( paths );
 	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filter, f );
+}
+
+IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const Filter *filter, const ScenePlug *scene )
+{
+	return matchingPathsHash( filter->outPlug(), scene );
+}
+
+IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const Gaffer::IntPlug *filterPlug, const ScenePlug *scene )
+{
+	ThreadablePathHashAccumulator f;
+	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filterPlug, f );
+	return IECore::MurmurHash( f.m_h1Accum, f.m_h2Accum );
+}
+
+IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const PathMatcher &filter, const ScenePlug *scene )
+{
+	ThreadablePathHashAccumulator f;
+	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filter, f );
+	return IECore::MurmurHash( f.m_h1Accum, f.m_h2Accum );
 }
 
 //////////////////////////////////////////////////////////////////////////
