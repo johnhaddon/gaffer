@@ -176,8 +176,6 @@ class PrimitiveInspector( GafferUI.NodeSetEditor ) :
 
 		nodeAndLocationContainer.append( self.__locationFrame )
 
-		nodeAndLocationContainer.append( GafferUI.Spacer( imath.V2i( 0 ) ) )
-
 		self.__busyWidget = GafferUI.BusyWidget( size = 20 )
 		nodeAndLocationContainer.append( self.__busyWidget )
 
@@ -316,10 +314,11 @@ class PrimitiveInspector( GafferUI.NodeSetEditor ) :
 		else:
 			targetPath = GafferSceneUI.ContextAlgo.getLastSelectedPath( self.getContext() )
 			if targetPath :
-				self.__locationLabel.setText( "Evaluating " + targetPath + " ... " )
+				self.__locationLabel.setText( targetPath )
+				self.__locationFrame._qtWidget().setProperty( "gafferDiff", "AB" )
 			else:
 				self.__locationLabel.setText( "Select a location to inspect" )
-		self.__locationFrame._qtWidget().setProperty( "gafferDiff", "Other" )
+				self.__locationFrame._qtWidget().setProperty( "gafferDiff", "Other" )
 		self.__locationFrame._repolish()
 
 	@__backgroundUpdate.postCall
