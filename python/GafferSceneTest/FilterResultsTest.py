@@ -202,10 +202,10 @@ class FilterResultsTest( GafferSceneTest.SceneTestCase ) :
 		filterResults["scene"].setInput( duplicate["out"] )
 		filterResults["filter"].setInput( pathFilter["out"] )
 
+		duplicate["out"].childNames( "/" )
+
 		with GafferTest.TestRunner.PerformanceScope():
 			filterResults["out"].hash()
-
-
 
 if __name__ == "__main__":
 	unittest.main()
