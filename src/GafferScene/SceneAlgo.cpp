@@ -64,6 +64,7 @@
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/unordered_map.hpp"
 
+#include "tbb/enumerable_thread_specific.h"
 #include "tbb/parallel_for.h"
 #include "tbb/spin_mutex.h"
 #include "tbb/task.h"
@@ -129,18 +130,26 @@ struct ThreadablePathAccumulator
 
 struct ThreadablePathHashAccumulator
 {
-	ThreadablePathHashAccumulator(): m_h1Accum( 0 ), m_h2Accum( 0 ){}
 
 	bool operator()( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
 	{
 		IECore::MurmurHash h;
 		h.append( &path.front(), path.size() );
-		m_h1Accum += h.h1();
-		m_h2Accum += h.h2();
+		HashPair &hp = hashPair.local();
+		hp.first += h.h1();
+		hp.second += h.h2();
 		return true;
 	}
 
-	std::atomic<uint64_t> m_h1Accum, m_h2Accum;
+	IECore::MurmurHash result()
+	{
+		HashPair c = hashPair.combine( []( const HashPair &a, const HashPair &b ) { return HashPair( a.first + b.first, a.second + b.second ); } );
+		return IECore::MurmurHash( c.first, c.second );
+	}
+
+	using HashPair = std::pair<uint64_t, uint64_t>;
+	tbb::enumerable_thread_specific<HashPair> hashPair;
+
 };
 
 } // namespace
@@ -178,14 +187,14 @@ IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const Gaffer::IntP
 {
 	ThreadablePathHashAccumulator f;
 	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filterPlug, f );
-	return IECore::MurmurHash( f.m_h1Accum, f.m_h2Accum );
+	return f.result();
 }
 
 IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const PathMatcher &filter, const ScenePlug *scene )
 {
 	ThreadablePathHashAccumulator f;
 	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filter, f );
-	return IECore::MurmurHash( f.m_h1Accum, f.m_h2Accum );
+	return f.result();
 }
 
 //////////////////////////////////////////////////////////////////////////
