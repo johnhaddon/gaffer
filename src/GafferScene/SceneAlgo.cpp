@@ -134,7 +134,11 @@ struct ThreadablePathHashAccumulator
 	bool operator()( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
 	{
 		IECore::MurmurHash h;
-		h.append( &path.front(), path.size() );
+		//h.append( &path.front(), path.size() );
+		for( const auto &n : path )
+		{
+			h.append( (uint64_t)n.c_str() );
+		}
 		m_h1Accum += h.h1();
 		m_h2Accum += h.h2();
 		return true;
