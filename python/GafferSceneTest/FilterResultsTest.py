@@ -186,7 +186,7 @@ class FilterResultsTest( GafferSceneTest.SceneTestCase ) :
 	@GafferTest.TestRunner.PerformanceTestMethod()
 	def testHashPerf( self ):
 
-		name = "longName" * 50
+		name = "longName"
 		sphere = GafferScene.Sphere()
 		sphere["name"].setValue( name )
 
