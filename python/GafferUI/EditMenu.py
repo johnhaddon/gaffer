@@ -37,6 +37,7 @@
 
 import sys
 import collections
+import functools
 import imath
 
 import IECore
@@ -60,7 +61,18 @@ def appendDefinitions( menuDefinition, prefix="" ) :
 	menuDefinition.append( prefix + "/FindDivider", { "divider" : True } )
 
 	menuDefinition.append( prefix + "/Arrange", { "command" : arrange, "shortCut" : "Ctrl+L", "active" : __arrangeAvailable } )
-	menuDefinition.append( prefix + "/ArrangeDivider", { "divider" : True } )
+	for label, position in ( ( "Left", 0.0 ), ( "Centre", 0.5 ), ( "Right", 1.0 ) ) :
+		menuDefinition.append(
+			prefix + "/Align Horizontal/" + label,
+			{ "command" : functools.partial( __align, axis = 0, position = position ), "active" : __arrangeAvailable }
+		)
+	for label, position in ( ( "Top", 1.0 ), ( "Centre", 0.5 ), ( "Bottom", 0.0 ) ) :
+		menuDefinition.append(
+			prefix + "/Align Vertical/" + label,
+			{ "command" : functools.partial( __align, axis = 1, position = position ), "active" : __arrangeAvailable }
+		)
+
+	menuDefinition.append( prefix + "/AlignDivider", { "divider" : True } )
 
 	menuDefinition.append( prefix + "/Select All", { "command" : selectAll, "shortCut" : "Ctrl+A" } )
 	menuDefinition.append( prefix + "/Select None", { "command" : selectNone, "shortCut" : "Shift+Ctrl+A", "active" : selectionAvailable } )
@@ -347,3 +359,36 @@ def __undoAvailable( menu ) :
 def __redoAvailable( menu ) :
 
 	return scope( menu ).script.redoAvailable()
+
+## \todo This should probably be a method on the GraphLayout class.
+# It also needs to deal with Backdrops properly, so that child nodes
+# move with them.
+def __align( menu, axis, position ) :
+
+	s = scope( menu )
+	if not s.graphEditor :
+		return
+
+	graph = s.graphEditor.graphGadget()
+
+	nodes = [ n for n in s.script.selection() if n.parent() == graph.getRoot() ]
+	if not nodes :
+		nodes = graph.getRoot().children( Gaffer.Node )
+
+	gadgets = [ graph.nodeGadget( n ) for n in nodes ]
+	if not gadgets :
+		return
+
+	bound = imath.Box3f()
+	for gadget in gadgets :
+		bound.extendBy( gadget.transformedBound( graph ) )
+
+	# Position to align to
+	a = bound.min()[axis] + bound.size()[axis] * position
+
+	with Gaffer.UndoScope( s.script ) :
+		for gadget in gadgets :
+			b = gadget.transformedBound( graph )
+			p = graph.getNodePosition( gadget.node() )
+			p[axis] -= ( b.min()[axis] + b.size()[axis] * position ) - a
+			graph.setNodePosition( gadget.node(), p )
