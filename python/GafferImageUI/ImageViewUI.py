@@ -45,7 +45,7 @@ import GafferUI
 import GafferImage
 import GafferImageUI
 
-
+from Qt import QtGui
 
 ##########################################################################
 # Metadata registration.
@@ -156,12 +156,29 @@ Gaffer.Metadata.registerNode(
 
 
 		"colorInspector" : [
-
-			"plugValueWidget:type", "GafferImageUI.ImageViewUI._ColorInspectorPlugValueWidget",
-			"label", "",
+			"plugValueWidget:type", "GafferUI.LayoutPlugValueWidget",
 			"toolbarLayout:section", "Bottom",
 			"toolbarLayout:index", 1,
+		],
 
+		"colorInspector.evaluator" : [
+			"plugValueWidget:type", "",
+		],
+
+		"colorInspector.inspectors" : [
+			"plugValueWidget:type", "GafferImageUI.ImageViewUI._ColorInspectorContainerPlug",
+			"label", "",
+		],
+
+		"colorInspector.inspectors.*" : [
+			"description",
+			"""
+			Display the value of the pixel under the cursor.  Ctrl-click to add an inspector to a pixel, or
+			Ctrl-drag to create a region inspector.  Display shows value of each channel, hue/saturation/value, and Exposure Value which is measured in stops relative to 18% grey.
+			""",
+			"label", "",
+			"plugValueWidget:type", "GafferImageUI.ImageViewUI._ColorInspectorPlugValueWidget",
+			"layout:index", lambda plug : 1024-int( "".join( ['0'] + [ i for i in plug.getName() if i.isdigit() ] ) )
 		],
 
 		"channels" : [
@@ -264,6 +281,12 @@ class _TogglePlugValueWidget( GafferUI.PlugValueWidget ) :
 # _ColorInspectorPlugValueWidget
 ##########################################################################
 
+def _inspectFormat( f ) :
+	r = "%.3f" % f
+	if '.' in r and len( r ) > 5:
+		r = r[0:5]
+	return r
+
 def _hsvString( color ) :
 
 	if any( math.isinf( x ) or math.isnan( x ) for x in color ) :
@@ -275,15 +298,13 @@ def _hsvString( color ) :
 		return "- - -"
 	else :
 		hsv = color.rgb2hsv()
-		return "%.3f %.3f %.3f" % ( hsv.r, hsv.g, hsv.b )
+		return "%s %s %s" % ( _inspectFormat( hsv.r ), _inspectFormat( hsv.g ), _inspectFormat( hsv.b ) )
 
-class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
+class _ColorInspectorContainerPlug( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plug, **kw ) :
 
 		frame = GafferUI.Frame( borderWidth = 4 )
-
-		GafferUI.PlugValueWidget.__init__( self, frame, plug, **kw )
 
 		# Style selector specificity rules seem to preclude us styling this
 		# based on gafferClass.
@@ -291,64 +312,179 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		with frame :
 
-			with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
+			GafferUI.LayoutPlugValueWidget( plug )
 
-				GafferUI.Spacer( imath.V2i( 10 ), imath.V2i( 10 ) )
+		GafferUI.PlugValueWidget.__init__( self, frame, plug, **kw )
 
-				self.__positionLabel = GafferUI.Label()
-				self.__positionLabel._qtWidget().setFixedWidth( 90 )
+class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
-				self.__swatch = GafferUI.ColorSwatch()
-				self.__swatch._qtWidget().setFixedWidth( 12 )
-				self.__swatch._qtWidget().setFixedHeight( 12 )
+	def __init__( self, plug, **kw ) :
 
-				self.__busyWidget = GafferUI.BusyWidget( size = 12 )
+		l = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 )
+		GafferUI.PlugValueWidget.__init__( self, l, plug, **kw )
 
-				self.__rgbLabel = GafferUI.Label()
+		mode = plug["mode"].getValue()
+		with l:
+			self.__indexLabel = GafferUI.Label()
+			labelFont = QtGui.QFont( self.__indexLabel._qtWidget().font() )
+			labelFont.setBold( True )
+			labelFont.setPixelSize( 10 )
+			labelFontMetrics = QtGui.QFontMetrics( labelFont )
+			self.__indexLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "19" ) )
 
-				GafferUI.Spacer( imath.V2i( 20, 10 ), imath.V2i( 20, 10 ) )
+			self.__modeImage = GafferUI.Image( "sourceCursor.png" )
 
-				self.__hsvLabel = GafferUI.Label()
+			self.__positionLabel = GafferUI.Label()
+			self.__positionLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "9999 9999 -> 9999 9999" ) )
 
-				GafferUI.Spacer( imath.V2i( 10 ), imath.V2i( 10 ) )
+			self.__swatch = GafferUI.ColorSwatch()
+			self.__swatch._qtWidget().setFixedWidth( 12 )
+			self.__swatch._qtWidget().setFixedHeight( 12 )
 
-		self.__pixel = imath.V2f( 0 )
+			self.__busyWidget = GafferUI.BusyWidget( size = 12 )
 
-		viewportGadget = plug.parent().viewportGadget()
-		viewportGadget.mouseMoveSignal().connect( Gaffer.WeakMethod( self.__mouseMove ), scoped = False )
+			self.__rgbLabel = GafferUI.Label()
+			self.__rgbLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "RGBA : 99999 99999 99999 99999" ) )
 
-		imageGadget = viewportGadget.getPrimaryChild()
-		imageGadget.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ), scoped = False )
-		imageGadget.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ), scoped = False )
-		imageGadget.dragEndSignal().connect( Gaffer.WeakMethod( self.__dragEnd ), scoped = False )
+			self.__hsvLabel = GafferUI.Label()
+			self.__hsvLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "HSV : 99999 99999 99999" ) )
+
+			self.__exposureLabel = GafferUI.Label()
+			self.__exposureLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "EV : 19.9" ) )
+
+			if mode == 2:
+				m = IECore.MenuDefinition()
+				m.append( "/Pixel Inspector",
+					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), False ) }
+				)
+				m.append( "/Region Inspector",
+					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), True ) }
+				)
+				button = GafferUI.MenuButton( "", "plus.png", hasFrame=False, menu = GafferUI.Menu( m, title = "Add Color Inspector" ) )
+			else:
+				button = GafferUI.Button( "", "delete.png", hasFrame=False )
+				button.clickedSignal().connect( Gaffer.WeakMethod( self.__deleteClick ), scoped = False )
+
+
+		self.__pixel = imath.V2i( 0 )
+
+
+		if plug.getName() == "ColorInspectorPlug":
+			viewportGadget = plug.node().viewportGadget()
+			viewportGadget.mouseMoveSignal().connect( Gaffer.WeakMethod( self.__mouseMove ), scoped = False )
+
+			imageGadget = viewportGadget.getPrimaryChild()
+			imageGadget.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ), scoped = False )
+			imageGadget.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ), scoped = False )
+			imageGadget.dragEnterSignal().connect( Gaffer.WeakMethod( self.__dragEnter ), scoped = False )
+			imageGadget.dragMoveSignal().connect( Gaffer.WeakMethod( self.__dragMove ), scoped = False )
+			imageGadget.dragEndSignal().connect( Gaffer.WeakMethod( self.__dragEnd ), scoped = False )
+
+		self.__swatch.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ), scoped = False )
+		self.__swatch.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ), scoped = False )
+		self.__swatch.dragEndSignal().connect( Gaffer.WeakMethod( self.__dragEnd ), scoped = False )
+
+		plug.node()["colorInspector"]["evaluator"]["pixelColor"].getInput().node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self._updateFromImageNode ), scoped = False )
+
+		plug.node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self._plugDirtied ), scoped = False )
+		plug.node()["in"].getInput().node().scriptNode().context().changedSignal().connect( Gaffer.WeakMethod( self._updateFromContext ), scoped = False )
+		Gaffer.Metadata.plugValueChangedSignal( self.getPlug().node() ).connect( Gaffer.WeakMethod( self.__plugMetadataChanged ), scoped = False )
 
 		self.__updateLabels( imath.V2i( 0 ), imath.Color4f( 0, 0, 0, 1 ) )
+
+		# Set initial state of mode icon
+		self._plugDirtied( plug["mode"] )
+
+	def addInspector( self ):
+		parent = self.getPlug().parent()
+		suffix = 1
+		while "c" + str( suffix ) in parent:
+			suffix += 1
+
+		parent.addChild( GafferImageUI.ImageView.ColorInspectorPlug( "c" + str( suffix ) ) )
+
+	def __addClick( self, region ):
+		self.addInspector()
+		ci = self.getPlug().parent().children()[-1]
+		ci["mode"].setValue( region )
+		if region:
+			ci["region"].setValue(
+				self.getPlug().node()["colorInspector"]["evaluator"]["regionColor"].getInput().node()["in"].format().getDisplayWindow()
+			)
+
+	def __deleteClick( self, button ):
+		self.getPlug().parent().removeChild( self.getPlug() )
+
+	def _updateFromImageNode( self, unused ):
+
+		self.__updateLazily()
+
+	def _plugDirtied( self, childPlug ):
+		if not self.getPlug().node():
+			# Special case when we're in the middle of being deleted
+			return
+
+		if childPlug.parent() == self.getPlug():
+			mode = self.getPlug()["mode"].getValue()
+
+			# TODO - should GafferUI.Image have a setImage?
+			self.__modeImage._qtWidget().setPixmap( GafferUI.Image._qtPixmapFromFile( [ "sourcePixel.png", "sourceRegion.png", "sourceCursor.png" ][ mode ]  ) )
+			self.__updateLazily()
+
+	def __plugMetadataChanged( self, plug, key, reason ):
+		if key == "__hovered" and ( plug == self.getPlug()["region"] or plug == self.getPlug()["pixel"] ):
+			# We could avoid the extra compute of the color at the cost of a little extra complexity if
+			# we stored the last evaluated color so we could directly call _updateLabels
+			self.__updateLazily()
 
 	def _updateFromPlug( self ) :
 
 		self.__updateLazily()
 
+	def _updateFromContext( self, context, name ) :
+
+		self.__updateLazily()
+
 	@GafferUI.LazyMethod()
 	def __updateLazily( self ) :
+		mode = self.getPlug()["mode"].getValue()
+		inputImagePlug = self.getPlug().node()["in"].getInput()
+		if not inputImagePlug:
+			# This can happen when the source is deleted - can't get pixel values if there's no input image
+			self.__updateLabels( self.__pixel, imath.Color4f( 0 ) )
+			return
 
-		with self.getContext() :
-			self.__updateInBackground( self.__pixel )
+		with inputImagePlug.node().scriptNode().context() :
+			if mode == 2:
+				self.__updateInBackground( self.__pixel )
+			elif mode == 1:
+				self.__updateInBackground( self.getPlug()["region"].getValue() )
+			elif mode == 0:
+				self.__updateInBackground( self.getPlug()["pixel"].getValue() )
 
 	@GafferUI.BackgroundMethod()
-	def __updateInBackground( self, pixel ) :
-
-		image = self.getPlug().node().viewportGadget().getPrimaryChild().getImage()
+	def __updateInBackground( self, source ) :
 
 		with Gaffer.Context( Gaffer.Context.current() ) as c :
-			c["colorInspector:pixel"] = pixel
-			samplerChannels = self.getPlug()["color"].getInput().node()["channels"].getValue()
-			channelNames = image["channelNames"].getValue()
-			color = self.getPlug()["color"].getValue()
+			if type( source ) == imath.V2i:
+				c["colorInspector:source"] = imath.V2f( source ) + imath.V2f( 0.5 ) # Center of pixel
+				color = self.getPlug().node()["colorInspector"]["evaluator"]["pixelColor"].getValue()
+			elif type( source ) == imath.Box2i:
+				regionEval = self.getPlug().node()["colorInspector"]["evaluator"]["regionColor"]
+				c["colorInspector:source"] = GafferImage.BufferAlgo.intersection( source, regionEval.getInput().node()["in"].format().getDisplayWindow() )
+				color = regionEval.getValue()
+			else:
+				raise Exception( "ColorInspector source must be V2i or Box2i, not " + str( type( source ) ) )
+
+		# TODO : This is a pretty ugly way to find the input node connected to the colorInspector?
+		samplerChannels = self.getPlug().node()["colorInspector"]["evaluator"]["pixelColor"].getInput().node()["channels"].getValue()
+		image = self.getPlug().node().viewportGadget().getPrimaryChild().getImage()
+		channelNames = image["channelNames"].getValue()
 
 		if samplerChannels[3] not in channelNames :
 			color = imath.Color3f( color[0], color[1], color[2] )
 
-		return pixel, color
+		return source, color
 
 	@__updateInBackground.preCall
 	def __updateInBackgroundPreCall( self ) :
@@ -384,19 +520,51 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__busyWidget.setBusy( False )
 
 	def __updateLabels( self, pixel, color ) :
+		m = self.getPlug()["mode"].getValue()
 
-		self.__positionLabel.setText( "<b>XY : %d %d</b>" % ( pixel.x, pixel.y ) )
+		hovered = False
+		if m == 1:
+			hovered = Gaffer.Metadata.value( self.getPlug()["region"], "__hovered" )
+		if m == 0:
+			hovered = Gaffer.Metadata.value( self.getPlug()["pixel"], "__hovered" )
+		prefix = ""
+		postfix = ""
+		if hovered:
+			prefix = '<font color="#8FBFFF">'
+			postfix = '</font>'
+		self.__indexLabel.setText( prefix + ( "" if m == 2 else "<b>" + self.getPlug().getName()[1:] + "</b>" ) + postfix )
+		if m == 1:
+			r = self.getPlug()["region"].getValue()
+			self.__positionLabel.setText( prefix + "<b>%i %i -> %i %i</b>" % ( r.min().x, r.min().y, r.max().x, r.max().y ) + postfix )
+		elif m == 2:
+			self.__positionLabel.setText( prefix + "<b>XY : %i %i</b>" % ( pixel.x, pixel.y ) + postfix )
+		else:
+			p = self.getPlug()["pixel"].getValue()
+			self.__positionLabel.setText( prefix + "<b>XY : %i %i</b>" % ( p.x, p.y ) + postfix )
+
 		self.__swatch.setColor( color )
 
 		if isinstance( color, imath.Color4f ) :
-			self.__rgbLabel.setText( "<b>RGBA : %.3f %.3f %.3f %.3f</b>" % ( color.r, color.g, color.b, color.a ) )
+			self.__rgbLabel.setText( "<b>RGBA : %s %s %s %s</b>" % ( _inspectFormat(color.r), _inspectFormat(color.g), _inspectFormat(color.b), _inspectFormat(color.a) ) )
 		else :
-			self.__rgbLabel.setText( "<b>RGB : %.3f %.3f %.3f</b>" % ( color.r, color.g, color.b ) )
+			self.__rgbLabel.setText( "<b>RGB : %s %s %s</b>" % ( _inspectFormat(color.r), _inspectFormat(color.g), _inspectFormat(color.b) ) )
 
 		self.__hsvLabel.setText( "<b>HSV : %s</b>" % _hsvString( color ) )
 
+		luminance = color.r * 0.2125 + color.g * 0.7154 + color.b * 0.0721
+		if luminance == 0:
+			exposure = "-inf"
+		elif luminance < 0:
+			exposure = "NaN"
+		else:
+			exposure = "%.1f" % ( math.log( luminance / 0.18 ) / math.log( 2 ) )
+			if exposure == "-0.0":
+				exposure = "0.0"
+		self.__exposureLabel.setText( "<b>EV : %s</b>" % exposure )
+
 	def __mouseMove( self, viewportGadget, event ) :
 
+		# TODO - can we unify this with __eventPosition?
 		imageGadget = viewportGadget.getPrimaryChild()
 		l = viewportGadget.rasterToGadgetSpace( imath.V2f( event.line.p0.x, event.line.p0.y ), imageGadget )
 
@@ -408,8 +576,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			# the error reporting to other UI components.
 			return False
 
-		pixel = imath.V2f( math.floor( pixel.x ), math.floor( pixel.y ) ) # Origin
-		pixel = pixel + imath.V2f( 0.5 ) # Center
+		pixel = imath.V2i( math.floor( pixel.x ), math.floor( pixel.y ) )
 
 		if pixel == self.__pixel :
 			return False
@@ -420,22 +587,54 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		return True
 
-	def __buttonPress( self, imageGadget, event ) :
+	def __eventPosition( self, event ):
+		viewportGadget = self.getPlug().node().viewportGadget()
+		imageGadget = viewportGadget.getPrimaryChild()
+		try :
+			pixel = imageGadget.pixelAt( event.line )
+		except :
+			# `pixelAt()` can throw if there is an error
+			# computing the image being viewed. We leave
+			# the error reporting to other UI components.
+			return imath.V2i( 0 )
+		return imath.V2i( math.floor( pixel.x ), math.floor( pixel.y ) )
 
-		if event.buttons != event.Buttons.Left or event.modifiers :
+	def __buttonPress( self, ui, event ) :
+
+		if event.buttons == event.Buttons.Left and not event.modifiers :
+			return True # accept press so we get dragBegin() for dragging color
+		elif event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
+			self.__dragStartPosition = self.__eventPosition( event )
+			self.addInspector()
+			ci = self.getPlug().parent().children()[-1]
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", True )
+			ci["pixel"].setValue( self.__dragStartPosition )
+
+			return True # creating inspector
+		else:
 			return False
 
-		return True # accept press so we get dragBegin()
-
-	def __dragBegin( self, imageGadget, event ) :
+	def __dragBegin( self, ui, event ) :
 
 		if event.buttons != event.Buttons.Left or event.modifiers :
-			return False
+			return IECore.NullObject.defaultNullObject()
 
-		with Gaffer.Context( self.getContext() ) as c :
-			c["colorInspector:pixel"] = self.__pixel
+		with Gaffer.Context( self.getPlug().node()["in"].getInput().node().scriptNode().context() ) as c :
+
 			try :
-				color = self.getPlug()["color"].getValue()
+				source = self.__pixel
+				if self.getPlug()["mode"].getValue() == 0:
+					source = self.getPlug()["pixel"].getValue()
+				elif self.getPlug()["mode"].getValue() == 1:
+					source = self.getPlug()["region"].getValue()
+
+				if type( source ) == imath.V2i:
+					c["colorInspector:source"] = imath.V2f( source ) + imath.V2f( 0.5 ) # Center of pixel
+					color = self.getPlug().node()["colorInspector"]["evaluator"]["pixelColor"].getValue()
+				else:
+					c["colorInspector:source"] = source
+					color = self.getPlug().node()["colorInspector"]["evaluator"]["regionColor"].getValue()
+
 			except :
 				# Error will be reported elsewhere in the UI
 				return None
@@ -443,7 +642,28 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		GafferUI.Pointer.setCurrent( "rgba" )
 		return color
 
-	def __dragEnd( self, imageGadget, event ) :
+	def __dragEnter( self, ui, event ) :
+		viewportGadget = self.getPlug().node().viewportGadget()
+		imageGadget = viewportGadget.getPrimaryChild()
+		if event.sourceGadget != imageGadget:
+			return False
+
+		return True
+
+	def __dragMove( self, ui, event ) :
+		if event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
+			ci = self.getPlug().parent().children()[-1]
+			c = imath.Box2i()
+			c.extendBy( self.__dragStartPosition )
+			c.extendBy( self.__eventPosition( event ) )
+			ci["mode"].setValue( 1 )
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False )
+			Gaffer.Metadata.registerValue( ci["region"], "__hovered", True )
+			ci["region"].setValue( c )
+
+		return True
+
+	def __dragEnd( self, ui, event ) :
 
 		GafferUI.Pointer.setCurrent( "" )
 		return True
