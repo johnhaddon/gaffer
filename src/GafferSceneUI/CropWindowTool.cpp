@@ -147,6 +147,7 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 
 		Imath::Box3f bound() const override
 		{
+			// TODO - why does the compiler not warn about dead code here?
 			return Box3f();
 			if( m_rasterSpace )
 			{
