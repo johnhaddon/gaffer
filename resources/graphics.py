@@ -245,6 +245,21 @@
 			],
 
 		},
+		"footer-icons" : {
+
+			"options" : {
+				"requiredWidth" : 16,
+				"requiredHeight" : 16,
+				"validatePixelAlignment" : True
+			},
+
+			"ids" : [
+				'sourceCursor',
+				'sourceRegion',
+				'sourcePixel'
+			]
+
+		}
 
 	},
 
