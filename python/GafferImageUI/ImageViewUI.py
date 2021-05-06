@@ -420,11 +420,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__updateLazily()
 
 	def _plugDirtied( self, childPlug ):
-		if not self.getPlug().node():
-			# Special case when we're in the middle of being deleted
-			return
-
-		if childPlug.parent() == self.getPlug():
+		if childPlug == self.getPlug()["mode"]:
 			mode = self.getPlug()["mode"].getValue()
 
 			# TODO - should GafferUI.Image have a setImage?
