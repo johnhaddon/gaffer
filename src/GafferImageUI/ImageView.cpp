@@ -1419,6 +1419,22 @@ void ImageView::insertConverter( Gaffer::NodePtr converter )
 
 ImageView::~ImageView()
 {
+	// Addons like m_colorInspector add plugs to us which are connected to nodes held by them, which are not
+	// our children.  If these were child nodes, they would be held by the GraphComponent base class which
+	// gets destructed very late, but because they are not actually children, they will be destructed fairly
+	// quickly by our destructor ... before the signals in the Node base class get destructed.
+	//
+	// These graph modifications happening during our destructor would trigger signals to be sent, which
+	// is very dangerous - those signals could be connected to something which tries to access us, and anyone
+	// who takes an intrusive pointer to us while we're destructing will trigger a segfault.
+	//
+	// We can safeguard against this by disconnecting any slots that would be trigger by graph structure changes
+	// before we destruct member variables.
+	//
+	// This shouldn't be necessary once we come up with a more general solution to:
+	// https://github.com/GafferHQ/gaffer/issues/4221
+	plugInputChangedSignal().disconnect_all_slots();
+	plugDirtiedSignal().disconnect_all_slots();
 }
 
 Gaffer::BoolPlug *ImageView::clippingPlug()
