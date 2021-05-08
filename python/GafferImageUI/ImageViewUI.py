@@ -55,7 +55,7 @@ Gaffer.Metadata.registerNode(
 
 	GafferImageUI.ImageView,
 
-	"nodeToolbar:bottom:type", "GafferUI.StandardNodeToolbar.bottom",
+	"nodeToolbar:bottom:type", "GafferImageUI.ImageViewUI._NodeToolbarBottomLeft",
 
 	"toolbarLayout:customWidget:StateWidget:widgetType", "GafferImageUI.ImageViewUI._StateWidget",
 	"toolbarLayout:customWidget:StateWidget:section", "Top",
@@ -72,10 +72,6 @@ Gaffer.Metadata.registerNode(
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:widgetType", "GafferImageUI.ImageViewUI._StateWidgetBalancingSpacer",
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:section", "Top",
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:index", -1,
-
-	"toolbarLayout:customWidget:BottomRightSpacer:widgetType", "GafferImageUI.ImageViewUI._Spacer",
-	"toolbarLayout:customWidget:BottomRightSpacer:section", "Bottom",
-	"toolbarLayout:customWidget:BottomRightSpacer:index", 2,
 
 	"layout:activator:gpuAvailable", lambda node : ImageViewUI.createDisplayTransform( node["displayTransform"].getValue() ).isinstance( GafferImage.OpenColorIOTransform ),
 
@@ -213,6 +209,19 @@ Gaffer.Metadata.registerNode(
 
 )
 
+class _NodeToolbarBottomLeft( GafferUI.StandardNodeToolbar ):
+	def __init__( self, node ):
+		GafferUI.StandardNodeToolbar.__init__( self, node, edge = GafferUI.Edge.Bottom )
+
+		# The sizing of ColorInspector is pretty tricky:  it needs to be able to grow if the
+		# RGB labels get huge, and it needs an expandable spacer to keep the icons at the end of the row
+		# lined up nicely, but we don't want it to grow larger when the Viewer is resized.
+		#
+		# To accomplish this, we need to give it a sibling that is stretchier than it is.  This trick
+		# requires messing with some weird internal guts, but it gives a nice visual effect
+		layout = self._Widget__gafferWidget._Widget__gafferWidget._Widget__gafferWidget._qtWidget().layout()
+		layout.insertStretch( layout.count(), 1 )
+
 ##########################################################################
 # _TogglePlugValueWidget
 ##########################################################################
@@ -284,8 +293,8 @@ class _TogglePlugValueWidget( GafferUI.PlugValueWidget ) :
 def _inspectFormat( f ) :
 	r = "%.3f" % f
 	if '.' in r and len( r ) > 5:
-		r = r[0:5]
-	return r
+		r = r[ 0 : max( 5, r.find('.') ) ]
+	return r.rstrip('.')
 
 def _hsvString( color ) :
 
@@ -330,12 +339,14 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			labelFont.setBold( True )
 			labelFont.setPixelSize( 10 )
 			labelFontMetrics = QtGui.QFontMetrics( labelFont )
-			self.__indexLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "19" ) )
+			self.__indexLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "99" ) )
+			self.__indexLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__modeImage = GafferUI.Image( "sourceCursor.png" )
 
 			self.__positionLabel = GafferUI.Label()
-			self.__positionLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "9999 9999 -> 9999 9999" ) )
+			self.__positionLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "9999 9999 -> 9999 9999" ) )
+			self.__positionLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__swatch = GafferUI.ColorSwatch()
 			self.__swatch._qtWidget().setFixedWidth( 12 )
@@ -344,13 +355,18 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			self.__busyWidget = GafferUI.BusyWidget( size = 12 )
 
 			self.__rgbLabel = GafferUI.Label()
-			self.__rgbLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "RGBA : 99999 99999 99999 99999" ) )
+			self.__rgbLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "RGBA : 99999 99999 99999 99999" ) )
+			self.__rgbLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__hsvLabel = GafferUI.Label()
-			self.__hsvLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "HSV : 99999 99999 99999" ) )
+			self.__hsvLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "HSV : 99999 99999 99999" ) )
+			self.__hsvLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__exposureLabel = GafferUI.Label()
-			self.__exposureLabel._qtWidget().setFixedWidth( labelFontMetrics.width( "EV : 19.9" ) )
+			self.__exposureLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "EV : 19.9" ) )
+			self.__exposureLabel._qtWidget().setMaximumWidth( 1000000 )
+
+			l.addChild( GafferUI.Spacer( size = imath.V2i( 0 ) ), expand = True )
 
 			if mode == 2:
 				m = IECore.MenuDefinition()
