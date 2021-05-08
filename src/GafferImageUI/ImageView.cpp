@@ -632,6 +632,11 @@ class Box2iGadget : public GafferUI::Gadget
 
 		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
 		{
+			if( m_deleting )
+			{
+				m_deleting = false;
+				return nullptr;
+			}
 			m_dragStart = eventPosition( event );
 			m_dragDirection = dragDirection( m_dragStart );
 			m_dragStartRectangle = m_plug->getValue();
@@ -658,16 +663,11 @@ class Box2iGadget : public GafferUI::Gadget
 		bool dragEnd( const GafferUI::DragDropEvent &event )
 		{
 			updateDragRectangle( event );
-			m_deleting = false;
 			return true;
 		}
 
 		void updateDragRectangle( const GafferUI::DragDropEvent &event )
 		{
-			if( m_deleting )
-			{
-				return;
-			}
 			const V2f p = eventPosition( event );
 			Box2i b = m_dragStartRectangle;
 
@@ -765,14 +765,14 @@ class Box2iGadget : public GafferUI::Gadget
 				return V2i( 0, 0 );
 			}
 
-			Box2f rectInner( V2f(rect.min) + threshold, V2f(rect.max) - threshold );
 
 			// We're not in the center, so we must be over an edge.  Return which edge
 			// Not that there is an extra pixel of tolerance here, since the selection rect snaps
 			// to the nearest half-pixel, and we need to include the whole selection rect
+			Box2f rectInner( V2f(rect.min) + threshold + planarScale, V2f(rect.max) - threshold - planarScale );
 			return V2i(
-				( p.x > rectInner.max.x - planarScale.x ) - ( p.x < rectInner.min.x + planarScale.x ),
-				( p.y > rectInner.max.y - planarScale.y ) - ( p.y < rectInner.min.y + planarScale.y )
+				p.x > rectInner.max.x ? 1 : ( p.x < rectInner.min.x ? -1 : 0 ),
+				p.y > rectInner.max.y ? 1 : ( p.y < rectInner.min.y ? -1 : 0 )
 			);
 		}
 
@@ -975,6 +975,12 @@ class V2iGadget : public GafferUI::Gadget
 
 		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
 		{
+			if( m_deleting )
+			{
+				m_deleting = false;
+				return nullptr;
+			}
+
 			m_dragStart = eventPosition( event );
 			m_dragStartPlugValue = m_plug->getValue();
 			return IECore::NullObject::defaultNullObject();
@@ -1000,16 +1006,11 @@ class V2iGadget : public GafferUI::Gadget
 		bool dragEnd( const GafferUI::DragDropEvent &event )
 		{
 			updateDragPoint( event );
-			m_deleting = false;
 			return true;
 		}
 
 		void updateDragPoint( const GafferUI::DragDropEvent &event )
 		{
-			if( m_deleting )
-			{
-				return;
-			}
 			const V2f p = eventPosition( event );
 			V2i point = m_dragStartPlugValue;
 
