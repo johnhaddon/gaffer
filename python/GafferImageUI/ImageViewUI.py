@@ -391,6 +391,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 			imageGadget = viewportGadget.getPrimaryChild()
 			imageGadget.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ), scoped = False )
+			imageGadget.buttonReleaseSignal().connect( Gaffer.WeakMethod( self.__buttonRelease ), scoped = False )
 			imageGadget.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ), scoped = False )
 			imageGadget.dragEnterSignal().connect( Gaffer.WeakMethod( self.__dragEnter ), scoped = False )
 			imageGadget.dragMoveSignal().connect( Gaffer.WeakMethod( self.__dragMove ), scoped = False )
@@ -614,21 +615,28 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 	def __buttonPress( self, ui, event ) :
 
 		if event.buttons == event.Buttons.Left and not event.modifiers :
+			self.__createInspectorStartPosition = None
 			return True # accept press so we get dragBegin() for dragging color
 		elif event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
-			self.__dragStartPosition = self.__eventPosition( event )
+			self.__createInspectorStartPosition = self.__eventPosition( event )
 			self.addInspector()
 			ci = self.getPlug().parent().children()[-1]
-			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", True )
-			ci["pixel"].setValue( self.__dragStartPosition )
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", True, persistent = False )
+			ci["pixel"].setValue( self.__createInspectorStartPosition )
 
 			return True # creating inspector
 		else:
 			return False
 
+	def __buttonRelease( self, ui, event ) :
+		if self.__createInspectorStartPosition:
+			ci = self.getPlug().parent().children()[-1]
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["region"], "__hovered", False, persistent = False )
+
 	def __dragBegin( self, ui, event ) :
 
-		if event.buttons != event.Buttons.Left or event.modifiers :
+		if self.__createInspectorStartPosition:
 			return IECore.NullObject.defaultNullObject()
 
 		with Gaffer.Context( self.getPlug().node()["in"].getInput().node().scriptNode().context() ) as c :
@@ -663,19 +671,23 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		return True
 
 	def __dragMove( self, ui, event ) :
-		if event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
+		if self.__createInspectorStartPosition:
 			ci = self.getPlug().parent().children()[-1]
 			c = imath.Box2i()
-			c.extendBy( self.__dragStartPosition )
+			c.extendBy( self.__createInspectorStartPosition )
 			c.extendBy( self.__eventPosition( event ) )
 			ci["mode"].setValue( 1 )
-			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False )
-			Gaffer.Metadata.registerValue( ci["region"], "__hovered", True )
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["region"], "__hovered", True, persistent = False )
 			ci["region"].setValue( c )
 
 		return True
 
 	def __dragEnd( self, ui, event ) :
+		if self.__createInspectorStartPosition:
+			ci = self.getPlug().parent().children()[-1]
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["region"], "__hovered", False, persistent = False )
 
 		GafferUI.Pointer.setCurrent( "" )
 		return True
