@@ -255,7 +255,7 @@
 
 			"ids" : [
 				'sourceCursor',
-				'sourceRegion',
+				'sourceArea',
 				'sourcePixel'
 			]
 
