@@ -162,7 +162,7 @@ Gaffer.Metadata.registerNode(
 		],
 
 		"colorInspector.inspectors" : [
-			"plugValueWidget:type", "GafferImageUI.ImageViewUI._ColorInspectorContainerPlug",
+			"plugValueWidget:type", "GafferImageUI.ImageViewUI._ColorInspectorsPlugValueWidget",
 			"label", "",
 		],
 
@@ -309,11 +309,12 @@ def _hsvString( color ) :
 		hsv = color.rgb2hsv()
 		return "%s %s %s" % ( _inspectFormat( hsv.r ), _inspectFormat( hsv.g ), _inspectFormat( hsv.b ) )
 
-class _ColorInspectorContainerPlug( GafferUI.PlugValueWidget ) :
+class _ColorInspectorsPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plug, **kw ) :
 
 		frame = GafferUI.Frame( borderWidth = 4 )
+		GafferUI.PlugValueWidget.__init__( self, frame, plug, **kw )
 
 		# Style selector specificity rules seem to preclude us styling this
 		# based on gafferClass.
@@ -323,7 +324,6 @@ class _ColorInspectorContainerPlug( GafferUI.PlugValueWidget ) :
 
 			GafferUI.LayoutPlugValueWidget( plug )
 
-		GafferUI.PlugValueWidget.__init__( self, frame, plug, **kw )
 
 class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
@@ -401,10 +401,10 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__swatch.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ), scoped = False )
 		self.__swatch.dragEndSignal().connect( Gaffer.WeakMethod( self.__dragEnd ), scoped = False )
 
-		plug.node()["colorInspector"]["evaluator"]["pixelColor"].getInput().node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self._updateFromImageNode ), scoped = False )
+		plug.node()["colorInspector"]["evaluator"]["pixelColor"].getInput().node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self.__updateFromImageNode ), scoped = False )
 
 		plug.node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self._plugDirtied ), scoped = False )
-		plug.node()["in"].getInput().node().scriptNode().context().changedSignal().connect( Gaffer.WeakMethod( self._updateFromContext ), scoped = False )
+		plug.node()["in"].getInput().node().scriptNode().context().changedSignal().connect( Gaffer.WeakMethod( self.__updateFromContext ), scoped = False )
 		Gaffer.Metadata.plugValueChangedSignal( self.getPlug().node() ).connect( Gaffer.WeakMethod( self.__plugMetadataChanged ), scoped = False )
 
 		self.__updateLabels( imath.V2i( 0 ), imath.Color4f( 0, 0, 0, 1 ) )
@@ -412,7 +412,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		# Set initial state of mode icon
 		self._plugDirtied( plug["mode"] )
 
-	def addInspector( self ):
+	def __addInspector( self ):
 		parent = self.getPlug().parent()
 		suffix = 1
 		while "c" + str( suffix ) in parent:
@@ -421,7 +421,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		parent.addChild( GafferImageUI.ImageView.ColorInspectorPlug( "c" + str( suffix ) ) )
 
 	def __addClick( self, area ):
-		self.addInspector()
+		self.__addInspector()
 		ci = self.getPlug().parent().children()[-1]
 		ci["mode"].setValue( area )
 		if area:
@@ -432,7 +432,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 	def __deleteClick( self, button ):
 		self.getPlug().parent().removeChild( self.getPlug() )
 
-	def _updateFromImageNode( self, unused ):
+	def __updateFromImageNode( self, unused ):
 
 		self.__updateLazily()
 
@@ -454,7 +454,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		self.__updateLazily()
 
-	def _updateFromContext( self, context, name ) :
+	def __updateFromContext( self, context, name ) :
 
 		self.__updateLazily()
 
@@ -543,7 +543,8 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		prefix = ""
 		postfix = ""
 		if hovered:
-			prefix = '<font color="#8FBFFF">'
+			# Chosen to match brightColor in python/GafferUI/_Stylesheet.py
+			prefix = '<font color="#779cbd">'
 			postfix = '</font>'
 		self.__indexLabel.setText( prefix + ( "" if m == 2 else "<b>" + self.getPlug().getName()[1:] + "</b>" ) + postfix )
 		if m == 1:
@@ -564,7 +565,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		self.__hsvLabel.setText( "<b>HSV : %s</b>" % _hsvString( color ) )
 
-		luminance = color.r * 0.2125 + color.g * 0.7154 + color.b * 0.0721
+		luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722
 		if luminance == 0:
 			exposure = "-inf"
 		elif luminance < 0:
@@ -619,7 +620,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			return True # accept press so we get dragBegin() for dragging color
 		elif event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
 			self.__createInspectorStartPosition = self.__eventPosition( event )
-			self.addInspector()
+			self.__addInspector()
 			ci = self.getPlug().parent().children()[-1]
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", True, persistent = False )
 			ci["pixel"].setValue( self.__createInspectorStartPosition )
