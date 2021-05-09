@@ -131,8 +131,8 @@ class GAFFERIMAGEUI_API ImageView : public GafferUI::View
 				Gaffer::V2iPlug *pixelPlug();
 				const Gaffer::V2iPlug *pixelPlug() const;
 
-				Gaffer::Box2iPlug *regionPlug();
-				const Gaffer::Box2iPlug *regionPlug() const;
+				Gaffer::Box2iPlug *areaPlug();
+				const Gaffer::Box2iPlug *areaPlug() const;
 
 				bool acceptsChild( const GraphComponent *potentialChild ) const override;
 				Gaffer::PlugPtr createCounterpart( const std::string &name, Plug::Direction direction ) const override;

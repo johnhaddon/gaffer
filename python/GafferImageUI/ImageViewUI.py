@@ -170,7 +170,7 @@ Gaffer.Metadata.registerNode(
 			"description",
 			"""
 			Display the value of the pixel under the cursor.  Ctrl-click to add an inspector to a pixel, or
-			Ctrl-drag to create a region inspector.  Display shows value of each channel, hue/saturation/value, and Exposure Value which is measured in stops relative to 18% grey.
+			Ctrl-drag to create an area inspector.  Display shows value of each channel, hue/saturation/value, and Exposure Value which is measured in stops relative to 18% grey.
 			""",
 			"label", "",
 			"plugValueWidget:type", "GafferImageUI.ImageViewUI._ColorInspectorPlugValueWidget",
@@ -373,7 +373,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 				m.append( "/Pixel Inspector",
 					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), False ) }
 				)
-				m.append( "/Region Inspector",
+				m.append( "/Area Inspector",
 					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), True ) }
 				)
 				button = GafferUI.MenuButton( "", "plus.png", hasFrame=False, menu = GafferUI.Menu( m, title = "Add Color Inspector" ) )
@@ -420,13 +420,13 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		parent.addChild( GafferImageUI.ImageView.ColorInspectorPlug( "c" + str( suffix ) ) )
 
-	def __addClick( self, region ):
+	def __addClick( self, area ):
 		self.addInspector()
 		ci = self.getPlug().parent().children()[-1]
-		ci["mode"].setValue( region )
-		if region:
-			ci["region"].setValue(
-				self.getPlug().node()["colorInspector"]["evaluator"]["regionColor"].getInput().node()["in"].format().getDisplayWindow()
+		ci["mode"].setValue( area )
+		if area:
+			ci["area"].setValue(
+				self.getPlug().node()["colorInspector"]["evaluator"]["areaColor"].getInput().node()["in"].format().getDisplayWindow()
 			)
 
 	def __deleteClick( self, button ):
@@ -441,11 +441,11 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			mode = self.getPlug()["mode"].getValue()
 
 			# TODO - should GafferUI.Image have a setImage?
-			self.__modeImage._qtWidget().setPixmap( GafferUI.Image._qtPixmapFromFile( [ "sourcePixel.png", "sourceRegion.png", "sourceCursor.png" ][ mode ]  ) )
+			self.__modeImage._qtWidget().setPixmap( GafferUI.Image._qtPixmapFromFile( [ "sourcePixel.png", "sourceArea.png", "sourceCursor.png" ][ mode ]  ) )
 			self.__updateLazily()
 
 	def __plugMetadataChanged( self, plug, key, reason ):
-		if key == "__hovered" and ( plug == self.getPlug()["region"] or plug == self.getPlug()["pixel"] ):
+		if key == "__hovered" and ( plug == self.getPlug()["area"] or plug == self.getPlug()["pixel"] ):
 			# We could avoid the extra compute of the color at the cost of a little extra complexity if
 			# we stored the last evaluated color so we could directly call _updateLabels
 			self.__updateLazily()
@@ -471,7 +471,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			if mode == 2:
 				self.__updateInBackground( self.__pixel )
 			elif mode == 1:
-				self.__updateInBackground( self.getPlug()["region"].getValue() )
+				self.__updateInBackground( self.getPlug()["area"].getValue() )
 			elif mode == 0:
 				self.__updateInBackground( self.getPlug()["pixel"].getValue() )
 
@@ -483,9 +483,9 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 				c["colorInspector:source"] = imath.V2f( source ) + imath.V2f( 0.5 ) # Center of pixel
 				color = self.getPlug().node()["colorInspector"]["evaluator"]["pixelColor"].getValue()
 			elif type( source ) == imath.Box2i:
-				regionEval = self.getPlug().node()["colorInspector"]["evaluator"]["regionColor"]
-				c["colorInspector:source"] = GafferImage.BufferAlgo.intersection( source, regionEval.getInput().node()["in"].format().getDisplayWindow() )
-				color = regionEval.getValue()
+				areaEval = self.getPlug().node()["colorInspector"]["evaluator"]["areaColor"]
+				c["colorInspector:source"] = GafferImage.BufferAlgo.intersection( source, areaEval.getInput().node()["in"].format().getDisplayWindow() )
+				color = areaEval.getValue()
 			else:
 				raise Exception( "ColorInspector source must be V2i or Box2i, not " + str( type( source ) ) )
 
@@ -537,7 +537,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		hovered = False
 		if m == 1:
-			hovered = Gaffer.Metadata.value( self.getPlug()["region"], "__hovered" )
+			hovered = Gaffer.Metadata.value( self.getPlug()["area"], "__hovered" )
 		if m == 0:
 			hovered = Gaffer.Metadata.value( self.getPlug()["pixel"], "__hovered" )
 		prefix = ""
@@ -547,7 +547,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			postfix = '</font>'
 		self.__indexLabel.setText( prefix + ( "" if m == 2 else "<b>" + self.getPlug().getName()[1:] + "</b>" ) + postfix )
 		if m == 1:
-			r = self.getPlug()["region"].getValue()
+			r = self.getPlug()["area"].getValue()
 			self.__positionLabel.setText( prefix + "<b>%i %i -> %i %i</b>" % ( r.min().x, r.min().y, r.max().x, r.max().y ) + postfix )
 		elif m == 2:
 			self.__positionLabel.setText( prefix + "<b>XY : %i %i</b>" % ( pixel.x, pixel.y ) + postfix )
@@ -632,7 +632,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		if self.__createInspectorStartPosition:
 			ci = self.getPlug().parent().children()[-1]
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
-			Gaffer.Metadata.registerValue( ci["region"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["area"], "__hovered", False, persistent = False )
 
 	def __dragBegin( self, ui, event ) :
 
@@ -646,14 +646,14 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 				if self.getPlug()["mode"].getValue() == 0:
 					source = self.getPlug()["pixel"].getValue()
 				elif self.getPlug()["mode"].getValue() == 1:
-					source = self.getPlug()["region"].getValue()
+					source = self.getPlug()["area"].getValue()
 
 				if type( source ) == imath.V2i:
 					c["colorInspector:source"] = imath.V2f( source ) + imath.V2f( 0.5 ) # Center of pixel
 					color = self.getPlug().node()["colorInspector"]["evaluator"]["pixelColor"].getValue()
 				else:
 					c["colorInspector:source"] = source
-					color = self.getPlug().node()["colorInspector"]["evaluator"]["regionColor"].getValue()
+					color = self.getPlug().node()["colorInspector"]["evaluator"]["areaColor"].getValue()
 
 			except :
 				# Error will be reported elsewhere in the UI
@@ -678,8 +678,8 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			c.extendBy( self.__eventPosition( event ) )
 			ci["mode"].setValue( 1 )
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
-			Gaffer.Metadata.registerValue( ci["region"], "__hovered", True, persistent = False )
-			ci["region"].setValue( c )
+			Gaffer.Metadata.registerValue( ci["area"], "__hovered", True, persistent = False )
+			ci["area"].setValue( c )
 
 		return True
 
@@ -687,7 +687,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		if self.__createInspectorStartPosition:
 			ci = self.getPlug().parent().children()[-1]
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
-			Gaffer.Metadata.registerValue( ci["region"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["area"], "__hovered", False, persistent = False )
 
 		GafferUI.Pointer.setCurrent( "" )
 		return True

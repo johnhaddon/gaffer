@@ -1094,7 +1094,7 @@ ImageView::ColorInspectorPlug::ColorInspectorPlug( const std::string &name )
 {
 	addChild( new IntPlug( "mode" ) );
 	addChild( new V2iPlug( "pixel" ) );
-	addChild( new Box2iPlug( "region" ) );
+	addChild( new Box2iPlug( "area" ) );
 }
 
 Gaffer::IntPlug *ImageView::ColorInspectorPlug::modePlug()
@@ -1117,12 +1117,12 @@ const Gaffer::V2iPlug *ImageView::ColorInspectorPlug::pixelPlug() const
 	return getChild<V2iPlug>( 1 );
 }
 
-Gaffer::Box2iPlug *ImageView::ColorInspectorPlug::regionPlug()
+Gaffer::Box2iPlug *ImageView::ColorInspectorPlug::areaPlug()
 {
 	return getChild<Box2iPlug>( 2 );
 }
 
-const Gaffer::Box2iPlug *ImageView::ColorInspectorPlug::regionPlug() const
+const Gaffer::Box2iPlug *ImageView::ColorInspectorPlug::areaPlug() const
 {
 	return getChild<Box2iPlug>( 2 );
 }
@@ -1149,10 +1149,10 @@ class ImageView::ColorInspector : public boost::signals::trackable
 		ColorInspector( ImageView *view )
 			:	m_view( view ),
 				m_pixel( new V2fContextVariable ),
-				m_region( new Box2iContextVariable ),
+				m_area( new Box2iContextVariable ),
 				m_deleteContextVariables( new DeleteContextVariables ),
 				m_sampler( new ImageSampler ),
-				m_regionSampler( new ImageStats )
+				m_areaSampler( new ImageStats )
 		{
 			// ---- Create a plug on ImageView which will be used for evaluating colorInspectors
 
@@ -1162,7 +1162,7 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			PlugPtr evaluatorPlug = new Plug( "evaluator" );
 			plug->addChild( evaluatorPlug );
 			evaluatorPlug->addChild( new Color4fPlug( "pixelColor" ) );
-			evaluatorPlug->addChild( new Color4fPlug( "regionColor" ) );
+			evaluatorPlug->addChild( new Color4fPlug( "areaColor" ) );
 
 			// We use `m_pixel` to fetch a context variable to transfer
 			// the mouse position into `m_sampler`. We could use `mouseMoveSignal()`
@@ -1172,9 +1172,9 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			// created in ImageViewUI's `_ColorInspectorPlugValueWidget`.
 			m_pixel->namePlug()->setValue( "colorInspector:source" );
 
-			// The same thing, but when we need a region to evaluate regionColor
+			// The same thing, but when we need an area to evaluate areaColor
 			// instead of a pixel to evaluate pixelColor
-			m_region->namePlug()->setValue( "colorInspector:source" );
+			m_area->namePlug()->setValue( "colorInspector:source" );
 
 			// And we use a DeleteContextVariables node to make sure that our
 			// private context variable doesn't become visible to the upstream
@@ -1195,9 +1195,9 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			evaluatorPlug->getChild<Color4fPlug>( "pixelColor" )->setInput( m_sampler->colorPlug() );
 
 
-			m_regionSampler->inPlug()->setInput( m_deleteContextVariables->outPlug() );
-			m_regionSampler->areaPlug()->setInput( m_region->outPlug() );
-			evaluatorPlug->getChild<Color4fPlug>( "regionColor" )->setInput( m_regionSampler->averagePlug() );
+			m_areaSampler->inPlug()->setInput( m_deleteContextVariables->outPlug() );
+			m_areaSampler->areaPlug()->setInput( m_area->outPlug() );
+			evaluatorPlug->getChild<Color4fPlug>( "areaColor" )->setInput( m_areaSampler->averagePlug() );
 
 			ImageGadget *imageGadget = static_cast<ImageGadget *>( m_view->viewportGadget()->getPrimaryChild() );
 			imageGadget->channelsChangedSignal().connect( boost::bind( &ColorInspector::channelsChanged, this ) );
@@ -1234,12 +1234,12 @@ class ImageView::ColorInspector : public boost::signals::trackable
 				{
 					if( colorInspector->modePlug()->getValue() == 0 )
 					{
-						colorInspector->pixelPlug()->setValue( colorInspector->regionPlug()->getValue().center() );
+						colorInspector->pixelPlug()->setValue( colorInspector->areaPlug()->getValue().center() );
 					}
 					else if( colorInspector->modePlug()->getValue() == 1 )
 					{
 						V2i pixel = colorInspector->pixelPlug()->getValue();
-						colorInspector->regionPlug()->setValue( Box2i( pixel - V2i( 50 ), pixel + V2i( 50 ) ) );
+						colorInspector->areaPlug()->setValue( Box2i( pixel - V2i( 50 ), pixel + V2i( 50 ) ) );
 					}
 					colorInspectorRemoved( colorInspector );
 					colorInspectorAdded( colorInspector );
@@ -1258,7 +1258,7 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			}
 			else
 			{
-				Box2iGadget::Ptr r = new Box2iGadget( IECore::runTimeCast<ColorInspectorPlug>( colorInspector )->regionPlug(), colorInspector->getName().value().substr( 1 ) );
+				Box2iGadget::Ptr r = new Box2iGadget( IECore::runTimeCast<ColorInspectorPlug>( colorInspector )->areaPlug(), colorInspector->getName().value().substr( 1 ) );
 				r->deleteClickedSignal().connect( boost::bind( &ColorInspector::deleteClicked, this, ::_1 ) );
 				m_view->viewportGadget()->addChild( r );
 			}
@@ -1271,7 +1271,7 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			{
 				if( (int)i->typeId() == (int)Box2iGadgetTypeId )
 				{
-					if( IECore::runTimeCast<Box2iGadget>( i.get() )->getPlug() == colorInspectorTyped->regionPlug() )
+					if( IECore::runTimeCast<Box2iGadget>( i.get() )->getPlug() == colorInspectorTyped->areaPlug() )
 					{
 						m_view->viewportGadget()->removeChild( i );
 						return;
@@ -1307,15 +1307,15 @@ class ImageView::ColorInspector : public boost::signals::trackable
 					imageGadget->getChannels().end()
 				) );
 			m_sampler->channelsPlug()->setValue( channels );
-			m_regionSampler->channelsPlug()->setValue( channels );
+			m_areaSampler->channelsPlug()->setValue( channels );
 		}
 
 		ImageView *m_view;
 		V2fContextVariablePtr m_pixel;
-		Box2iContextVariablePtr m_region;
+		Box2iContextVariablePtr m_area;
 		DeleteContextVariablesPtr m_deleteContextVariables;
 		ImageSamplerPtr m_sampler;
-		ImageStatsPtr m_regionSampler;
+		ImageStatsPtr m_areaSampler;
 
 };
 
