@@ -387,9 +387,9 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		if plug.getName() == "ColorInspectorPlug":
 			viewportGadget = plug.node().viewportGadget()
-			viewportGadget.mouseMoveSignal().connect( Gaffer.WeakMethod( self.__mouseMove ), scoped = False )
 
 			imageGadget = viewportGadget.getPrimaryChild()
+			imageGadget.mouseMoveSignal().connect( Gaffer.WeakMethod( self.__mouseMove ), scoped = False )
 			imageGadget.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ), scoped = False )
 			imageGadget.buttonReleaseSignal().connect( Gaffer.WeakMethod( self.__buttonRelease ), scoped = False )
 			imageGadget.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ), scoped = False )
@@ -576,21 +576,19 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 				exposure = "0.0"
 		self.__exposureLabel.setText( "<b>EV : %s</b>" % exposure )
 
-	def __mouseMove( self, viewportGadget, event ) :
-
-		# TODO - can we unify this with __eventPosition?
-		imageGadget = viewportGadget.getPrimaryChild()
-		l = viewportGadget.rasterToGadgetSpace( imath.V2f( event.line.p0.x, event.line.p0.y ), imageGadget )
-
+	def __eventPosition( self, imageGadget, event ):
 		try :
-			pixel = imageGadget.pixelAt( l )
+			pixel = imageGadget.pixelAt( event.line )
 		except :
 			# `pixelAt()` can throw if there is an error
 			# computing the image being viewed. We leave
 			# the error reporting to other UI components.
-			return False
+			return imath.V2i( 0 )
+		return imath.V2i( math.floor( pixel.x ), math.floor( pixel.y ) )
 
-		pixel = imath.V2i( math.floor( pixel.x ), math.floor( pixel.y ) )
+	def __mouseMove( self, imageGadget, event ) :
+
+		pixel = self.__eventPosition( imageGadget, event )
 
 		if pixel == self.__pixel :
 			return False
@@ -601,25 +599,13 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		return True
 
-	def __eventPosition( self, event ):
-		viewportGadget = self.getPlug().node().viewportGadget()
-		imageGadget = viewportGadget.getPrimaryChild()
-		try :
-			pixel = imageGadget.pixelAt( event.line )
-		except :
-			# `pixelAt()` can throw if there is an error
-			# computing the image being viewed. We leave
-			# the error reporting to other UI components.
-			return imath.V2i( 0 )
-		return imath.V2i( math.floor( pixel.x ), math.floor( pixel.y ) )
-
-	def __buttonPress( self, ui, event ) :
+	def __buttonPress( self, imageGadget, event ) :
 
 		if event.buttons == event.Buttons.Left and not event.modifiers :
 			self.__createInspectorStartPosition = None
 			return True # accept press so we get dragBegin() for dragging color
 		elif event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
-			self.__createInspectorStartPosition = self.__eventPosition( event )
+			self.__createInspectorStartPosition = self.__eventPosition( imageGadget, event )
 			self.__addInspector()
 			ci = self.getPlug().parent().children()[-1]
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", True, persistent = False )
@@ -629,13 +615,13 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		else:
 			return False
 
-	def __buttonRelease( self, ui, event ) :
+	def __buttonRelease( self, imageGadget, event ) :
 		if self.__createInspectorStartPosition:
 			ci = self.getPlug().parent().children()[-1]
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
 			Gaffer.Metadata.registerValue( ci["area"], "__hovered", False, persistent = False )
 
-	def __dragBegin( self, ui, event ) :
+	def __dragBegin( self, imageGadget, event ) :
 
 		if self.__createInspectorStartPosition:
 			return IECore.NullObject.defaultNullObject()
@@ -663,7 +649,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		GafferUI.Pointer.setCurrent( "rgba" )
 		return color
 
-	def __dragEnter( self, ui, event ) :
+	def __dragEnter( self, imageGadget, event ) :
 		viewportGadget = self.getPlug().node().viewportGadget()
 		imageGadget = viewportGadget.getPrimaryChild()
 		if event.sourceGadget != imageGadget:
@@ -671,12 +657,12 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		return True
 
-	def __dragMove( self, ui, event ) :
+	def __dragMove( self, imageGadget, event ) :
 		if self.__createInspectorStartPosition:
 			ci = self.getPlug().parent().children()[-1]
 			c = imath.Box2i()
 			c.extendBy( self.__createInspectorStartPosition )
-			c.extendBy( self.__eventPosition( event ) )
+			c.extendBy( self.__eventPosition( imageGadget, event ) )
 			ci["mode"].setValue( 1 )
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
 			Gaffer.Metadata.registerValue( ci["area"], "__hovered", True, persistent = False )
@@ -684,7 +670,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		return True
 
-	def __dragEnd( self, ui, event ) :
+	def __dragEnd( self, imageGadget, event ) :
 		if self.__createInspectorStartPosition:
 			ci = self.getPlug().parent().children()[-1]
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
