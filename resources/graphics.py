@@ -245,7 +245,7 @@
 			],
 
 		},
-		"footer-icons" : {
+		"colorInspectorIcons" : {
 
 			"options" : {
 				"requiredWidth" : 16,

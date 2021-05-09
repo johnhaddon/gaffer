@@ -1632,14 +1632,14 @@
        orientation="0,1"
        id="guide5839"
        inkscape:locked="false"
-       inkscape:label="footer icons - 12 - upper bound"
+       inkscape:label="colorInspector icons - 12 - upper bound"
        inkscape:color="rgb(0,0,255)" />
     <sodipodi:guide
        position="0,-1318"
        orientation="0,1"
        id="guide5840"
        inkscape:locked="false"
-       inkscape:label="footer icons - 12 - lower bound"
+       inkscape:label="colorInspector icons - 12 - lower bound"
        inkscape:color="rgb(0,0,255)" />
   </sodipodi:namedview>
   <metadata
@@ -2470,7 +2470,7 @@
            height="54.25"
            width="343.75" /></flowRegion><flowPara
          id="flowPara2016-2"
-         style="font-size:16px;fill:#f4f4f4;fill-opacity:1;stroke-width:1.00000536">FOOTER ICONS</flowPara></flowRoot>    <rect
+         style="font-size:16px;fill:#f4f4f4;fill-opacity:1;stroke-width:1.00000536">Color Inspector Icons</flowPara></flowRoot>    <rect
        inkscape:label="sizeGuide"
        style="display:inline;opacity:1;fill:url(#linearGradient2022);fill-opacity:1;stroke:none;stroke-width:0.59761435;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1.10173225;stroke-opacity:1;paint-order:markers stroke fill"
        id="rect2020-0"
@@ -7924,7 +7924,7 @@
     </g>
     <g
        transform="translate(-418,2215.5)"
-       inkscape:label="footer-icon"
+       inkscape:label="colorInspector-icon"
        id="sourceCursor"
        style="display:inline">
       <rect
@@ -7943,7 +7943,7 @@
     </g>
     <g
        transform="translate(-396.50003,2214)"
-       inkscape:label="footer-icon"
+       inkscape:label="colorInspector-icon"
        id="sourcePixel"
        style="display:inline">
       <rect
@@ -7977,7 +7977,7 @@
     </g>
     <g
        transform="translate(-371.50003,2214)"
-       inkscape:label="footer-icon"
+       inkscape:label="colorInspector-icon"
        id="sourceRegion"
        style="display:inline">
       <rect
