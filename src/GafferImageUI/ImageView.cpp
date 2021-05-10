@@ -671,20 +671,20 @@ class Box2iGadget : public GafferUI::Gadget
 			{
 				if( m_dragDirection.x == -1 )
 				{
-					b.min.x = p.x;
+					b.min.x = round( p.x );
 				}
 				else if( m_dragDirection.x == 1 )
 				{
-					b.max.x = p.x;
+					b.max.x = round( p.x );
 				}
 
 				if( m_dragDirection.y == -1 )
 				{
-					b.min.y = p.y;
+					b.min.y = round( p.y );
 				}
 				else if( m_dragDirection.y == 1 )
 				{
-					b.max.y = p.y;
+					b.max.y = round( p.y );
 				}
 			}
 

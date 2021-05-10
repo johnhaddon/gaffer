@@ -663,6 +663,11 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			c = imath.Box2i()
 			c.extendBy( self.__createInspectorStartPosition )
 			c.extendBy( self.__eventPosition( imageGadget, event ) )
+
+			# __eventPosition is rounded down, the rectangle should also include the upper end of the
+			# pixel containing the cursor
+			c.setMax( c.max() + imath.V2i( 1 ) )
+
 			ci["mode"].setValue( GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area )
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
 			Gaffer.Metadata.registerValue( ci["area"], "__hovered", True, persistent = False )
