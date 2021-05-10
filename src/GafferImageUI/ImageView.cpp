@@ -579,6 +579,9 @@ class Box2iGadget : public GafferUI::Gadget
 
 		bool mouseMove( const ButtonEvent &event )
 		{
+			// Request render in case the hover state has changed
+			dirty( DirtyType::Render );
+
 			const V2f p = eventPosition( event );
 
 			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( true ), false );
@@ -937,6 +940,9 @@ class V2iGadget : public GafferUI::Gadget
 
 		bool mouseMove( const ButtonEvent &event )
 		{
+			// Request render in case the hover state has changed
+			dirty( DirtyType::Render );
+
 			const V2f p = eventPosition( event );
 
 			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( true ), false );
