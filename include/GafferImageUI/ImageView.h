@@ -120,10 +120,16 @@ class GAFFERIMAGEUI_API ImageView : public GafferUI::View
 		class ColorInspectorPlug : public Gaffer::ValuePlug
 		{
 			public :
+				enum class Mode
+				{
+					Cursor,
+					Pixel,
+					Area
+				};
 
 				GAFFER_PLUG_DECLARE_TYPE( ColorInspectorPlug, ColorInspectorPlugTypeId, Gaffer::ValuePlug );
 
-				ColorInspectorPlug( const std::string &name = defaultName<ColorInspectorPlug>() );
+				ColorInspectorPlug( const std::string &name = defaultName<ColorInspectorPlug>(), Direction direction=In, unsigned flags=Default );
 
 				Gaffer::IntPlug *modePlug();
 				const Gaffer::IntPlug *modePlug() const;

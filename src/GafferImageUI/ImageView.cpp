@@ -426,8 +426,9 @@ class Box2iGadget : public GafferUI::Gadget
 	public :
 
 		Box2iGadget( Box2iPlugPtr plug, std::string id )
-			:   Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deleting( false )
+			:   Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deletePressed( false )
 		{
+			enterSignal().connect( boost::bind( &Box2iGadget::enter, this, ::_2 ) );
 			mouseMoveSignal().connect( boost::bind( &Box2iGadget::mouseMove, this, ::_2 ) );
 			buttonPressSignal().connect( boost::bind( &Box2iGadget::buttonPress, this, ::_2 ) );
 			dragBeginSignal().connect( boost::bind( &Box2iGadget::dragBegin, this, ::_1, ::_2 ) );
@@ -454,26 +455,6 @@ class Box2iGadget : public GafferUI::Gadget
 		const Box2iPlug *getPlug() const
 		{
 			return m_plug.get();
-		}
-
-		void setEditable( bool editable )
-		{
-			m_editable = editable;
-		}
-
-		bool getEditable() const
-		{
-			return m_editable;
-		}
-
-		void setHandleSize( bool handleSize )
-		{
-			m_handleSize = handleSize;
-		}
-
-		bool getHandleSize() const
-		{
-			return m_handleSize;
 		}
 
 		typedef boost::signal<void ( Plug * )> DeleteClickedSignal;
@@ -577,6 +558,12 @@ class Box2iGadget : public GafferUI::Gadget
 			}
 		}
 
+		bool enter( const ButtonEvent &event )
+		{
+			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( true ), false );
+			return true;
+		}
+
 		bool mouseMove( const ButtonEvent &event )
 		{
 			// Request render in case the hover state has changed
@@ -584,7 +571,6 @@ class Box2iGadget : public GafferUI::Gadget
 
 			const V2f p = eventPosition( event );
 
-			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( true ), false );
 			if( onDeleteButton( p ) )
 			{
 				Pointer::setCurrent( "" );
@@ -594,7 +580,7 @@ class Box2iGadget : public GafferUI::Gadget
 
 			m_hover = 1;
 
-			V2f dir = dragDirection( p );
+			const V2i dir = dragDirection( p );
 			if( dir.x && dir.y )
 			{
 				Pointer::setCurrent( ( dir.x * dir.y < 0 ) ? "moveDiagonallyDown" : "moveDiagonallyUp" );
@@ -626,7 +612,7 @@ class Box2iGadget : public GafferUI::Gadget
 			const V2f p = eventPosition( event );
 			if( onDeleteButton( p ) )
 			{
-				m_deleting = true;
+				m_deletePressed = true;
 				return true;
 			}
 
@@ -635,9 +621,9 @@ class Box2iGadget : public GafferUI::Gadget
 
 		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
 		{
-			if( m_deleting )
+			if( m_deletePressed )
 			{
-				m_deleting = false;
+				m_deletePressed = false;
 				return nullptr;
 			}
 			m_dragStart = eventPosition( event );
@@ -713,11 +699,11 @@ class Box2iGadget : public GafferUI::Gadget
 		bool buttonRelease( const GafferUI::ButtonEvent &event )
 		{
 			const V2f p = eventPosition( event );
-			if( m_deleting && onDeleteButton( p ) )
+			if( m_deletePressed && onDeleteButton( p ) )
 			{
 				m_deleteClickedSignal( m_plug.get() );
 			}
-			m_deleting = false;
+			m_deletePressed = false;
 
 			return true;
 		}
@@ -726,7 +712,7 @@ class Box2iGadget : public GafferUI::Gadget
 		{
 			Pointer::setCurrent( "" );
 			m_hover = 0;
-			m_deleting = false;
+			m_deletePressed = false;
 
 			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( false ), false );
 		}
@@ -785,7 +771,6 @@ class Box2iGadget : public GafferUI::Gadget
 			const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
 			V2f pixel = imageGadget->pixelAt( event.line );
 			Context::Scope contextScope( imageGadget->getContext() );
-			pixel.x *= imageGadget->getImage()->format().getPixelAspect();
 			return pixel;
 		}
 
@@ -793,8 +778,8 @@ class Box2iGadget : public GafferUI::Gadget
 		const std::string m_id;
 		bool m_editable;
 		float m_handleSize;
-		int m_hover;
-		bool m_deleting;
+		int m_hover;  // Hover state:  0 no hover, 1 for hovered, 2 for deleteButton hovered
+		bool m_deletePressed;
 
 		DeleteClickedSignal m_deleteClickedSignal;
 
@@ -811,8 +796,9 @@ class V2iGadget : public GafferUI::Gadget
 	public :
 
 		V2iGadget( V2iPlugPtr plug, std::string id )
-			:   Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deleting( false )
+			:   Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deletePressed( false )
 		{
+			enterSignal().connect( boost::bind( &V2iGadget::enter, this, ::_2 ) );
 			mouseMoveSignal().connect( boost::bind( &V2iGadget::mouseMove, this, ::_2 ) );
 			buttonPressSignal().connect( boost::bind( &V2iGadget::buttonPress, this, ::_2 ) );
 			dragBeginSignal().connect( boost::bind( &V2iGadget::dragBegin, this, ::_1, ::_2 ) );
@@ -839,26 +825,6 @@ class V2iGadget : public GafferUI::Gadget
 		const V2iPlug *getPlug() const
 		{
 			return m_plug.get();
-		}
-
-		void setEditable( bool editable )
-		{
-			m_editable = editable;
-		}
-
-		bool getEditable() const
-		{
-			return m_editable;
-		}
-
-		void setHandleSize( bool handleSize )
-		{
-			m_handleSize = handleSize;
-		}
-
-		bool getHandleSize() const
-		{
-			return m_handleSize;
 		}
 
 		typedef boost::signal<void ( Plug * )> DeleteClickedSignal;
@@ -938,14 +904,18 @@ class V2iGadget : public GafferUI::Gadget
 			}
 		}
 
+		bool enter( const ButtonEvent &event )
+		{
+			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( true ), false );
+			return true;
+		}
+
 		bool mouseMove( const ButtonEvent &event )
 		{
 			// Request render in case the hover state has changed
 			dirty( DirtyType::Render );
 
 			const V2f p = eventPosition( event );
-
-			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( true ), false );
 
 			if( onDeleteButton( p ) )
 			{
@@ -972,7 +942,7 @@ class V2iGadget : public GafferUI::Gadget
 			const V2f p = eventPosition( event );
 			if( onDeleteButton( p ) )
 			{
-				m_deleting = true;
+				m_deletePressed = true;
 				return true;
 			}
 
@@ -981,9 +951,9 @@ class V2iGadget : public GafferUI::Gadget
 
 		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
 		{
-			if( m_deleting )
+			if( m_deletePressed )
 			{
-				m_deleting = false;
+				m_deletePressed = false;
 				return nullptr;
 			}
 
@@ -1029,11 +999,11 @@ class V2iGadget : public GafferUI::Gadget
 		bool buttonRelease( const GafferUI::ButtonEvent &event )
 		{
 			const V2f p = eventPosition( event );
-			if( m_deleting && onDeleteButton( p ) )
+			if( m_deletePressed && onDeleteButton( p ) )
 			{
 				m_deleteClickedSignal( m_plug.get() );
 			}
-			m_deleting = false;
+			m_deletePressed = false;
 
 			return true;
 		}
@@ -1042,7 +1012,7 @@ class V2iGadget : public GafferUI::Gadget
 		{
 			Pointer::setCurrent( "" );
 			m_hover = 0;
-			m_deleting = false;
+			m_deletePressed = false;
 
 			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( false ), false );
 		}
@@ -1075,7 +1045,6 @@ class V2iGadget : public GafferUI::Gadget
 			const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
 			V2f pixel = imageGadget->pixelAt( event.line );
 			Context::Scope contextScope( imageGadget->getContext() );
-			pixel.x *= imageGadget->getImage()->format().getPixelAspect();
 			return pixel;
 		}
 
@@ -1083,8 +1052,8 @@ class V2iGadget : public GafferUI::Gadget
 		const std::string m_id;
 		bool m_editable;
 		float m_handleSize;
-		int m_hover;
-		bool m_deleting;
+		int m_hover;  // Hover state:  0 no hover, 1 for hovered, 2 for deleteButton hovered
+		bool m_deletePressed;
 
 		DeleteClickedSignal m_deleteClickedSignal;
 
@@ -1095,10 +1064,10 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( V2iGadget )
 
 } // namespace
 
-ImageView::ColorInspectorPlug::ColorInspectorPlug( const std::string &name )
-	: ValuePlug( name, ValuePlug::Direction::In, Default )
+ImageView::ColorInspectorPlug::ColorInspectorPlug( const std::string &name, Direction direction, unsigned flags )
+	: ValuePlug( name, direction, flags )
 {
-	addChild( new IntPlug( "mode" ) );
+	addChild( new IntPlug( "mode", Direction::In, (int)Mode::Pixel, (int)Mode::Cursor, (int)Mode::Area ) );
 	addChild( new V2iPlug( "pixel" ) );
 	addChild( new Box2iPlug( "area" ) );
 }
@@ -1144,7 +1113,7 @@ bool ImageView::ColorInspectorPlug::acceptsChild( const Gaffer::GraphComponent *
 
 Gaffer::PlugPtr ImageView::ColorInspectorPlug::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new ColorInspectorPlug();
+	return new ColorInspectorPlug( name, direction, getFlags() );
 }
 
 class ImageView::ColorInspector : public boost::signals::trackable
@@ -1214,7 +1183,7 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			colorInspectorsPlug()->childAddedSignal().connect( boost::bind( &ColorInspector::colorInspectorAdded, this, ::_2 ) );
 			colorInspectorsPlug()->childRemovedSignal().connect( boost::bind( &ColorInspector::colorInspectorRemoved, this, ::_2 ) );
 
-			colorInspectorsPlug()->getChild<ColorInspectorPlug>( 0 )->modePlug()->setValue( 2 );
+			colorInspectorsPlug()->getChild<ColorInspectorPlug>( 0 )->modePlug()->setValue( (int)ColorInspectorPlug::Mode::Cursor );
 
 			view->plugSetSignal().connect( boost::bind( &ColorInspector::plugSet, this, ::_1 ) );
 		}
@@ -1233,16 +1202,18 @@ class ImageView::ColorInspector : public boost::signals::trackable
 
 		void plugSet( Gaffer::Plug *plug )
 		{
+			// Note that this code is currently unused, since I've disabled the ability to toggle
+			// mode from the UI.  Perhaps this should be deleted?
 			if( plug->parent()->parent() == colorInspectorsPlug() )
 			{
-				ColorInspectorPlug *colorInspector = IECore::runTimeCast<ColorInspectorPlug>( plug->parent() );
+				ColorInspectorPlug *colorInspector = static_cast<ColorInspectorPlug*>( plug->parent() );
 				if( plug == colorInspector->modePlug() )
 				{
-					if( colorInspector->modePlug()->getValue() == 0 )
+					if( colorInspector->modePlug()->getValue() == (int)ColorInspectorPlug::Mode::Pixel )
 					{
 						colorInspector->pixelPlug()->setValue( colorInspector->areaPlug()->getValue().center() );
 					}
-					else if( colorInspector->modePlug()->getValue() == 1 )
+					else if( colorInspector->modePlug()->getValue() == (int)ColorInspectorPlug::Mode::Area )
 					{
 						V2i pixel = colorInspector->pixelPlug()->getValue();
 						colorInspector->areaPlug()->setValue( Box2i( pixel - V2i( 50 ), pixel + V2i( 50 ) ) );
@@ -1255,8 +1226,8 @@ class ImageView::ColorInspector : public boost::signals::trackable
 
 		void colorInspectorAdded( GraphComponent *colorInspector )
 		{
-			ColorInspectorPlug *colorInspectorTyped = IECore::runTimeCast<ColorInspectorPlug>( colorInspector );
-			if( colorInspectorTyped->modePlug()->getValue() == 0 )
+			ColorInspectorPlug *colorInspectorTyped = static_cast<ColorInspectorPlug*>( colorInspector );
+			if( colorInspectorTyped->modePlug()->getValue() == (int)ColorInspectorPlug::Mode::Pixel )
 			{
 				V2iGadget::Ptr r = new V2iGadget( colorInspectorTyped->pixelPlug(), colorInspector->getName().value().substr( 1 ) );
 				r->deleteClickedSignal().connect( boost::bind( &ColorInspector::deleteClicked, this, ::_1 ) );
@@ -1264,7 +1235,7 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			}
 			else
 			{
-				Box2iGadget::Ptr r = new Box2iGadget( IECore::runTimeCast<ColorInspectorPlug>( colorInspector )->areaPlug(), colorInspector->getName().value().substr( 1 ) );
+				Box2iGadget::Ptr r = new Box2iGadget( colorInspectorTyped->areaPlug(), colorInspector->getName().value().substr( 1 ) );
 				r->deleteClickedSignal().connect( boost::bind( &ColorInspector::deleteClicked, this, ::_1 ) );
 				m_view->viewportGadget()->addChild( r );
 			}
@@ -1272,20 +1243,20 @@ class ImageView::ColorInspector : public boost::signals::trackable
 
 		void colorInspectorRemoved( GraphComponent *colorInspector )
 		{
-			ColorInspectorPlug *colorInspectorTyped = IECore::runTimeCast<ColorInspectorPlug>( colorInspector );
+			ColorInspectorPlug *colorInspectorTyped = static_cast<ColorInspectorPlug*>( colorInspector );
 			for( auto &i : m_view->viewportGadget()->children() )
 			{
-				if( (int)i->typeId() == (int)Box2iGadgetTypeId )
+				if( Box2iGadget *boxGadget = runTimeCast<Box2iGadget>( i.get() ) )
 				{
-					if( IECore::runTimeCast<Box2iGadget>( i.get() )->getPlug() == colorInspectorTyped->areaPlug() )
+					if( boxGadget->getPlug() == colorInspectorTyped->areaPlug() )
 					{
 						m_view->viewportGadget()->removeChild( i );
 						return;
 					}
 				}
-				else if( (int)i->typeId() == (int)V2iGadgetTypeId )
+				else if( V2iGadget *v2iGadget = runTimeCast<V2iGadget>( i.get() ) )
 				{
-					if( IECore::runTimeCast<V2iGadget>( i.get() )->getPlug() == colorInspectorTyped->pixelPlug() )
+					if( v2iGadget->getPlug() == colorInspectorTyped->pixelPlug() )
 					{
 						m_view->viewportGadget()->removeChild( i );
 						return;
@@ -1299,19 +1270,13 @@ class ImageView::ColorInspector : public boost::signals::trackable
 			colorInspectorsPlug()->removeChild( plug->parent() );
 		}
 
-		// Why is there a private function that's never used, should this just be deleted?
-		/*Plug *plug()
-		{
-			return m_view->getChild<Plug>( "colorInspector" );
-		}*/
-
 		void channelsChanged()
 		{
 			ImageGadget *imageGadget = static_cast<ImageGadget *>( m_view->viewportGadget()->getPrimaryChild() );
 			StringVectorDataPtr channels = new StringVectorData( std::vector<std::string>(
-					imageGadget->getChannels().begin(),
-					imageGadget->getChannels().end()
-				) );
+				imageGadget->getChannels().begin(),
+				imageGadget->getChannels().end()
+			) );
 			m_sampler->channelsPlug()->setValue( channels );
 			m_areaSampler->channelsPlug()->setValue( channels );
 		}
@@ -1361,7 +1326,6 @@ ImageView::ImageView( const std::string &name )
 
 	addChild( new StringPlug( "displayTransform", Plug::In, "Default", Plug::Default & ~Plug::AcceptsInputs ) );
 	addChild( new BoolPlug( "lutGPU", Plug::In, true, Plug::Default & ~Plug::AcceptsInputs ) );
-
 
 	ImagePlugPtr preprocessorOutput = new ImagePlug( "out", Plug::Out );
 	preprocessor->addChild( preprocessorOutput );

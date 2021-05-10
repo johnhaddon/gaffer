@@ -368,13 +368,13 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 			l.addChild( GafferUI.Spacer( size = imath.V2i( 0 ) ), expand = True )
 
-			if mode == 2:
+			if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Cursor:
 				m = IECore.MenuDefinition()
 				m.append( "/Pixel Inspector",
-					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), False ) }
+					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), GafferImageUI.ImageView.ColorInspectorPlug.Mode.Pixel ) }
 				)
 				m.append( "/Area Inspector",
-					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), True ) }
+					{ "command" : functools.partial( Gaffer.WeakMethod( self.__addClick ), GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area ) }
 				)
 				button = GafferUI.MenuButton( "", "plus.png", hasFrame=False, menu = GafferUI.Menu( m, title = "Add Color Inspector" ) )
 			else:
@@ -420,11 +420,11 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		parent.addChild( GafferImageUI.ImageView.ColorInspectorPlug( "c" + str( suffix ) ) )
 
-	def __addClick( self, area ):
+	def __addClick( self, mode ):
 		self.__addInspector()
 		ci = self.getPlug().parent().children()[-1]
-		ci["mode"].setValue( area )
-		if area:
+		ci["mode"].setValue( mode )
+		if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area:
 			ci["area"].setValue(
 				self.getPlug().node()["colorInspector"]["evaluator"]["areaColor"].getInput().node()["in"].format().getDisplayWindow()
 			)
@@ -441,7 +441,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			mode = self.getPlug()["mode"].getValue()
 
 			# TODO - should GafferUI.Image have a setImage?
-			self.__modeImage._qtWidget().setPixmap( GafferUI.Image._qtPixmapFromFile( [ "sourcePixel.png", "sourceArea.png", "sourceCursor.png" ][ mode ]  ) )
+			self.__modeImage._qtWidget().setPixmap( GafferUI.Image._qtPixmapFromFile( [ "sourceCursor.png", "sourcePixel.png", "sourceArea.png" ][ mode ]  ) )
 			self.__updateLazily()
 
 	def __plugMetadataChanged( self, plug, key, reason ):
@@ -468,11 +468,11 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			return
 
 		with inputImagePlug.node().scriptNode().context() :
-			if mode == 2:
+			if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Cursor:
 				self.__updateInBackground( self.__pixel )
-			elif mode == 1:
+			elif mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area:
 				self.__updateInBackground( self.getPlug()["area"].getValue() )
-			elif mode == 0:
+			elif mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Pixel:
 				self.__updateInBackground( self.getPlug()["pixel"].getValue() )
 
 	@GafferUI.BackgroundMethod()
@@ -533,12 +533,12 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__busyWidget.setBusy( False )
 
 	def __updateLabels( self, pixel, color ) :
-		m = self.getPlug()["mode"].getValue()
+		mode = self.getPlug()["mode"].getValue()
 
 		hovered = False
-		if m == 1:
+		if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area:
 			hovered = Gaffer.Metadata.value( self.getPlug()["area"], "__hovered" )
-		if m == 0:
+		if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Pixel:
 			hovered = Gaffer.Metadata.value( self.getPlug()["pixel"], "__hovered" )
 		prefix = ""
 		postfix = ""
@@ -546,11 +546,11 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			# Chosen to match brightColor in python/GafferUI/_Stylesheet.py
 			prefix = '<font color="#779cbd">'
 			postfix = '</font>'
-		self.__indexLabel.setText( prefix + ( "" if m == 2 else "<b>" + self.getPlug().getName()[1:] + "</b>" ) + postfix )
-		if m == 1:
+		self.__indexLabel.setText( prefix + ( "" if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Cursor else "<b>" + self.getPlug().getName()[1:] + "</b>" ) + postfix )
+		if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area:
 			r = self.getPlug()["area"].getValue()
 			self.__positionLabel.setText( prefix + "<b>%i %i -> %i %i</b>" % ( r.min().x, r.min().y, r.max().x, r.max().y ) + postfix )
-		elif m == 2:
+		elif mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Cursor:
 			self.__positionLabel.setText( prefix + "<b>XY : %i %i</b>" % ( pixel.x, pixel.y ) + postfix )
 		else:
 			p = self.getPlug()["pixel"].getValue()
@@ -630,9 +630,9 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 			try :
 				source = self.__pixel
-				if self.getPlug()["mode"].getValue() == 0:
+				if self.getPlug()["mode"].getValue() == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Pixel:
 					source = self.getPlug()["pixel"].getValue()
-				elif self.getPlug()["mode"].getValue() == 1:
+				elif self.getPlug()["mode"].getValue() == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area:
 					source = self.getPlug()["area"].getValue()
 
 				if type( source ) == imath.V2i:
@@ -663,7 +663,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			c = imath.Box2i()
 			c.extendBy( self.__createInspectorStartPosition )
 			c.extendBy( self.__eventPosition( imageGadget, event ) )
-			ci["mode"].setValue( 1 )
+			ci["mode"].setValue( GafferImageUI.ImageView.ColorInspectorPlug.Mode.Area )
 			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
 			Gaffer.Metadata.registerValue( ci["area"], "__hovered", True, persistent = False )
 			ci["area"].setValue( c )

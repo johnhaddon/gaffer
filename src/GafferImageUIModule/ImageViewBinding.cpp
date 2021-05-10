@@ -44,6 +44,7 @@
 #include "GafferImage/ImageProcessor.h"
 
 #include "GafferBindings/NodeBinding.h"
+#include "GafferBindings/PlugBinding.h"
 
 using namespace std;
 using namespace boost::python;
@@ -133,6 +134,21 @@ void GafferImageUIModule::bindImageView()
 		.staticmethod( "createDisplayTransform" )
 	;
 
-	GafferBindings::NodeClass<ImageView::ColorInspectorPlug>();
+	scope ci = GafferBindings::PlugClass<ImageView::ColorInspectorPlug>()
+		.def( init<const char *, Plug::Direction, unsigned>(
+				(
+					boost::python::arg_( "name" )=GraphComponent::defaultName<ImageView::ColorInspectorPlug>(),
+					boost::python::arg_( "direction" )=Plug::In,
+					boost::python::arg_( "flags" )=Plug::Default
+				)
+			)
+		)
+	;
+
+	enum_<ImageView::ColorInspectorPlug::Mode>( "Mode" )
+		.value( "Cursor", ImageView::ColorInspectorPlug::Mode::Cursor )
+		.value( "Pixel", ImageView::ColorInspectorPlug::Mode::Pixel )
+		.value( "Area", ImageView::ColorInspectorPlug::Mode::Area )
+	;
 
 }
