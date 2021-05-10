@@ -390,7 +390,7 @@ void renderLine2D( const Style *style, V2f a, V2f b, float width, const Color4f 
 
 // TODO - these are some terrible ways of drawing circles, but I just wanted something quick that works.  Add
 // something better somewhere central
-void renderCircle2D( const Style *style, V2f center, float radius, float width, const Color4f &col )
+void renderCircle2D( const Style *style, V2f center, V2f radius, float width, const Color4f &col )
 {
 	int segments = 16;
 	V2f prevAngle( 1, 0 );
@@ -402,7 +402,7 @@ void renderCircle2D( const Style *style, V2f center, float radius, float width, 
 	}
 }
 
-void renderFilledCircle2D( const Style *style, V2f center, float radius, const Color4f &col )
+void renderFilledCircle2D( const Style *style, V2f center, V2f radius, const Color4f &col )
 {
 	// TODO : Terrible hack, rendering a dummy rectangle which will put the style's shader in a state where
 	// it will allow us to draw a polygon
@@ -414,7 +414,7 @@ void renderFilledCircle2D( const Style *style, V2f center, float radius, const C
 		for( int i = 0; i < segments; i++ )
 		{
 			V2f angle( cos( 2.0f * M_PI * ( i + 1.0f ) / segments ), sin( 2.0f * M_PI * ( i + 1.0f ) / segments ) );
-			glVertex2f( center.x + angle.x * radius, center.y + angle.y * radius );
+			glVertex2f( center.x + angle.x * radius.x, center.y + angle.y * radius.y );
 		}
 
 	glEnd();
@@ -467,8 +467,6 @@ class Box2iGadget : public GafferUI::Gadget
 
 		void doRenderLayer( Layer layer, const Style *style ) const override
 		{
-			const V2f planarScale = viewportPlanarScale();
-			const V2f threshold( planarScale * m_handleSize );
 			if( layer != Layer::Main )
 			{
 				return;
@@ -479,6 +477,19 @@ class Box2iGadget : public GafferUI::Gadget
 			{
 				return;
 			}
+
+			V2f planarScale = viewportPlanarScale();
+			const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+			const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
+			// Weird hack to reverse engineer imageGadget->format().getPixelAspect() since it's not public
+			float pixelAspect = 1.0f / imageGadget->pixelAt( LineSegment3f( V3f( 1, 0, 0 ), V3f( 1, 0, 1 ) ) ).x;
+			// Compensate for pixelAspect so UI doesn't get stretched
+			planarScale.x /= pixelAspect;
+
+			const V2f threshold( planarScale * m_handleSize );
+
+			glPushMatrix();
+			glScalef( pixelAspect, 1, 1 );
 
 			V2f crossHairSize(
 				std::min ( threshold.x, rect.size().x * 0.5f ),
@@ -523,7 +534,7 @@ class Box2iGadget : public GafferUI::Gadget
 
 					if( m_hover )
 					{
-						renderFilledCircle2D( style, deleteButtonCenter, deleteButtonSize.x * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 ) );
+						renderFilledCircle2D( style, deleteButtonCenter, deleteButtonSize * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 ) );
 						Color4f buttonCol( 0.0f, 0.0f, 0.0f, 1.0f );
 						if( m_hover == 2 )
 						{
@@ -545,7 +556,7 @@ class Box2iGadget : public GafferUI::Gadget
 
 			glPopAttrib();
 
-
+			glPopMatrix();
 		}
 
 	private :
@@ -837,12 +848,23 @@ class V2iGadget : public GafferUI::Gadget
 
 		void doRenderLayer( Layer layer, const Style *style ) const override
 		{
-			const V2f planarScale = viewportPlanarScale();
-			const V2f threshold( planarScale * m_handleSize );
 			if( layer != Layer::Main )
 			{
 				return;
 			}
+
+			V2f planarScale = viewportPlanarScale();
+			const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+			const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
+			// Weird hack to reverse engineer imageGadget->format().getPixelAspect() since it's not public
+			float pixelAspect = 1.0f / imageGadget->pixelAt( LineSegment3f( V3f( 1, 0, 0 ), V3f( 1, 0, 1 ) ) ).x;
+			// Compensate for pixelAspect so UI doesn't get stretched
+			planarScale.x /= pixelAspect;
+
+			const V2f threshold( planarScale * m_handleSize );
+
+			glPushMatrix();
+			glScalef( pixelAspect, 1, 1 );
 
 			V2f point = V2f(m_plug->getValue()) + V2f( 0.5 );
 			V2f deleteButtonCenter( point.x + threshold.x, point.y + threshold.y );
@@ -867,11 +889,11 @@ class V2iGadget : public GafferUI::Gadget
 					renderLine2D( style, point + V2f( threshold.x, 0 ), point + V2f( 2.5 * planarScale.x, 0 ), planarScale.y * 2.0f, black );
 					renderLine2D( style, point - V2f( 0, threshold.y ), point - V2f( 0, 2.5 * planarScale.y ), planarScale.x * 2.0f, black );
 					renderLine2D( style, point + V2f( 0, threshold.y ), point + V2f( 0, 2.5 * planarScale.y ), planarScale.x * 2.0f, black );
-					renderCircle2D( style, point, 2.5 * planarScale.x, planarScale.x * 2.0f, Color4f( 0.8, 0.8, 0.8, 1.0 ) );
+					renderCircle2D( style, point, 2.5f * planarScale, planarScale.x * 2.0f, Color4f( 0.8, 0.8, 0.8, 1.0 ) );
 
 					if( m_hover )
 					{
-						renderFilledCircle2D( style, deleteButtonCenter, deleteButtonSize.x * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 ) );
+						renderFilledCircle2D( style, deleteButtonCenter, deleteButtonSize * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 ) );
 						Color4f buttonCol( 0.0f, 0.0f, 0.0f, 1.0f );
 						if( m_hover == 2 )
 						{
@@ -892,6 +914,8 @@ class V2iGadget : public GafferUI::Gadget
 				}
 
 			glPopAttrib();
+
+			glPopMatrix();
 		}
 
 	private :
