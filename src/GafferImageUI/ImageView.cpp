@@ -634,7 +634,6 @@ class Box2iGadget : public GafferUI::Gadget
 		{
 			if( m_deletePressed )
 			{
-				m_deletePressed = false;
 				return nullptr;
 			}
 			m_dragStart = eventPosition( event );
@@ -723,7 +722,6 @@ class Box2iGadget : public GafferUI::Gadget
 		{
 			Pointer::setCurrent( "" );
 			m_hover = 0;
-			m_deletePressed = false;
 
 			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( false ), false );
 		}
@@ -977,7 +975,6 @@ class V2iGadget : public GafferUI::Gadget
 		{
 			if( m_deletePressed )
 			{
-				m_deletePressed = false;
 				return nullptr;
 			}
 
@@ -1036,7 +1033,6 @@ class V2iGadget : public GafferUI::Gadget
 		{
 			Pointer::setCurrent( "" );
 			m_hover = 0;
-			m_deletePressed = false;
 
 			Metadata::registerValue( m_plug.get(), g_hoveredKey, new IECore::BoolData( false ), false );
 		}

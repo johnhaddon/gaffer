@@ -383,7 +383,7 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 
 		self.__pixel = imath.V2i( 0 )
-
+		self.__createInspectorStartPosition = None
 
 		if plug.getName() == "ColorInspectorPlug":
 			viewportGadget = plug.node().viewportGadget()
