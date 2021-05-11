@@ -46,6 +46,7 @@ import GafferImage
 import GafferImageUI
 
 from Qt import QtGui
+from Qt import QtWidgets
 
 ##########################################################################
 # Metadata registration.
@@ -55,7 +56,7 @@ Gaffer.Metadata.registerNode(
 
 	GafferImageUI.ImageView,
 
-	"nodeToolbar:bottom:type", "GafferImageUI.ImageViewUI._NodeToolbarBottomLeft",
+	"nodeToolbar:bottom:type", "GafferUI.StandardNodeToolbar.bottom",
 
 	"toolbarLayout:customWidget:StateWidget:widgetType", "GafferImageUI.ImageViewUI._StateWidget",
 	"toolbarLayout:customWidget:StateWidget:section", "Top",
@@ -72,6 +73,10 @@ Gaffer.Metadata.registerNode(
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:widgetType", "GafferImageUI.ImageViewUI._StateWidgetBalancingSpacer",
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:section", "Top",
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:index", -1,
+
+	"toolbarLayout:customWidget:BottomRightSpacer:widgetType", "GafferImageUI.ImageViewUI._ExpandingSpacer",
+	"toolbarLayout:customWidget:BottomRightSpacer:section", "Bottom",
+	"toolbarLayout:customWidget:BottomRightSpacer:index", 2,
 
 	"layout:activator:gpuAvailable", lambda node : ImageViewUI.createDisplayTransform( node["displayTransform"].getValue() ).isinstance( GafferImage.OpenColorIOTransform ),
 
@@ -208,19 +213,6 @@ Gaffer.Metadata.registerNode(
 	}
 
 )
-
-class _NodeToolbarBottomLeft( GafferUI.StandardNodeToolbar ):
-	def __init__( self, node ):
-		GafferUI.StandardNodeToolbar.__init__( self, node, edge = GafferUI.Edge.Bottom )
-
-		# The sizing of ColorInspector is pretty tricky:  it needs to be able to grow if the
-		# RGB labels get huge, and it needs an expandable spacer to keep the icons at the end of the row
-		# lined up nicely, but we don't want it to grow larger when the Viewer is resized.
-		#
-		# To accomplish this, we need to give it a sibling that is stretchier than it is.  This trick
-		# requires messing with some weird internal guts, but it gives a nice visual effect
-		layout = self._Widget__gafferWidget._Widget__gafferWidget._Widget__gafferWidget._qtWidget().layout()
-		layout.insertStretch( layout.count(), 1 )
 
 ##########################################################################
 # _TogglePlugValueWidget
@@ -826,6 +818,16 @@ class _Spacer( GafferUI.Spacer ) :
 	def __init__( self, imageView, **kw ) :
 
 		GafferUI.Spacer.__init__( self, size = imath.V2i( 0, 25 ) )
+
+class _ExpandingSpacer( GafferUI.Spacer ):
+	def __init__( self, imageView, **kw ) :
+
+		GafferUI.Widget.__init__( self, QtWidgets.QWidget(), **kw )
+
+		layout = QtWidgets.QHBoxLayout()
+		layout.setContentsMargins( 0, 0, 0, 0 )
+		self._qtWidget().setLayout( layout )
+		layout.addStretch( 1 )
 
 class _StateWidgetBalancingSpacer( GafferUI.Spacer ) :
 
