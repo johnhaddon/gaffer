@@ -74,7 +74,7 @@ Gaffer.Metadata.registerNode(
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:section", "Top",
 	"toolbarLayout:customWidget:StateWidgetBalancingSpacer:index", -1,
 
-	"toolbarLayout:customWidget:BottomRightSpacer:widgetType", "GafferImageUI.ImageViewUI._ExpandingSpacer",
+	"toolbarLayout:customWidget:BottomRightSpacer:widgetType", "GafferImageUI.ImageViewUI._Spacer",
 	"toolbarLayout:customWidget:BottomRightSpacer:section", "Bottom",
 	"toolbarLayout:customWidget:BottomRightSpacer:index", 2,
 
@@ -327,18 +327,19 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		mode = plug["mode"].getValue()
 		with l:
 			self.__indexLabel = GafferUI.Label()
+
+			## \todo Perhaps this magic could be provided more officially by a
+			# `GafferUI.Label.setMinimumText()` method?
 			labelFont = QtGui.QFont( self.__indexLabel._qtWidget().font() )
 			labelFont.setBold( True )
 			labelFont.setPixelSize( 10 )
 			labelFontMetrics = QtGui.QFontMetrics( labelFont )
 			self.__indexLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "99" ) )
-			self.__indexLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__modeImage = GafferUI.Image( "sourceCursor.png" )
 
 			self.__positionLabel = GafferUI.Label()
 			self.__positionLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "9999 9999 -> 9999 9999" ) )
-			self.__positionLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__swatch = GafferUI.ColorSwatch()
 			self.__swatch._qtWidget().setFixedWidth( 12 )
@@ -348,17 +349,14 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 			self.__rgbLabel = GafferUI.Label()
 			self.__rgbLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "RGBA : 99999 99999 99999 99999" ) )
-			self.__rgbLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__hsvLabel = GafferUI.Label()
 			self.__hsvLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "HSV : 99999 99999 99999" ) )
-			self.__hsvLabel._qtWidget().setMaximumWidth( 1000000 )
 
 			self.__exposureLabel = GafferUI.Label()
 			self.__exposureLabel._qtWidget().setMinimumWidth( labelFontMetrics.width( "EV : 19.9" ) )
-			self.__exposureLabel._qtWidget().setMaximumWidth( 1000000 )
 
-			l.addChild( GafferUI.Spacer( size = imath.V2i( 0 ) ), expand = True )
+			l.addChild( GafferUI.Spacer( size = imath.V2i( 0 ) ) )
 
 			if mode == GafferImageUI.ImageView.ColorInspectorPlug.Mode.Cursor:
 				m = IECore.MenuDefinition()
@@ -372,7 +370,6 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			else:
 				button = GafferUI.Button( "", "delete.png", hasFrame=False )
 				button.clickedSignal().connect( Gaffer.WeakMethod( self.__deleteClick ), scoped = False )
-
 
 		self.__pixel = imath.V2i( 0 )
 		self.__createInspectorStartPosition = None
@@ -818,16 +815,6 @@ class _Spacer( GafferUI.Spacer ) :
 	def __init__( self, imageView, **kw ) :
 
 		GafferUI.Spacer.__init__( self, size = imath.V2i( 0, 25 ) )
-
-class _ExpandingSpacer( GafferUI.Spacer ):
-	def __init__( self, imageView, **kw ) :
-
-		GafferUI.Widget.__init__( self, QtWidgets.QWidget(), **kw )
-
-		layout = QtWidgets.QHBoxLayout()
-		layout.setContentsMargins( 0, 0, 0, 0 )
-		self._qtWidget().setLayout( layout )
-		layout.addStretch( 1 )
 
 class _StateWidgetBalancingSpacer( GafferUI.Spacer ) :
 
