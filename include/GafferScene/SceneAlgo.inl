@@ -44,6 +44,115 @@ namespace GafferScene
 namespace Detail
 {
 
+template<typename Functor>
+struct Range
+{
+
+	using ChildNameIterator = std::vector<IECore::InternedString>::const_iterator;
+
+	// Implementation of TBB Range concept
+
+	Range( const Range & ) = default;
+
+	//Range & operator = ( const Range &rhs ) = default;
+
+	Range( Range &r, tbb::split )
+		:	m_scene( r.m_scene ), m_threadState( r.m_threadState ),
+			m_functor( r.m_functor )
+	{
+		if( r.m_end - r.m_begin == 1 )
+		{
+			// Single child. Recurse before splitting.
+			ScenePlug::ScenePath child = r.m_parent;
+			child.push_back( *r.m_begin );
+			//std::cerr << "RECURSIVE SPLITTING" << std::endl;
+			Range childRange( r.m_scene, r.m_threadState, r.m_functor, child );
+			r.m_parent = childRange.m_parent;
+			r.m_childNames = childRange.m_childNames;
+			r.m_begin = childRange.m_begin;
+			r.m_end = childRange.m_end; /// DON'T COPY THIS
+			//std::cerr << "   " << r.m_parent << " " << ( r.m_end - r.m_begin ) << std::endl;
+		}
+
+		// Split children equally.
+		//std::cerr << "SPLITTING " << (r.m_end - r.m_begin) << std::endl;
+		ChildNameIterator mid = r.m_begin + (r.m_end - r.m_begin)/2;
+		m_parent = r.m_parent;
+		m_childNames = r.m_childNames;
+		m_begin = mid;
+		m_end = r.m_end;
+		r.m_end = mid;
+		//std::cerr << "   " << (r.m_end - r.m_begin) << " " << (m_end - m_begin) << std::endl;
+	}
+
+	bool empty() const
+	{
+		return m_begin == m_end;
+	}
+
+	bool is_divisible() const
+	{
+		// We don't really know if we're divisible until
+		// we evaluate our children. Even one child could
+		// lead to loads of recursive splitting later.
+		return !empty();
+	}
+
+	// Our methods used to initialise and traverse the range.
+
+	Range( const ScenePlug *scene, const Gaffer::ThreadState &threadState, Functor &f, const ScenePlug::ScenePath &parent )
+		:	m_scene( scene ), m_threadState( threadState ),
+			m_functor( f ), m_parent( parent )
+	{
+		//std::cerr << "CONSTRUCTING " << m_parent << std::endl;
+		ScenePlug::PathScope scope( m_threadState, &m_parent );
+		if( m_functor( m_scene, m_parent ) )
+		{
+		//	std::cerr << "  FUNCTOR 1" << std::endl;
+			m_childNames = m_scene->childNamesPlug()->getValue();
+		}
+		else
+		{
+			//std::cerr << "  FUNCTOR 0" << std::endl;
+			m_childNames = m_scene->childNamesPlug()->defaultValue();
+		}
+
+		m_begin = m_childNames->readable().begin();
+		m_end = m_childNames->readable().end();
+	}
+
+	void execute() const
+	{
+		//std::cerr << "EXECUTING " << m_parent << " " << (m_end - m_begin) << std::endl;
+		if( empty() )
+		{
+			//std::cerr << "   EARLY OUT" << std::endl;
+			return;
+		}
+
+		ScenePlug::ScenePath childPath = m_parent;
+		childPath.push_back( IECore::InternedString() );
+		//std::cerr << "CHILD PATH " << childPath << std::endl;
+		for( ChildNameIterator it = m_begin; it != m_end; ++it )
+		{
+			//std::cerr << *it << std::endl;
+			childPath.back() = *it;
+			Range( m_scene, m_threadState, m_functor, childPath ).execute();
+		}
+	}
+
+	//private :
+
+		const ScenePlug *m_scene;
+		const Gaffer::ThreadState &m_threadState;
+		Functor &m_functor;
+		ScenePlug::ScenePath m_parent;
+		IECore::ConstInternedStringVectorDataPtr m_childNames;
+		ChildNameIterator m_begin;
+		ChildNameIterator m_end;
+
+};
+
 template<typename ThreadableFunctor>
 void parallelProcessLocationsWalk( const GafferScene::ScenePlug *scene, const Gaffer::ThreadState &threadState, const ScenePlug::ScenePath &path, ThreadableFunctor &f, tbb::task_group_context &taskGroupContext )
 {
@@ -146,11 +255,38 @@ struct PathMatcherFunctor
 namespace SceneAlgo
 {
 
+template<typename Range>
+void walkRange( Range &r )
+{
+	//std::cerr << "WALK " << ScenePlug::pathToString( r.m_parent ) << std::endl;
+	if( r.is_divisible() )
+	{
+		Range s( r, tbb::split() );
+		walkRange( r );
+		walkRange( s );
+	}
+}
+
 template <class ThreadableFunctor>
 void parallelProcessLocations( const GafferScene::ScenePlug *scene, ThreadableFunctor &f, const ScenePlug::ScenePath &root )
 {
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated ); // Prevents outer tasks silently cancelling our tasks
-	Detail::parallelProcessLocationsWalk( scene, Gaffer::ThreadState::current(), root, f, taskGroupContext );
+
+	Detail::Range<ThreadableFunctor> range( scene, Gaffer::ThreadState::current(), f, root );
+	if( range.empty() )
+	{
+		return;
+	}
+
+	//walkRange( range );
+
+	tbb::parallel_for(
+		range,
+		[] ( const Detail::Range<ThreadableFunctor> &range ) {
+			range.execute();
+		},
+		taskGroupContext
+	);
 }
 
 template <class ThreadableFunctor>
