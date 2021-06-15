@@ -34,74 +34,235 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GafferUI/PlugAdder.h"
+#include "GafferSceneUI/AttributeQueryUI.h"
+
+#include "Gaffer/BoxPlug.h"
+#include "Gaffer/CompoundNumericPlug.h"
+#include "Gaffer/Metadata.h"
+#include "Gaffer/TypedObjectPlug.h"
+#include "Gaffer/TypedPlug.h"
+#include "Gaffer/StringPlug.h"
+
 #include "GafferUI/NoduleLayout.h"
 
-#include "GafferScene/AttributeQuery.h"
-
 #include "IECore/Exception.h"
+#include "IECore/NullObject.h"
 
 #include <boost/bind.hpp>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/mem_fun.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/random_access_index.hpp>
 
+#include <algorithm>
 #include <cassert>
+#include <functional>
+#include <iterator>
 
 namespace
 {
 
-struct AttributeQueryPlugAdder : GafferUI::PlugAdder
+template< typename ValueType >
+Gaffer::ConstValuePlugPtr createNumericPlug( 
+	const std::string& name, const Gaffer::Plug::Direction direction, const ValueType& value, const unsigned flags )
 {
-	AttributeQueryPlugAdder( GafferScene::AttributeQuery& query )
-	: GafferUI::PlugAdder()
-	, m_query( & query )
-	{
-		m_query->childAddedSignal().connect( boost::bind( & AttributeQueryPlugAdder::updateVisibility, this ) );
-		m_query->childRemovedSignal().connect( boost::bind( & AttributeQueryPlugAdder::updateVisibility, this ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::NumericPlug< ValueType >( name, direction, value, 
+		ValueType( Imath::limits< ValueType >::min() ), 
+		ValueType( Imath::limits< ValueType >::max() ), flags ) );
+	return plug;
+}
 
-		updateVisibility();
-	}
+template< typename ValueType >
+Gaffer::ConstValuePlugPtr createCompoundNumericPlug( 
+	const std::string& name, const Gaffer::Plug::Direction direction, const ValueType& value, const unsigned flags )
+{
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::CompoundNumericPlug< ValueType >( name, direction, value, 
+		ValueType( Imath::limits< typename ValueType::BaseType >::min() ), 
+		ValueType( Imath::limits< typename ValueType::BaseType >::max() ), flags ) );
+	return plug;
+}
 
-	~AttributeQueryPlugAdder() override
+template< typename ValueType >
+Gaffer::ConstValuePlugPtr createBoxPlug(
+	const std::string& name, const Gaffer::Plug::Direction direction, const Imath::Box< ValueType >& value, const unsigned flags )
+{
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::BoxPlug< Imath::Box< ValueType > >( name, direction, value, 
+		ValueType( Imath::limits< typename ValueType::BaseType >::min() ), 
+		ValueType( Imath::limits< typename ValueType::BaseType >::max() ), flags ) );
+	return plug;
+}
+
+template< typename ValueType >
+Gaffer::ConstValuePlugPtr createVectorDataPlug(
+	const std::string& name, const Gaffer::Plug::Direction direction, const IECore::TypedData< std::vector< ValueType > >* value, const unsigned flags )
+{
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::TypedObjectPlug< IECore::TypedData< std::vector< ValueType > > >( name, direction, value, flags ) );
+	return plug;
+}
+
+struct MenuItem
+{
+	explicit
+	MenuItem( const std::string& name, Gaffer::ConstValuePlugPtr plug = Gaffer::ConstValuePlugPtr() )
+	: m_name( name )
+	, m_plug( plug )
 	{}
 
-protected:
+	const std::string& getName() const
+	{
+		return m_name;
+	}
 
-	bool canCreateConnection( const Gaffer::Plug* plug ) const override;
-	void createConnection( Gaffer::Plug* plug ) override;
+	const Gaffer::ValuePlug* getPlug() const
+	{
+		return m_plug.get();
+	}
 
 private:
 
-	void updateVisibility()
-	{
-		setVisible( m_query->valuePlug() == 0 );
-	}
-
-	struct Register
-	{
-		Register()
-		{
-			GafferUI::NoduleLayout::registerCustomGadget( "GafferUI.AttributeQueryUI.PlugAdder", & Register::create );
-		}
-
-		static GafferUI::GadgetPtr create( Gaffer::GraphComponentPtr parent )
-		{
-			const GafferScene::AttributeQueryPtr query = IECore::runTimeCast< GafferScene::AttributeQuery >( parent );
-
-			if( ! query )
-			{
-				throw IECore::Exception( "AttributeQueryPlugAdder requires an AttributeQuery" );
-			}
-
-			const GafferUI::GadgetPtr gadget( new AttributeQueryPlugAdder( *query ) );
-			return gadget;
-		}
-	};
-
-	static Register m_register;
-
-	GafferScene::AttributeQueryPtr m_query;
+	std::string m_name;
+	Gaffer::ConstValuePlugPtr m_plug;
 };
 
-bool AttributeQueryPlugAdder::canCreateConnection( const Gaffer::Plug* const plug ) const
+typedef boost::multi_index_container<
+	MenuItem,
+	boost::multi_index::indexed_by<
+		boost::multi_index::random_access<>,
+		boost::multi_index::ordered_non_unique< 
+			boost::multi_index::const_mem_fun< MenuItem, const std::string&, & MenuItem::getName > > > > MenuItemContainer;
+
+const MenuItemContainer& menuItemContainer()
+{
+	static MenuItemContainer items;
+
+	if( items.empty() )
+	{
+		const std::string name( "value" );
+		const Gaffer::Plug::Direction direction = Gaffer::Plug::In;
+		const unsigned flags = Gaffer::Plug::Flags::Default | Gaffer::Plug::Flags::Dynamic;
+
+		items.push_back( MenuItem( "Bool", new Gaffer::BoolPlug( name, direction, false, flags ) ) );
+		items.push_back( MenuItem( "Float", createNumericPlug( name, direction, 0.f, flags ) ) );
+		items.push_back( MenuItem( "Int", createNumericPlug( name, direction, 0, flags ) ) );
+		items.push_back( MenuItem( "" ) );
+		items.push_back( MenuItem( "String", new Gaffer::StringPlug( name, direction, "", flags ) ) );
+		items.push_back( MenuItem( "" ) );
+		items.push_back( MenuItem( "V2i", createCompoundNumericPlug( name, direction, Imath::V2i( 0 ), flags ) ) );
+		items.push_back( MenuItem( "V2f", createCompoundNumericPlug( name, direction, Imath::V2f( 0 ), flags ) ) );
+		items.push_back( MenuItem( "V3i", createCompoundNumericPlug( name, direction, Imath::V3i( 0 ), flags ) ) );
+		items.push_back( MenuItem( "V3f", createCompoundNumericPlug( name, direction, Imath::V3f( 0 ), flags ) ) );
+		items.push_back( MenuItem( "" ) );
+		items.push_back( MenuItem( "Color3f", createCompoundNumericPlug( name, direction, Imath::Color3f( 0 ), flags ) ) );
+		items.push_back( MenuItem( "Color4f", createCompoundNumericPlug( name, direction, Imath::Color4f( 0 ), flags ) ) );
+		items.push_back( MenuItem( "" ) );
+		items.push_back( MenuItem( "Box2i", createBoxPlug( name, direction, Imath::Box2i( Imath::V2i( 0 ) ), flags ) ) );
+		items.push_back( MenuItem( "Box2f", createBoxPlug( name, direction, Imath::Box2f( Imath::V2f( 0.f ) ), flags ) ) );
+		items.push_back( MenuItem( "Box3i", createBoxPlug( name, direction, Imath::Box3i( Imath::V3i( 0 ) ), flags ) ) );
+		items.push_back( MenuItem( "Box3f", createBoxPlug( name, direction, Imath::Box3f( Imath::V3f( 0.f ) ), flags ) ) );
+		items.push_back( MenuItem( "" ) );
+		items.push_back( MenuItem( "Object", new Gaffer::ObjectPlug( name, direction, IECore::NullObject::defaultNullObject(), flags ) ) );
+		items.push_back( MenuItem( "" ) );
+		items.push_back( MenuItem( "Array/Bool", createVectorDataPlug( name, direction, new IECore::BoolVectorData(), flags ) ) );
+		items.push_back( MenuItem( "Array/Float", createVectorDataPlug( name, direction, new IECore::FloatVectorData(), flags ) ) );
+		items.push_back( MenuItem( "Array/Int", createVectorDataPlug( name, direction, new IECore::IntVectorData(), flags ) ) );
+		items.push_back( MenuItem( "Array/" ) );
+		items.push_back( MenuItem( "Array/String", createVectorDataPlug( name, direction, new IECore::StringVectorData(), flags ) ) );
+	}
+
+	return items;
+}
+
+struct Registration
+{
+	Registration()
+	{
+		GafferUI::NoduleLayout::registerCustomGadget( "GafferSceneUI.AttributeQueryUI.PlugAdder", & Registration::create );
+	}
+
+	static GafferUI::GadgetPtr create( Gaffer::GraphComponentPtr parent )
+	{
+		const GafferScene::AttributeQueryPtr query = IECore::runTimeCast< GafferScene::AttributeQuery >( parent );
+
+		if( ! query )
+		{
+			throw IECore::Exception( "AttributeQueryUI.PlugAdder requires an AttributeQuery" );
+		}
+
+		const GafferUI::GadgetPtr gadget( new GafferSceneUI::AttributeQueryUI::PlugAdder( *query ) );
+		return gadget;
+	}
+};
+
+Registration m_registration;
+
+} // namespace
+
+namespace GafferSceneUI
+{
+
+const std::string& AttributeQueryUI::setupMenuTitle()
+{
+	static const std::string title( "Plug type" );
+
+	return title;
+}
+
+const std::vector< std::string >& AttributeQueryUI::setupMenuNames()
+{
+	static std::vector< std::string > names;
+
+	if( names.empty() )
+	{
+		const MenuItemContainer::nth_index< 0 >::type& items = menuItemContainer().get< 0 >();
+		std::transform( items.begin(), items.end(), std::back_inserter( names ), std::mem_fn( & MenuItem::getName ) );
+	}
+
+	return names;
+}
+
+bool AttributeQueryUI::setupFromMenuName( GafferScene::AttributeQuery& query, const std::string& name )
+{
+	if( name.empty() )
+	{
+		return false;
+	}
+
+	if( query.isSetup() )
+	{
+		return false;
+	}
+
+	const MenuItemContainer::nth_index< 1 >::type& items = menuItemContainer().get< 1 >();
+	const MenuItemContainer::nth_index< 1 >::type::iterator it = items.find( name );
+
+	if( it == items.end() )
+	{
+		return false;
+	}
+
+	const Gaffer::ValuePlug* const plug = ( *it ).getPlug();
+
+	query.setup( plug );
+
+	return true;
+}
+
+AttributeQueryUI::PlugAdder::PlugAdder( GafferScene::AttributeQuery& query )
+: GafferUI::PlugAdder()
+, m_query( & query )
+{
+	m_query->childAddedSignal().connect( boost::bind( & AttributeQueryUI::PlugAdder::updateVisibility, this ) );
+	m_query->childRemovedSignal().connect( boost::bind( & AttributeQueryUI::PlugAdder::updateVisibility, this ) );
+
+	buttonReleaseSignal().connect( boost::bind( & AttributeQueryUI::PlugAdder::buttonRelease, this, ::_2 ) );
+
+	updateVisibility();
+}
+
+AttributeQueryUI::PlugAdder::~PlugAdder()
+{}
+
+bool AttributeQueryUI::PlugAdder::canCreateConnection( const Gaffer::Plug* const plug ) const
 {
 	assert( m_query );
 
@@ -112,7 +273,7 @@ bool AttributeQueryPlugAdder::canCreateConnection( const Gaffer::Plug* const plu
 		( m_query->canSetup( IECore::runTimeCast< const Gaffer::ValuePlug >( plug ) ) ) );
 }
 
-void AttributeQueryPlugAdder::createConnection( Gaffer::Plug* const plug )
+void AttributeQueryUI::PlugAdder::createConnection( Gaffer::Plug* const plug )
 {
 	assert( plug->direction() == Gaffer::Plug::In );
 
@@ -121,6 +282,15 @@ void AttributeQueryPlugAdder::createConnection( Gaffer::Plug* const plug )
 	plug->setInput( m_query->valuePlug() );
 }
 
-AttributeQueryPlugAdder::Register AttributeQueryPlugAdder::m_register;
+bool AttributeQueryUI::PlugAdder::buttonRelease( const GafferUI::ButtonEvent& event )
+{
+	return AttributeQueryUI::setupFromMenuName( *m_query, menuSignal()(
+		AttributeQueryUI::setupMenuTitle(), AttributeQueryUI::setupMenuNames() ) );
+}
 
-} // namespace
+void AttributeQueryUI::PlugAdder::updateVisibility()
+{
+	setVisible( !( m_query->isSetup() ) );
+}
+
+} // GafferSceneUI

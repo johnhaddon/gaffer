@@ -36,6 +36,75 @@
 
 import Gaffer
 import GafferScene
+import GafferUI
+import imath
+import IECore
+import functools
+import uuid
+
+from GafferSceneUI._GafferSceneUI import __setupMenuTitle as setupMenuTitle
+from GafferSceneUI._GafferSceneUI import __setupMenuNames as setupMenuNames
+from GafferSceneUI._GafferSceneUI import __setupFromMenuName as setupFromMenuName
+
+class _SetupButton( GafferUI.Widget ) :
+
+	def __init__( self, node ) :
+
+		self.__node = node
+		self.__row = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal )
+
+		GafferUI.Widget.__init__( self, self.__row )
+
+		with self.__row :
+
+				GafferUI.Spacer( imath.V2i( GafferUI.PlugWidget.labelWidth(), 1 ) )
+
+				menuButton = GafferUI.MenuButton(
+					image = "plus.png",
+					hasFrame = False,
+					menu = GafferUI.Menu(
+						Gaffer.WeakMethod( self.__menuDefinition ),
+						title = setupMenuTitle()
+					)
+				)
+
+				GafferUI.Spacer( imath.V2i( 1 ), imath.V2i( 999999, 1 ), parenting = { "expand" : True } )
+
+		node.childAddedSignal().connect( Gaffer.WeakMethod( self.__updateVisibility ), scoped = False )
+		node.childRemovedSignal().connect( Gaffer.WeakMethod( self.__updateVisibility ), scoped = False )
+
+		self.__updateVisibility()
+
+	def __menuDefinition( self ) :
+
+		menuDefinition = IECore.MenuDefinition()
+
+		for name in setupMenuNames() :
+			if not name.split('/')[~0] :
+				menuDefinition.append(
+					"/" + name + uuid.uuid4().hex,
+					{
+						"divider" : True
+					}
+				)
+			else :
+				menuDefinition.append(
+					"/" + name,
+					{
+						"command" : functools.partial( Gaffer.WeakMethod( self.__setup ), name )
+					}
+				)
+
+		return menuDefinition
+
+	def __setup( self, name ) :
+
+		setupFromMenuName( self.__node, name )
+
+	def __updateVisibility( self, *args, **kwargs ) :
+
+		# calling self.setVisible() does not hide the button widget (something to do with layouts)
+		self.__row.setVisible( not ( self.__node.isSetup() ) )
 
 Gaffer.Metadata.registerNode(
 
@@ -46,9 +115,12 @@ Gaffer.Metadata.registerNode(
 	Query a particular location in a scene and outputs attribute.
 	""",
 
-	# Add + button for creating default/output plugs in the GraphEditor
-	"noduleLayout:customGadget:addButtonBottom:gadgetType", "GafferUI.AttributeQueryUI.PlugAdder",
-	"noduleLayout:customGadget:addButtonBottom:section", "bottom",
+	"layout:customWidget:setupButton:widgetType", "GafferSceneUI.AttributeQueryUI._SetupButton",
+	"layout:customWidget:setupButton:section", "Settings",
+	"layout:customWidget:setupButton:index", -1,
+
+	"noduleLayout:customGadget:setupButton:gadgetType", "GafferSceneUI.AttributeQueryUI.PlugAdder",
+	"noduleLayout:customGadget:setupButton:section", "bottom",
 
 	plugs = {
 

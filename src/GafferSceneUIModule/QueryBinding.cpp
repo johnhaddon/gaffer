@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, John Haddon. All rights reserved.
+//  Copyright (c) 2021, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,25 +36,36 @@
 
 #include "boost/python.hpp"
 
-#include "ContextAlgoBinding.h"
-#include "HierarchyViewBinding.h"
-#include "SceneGadgetBinding.h"
-#include "ToolBinding.h"
-#include "ViewBinding.h"
-#include "VisualiserBinding.h"
 #include "QueryBinding.h"
 
-using namespace GafferSceneUIModule;
+#include "GafferSceneUI/AttributeQueryUI.h"
 
-BOOST_PYTHON_MODULE( _GafferSceneUI )
+namespace
 {
+	std::string setupMenuTitle()
+	{
+		return GafferSceneUI::AttributeQueryUI::setupMenuTitle();
+	}
 
-	bindViews();
-	bindTools();
-	bindVisualisers();
-	bindHierarchyView();
-	bindSceneGadget();
-	bindContextAlgo();
-	bindQueries();
+	boost::python::list setupMenuNames()
+	{
+		const std::vector< std::string >& names = GafferSceneUI::AttributeQueryUI::setupMenuNames();
 
+		boost::python::list list;
+
+		for( std::vector< std::string >::const_iterator it = names.begin(), itEnd = names.end(); it != itEnd; ++it )
+		{
+			list.append( *it );
+		}
+
+		return list;
+	}
+
+} // namespace
+
+void GafferSceneUIModule::bindQueries()
+{
+	boost::python::def( "__setupMenuTitle", & setupMenuTitle );
+	boost::python::def( "__setupMenuNames", & setupMenuNames );
+	boost::python::def( "__setupFromMenuName", & GafferSceneUI::AttributeQueryUI::setupFromMenuName );
 }

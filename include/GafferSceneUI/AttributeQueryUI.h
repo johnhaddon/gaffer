@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, John Haddon. All rights reserved.
+//  Copyright (c) 2021, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,27 +34,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef GAFFERSCENEUI_ATTRIBUTEQUERYUI_H
+#define GAFFERSCENEUI_ATTRIBUTEQUERYUI_H
 
-#include "ContextAlgoBinding.h"
-#include "HierarchyViewBinding.h"
-#include "SceneGadgetBinding.h"
-#include "ToolBinding.h"
-#include "ViewBinding.h"
-#include "VisualiserBinding.h"
-#include "QueryBinding.h"
+#include "GafferSceneUI/Export.h"
 
-using namespace GafferSceneUIModule;
+#include "GafferScene/AttributeQuery.h"
 
-BOOST_PYTHON_MODULE( _GafferSceneUI )
+#include "GafferUI/PlugAdder.h"
+
+namespace GafferSceneUI
 {
 
-	bindViews();
-	bindTools();
-	bindVisualisers();
-	bindHierarchyView();
-	bindSceneGadget();
-	bindContextAlgo();
-	bindQueries();
+struct AttributeQueryUI
+{
+	GAFFERSCENEUI_API static const std::string& setupMenuTitle();
+	GAFFERSCENEUI_API static const std::vector< std::string >& setupMenuNames();
+	GAFFERSCENEUI_API static bool setupFromMenuName( GafferScene::AttributeQuery& query, const std::string& name );
 
-}
+	struct PlugAdder : GafferUI::PlugAdder
+	{
+		explicit PlugAdder( GafferScene::AttributeQuery& query );
+		~PlugAdder() override;
+
+	protected:
+
+		bool canCreateConnection( const Gaffer::Plug* plug ) const override;
+		void createConnection( Gaffer::Plug* plug ) override;
+
+	private:
+
+		bool buttonRelease( const GafferUI::ButtonEvent& event );
+		void updateVisibility();
+
+		GafferScene::AttributeQueryPtr m_query;
+	};
+};
+
+} // GafferSceneUI
+
+#endif // GAFFERSCENEUI_ATTRIBUTEQUERYUI_H
