@@ -698,10 +698,12 @@ void AttributeQuery::setup( const Gaffer::ValuePlug* const plug )
 
 	Gaffer::PlugPtr def = plug->createCounterpart( g_defPlugName, Gaffer::Plug::In );
 	def->setFlags( Gaffer::Plug::Serialisable, true );
+	def->setFlags( Gaffer::Plug::Dynamic, false );
 	addChild( def );
 
 	Gaffer::PlugPtr val = plug->createCounterpart( g_valPlugName, Gaffer::Plug::Out );
 	val->setFlags( Gaffer::Plug::Serialisable, true );
+	val->setFlags( Gaffer::Plug::Dynamic, false );
 	addChild( val );
 }
 
