@@ -86,20 +86,8 @@ void setup( AttributeQuery& query, const Gaffer::ValuePlug& plug )
 
 class Serialiser : public GafferBindings::NodeSerialiser
 {
-	bool childNeedsConstruction( const Gaffer::GraphComponent* child, const GafferBindings::Serialisation& serialisation ) const override;
 	std::string postConstructor( const Gaffer::GraphComponent* component, const std::string& identifier, GafferBindings::Serialisation& serialisation ) const override;
 };
-
-bool Serialiser::childNeedsConstruction( const Gaffer::GraphComponent* const child, const GafferBindings::Serialisation& serialisation ) const
-{
-	const AttributeQuery* const query = child->parent< AttributeQuery >();
-	assert( query != 0 );
-
-	return ( !(
-			( child == query->defaultPlug() ) ||
-			( child == query->valuePlug() ) ) ) &&
-		( GafferBindings::NodeSerialiser::childNeedsConstruction( child, serialisation ) );
-}
 
 std::string Serialiser::postConstructor( const Gaffer::GraphComponent* const component, const std::string& identifier, GafferBindings::Serialisation& serialisation ) const
 {
@@ -114,15 +102,8 @@ std::string Serialiser::postConstructor( const Gaffer::GraphComponent* const com
 			result += "\n";
 		}
 
-		Gaffer::PlugPtr plug = query->valuePlug()->createCounterpart( "in", Gaffer::Plug::In );
-		assert( plug );
-
-		plug->setFlags( Gaffer::Plug::Dynamic, false );
-
-		const GafferBindings::Serialisation::Serialiser* const serialiser = GafferBindings::Serialisation::acquireSerialiser( plug.get() );
-		assert( serialiser != 0 );
-
-		result += identifier + ".setup( " + serialiser->constructor( plug.get(), serialisation ) + " )\n";
+		const GafferBindings::Serialisation::Serialiser* const serialiser = GafferBindings::Serialisation::acquireSerialiser( query->valuePlug() );
+		result += identifier + ".setup( " + serialiser->constructor( query->valuePlug(), serialisation ) + " )\n";
 	}
 
 	return result;
