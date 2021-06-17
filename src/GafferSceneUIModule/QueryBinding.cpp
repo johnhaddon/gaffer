@@ -40,6 +40,8 @@
 
 #include "GafferSceneUI/AttributeQueryUI.h"
 
+#include "IECorePython/ScopedGILRelease.h"
+
 namespace
 {
 	std::string setupMenuTitle()
@@ -61,11 +63,17 @@ namespace
 		return list;
 	}
 
+	bool setupFromMenuName( GafferScene::AttributeQuery& query, const std::string& name )
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		return GafferSceneUI::AttributeQueryUI::setupFromMenuName( query, name );
+	}
+
 } // namespace
 
 void GafferSceneUIModule::bindQueries()
 {
 	boost::python::def( "__setupMenuTitle", & setupMenuTitle );
 	boost::python::def( "__setupMenuNames", & setupMenuNames );
-	boost::python::def( "__setupFromMenuName", & GafferSceneUI::AttributeQueryUI::setupFromMenuName );
+	boost::python::def( "__setupFromMenuName", & setupFromMenuName );
 }

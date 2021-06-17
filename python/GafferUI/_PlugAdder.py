@@ -73,7 +73,7 @@ def __menu( title, names ) :
 
 	menuDefinition = IECore.MenuDefinition()
 	for name in names :
-		if not name.split('/')[~0] :
+		if not name.split('/')[-1] :
 			menuDefinition.append(
 				"/" + name + uuid4().hex,
 				{

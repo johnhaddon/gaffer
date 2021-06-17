@@ -41,7 +41,9 @@
 #include "Gaffer/Metadata.h"
 #include "Gaffer/TypedObjectPlug.h"
 #include "Gaffer/TypedPlug.h"
+#include "Gaffer/ScriptNode.h"
 #include "Gaffer/StringPlug.h"
+#include "Gaffer/UndoScope.h"
 
 #include "GafferUI/NoduleLayout.h"
 
@@ -128,7 +130,7 @@ typedef boost::multi_index_container<
 	MenuItem,
 	boost::multi_index::indexed_by<
 		boost::multi_index::random_access<>,
-		boost::multi_index::ordered_non_unique< 
+		boost::multi_index::ordered_non_unique<
 			boost::multi_index::const_mem_fun< MenuItem, const std::string&, & MenuItem::getName > > > > MenuItemContainer;
 
 const MenuItemContainer& menuItemContainer()
@@ -172,6 +174,61 @@ const MenuItemContainer& menuItemContainer()
 	return items;
 }
 
+struct PlugAdder : GafferUI::PlugAdder
+{
+	explicit PlugAdder( GafferScene::AttributeQuery& query )
+	: GafferUI::PlugAdder()
+	, m_query( & query )
+	{
+		m_query->childAddedSignal().connect( boost::bind( & PlugAdder::updateVisibility, this ) );
+		m_query->childRemovedSignal().connect( boost::bind( & PlugAdder::updateVisibility, this ) );
+
+		buttonReleaseSignal().connect( boost::bind( & PlugAdder::buttonRelease, this, ::_2 ) );
+
+		updateVisibility();
+	}
+
+	~PlugAdder() override
+	{}
+
+protected:
+
+	bool canCreateConnection( const Gaffer::Plug* plug ) const override
+	{
+		assert( m_query );
+
+		return (
+			( GafferUI::PlugAdder::canCreateConnection( plug ) ) &&
+			( plug->direction() == Gaffer::Plug::In ) &&
+			( plug->node() != m_query ) &&
+			( m_query->canSetup( IECore::runTimeCast< const Gaffer::ValuePlug >( plug ) ) ) );
+	}
+
+	void createConnection( Gaffer::Plug* plug ) override
+	{
+		assert( plug->direction() == Gaffer::Plug::In );
+
+		m_query->setup( IECore::assertedStaticCast< const Gaffer::ValuePlug >( plug ) );
+
+		plug->setInput( m_query->valuePlug() );
+	}
+
+private:
+
+	bool buttonRelease( const GafferUI::ButtonEvent& event )
+	{
+		return GafferSceneUI::AttributeQueryUI::setupFromMenuName( *m_query, menuSignal()(
+			GafferSceneUI::AttributeQueryUI::setupMenuTitle(), GafferSceneUI::AttributeQueryUI::setupMenuNames() ) );
+	}
+
+	void updateVisibility()
+	{
+		setVisible( !( m_query->isSetup() ) );
+	}
+
+	GafferScene::AttributeQueryPtr m_query;
+};
+
 struct Registration
 {
 	Registration()
@@ -188,7 +245,7 @@ struct Registration
 			throw IECore::Exception( "AttributeQueryUI.PlugAdder requires an AttributeQuery" );
 		}
 
-		const GafferUI::GadgetPtr gadget( new GafferSceneUI::AttributeQueryUI::PlugAdder( *query ) );
+		const GafferUI::GadgetPtr gadget( new PlugAdder( *query ) );
 		return gadget;
 	}
 };
@@ -240,57 +297,12 @@ bool AttributeQueryUI::setupFromMenuName( GafferScene::AttributeQuery& query, co
 		return false;
 	}
 
-	const Gaffer::ValuePlug* const plug = ( *it ).getPlug();
-
-	query.setup( plug );
+	{
+		Gaffer::UndoScope undoScope( query.ancestor< Gaffer::ScriptNode >() );
+		query.setup( ( *it ).getPlug() );
+	}
 
 	return true;
-}
-
-AttributeQueryUI::PlugAdder::PlugAdder( GafferScene::AttributeQuery& query )
-: GafferUI::PlugAdder()
-, m_query( & query )
-{
-	m_query->childAddedSignal().connect( boost::bind( & AttributeQueryUI::PlugAdder::updateVisibility, this ) );
-	m_query->childRemovedSignal().connect( boost::bind( & AttributeQueryUI::PlugAdder::updateVisibility, this ) );
-
-	buttonReleaseSignal().connect( boost::bind( & AttributeQueryUI::PlugAdder::buttonRelease, this, ::_2 ) );
-
-	updateVisibility();
-}
-
-AttributeQueryUI::PlugAdder::~PlugAdder()
-{}
-
-bool AttributeQueryUI::PlugAdder::canCreateConnection( const Gaffer::Plug* const plug ) const
-{
-	assert( m_query );
-
-	return (
-		( GafferUI::PlugAdder::canCreateConnection( plug ) ) &&
-		( plug->direction() == Gaffer::Plug::In ) &&
-		( plug->node() != m_query ) &&
-		( m_query->canSetup( IECore::runTimeCast< const Gaffer::ValuePlug >( plug ) ) ) );
-}
-
-void AttributeQueryUI::PlugAdder::createConnection( Gaffer::Plug* const plug )
-{
-	assert( plug->direction() == Gaffer::Plug::In );
-
-	m_query->setup( IECore::assertedStaticCast< const Gaffer::ValuePlug >( plug ) );
-
-	plug->setInput( m_query->valuePlug() );
-}
-
-bool AttributeQueryUI::PlugAdder::buttonRelease( const GafferUI::ButtonEvent& event )
-{
-	return AttributeQueryUI::setupFromMenuName( *m_query, menuSignal()(
-		AttributeQueryUI::setupMenuTitle(), AttributeQueryUI::setupMenuNames() ) );
-}
-
-void AttributeQueryUI::PlugAdder::updateVisibility()
-{
-	setVisible( !( m_query->isSetup() ) );
 }
 
 } // GafferSceneUI

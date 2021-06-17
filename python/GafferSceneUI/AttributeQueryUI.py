@@ -80,7 +80,7 @@ class _SetupButton( GafferUI.Widget ) :
 		menuDefinition = IECore.MenuDefinition()
 
 		for name in setupMenuNames() :
-			if not name.split('/')[~0] :
+			if not name.split('/')[-1] :
 				menuDefinition.append(
 					"/" + name + uuid.uuid4().hex,
 					{
@@ -103,7 +103,7 @@ class _SetupButton( GafferUI.Widget ) :
 
 	def __updateVisibility( self, *args, **kwargs ) :
 
-		# calling self.setVisible() does not hide the button widget (something to do with layouts)
+		# We can't use `self.setVisible()` because PlugLayout uses it to implement visibility activators
 		self.__row.setVisible( not ( self.__node.isSetup() ) )
 
 Gaffer.Metadata.registerNode(

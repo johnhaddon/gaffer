@@ -51,24 +51,6 @@ struct AttributeQueryUI
 	GAFFERSCENEUI_API static const std::string& setupMenuTitle();
 	GAFFERSCENEUI_API static const std::vector< std::string >& setupMenuNames();
 	GAFFERSCENEUI_API static bool setupFromMenuName( GafferScene::AttributeQuery& query, const std::string& name );
-
-	struct PlugAdder : GafferUI::PlugAdder
-	{
-		explicit PlugAdder( GafferScene::AttributeQuery& query );
-		~PlugAdder() override;
-
-	protected:
-
-		bool canCreateConnection( const Gaffer::Plug* plug ) const override;
-		void createConnection( Gaffer::Plug* plug ) override;
-
-	private:
-
-		bool buttonRelease( const GafferUI::ButtonEvent& event );
-		void updateVisibility();
-
-		GafferScene::AttributeQueryPtr m_query;
-	};
 };
 
 } // GafferSceneUI
