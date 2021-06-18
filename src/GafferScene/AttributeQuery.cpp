@@ -43,6 +43,7 @@
 #include "IECore/Exception.h"
 
 #include "boost/container/small_vector.hpp"
+#include "boost/timer/timer.hpp"
 
 #include <cassert>
 #include <vector>
@@ -320,6 +321,39 @@ void addChildPlugsToAffectedOutputs( const Gaffer::Plug* const plug, Gaffer::Dep
 	}
 }
 
+void addChildPlugsToAffectedOutputs2( const Gaffer::Plug* const plug, Gaffer::DependencyNode::AffectedPlugsContainer& outputs )
+{
+	assert( plug != 0 );
+
+	if( plug->children().empty() )
+	{
+		outputs.push_back( plug );
+	}
+	else for( const auto &child : Plug::Range( *plug ) )
+	{
+		addChildPlugsToAffectedOutputs2( child.get(), outputs );
+	}
+}
+
+void addChildPlugsToAffectedOutputs3( const Gaffer::Plug* const plug, Gaffer::DependencyNode::AffectedPlugsContainer& outputs )
+{
+	assert( plug != 0 );
+
+	if( plug->children().empty() )
+	{
+		outputs.push_back( plug );
+	}
+	else for( const auto &child : plug->children() )
+	{
+		const Gaffer::Plug* const childPlug = IECore::runTimeCast< const Gaffer::Plug >( child.get() );
+
+		if( childPlug && childPlug->direction() == Plug::Out )
+		{
+			addChildPlugsToAffectedOutputs3( childPlug, outputs );
+		}
+	}
+}
+
 IECore::InternedString g_defPlugName( "default" );
 IECore::InternedString g_valPlugName( "value" );
 
@@ -342,6 +376,75 @@ AttributeQuery::AttributeQuery( const std::string& name )
 	addChild( new Gaffer::BoolPlug( "inherit", Gaffer::Plug::In, false ) );
 	addChild( new Gaffer::BoolPlug( "exists", Gaffer::Plug::Out, false ) );
 	addChild( new Gaffer::ObjectPlug( "__internalObject", Gaffer::Plug::Out, IECore::NullObject::defaultNullObject() ) );
+
+	Box3fPlugPtr b = new Box3fPlug( "p", Plug::Out );
+	//V3fPlugPtr b = new V3fPlug( "p", Plug::Out );
+	//FloatPlugPtr b = new FloatPlug( "p", Plug::Out );
+
+	AffectedPlugsContainer c; c.reserve( 6 );
+	const int n = 100000000;
+
+	std::cerr << "Raw iterators :" << std::endl;
+
+	{
+		boost::timer::auto_cpu_timer t;
+		for( int i = 0; i < n; i++ )
+		{
+			c.clear();
+			addChildPlugsToAffectedOutputs( b.get(), c );
+		}
+	}
+	std::cerr << " Plugs : " << c.size() << std::endl;
+
+	std::cerr << "Plug Range : " << std::endl;
+
+	{
+		boost::timer::auto_cpu_timer t;
+		for( int i = 0; i < n; i++ )
+		{
+			c.clear();
+			addChildPlugsToAffectedOutputs2( b.get(), c );
+		}
+	}
+	std::cerr << " Plugs : " << c.size() << std::endl;
+
+	std::cerr << "Raw range-for : " << std::endl;
+
+	{
+  		boost::timer::auto_cpu_timer t;
+		for( int i = 0; i < n; i++ )
+		{
+			c.clear();
+			addChildPlugsToAffectedOutputs3( b.get(), c );
+		}
+	}
+	std::cerr << " Plugs : " << c.size() << std::endl;
+
+	std::cerr << "Recursive iterator : " << std::endl;
+
+	{
+		boost::timer::auto_cpu_timer t;
+		for( int i = 0; i < n; i++ )
+		{
+			c.clear();
+			if( b->children().empty() )
+			{
+				c.push_back( b.get() );
+			}
+			else
+			{
+				for( const auto &child : Plug::RecursiveRange( *b ) )
+				{
+					if( child->children().empty() )
+					{
+						c.push_back( child.get() );
+					}
+				}
+			}
+		}
+	}
+	std::cerr << " Plugs : " << c.size() << std::endl;
+
 }
 
 AttributeQuery::~AttributeQuery()
