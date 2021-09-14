@@ -67,6 +67,9 @@ class TestRunner( unittest.TextTestRunner ) :
 		# Called to return the decorated method.
 		def __call__( self, method ) :
 
+			if Gaffer.isDebug() :
+				return unittest.skip( "Performance not relevant in debug builds" )( method )
+
 			@functools.wraps( method )
 			def wrapper( *args, **kw ) :
 
