@@ -52,6 +52,8 @@ from .LightEditor import LightEditor
 from . import SceneHistoryUI
 from . import EditScopeUI
 
+from . import ImageSelectionTool
+
 from . import SceneNodeUI
 from . import SceneReaderUI
 from . import SceneProcessorUI

@@ -156,6 +156,7 @@
 				'gafferSceneUIRotateTool',
 				'gafferSceneUIScaleTool',
 				'gafferSceneUITranslateTool',
+				'gafferSceneUIImageSelectionTool',
 			]
 
 		},
