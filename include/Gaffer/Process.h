@@ -120,6 +120,8 @@ class GAFFER_API ProcessException : public std::runtime_error
 		const Context *context() const;
 		IECore::InternedString processType() const;
 
+		/// Returns the original exception that was wrapped by `wrapCurrentException()`.
+		std::exception_ptr unwrapped() const { return m_exception; };
 		/// Rethrows the original exception that was wrapped by `wrapCurrentException()`.
 		[[noreturn]] void rethrowUnwrapped() const;
 

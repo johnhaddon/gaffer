@@ -80,6 +80,35 @@ inline const ValuePlug *sourcePlug( const ValuePlug *p )
 	return p;
 }
 
+std::exception_ptr cacheExceptionHandler( const std::exception_ptr &e )
+{
+	try
+	{
+		std::rethrow_exception( e );
+	}
+	catch( const ProcessException &e )
+	{
+		// The ProcessException thrown by `Process::handleException()` is
+		// unsuitable for caching because :
+		//
+		// - There isn't a one-to-one mapping between processes and cache
+		//   entries (different plugs can share the same entry).
+		// - ProcessException stores the plug name for return from `what()`, but
+		//   the plug may be renamed.
+		// - ProcessException holds a reference to the plug, and we don't want
+		//   the cache to extend the plug's lifetime.
+		//
+		// So we cache the original exception instead, and use
+		// `ProcessException::wrapCurrentException()` to rewrap exceptions
+		// thrown by `cache.get()`.
+		return e.unwrapped();
+	}
+	catch( ... )
+	{
+		return e;
+	}
+}
+
 const IECore::MurmurHash g_nullHash;
 
 // We only use the lower half of possible dirty count values.
@@ -259,41 +288,38 @@ class ValuePlug::HashProcess : public Process
 				}
 
 				// And then look up the result in our cache.
-				if( g_hashCacheMode == HashCacheMode::Standard )
-				{
-					return threadData.cache.get( processKey );
-				}
-				else if( g_hashCacheMode == HashCacheMode::Checked )
-				{
-					HashProcessKey legacyProcessKey( processKey );
-					legacyProcessKey.dirtyCount = g_legacyGlobalDirtyCount + DIRTY_COUNT_RANGE_MAX + 1;
 
-					const IECore::MurmurHash check = threadData.cache.get( legacyProcessKey );
-					const IECore::MurmurHash result = threadData.cache.get( processKey );
-
-					if( result != check )
+				try
+				{
+					if( g_hashCacheMode == HashCacheMode::Standard )
 					{
-						// This isn't exactly a  process exception, but we want to treat it the same, in
-						// terms of associating it with a plug.  Creating a ProcessException is the simplest
-						// approach, which can be done by throwing and then immediately wrapping
-						try
-						{
-							throw IECore::Exception(  "Detected undeclared dependency. Fix DependencyNode::affects() implementation." );
-						}
-						catch( ... )
-						{
-							ProcessException::wrapCurrentException( processKey.plug, Context::current(), staticType );
-						}
+						return threadData.cache.get( processKey );
 					}
-					return result;
-				}
-				else
-				{
-					// HashCacheMode::Legacy
-					HashProcessKey legacyProcessKey( processKey );
-					legacyProcessKey.dirtyCount = g_legacyGlobalDirtyCount + DIRTY_COUNT_RANGE_MAX + 1;
+					else if( g_hashCacheMode == HashCacheMode::Checked )
+					{
+						HashProcessKey legacyProcessKey( processKey );
+						legacyProcessKey.dirtyCount = g_legacyGlobalDirtyCount + DIRTY_COUNT_RANGE_MAX + 1;
 
-					return threadData.cache.get( legacyProcessKey );
+						const IECore::MurmurHash check = threadData.cache.get( legacyProcessKey );
+						const IECore::MurmurHash result = threadData.cache.get( processKey );
+
+						if( result != check )
+						{
+							throw IECore::Exception( "Detected undeclared dependency. Fix DependencyNode::affects() implementation." );
+						}
+						return result;
+					}
+					else
+					{
+						// HashCacheMode::Legacy
+						HashProcessKey legacyProcessKey( processKey );
+						legacyProcessKey.dirtyCount = g_legacyGlobalDirtyCount + DIRTY_COUNT_RANGE_MAX + 1;
+						return threadData.cache.get( legacyProcessKey );
+					}
+				}
+				catch( ... )
+				{
+					ProcessException::wrapCurrentException( processKey.plug, Context::current(), staticType );
 				}
 			}
 		}
@@ -454,7 +480,7 @@ class ValuePlug::HashProcess : public Process
 
 		struct ThreadData
 		{
-			ThreadData() : cache( localCacheGetter, g_cacheSizeLimit, Cache::RemovalCallback(), /* cacheErrors = */ false ), clearCache( 0 ) {}
+			ThreadData() : cache( localCacheGetter, g_cacheSizeLimit, Cache::RemovalCallback(), cacheExceptionHandler ), clearCache( 0 ) {}
 			Cache cache;
 			// Flag to request that hashCache be cleared.
 			tbb::atomic<int> clearCache;
@@ -471,7 +497,7 @@ const IECore::InternedString ValuePlug::HashProcess::staticType( "computeNode:ha
 tbb::enumerable_thread_specific<ValuePlug::HashProcess::ThreadData, tbb::cache_aligned_allocator<ValuePlug::HashProcess::ThreadData>, tbb::ets_key_per_instance > ValuePlug::HashProcess::g_threadData;
 // Default limit corresponds to a cost of roughly 25Mb per thread.
 tbb::atomic<size_t> ValuePlug::HashProcess::g_cacheSizeLimit = 128000;
-ValuePlug::HashProcess::GlobalCache ValuePlug::HashProcess::g_globalCache( globalCacheGetter, g_cacheSizeLimit, Cache::RemovalCallback(), /* cacheErrors = */ false );
+ValuePlug::HashProcess::GlobalCache ValuePlug::HashProcess::g_globalCache( globalCacheGetter, g_cacheSizeLimit, Cache::RemovalCallback(), cacheExceptionHandler );
 std::atomic<uint64_t> ValuePlug::HashProcess::g_legacyGlobalDirtyCount( 0 );
 ValuePlug::HashCacheMode ValuePlug::HashProcess::g_hashCacheMode( defaultHashCacheMode() );
 
@@ -611,7 +637,14 @@ class ValuePlug::ComputeProcess : public Process
 			}
 			else
 			{
-				return g_cache.get( processKey );
+				try
+				{
+					return g_cache.get( processKey );
+				}
+				catch( ... )
+				{
+					ProcessException::wrapCurrentException( processKey.plug, Context::current(), staticType );
+				}
 			}
 		}
 
@@ -719,7 +752,7 @@ class ValuePlug::ComputeProcess : public Process
 };
 
 const IECore::InternedString ValuePlug::ComputeProcess::staticType( "computeNode:compute" );
-ValuePlug::ComputeProcess::Cache ValuePlug::ComputeProcess::g_cache( cacheGetter, 1024 * 1024 * 1024 * 1, ValuePlug::ComputeProcess::Cache::RemovalCallback(), /* cacheErrors = */ false ); // 1 gig
+ValuePlug::ComputeProcess::Cache ValuePlug::ComputeProcess::g_cache( cacheGetter, 1024 * 1024 * 1024 * 1, ValuePlug::ComputeProcess::Cache::RemovalCallback(), cacheExceptionHandler ); // 1 gig
 
 //////////////////////////////////////////////////////////////////////////
 // SetValueAction implementation
