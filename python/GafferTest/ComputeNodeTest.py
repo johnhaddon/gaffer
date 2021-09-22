@@ -698,6 +698,23 @@ class ComputeNodeTest( GafferTest.TestCase ) :
 
 		self.assertEqual( raised.exception.plug(), thrower2["out"] )
 
+	def testHashProcessExceptionNotShared( self ) :
+
+		thrower1 = self.ThrowingNode( "thrower1" )
+		thrower1.hashFail = True
+		thrower2 = self.ThrowingNode( "thrower2" )
+		thrower2.hashFail = True
+
+		with six.assertRaisesRegex( self, Gaffer.ProcessException, r'thrower1.out : [\s\S]*HashEeek!' ) as raised :
+			thrower1["out"].hash()
+
+		self.assertEqual( raised.exception.plug(), thrower1["out"] )
+
+		with six.assertRaisesRegex( self, Gaffer.ProcessException, r'thrower2.out : [\s\S]*HashEeek!' ) as raised :
+			thrower2["out"].hash()
+
+		self.assertEqual( raised.exception.plug(), thrower2["out"] )
+
 	def testProcessExceptionRespectsNameChanges( self ) :
 
 		thrower = self.ThrowingNode( "thrower1" )
@@ -709,6 +726,21 @@ class ComputeNodeTest( GafferTest.TestCase ) :
 		thrower.setName( "thrower2" )
 		with six.assertRaisesRegex( self, Gaffer.ProcessException, r'thrower2.out : [\s\S]*Eeek!' ) as raised :
 			thrower["out"].getValue()
+
+		self.assertEqual( raised.exception.plug(), thrower["out"] )
+
+	def testHashProcessExceptionRespectsNameChanges( self ) :
+
+		thrower = self.ThrowingNode( "thrower1" )
+		thrower.hashFail = True
+		with six.assertRaisesRegex( self, Gaffer.ProcessException, r'thrower1.out : [\s\S]*HashEeek!' ) as raised :
+			thrower["out"].hash()
+
+		self.assertEqual( raised.exception.plug(), thrower["out"] )
+
+		thrower.setName( "thrower2" )
+		with six.assertRaisesRegex( self, Gaffer.ProcessException, r'thrower2.out : [\s\S]*HashEeek!' ) as raised :
+			thrower["out"].hash()
 
 		self.assertEqual( raised.exception.plug(), thrower["out"] )
 
