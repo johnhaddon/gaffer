@@ -490,11 +490,7 @@ struct TestLRUCacheExceptions
 			},
 			1000,
 			typename Cache::RemovalCallback(),
-			// Exception handler
-			[] ( const std::exception_ptr &e ) {
-				// Disable caching
-				return std::exception_ptr();
-			}
+			/* cacheErrors = */ false
 		);
 
 		caughtException = false;

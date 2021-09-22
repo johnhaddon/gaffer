@@ -104,13 +104,8 @@ class LRUCache : private boost::noncopyable
 		typedef boost::function<Value ( const GetterKey &key, Cost &cost )> GetterFunction;
 		/// The optional RemovalCallback is called whenever an item is discarded from the cache.
 		typedef boost::function<void ( const Key &key, const Value &data )> RemovalCallback;
-		/// The optional ExceptionHandler is called whenever `getter` throws, and is responsible
-		/// for returning an exception to be cached. It may return the original exception unchanged
-		/// (the default behaviour), return an empty `exception_ptr` (to disable caching of errors)
-		/// or return a different exception entirely (to cache that instead).
-		typedef boost::function<std::exception_ptr ( const std::exception_ptr & )> ExceptionHandler;
 
-		LRUCache( GetterFunction getter, Cost maxCost, RemovalCallback removalCallback = RemovalCallback(), ExceptionHandler exceptionHandler = ExceptionHandler() );
+		LRUCache( GetterFunction getter, Cost maxCost, RemovalCallback removalCallback = RemovalCallback(), bool cacheErrors = true );
 		virtual ~LRUCache();
 
 		/// Retrieves an item from the cache, computing it if necessary.
@@ -166,7 +161,6 @@ class LRUCache : private boost::noncopyable
 		// A function for computing values, and one for notifying of removals.
 		GetterFunction m_getter;
 		RemovalCallback m_removalCallback;
-		ExceptionHandler m_exceptionHandler;
 
 		// Status of each item in the cache.
 		enum Status
@@ -201,6 +195,7 @@ class LRUCache : private boost::noncopyable
 		Policy<LRUCache> m_policy;
 
 		Cost m_maxCost;
+		bool m_cacheErrors;
 
 		// Methods
 		// =======
