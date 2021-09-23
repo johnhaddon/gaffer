@@ -153,7 +153,7 @@ IECore::ConstObjectPtr MeshType::computeProcessedObject( const ScenePath &path, 
 
 	if( doNormals )
 	{
-		result->variables[ "N" ] = MeshAlgo::calculateNormals( result.get(), PrimitiveVariable::Interpolation::Vertex, "P", context->canceller() );
+		result->variables[ "N" ] = MeshAlgo::calculateNormals( result.get(), PrimitiveVariable::Interpolation::Vertex, "P", context->getCanceller() );
 	}
 
 	return result;

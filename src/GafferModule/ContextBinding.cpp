@@ -205,7 +205,12 @@ void GafferModule::bindContext()
 		.def( self == self )
 		.def( self != self )
 		.def( "substitute", &Context::substitute, ( arg( "input" ), arg( "substitutions" ) = IECore::StringAlgo::AllSubstitutions ) )
-		.def( "canceller", &Context::canceller, return_internal_reference<1>() )
+		WE WANT TO EXTEND THE LIFETIME OF CANCELLER TO MATCH CONTEXT HERE (CUSTODIAN_AND_WARD?)
+		!!!.def( "setCanceller", &Context::setCanceller, return_internal_reference<1>() )
+		BUT HERE WE'RE EXTENDING THE LIFETIME OF CONTEXT TO MATCH CANCELLER. BOTH DON'T MAKE
+		SENSE! Since context doesn't own the canceller anyway, maybe we should just reference_existing_object here?
+		!!!.def( "getCanceller", &Context::getCanceller, return_internal_reference<1>() )
+		.def( "canceller", &Context::getCanceller, return_internal_reference<1>() )
 		.def( "current", &current ).staticmethod( "current" )
 		;
 

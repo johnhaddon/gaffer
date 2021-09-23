@@ -124,7 +124,7 @@ IECore::ConstObjectPtr LevelSetOffset::computeProcessedObject( const ScenePath &
 	}
 
 	openvdb::GridBase::Ptr newGrid;
-	Interrupter interrupter( context->canceller() );
+	Interrupter interrupter( context->getCanceller() );
 
 	if ( openvdb::FloatGrid::ConstPtr floatGrid = openvdb::GridBase::constGrid<openvdb::FloatGrid>( gridBase ) )
 	{

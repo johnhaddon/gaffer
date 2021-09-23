@@ -406,7 +406,10 @@ class CapturingMonitor : public Monitor
 			capturedProcess->type = process->type();
 			capturedProcess->plug = process->plug();
 			capturedProcess->destinationPlug = process->destinationPlug();
-			capturedProcess->context = new Context( *process->context(), /* omitCanceller = */ true );
+			capturedProcess->context = new Context( *process->context() );
+			// Our context may outlive the original canceller, and we don't
+			// want the canceller anyway.
+			capturedProcess->context->setCanceller( nullptr );
 
 			Mutex::scoped_lock lock( m_mutex );
 
@@ -692,9 +695,11 @@ SceneAlgo::History::Ptr SceneAlgo::history( const Gaffer::ValuePlug *scenePlugCh
 
 	if( monitor->rootProcesses().size() == 0 )
 	{
+		ContextPtr context = new Context( *Context::current() );
+		context->setCanceller( nullptr );
 		return new History(
 			const_cast<ScenePlug *>( scenePlugChild->parent<ScenePlug>() ),
-			new Context( *Context::current(), /* omitCanceller = */ true )
+			context
 		);
 	}
 

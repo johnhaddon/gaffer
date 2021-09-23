@@ -1026,7 +1026,7 @@ Imath::M44f Constraint::computeProcessedTransform( const ScenePath &path, const 
 			Imath::M44f surfaceTransform;
 			const Imath::V2f uv = targetUVPlug()->getValue();
 			const bool throwOnError = !( ignoreMissingTargetPlug()->getValue() );
-			computeUVLocalFrame( *object, surfaceTransform, uv, "uv", throwOnError, context->canceller() );
+			computeUVLocalFrame( *object, surfaceTransform, uv, "uv", throwOnError, context->getCanceller() );
 			fullTargetTransform = surfaceTransform * fullTargetTransform;
 			break;
 		}
@@ -1036,7 +1036,7 @@ Imath::M44f Constraint::computeProcessedTransform( const ScenePath &path, const 
 			Imath::M44f surfaceTransform;
 			const int vertexId = targetVertexPlug()->getValue();
 			const bool throwOnError = !( ignoreMissingTargetPlug()->getValue() );
-			computeVertexLocalFrame( *object, surfaceTransform, vertexId, "uv", throwOnError, context->canceller() );
+			computeVertexLocalFrame( *object, surfaceTransform, vertexId, "uv", throwOnError, context->getCanceller() );
 			fullTargetTransform = surfaceTransform * fullTargetTransform;
 			break;
 		}

@@ -309,7 +309,7 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 	ConstPrimitivePtr preprocessedSourcePrimitive = sourcePrimitive;
 	if( auto mesh = runTimeCast<const MeshPrimitive>( preprocessedSourcePrimitive.get() ) )
 	{
-		preprocessedSourcePrimitive = MeshAlgo::triangulate( mesh, context->canceller() );
+		preprocessedSourcePrimitive = MeshAlgo::triangulate( mesh, context->getCanceller() );
 	}
 	PrimitiveEvaluatorPtr evaluator = PrimitiveEvaluator::create( preprocessedSourcePrimitive );
 	if( !evaluator )
@@ -353,7 +353,7 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 		PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();
 		for( size_t i = r.begin(); i != r.end(); ++i )
 		{
-			Canceller::check( context->canceller() );
+			Canceller::check( context->getCanceller() );
 			if( samplingFunction( *evaluator, i, samplingTransform, *evaluatorResult ) )
 			{
 				for( const auto &o : outputVariables )

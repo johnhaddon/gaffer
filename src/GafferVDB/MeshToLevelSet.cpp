@@ -218,7 +218,7 @@ IECore::ConstObjectPtr MeshToLevelSet::computeProcessedObject( const ScenePath &
 	const float interiorBandwidth = interiorBandwidthPlug()->getValue();
 
 	openvdb::math::Transform::Ptr transform = openvdb::math::Transform::createLinearTransform( voxelSize );
-	Interrupter interrupter( context->canceller() );
+	Interrupter interrupter( context->getCanceller() );
 
 	openvdb::FloatGrid::Ptr grid = openvdb::tools::meshToVolume<openvdb::FloatGrid>(
 		interrupter,

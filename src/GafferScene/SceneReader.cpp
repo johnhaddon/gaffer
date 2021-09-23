@@ -342,7 +342,7 @@ IECore::ConstObjectPtr SceneReader::computeObject( const ScenePath &path, const 
 		return parent->objectPlug()->defaultValue();
 	}
 
-	return s->readObject( context->getTime(), context->canceller() );
+	return s->readObject( context->getTime(), context->getCanceller() );
 }
 
 void SceneReader::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
@@ -480,7 +480,7 @@ static void loadSetWalk( const SceneInterface *s, const InternedString &setName,
 	childPath.push_back( InternedString() ); // room for the child name
 	for( SceneInterface::NameList::const_iterator it = childNames.begin(), eIt = childNames.end(); it != eIt; ++it )
 	{
-		Canceller::check( context->canceller() );
+		Canceller::check( context->getCanceller() );
 
 		ConstSceneInterfacePtr child = s->child( *it );
 		childPath.back() = *it;

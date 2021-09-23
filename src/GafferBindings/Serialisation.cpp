@@ -146,7 +146,7 @@ Serialisation::Serialisation( const Gaffer::GraphComponent *parent, const std::s
 		m_protectParentNamespace( Context::current()->get<bool>( "serialiser:protectParentNamespace", true ) )
 {
 	IECorePython::ScopedGILLock gilLock;
-	walk( parent, parentName, acquireSerialiser( parent ), Context::current()->canceller() );
+	walk( parent, parentName, acquireSerialiser( parent ), Context::current()->getCanceller() );
 
 	if( Context::current()->get<bool>( "serialiser:includeParentMetadata", false ) )
 	{

@@ -165,6 +165,6 @@ IECore::ConstObjectPtr Sphere::computeSource( const Context *context ) const
 	}
 	else
 	{
-		return MeshPrimitive::createSphere( radius, zMin, zMax, thetaMax, divisionsPlug()->getValue(), context->canceller() );
+		return MeshPrimitive::createSphere( radius, zMin, zMax, thetaMax, divisionsPlug()->getValue(), context->getCanceller() );
 	}
 }

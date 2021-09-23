@@ -212,7 +212,7 @@ std::string readFile( const std::string &fileName )
 		throw IECore::IOException( "Unable to open file \"" + fileName + "\"" );
 	}
 
-	const IECore::Canceller *canceller = Context::current()->canceller();
+	const IECore::Canceller *canceller = Context::current()->getCanceller();
 
 	std::string s;
 	while( !f.eof() )

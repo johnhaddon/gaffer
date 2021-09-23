@@ -76,7 +76,7 @@ std::string prefixedWhat( const IECore::Exception &e )
 Process::Process( const IECore::InternedString &type, const Plug *plug, const Plug *destinationPlug )
 	:	m_type( type ), m_plug( plug ), m_destinationPlug( destinationPlug ? destinationPlug : plug )
 {
-	IECore::Canceller::check( context()->canceller() );
+	IECore::Canceller::check( context()->getCanceller() );
 	m_parent = m_threadState->m_process;
 	m_threadState->m_process = this;
 
@@ -93,9 +93,9 @@ Process::~Process()
 		m->processFinished( this );
 	}
 
-	if( context()->canceller() )
+	if( context()->getCanceller() )
 	{
-		const auto t = context()->canceller()->elapsedTime();
+		const auto t = context()->getCanceller()->elapsedTime();
 		if( t > std::chrono::seconds( 1 ) )
 		{
 			IECore::msg(

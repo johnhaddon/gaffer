@@ -146,7 +146,7 @@ bool tolerantExec( const char *pythonScript, boost::python::object globals, boos
 		return false;
 	}
 
-	const IECore::Canceller *canceller = Context::current()->canceller();
+	const IECore::Canceller *canceller = Context::current()->getCanceller();
 	IECore::Canceller::check( canceller );
 
 	assert( mod->kind == Module_kind );

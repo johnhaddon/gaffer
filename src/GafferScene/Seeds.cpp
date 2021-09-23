@@ -203,7 +203,7 @@ IECore::ConstObjectPtr Seeds::computeBranchObject( const ScenePath &sourcePath, 
 			densityPrimitiveVariablePlug()->getValue(),
 			"uv",
 			"P",
-			context->canceller()
+			context->getCanceller()
 		);
 		result->variables["type"] = PrimitiveVariable( PrimitiveVariable::Constant, new StringData( pointTypePlug()->getValue() ) );
 

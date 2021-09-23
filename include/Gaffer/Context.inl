@@ -271,6 +271,16 @@ void Context::EditableScope::setAllocated( const IECore::InternedString &name, c
 	m_context->set( name, value );
 }
 
+inline void Context::setCanceller( const IECore::Canceller *canceller )
+{
+	m_canceller = canceller;
+}
+
+inline const IECore::Canceller *Context::getCanceller() const
+{
+	return m_canceller;
+}
+
 inline const IECore::Canceller *Context::canceller() const
 {
 	return m_canceller;

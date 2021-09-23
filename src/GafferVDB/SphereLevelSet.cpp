@@ -147,7 +147,7 @@ void SphereLevelSet::hashSource( const Gaffer::Context *context, IECore::MurmurH
 
 IECore::ConstObjectPtr SphereLevelSet::computeSource( const Context *context ) const
 {
-	Interrupter interrupter( context->canceller() );
+	Interrupter interrupter( context->getCanceller() );
 
 	const auto center = centerPlug()->getValue();
 
@@ -159,7 +159,7 @@ IECore::ConstObjectPtr SphereLevelSet::computeSource( const Context *context ) c
 		&interrupter
 	);
 
-	Canceller::check( context->canceller() );
+	Canceller::check( context->getCanceller() );
 
 	grid->addStatsMetadata();
 	grid->setName( gridPlug()->getValue() );

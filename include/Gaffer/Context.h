@@ -85,9 +85,11 @@ class GAFFER_API Context : public IECore::RefCounted
 		/// Copy constructor for creating a cancellable context.
 		/// The canceller is referenced, not copied, and must remain
 		/// alive for as long as the context is in use.
+		[[deprecated( "Use `setCanceller()` instead" )]]
 		Context( const Context &other, const IECore::Canceller &canceller );
 		/// Copy constructor which can optionally omit an existing canceller
 		/// if `omitCanceller = true` is passed.
+		[[deprecated( "Use `setCanceller()` instead" )]]
 		Context( const Context &other, bool omitCanceller );
 		~Context() override;
 
@@ -182,9 +184,17 @@ class GAFFER_API Context : public IECore::RefCounted
 		/// pass context variables to `IECore::StringAlgo::substitute()`.
 		class SubstitutionProvider;
 
-		/// Used to request cancellation of long running background operations.
-		/// May be null. Nodes that perform expensive work should check for
-		/// cancellation periodically by calling `Canceller::check( context->canceller() )`.
+		/// Sets the canceller that will be used to request cancellation of long
+		/// running background operations. It is the caller's responsibility to
+		/// ensure that the pointer remains valid for the lifetime of the
+		/// context. To remove an existing canceller, pass `nullptr`.
+		void setCanceller( const IECore::Canceller *canceller );
+		/// Returns the canceller used to request cancellation of long running
+		/// background operations. May be null. Nodes that perform expensive
+		/// work should check for cancellation periodically by calling
+		/// `Canceller::check( context->getCanceller() )`.
+		const IECore::Canceller *getCanceller() const;
+		[[deprecated( "Use `getCanceller()` instead" )]]
 		const IECore::Canceller *canceller() const;
 
 		/// The Scope class is used to push and pop the current context on

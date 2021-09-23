@@ -1206,7 +1206,7 @@ IECore::CompoundDataPtr ShadingEngine::shade( const IECore::CompoundData *points
 
 	tbb::enumerable_thread_specific<ThreadInfo> threadInfoCache;
 
-	const IECore::Canceller *canceller = context->canceller();
+	const IECore::Canceller *canceller = context->getCanceller();
 
 	ShadingSystem *shadingSystem = ::shadingSystem();
 	ShaderGroup &shaderGroup = **static_cast<ShaderGroupRef *>( m_shaderGroupRef );
