@@ -53,6 +53,7 @@ from .TransformToolTest import TransformToolTest
 from .SourceSetTest import SourceSetTest
 from .CropWindowToolTest import CropWindowToolTest
 from .NodeUITest import NodeUITest
+from .GraphGadgetTest import GraphGadgetTest
 
 if __name__ == "__main__":
 	unittest.main()

@@ -122,6 +122,12 @@ class StandardNodeGadgetWrapper : public NodeGadgetWrapper<StandardNodeGadget>
 
 };
 
+StandardNodeGadgetPtr standardNodeGadgetConstructor( PyObject *self, Gaffer::Node &node )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return new StandardNodeGadgetWrapper( self, &node );
+}
+
 GadgetPtr getContents( StandardNodeGadget &g )
 {
 	return g.getContents();
@@ -193,7 +199,7 @@ void GafferUIModule::bindNodeGadget()
 
 	{
 		scope s = NodeGadgetClass<StandardNodeGadget, StandardNodeGadgetWrapper>()
-			.def( init<Gaffer::NodePtr>( arg( "node" ) ) )
+			.def( "__init__", make_function( standardNodeGadgetConstructor, default_call_policies(), ( arg( "node" ) ) ) )
 			.def( "setContents", &StandardNodeGadget::setContents )
 			.def( "getContents", &getContents )
 			.def( "setEdgeGadget", &StandardNodeGadget::setEdgeGadget )

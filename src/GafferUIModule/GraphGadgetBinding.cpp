@@ -62,6 +62,12 @@ using namespace GafferUIBindings;
 namespace
 {
 
+GraphGadgetPtr constructor( Gaffer::NodePtr root, Gaffer::SetPtr filter )
+{
+	ScopedGILRelease gilRelease;
+	return new GraphGadget( root, filter );
+}
+
 void setRoot( GraphGadget &graphGadget, Gaffer::NodePtr root, Gaffer::SetPtr filter )
 {
 	ScopedGILRelease gilRelease;
@@ -221,7 +227,7 @@ void GafferUIModule::bindGraphGadget()
 {
 	{
 		scope s = GadgetClass<GraphGadget>()
-			.def( init<Gaffer::NodePtr, Gaffer::SetPtr>( ( arg_( "root" ), arg_( "filter" ) = object() ) ) )
+			.def( "__init__", make_constructor( constructor, default_call_policies(), ( arg( "root" ), arg( "filter" ) = object() ) ) )
 			.def( "getRoot", (Gaffer::Node *(GraphGadget::*)())&GraphGadget::getRoot, return_value_policy<CastToIntrusivePtr>() )
 			.def( "setRoot", &setRoot, ( arg_( "root" ), arg_( "filter" ) = object() ) )
 			.def( "rootChangedSignal", &GraphGadget::rootChangedSignal, return_internal_reference<1>() )
