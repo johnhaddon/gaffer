@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2021, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,33 +34,43 @@
 #
 ##########################################################################
 
-__import__( "GafferScene" )
+import Gaffer
+import GafferScene
+import GafferArnold
 
-# GafferArnold makes use of OSL closure plugs, this ensures that the bindings
-# are always loaded for these, even if people only import GafferArnold
-__import__( "GafferOSL" )
+Gaffer.Metadata.registerNode(
 
-try :
+	GafferArnold.ArnoldCryptomatteOutputs,
 
-	# Make sure we import _GafferArnold _without_ RTLD_GLOBAL. This prevents
-	# clashes between the LLVM symbols in libai.so and the Mesa OpenGL driver.
-	# Ideally we wouldn't use RTLD_GLOBAL anywhere - see
-	# https://github.com/ImageEngine/cortex/pull/810.
+	"layout:activator:renderTypeIsBatch", lambda node : node["renderType"].getValue() == GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch,
 
-	import sys
-	import ctypes
-	originalDLOpenFlags = sys.getdlopenflags()
-	sys.setdlopenflags( originalDLOpenFlags & ~ctypes.RTLD_GLOBAL )
+	plugs = {
 
-	from ._GafferArnold import *
+		"renderType" : [
 
-finally :
+			"preset:Batch", GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch,
+			"preset:Interactive", GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive,
 
-	sys.setdlopenflags( originalDLOpenFlags )
-	del sys, ctypes, originalDLOpenFlags
+			"plugValueWidget:type", "GafferUI.PresetsPlugValueWidget",
 
-from .ArnoldShaderBall import ArnoldShaderBall
-from .ArnoldTextureBake import ArnoldTextureBake
-from .ArnoldCryptomatteOutputs import ArnoldCryptomatteOutputs
+		],
 
-__import__( "IECore" ).loadConfig( "GAFFER_STARTUP_PATHS", subdirectory = "GafferArnold" )
+		"fileName" : [
+
+			"plugValueWidget:type", "GafferUI.FileSystemPathPlugValueWidget",
+			"path:bookmarks", "image",
+			"path:leaf", True,
+
+			"layout:activator", "renderTypeIsBatch",
+
+		],
+
+		"depth" : [
+
+			"layout:activator", "renderTypeIsBatch",
+
+		],
+
+	}
+
+)
