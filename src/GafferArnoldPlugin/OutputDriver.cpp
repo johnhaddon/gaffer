@@ -366,41 +366,34 @@ void driverFinish( AtNode *node )
 
 } // namespace
 
-AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
+IECORE_EXPORT void loadOutputDriverNode( AtNodeLib *node )
 {
-	if( i==0 )
-	{
-		static AtCommonMethods commonMethods = {
-			nullptr, // Whole plugin init
-			nullptr, // Whole plugin cleanup
-			driverParameters,
-			driverInitialize,
-			driverUpdate,
-			driverFinish
-		};
-		static AtDriverNodeMethods driverMethods = {
-			driverSupportsPixelType,
-			driverExtension,
-			driverOpen,
-			driverNeedsBucket,
-			driverPrepareBucket,
-			driverProcessBucket,
-			driverWriteBucket,
-			driverClose
-		};
-		static AtNodeMethods nodeMethods = {
-			&commonMethods,
-			&driverMethods
-		};
+	static AtCommonMethods commonMethods = {
+		nullptr, // Whole plugin init
+		nullptr, // Whole plugin cleanup
+		driverParameters,
+		driverInitialize,
+		driverUpdate,
+		driverFinish
+	};
+	static AtDriverNodeMethods driverMethods = {
+		driverSupportsPixelType,
+		driverExtension,
+		driverOpen,
+		driverNeedsBucket,
+		driverPrepareBucket,
+		driverProcessBucket,
+		driverWriteBucket,
+		driverClose
+	};
+	static AtNodeMethods nodeMethods = {
+		&commonMethods,
+		&driverMethods
+	};
 
-		node->node_type = AI_NODE_DRIVER;
-		node->output_type = AI_TYPE_NONE;
-		node->name = "ieDisplay";
-		node->methods = &nodeMethods;
-		sprintf( node->version, AI_VERSION );
-
-		return true;
-	}
-
-	return false;
+	node->node_type = AI_NODE_DRIVER;
+	node->output_type = AI_TYPE_NONE;
+	node->name = "ieDisplay";
+	node->methods = &nodeMethods;
+	sprintf( node->version, AI_VERSION );
 }
