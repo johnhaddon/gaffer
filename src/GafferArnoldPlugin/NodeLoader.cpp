@@ -38,6 +38,7 @@
 #include "ai_plugins.h"
 
 void loadOutputDriverNode( AtNodeLib *node );
+void loadCryptomatteNode( AtNodeLib *node );
 
 node_loader
 {
@@ -45,6 +46,9 @@ node_loader
 	{
 		case 0 :
 			loadOutputDriverNode( node );
+			return true;
+		case 1 :
+			loadCryptomatteNode( node );
 			return true;
 		default :
 			return false;
