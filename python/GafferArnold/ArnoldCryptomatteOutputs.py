@@ -50,7 +50,7 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 		GafferScene.SceneProcessor.__init__( self, name )
 
 		self["renderType"] = Gaffer.IntPlug(
-			defaultValue = GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch, 
+			defaultValue = GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch,
 			minValue = GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch,
 			maxValue = GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive
 		)
@@ -125,7 +125,12 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 				}
 			)
 
-		result[prefix + "Object"] = outputTemplate
+		for d in range( 0, depth, 2 ) :
+
+			output = outputTemplate.copy()
+			output.parameters()["filter:rank"] = depth
+
+			result["{}Object{}{}".format( prefix, d, d + 1 )] = output
 
 		return result
 

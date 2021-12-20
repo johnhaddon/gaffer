@@ -53,6 +53,7 @@ from .ArnoldShaderBallTest import ArnoldShaderBallTest
 from .ArnoldCameraShadersTest import ArnoldCameraShadersTest
 from .ArnoldLightFilterTest import ArnoldLightFilterTest
 from .ArnoldColorManagerTest import ArnoldColorManagerTest
+from .ArnoldCryptomatteOutputsTest import ArnoldCryptomatteOutputsTest
 
 if __name__ == "__main__":
 	import unittest
