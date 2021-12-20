@@ -161,6 +161,11 @@ with IECore.IgnoredExceptions( ImportError ) :
 			)
 		)
 
+	Gaffer.Metadata.registerValue(
+		GafferArnold.ArnoldCryptomatteOutputs, "fileName", "userDefault",
+		"${project:rootDirectory}/renders/${script:name}/crypto_object<depth>/crypto_object<depth>.####.exr"
+	)
+
 # Add standard AOVs as they are defined in the 3Delight shaders
 
 with IECore.IgnoredExceptions( ImportError ) :

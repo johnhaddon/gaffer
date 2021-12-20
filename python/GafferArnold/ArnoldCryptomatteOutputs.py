@@ -100,7 +100,7 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 			if not k.startswith( prefix )
 		} )
 
-		# Add the outputs we want
+		# Make a template output
 
 		if renderType == GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch :
 			outputTemplate = IECoreScene.Output(
@@ -108,7 +108,8 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 				"exr",
 				"crypto_object FLOAT",
 				{
-					"filter" : "cryptomatte"
+					#"preserve_layer_name" : True, HOW TO GET 00 suffix?
+					"filter" : "cryptomatte",
 				}
 			)
 		else :
@@ -125,12 +126,28 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 				}
 			)
 
+		# Add the outputs we want
+
+		print( "DOING" )
+
 		for d in range( 0, depth, 2 ) :
 
-			output = outputTemplate.copy()
-			output.parameters()["filter:rank"] = depth
+			depthSuffix = "{:02}".format( d / 2 )
 
-			result["{}Object{}{}".format( prefix, d, d + 1 )] = output
+			print( " ", d / 2, "{}Object{}".format( prefix, depthSuffix ) )
+
+			output = outputTemplate.copy()
+			output.setName(
+				output.getName().replace(
+					"<depth>", depthSuffix
+				)
+			)
+			output.parameters()["filterrank"] = d
+
+			result["{}Object{}".format( prefix, depthSuffix )] = output
+
+
+		print( "DONE" )
 
 		return result
 
