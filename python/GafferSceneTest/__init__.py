@@ -159,6 +159,7 @@ from .ExistenceQueryTest import ExistenceQueryTest
 from .AttributeQueryTest import AttributeQueryTest
 from .NameSwitchTest import NameSwitchTest
 from .CryptomatteTest import CryptomatteTest
+from .CryptomatteAlgoTest import CryptomatteAlgoTest
 
 from .IECoreScenePreviewTest import *
 from .IECoreGLPreviewTest import *

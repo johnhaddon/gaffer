@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2021, Murray Stevenson. All rights reserved.
+//  Copyright (c) John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
 //
 //      * Redistributions of source code must retain the above
-//       copyright notice, this list of conditions and the following
+//        copyright notice, this list of conditions and the following
 //        disclaimer.
 //
 //      * Redistributions in binary form must reproduce the above
@@ -34,52 +34,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef GAFFERSCENE_CRYPTOMATTEALGO_H
+#define GAFFERSCENE_CRYPTOMATTEALGO_H
 
-#include "CryptomatteBinding.h"
+#include "GafferScene/Export.h"
 
-#include "GafferScene/Cryptomatte.h"
-#include "GafferScene/CryptomatteAlgo.h"
+#include "boost/utility/string_view.hpp"
 
-#include "GafferBindings/DependencyNodeBinding.h"
-#include "GafferBindings/PlugBinding.h"
+#include <string>
 
-using namespace boost::python;
-using namespace IECorePython;
-using namespace Gaffer;
-using namespace GafferBindings;
-using namespace GafferScene;
-
-namespace
+namespace GafferScene
 {
 
-float hashWrapper( const std::string &s )
+namespace CryptomatteAlgo
 {
-	/// \todo Figure out how to get a `string_view` that directly
-	/// refers to a Python string.
-	return CryptomatteAlgo::hash( s );
-}
 
-} // namespace
+GAFFERSCENE_API float hash( const boost::string_view &s );
 
-void GafferSceneModule::bindCryptomatte()
-{
-	{
-		scope s = GafferBindings::DependencyNodeClass<Cryptomatte>();
-		enum_<Cryptomatte::ManifestSource>( "ManifestSource" )
-			.value( "None", Cryptomatte::ManifestSource::None )
-			.value( "None_", Cryptomatte::ManifestSource::None )
-			.value( "Metadata", Cryptomatte::ManifestSource::Metadata )
-			.value( "Sidecar", Cryptomatte::ManifestSource::Sidecar )
-		;
-	}
+GAFFERSCENE_API std::string metadataPrefix( const std::string &layer );
 
-	{
-		object module( borrowed( PyImport_AddModule( "GafferScene.CryptomatteAlgo" ) ) );
-		scope().attr( "CryptomatteAlgo" ) = module;
-		scope moduleScope( module );
+} // namespace SceneAlgo
 
-		def( "hash", &hashWrapper );
-		def( "metadataPrefix", &CryptomatteAlgo::metadataPrefix );
-	}
-}
+} // namespace CryptomatteAlgo
+
+#endif // GAFFERSCENE_CRYPTOMATTEALGO_H

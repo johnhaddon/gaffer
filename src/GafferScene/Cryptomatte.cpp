@@ -36,6 +36,8 @@
 
 #include "GafferScene/Cryptomatte.h"
 
+#include "GafferScene/CryptomatteAlgo.h"
+
 #include "GafferImage/ImageAlgo.h"
 
 #include "Gaffer/Context.h"
@@ -54,112 +56,10 @@
 using namespace std;
 using namespace IECore;
 using namespace Gaffer;
+using namespace GafferScene;
 
 namespace
 {
-
-//-----------------------------------------------------------------------------
-// MurmurHash3 was written by Austin Appleby, and is placed in the public
-// domain. The author hereby disclaims copyright to this source code.
-
-inline uint32_t rotl32( uint32_t x, int8_t r )
-{
-	return (x << r) | (x >> (32 - r));
-}
-
-inline uint32_t fmix( uint32_t h )
-{
-	h ^= h >> 16;
-	h *= 0x85ebca6b;
-	h ^= h >> 13;
-	h *= 0xc2b2ae35;
-	h ^= h >> 16;
-
-	return h;
-}
-
-uint32_t MurmurHash3_x86_32( const void *key, size_t len, uint32_t seed )
-{
-	const uint8_t *data = (const uint8_t *)key;
-	const size_t nblocks = len / 4;
-
-	uint32_t h1 = seed;
-
-	const uint32_t c1 = 0xcc9e2d51;
-	const uint32_t c2 = 0x1b873593;
-
-	/* body */
-
-	const uint32_t *blocks = (const uint32_t *)(data + nblocks * 4);
-
-	for( size_t i = -nblocks; i; i++ )
-	{
-		uint32_t k1 = blocks[i];
-
-		k1 *= c1;
-		k1 = rotl32( k1, 15 );
-		k1 *= c2;
-
-		h1 ^= k1;
-		h1 = rotl32( h1, 13 );
-		h1 = h1 * 5 + 0xe6546b64;
-	}
-
-	/* tail */
-
-	const uint8_t *tail = (const uint8_t *)(data + nblocks * 4);
-
-	uint32_t k1 = 0;
-
-	switch( len & 3 )
-	{
-	case 3:
-		k1 ^= tail[2] << 16;
-	case 2:
-		k1 ^= tail[1] << 8;
-	case 1:
-		k1 ^= tail[0];
-		k1 *= c1;
-		k1 = rotl32( k1, 15 );
-		k1 *= c2;
-		h1 ^= k1;
-	}
-
-	/* finalization */
-
-	h1 ^= len;
-
-	h1 = fmix( h1 );
-
-	return h1;
-}
-
-//-----------------------------------------------------------------------------
-
-inline float matteNameToValue( const std::string &matteName )
-{
-	uint32_t hash = MurmurHash3_x86_32( matteName.c_str(), matteName.length(), 0);
-
-	// Taken from the Cryptomatte specification - https://github.com/Psyop/Cryptomatte/blob/master/specification/cryptomatte_specification.pdf
-	// if all exponent bits are 0 (subnormals, +zero, -zero) set exponent to 1
-	// if all exponent bits are 1 (NaNs, +inf, -inf) set exponent to 254
-	const uint32_t exponent = hash >> 23 & 255;
-	// extract exponent (8 bits)
-	if( exponent == 0 || exponent == 255 )
-	{
-		hash ^= 1 << 23; // toggle bit
-	}
-	float result;
-	std::memcpy( &result, &hash, sizeof( uint32_t ) );
-
-	return result;
-}
-
-inline std::string hashLayerName( const std::string &layerName )
-{
-	// hash the layer name to find manifest keys from image metadata
-	return boost::str( boost::format( "%08x" ) % MurmurHash3_x86_32( layerName.c_str(), layerName.length(), 0 ) );
-}
 
 IECore::CompoundDataPtr propertyTreeToCompoundData( const boost::property_tree::ptree &pt )
 {
@@ -186,8 +86,9 @@ IECore::CompoundDataPtr propertyTreeToCompoundData( const boost::property_tree::
 	return resultData;
 }
 
-IECore::CompoundDataPtr parseManifestFromMetadata( const std::string &metadataKey, ConstCompoundDataPtr metadata )
+IECore::CompoundDataPtr parseManifestFromMetadata( const std::string &cryptomatteLayer, ConstCompoundDataPtr metadata )
 {
+	const std::string metadataKey = CryptomatteAlgo::metadataPrefix( cryptomatteLayer ) + "manifest";
 	if( metadata->readable().find( metadataKey ) == metadata->readable().end() )
 	{
 		throw IECore::Exception( boost::str( boost::format( "Image metadata entry not found: %s" ) % metadataKey ) );
@@ -261,11 +162,11 @@ IECore::CompoundDataPtr parseManifestFromMetadataAndSidecar( const std::string &
 IECore::CompoundDataPtr parseManifestFromFirstMetadataEntry( const std::string &cryptomatteLayer, ConstCompoundDataPtr metadata, const std::string &manifestDirectory )
 {
 	// The Cryptomatte specification suggests metadata entries stored for each layer based on a key generated from the first 7 characters of the hashed layer name.
-	const std::string layerPrefix = boost::str( boost::format( "cryptomatte/%.7s" ) % hashLayerName( cryptomatteLayer ) );
+	const std::string metadataPrefix = CryptomatteAlgo::metadataPrefix( cryptomatteLayer );
 
 	// A "conversion" metadata entry is required, specifying the conversion method used to convert hash values to pixel values.
 	// As per the Cryptomatte specification, "uint32_to_float32" is the only currently supported conversion type.
-	const std::string manifestConversion = layerPrefix + "/conversion";
+	const std::string manifestConversion = metadataPrefix + "conversion";
 
 	if( metadata->readable().find( manifestConversion ) == metadata->readable().end() )
 	{
@@ -278,7 +179,7 @@ IECore::CompoundDataPtr parseManifestFromFirstMetadataEntry( const std::string &
 
 	// A "hash" metadata entry is required, specifying the type of hash used to generate the manifest.
 	// As per the Cryptomatte specification, "MurmurHash3_32" is the only currently supported hash type.
-	const std::string manifestHash = layerPrefix + "/hash";
+	const std::string manifestHash = metadataPrefix + "hash";
 
 	if( metadata->readable().find( manifestHash ) == metadata->readable().end() )
 	{
@@ -290,8 +191,8 @@ IECore::CompoundDataPtr parseManifestFromFirstMetadataEntry( const std::string &
 	}
 
 	// The manifest is defined by the existence of one of two metadata entries representing either the manifest data, or the filename of a sidecar manifest.
-	const std::string manifestKey = layerPrefix + "/manifest";
-	const std::string manifestFileKey = layerPrefix + "/manif_file";
+	const std::string manifestKey = metadataPrefix + "manifest";
+	const std::string manifestFileKey = metadataPrefix + "manif_file";
 
 	if( metadata->readable().find( manifestKey ) != metadata->readable().end() )
 	{
@@ -661,7 +562,7 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 				if( !StringAlgo::hasWildcards( name ) || name.find( "..." ) == string::npos )
 				{
 					// Hash names without wildcards directly. This allows them to still be matched if no manifest exists or has been truncated by the renderer
-					matteValues.insert( matteNameToValue( name ) );
+					matteValues.insert( CryptomatteAlgo::hash( name ) );
 				}
 			}
 		}
@@ -673,7 +574,7 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 				const std::string &matteName = static_cast<IECore::StringData *>( manifestEntry.second.get() )->readable();
 				if( pathMatcher.match( matteName ) & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch ) )
 				{
-					matteValues.insert( matteNameToValue( matteName ) );
+					matteValues.insert( CryptomatteAlgo::hash( matteName ) );
 				}
 			}
 		}
