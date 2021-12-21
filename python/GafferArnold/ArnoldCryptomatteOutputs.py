@@ -108,7 +108,6 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 				"exr",
 				"crypto_object FLOAT",
 				{
-					#"preserve_layer_name" : True, HOW TO GET 00 suffix?
 					"filter" : "cryptomatte",
 				}
 			)
@@ -128,13 +127,9 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 
 		# Add the outputs we want
 
-		print( "DOING" )
-
 		for d in range( 0, depth, 2 ) :
 
 			depthSuffix = "{:02}".format( d / 2 )
-
-			print( " ", d / 2, "{}Object{}".format( prefix, depthSuffix ) )
 
 			output = outputTemplate.copy()
 			output.setName(
@@ -145,9 +140,6 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 			output.parameters()["filterrank"] = d
 
 			result["{}Object{}".format( prefix, depthSuffix )] = output
-
-
-		print( "DONE" )
 
 		return result
 
