@@ -80,6 +80,8 @@ def joinEdges( widgets, orientation = None ) :
 
 def grab( widget, imagePath ) :
 
+	print( "GRABBING", imagePath )
+
 	if not GafferUI.EventLoop.mainEventLoop().running() :
 		# This is a hack to try to give Qt time to
 		# finish processing any events needed to get
