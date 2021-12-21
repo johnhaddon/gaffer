@@ -44,9 +44,9 @@ class CryptomatteAlgoTest( GafferSceneTest.SceneTestCase ) :
 
 	def testHash( self ) :
 
-		self.assertEqual(
+		self.assertFloat32Equal(
 			GafferScene.CryptomatteAlgo.hash( "/GAFFERBOT/C_torso_GRP/C_head_GRP/C_head_CPT/C_head001_REN" ),
-			-2.52222491e+36,
+			-2.52222490915e+36,
 		)
 
 	def testMetadataPrefix( self ) :
