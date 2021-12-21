@@ -102,28 +102,27 @@ class ArnoldCryptomatteOutputs( GafferScene.SceneProcessor ) :
 
 		# Make a template output
 
+		metadataPrefix = "header:" + GafferScene.CryptomatteAlgo.metadataPrefix( "crypto_object" )
+
+		outputTemplate = IECoreScene.Output(
+			fileName,
+			"exr",
+			"crypto_object FLOAT",
+			{
+				"{}name".format( metadataPrefix ) : "crypto_object",
+				"{}hash".format( metadataPrefix ) : "MurmurHash3_32",
+				"{}conversion".format( metadataPrefix ) : "uint32_to_float32",
+			}
+		)
+
 		if renderType == GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch :
-			outputTemplate = IECoreScene.Output(
-				fileName,
-				"exr",
-				"crypto_object FLOAT",
-				{
-					"filter" : "cryptomatte",
-				}
-			)
+			outputTemplate.parameters()["filter"] = IECore.StringData( "cryptomatte" )
 		else :
 			# The `cryptomatte_filter` isn't optimised for progressive rendering,
 			# so we avoid it. A single layer with the `nearest` filter is sufficient
 			# for interactive picking (but not matte extraction with anti-aliased edges).
 			depth = 1
-			outputTemplate = IECoreScene.Output(
-				fileName,
-				"exr",
-				"crypto_object FLOAT",
-				{
-					"filter" : "nearest"
-				}
-			)
+			outputTemplate.parameters()["filter"] = IECore.StringData( "nearest" )
 
 		# Add the outputs we want
 
