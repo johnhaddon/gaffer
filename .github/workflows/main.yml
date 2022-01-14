@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - master
@@ -29,53 +30,20 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux-python2,
-          linux-python2-debug,
-          linux-python3,
+          #linux-python2,
+          #linux-python2-debug,
+          #linux-python3,
           macos-python2,
         ]
 
         include:
-
-          - name: linux-python2
-            os: ubuntu-16.04
-            buildType: RELEASE
-            publish: true
-            containerImage: gafferhq/build:1.2.0
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.1.0/gafferDependencies-3.1.0-Python2-linux.tar.gz
-            # GitHub container builds run as root. This causes failures for tests that
-            # assert that filesystem permissions are respected, because root doesn't
-            # respect permissions. So we run the final test suite as a dedicated
-            # test user rather than as root.
-            testRunner: su testUser -c
-            sconsCacheMegabytes: 400
-
-          - name: linux-python2-debug
-            os: ubuntu-16.04
-            buildType: DEBUG
-            publish: false
-            containerImage: gafferhq/build:1.2.0
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.1.0/gafferDependencies-3.1.0-Python2-linux.tar.gz
-            testRunner: su testUser -c
-            # Debug builds are ludicrously big, so we must use a larger cache
-            # limit. In practice this compresses down to 4-500Mb.
-            sconsCacheMegabytes: 2500
-
-          - name: linux-python3
-            os: ubuntu-16.04
-            buildType: RELEASE
-            publish: true
-            containerImage: gafferhq/build:1.2.0
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.1.0/gafferDependencies-3.1.0-Python3-linux.tar.gz
-            testRunner: su testUser -c
-            sconsCacheMegabytes: 400
 
           - name: macos-python2
             os: macos-10.15
             buildType: RELEASE
             publish: true
             containerImage:
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.1.0/gafferDependencies-3.1.0-Python2-osx.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/gaffer/releases/download/0.60.6.1/gaffer-0.60.6.1-osx.tar.gz
             testRunner: bash -c
             sconsCacheMegabytes: 400
 
@@ -127,11 +95,11 @@ jobs:
        GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        GAFFER_BUILD_VARIANT: ${{ matrix.name }}
 
-    - name: Disable macOS PR Docs
-      run: |
-        echo GAFFER_SPHINX=doesNotExist >> $GITHUB_ENV
-        echo GAFFER_VALIDATE_EXTRA_FLAGS=--skipDocs >> $GITHUB_ENV
-      if: runner.os == 'macOS' && env.GAFFER_GITHUB_RELEASEID == ''
+    # - name: Disable macOS PR Docs
+    #   run: |
+    #     echo GAFFER_SPHINX=doesNotExist >> $GITHUB_ENV
+    #     echo GAFFER_VALIDATE_EXTRA_FLAGS=--skipDocs >> $GITHUB_ENV
+    #   if: runner.os == 'macOS' && env.GAFFER_GITHUB_RELEASEID == ''
 
     - name: Install dependencies
       # The `$GITHUB_ENV` shenanigans creates an environment variable
@@ -152,19 +120,37 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-${{ matrix.containerImage }}-${{env.GAFFER_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-
 
-    - name: Build Gaffer
-      run: |
-       scons -j 2 build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
+    # - name: Build Gaffer
+    #   run: |
+    #    scons -j 2 build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
 
-    - name: Test
-      # Tests should complete in well under an hour. If they don't it's most likely because
-      # of a hang, in which case we'd like to know more quickly than the default 6hr timeout
-      # allows.
-      timeout-minutes: 60
-      run: |
-        echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
-        ${{ matrix.testRunner }} "${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test"
-        echo "::remove-matcher owner=unittest::"
+    # - name: Test
+    #   # Tests should complete in well under an hour. If they don't it's most likely because
+    #   # of a hang, in which case we'd like to know more quickly than the default 6hr timeout
+    #   # allows.
+    #   timeout-minutes: 60
+    #   run: |
+    #     echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
+    #     ${{ matrix.testRunner }} "${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test"
+    #     echo "::remove-matcher owner=unittest::"
+
+    # - name: Build and test Arnold extension
+    #   run: |
+    #     for arnoldVersion in 6.2.0.1 7.0.0.0
+    #     do
+    #       # Install Arnold
+    #       ./.github/workflows/main/installArnold.sh $arnoldVersion
+    #       export ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot/$arnoldVersion
+    #       # Build Arnold extension
+    #       scons -j 2 build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
+    #       # Test Arnold extension
+    #       echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
+    #       ${{ matrix.testRunner }} "${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test IECoreArnoldTest GafferArnoldTest GafferArnoldUITest"
+    #       echo "::remove-matcher owner=unittest::"
+    #       # Publish ARNOLD_ROOT to the environment for subsequent steps,
+    #       # so we can build the docs for GafferArnold.
+    #       echo ARNOLD_ROOT=$ARNOLD_ROOT >> $GITHUB_ENV
+    #     done
 
     - name: Build Docs and Package
       # We currently experience sporadic hangs in the docs builds (mac), this
@@ -173,7 +159,7 @@ jobs:
       run: |
         # Treats warnings-as-errors so we know about broken links
         echo "::add-matcher::./.github/workflows/main/problemMatchers/sphinx.json"
-        scons -j 2 package BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
+        scons -j 2 docs BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
         echo "::remove-matcher owner=sphinx::"
       if: matrix.publish
 

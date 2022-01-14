@@ -1446,7 +1446,7 @@ def generateDocs( target, source, env ) :
 	if localFile == "screengrab.py" :
 		command = [ "gaffer", "screengrab", "-commandFile", localFile ]
 	elif ext == ".py" :
-		command = [ "gaffer", "env", "python", localFile ]
+		command = [ "gaffer", "env", "python", "-m", "trace", "--trace", localFile ]
 	elif ext == ".sh" :
 		command = [ "gaffer", "env", "./" + localFile ]
 	if command :
@@ -1479,7 +1479,7 @@ def locateDocs( docRoot, env ) :
 						line = s.readline()
 					if targets:
 						command = env.Command( targets, sourceFile, generateDocs )
-						env.Depends( command, "build" )
+						#env.Depends( command, "build" )
 						if line.startswith( "# UndeclaredBuildTargets" ) :
 							env.NoCache( command )
 						# Force the commands to run serially, in case the doc generation
@@ -1549,7 +1549,7 @@ if haveSphinx and haveInkscape :
 	docEnv.NoCache( docs )
 	docEnv.Depends( docGenerationCommands, docGraphicsCommands )
 	docEnv.Depends( docs, docGraphicsCommands )
-	docEnv.Depends( docs, "build" )
+	#docEnv.Depends( docs, "build" )
 	docVars = docCommandEnv.Command( "doc/source/gafferVars.json", "doc/source/gafferVars.py", generateDocs )
 	docEnv.Depends( docs, docVars )
 	if resources is not None :
