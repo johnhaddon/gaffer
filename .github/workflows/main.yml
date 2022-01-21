@@ -165,6 +165,7 @@ jobs:
 
     - name: Print crash logs 2
       run: |
+        sleep 20
         ls /Users/runner/Library/Logs/DiagnosticReports
         cat /Users/runner/Library/Logs/DiagnosticReports/*.crash
       if: failure()
