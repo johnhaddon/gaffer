@@ -166,11 +166,11 @@ jobs:
     - name: Print crash logs
       run: |
         echo System Logs
-        ls /Library/Logs/DiagnosticReports
-        cat /Library/Logs/DiagnosticReports/*
+        ls /Library/Logs/CrashReporter
+        cat /Library/Logs/CrashReporter/*
         echo User Logs
-        ls ~/Library/Logs/DiagnosticReports
-        cat ~/Library/Logs/DiagnosticReports/*
+        ls ~/Library/Logs/CrashReporter
+        cat ~/Library/Logs/CrashReporter/*
       if: failure()
 
     - name: Validate
