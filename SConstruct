@@ -1237,7 +1237,9 @@ for libraryName, libraryDef in libraries.items() :
 	# command ourselves.
 
 	for sourceFile in libraryDef.get( "mocSourceFiles", [] ) :
-		mocOutput = commandEnv.Command( os.path.splitext( sourceFile )[0] + ".moc", sourceFile, "moc $SOURCE -o $TARGET" )
+		mce = commandEnv.Clone()
+		mce["ENV"]["DYLD_LIBRARY_PATH"] = "/System/Library/Frameworks/ImageIO.framework/Resources:" + mce["ENV"]["DYLD_LIBRARY_PATH"]
+		mocOutput = mce.Command( os.path.splitext( sourceFile )[0] + ".moc", sourceFile, "moc $SOURCE -o $TARGET" )
 		# Somehow the above leads to a circular dependency between `mocOutput` and itself.
 		# Tell SCons not to worry. The official SCons tool does the same.
 		env.Ignore( mocOutput, mocOutput )
