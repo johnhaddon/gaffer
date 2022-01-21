@@ -1446,7 +1446,7 @@ def generateDocs( target, source, env ) :
 	if localFile == "screengrab.py" :
 		command = [ "gaffer", "screengrab", "-commandFile", localFile ]
 	elif ext == ".py" :
-		command = [ "gaffer", "env", "python", "-m", "trace", "--trace", localFile ]
+		command = [ "gaffer", "env", "python", localFile ]
 	elif ext == ".sh" :
 		command = [ "gaffer", "env", "./" + localFile ]
 	if command :
