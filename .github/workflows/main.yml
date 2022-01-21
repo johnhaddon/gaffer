@@ -165,6 +165,7 @@ jobs:
 
     - name: Print crash logs
       run: |
+        ls /Users/runner/Library/Logs/DiagnosticReports
         cat /Users/runner/Library/Logs/DiagnosticReports/Python*.crash
       if: failure()
 
