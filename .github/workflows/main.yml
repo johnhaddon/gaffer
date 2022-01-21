@@ -163,6 +163,16 @@ jobs:
         echo "::remove-matcher owner=sphinx::"
       if: matrix.publish
 
+    - name: Print crash logs
+      run: |
+        echo System Logs
+        ls /Library/Logs/DiagnosticReports
+        cat /Library/Logs/DiagnosticReports/*
+        echo User Logs
+        ls ~/Library/Logs/DiagnosticReports
+        cat ~/Library/Logs/DiagnosticReports/*
+      if: failure()
+
     - name: Validate
       run: |
         echo "::add-matcher::./.github/workflows/main/problemMatchers/validateRelease.json"
