@@ -163,7 +163,7 @@ jobs:
         echo "::remove-matcher owner=sphinx::"
       if: matrix.publish
 
-    - name: Print crash logs
+    - name: Print crash logs 2
       run: |
         ls /Users/runner/Library/Logs/DiagnosticReports
         cat /Users/runner/Library/Logs/DiagnosticReports/*.crash
