@@ -157,10 +157,20 @@ jobs:
       # aborts them in a more timely fashion than the default 6hr timeout.
       timeout-minutes: 20
       run: |
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
         # Treats warnings-as-errors so we know about broken links
-        echo "::add-matcher::./.github/workflows/main/problemMatchers/sphinx.json"
-        scons -j 2 docs BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
-        echo "::remove-matcher owner=sphinx::"
+        #echo "::add-matcher::./.github/workflows/main/problemMatchers/sphinx.json"
+        #scons -j 2 docs BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
+        #echo "::remove-matcher owner=sphinx::"
       if: matrix.publish
 
     - name: Print crash logs 2
