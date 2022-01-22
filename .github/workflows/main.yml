@@ -198,3 +198,12 @@ jobs:
       # unbounded growth. In practice, the archives that get uploaded are much smaller
       # than the limit we apply here, because they're compressed.
       run: ./.github/workflows/main/limitDirectorySize.py --directory ./sconsCache --megabytes ${{ matrix.sconsCacheMegabytes }} --verbose
+
+    - name: Print logs (MacOS)
+      run: |
+        # Give the Mac crash detector time to do it's thing
+        sleep 20
+        # Print the contents of the files
+        ls ~/Library/Logs/DiagnosticReports
+        cat ~/Library/Logs/DiagnosticReports/*.crash
+      if: failure() && runner.os == 'macOS'
