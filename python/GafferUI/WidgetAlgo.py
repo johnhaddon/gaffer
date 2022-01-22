@@ -80,6 +80,8 @@ def joinEdges( widgets, orientation = None ) :
 
 def grab( widget, imagePath ) :
 
+	print( "GRABBING", imagePath )
+
 	if not GafferUI.EventLoop.mainEventLoop().running() :
 		# This is a hack to try to give Qt time to
 		# finish processing any events needed to get
@@ -123,6 +125,8 @@ def grab( widget, imagePath ) :
 		pixmap = QtGui.QPixmap.grabWindow( long( widget._qtWidget().winId() ) )
 
 	pixmap.save( imagePath )
+
+	print( "GRABBED", imagePath )
 
 ## Useful as a workaround when you want to dispose of a GafferUI.Widget immediately,
 # but Qt bugs prevent you from doing so.
