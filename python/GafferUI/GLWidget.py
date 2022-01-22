@@ -404,9 +404,6 @@ class _GLGraphicsScene( QtWidgets.QGraphicsScene ) :
 
 		painter.beginNativePainting()
 
-
-		print( "VALID", self.__framebufferValid() )
-
 		# Qt sometimes enters this method with a GL error flag still set.
 		# We unset it here so it won't trigger our own error checking.
 		while GL.glGetError() :
@@ -415,9 +412,7 @@ class _GLGraphicsScene( QtWidgets.QGraphicsScene ) :
 		GL.glPushAttrib( GL.GL_ALL_ATTRIB_BITS )
 		GL.glPushClientAttrib( GL.GL_CLIENT_ALL_ATTRIB_BITS )
 
-		GL.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT )
-
-		#self.__backgroundDrawFunction()
+		self.__backgroundDrawFunction()
 
 		GL.glPopClientAttrib()
 		GL.glPopAttrib()
@@ -438,11 +433,6 @@ class _GLGraphicsScene( QtWidgets.QGraphicsScene ) :
 	def __updateItemGeometry( self, item, sceneRect ) :
 
 		item.widget().setGeometry( QtCore.QRect( 0, 0, sceneRect.width(), sceneRect.height() ) )
-
-	def __framebufferValid( self ) :
-
-		import OpenGL.GL.framebufferobjects
-		return GL.framebufferobjects.glCheckFramebufferStatus( GL.framebufferobjects.GL_FRAMEBUFFER ) == GL.framebufferobjects.GL_FRAMEBUFFER_COMPLETE
 
 ## A QGraphicsProxyWidget whose shape is derived from the opaque parts of its
 # child widgets. This allows our overlays to pass through events in the regions
