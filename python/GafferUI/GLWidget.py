@@ -222,7 +222,7 @@ class _GLGraphicsView( QtWidgets.QGraphicsView ) :
 		# possible moment, otherwise we get "invalid drawable"
 		# errors spewing all over the place. See event() for the
 		# spot where we show the widget.
-		#glWidget.hide()
+		glWidget.hide()
 
 		self.setViewport( glWidget )
 		self.setViewportUpdateMode( self.FullViewportUpdate )
@@ -237,12 +237,12 @@ class _GLGraphicsView( QtWidgets.QGraphicsView ) :
 
 	def event( self, event ) :
 
-		#if event.type() == event.PolishRequest :
-		#	# This seems to be the one signal that reliably
-		#	# lets us know we're becoming genuinely visible
-		#	# on screen. We use it to show the GL widget we
-		#	# hid in our constructor.
-		#	self.viewport().show()
+		if event.type() == event.PolishRequest :
+			# This seems to be the one signal that reliably
+			# lets us know we're becoming genuinely visible
+			# on screen. We use it to show the GL widget we
+			# hid in our constructor.
+			self.viewport().show()
 
 		return QtWidgets.QGraphicsView.event( self, event )
 
