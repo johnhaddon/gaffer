@@ -128,12 +128,6 @@ jobs:
        GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        GAFFER_BUILD_VARIANT: ${{ matrix.name }}
 
-    - name: Disable macOS PR Docs
-      run: |
-        echo GAFFER_SPHINX=doesNotExist >> $GITHUB_ENV
-        echo GAFFER_VALIDATE_EXTRA_FLAGS=--skipDocs >> $GITHUB_ENV
-      if: runner.os == 'macOS' && env.GAFFER_GITHUB_RELEASEID == ''
-
     - name: Install dependencies
       # The `$GITHUB_ENV` shenanigans creates an environment variable
       # containing the hash of the archive, for use in the cache key
