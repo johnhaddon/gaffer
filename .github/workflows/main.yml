@@ -158,16 +158,12 @@ jobs:
       timeout-minutes: 20
       run: |
         cp python/GafferUI/*.py  ${{ env.GAFFER_BUILD_DIR }}/python/GafferUI
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/GettingStarted/TutorialAssemblingTheGafferBot/screengrab.py
+        echo DONE 1
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/GettingStarted/TutorialAssemblingTheGafferBot/screengrab.py
+        echo DONE 2
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/GettingStarted/TutorialAssemblingTheGafferBot/screengrab.py
+        echo DONE 3
         # Treats warnings-as-errors so we know about broken links
         #echo "::add-matcher::./.github/workflows/main/problemMatchers/sphinx.json"
         #scons -j 2 docs BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
