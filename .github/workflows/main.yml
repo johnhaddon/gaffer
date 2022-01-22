@@ -157,6 +157,7 @@ jobs:
       # aborts them in a more timely fashion than the default 6hr timeout.
       timeout-minutes: 20
       run: |
+        cp python/GafferUI/*.py  ${{ env.GAFFER_BUILD_DIR }}/python/GafferUI
         ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
         ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
         ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile doc/source/WorkingWithTheNodeGraph/TutorialSettingUpASpreadsheet/screengrab.py
