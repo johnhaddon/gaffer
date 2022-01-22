@@ -310,6 +310,10 @@ class _GLGraphicsView( QtWidgets.QGraphicsView ) :
 		if cls.__shareWidget is None :
 			cls.__shareWidget = QtOpenGL.QGLWidget()
 
+
+		from PySide2 import QtWidgets
+
+		return QtWidgets.QOpenGLWidget()
 		return QtOpenGL.QGLWidget( format, shareWidget = cls.__shareWidget )
 
 	@classmethod
