@@ -416,7 +416,7 @@ class _GLGraphicsScene( QtWidgets.QGraphicsScene ) :
 		GL.glPushAttrib( GL.GL_ALL_ATTRIB_BITS )
 		GL.glPushClientAttrib( GL.GL_CLIENT_ALL_ATTRIB_BITS )
 
-		GL.glClear()
+		GL.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT )
 
 		#self.__backgroundDrawFunction()
 
