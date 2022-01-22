@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - master
