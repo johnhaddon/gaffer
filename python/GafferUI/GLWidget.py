@@ -216,15 +216,7 @@ class _GLGraphicsView( QtWidgets.QGraphicsView ) :
 		self.setHorizontalScrollBarPolicy( QtCore.Qt.ScrollBarAlwaysOff )
 		self.setVerticalScrollBarPolicy( QtCore.Qt.ScrollBarAlwaysOff )
 
-		glWidget = self.__createQGLWidget( format )
-
-		# On mac, we need to hide the GL widget until the last
-		# possible moment, otherwise we get "invalid drawable"
-		# errors spewing all over the place. See event() for the
-		# spot where we show the widget.
-		glWidget.hide()
-
-		self.setViewport( glWidget )
+		self.setViewport( self.__createQGLWidget( format ) )
 		self.setViewportUpdateMode( self.FullViewportUpdate )
 
 	# QAbstractScrollArea (one of our base classes), implements
@@ -234,17 +226,6 @@ class _GLGraphicsView( QtWidgets.QGraphicsView ) :
 	def minimumSizeHint( self ) :
 
 		return QtCore.QSize()
-
-	def event( self, event ) :
-
-		if event.type() == event.PolishRequest :
-			# This seems to be the one signal that reliably
-			# lets us know we're becoming genuinely visible
-			# on screen. We use it to show the GL widget we
-			# hid in our constructor.
-			self.viewport().show()
-
-		return QtWidgets.QGraphicsView.event( self, event )
 
 	def resizeEvent( self, event ) :
 
