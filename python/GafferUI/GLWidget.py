@@ -416,7 +416,9 @@ class _GLGraphicsScene( QtWidgets.QGraphicsScene ) :
 		GL.glPushAttrib( GL.GL_ALL_ATTRIB_BITS )
 		GL.glPushClientAttrib( GL.GL_CLIENT_ALL_ATTRIB_BITS )
 
-		self.__backgroundDrawFunction()
+		GL.glClear()
+
+		#self.__backgroundDrawFunction()
 
 		GL.glPopClientAttrib()
 		GL.glPopAttrib()
