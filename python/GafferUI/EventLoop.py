@@ -282,9 +282,11 @@ class EventLoop( object ) :
 
 		GafferUI.Gadget.idleSignal()()
 
+		print( "IDLE CALLBACK", EventLoop.__idleCallbacks )
 		for c in EventLoop.__idleCallbacks[:] : # slice takes copy, so we can remove during iteration
 			try :
 				if not c() :
+					print( "REMOVING IDLE CALLBACK" )
 					EventLoop.__idleCallbacks.remove( c )
 			except Exception as e :
 				# if the callback throws then we remove it anyway, because
@@ -294,6 +296,7 @@ class EventLoop( object ) :
 				IECore.msg( IECore.Msg.Level.Error, "EventLoop.__qtIdleCallback", "".join( traceback.format_exc() ) )
 
 		if len( EventLoop.__idleCallbacks )==0 and GafferUI.Gadget.idleSignal().empty() :
+			print( "STOPPING IDLE TIMER" )
 			EventLoop.__idleTimer.stop()
 
 	@classmethod
