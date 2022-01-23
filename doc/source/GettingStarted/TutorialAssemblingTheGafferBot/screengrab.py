@@ -161,6 +161,9 @@ def __renderAndGrab( script, widget, imagePath, delay = 15 ) :
 
 	script["variables"]["imageCataloguePort"]["value"].setValue( script["Catalogue"].displayDriverServer().portNumber() )
 	script["InteractiveAppleseedRender"]["state"].setValue( script["InteractiveAppleseedRender"].State.Running )
+
+	print( "STARTED" )
+
 	__delay( delay )
 
 	print( "DELAYED", imagePath )
