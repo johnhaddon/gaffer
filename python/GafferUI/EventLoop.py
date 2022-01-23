@@ -215,14 +215,23 @@ class EventLoop( object ) :
 
 			cls.__idleCount += 1
 
+			print( "IDLE COUNT", cls.__idleCount )
+
 			if cls.__idleCount >= count :
 				EventLoop.mainEventLoop().stop()
 				return False
 
 			return True
 
+		print( "ADDING CALLBACK" )
+
 		EventLoop.addIdleCallback( f )
+
+		print( "STARTING EVENT LOOP" )
+
 		EventLoop.mainEventLoop().start()
+
+		print( "LEFT EVENT LOOP" )
 
 	## Widgets may only be manipulated on the thread where mainEventLoop() is running. It
 	# is common to want to perform some background processing on a secondary thread, and
