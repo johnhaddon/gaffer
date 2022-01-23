@@ -215,7 +215,8 @@ class EventLoop( object ) :
 
 			cls.__idleCount += 1
 
-			print( "IDLE COUNT", cls.__idleCount )
+			import time
+			print( "IDLE COUNT", cls.__idleCount, time.time() )
 
 			if cls.__idleCount >= count :
 				EventLoop.mainEventLoop().stop()
