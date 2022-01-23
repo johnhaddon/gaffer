@@ -159,7 +159,7 @@ jobs:
       run: |
         cp python/GafferUI/*.py  ${{ env.GAFFER_BUILD_DIR }}/python/GafferUI
         cd doc/source/GettingStarted/TutorialAssemblingTheGafferBot
-        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile screengrab.py
+        $GITHUB_WORKSPACE/build/bin/gaffer screengrab -commandFile screengrab.py
         echo DONE 1
         ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer screengrab -commandFile screengrab.py
         echo DONE 2
