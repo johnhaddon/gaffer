@@ -45,6 +45,7 @@ hierarchyView = scriptWindow.getLayout().editors( GafferSceneUI.HierarchyView )[
 def __delay( delay ) :
 	endtime = time.time() + delay
 	while time.time() < endtime :
+		print( "DELAYING", time.time(), endtime )
 		GafferUI.EventLoop.waitForIdle( 1 )
 
 # Default layout in main window
