@@ -157,16 +157,24 @@ GafferUI.WidgetAlgo.grab( widget = graphEditor, imagePath = "images/graphEditorR
 # GafferBot render without lighting in main window
 def __renderAndGrab( script, widget, imagePath, delay = 15 ) :
 
+	print( "RENDERING", imagePath )
+
 	script["variables"]["imageCataloguePort"]["value"].setValue( script["Catalogue"].displayDriverServer().portNumber() )
 	script["InteractiveAppleseedRender"]["state"].setValue( script["InteractiveAppleseedRender"].State.Running )
 	__delay( delay )
+
+	print( "DELAYED", imagePath )
 
 	viewport = scriptWindow.getLayout().editors( GafferUI.Viewer )[0].view().viewportGadget()
 	viewport.frame( viewport.getPrimaryChild().bound() )
 	GafferUI.EventLoop.waitForIdle()
 
+	print( "WAITED", imagePath )
+
 	GafferUI.WidgetAlgo.grab( widget = widget, imagePath = imagePath )
 	script["InteractiveAppleseedRender"]["state"].setValue( script["InteractiveAppleseedRender"].State.Stopped )
+
+	print( "GRABBED", imagePath )
 
 __renderAndGrab( script, scriptWindow, "images/mainRenderGrey.png", delay = 1 )
 
