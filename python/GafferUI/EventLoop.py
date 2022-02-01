@@ -205,11 +205,14 @@ class EventLoop( object ) :
 
 		cls.__idleCallbacks.remove( callback )
 
+
+	__idleCount = 0
+
 	## Convenience method to introduce a delay on the mainEventLoop().
 	@classmethod
 	def waitForIdle( cls, count = 1000 ) :
 
-		cls.__idleCount = 0
+		assert( cls.__idleCount == 0 )
 
 		def f() :
 
@@ -231,6 +234,7 @@ class EventLoop( object ) :
 		print( "STARTING EVENT LOOP" )
 
 		EventLoop.mainEventLoop().start()
+		cls.__idleCount = 0
 
 		print( "LEFT EVENT LOOP" )
 
