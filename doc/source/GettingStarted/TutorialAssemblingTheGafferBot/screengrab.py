@@ -175,8 +175,8 @@ def __renderAndGrab( script, widget, imagePath, delay = 15 ) :
 
 	print( "WAITED", imagePath )
 
-	GafferUI.WidgetAlgo.grab( widget = widget, imagePath = imagePath )
 	script["InteractiveAppleseedRender"]["state"].setValue( script["InteractiveAppleseedRender"].State.Stopped )
+	GafferUI.WidgetAlgo.grab( widget = widget, imagePath = imagePath )
 
 	print( "GRABBED", imagePath )
 
