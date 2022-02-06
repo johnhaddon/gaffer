@@ -36,6 +36,8 @@
 
 #include "GafferScene/CryptomatteAlgo.h"
 
+#include "GafferScene/SceneAlgo.h"
+
 #include "boost/format.hpp"
 
 using namespace GafferScene;
@@ -148,3 +150,33 @@ std::string CryptomatteAlgo::metadataPrefix( const std::string &layer )
 		boost::format( "%08x" ) % MurmurHash3_x86_32( layer.data(), layer.size(), 0 )
 	).substr( 0, 7 ) + "/";
 }
+
+GAFFERSCENE_API boost::optional<ScenePlug::ScenePath> CryptomatteAlgo::find( const ScenePlug *scene, float hash )
+{
+	std::atomic_bool found( false );
+	boost::optional<ScenePlug::ScenePath> result;
+
+	auto f = [&] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
+
+		if( found )
+		{
+			return false;
+		}
+
+		const std::string pathString = ScenePlug::pathToString( path );
+		if( CryptomatteAlgo::hash( pathString ) == hash )
+		{
+			if( !found.exchange( true ) )
+			{
+				result = path;
+			}
+			return false;
+		}
+
+		return true;
+	};
+
+	SceneAlgo::parallelProcessLocations( scene, f );
+	return result;
+}
+

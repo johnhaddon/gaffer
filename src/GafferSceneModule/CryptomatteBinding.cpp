@@ -60,6 +60,26 @@ float hashWrapper( const std::string &s )
 	return CryptomatteAlgo::hash( s );
 }
 
+object findWrapper( const ScenePlug &scene, float hash )
+{
+	boost::optional<ScenePlug::ScenePath> path;
+	{
+		ScopedGILRelease gilRelease;
+		path = CryptomatteAlgo::find( &scene, hash );
+	}
+
+	if( path )
+	{
+		return object( IECore::InternedStringVectorDataPtr(
+			new IECore::InternedStringVectorData( *path )
+		) );
+	}
+	else
+	{
+		return object();
+	}
+}
+
 } // namespace
 
 void GafferSceneModule::bindCryptomatte()
@@ -81,5 +101,6 @@ void GafferSceneModule::bindCryptomatte()
 
 		def( "hash", &hashWrapper );
 		def( "metadataPrefix", &CryptomatteAlgo::metadataPrefix );
+		def( "find", &findWrapper );
 	}
 }

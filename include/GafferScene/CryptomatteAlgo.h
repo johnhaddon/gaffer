@@ -38,7 +38,9 @@
 #define GAFFERSCENE_CRYPTOMATTEALGO_H
 
 #include "GafferScene/Export.h"
+#include "GafferScene/ScenePlug.h"
 
+#include "boost/optional.hpp"
 #include "boost/utility/string_view.hpp"
 
 #include <string>
@@ -52,6 +54,8 @@ namespace CryptomatteAlgo
 GAFFERSCENE_API float hash( const boost::string_view &s );
 
 GAFFERSCENE_API std::string metadataPrefix( const std::string &layer );
+
+GAFFERSCENE_API boost::optional<ScenePlug::ScenePath> find( const ScenePlug *scene, float hash );
 
 } // namespace SceneAlgo
 

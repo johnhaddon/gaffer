@@ -36,6 +36,7 @@
 
 import unittest
 
+import IECore
 import Gaffer
 import GafferScene
 import GafferSceneTest
@@ -54,6 +55,35 @@ class CryptomatteAlgoTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual(
 			GafferScene.CryptomatteAlgo.metadataPrefix( "crypto_object" ),
 			"cryptomatte/f834d0a/"
+		)
+
+	def testFind( self ) :
+
+		reader = GafferScene.SceneReader()
+		reader["fileName"].setValue( "${GAFFER_ROOT}/resources/gafferBot/caches/gafferBot.scc" )
+
+		def walk( path ) :
+
+			h = GafferScene.CryptomatteAlgo.hash( GafferScene.ScenePlug.pathToString( path ) )
+			self.assertEqual(
+				GafferScene.CryptomatteAlgo.find( reader["out"], h ),
+				path
+			)
+
+			for childName in reader["out"].childNames( path ) :
+
+				childPath = IECore.InternedStringVectorData( path )
+				childPath.append( childName )
+
+				walk( childPath )
+
+		walk( IECore.InternedStringVectorData() )
+
+		self.assertIsNone(
+			GafferScene.CryptomatteAlgo.find(
+				reader["out"],
+				GafferScene.CryptomatteAlgo.hash( "/non/existent/path" )
+			)
 		)
 
 if __name__ == "__main__":
