@@ -1,0 +1,16 @@
+name: Target branch check
+on: [ pull_request ]
+jobs:
+  check:
+    runs-on: ubuntu-20.04
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        # Check out the pull request branch, _not_ the merge commit.
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Check target branch
+      run: |
+        .github/workflows/targetBranchCheck/checkTargetBranch.py
+
