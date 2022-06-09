@@ -122,6 +122,14 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 					return plugs == other.plugs && ( it - plugs.begin() == other.it - other.plugs.begin() );
 				}
 
+				Level &operator=( const Level &rhs )
+				{
+					plugs = rhs.plugs;
+					it = plugs.begin() + (rhs.it - rhs.plugs.begin());
+					end = plugs.end();
+					return *this;
+				}
+
 				DependencyNode::AffectedPlugsContainer plugs;
 				DependencyNode::AffectedPlugsContainer::const_iterator it;
 				DependencyNode::AffectedPlugsContainer::const_iterator end;

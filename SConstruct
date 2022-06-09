@@ -479,7 +479,8 @@ if env["PLATFORM"] != "win32" :
 	if env["WARNINGS_AS_ERRORS"] :
 		env.Append(
 			CXXFLAGS = [ "-Werror" ],
-			SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
+			# PROBLEMS WITH MACOS VERSION DIFFERENCES BETWEEN BUILDS
+			#SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
 		)
 
 ###########################################################################################
@@ -798,7 +799,7 @@ if basePythonEnv["PLATFORM"]=="darwin" :
 
 	basePythonEnv.Append(
 		CPPPATH = [ "$BUILD_DIR/lib/Python.framework/Versions/$PYTHON_VERSION/include/python$PYTHON_VERSION" ],
-		LIBPATH = [ "$BUILD_DIR/lib/Python.framework/Versions/$PYTHON_VERSION/lib/python$PYTHON_VERSION/config" ],
+		LIBPATH = [ "$BUILD_DIR/lib/Python.framework/Versions/$PYTHON_VERSION/lib" ],
 		LIBS = [ "python$PYTHON_VERSION" ],
 	)
 
@@ -1167,12 +1168,12 @@ libraries = {
 
 	"GafferAppleseed" : {
 		"envAppends" : {
-			"CXXFLAGS" : [ systemIncludeArgument, "$APPLESEED_ROOT/include", "-DAPPLESEED_ENABLE_IMATH_INTEROP", "-DAPPLESEED_USE_SSE" ],
+			"CXXFLAGS" : [ systemIncludeArgument, "$APPLESEED_ROOT/include", "-DAPPLESEED_ENABLE_IMATH_INTEROP" ],
 			"LIBPATH" : [ "$APPLESEED_ROOT/lib" ],
 			"LIBS" : [ "Gaffer", "GafferDispatch", "GafferScene", "appleseed",  "IECoreScene$CORTEX_LIB_SUFFIX", "IECoreAppleseed$CORTEX_LIB_SUFFIX", "OpenImageIO$OIIO_LIB_SUFFIX", "OpenImageIO_Util$OIIO_LIB_SUFFIX", "oslquery$OSL_LIB_SUFFIX" ],
 		},
 		"pythonEnvAppends" : {
-			"CXXFLAGS" : [ systemIncludeArgument, "$APPLESEED_ROOT/include", "-DAPPLESEED_ENABLE_IMATH_INTEROP", "-DAPPLESEED_USE_SSE" ],
+			"CXXFLAGS" : [ systemIncludeArgument, "$APPLESEED_ROOT/include", "-DAPPLESEED_ENABLE_IMATH_INTEROP" ],
 			"LIBPATH" : [ "$APPLESEED_ROOT/lib" ],
 			"LIBS" : [ "Gaffer", "GafferDispatch", "GafferScene", "GafferBindings", "GafferAppleseed" ],
 		},
@@ -1497,7 +1498,9 @@ for libraryName, libraryDef in libraries.items() :
 	# command ourselves.
 
 	for sourceFile in libraryDef.get( "mocSourceFiles", [] ) :
-		mocOutput = commandEnv.Command( os.path.splitext( sourceFile )[0] + ".moc", sourceFile, "moc $SOURCE -o $TARGET" )
+		mce = commandEnv.Clone()
+		mce["ENV"]["DYLD_LIBRARY_PATH"] = "/System/Library/Frameworks/ImageIO.framework/Resources:" + mce["ENV"]["DYLD_LIBRARY_PATH"]
+		mocOutput = mce.Command( os.path.splitext( sourceFile )[0] + ".moc", sourceFile, "moc $SOURCE -o $TARGET" )
 		# Somehow the above leads to a circular dependency between `mocOutput` and itself.
 		# Tell SCons not to worry. The official SCons tool does the same.
 		env.Ignore( mocOutput, mocOutput )

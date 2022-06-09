@@ -56,63 +56,58 @@
 
 #include "IECore/MessageHandler.h"
 
-#ifdef _MSC_VER
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/find_iterator.hpp"
-#endif
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 
 #include <memory>
 
-#ifdef _MSC_VER
 using namespace std;
 using namespace boost;
-#endif
-
 using namespace Gaffer;
 using namespace GafferBindings;
 
-#ifndef _MSC_VER
-//////////////////////////////////////////////////////////////////////////
-// Access to Python AST
-//////////////////////////////////////////////////////////////////////////
+// #ifndef _MSC_VER
+// //////////////////////////////////////////////////////////////////////////
+// // Access to Python AST
+// //////////////////////////////////////////////////////////////////////////
 
-extern "C"
-{
+// extern "C"
+// {
 
-// Essential to include this last, since it defines macros which
-// clash with other headers.
-#include "Python-ast.h"
+// // Essential to include this last, since it defines macros which
+// // clash with other headers.
+// //#include "Python-ast.h"
 
-#if PY_MAJOR_VERSION >= 3
-/// \todo The already esoteric AST API appears to be even more obscure
-/// in Python 3, and it has never been available on Windows. We would do
-/// well to avoid it entirely. One simple alternative is implemented in
-/// https://github.com/johnhaddon/gaffer/tree/simpleTolerantExec, but
-/// initial benchmarking suggested that performance was worse.
-#include "asdl.h"
-#undef arg
-#define asdl_seq_new _Py_asdl_seq_new
-#endif
+// #if PY_MAJOR_VERSION >= 3
+// /// \todo The already esoteric AST API appears to be even more obscure
+// /// in Python 3, and it has never been available on Windows. We would do
+// /// well to avoid it entirely. One simple alternative is implemented in
+// /// https://github.com/johnhaddon/gaffer/tree/simpleTolerantExec, but
+// /// initial benchmarking suggested that performance was worse.
+// //#include "asdl.h"
+// //#undef arg
+// //#define asdl_seq_new _Py_asdl_seq_new
+// #endif
 
-};
+// };
 
-namespace boost {
-namespace python {
+// namespace boost {
+// namespace python {
 
-// Specialisation to allow use of handle<PyCodeObject>
-template<>
-struct base_type_traits<PyCodeObject>
-{
-	using type = PyObject;
-};
+// // Specialisation to allow use of handle<PyCodeObject>
+// template<>
+// struct base_type_traits<PyCodeObject>
+// {
+// 	using type = PyObject;
+// };
 
-} // namespace python
-} // namespace boost
+// } // namespace python
+// } // namespace boost
 
-#endif
+// #endif
 
 //////////////////////////////////////////////////////////////////////////
 // Serialisation
@@ -131,7 +126,7 @@ const std::string formattedErrorContext( int lineNumber, const std::string &cont
 	);
 }
 
-#ifndef _MSC_VER
+#if 0
 // Execute the script one top level statement at a time,
 // reporting errors that occur, but otherwise continuing
 // with execution.
