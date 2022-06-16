@@ -17,6 +17,7 @@ API
 ---
 
 - PlugAlgo : Added optional `value` argument to `canSetValueFromData()`.
+- TestCase : Added `assertNodeIsDocumented()` method.
 
 Breaking Changes
 ----------------
