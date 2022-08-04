@@ -1131,9 +1131,7 @@ class CyclesAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 			if( !m_volume.apply( object ) )
 				return false;
 
-#ifdef WITH_CYCLES_LIGHTGROUPS
 			object->set_lightgroup( ccl::ustring( m_lightGroup.c_str() ) );
-#endif
 
 			return true;
 		}
@@ -3961,7 +3959,6 @@ class CyclesRenderer final : public IECoreScenePreview::Renderer
 				}
 			}
 
-#ifdef WITH_CYCLES_LIGHTGROUPS
 			// Add lightgroups on the end
 			for( auto &coutput : m_outputs )
 			{
@@ -3988,7 +3985,6 @@ class CyclesRenderer final : public IECoreScenePreview::Renderer
 				const IECore::CompoundDataPtr layer = coutput.second->m_parameters->copy();
 				layersData->writable()[name] = layer;
 			}
-#endif
 
 			paramData->writable()["layers"] = layersData;
 
