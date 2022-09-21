@@ -161,6 +161,11 @@
 				'compareModeSideBySide',
 				'wipeDisabled',
 				'wipeEnabled',
+				'catalogueOutputHeader',
+				'nodeSetCatalogueOutput1',
+				'nodeSetCatalogueOutput2',
+				'nodeSetCatalogueOutput3',
+				'nodeSetCatalogueOutput4',
 			]
 
 		},
