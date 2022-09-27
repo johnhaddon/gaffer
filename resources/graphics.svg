@@ -113,7 +113,8 @@
     </linearGradient>
     <linearGradient
        id="backgroundLightLowlight-5"
-       osb:paint="solid">
+       osb:paint="solid"
+       gradientTransform="matrix(1.2290988,0,0,1.2291084,-132.4402,-402.51184)">
       <stop
          style="stop-color:#525252;stop-opacity:1;"
          offset="0"
@@ -137,7 +138,8 @@
     </linearGradient>
     <linearGradient
        id="backgroundLight"
-       osb:paint="solid">
+       osb:paint="solid"
+       gradientTransform="matrix(0.99899272,0,0,0.99899272,0.56660585,1.7696343)">
       <stop
          style="stop-color:#818181;stop-opacity:1;"
          offset="0"
@@ -238,7 +240,18 @@
      inkscape:guide-bbox="true"
      inkscape:object-paths="false"
      inkscape:bbox-paths="false"
-     inkscape:bbox-nodes="true">
+     inkscape:bbox-nodes="true"
+     showgrid="true"
+     inkscape:snap-bbox="true"
+     inkscape:zoom="16"
+     inkscape:cx="578.82197"
+     inkscape:cy="-709.47568"
+     inkscape:window-width="3840"
+     inkscape:window-height="2031"
+     inkscape:window-x="0"
+     inkscape:window-y="55"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
     <inkscape:grid
        type="xygrid"
        id="grid3598"
@@ -7848,14 +7861,15 @@
            cx="545.5"
            cy="1756.8622"
            id="circle2086"
-           style="display:inline;opacity:1;fill:url(#backgroundLight);fill-opacity:1.0;fill-rule:nonzero;stroke:none;stroke-width:1.69515121;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+           style="display:inline;opacity:1;fill:url(#backgroundLight);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.69515121;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
            r="6.5065413" />
-        <circle
+        <ellipse
            cx="545.5"
            cy="1756.8622"
-           r="5.7574873"
            id="path2059"
-           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:url(#backgroundLightLowlight-5);stroke-width:1.5;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
+           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:#3c3c3c;stroke-width:0.99999988;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+           rx="5.9999995"
+           ry="6.00003" />
         <g
            id="text2462"
            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:10.66666698px;line-height:100.40000677%;font-family:Arial;-inkscape-font-specification:'Sans Bold';letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -7865,13 +7879,13 @@
              inkscape:connector-curvature="0"
              id="path2464"
              style="font-size:10.66666698px;line-height:10.00000015%;fill:#ffffff;fill-opacity:1"
-             d="m 543.32083,1758.7111 h -0.73175 v -1.1459 h 0.96091 l 0.3125,-1.5364 h -1.27341 v -1.1511 h 1.50779 l 0.27862,-1.3836 h 1.16666 l -0.27861,1.3836 h 1.15104 l 0.2682,-1.3836 h 1.20833 l -0.28382,1.3836 h 0.69534 v 1.1511 h -0.92972 l -0.3125,1.5364 h 1.24222 v 1.1459 h -1.47659 l -0.2738,1.3516 h -1.16146 l 0.26338,-1.3516 h -1.15625 l -0.2738,1.3516 h -1.17708 z m 1.71354,-2.6823 -0.30729,1.5364 h 1.15625 l 0.30208,-1.5364 z" />
+             d="m 544,1758.3622 h -2 v -1 h 2 l -0.0104,-0.9995 -1.9896,-5e-4 v -1 h 1.99998 l 2e-5,-2 h 1 l -2e-5,2 H 546 l 2e-5,-2 h 1 l -2e-5,2 h 2 v 1 h -2 v 1 h 2 v 1 h -2 v 2 h -1 v -2 h -1 v 2 h -1 z m 1,-2 v 1 h 1 v -1 z" />
         </g>
       </g>
       <g
          id="g2140">
         <circle
-           r="6.5065413"
+           r="6.4999876"
            style="display:inline;opacity:1;fill:url(#backgroundLight);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.69515121;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
            id="circle2061"
            cy="1756.8622"
@@ -7887,12 +7901,13 @@
              x="559.3783"
              id="tspan2096"
              sodipodi:role="line">1</tspan></text>
-        <circle
-           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:url(#backgroundLightLowlight-5);stroke-width:1.5;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+        <ellipse
+           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:#3c3c3c;stroke-width:1;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
            id="circle2102"
-           r="5.7574873"
            cy="1756.8622"
-           cx="562.5" />
+           cx="562.5"
+           rx="5.9999995"
+           ry="6.0000157" />
       </g>
       <g
          id="g2134">
@@ -7916,9 +7931,9 @@
         <circle
            cx="579.5"
            cy="1756.8622"
-           r="5.7574873"
+           r="5.99998"
            id="circle2106"
-           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:url(#backgroundLightLowlight-5);stroke-width:1.5;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
+           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:#3c3c3c;stroke-width:0.99999994;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
       </g>
       <g
          id="g2128">
@@ -7940,9 +7955,9 @@
              id="tspan2210"
              sodipodi:role="line">3</tspan></text>
         <circle
-           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:url(#backgroundLightLowlight-5);stroke-width:1.5;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:#3c3c3c;stroke-width:0.99999994;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
            id="circle2110"
-           r="5.7574873"
+           r="5.99998"
            cy="1756.8622"
            cx="596.5" />
       </g>
@@ -7957,20 +7972,20 @@
         <text
            xml:space="preserve"
            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:10.66666698px;line-height:100.40000677%;font-family:Arial;-inkscape-font-specification:'Sans Bold';letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           x="610.3783"
-           y="1760.3546"
+           x="609.83856"
+           y="1760.3622"
            id="text2358"><tspan
              sodipodi:role="line"
              id="tspan2356"
-             x="610.3783"
-             y="1760.3546"
+             x="609.83856"
+             y="1760.3622"
              style="font-size:10.66666698px;line-height:10.00000015%;fill:#ffffff;fill-opacity:1">4</tspan></text>
         <circle
            cx="613.5"
            cy="1756.8622"
-           r="5.7574873"
+           r="5.99998"
            id="circle2114"
-           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:url(#backgroundLightLowlight-5);stroke-width:1.5;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
+           style="display:inline;opacity:1;fill:none;fill-opacity:0;fill-rule:nonzero;stroke:#3c3c3c;stroke-width:0.99999994;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
       </g>
     </g>
   </g>
