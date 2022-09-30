@@ -177,6 +177,21 @@ struct ChangedSignalSlotCaller
 	}
 };
 
+struct ButtonSignalSlotCaller
+{
+	bool operator()( boost::python::object slot, Path &path, const ButtonEvent &event )
+	{
+		try
+		{
+			return slot( PathPtr( &path ), event );
+		}
+		catch( const error_already_set &e )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
+		}
+	}
+};
+
 } // namespace
 
 void GafferUIModule::bindPathColumn()
@@ -186,6 +201,8 @@ void GafferUIModule::bindPathColumn()
 			.def( init<>() )
 			.def( "changedSignal", &PathColumn::changedSignal, return_internal_reference<1>() )
 			.def( "cellData", &cellDataWrapper, ( arg( "path" ), arg( "canceller" ) = object() ) )
+			.def( "buttonPressSignal", &PathColumn::buttonPressSignal, return_internal_reference<1>() )
+			.def( "buttonReleaseSignal", &PathColumn::buttonReleaseSignal, return_internal_reference<1>() )
 		;
 
 		class_<PathColumn::CellData>( "CellData" )
@@ -214,6 +231,7 @@ void GafferUIModule::bindPathColumn()
 		;
 
 		SignalClass<PathColumn::PathColumnSignal, DefaultSignalCaller<PathColumn::PathColumnSignal>, ChangedSignalSlotCaller>( "PathColumnSignal" );
+		SignalClass<PathColumn::ButtonSignal, DefaultSignalCaller<PathColumn::ButtonSignal>, ButtonSignalSlotCaller>( "ButtonSignal" );
 	}
 
 	IECorePython::RefCountedClass<StandardPathColumn, PathColumn>( "StandardPathColumn" )

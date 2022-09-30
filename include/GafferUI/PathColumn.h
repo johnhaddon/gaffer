@@ -37,6 +37,8 @@
 #ifndef GAFFERUI_PATHCOLUMN_H
 #define GAFFERUI_PATHCOLUMN_H
 
+#include "GafferUI/ButtonEvent.h"
+#include "GafferUI/EventSignalCombiner.h"
 #include "GafferUI/Export.h"
 
 #include "Gaffer/Path.h"
@@ -55,6 +57,9 @@ class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signal
 	public :
 
 		IE_CORE_DECLAREMEMBERPTR( PathColumn )
+
+		/// Display data
+		/// ============
 
 		struct CellData
 		{
@@ -111,9 +116,23 @@ class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signal
 		/// or `headerValue()`.
 		PathColumnSignal &changedSignal();
 
+		/// Event handling
+		/// ==============
+		///
+		/// These signals are emitted when the user interacts with the
+		/// column. Subclasses may connect to them to implement custom
+		/// behaviours.
+
+		using ButtonSignal = Gaffer::Signals::Signal<bool ( Gaffer::Path &path, const ButtonEvent &event ), EventSignalCombiner<bool>>;
+
+		ButtonSignal &buttonPressSignal();
+		ButtonSignal &buttonReleaseSignal();
+
 	private :
 
 		PathColumnSignal m_changedSignal;
+		ButtonSignal m_buttonPressSignal;
+		ButtonSignal m_buttonReleaseSignal;
 
 };
 

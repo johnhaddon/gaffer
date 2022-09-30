@@ -78,6 +78,16 @@ PathColumn::PathColumnSignal &PathColumn::changedSignal()
 	return m_changedSignal;
 }
 
+PathColumn::ButtonSignal &PathColumn::buttonPressSignal()
+{
+	return m_buttonPressSignal;
+}
+
+PathColumn::ButtonSignal &PathColumn::buttonReleaseSignal()
+{
+	return m_buttonReleaseSignal;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // StandardPathColumn
 //////////////////////////////////////////////////////////////////////////

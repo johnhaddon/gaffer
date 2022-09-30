@@ -600,13 +600,23 @@ class PathListingWidget( GafferUI.Widget ) :
 	def __buttonPress( self, widget, event ) :
 
 		self.__updateSelectionInButtonRelease = False
-		if event.buttons != event.Buttons.Left :
-			return False
 
 		# Get model index under cursor.
 
 		index = self.__indexAt( event.line.p0 )
 		if index is None :
+			return False
+
+		# Delegate the click to the PathColumn, if it wants it.
+
+		if self.getColumns()[index.column()].buttonPressSignal()(
+			self.__pathForIndex( index ), event
+		) :
+			return True
+
+		# Otherwise, perform expansion and selection as appropriate.
+
+		if event.buttons != event.Buttons.Left :
 			return False
 
 		# Do expansion/collapsing if the arrow was clicked on. QTreeView doesn't
@@ -651,15 +661,17 @@ class PathListingWidget( GafferUI.Widget ) :
 
 	def __buttonRelease( self, widget, event ) :
 
-		if not self.__updateSelectionInButtonRelease :
-			return False
-
 		index = self.__indexAt( event.line.p0 )
 		if index is None :
 			return False
 
-		self.__singleSelect( index )
-		return True
+		if self.__updateSelectionInButtonRelease :
+			self.__singleSelect( index )
+			return True
+		else :
+			return self.getColumns()[index.column()].buttonReleaseSignal()(
+				self.__pathForIndex( index ), event
+			)
 
 	def __buttonDoubleClick( self, widget, event ) :
 
