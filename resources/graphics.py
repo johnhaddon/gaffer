@@ -100,6 +100,10 @@
 				'catalogueOutput2',
 				'catalogueOutput3',
 				'catalogueOutput4',
+				'catalogueOutput1Highlighted',
+				'catalogueOutput2Highlighted',
+				'catalogueOutput3Highlighted',
+				'catalogueOutput4Highlighted',
 			]
 
 		},
