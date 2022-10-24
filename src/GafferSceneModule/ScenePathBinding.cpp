@@ -42,6 +42,7 @@
 #include "GafferScene/SceneFilterPathFilter.h"
 #include "GafferScene/ScenePath.h"
 #include "GafferScene/ScenePlug.h"
+#include "GafferScene/SetPath.h"
 
 #include "GafferBindings/PathBinding.h"
 
@@ -59,14 +60,16 @@ using namespace GafferScene;
 namespace
 {
 
-ScenePathPtr constructor1( ScenePlug &scene, Context &context, PathFilterPtr filter )
+template<typename T>
+typename T::Ptr constructor1( ScenePlug &scene, Context &context, PathFilterPtr filter )
 {
-	return new ScenePath( &scene, &context, filter );
+	return new T( &scene, &context, filter );
 }
 
-ScenePathPtr constructor2( ScenePlug &scene, Context &context, const std::string &path, PathFilterPtr filter )
+template<typename T>
+typename T::Ptr constructor2( ScenePlug &scene, Context &context, const std::string &path, PathFilterPtr filter )
 {
-	return new ScenePath( &scene, &context, path, filter );
+	return new T( &scene, &context, path, filter );
 }
 
 PathFilterPtr createStandardFilter( object pythonSetNames, const std::string &setsLabel )
@@ -78,14 +81,14 @@ PathFilterPtr createStandardFilter( object pythonSetNames, const std::string &se
 
 } // namespace
 
-void GafferSceneModule::bindScenePath()
+void GafferSceneModule::bindScenePath() // TODO : RENAME TO BINDPATH, AND RENAME FILE TOO
 {
 
 	PathClass<ScenePath>()
 		.def(
 			"__init__",
 			make_constructor(
-				constructor1,
+				constructor1<ScenePath>,
 				default_call_policies(),
 				(
 					arg( "scene" ),
@@ -97,7 +100,7 @@ void GafferSceneModule::bindScenePath()
 		.def(
 			"__init__",
 			make_constructor(
-				constructor2,
+				constructor2<ScenePath>,
 				default_call_policies(),
 				(
 					arg( "scene" ),
@@ -121,6 +124,38 @@ void GafferSceneModule::bindScenePath()
 
 	RunTimeTypedClass<SceneFilterPathFilter>()
 		.def( init<FilterPtr, IECore::CompoundDataPtr>( ( arg( "filter" ), arg( "userData" ) = object() ) ) )
+	;
+
+	PathClass<SetPath>()
+		.def(
+			"__init__",
+			make_constructor(
+				constructor1<SetPath>,
+				default_call_policies(),
+				(
+					arg( "scene" ),
+					arg( "context" ),
+					arg( "filter" ) = object()
+				)
+			)
+		)
+		.def(
+			"__init__",
+			make_constructor(
+				constructor2<SetPath>,
+				default_call_policies(),
+				(
+					arg( "scene" ),
+					arg( "context" ),
+					arg( "path" ),
+					arg( "filter" ) = object()
+				)
+			)
+		)
+		.def( "setScene", &SetPath::setScene )
+		.def( "getScene", (ScenePlug *(SetPath::*)())&SetPath::getScene, return_value_policy<CastToIntrusivePtr>() )
+		.def( "setContext", &SetPath::setContext )
+		.def( "getContext", (Context *(SetPath::*)())&SetPath::getContext, return_value_policy<CastToIntrusivePtr>() )
 	;
 
 }
