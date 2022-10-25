@@ -38,18 +38,84 @@
 
 #include "GafferScene/ScenePlug.h"
 
-//#include "Gaffer/ArrayPlug.h"
 #include "Gaffer/Context.h"
 #include "Gaffer/Node.h"
 #include "Gaffer/PathFilter.h"
 
+#include "IECore/StringAlgo.h"
+
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/bind/bind.hpp"
+#include "boost/container/flat_set.hpp"
 
+using namespace std;
 using namespace boost::placeholders;
 using namespace IECore;
 using namespace Gaffer;
 using namespace GafferScene;
+
+//////////////////////////////////////////////////////////////////////////
+// Internal implementation
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+const boost::container::flat_set<InternedString> g_standardSets = {
+	"__lights",
+	"__lightFilters",
+	"__cameras",
+	"__coordinateSystems",
+	"defaultLights",
+	"soloLights"
+};
+
+Path::Names parent( InternedString setName )
+{
+	if( g_standardSets.contains( setName ) )
+	{
+		return { "Standard" };
+	}
+	else
+	{
+		Path::Names result;
+		StringAlgo::tokenize( setName.string(), ':', result );
+		if( result.size() == 1 )
+		{
+			// Nonsense for Cinesite
+			result.clear();
+			StringAlgo::tokenize( setName.string(), '_', result );
+			result.resize( std::min( result.size(), (size_t)2 ) );
+		}
+		result.pop_back();
+		return result;
+	}
+}
+
+/// TODO : CACHE ME, OR DO WITHOUT ME. PROBABLY CACHE ME, THEN CINESITE CAN
+/// INDULGE IN A PYTHON-BASED `PARENT()` FUNCTION.
+PathMatcher pathMatcher( const ScenePlug *scene )
+{
+	ConstInternedStringVectorDataPtr setNamesData = scene->setNames();
+
+	PathMatcher result;
+	for( const auto &setName : setNamesData->readable() )
+	{
+		Path::Names path = parent( setName );
+		path.push_back( setName );
+		result.addPath( path );
+	}
+
+	return result;
+}
+
+const InternedString g_setNamePropertyName( "setPath:setName" );
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// SetPath
+//////////////////////////////////////////////////////////////////////////
 
 IE_CORE_DEFINERUNTIMETYPED( SetPath );
 
@@ -108,7 +174,6 @@ void SetPath::setContext( Gaffer::ContextPtr context )
 		return;
 	}
 
-
 	m_context = context;
 	m_contextChangedConnection = context->changedSignal().connect( boost::bind( &SetPath::contextChanged, this, ::_2 ) );
 
@@ -131,8 +196,6 @@ bool SetPath::isValid( const IECore::Canceller *canceller ) const
 	{
 		return false;
 	}
-
-	std::cerr << "IS VALID CALLED" << std::endl;
 
 	// Context::EditableScope scopedContext( m_context.get() );
 	// if( canceller )
@@ -158,6 +221,25 @@ PathPtr SetPath::copy() const
 	return new SetPath( m_scene, m_context, names(), root(), const_cast<PathFilter *>( getFilter() ) );
 }
 
+void SetPath::propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller ) const
+{
+	Path::propertyNames( names, canceller );
+	names.push_back( g_setNamePropertyName );
+}
+
+IECore::ConstRunTimeTypedPtr SetPath::property( const IECore::InternedString &name, const IECore::Canceller *canceller ) const
+{
+	if( name == g_setNamePropertyName )
+	{
+		const PathMatcher p = pathMatcher( canceller );
+		if( p.match( names() ) & PathMatcher::ExactMatch )
+		{
+			return new StringData( names().back().string() );
+		}
+	}
+	return Path::property( name, canceller );
+}
+
 const Gaffer::Plug *SetPath::cancellationSubject() const
 {
 	return m_scene.get();
@@ -165,22 +247,38 @@ const Gaffer::Plug *SetPath::cancellationSubject() const
 
 void SetPath::doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const
 {
-	if( names().size() )
+	const PathMatcher p = pathMatcher( canceller );
+
+	auto it = p.find( names() );
+	if( it == p.end() )
 	{
 		return;
 	}
 
+	++it;
+	while( it != p.end() && it->size() == names().size() + 1 )
+	{
+		children.push_back( new SetPath( m_scene, m_context, *it, root(), const_cast<PathFilter *>( getFilter() ) ) );
+		it.prune();
+		++it;
+	}
+
+	std::sort(
+		children.begin(), children.end(),
+		[]( const PathPtr &a, const PathPtr &b ) {
+			return a->names().back().string() < b->names().back().string();
+		}
+	);
+}
+
+const IECore::PathMatcher SetPath::pathMatcher( const IECore::Canceller *canceller ) const
+{
 	Context::EditableScope scopedContext( m_context.get() );
 	if( canceller )
 	{
 		scopedContext.setCanceller( canceller );
 	}
-
-	ConstInternedStringVectorDataPtr setNamesData = m_scene->setNames();
-	for( const auto &setName : setNamesData->readable() )
-	{
-		children.push_back( new SetPath( m_scene, m_context, { setName }, root(), const_cast<PathFilter *>( getFilter() ) ) );
-	}
+	return ::pathMatcher( m_scene.get() );
 }
 
 void SetPath::contextChanged( const IECore::InternedString &key )

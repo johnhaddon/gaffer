@@ -529,7 +529,7 @@ static void loadSetWalk( const SceneInterface *s, const InternedString &setName,
 	childPath.push_back( InternedString() ); // room for the child name
 	for( SceneInterface::NameList::const_iterator it = childNames.begin(), eIt = childNames.end(); it != eIt; ++it )
 	{
-		Canceller::check( context->canceller() );
+		Canceller::check( context->canceller() ); // WHY ISN'T THIS GETTING TRIGGERED? WHAT'S WRONG WITH YOUR SETEDITOR???
 
 		ConstSceneInterfacePtr child = s->child( *it );
 		childPath.back() = *it;

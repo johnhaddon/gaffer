@@ -34,13 +34,71 @@
 #
 ##########################################################################
 
-#import IECore
+import IECore
 #import IECoreScene
 
 import Gaffer
 import GafferScene
 import GafferUI
 import GafferSceneUI
+
+## TODO : SHOULD BE C++
+# OR OR OR, SETPATH SHOULD BE PYTHON?
+# NAH. PYTHON SUCKS.
+class _SetContentsColumn( GafferUI.PathColumn ) :
+
+	def __init__( self ) :
+
+		GafferUI.PathColumn.__init__( self )
+
+	def headerData( self, canceller = None ) :
+
+		return self.CellData( value = "Members" )
+
+	def cellData( self, path, canceller = None ) :
+
+		setName = path.property( "setPath:setName", canceller )
+		if not setName :
+			return self.CellData()
+
+		with Gaffer.Context( path.getContext(), canceller ) as c :
+			c["scene:setName"] = IECore.InternedStringData( setName )
+			set = path.getScene()["set"].getValue().value
+
+		return self.CellData(
+			value = set.size()
+		)
+
+		# image = path.property( "catalogue:image" )
+		# catalogue = path.property( "catalogue" )
+
+		# # Suppress error. The GraphEditor will be displaying the
+		# # error anyway, as will the standard type column, and we're
+		# # not in a position to do anything more helpful.
+		# with IECore.IgnoredExceptions( Gaffer.ProcessException ) :
+
+		# 	# Call `_imageCellData()` in a context which causes the Catalogue
+		# 	# to output the image of interest.
+		# 	with Gaffer.Context( catalogue.scriptNode().context() ) as context :
+		# 		context["catalogue:imageName"] = image.getName()
+
+		# 		# Our cells can only display data from one view, so we need to pick one.
+		# 		# If the "default" view is present use that, otherwise use the first view
+		# 		viewNames = catalogue["out"].viewNames()
+		# 		if not len( viewNames ):
+		# 			raise Exception( "Catalogue : Image has no views, no data to display" )
+		# 		context["image:viewName"] = "default" if "default" in viewNames else viewNames[0]
+
+		# 		try :
+		# 			return self._imageCellData( image, catalogue )
+		# 		except NotImplementedError :
+		# 			# Backwards compatibility for deprecated API.
+		# 			if isinstance( self, IconColumn ) :
+		# 				return self.CellData( icon = self.value( image, catalogue ) + ".png" )
+		# 			else :
+		# 				return self.CellData( value = self.value( image, catalogue ) )
+
+		# return self.CellData()
 
 ## TODO : MAKE A SCENEEDITOR BASE CLASS TO ENCAPSULATE THE LOGIC ABOUT WHAT
 # SCENE TO VIEW, AND TO TRACK THE REPARENTING OF THE PLUG.
@@ -56,7 +114,7 @@ class SetEditor( GafferUI.NodeSetEditor ) :
 
 			self.__pathListing = GafferUI.PathListingWidget(
 				Gaffer.DictPath( {}, "/" ), # temp till we make a SetPath
-				columns = [ GafferUI.PathListingWidget.defaultNameColumn ],
+				columns = [ GafferUI.PathListingWidget.defaultNameColumn, _SetContentsColumn() ],
 				selectionMode = GafferUI.PathListingWidget.SelectionMode.Rows,
 				displayMode = GafferUI.PathListingWidget.DisplayMode.Tree,
 			)

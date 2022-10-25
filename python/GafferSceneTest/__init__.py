@@ -168,6 +168,7 @@ from .SetQueryTest import SetQueryTest
 from .VisibleSetTest import VisibleSetTest
 from .VisibleSetDataTest import VisibleSetDataTest
 from .MeshSegmentsTest import MeshSegmentsTest
+from .SetPathTest import SetPathTest
 
 from .IECoreScenePreviewTest import *
 from .IECoreGLPreviewTest import *

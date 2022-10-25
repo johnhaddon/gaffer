@@ -42,6 +42,8 @@
 
 #include "Gaffer/Path.h"
 
+#include "IECore/PathMatcher.h"
+
 namespace Gaffer
 {
 
@@ -81,6 +83,9 @@ class GAFFERSCENE_API SetPath : public Gaffer::Path
 		bool isLeaf( const IECore::Canceller *canceller = nullptr ) const override;
 		Gaffer::PathPtr copy() const override;
 
+		void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override;
+		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
+
 		const Gaffer::Plug *cancellationSubject() const override;
 
 	protected :
@@ -88,6 +93,8 @@ class GAFFERSCENE_API SetPath : public Gaffer::Path
 		void doChildren( std::vector<Gaffer::PathPtr> &children, const IECore::Canceller *canceller ) const override;
 
 	private :
+
+		const IECore::PathMatcher pathMatcher( const IECore::Canceller *canceller ) const;
 
 		void contextChanged( const IECore::InternedString &key );
 		void plugDirtied( Gaffer::Plug *plug );
