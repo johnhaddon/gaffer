@@ -1,6 +1,11 @@
 1.1.x.x (relative to 1.1.3.0)
 =======
 
+Features
+--------
+
+- SetQuery : Added a new node for querying the set memberships of a location.
+
 Improvements
 ------------
 
