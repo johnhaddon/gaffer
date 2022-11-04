@@ -21,6 +21,7 @@ Improvements
 - ShuffleAttributes, ShufflePrimitiveVariables :
   - Added `replaceDestination` plugs that may be used to specify whether each shuffle replaces existing destination data with the same name.
   - Shuffles are now performed in the order they are defined, and separate shuffles may write to the same destination.
+- Cycles : Added support for custom attributes with either a user: or render: prefix. These can be authored in Gaffer and then read at render time using Cycle's attribute shader.
 
 Fixes
 -----
