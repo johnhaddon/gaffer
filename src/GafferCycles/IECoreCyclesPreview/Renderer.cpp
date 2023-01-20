@@ -3211,21 +3211,16 @@ class CyclesRenderer final : public IECoreScenePreview::Renderer
 				updateCamera();
 				updateOutputs();
 
-				if( m_renderState == RENDERSTATE_RENDERING )
+				//if( m_renderState == RENDERSTATE_RENDERING )
 				{
-					if( m_scene->need_reset() )
+					if( true || m_scene->need_reset() )
 					{
 						m_session->reset( m_sessionParams, m_bufferParams );
 					}
 				}
 			}
 
-			if( m_renderState == RENDERSTATE_RENDERING )
-			{
-				m_session->set_pause( false );
-				return;
-			}
-
+			m_session->progress.reset();
 			m_session->start();
 
 			m_renderState = RENDERSTATE_RENDERING;
@@ -3244,11 +3239,7 @@ class CyclesRenderer final : public IECoreScenePreview::Renderer
 		void pause() override
 		{
 			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
-
-			if( m_renderState == RENDERSTATE_RENDERING )
-			{
-				m_session->set_pause( true );
-			}
+			m_session->cancel();
 		}
 
 		IECore::DataPtr command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters ) override
