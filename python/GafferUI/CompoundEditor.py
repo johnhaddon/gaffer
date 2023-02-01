@@ -1431,19 +1431,18 @@ def _restoreWindowState( gafferWindow, boundData ) :
 			targetScreen = screens[ boundData["screen"] ]
 			window.setScreen( targetScreen )
 
-	screenGeom = targetScreen.availableGeometry()
-	window.setGeometry(
-		( boundData["bound"].min()[0] * screenGeom.width() ) + screenGeom.x(),
-		( ( 1.0 - boundData["bound"].max()[1] ) * screenGeom.height() ) + screenGeom.y(),
-		( boundData["bound"].size()[0] * screenGeom.width() ),
-		( boundData["bound"].size()[1] * screenGeom.height() )
-	)
-
 	if boundData["fullScreen"] :
 		window.setWindowState( QtCore.Qt.WindowFullScreen )
 	elif boundData["maximized"] and sys.platform != "darwin" :
 		window.setWindowState( QtCore.Qt.WindowMaximized )
 	else :
+		screenGeom = targetScreen.availableGeometry()
+		window.setGeometry(
+			( boundData["bound"].min()[0] * screenGeom.width() ) + screenGeom.x(),
+			( ( 1.0 - boundData["bound"].max()[1] ) * screenGeom.height() ) + screenGeom.y(),
+			( boundData["bound"].size()[0] * screenGeom.width() ),
+			( boundData["bound"].size()[1] * screenGeom.height() )
+		)
 		window.setWindowState( QtCore.Qt.WindowNoState )
 
 
