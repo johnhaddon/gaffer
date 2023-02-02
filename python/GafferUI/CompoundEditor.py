@@ -1414,15 +1414,6 @@ def _restoreWindowState( gafferWindow, boundData ) :
 	if not window :
 		return
 
-	# If we don't clear the full-screen flag then restoring geometry won't
-	# work, as its overridden by the full-screen state.  Doing it conditionally
-	# improves fullscreen - fullscreen layout transitions (avoids pointless
-	# re-scale animations), but does mean that we don't properly restore the
-	# non-fullscreen size of the window and it will keep that of the first
-	# fullscreen layout loaded. Seems a reasonable trade-off though.
-	if not ( boundData["fullScreen"] and window.windowState() == QtCore.Qt.WindowFullScreen ) :
-		window.setWindowState( QtCore.Qt.WindowNoState )
-
 	targetScreen = QtWidgets.QApplication.primaryScreen()
 
 	if boundData["screen"] > -1 :
@@ -1436,6 +1427,7 @@ def _restoreWindowState( gafferWindow, boundData ) :
 	elif boundData["maximized"] and sys.platform != "darwin" :
 		window.setWindowState( QtCore.Qt.WindowMaximized )
 	else :
+		window.setWindowState( QtCore.Qt.WindowNoState )
 		screenGeom = targetScreen.availableGeometry()
 		window.setGeometry(
 			( boundData["bound"].min()[0] * screenGeom.width() ) + screenGeom.x(),
@@ -1443,8 +1435,6 @@ def _restoreWindowState( gafferWindow, boundData ) :
 			( boundData["bound"].size()[0] * screenGeom.width() ),
 			( boundData["bound"].size()[1] * screenGeom.height() )
 		)
-		window.setWindowState( QtCore.Qt.WindowNoState )
-
 
 def _reprDict( d ) :
 
