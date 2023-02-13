@@ -70,6 +70,8 @@ class GAFFERUI_API BackdropNodeGadget : public NodeGadget
 
 	protected :
 
+		void parentChanged( Gaffer::GraphComponent *oldParent ) const override;
+
 		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 		unsigned layerMask() const override;
 		Imath::Box3f renderBound() const override;
@@ -105,6 +107,9 @@ class GAFFERUI_API BackdropNodeGadget : public NodeGadget
 		int m_mergeGroupId;
 
 		std::optional<Imath::Color3f> m_userColor;
+
+		class Renderer;
+		std::shared_ptr<Renderer> m_renderer;
 
 		static NodeGadgetTypeDescription<BackdropNodeGadget> g_nodeGadgetTypeDescription;
 

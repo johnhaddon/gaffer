@@ -60,6 +60,55 @@ using namespace IECore;
 using namespace Gaffer;
 using namespace GafferUI;
 
+//////////////////////////////////////////////////////////////////////////
+// BackdropNodeGadget::Renderer
+//////////////////////////////////////////////////////////////////////////
+
+// Backdrops can't be rendered independently, because we need full control
+// over the order in which they are renderered relative to one another.
+// All backdrops with the same parent gadget share a single instance of
+// Renderer, and it coordinates the rendering.
+class BackdropNodeGadget::Renderer
+{
+
+	public :
+
+		static std::shared_ptr<Renderer> acquire( const Gadget *parent )
+		{
+			std::weak_ptr<Renderer> &weak = g_instances[parent];
+			if( auto strong = w.lock() )
+			{
+				// Found existing renderer for this parent.
+				return strong;
+			}
+
+			// Make new renderer and store it in the instances map.
+			auto strong = std::make_shared<Renderer>();
+			weak = strong;
+			return strong;
+		}
+
+		void render( const BackdropNodeGadget *gadget ) const
+		{
+
+		}
+
+	private :
+
+		Renderer()
+		{
+		}
+
+		// MAYBE NOT NECESSARY, BECAUSE WE'LL BECOME WEAK WHEN WE DIE ANYWAY?
+		// ~Renderer()
+		// {
+		// 	g_instances.erase( parent );
+		// }
+
+		static std::unordered_map<const Gadget *, std::weak_ptr<Renderer>> g_instances;
+
+};
+
 namespace
 {
 
@@ -95,6 +144,11 @@ IECore::InternedString g_colorKey( "nodeGadget:color" );
 Box2f g_defaultBound( V2f( -10 ), V2f( 10 ) );
 
 } // namespace
+
+
+//////////////////////////////////////////////////////////////////////////
+// BackdropNodeGadget
+//////////////////////////////////////////////////////////////////////////
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( BackdropNodeGadget );
 
@@ -245,6 +299,11 @@ void BackdropNodeGadget::framed( std::vector<Gaffer::Node *> &nodes ) const
 			}
 		}
 	}
+}
+
+void BackdropNodeGadget::parentChanged() const
+{
+	m_renderer = Renderer::acquire( this->parent<Gadget>() );
 }
 
 Imath::Box3f BackdropNodeGadget::bound() const
