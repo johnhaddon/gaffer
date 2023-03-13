@@ -1,6 +1,11 @@
 1.2.x.x (relative to 1.2.2.0)
 =======
 
+Improvements
+------------
+
+- Shader : Added support for shading input connections to splines.  After double clicking on a spline to open the editor, you may select a control point, and then drag an input to the value control.  Works in GafferImage, GafferObject and Arnold.  Supports a max of 32 values in the spline.
+
 1.2.2.0 (relative to 1.2.1.1)
 =======
 
