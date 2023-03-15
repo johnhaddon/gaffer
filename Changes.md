@@ -5,6 +5,7 @@ Fixes
 -----
 
 - DispatchDialogue : Fixed `AttributeError: '__Implementation' object has no attribute 'message'` error.
+- PathListingWidget : Fixed issue with columns set to automatically stretch not resizing if column headers are hidden.
 
 Documentation
 -------------
