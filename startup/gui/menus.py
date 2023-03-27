@@ -180,12 +180,12 @@ if moduleSearchPath.find( "nsi.py" ) and moduleSearchPath.find( "GafferDelight" 
 				searchText = "dl" + label
 			)
 
+		GafferSceneUI.ShaderUI.hideShaders( IECore.PathMatcher( [ ".../__*" ] ) )
 		GafferSceneUI.ShaderUI.appendShaders(
 			nodeMenu.definition(), "/3Delight/Shader/Maya",
 			[ os.path.join( os.environ["DELIGHT"], "maya", "osl" ) ],
 			[ "oso" ],
 			__shaderNodeCreator,
-			matchExpression = re.compile( "^[^_].*$"),
 			searchTextPrefix = "maya"
 		)
 
