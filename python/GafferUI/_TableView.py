@@ -38,11 +38,13 @@
 from Qt import QtCore
 from Qt import QtWidgets
 
-# A QTableView derived class with custom size behaviours we want for
+# A QTableView derived class with custom behaviours we want for
 # GafferUI. This is not part of the public API.
 #
 # - Always requests enough space to show all cells if possible.
 # - Optionally refuses to shrink below a certain number of visible rows.
+# - Ensures navigation key presses aren't stolen by any application-level
+#   actions.
 class _TableView( QtWidgets.QTableView ) :
 
 	def __init__( self, minimumVisibleRows = 0 ) :
@@ -126,6 +128,21 @@ class _TableView( QtWidgets.QTableView ) :
 			h += self.horizontalHeader().sizeHint().height()
 
 		return QtCore.QSize( w, h )
+
+	__protectedKeys = (
+		QtCore.Qt.Key_Left,
+		QtCore.Qt.Key_Right,
+		QtCore.Qt.Key_Up,
+		QtCore.Qt.Key_Down
+	)
+
+	def event( self, event ) :
+
+		if event.type() == QtCore.QEvent.ShortcutOverride and event.key() in self.__protectedKeys :
+			event.accept()
+			return True
+		else :
+			return QtWidgets.QTableView.event( self, event )
 
 	def __sizeShouldChange( self, *unusedArgs ) :
 
