@@ -181,7 +181,7 @@ class PrimitiveInspector( GafferUI.NodeSetEditor ) :
 			return l
 
 		vectorDataWidgetOptions = {
-			"editable" : False, "header" : True,
+			"editable" : False, "header" : True, "sortable" : True,
 			"horizontalScrollMode" : GafferUI.ScrollMode.Automatic,
 			"verticalScrollMode" : GafferUI.ScrollMode.Automatic
 		}

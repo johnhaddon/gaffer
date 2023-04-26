@@ -85,6 +85,7 @@ class VectorDataWidget( GafferUI.Widget ) :
 		columnEditability=None,
 		horizontalScrollMode = GafferUI.ScrollMode.Never,
 		verticalScrollMode = GafferUI.ScrollMode.Automatic,
+		sortable = False,
 		**kw
 	) :
 
@@ -111,6 +112,8 @@ class VectorDataWidget( GafferUI.Widget ) :
 		self.__tableView.customContextMenuRequested.connect( Gaffer.WeakMethod( self.__contextMenu ) )
 
 		self.__tableView.verticalHeader().setDefaultSectionSize( 20 )
+
+		self.__tableView.setSortingEnabled( sortable )
 
 		self.__tableViewHolder = GafferUI.Widget( self.__tableView )
 		self.__column.append( self.__tableViewHolder )
@@ -176,6 +179,7 @@ class VectorDataWidget( GafferUI.Widget ) :
 		self.__propagatingDataChangesToSelection = False
 
 		self.__sizeEditable = sizeEditable
+		self.__sortable = sortable
 		self.setData( data )
 		self.setEditable( editable )
 
@@ -218,7 +222,12 @@ class VectorDataWidget( GafferUI.Widget ) :
 		if data is not None :
 			if not isinstance( data, list ) :
 				data = [ data ]
-			self.__model = _Model( data, self.__tableView, self.getEditable(), self.__header, self.__toolTips, self.__columnEditability )
+			vectorDataModel = _VectorDataModel( data, self.__tableView, self.getEditable(), self.__header, self.__toolTips, self.__columnEditability )
+			if self.__sortable :
+				self.__model = QtCore.QSortFilterProxyModel()
+				self.__model.setSourceModel( vectorDataModel )
+			else :
+				self.__model = vectorDataModel
 			self.__model.dataChanged.connect( Gaffer.WeakMethod( self.__modelDataChanged ) )
 			self.__model.rowsInserted.connect( Gaffer.WeakMethod( self.__emitDataChangedSignal ) )
 			self.__model.rowsRemoved.connect( Gaffer.WeakMethod( self.__emitDataChangedSignal ) )
@@ -227,11 +236,11 @@ class VectorDataWidget( GafferUI.Widget ) :
 
 		self.__tableView.setModel( self.__model )
 
-		if self.__model :
+		if self.__model is not None :
 
 			columnIndex = 0
 			haveResizeableContents = False
-			for accessor in self.__model.vectorDataAccessors() :
+			for accessor in self.__vectorDataModel().vectorDataAccessors() :
 				for i in range( 0, accessor.numColumns() ) :
 					delegate = _Delegate.create( accessor.data() )
 					delegate.setParent( self.__model )
@@ -270,10 +279,9 @@ class VectorDataWidget( GafferUI.Widget ) :
 	## Returns the data being displayed. This is always returned as a list of
 	# VectorData instances, even if only one instance was passed to setData().
 	def getData( self ) :
-		if not self.__model:
-			return []
 
-		return self.__model.vectorData()
+		model = self.__vectorDataModel()
+		return model.vectorData() if model is not None else None
 
 	def setHeader( self, header ) :
 
@@ -315,7 +323,7 @@ class VectorDataWidget( GafferUI.Widget ) :
 
 		# update the model
 		if self.__model is not None :
-			self.__model.setEditable( editable )
+			self.__vectorDataModel().setEditable( editable )
 
 	def getEditable( self ) :
 
@@ -408,13 +416,12 @@ class VectorDataWidget( GafferUI.Widget ) :
 	# componentIndex will be -1.
 	def columnToDataIndex( self, columnIndex ) :
 
-		return self.__model.columnToDataIndex( columnIndex )
+		return self.__vectorDataModel().columnToDataIndex( columnIndex )
 
 	## Performs the reverse of columnToDataIndex.
 	def dataToColumnIndex( self, dataIndex, componentIndex ) :
 
-		return self.__model.dataToColumnIndex( dataIndex, componentIndex )
-
+		return self.__vectorDataModel().dataToColumnIndex( dataIndex, componentIndex )
 
 	## Returns a signal which is emitted whenever the data is edited.
 	# The signal is /not/ emitted when setData() is called.
@@ -476,13 +483,22 @@ class VectorDataWidget( GafferUI.Widget ) :
 
 		newData = []
 		data = self.getData()
-		accessors = self.__model.vectorDataAccessors()
+		accessors = self.__vectorDataModel().vectorDataAccessors()
 		for d, a in zip( data, accessors ) :
 			nd = d.__class__()
 			nd.append( a.defaultElement() )
 			newData.append( nd )
 
 		return newData
+
+	def __vectorDataModel( self ) :
+
+		if self.__model is None :
+			return None
+		elif isinstance( self.__model, QtCore.QSortFilterProxyModel ) :
+			return self.__model.sourceModel()
+		else :
+			return self.__model
 
 	def __modelDataChanged( self, topLeft, bottomRight, roles ) :
 
@@ -537,6 +553,7 @@ class VectorDataWidget( GafferUI.Widget ) :
 
 	def __selectionChanged( self, *unused ) :
 
+		print( "SELECTION CHANGED" )
 		self.__updateRemoveButtonEnabled()
 
 	def __removeSelection( self, button ) :
@@ -595,7 +612,7 @@ class VectorDataWidget( GafferUI.Widget ) :
 		selection = QtCore.QItemSelection(
 			self.__model.index( originalLength, 0 ),
 			lastIndex
-		)
+		) # ??
 
 		self.__tableView.selectionModel().select(
 			selection,
@@ -784,9 +801,9 @@ class VectorDataWidget( GafferUI.Widget ) :
 				self.__removeRows( self.__selectedRows() )
 			return True
 
-# Internal implementation detail - a qt model which wraps
+# Internal implementation detail - a Qt model which wraps
 # around the VectorData.
-class _Model( QtCore.QAbstractTableModel ) :
+class _VectorDataModel( QtCore.QAbstractTableModel ) :
 
 	__addValueText = "Add..."
 
