@@ -60,14 +60,28 @@ void GafferSceneModule::bindVisibleSet()
 
 	IECorePython::TypedDataFromType<VisibleSetData>();
 
-	class_<VisibleSet>( "VisibleSet" )
+	scope s = class_<VisibleSet>( "VisibleSet" )
 		.def( init<>() )
 		.def( init<const VisibleSet &>() )
-		.def( "match", (PathMatcher::Result (VisibleSet ::*)( const std::vector<InternedString> &, const size_t ) const)&VisibleSet::match, arg( "minimumExpansionDepth" ) = 0 )
+		.def( "match", (VisibleSet::Result (VisibleSet ::*)( const std::vector<InternedString> &, const size_t ) const)&VisibleSet::match, arg( "minimumExpansionDepth" ) = 0 )
 		.def_readwrite( "expansions", &VisibleSet::expansions )
 		.def_readwrite( "inclusions", &VisibleSet::inclusions )
 		.def_readwrite( "exclusions", &VisibleSet::exclusions )
 		.def( "__eq__", &VisibleSet::operator== )
+	;
+
+	scope r = class_<VisibleSet::Result>( "Result" )
+		.def( init<>() )
+		.def( init<VisibleSet::Result::DrawMode, bool>() )
+		.def_readwrite( "descendantsVisible", &VisibleSet::Result::descendantsVisible )
+		.def_readwrite( "drawMode", &VisibleSet::Result::drawMode )
+		.def( "__eq__", &VisibleSet::Result::operator== )
+	;
+
+	enum_<VisibleSet::Result::DrawMode>( "DrawMode" )
+		.value( "None_", VisibleSet::Result::DrawMode::None )
+		.value( "Visible", VisibleSet::Result::DrawMode::Visible )
+		.value( "ExcludedBounds", VisibleSet::Result::DrawMode::ExcludedBounds )
 	;
 
 }
