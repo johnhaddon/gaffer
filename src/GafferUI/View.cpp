@@ -490,6 +490,8 @@ void View::DisplayTransform::preRender()
 			}
 		}
 
+		std::cerr << "Transform : " << name << " " << m_shader << std::endl;
+
 		view()->viewportGadget()->setPostProcessShader( Gadget::Layer::Main, m_shader );
 		m_shaderDirty = false;
 		m_parametersDirty = true;

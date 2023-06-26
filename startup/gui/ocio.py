@@ -40,6 +40,8 @@ import GafferUI
 import GafferImage
 import GafferImageUI
 
+print( "RUNNING OCIO.PY!!!!!!!!!!!!!" )
+
 # Make sure every script has a config plug added to it, and that we update
 # the View and Widget display transforms appropriately when the config is changed.
 

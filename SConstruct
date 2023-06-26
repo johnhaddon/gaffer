@@ -546,6 +546,7 @@ else:
 			"/D_USE_MATH_DEFINES",  # Required when permissive mode is off, for defining constants like M_PI used by OpenVDB
 			"/std:$CXXSTD",
 			"/DHAVE_SNPRINTF",  # Fix a legacy issue for MSVC versions < 2019
+			"/wd4100",  # Suppress warning about unused parameters
 		]
 	)
 
@@ -1481,7 +1482,7 @@ if env["PLATFORM"] == "win32" :
 		if os.path.isdir( source ) or os.path.isdir( dest ) :
 			raise RuntimeError( "Cannot copy {} to {}. Source and destination cannot be directories.".format( source, dest ) )
 
-		fileInfo = runCommand( "git ls-files -s {}".format( source ) ).split()
+		fileInfo = runCommand( "/mingw64/bin/git ls-files -s {}".format( source ) ).split()
 
 		if len( fileInfo ) == 4 or len( fileInfo ) == 5:
 
@@ -1521,7 +1522,7 @@ if env["PLATFORM"] == "win32" :
 
 		shutil.copy2( source, dest )
 
-	env["INSTALL"] = customInstaller
+	#env["INSTALL"] = customInstaller
 
 ###############################################################################################
 # The stuff that actually builds the libraries and python modules

@@ -151,6 +151,8 @@ class DisplayTransformPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plugs, **kw ) :
 
+		print( "MAKING DisplayTransformPlugValueWidget" )
+
 		self.__menuButton = GafferUI.MenuButton( "", menu = GafferUI.Menu( Gaffer.WeakMethod( self.__menuDefinition ) ) )
 		GafferUI.PlugValueWidget.__init__( self, self.__menuButton, plugs, **kw )
 
@@ -248,6 +250,7 @@ class DisplayTransformPlugValueWidget( GafferUI.PlugValueWidget ) :
 			try :
 				config = GafferImage.OpenColorIOAlgo.currentConfig()
 			except :
+				print( "ERROR IN __ENSUREVALIDVALUE" )
 				return
 			elements = self.getPlug().getValue().split( "/" )
 
@@ -262,6 +265,8 @@ class DisplayTransformPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		if view not in config.getViews( display ) :
 			view = config.getDefaultView( display )
+
+		print( "ENSURE VALID VALUE" )
 
 		self.__setValue( f"{display}/{view}" )
 
