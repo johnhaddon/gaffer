@@ -63,7 +63,7 @@ struct GAFFERSCENE_API VisibleSet
 	PathMatcher inclusions;
 	PathMatcher exclusions;
 
-	struct Result
+	struct Visibility
 	{
 		enum DrawMode
 		{
@@ -72,12 +72,12 @@ struct GAFFERSCENE_API VisibleSet
 			ExcludedBounds = 2,
 		};
 
-		Result( DrawMode drawMode = DrawMode::None, bool descendantsVisible = false )
+		Visibility( DrawMode drawMode = DrawMode::None, bool descendantsVisible = false )
 			: drawMode( drawMode ), descendantsVisible( descendantsVisible )
 		{
 		}
 
-		bool operator == ( const Result &rhs ) const
+		bool operator == ( const Visibility &rhs ) const
 		{
 			return drawMode == rhs.drawMode && descendantsVisible == rhs.descendantsVisible;
 		}
@@ -86,8 +86,8 @@ struct GAFFERSCENE_API VisibleSet
 		bool descendantsVisible;
 	};
 
-	/// Returns the Result of a match made against the VisibleSet.
-	Result match( const std::vector<InternedString> &path, const size_t minimumExpansionDepth = 0 ) const;
+	/// Returns the Visibility of a path tested against the VisibleSet.
+	Visibility visibility( const std::vector<InternedString> &path, const size_t minimumExpansionDepth = 0 ) const;
 
 	bool operator == ( const VisibleSet &rhs ) const;
 	bool operator != ( const VisibleSet &rhs ) const;

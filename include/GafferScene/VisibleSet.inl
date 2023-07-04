@@ -60,7 +60,7 @@ bool allAncestorsMatch( const std::vector<InternedString> &path, const IECore::P
 namespace GafferScene
 {
 
-inline VisibleSet::Result VisibleSet::match( const std::vector<InternedString> &path, const size_t minimumExpansionDepth ) const
+inline VisibleSet::Visibility VisibleSet::visibility( const std::vector<InternedString> &path, const size_t minimumExpansionDepth ) const
 {
 
 	const unsigned exclusionsMatch = exclusions.match( path );
@@ -68,29 +68,29 @@ inline VisibleSet::Result VisibleSet::match( const std::vector<InternedString> &
 	{
 		// If all ancestors are expanded then we consider the bounds of this excluded path to be visible,
 		// but none of its descendants to be
-		return VisibleSet::Result( VisibleSet::Result::ExcludedBounds, false );
+		return VisibleSet::Visibility( VisibleSet::Visibility::ExcludedBounds, false );
 	}
 	else if( exclusionsMatch & ( PathMatcher::ExactMatch | PathMatcher::AncestorMatch ) )
 	{
 		// This path and its descendants are not visible as it or an ancestor are in `exclusions`
-		return VisibleSet::Result( VisibleSet::Result::None, false );
+		return VisibleSet::Visibility( VisibleSet::Visibility::None, false );
 	}
 
 	if( minimumExpansionDepth >= path.size() )
 	{
 		// Paths within minimumExpansionDepth are visible and have visible children
-		return VisibleSet::Result( VisibleSet::Result::Visible, true );
+		return VisibleSet::Visibility( VisibleSet::Visibility::Visible, true );
 	}
 
 	const unsigned inclusionsMatch = inclusions.match( path );
 	if( inclusionsMatch & ( PathMatcher::ExactMatch | PathMatcher::AncestorMatch ) )
 	{
 		// This path and its descendants are visible as it or an ancestor are in `inclusions`
-		return VisibleSet::Result( VisibleSet::Result::Visible, true );
+		return VisibleSet::Visibility( VisibleSet::Visibility::Visible, true );
 	}
 
-	auto result = VisibleSet::Result(
-		VisibleSet::Result::None,
+	auto result = VisibleSet::Visibility(
+		VisibleSet::Visibility::None,
 		// Any descendants in `inclusions` are visible
 		inclusionsMatch & PathMatcher::DescendantMatch
 	);
@@ -98,7 +98,7 @@ inline VisibleSet::Result VisibleSet::match( const std::vector<InternedString> &
 	if( allAncestorsMatch( path, expansions, minimumExpansionDepth ) )
 	{
 		// This path is visible as all its ancestors are expanded
-		result.drawMode = VisibleSet::Result::Visible;
+		result.drawMode = VisibleSet::Visibility::Visible;
 		// If the path is also expanded then it could have visible children
 		result.descendantsVisible |= (bool)(expansions.match( path ) & PathMatcher::ExactMatch);
 	}

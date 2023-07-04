@@ -63,25 +63,25 @@ void GafferSceneModule::bindVisibleSet()
 	scope s = class_<VisibleSet>( "VisibleSet" )
 		.def( init<>() )
 		.def( init<const VisibleSet &>() )
-		.def( "match", (VisibleSet::Result (VisibleSet ::*)( const std::vector<InternedString> &, const size_t ) const)&VisibleSet::match, arg( "minimumExpansionDepth" ) = 0 )
+		.def( "visibility", (VisibleSet::Visibility (VisibleSet ::*)( const std::vector<InternedString> &, const size_t ) const)&VisibleSet::visibility, arg( "minimumExpansionDepth" ) = 0 )
 		.def_readwrite( "expansions", &VisibleSet::expansions )
 		.def_readwrite( "inclusions", &VisibleSet::inclusions )
 		.def_readwrite( "exclusions", &VisibleSet::exclusions )
 		.def( "__eq__", &VisibleSet::operator== )
 	;
 
-	scope r = class_<VisibleSet::Result>( "Result" )
+	scope r = class_<VisibleSet::Visibility>( "Visibility" )
 		.def( init<>() )
-		.def( init<VisibleSet::Result::DrawMode, bool>() )
-		.def_readwrite( "descendantsVisible", &VisibleSet::Result::descendantsVisible )
-		.def_readwrite( "drawMode", &VisibleSet::Result::drawMode )
-		.def( "__eq__", &VisibleSet::Result::operator== )
+		.def( init<VisibleSet::Visibility::DrawMode, bool>() )
+		.def_readwrite( "descendantsVisible", &VisibleSet::Visibility::descendantsVisible )
+		.def_readwrite( "drawMode", &VisibleSet::Visibility::drawMode )
+		.def( "__eq__", &VisibleSet::Visibility::operator== )
 	;
 
-	enum_<VisibleSet::Result::DrawMode>( "DrawMode" )
-		.value( "None_", VisibleSet::Result::DrawMode::None )
-		.value( "Visible", VisibleSet::Result::DrawMode::Visible )
-		.value( "ExcludedBounds", VisibleSet::Result::DrawMode::ExcludedBounds )
+	enum_<VisibleSet::Visibility::DrawMode>( "DrawMode" )
+		.value( "None_", VisibleSet::Visibility::DrawMode::None )
+		.value( "Visible", VisibleSet::Visibility::DrawMode::Visible )
+		.value( "ExcludedBounds", VisibleSet::Visibility::DrawMode::ExcludedBounds )
 	;
 
 }

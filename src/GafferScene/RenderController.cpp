@@ -961,13 +961,13 @@ class RenderController::SceneGraph
 		{
 			/// \todo We expand based on the descendant visibility to ensure the ancestors of visible paths are expanded,
 			/// ideally we'd avoid drawing those ancestors and instead render only the visible locations.
-			const auto match = visibleSet.match( path, minimumExpansionDepth );
+			const auto visibility = visibleSet.visibility( path, minimumExpansionDepth );
 
-			if( match.descendantsVisible == m_expanded )
+			if( visibility.descendantsVisible == m_expanded )
 			{
 				return false;
 			}
-			m_expanded = match.descendantsVisible;
+			m_expanded = visibility.descendantsVisible;
 			return true;
 		}
 
