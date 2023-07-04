@@ -65,10 +65,15 @@ struct GAFFERSCENE_API VisibleSet
 
 	struct Visibility
 	{
+		/// The draw mode of a location as defined by the VisibleSet.
 		enum DrawMode
 		{
+			/// The location is not visible.
 			None = 0,
+			/// The location is visible and will be drawn. If the location has descendants then their combined bounding
+			/// box will also be drawn when `descendantsVisible` is false.
 			Visible = 1,
+			/// The location is visible, but only ever drawn as a bounding box as it is excluded from the VisibleSet.
 			ExcludedBounds = 2,
 		};
 
