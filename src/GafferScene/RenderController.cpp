@@ -539,7 +539,7 @@ class RenderController::SceneGraph
 			{
 				// Create bounding box if needed
 				Box3f bound;
-				if( ( m_drawMode == VisibleSet::Result::Visible && !m_expanded && m_children.size() ) || m_drawMode == VisibleSet::Result::ExcludedBounds )
+				if( ( m_drawMode == VisibleSet::Visibility::Visible && !m_expanded && m_children.size() ) || m_drawMode == VisibleSet::Visibility::ExcludedBounds )
 				{
 					bound = controller->m_scene->boundPlug()->getValue();
 				}
@@ -622,7 +622,7 @@ class RenderController::SceneGraph
 			m_attributesHash = m_lightLinksHash = m_transformHash = m_childNamesHash = IECore::MurmurHash();
 			m_cleared = true;
 			m_expanded = false;
-			m_drawMode = VisibleSet::Result::None;
+			m_drawMode = VisibleSet::Visibility::None;
 			m_boundInterface = nullptr;
 			m_dirtyComponents = AllComponents;
 		}
@@ -763,7 +763,7 @@ class RenderController::SceneGraph
 		bool updateObject( const ObjectPlug *objectPlug, Type type, IECoreScenePreview::Renderer *renderer, const IECore::CompoundObject *globals, const ScenePlug *scene, LightLinks *lightLinks, const MotionBlurOptions &motionBlurOptions )
 		{
 			const bool hadObjectInterface = static_cast<bool>( m_objectInterface );
-			if( type == NoType || m_drawMode != VisibleSet::Result::Visible )
+			if( type == NoType || m_drawMode != VisibleSet::Visibility::Visible )
 			{
 				clearObject();
 				return hadObjectInterface;
@@ -961,14 +961,14 @@ class RenderController::SceneGraph
 
 		bool updateVisibleSet( const ScenePlug::ScenePath &path, const GafferScene::VisibleSet &visibleSet, size_t minimumExpansionDepth )
 		{
-			const auto match = visibleSet.match( path, minimumExpansionDepth );
+			const auto visibility = visibleSet.visibility( path, minimumExpansionDepth );
 
-			if( match.descendantsVisible == m_expanded && match.drawMode == m_drawMode )
+			if( visibility.descendantsVisible == m_expanded && visibility.drawMode == m_drawMode )
 			{
 				return false;
 			}
-			m_expanded = match.descendantsVisible;
-			m_drawMode = match.drawMode;
+			m_expanded = visibility.descendantsVisible;
+			m_drawMode = visibility.drawMode;
 
 			return true;
 		}
@@ -1109,7 +1109,7 @@ class RenderController::SceneGraph
 
 		IECoreScenePreview::Renderer::ObjectInterfacePtr m_boundInterface;
 		bool m_expanded;
-		VisibleSet::Result::DrawMode m_drawMode;
+		VisibleSet::Visibility::DrawMode m_drawMode;
 
 		// Tracks work which needs to be done on
 		// the next call to `update()`.
