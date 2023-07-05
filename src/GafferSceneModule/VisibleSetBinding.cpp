@@ -44,9 +44,25 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
 
+#include "fmt/format.h"
+
 using namespace boost::python;
 using namespace IECore;
 using namespace GafferScene;
+
+namespace
+{
+
+std::string visibilityRepr( const VisibleSet::Visibility &visibility )
+{
+	const std::string drawMode = extract<std::string>( object( visibility.drawMode ).attr( "__str__" )() );
+	return fmt::format(
+			"GafferScene.VisibleSet.Visibility( GafferScene.VisibleSet.Visibility.DrawMode.{}, {} )",
+			drawMode, visibility.descendantsVisible ? "True" : "False"
+	);
+}
+
+} // namespace
 
 void GafferSceneModule::bindVisibleSet()
 {
@@ -76,6 +92,7 @@ void GafferSceneModule::bindVisibleSet()
 		.def_readwrite( "descendantsVisible", &VisibleSet::Visibility::descendantsVisible )
 		.def_readwrite( "drawMode", &VisibleSet::Visibility::drawMode )
 		.def( self == self )
+		.def( "__repr__", &visibilityRepr )
 	;
 
 	enum_<VisibleSet::Visibility::DrawMode>( "DrawMode" )
