@@ -107,7 +107,7 @@ void GafferSceneModule::bindVisibleSet()
 		.def( init<VisibleSet::Visibility::DrawMode, bool>() )
 		.def_readwrite( "descendantsVisible", &VisibleSet::Visibility::descendantsVisible )
 		.def_readwrite( "drawMode", &VisibleSet::Visibility::drawMode )
-		.def( "__eq__", &VisibleSet::Visibility::operator== )
+		.def( self == self )
 		.def( "__repr__", &visibilityRepr )
 	;
 
