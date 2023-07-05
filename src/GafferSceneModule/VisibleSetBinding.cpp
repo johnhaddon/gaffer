@@ -44,9 +44,41 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
 
+#include "fmt/format.h"
+
 using namespace boost::python;
 using namespace IECore;
 using namespace GafferScene;
+
+namespace
+{
+
+	const char* drawModeToString( const VisibleSet::Visibility::DrawMode drawMode )
+	{
+		switch( drawMode )
+		{
+			case VisibleSet::Visibility::DrawMode::None:
+				return "None_";
+			case VisibleSet::Visibility::DrawMode::Visible:
+				return "Visible";
+			case VisibleSet::Visibility::DrawMode::ExcludedBounds:
+				return "ExcludedBounds";
+			default:
+				assert( false );
+				return nullptr;
+		}
+	}
+
+	std::string visibilityRepr( const VisibleSet::Visibility &visibility )
+	{
+		return fmt::format(
+			"GafferScene.VisibleSet.Visibility( GafferScene.VisibleSet.Visibility.DrawMode.{}, {} )",
+			drawModeToString( visibility.drawMode ),
+			visibility.descendantsVisible ? "True" : "False"
+		);
+	}
+
+} // namespace
 
 void GafferSceneModule::bindVisibleSet()
 {
@@ -76,12 +108,13 @@ void GafferSceneModule::bindVisibleSet()
 		.def_readwrite( "descendantsVisible", &VisibleSet::Visibility::descendantsVisible )
 		.def_readwrite( "drawMode", &VisibleSet::Visibility::drawMode )
 		.def( "__eq__", &VisibleSet::Visibility::operator== )
+		.def( "__repr__", &visibilityRepr )
 	;
 
 	enum_<VisibleSet::Visibility::DrawMode>( "DrawMode" )
-		.value( "None_", VisibleSet::Visibility::DrawMode::None )
-		.value( "Visible", VisibleSet::Visibility::DrawMode::Visible )
-		.value( "ExcludedBounds", VisibleSet::Visibility::DrawMode::ExcludedBounds )
+		.value( drawModeToString( VisibleSet::Visibility::DrawMode::None ), VisibleSet::Visibility::DrawMode::None )
+		.value( drawModeToString( VisibleSet::Visibility::DrawMode::Visible ), VisibleSet::Visibility::DrawMode::Visible )
+		.value( drawModeToString( VisibleSet::Visibility::DrawMode::ExcludedBounds ), VisibleSet::Visibility::DrawMode::ExcludedBounds )
 	;
 
 }
