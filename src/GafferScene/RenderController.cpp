@@ -438,11 +438,16 @@ class RenderController::SceneGraph
 			clean( TransformComponent );
 
 			// VisibleSet
-
+			const auto currentDrawMode = m_drawMode;
 			if( ( m_dirtyComponents & VisibleSetComponent ) && updateVisibleSet( path, controller->m_visibleSet, controller->m_minimumExpansionDepth ) )
 			{
 				m_changedComponents |= VisibleSetComponent;
-				m_dirtyComponents |= ObjectComponent;
+
+				// An object update is only required on change of draw mode for this location.
+				if( currentDrawMode != m_drawMode )
+				{
+					m_dirtyComponents |= ObjectComponent;
+				}
 			}
 
 			// Object
