@@ -553,7 +553,7 @@ class RenderController::SceneGraph
 				{
 					IECoreScenePreview::PlaceholderPtr placeholder = new IECoreScenePreview::Placeholder(
 						bound,
-						m_drawMode == VisibleSet::Result::ExcludedBounds ? IECoreScenePreview::Placeholder::Mode::Excluded : IECoreScenePreview::Placeholder::Mode::Default
+						m_drawMode == VisibleSet::Visibility::ExcludedBounds ? IECoreScenePreview::Placeholder::Mode::Excluded : IECoreScenePreview::Placeholder::Mode::Default
 					);
 
 					std::string boundName;
