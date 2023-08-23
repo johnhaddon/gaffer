@@ -34,6 +34,11 @@ API
 
 - Sampler : Added `populate()` method, which populates the internal tile cache in parallel, and subsequently allows `sample()` to be called concurrently.
 
+Fixes
+-----
+
+- ValuePlug : Fixed hangs and poor performance caused by plugs depending on upstream plugs with an identical hash (#4978).
+
 API
 ---
 
