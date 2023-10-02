@@ -40,41 +40,50 @@ import GafferTest
 
 class LRUCacheTest( GafferTest.TestCase ) :
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test100PercentOfWorkingSetSerial( self ) :
 
-		GafferTest.testLRUCache( "serial", numIterations = 100000, numValues = 100, maxCost = 100 )
+		GafferTest.testLRUCache( "serial", numIterations = 10000000, numValues = 1000, maxCost = 1000 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test100PercentOfWorkingSetParallel( self ) :
 
-		GafferTest.testLRUCache( "parallel", numIterations = 100000, numValues = 100, maxCost = 100 )
+		GafferTest.testLRUCache( "parallel", numIterations = 10000000, numValues = 1000, maxCost = 1000 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test100PercentOfWorkingSetTaskParallel( self ) :
 
-		GafferTest.testLRUCache( "taskParallel", numIterations = 100000, numValues = 100, maxCost = 100 )
+		GafferTest.testLRUCache( "taskParallel", numIterations = 10000000, numValues = 1000, maxCost = 1000 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test90PercentOfWorkingSetSerial( self ) :
 
-		GafferTest.testLRUCache( "serial", numIterations = 100000, numValues = 100, maxCost = 90 )
+		GafferTest.testLRUCache( "serial", numIterations = 10000000, numValues = 1000, maxCost = 900 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test90PercentOfWorkingSetParallel( self ) :
 
-		GafferTest.testLRUCache( "parallel", numIterations = 100000, numValues = 100, maxCost = 90 )
+		GafferTest.testLRUCache( "parallel", numIterations = 10000000, numValues = 1000, maxCost = 900 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test90PercentOfWorkingSetTaskParallel( self ) :
 
-		GafferTest.testLRUCache( "taskParallel", numIterations = 100000, numValues = 100, maxCost = 90 )
+		GafferTest.testLRUCache( "taskParallel", numIterations = 1000000, numValues = 1000, maxCost = 900 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test2PercentOfWorkingSetSerial( self ) :
 
-		GafferTest.testLRUCache( "serial", numIterations = 100000, numValues = 100, maxCost = 2 )
+		GafferTest.testLRUCache( "serial", numIterations = 10000000, numValues = 1000, maxCost = 20 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test2PercentOfWorkingSetParallel( self ) :
 
-		GafferTest.testLRUCache( "parallel", numIterations = 100000, numValues = 100, maxCost = 2 )
+		GafferTest.testLRUCache( "parallel", numIterations = 10000000, numValues = 1000, maxCost = 20 )
 
+	@GafferTest.TestRunner.PerformanceTestMethod()
 	def test2PercentOfWorkingSetTaskParallel( self ) :
 
-		GafferTest.testLRUCache( "taskParallel", numIterations = 10000, numValues = 100, maxCost = 2 )
+		GafferTest.testLRUCache( "taskParallel", numIterations = 100000, numValues = 1000, maxCost = 20 )
 
 	def testRemovalCallbackSerial( self ) :
 
