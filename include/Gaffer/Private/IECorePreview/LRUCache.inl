@@ -348,7 +348,7 @@ class Parallel
 
 		using MapIterator = typename Map::iterator;
 
-		struct Bin
+		struct alignas( 64 ) Bin
 		{
 			Bin() {}
 			Bin( const Bin &other ) : map( other.map ) {}
@@ -694,7 +694,7 @@ class TaskParallel
 
 		using MapIterator = typename Map::iterator;
 
-		struct Bin
+		struct alignas( 64 ) Bin
 		{
 			Bin() {}
 			Bin( const Bin &other ) : map( other.map ) {}
