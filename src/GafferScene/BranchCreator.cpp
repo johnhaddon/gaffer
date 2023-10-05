@@ -190,7 +190,7 @@ class BranchCreator::BranchesData : public IECore::Data
 			// When multiple sources map to the same destination, we have no guarantees about
 			// the order they will be visited above. Sort them alphabetically so that our output
 			// is stable from run to run.
-			parallelVisitLocations(
+			visitLocationsWalk(
 				[] ( const ScenePlug::ScenePath &path, Location *location ) {
 					if( location->sourcePaths )
 					{
@@ -211,7 +211,9 @@ class BranchCreator::BranchesData : public IECore::Data
 							internedStringValueLess
 						);
 					}
-				}
+				},
+				ScenePath(),
+				m_root.get()
 			);
 
 		}
@@ -288,38 +290,33 @@ class BranchCreator::BranchesData : public IECore::Data
 		}
 
 		template<typename F>
-		void parallelVisitDestinations( F &&f ) const
+		void visitDestinations( F &&f ) const
 		{
-			parallelVisitLocations(
+			visitLocationsWalk(
 				[ &f ] ( const ScenePlug::ScenePath &path, const Location *location ) {
 					if( location->sourcePaths )
 					{
 						f( path, *location->sourcePaths );
 					}
-				}
+				},
+				ScenePath(),
+				m_root.get()
 			);
 		}
 
 	private :
 
 		template<typename F>
-		void parallelVisitLocations( F &&F ) const
+		void visitLocationsWalk( F &&f, const ScenePlug::ScenePath &path, Location *location ) const
 		{
-			tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-			parallelProcessLocationsWalk( f, ScenePlug::ScenePath(), root, m_root.get(), taskGroupContext );
-		}
+			f( path, location );
 
-		template<typename F>
-		void parallelVisitLocations( F &&f, const ScenePlug::ScenePath &path, Location *location, tbb::task_group_context &taskGroupContext ) const
-		{
-			// f( path, location );
-
-			// ScenePlug::ScenePath childPath = path; childPath.push_back( InternedString() );
-			// for( const auto &child : location->children )
-			// {
-			// 	childPath.back() = child.first;
-			// 	visitLocationsWalk( f, childPath, child.second.get() );
-			// }
+			ScenePlug::ScenePath childPath = path; childPath.push_back( InternedString() );
+			for( const auto &child : location->children )
+			{
+				childPath.back() = child.first;
+				visitLocationsWalk( f, childPath, child.second.get() );
+			}
 		}
 
 		static void hashBranch( const BranchCreator *branchCreator, const ScenePlug::ScenePath &path, IECore::MurmurHash &h )
@@ -908,16 +905,16 @@ void BranchCreator::hashSetNames( const Gaffer::Context *context, const ScenePlu
 	}
 	else
 	{
-		// branchesData->parallelVisitDestinations(
-		// 	[&context, &h, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
-		// 		for( const auto &sourcePath : sourcePaths )
-		// 		{
-		// 			MurmurHash branchSetNamesHash;
-		// 			hashBranchSetNames( sourcePath, context, branchSetNamesHash );
-		// 			h.append( branchSetNamesHash );
-		// 		}
-		// 	}
-		// );
+		branchesData->visitDestinations(
+			[&context, &h, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+				for( const auto &sourcePath : sourcePaths )
+				{
+					MurmurHash branchSetNamesHash;
+					hashBranchSetNames( sourcePath, context, branchSetNamesHash );
+					h.append( branchSetNamesHash );
+				}
+			}
+		);
 	}
 }
 
@@ -941,15 +938,15 @@ IECore::ConstInternedStringVectorDataPtr BranchCreator::computeSetNames( const G
 	}
 	else
 	{
-		// branchesData->visitDestinations(
-		// 	[&context, &result, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
-		// 		for( const auto &sourcePath : sourcePaths )
-		// 		{
-		// 			ConstInternedStringVectorDataPtr branchSetNamesData = computeBranchSetNames( sourcePath, context );
-		// 			mergeSetNames( branchSetNamesData.get(), result );
-		// 		}
-		// 	}
-		// );
+		branchesData->visitDestinations(
+			[&context, &result, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+				for( const auto &sourcePath : sourcePaths )
+				{
+					ConstInternedStringVectorDataPtr branchSetNamesData = computeBranchSetNames( sourcePath, context );
+					mergeSetNames( branchSetNamesData.get(), result );
+				}
+			}
+		);
 	}
 
 	return resultData;
@@ -968,19 +965,19 @@ void BranchCreator::hashSet( const IECore::InternedString &setName, const Gaffer
 	inPlug()->setPlug()->hash( h );
 
 	/// \todo Parallelise.
-	// branches->visitDestinations(
-	// 	[&setName, &context, &h, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
-	// 		for( const auto &sourcePath : sourcePaths )
-	// 		{
-	// 			MurmurHash branchSetHash;
-	// 			hashBranchSet( sourcePath, setName, context, branchSetHash );
-	// 			h.append( branchSetHash );
-	// 		}
-	// 		ScenePlug::PathScope pathScope( context, &destination );
-	// 		mappingPlug()->hash( h );
-	// 		h.append( destination.data(), destination.size() );
-	// 	}
-	// );
+	branches->visitDestinations(
+		[&setName, &context, &h, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+			for( const auto &sourcePath : sourcePaths )
+			{
+				MurmurHash branchSetHash;
+				hashBranchSet( sourcePath, setName, context, branchSetHash );
+				h.append( branchSetHash );
+			}
+			ScenePlug::PathScope pathScope( context, &destination );
+			mappingPlug()->hash( h );
+			h.append( destination.data(), destination.size() );
+		}
+	);
 }
 
 IECore::ConstPathMatcherDataPtr BranchCreator::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
@@ -997,25 +994,33 @@ IECore::ConstPathMatcherDataPtr BranchCreator::computeSet( const IECore::Interne
 	PathMatcher &outputSet = outputSetData->writable();
 
 	/// \todo Parallelise.
-	// branches->visitDestinations(
-	// 	[&setName, &context, &outputSet, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
-	// 		vector<ConstPathMatcherDataPtr> branchSets = { nullptr };
-	// 		for( const auto &sourcePath : sourcePaths )
-	// 		{
-	// 			branchSets.push_back( computeBranchSet( sourcePath, setName, context ) );
-	// 		}
-	// 		ScenePlug::PathScope pathScope( context, &destination );
-	// 		Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
-	// 		outputSet.addPaths( mapping->set( branchSets ), destination );
-	// 	}
-	// );
+	branches->visitDestinations(
+		[&setName, &context, &outputSet, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+			vector<ConstPathMatcherDataPtr> branchSets = { nullptr };
+			for( const auto &sourcePath : sourcePaths )
+			{
+				branchSets.push_back( computeBranchSet( sourcePath, setName, context ) );
+			}
+			ScenePlug::PathScope pathScope( context, &destination );
+			Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
+			outputSet.addPaths( mapping->set( branchSets ), destination );
+		}
+	);
 
 	return outputSetData;
 }
 
 Gaffer::ValuePlug::CachePolicy BranchCreator::hashCachePolicy( const Gaffer::ValuePlug *output ) const
 {
-	if( output == branchesPlug() || output == outPlug()->setPlug() )
+	if( output == outPlug()->setPlug() )
+	{
+		// Technically we do not _need_ TaskIsolation because we have not yet
+		// multithreaded `hashSet()`. But we still benefit from requesting it
+		// because it means the hash is stored in the global cache, where it is
+		// shared between all threads and is almost guaranteed not to be evicted.
+		return ValuePlug::CachePolicy::TaskIsolation;
+	}
+	else if( output == branchesPlug() )
 	{
 		return ValuePlug::CachePolicy::TaskCollaboration;
 	}
@@ -1024,7 +1029,7 @@ Gaffer::ValuePlug::CachePolicy BranchCreator::hashCachePolicy( const Gaffer::Val
 
 Gaffer::ValuePlug::CachePolicy BranchCreator::computeCachePolicy( const Gaffer::ValuePlug *output ) const
 {
-	if( output == branchesPlug() || output == outPlug()->setPlug() )
+	if( output == branchesPlug() )
 	{
 		return ValuePlug::CachePolicy::TaskCollaboration;
 	}
