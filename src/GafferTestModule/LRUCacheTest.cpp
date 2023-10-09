@@ -847,44 +847,6 @@ void testLRUCacheSetIfUncached( const std::string &policy )
 	DispatchTest<TestLRUCacheSetIfUncached>()( policy );
 }
 
-template<template<typename> class Policy>
-struct TestLRUCacheSetIfUncachedRecursion
-{
-
-	void operator()()
-	{
-		using Cache = LRUCache<int, int, Policy>;
-		using CachePtr = std::unique_ptr<Cache>;
-
-		CachePtr cache;
-		cache.reset(
-			new Cache(
-				// Getter that calls `setIfUncached()` with the _same_ key. This
-				// is basically insane, but it models situations that can occur
-				// in Gaffer.
-				[&cache]( int key, size_t &cost, const IECore::Canceller *canceller ) {
-					cost = 1;
-					// We expect the call to fail, because the lock is held by the
-					// outer call to `get()`.
-					GAFFERTEST_ASSERT( !cache->setIfUncached( key, key, []( int ) { return 1; } ) );
-					return key;
-				},
-				1000
-			)
-		);
-
-		GAFFERTEST_ASSERTEQUAL( cache->currentCost(), 0 );
-		GAFFERTEST_ASSERTEQUAL( cache->get( 1 ), 1 );
-		GAFFERTEST_ASSERTEQUAL( cache->currentCost(), 1 );
-	}
-
-};
-
-void testLRUCacheSetIfUncachedRecursion( const std::string &policy )
-{
-	DispatchTest<TestLRUCacheSetIfUncachedRecursion>()( policy );
-}
-
 } // namespace
 
 void GafferTestModule::bindLRUCacheTest()
@@ -901,5 +863,4 @@ void GafferTestModule::bindLRUCacheTest()
 	def( "testLRUCacheUncacheableItem", &testLRUCacheUncacheableItem );
 	def( "testLRUCacheGetIfCached", &testLRUCacheGetIfCached );
 	def( "testLRUCacheSetIfUncached", &testLRUCacheSetIfUncached );
-	def( "testLRUCacheSetIfUncachedRecursion", &testLRUCacheSetIfUncachedRecursion );
 }

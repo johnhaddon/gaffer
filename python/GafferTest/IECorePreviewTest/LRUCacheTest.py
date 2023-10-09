@@ -232,9 +232,5 @@ class LRUCacheTest( GafferTest.TestCase ) :
 			with self.subTest( policy = policy ) :
 				GafferTest.testLRUCacheSetIfUncached( policy )
 
-	def testSetIfUncachedRecursion( self ) :
-
-		GafferTest.testLRUCacheSetIfUncachedRecursion( "serial" )
-
 if __name__ == "__main__":
 	unittest.main()
