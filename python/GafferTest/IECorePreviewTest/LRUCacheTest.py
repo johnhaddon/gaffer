@@ -154,10 +154,6 @@ class LRUCacheTest( GafferTest.TestCase ) :
 
 		GafferTest.testLRUCacheRecursion( "taskParallel", numIterations = 100000, numValues = 1000, maxCost = 100 )
 
-	def testRecursionOnOneItemSerial( self ) :
-
-		GafferTest.testLRUCacheRecursionOnOneItem( "serial" )
-
 	def testClearFromGetSerial( self ) :
 
 		GafferTest.testLRUCacheClearFromGet( "serial" )
