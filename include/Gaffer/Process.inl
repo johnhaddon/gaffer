@@ -229,7 +229,7 @@ namespace Gaffer
 /// A "vertex" in the process graph where collaboration may be performed. We
 /// only track collaborative processes because non-collaborative processes can't
 /// introduce edges that could lead to cycles.
-class Process::Collaboration : public IECore::RefCounted
+class GAFFER_API Process::Collaboration : public IECore::RefCounted
 {
 
 	public :
