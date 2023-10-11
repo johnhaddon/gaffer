@@ -602,7 +602,7 @@ class ValuePlug::ComputeProcess : public Process
 			g_cache.clear();
 		}
 
-		static IECore::ConstObjectPtr value( const ValuePlug *plug, const IECore::MurmurHash *precomputedHash )
+		static const IECore::Object *value( const ValuePlug *plug, IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash )
 		{
 			const ValuePlug *p = sourcePlug( plug );
 
@@ -617,7 +617,7 @@ class ValuePlug::ComputeProcess : public Process
 					// No input connection, and no means of computing
 					// a value. There can only ever be a single value,
 					// which is stored directly on the plug.
-					return p->m_staticValue;
+					return p->m_staticValue.get();
 				}
 			}
 
@@ -646,16 +646,16 @@ class ValuePlug::ComputeProcess : public Process
 
 			if( processKey.cachePolicy == CachePolicy::Uncached )
 			{
-				return ComputeProcess( processKey ).m_result;
+				return ComputeProcess( processKey, owner ).m_result.get();
 			}
 			else if( Process::forceMonitoring( threadState, plug, ValuePlug::ComputeProcess::staticType ) )
 			{
-				ComputeProcess process( processKey );
+				ComputeProcess process( processKey, owner );
 				g_cache.setIfUncached(
 					processKey, process.m_result,
 					[]( const IECore::ConstObjectPtr &v ) { return v->memoryUsage(); }
 				);
-				return process.m_result;
+				return process.m_result.get();
 			}
 			else if( processKey.cachePolicy == CachePolicy::Legacy )
 			{
@@ -668,9 +668,10 @@ class ValuePlug::ComputeProcess : public Process
 				if( auto result = g_cache.getIfCached( processKey ) )
 				{
 					// Move avoids unnecessary additional addRef/removeRef.
-					return std::move( *result );
+					owner = std::move( *result );
+					return owner.get();
 				}
-				ComputeProcess process( processKey );
+				ComputeProcess process( processKey, owner );
 				// Store the value in the cache, but only if it isn't there
 				// already. The check is useful because it's common for an
 				// upstream compute triggered by us to have already done the
@@ -686,11 +687,12 @@ class ValuePlug::ComputeProcess : public Process
 					processKey, process.m_result,
 					[]( const IECore::ConstObjectPtr &v ) { return v->memoryUsage(); }
 				);
-				return process.m_result;
+				return process.m_result.get();
 			}
 			else
 			{
-				return g_cache.get( processKey, currentContext->canceller() );
+				owner = g_cache.get( processKey, currentContext->canceller() );
+				return owner.get();
 			}
 		}
 
@@ -715,8 +717,8 @@ class ValuePlug::ComputeProcess : public Process
 
 	private :
 
-		ComputeProcess( const ComputeProcessKey &key )
-			:	Process( staticType, key.plug, key.destinationPlug )
+		ComputeProcess( const ComputeProcessKey &key, IECore::ConstObjectPtr &result )
+			:	Process( staticType, key.plug, key.destinationPlug ), m_result( result )
 		{
 			try
 			{
@@ -760,22 +762,19 @@ class ValuePlug::ComputeProcess : public Process
 			{
 				case CachePolicy::Standard :
 				{
-					ComputeProcess process( key );
-					result = process.m_result;
+					ComputeProcess process( key, result );
 					break;
 				}
 				case CachePolicy::TaskCollaboration :
 				{
-					ComputeProcess process( key );
-					result = process.m_result;
+					ComputeProcess process( key, result );
 					break;
 				}
 				case CachePolicy::TaskIsolation :
 				{
 					tbb::this_task_arena::isolate(
 						[&result, &key] {
-							ComputeProcess process( key );
-							result = process.m_result;
+							ComputeProcess process( key, result );
 						}
 					);
 					break;
@@ -796,7 +795,7 @@ class ValuePlug::ComputeProcess : public Process
 		using Cache = IECorePreview::LRUCache<IECore::MurmurHash, IECore::ConstObjectPtr, IECorePreview::LRUCachePolicy::TaskParallel, ComputeProcessKey>;
 		static Cache g_cache;
 
-		IECore::ConstObjectPtr m_result;
+		IECore::ConstObjectPtr &m_result;
 
 };
 
@@ -1141,9 +1140,16 @@ const IECore::Object *ValuePlug::defaultObjectValue() const
 	return m_defaultValue.get();
 }
 
+const IECore::Object *ValuePlug::getValueInternal( IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash ) const
+{
+	return ComputeProcess::value( this, owner, precomputedHash );
+}
+
 IECore::ConstObjectPtr ValuePlug::getValueInternal( const IECore::MurmurHash *precomputedHash ) const
 {
-	return ComputeProcess::value( this, precomputedHash );
+	IECore::ConstObjectPtr owner;
+	const IECore::Object *result = getValueInternal( owner, precomputedHash );
+	return owner ? owner : result;
 }
 
 void ValuePlug::setObjectValue( IECore::ConstObjectPtr value )
