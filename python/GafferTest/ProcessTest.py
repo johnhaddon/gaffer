@@ -51,14 +51,21 @@ class ProcessTest( GafferTest.TestCase ) :
 	@GafferTest.TestRunner.CategorisedTestMethod( { "taskCollaboration" } )
 	def testCollaboration( self ) :
 
-		# We expect processes `1...n` to collaborate on
-		# process 1000000.
+		# We expect processes `1...n` to collaborate on process `n+1`.
 		#
 		#   n+1
 		#  / | \
 		# 1 ... n
 		#  \ | /
 		#    0
+		#
+		# Note on conventions used throughout this file :
+		#
+		# - Processes are labelled with the value of their result.
+		# - Lines connecting processes denote dependencies between them.
+		# - Dependent processes appear below the processes they depend on,
+		#   matching the typical top-to-bottom flow of a Gaffer graph.
+		# - The root process is therefore always the bottom-most one.
 
 		n = 10000
 
