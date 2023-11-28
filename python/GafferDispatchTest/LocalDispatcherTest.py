@@ -1033,11 +1033,12 @@ class LocalDispatcherTest( GafferTest.TestCase ) :
 
 		# And we want the process for the child task to have
 		# been terminated.
+		# \todo Figure out how to check this on Windows.
 
-		with self.assertRaises( OSError ) as check :
-			os.kill( pid, 0 )
-
-		self.assertEqual( check.exception.errno, errno.ESRCH ) # ESRCH means "no such process"
+		if os.name != "nt" :
+			with self.assertRaises( OSError ) as check :
+				os.kill( pid, 0 )
+			self.assertEqual( check.exception.errno, errno.ESRCH ) # ESRCH means "no such process"
 
 	@staticmethod
 	def _shutdownDuringBackgroundDispatch() :
