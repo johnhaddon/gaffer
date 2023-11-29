@@ -76,6 +76,12 @@ void GafferImageModule::bindTransforms()
 			.value( "HorizontalPass", Resample::HorizontalPass )
 			.value( "SinglePass", Resample::SinglePass )
 		;
+
+		enum_<Resample::DeepMode>( "DeepMode")
+			.value( "Accurate", Resample::DeepMode::Accurate )
+			.value( "ForceNearest", Resample::DeepMode::ForceNearest )
+			.value( "ErrorIfSlow", Resample::DeepMode::ErrorIfSlow )
+		;
 	}
 
 	{
