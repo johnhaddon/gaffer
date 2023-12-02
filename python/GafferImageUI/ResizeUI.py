@@ -115,7 +115,7 @@ Gaffer.Metadata.registerNode(
 
 			"description",
 			"""
-			The pixel used when transforming the image. Each
+			The filter used when transforming the image. Each
 			filter provides different tradeoffs between sharpness and
 			the danger of aliasing or ringing.
 			""",
@@ -123,6 +123,7 @@ Gaffer.Metadata.registerNode(
 			"plugValueWidget:type", "GafferUI.PresetsPlugValueWidget",
 
 			"preset:Default", "",
+			"preset:Nearest", "nearest",
 
 		] + list( itertools.chain(
 
@@ -131,6 +132,30 @@ Gaffer.Metadata.registerNode(
 			*[ ( "preset:" + x.title(), x ) for x in GafferImage.FilterAlgo.filterNames() if x != "disk" ]
 
 		) ),
+
+		"deepMode" : [
+
+
+			"description",
+			"""
+			Controls what happens if you try to filter a deep image.
+			Accurately filtering deep images is very slow and produces
+			results that are impractically large to save to disk.
+			The options are Accurate, which does the very large and slow
+			filtering option, Force Nearest, which always uses the filter
+			"nearest" if the input is deep, and Error If Slow, which just
+			throws an error if the input is deep and the filter is not
+			nearest ( signalling to the user that they must make a choice
+			between getting an inaccurate result or an extremely slow one ).
+			""",
+
+			"preset:Accurate", GafferImage.Resample.DeepMode.Accurate,
+			"preset:Force Nearest", GafferImage.Resample.DeepMode.ForceNearest,
+			"preset:Error If Slow", GafferImage.Resample.DeepMode.ErrorIfSlow,
+
+			"plugValueWidget:type", "GafferUI.PresetsPlugValueWidget",
+
+		],
 
 	}
 
