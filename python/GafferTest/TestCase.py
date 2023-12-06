@@ -118,6 +118,13 @@ class TestCase( unittest.TestCase ) :
 			if message not in self.__messagesToIgnore :
 				self.fail( f"Unexpected message : {message}" )
 
+		import gc
+		import GafferImage
+		self.assertEqual(
+			[ o for o in gc.get_objects() if isinstance( o, GafferImage.Catalogue ) ],
+			[]
+		)
+
 	## Registers a message that will be ignored if it is emitted during the
 	# test run, instead of triggering a failure.
 	def ignoreMessage( self, level, context, message ) :
