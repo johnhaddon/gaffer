@@ -46,6 +46,7 @@ jobs:
             # respect permissions. So we run the final test suite as a dedicated
             # test user rather than as root.
             testRunner: su testUser -c
+            testArguments: -excludedCategories performance -stopOnFailure
             sconsCacheMegabytes: 400
 
           - name: linux-debug
@@ -54,7 +55,7 @@ jobs:
             publish: false
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             testRunner: su testUser -c
-            testArguments: -excludedCategories performance
+            testArguments: -excludedCategories performance -stopOnFailure
             # Debug builds are ludicrously big, so we must use a larger cache
             # limit. In practice this compresses down to 4-500Mb.
             sconsCacheMegabytes: 2500
