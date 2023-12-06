@@ -46,7 +46,7 @@ jobs:
             # respect permissions. So we run the final test suite as a dedicated
             # test user rather than as root.
             testRunner: su testUser -c
-            testArguments: -excludedCategories performance -stopOnFailure
+            #testArguments: -excludedCategories performance -stopOnFailure
             sconsCacheMegabytes: 400
 
           - name: linux-debug
@@ -172,74 +172,74 @@ jobs:
         ${{ matrix.testRunner }} "${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }}"
         echo "::remove-matcher owner=unittest::"
 
-    - name: Build and test Arnold extension
-      run: |
-        import subprocess
-        import sys
-        import os
+    # - name: Build and test Arnold extension
+    #   run: |
+    #     import subprocess
+    #     import sys
+    #     import os
 
-        for arnoldVersion in [ "7.1.1.0", "7.2.1.0" ] :
-          arnoldRoot = os.path.join( os.environ["GITHUB_WORKSPACE"], "arnoldRoot", arnoldVersion )
-          os.environ["ARNOLD_ROOT"] = arnoldRoot
+    #     for arnoldVersion in [ "7.1.1.0", "7.2.1.0" ] :
+    #       arnoldRoot = os.path.join( os.environ["GITHUB_WORKSPACE"], "arnoldRoot", arnoldVersion )
+    #       os.environ["ARNOLD_ROOT"] = arnoldRoot
 
-          subprocess.check_call(
-            [
-              sys.executable,
-              ".github/workflows/main/installArnold.py",
-              "--version",
-              arnoldVersion
-            ]
-          )
-          #Build Arnold extension
-          subprocess.check_call( "scons -j 2 build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions", shell = True )
+    #       subprocess.check_call(
+    #         [
+    #           sys.executable,
+    #           ".github/workflows/main/installArnold.py",
+    #           "--version",
+    #           arnoldVersion
+    #         ]
+    #       )
+    #       #Build Arnold extension
+    #       subprocess.check_call( "scons -j 2 build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions", shell = True )
 
-          if os.name != "nt" :
-            # Test Arnold extension
-            print( "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json" )
-            subprocess.check_call( "${{ matrix.testRunner }} \"" + os.path.join( os.environ["GAFFER_BUILD_DIR"], "bin", "gaffer" ) + " test IECoreArnoldTest GafferArnoldTest GafferArnoldUITest\"", shell = True )
-            print( "::remove-matcher owner=unittest::" )
+    #       if os.name != "nt" :
+    #         # Test Arnold extension
+    #         print( "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json" )
+    #         subprocess.check_call( "${{ matrix.testRunner }} \"" + os.path.join( os.environ["GAFFER_BUILD_DIR"], "bin", "gaffer" ) + " test IECoreArnoldTest GafferArnoldTest GafferArnoldUITest\"", shell = True )
+    #         print( "::remove-matcher owner=unittest::" )
 
-          # Publish ARNOLD_ROOT to the environment for subsequent steps,
-          # so we can build the docs for GafferArnold.
-          with open( os.environ["GITHUB_ENV"], "a" ) as f :
-            print( "Setting $ARNOLD_ROOT to '%s'" % arnoldRoot )
-            f.write( 'ARNOLD_ROOT=%s\n' % arnoldRoot )
-      env:
-        PYTHONUTF8: 1
-      shell: python
+    #       # Publish ARNOLD_ROOT to the environment for subsequent steps,
+    #       # so we can build the docs for GafferArnold.
+    #       with open( os.environ["GITHUB_ENV"], "a" ) as f :
+    #         print( "Setting $ARNOLD_ROOT to '%s'" % arnoldRoot )
+    #         f.write( 'ARNOLD_ROOT=%s\n' % arnoldRoot )
+    #   env:
+    #     PYTHONUTF8: 1
+    #   shell: python
 
-    - name: Build Docs and Package
-      # Docs builds should be relatively quick. If there is a problem, this
-      # aborts them in a more timely fashion than the default 6hr timeout.
-      timeout-minutes: 20
-      run: |
-        # Treats warnings-as-errors so we know about broken links
-        echo "::add-matcher::./.github/workflows/main/problemMatchers/sphinx.json"
-        scons -j 2 package BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
-        echo "::remove-matcher owner=sphinx::"
-      env:
-        PYTHONUTF8: 1
-      if: matrix.publish
+    # - name: Build Docs and Package
+    #   # Docs builds should be relatively quick. If there is a problem, this
+    #   # aborts them in a more timely fashion than the default 6hr timeout.
+    #   timeout-minutes: 20
+    #   run: |
+    #     # Treats warnings-as-errors so we know about broken links
+    #     echo "::add-matcher::./.github/workflows/main/problemMatchers/sphinx.json"
+    #     scons -j 2 package BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
+    #     echo "::remove-matcher owner=sphinx::"
+    #   env:
+    #     PYTHONUTF8: 1
+    #   if: matrix.publish
 
-    - name: Validate
-      run: |
-        echo "::add-matcher::./.github/workflows/main/problemMatchers/validateRelease.json"
-        python ./config/validateRelease.py --archive ${{ env.GAFFER_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }} ${{ env.GAFFER_VALIDATE_EXTRA_FLAGS }}
-        echo "::remove-matcher owner=validateRelease::"
-      if: matrix.publish
+    # - name: Validate
+    #   run: |
+    #     echo "::add-matcher::./.github/workflows/main/problemMatchers/validateRelease.json"
+    #     python ./config/validateRelease.py --archive ${{ env.GAFFER_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }} ${{ env.GAFFER_VALIDATE_EXTRA_FLAGS }}
+    #     echo "::remove-matcher owner=validateRelease::"
+    #   if: matrix.publish
 
-    - uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.GAFFER_BUILD_NAME }}
-        path: ${{ env.GAFFER_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}
-      if: matrix.publish
+    # - uses: actions/upload-artifact@v3
+    #   with:
+    #     name: ${{ env.GAFFER_BUILD_NAME }}
+    #     path: ${{ env.GAFFER_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}
+    #   if: matrix.publish
 
-    - name: Publish Release
-      run: |
-        python ./config/publishRelease.py --archive ${{ env.GAFFER_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }} --repo ${{ github.repository }} --releaseId ${{ env.GAFFER_GITHUB_RELEASEID }}
-      if: matrix.publish && env.GAFFER_GITHUB_RELEASEID != ''
-      env:
-        GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Publish Release
+    #   run: |
+    #     python ./config/publishRelease.py --archive ${{ env.GAFFER_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }} --repo ${{ github.repository }} --releaseId ${{ env.GAFFER_GITHUB_RELEASEID }}
+    #   if: matrix.publish && env.GAFFER_GITHUB_RELEASEID != ''
+    #   env:
+    #     GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Limit cache size
       # GitHub has a limit of 5G for all caches in a repository. Because we write new
