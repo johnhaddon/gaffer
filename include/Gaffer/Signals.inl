@@ -40,8 +40,10 @@
 
 #include "boost/function.hpp"
 #include "boost/iterator/iterator_facade.hpp"
+#include "boost/stacktrace.hpp"
 #include "boost/visit_each.hpp"
 
+#include <iostream>
 #include <optional>
 
 namespace Gaffer::Signals
@@ -392,10 +394,12 @@ struct CatchingCombiner
 				catch( const std::exception &e )
 				{
 					IECore::msg( IECore::Msg::Error, "Emitting signal", e.what() );
+					std::cerr << boost::stacktrace::stacktrace() << std::endl;
 				}
 				catch( ... )
 				{
 					IECore::msg( IECore::Msg::Error, "Emitting signal", "Unknown error" );
+					std::cerr << boost::stacktrace::stacktrace() << std::endl;
 				}
 				++first;
 			}
@@ -412,10 +416,12 @@ struct CatchingCombiner
 				catch( const std::exception &e )
 				{
 					IECore::msg( IECore::Msg::Error, "Emitting signal", e.what() );
+					std::cerr << boost::stacktrace::stacktrace() << std::endl;
 				}
 				catch( ... )
 				{
 					IECore::msg( IECore::Msg::Error, "Emitting signal", "Unknown error" );
+					std::cerr << boost::stacktrace::stacktrace() << std::endl;
 				}
 				++first;
 			}
