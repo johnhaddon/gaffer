@@ -300,9 +300,16 @@ void Switch::plugInputChanged( Plug *plug )
 			updateInternalConnection();
 		}
 	}
+	catch( const std::exception &e )
+	{
+		std::cerr << "STD ERROR IN Switch::plugInputChanged" << std::endl;
+		std::cerr << e.what() << std::endl;
+	}
 	catch( ... )
 	{
-		std::cerr << "ERROR IN Switch::plugInputChanged" << std::endl;
+		std::cerr << "UNKNOWN ERROR IN Switch::plugInputChanged" << std::endl;
+		int status;
+   		std::cerr << "EXCEPTION TYPE IS " << abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status) << std::endl;;
 		throw;
 	}
 }
