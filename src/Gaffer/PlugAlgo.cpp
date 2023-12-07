@@ -170,9 +170,12 @@ void replacePlug( Gaffer::GraphComponent *parent, PlugPtr plug )
 
 bool Gaffer::PlugAlgo::dependsOnCompute( const ValuePlug *plug )
 {
+	std::cerr << "dependsOnCompute 1 " << plug->fullName() << std::endl;
 	if( plug->children().empty() )
 	{
+		std::cerr << "dependsOnCompute 2 " << plug->fullName() << std::endl;
 		plug = plug->source<Gaffer::ValuePlug>();
+		std::cerr << "dependsOnCompute 3 " << plug->fullName() << std::endl;
 		return plug->direction() == Plug::Out && IECore::runTimeCast<const ComputeNode>( plug->node() );
 	}
 	else
