@@ -296,7 +296,6 @@ void Switch::plugInputChanged( Plug *plug )
 {
 	try
 	{
-		std::cerr << "Switch::plugInputChanged " << fullName() << std::endl;
 		if( plug == indexPlug() || plug == enabledPlug() )
 		{
 			updateInternalConnection();
@@ -441,7 +440,7 @@ void Switch::updateInternalConnection()
 
 	std::cerr << "Switch::updateInternalConnection 3.5 " << fullName() << std::endl;
 
-	Plug *in = const_cast<Plug *>( oppositePlug( out, Context::current() ) );
+	Plug *in = const_cast<Plug *>( oppositePlug( out, nullptr ) );
 	std::cerr << "Switch::updateInternalConnection 4 " << fullName() << std::endl;
 	out->setInput( in );
 	std::cerr << "Switch::updateInternalConnection 5 " << fullName() << std::endl;
