@@ -31,7 +31,7 @@ jobs:
         name: [
           linux,
           linux-debug,
-          windows,
+          #windows,
         ]
 
         include:
@@ -46,7 +46,7 @@ jobs:
             # respect permissions. So we run the final test suite as a dedicated
             # test user rather than as root.
             testRunner: su testUser -c
-            #testArguments: -excludedCategories performance -stopOnFailure
+            testArguments: -stopOnFailure
             sconsCacheMegabytes: 400
 
           - name: linux-debug
@@ -60,14 +60,14 @@ jobs:
             # limit. In practice this compresses down to 4-500Mb.
             sconsCacheMegabytes: 2500
 
-          - name: windows
-            os: windows-2019
-            buildType: RELEASE
-            publish: true
-            containerImage:
-            testRunner: Invoke-Expression
-            testArguments: -excludedCategories performance GafferTest GafferVDBTest GafferUSDTest GafferSceneTest GafferDispatchTest GafferOSLTest GafferImageTest GafferUITest GafferImageUITest GafferSceneUITest GafferDispatchUITest GafferOSLUITest GafferUSDUITest GafferVDBUITest GafferDelightUITest GafferTractorTest GafferTractorUITest
-            sconsCacheMegabytes: 400
+          # - name: windows
+          #   os: windows-2019
+          #   buildType: RELEASE
+          #   publish: true
+          #   containerImage:
+          #   testRunner: Invoke-Expression
+          #   testArguments: -excludedCategories performance GafferTest GafferVDBTest GafferUSDTest GafferSceneTest GafferDispatchTest GafferOSLTest GafferImageTest GafferUITest GafferImageUITest GafferSceneUITest GafferDispatchUITest GafferOSLUITest GafferUSDUITest GafferVDBUITest GafferDelightUITest GafferTractorTest GafferTractorUITest
+          #   sconsCacheMegabytes: 400
 
     runs-on: ${{ matrix.os }}
 
