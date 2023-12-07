@@ -71,6 +71,7 @@ Switch::Switch( const std::string &name)
 
 Switch::~Switch()
 {
+	//disconnectTrackedConnections();
 }
 
 void Switch::setup( const Plug *plug )
@@ -295,6 +296,7 @@ void Switch::plugInputChanged( Plug *plug )
 {
 	try
 	{
+		std::cerr << "Switch::plugInputChanged " << fullName() << std::endl;
 		if( plug == indexPlug() || plug == enabledPlug() )
 		{
 			updateInternalConnection();
@@ -418,11 +420,13 @@ const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) con
 
 void Switch::updateInternalConnection()
 {
+	std::cerr << "Switch::plugInputChanged 1" << fullName() << std::endl;
 	Plug *out = outPlug();
 	if( !out )
 	{
 		return;
 	}
+	std::cerr << "Switch::plugInputChanged 2" << fullName() << std::endl;
 
 	if( PlugAlgo::dependsOnCompute( enabledPlug() ) || PlugAlgo::dependsOnCompute( indexPlug() ) )
 	{
@@ -430,9 +434,13 @@ void Switch::updateInternalConnection()
 		// because the index might vary from context to context. We must
 		// therefore implement switching via hash()/compute().
 		out->setInput( nullptr );
+		std::cerr << "Switch::plugInputChanged 3" << fullName() << std::endl;
 		return;
 	}
 
 	Plug *in = const_cast<Plug *>( oppositePlug( out, Context::current() ) );
+	std::cerr << "Switch::plugInputChanged 4" << fullName() << std::endl;
 	out->setInput( in );
+	std::cerr << "Switch::plugInputChanged 5" << fullName() << std::endl;
+
 }
