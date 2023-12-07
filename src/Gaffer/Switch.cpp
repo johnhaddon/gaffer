@@ -344,26 +344,36 @@ size_t Switch::inputIndex( const Context *context ) const
 		globalScope.emplace( context, globalScopePlug );
 	}
 
+	std::cerr << "inputIndex 1 " << fullName() << std::endl;
+
 	if( !enabledPlug->getValue() )
 	{
+		std::cerr << "inputIndex 1.1 " << fullName() << std::endl;
 		return 0;
 	}
 
+	std::cerr << "inputIndex 2 " << fullName() << std::endl;
+
 	const size_t index = indexPlug->getValue();
+
+	std::cerr << "inputIndex 3 " << fullName() << std::endl;
+
 	if( inPlugs->resizeWhenInputsChange() )
 	{
 		// Last input is always unconnected, so should be ignored.
+	std::cerr << "inputIndex 3.1 " << fullName() << std::endl;
 		return index % (numInputs - 1);
 	}
 	else
 	{
+	std::cerr << "inputIndex 3.2 " << fullName() << std::endl;
 		return index % numInputs;
 	}
 }
 
 const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) const
 {
-	std::cerr << "oppositePlug 1 " << plug->fullName() << std::endl;
+	//std::cerr << "oppositePlug 1 " << plug->fullName() << std::endl;
 	const ArrayPlug *inPlugs = this->inPlugs();
 	const Plug *outPlug = this->outPlug();
 	if( !inPlugs || !outPlug )
@@ -390,7 +400,7 @@ const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) con
 			plug = static_cast<const Plug *>( plugParent );
 		}
 	}
-	std::cerr << "oppositePlug 2 " << std::endl;
+	//std::cerr << "oppositePlug 2 " << std::endl;
 
 	if( !ancestorPlug )
 	{
@@ -401,9 +411,9 @@ const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) con
 	const Plug *oppositeAncestorPlug = nullptr;
 	if( plug->direction() == Plug::Out )
 	{
-	std::cerr << "oppositePlug 3 " << std::endl;
+	//std::cerr << "oppositePlug 3 " << std::endl;
 		const size_t i = context ? inputIndex( context ) : 0;
-	std::cerr << "oppositePlug 4 " << std::endl;
+	//std::cerr << "oppositePlug 4 " << std::endl;
 		oppositeAncestorPlug = inPlugs->getChild<Plug>( i );
 	}
 	else
@@ -411,7 +421,7 @@ const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) con
 		oppositeAncestorPlug = outPlug;
 	}
 
-	std::cerr << "oppositePlug 5 " << std::endl;
+	//std::cerr << "oppositePlug 5 " << std::endl;
 
 	// And then find the opposite of plug by traversing down from the ancestor plug.
 	const Plug *result = oppositeAncestorPlug;
