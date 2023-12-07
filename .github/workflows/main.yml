@@ -46,7 +46,6 @@ jobs:
             # respect permissions. So we run the final test suite as a dedicated
             # test user rather than as root.
             testRunner: su testUser -c
-            testArguments: -stopOnFailure
             sconsCacheMegabytes: 400
 
           - name: linux-debug
