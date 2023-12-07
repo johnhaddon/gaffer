@@ -344,6 +344,12 @@ size_t Switch::inputIndex( const Context *context ) const
 		globalScope.emplace( context, globalScopePlug );
 	}
 
+	std::cerr << "inputIndex canceller " << Context::current()->canceller() << std::endl;
+	if( Context::current()->canceller() &&  Context::current()->canceller()->cancelled() )
+	{
+		std::cerr << "   CANCELLED!!!" << std::endl;
+	}
+
 	std::cerr << "inputIndex 1 " << fullName() << std::endl;
 
 	if( !enabledPlug->getValue() )
