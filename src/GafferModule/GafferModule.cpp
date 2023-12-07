@@ -88,6 +88,8 @@
 
 #include "Gaffer/Backdrop.h"
 
+#include <thread>
+
 #ifdef __linux__
 #include <sys/prctl.h>
 #endif
@@ -200,6 +202,8 @@ __attribute__( ( section( ".init_array" ) ) ) decltype( storeArgcArgv ) *g_initA
 
 BOOST_PYTHON_MODULE( _Gaffer )
 {
+
+	std::cerr << "MAIN THREAD IS " << std::this_thread::get_id() << std::endl;
 
 	bindSignals();
 	bindGraphComponent();

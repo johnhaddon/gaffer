@@ -46,6 +46,8 @@
 #include "boost/bind/bind.hpp"
 #include "boost/bind/placeholders.hpp"
 
+#include <thread>
+
 using namespace boost::placeholders;
 using namespace Gaffer;
 
@@ -309,6 +311,8 @@ void Switch::plugInputChanged( Plug *plug )
 	catch( ... )
 	{
 		std::cerr << "UNKNOWN ERROR IN Switch::plugInputChanged" << std::endl;
+		std::cerr << "THREAD IS " << std::this_thread::get_id() << std::endl;
+
 		int status;
    		std::cerr << "EXCEPTION TYPE IS " << abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status) << std::endl;;
 		throw;
@@ -360,7 +364,7 @@ size_t Switch::inputIndex( const Context *context ) const
 
 	std::cerr << "inputIndex 2 " << fullName() << std::endl;
 
-	const size_t index = indexPlug->getValue();
+	const size_t index = indexPlug->getValue(); // THROWING CANCELLED FROM HERE
 
 	std::cerr << "inputIndex 3 " << fullName() << std::endl;
 
