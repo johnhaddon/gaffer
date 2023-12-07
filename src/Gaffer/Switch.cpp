@@ -363,6 +363,7 @@ size_t Switch::inputIndex( const Context *context ) const
 
 const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) const
 {
+	std::cerr << "oppositePlug 1 " << plug->fullName() << std::endl;
 	const ArrayPlug *inPlugs = this->inPlugs();
 	const Plug *outPlug = this->outPlug();
 	if( !inPlugs || !outPlug )
@@ -389,6 +390,7 @@ const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) con
 			plug = static_cast<const Plug *>( plugParent );
 		}
 	}
+	std::cerr << "oppositePlug 2 " << std::endl;
 
 	if( !ancestorPlug )
 	{
@@ -399,13 +401,17 @@ const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) con
 	const Plug *oppositeAncestorPlug = nullptr;
 	if( plug->direction() == Plug::Out )
 	{
+	std::cerr << "oppositePlug 3 " << std::endl;
 		const size_t i = context ? inputIndex( context ) : 0;
+	std::cerr << "oppositePlug 4 " << std::endl;
 		oppositeAncestorPlug = inPlugs->getChild<Plug>( i );
 	}
 	else
 	{
 		oppositeAncestorPlug = outPlug;
 	}
+
+	std::cerr << "oppositePlug 5 " << std::endl;
 
 	// And then find the opposite of plug by traversing down from the ancestor plug.
 	const Plug *result = oppositeAncestorPlug;
@@ -419,30 +425,30 @@ const Plug *Switch::oppositePlug( const Plug *plug, const Context *context ) con
 
 void Switch::updateInternalConnection()
 {
-	std::cerr << "Switch::updateInternalConnection 1 " << fullName() << std::endl;
+	//std::cerr << "Switch::updateInternalConnection 1 " << fullName() << std::endl;
 	Plug *out = outPlug();
 	if( !out )
 	{
 		return;
 	}
-	std::cerr << "Switch::updateInternalConnection 2 " << fullName() << std::endl;
+	//std::cerr << "Switch::updateInternalConnection 2 " << fullName() << std::endl;
 
 	if( PlugAlgo::dependsOnCompute( enabledPlug() ) || PlugAlgo::dependsOnCompute( indexPlug() ) )
 	{
-		std::cerr << "Switch::updateInternalConnection 2.5 " << fullName() << std::endl;
+	//	std::cerr << "Switch::updateInternalConnection 2.5 " << fullName() << std::endl;
 		// We can't use an internal connection to implement the switch,
 		// because the index might vary from context to context. We must
 		// therefore implement switching via hash()/compute().
 		out->setInput( nullptr );
-		std::cerr << "Switch::updateInternalConnection 3 " << fullName() << std::endl;
+	//	std::cerr << "Switch::updateInternalConnection 3 " << fullName() << std::endl;
 		return;
 	}
 
-	std::cerr << "Switch::updateInternalConnection 3.5 " << fullName() << std::endl;
+	//std::cerr << "Switch::updateInternalConnection 3.5 " << fullName() << std::endl;
 
-	Plug *in = const_cast<Plug *>( oppositePlug( out, nullptr ) );
-	std::cerr << "Switch::updateInternalConnection 4 " << fullName() << std::endl;
+	Plug *in = const_cast<Plug *>( oppositePlug( out, Context::current() ) );
+	//std::cerr << "Switch::updateInternalConnection 4 " << fullName() << std::endl;
 	out->setInput( in );
-	std::cerr << "Switch::updateInternalConnection 5 " << fullName() << std::endl;
+	//std::cerr << "Switch::updateInternalConnection 5 " << fullName() << std::endl;
 
 }
