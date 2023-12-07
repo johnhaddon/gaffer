@@ -293,9 +293,17 @@ void Switch::plugSet( Plug *plug )
 
 void Switch::plugInputChanged( Plug *plug )
 {
-	if( plug == indexPlug() || plug == enabledPlug() )
+	try
 	{
-		updateInternalConnection();
+		if( plug == indexPlug() || plug == enabledPlug() )
+		{
+			updateInternalConnection();
+		}
+	}
+	catch( ... )
+	{
+		std::cerr << "ERROR IN Switch::plugInputChanged" << std::endl;
+		throw;
 	}
 }
 

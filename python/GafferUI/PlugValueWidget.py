@@ -625,9 +625,15 @@ class PlugValueWidget( GafferUI.Widget ) :
 
 	def __plugInputChanged( self, plug ) :
 
-		if plug in self.__plugs :
-			self.__updateContextConnection()
-			self._updateFromEditable()
+		try :
+			if plug in self.__plugs :
+				self.__updateContextConnection()
+				self._updateFromEditable()
+		except :
+			print( "ERROR IN PlugValueWidget.__plugInputChanged" )
+			import traceback
+			traceback.print_exc()
+			raise
 
 	def __plugMetadataChanged( self, plug, key, reason ) :
 
