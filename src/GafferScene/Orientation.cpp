@@ -188,11 +188,26 @@ PrimitiveVariable inQuaternion( const Primitive *inputPrimitive, Primitive *outp
 	{
 		if( xyzw )
 		{
-			quaternions.push_back( Quatf( q.v.z, V3f( q.r, q.v.x, q.v.y ) ) );
+			Quatf qOrdered = Quatf( q.v.z, V3f( q.r, q.v.x, q.v.y ) );
+			if( Orientation::isNormalized( qOrdered ) )
+			{
+				quaternions.push_back( qOrdered );
+			}
+			else
+			{
+				quaternions.push_back( qOrdered.normalized() );
+			}
 		}
 		else
 		{
-			quaternions.push_back( q );
+			if( Orientation::isNormalized( q ) )
+			{
+				quaternions.push_back( q );
+			}
+			else
+			{
+				quaternions.push_back( q.normalized() );
+			}
 		}
 	}
 
