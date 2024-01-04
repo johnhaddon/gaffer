@@ -14,6 +14,7 @@ Improvements
   - Added bookmarks.
 - USDLight : Added file browser for `shaping:ies:file` parameter.
 - OpenColorIOContext : Added file browser for `config` plug.
+- LightTool : Changed the color of the non-highlighted handles to orange and the highlighted handles to cyan for consistency with other highlight colors.
 
 Fixes
 -----
