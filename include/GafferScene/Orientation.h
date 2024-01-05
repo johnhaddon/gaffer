@@ -196,6 +196,7 @@ class GAFFERSCENE_API Orientation : public ObjectProcessor
 		// Test if a quaternion is normalized. Uses a small tolerance to account for floating point precision,
 		// so that it should return true for any quaternion produced by Imath::Quatf::normalized().
 		static inline bool isNormalized( const Imath::Quatf &q );
+		static inline Imath::Quatf normalizeIfNeeded( const Imath::Quatf &q );
 
 	protected :
 

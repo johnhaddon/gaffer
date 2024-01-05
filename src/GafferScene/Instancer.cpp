@@ -581,20 +581,7 @@ class Instancer::EngineData : public Data
 			}
 			if( m_orientations )
 			{
-				if( Orientation::isNormalized( (*m_orientations)[pointIndex] ) )
-				{
-					// The quaternion is already normalized, we can directly convert it to matrix.
-					// Skipping normalization here saves 7% on InstancerTest.testBoundPerformance
-					// ( And it's probably slightly better from a correctness point of view to
-					// not be pointlessly changing the values slightly at the limits of floating
-					// point precision, when they're already as close to normalized as they can get )
-					result = (*m_orientations)[pointIndex].toMatrix44() * result;
-				}
-				else
-				{
-					// Normalize the quaternion, then convert it to matrix.
-					result = (*m_orientations)[pointIndex].normalized().toMatrix44() * result;
-				}
+				result = Orientation::normalizeIfNeeded( (*m_orientations)[pointIndex] ).toMatrix44() * result;
 			}
 			if( m_scales )
 			{
