@@ -2893,7 +2893,7 @@ parent["radius"] = ( 2 + context.getFrame() ) * 15
 	def testBoundPerformance( self ) :
 
 		sphere = GafferScene.Sphere()
-		sphere["divisions"].setValue( imath.V2i( 1000 ) )
+		sphere["divisions"].setValue( imath.V2i( 2000 ) )
 
 		filter = GafferScene.PathFilter()
 		filter["paths"].setValue( IECore.StringVectorData( [ '/sphere' ] ) )
