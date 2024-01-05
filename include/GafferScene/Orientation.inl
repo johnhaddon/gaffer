@@ -39,18 +39,20 @@
 namespace GafferScene
 {
 
-inline bool Orientation::isNormalized( const Imath::Quatf &q )
+inline Imath::Quatf Orientation::normalizeIfNeeded( const Imath::Quatf &q )
 {
 	// Testing with four hundred million random quaternions, normalized using Imath, the lengths
 	// are always > 1 - 5e-7 and < 1 + 5e-7. We make this threshold slightly more tolerant
 	// to be safe.
 	float lengthSquared = q.r * q.r + ( q.v ^ q.v );
-	return lengthSquared >= ( 1 - 6e-7 ) && lengthSquared <= ( 1 + 6e-7 );
-}
-
-inline Imath::Quatf Orientation::normalizeIfNeeded( const Imath::Quatf &q )
-{
-	return isNormalized( q ) ? q : q.normalized();
+	if( lengthSquared >= ( 1 - 6e-7 ) && lengthSquared <= ( 1 + 6e-7 ) )
+	{
+		return q;
+	}
+	else
+	{
+		return q.normalized();
+	}
 }
 
 } // namespace GafferScene

@@ -101,8 +101,8 @@ void GafferSceneModule::bindObjectProcessor()
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<Orientation>()
-			.def( "isNormalized", &Orientation::isNormalized )
-			.staticmethod( "isNormalized" )
+			//.def( "isNormalized", &Orientation::isNormalized )
+			//.staticmethod( "isNormalized" )
 		;
 
 
