@@ -108,7 +108,7 @@ const std::string g_lightAttributePattern = "light *:light";
 
 const Color3f g_lightToolArcColor = Color3f( 0.825, 0.720f, 0.230f );
 
-const Color3f g_lightToolColor = Color3f( 1.0f, 0.365f, 0.075f );
+const Color3f g_lightToolColor = Color3f( 0.745f, 0.325f, 0.173f );
 const Color4f g_lightToolColor4 = Color4f( g_lightToolColor.x, g_lightToolColor.y, g_lightToolColor.z, 1.f );
 
 const Color4f g_lightToolDisabledColor4 = Color4f( 0.4f, 0.4f, 0.4f, 1.f );
