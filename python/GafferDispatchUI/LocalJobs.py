@@ -288,11 +288,13 @@ class LocalJobs( GafferUI.Editor ) :
 		assert( threading.current_thread() is threading.main_thread() )
 		job.statusChangedSignal().connect( Gaffer.WeakMethod( self.__jobStatusChanged ), scoped = False )
 		self.__jobListingWidget.getPath()._emitPathChanged()
+		self.__jobSelectionChanged( self.__jobListingWidget )
 
 	def __jobRemoved( self, job ) :
 
 		assert( threading.current_thread() is threading.main_thread() )
 		self.__jobListingWidget.getPath()._emitPathChanged()
+		self.__jobSelectionChanged( self.__jobListingWidget )
 
 	def __jobStatusChanged( self, job ) :
 
@@ -315,6 +317,7 @@ class LocalJobs( GafferUI.Editor ) :
 		for job in self.__selectedJobs() :
 			job.kill()
 			jobPool.removeJob( job )
+			self.__jobListingWidget.setSelection( IECore.PathMatcher() )
 
 	def __selectedJobs( self ) :
 
@@ -328,6 +331,8 @@ class LocalJobs( GafferUI.Editor ) :
 	def __jobSelectionChanged( self, widget ) :
 
 		jobs = self.__selectedJobs()
+
+		print( "SELECTIN CHANGED", jobs )
 
 		if len( jobs ) == 1 :
 			self.__messageWidget.setMessages( jobs[0].messages() )
