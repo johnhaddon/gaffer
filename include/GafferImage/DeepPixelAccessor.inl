@@ -41,7 +41,7 @@
 namespace GafferImage
 {
 
-inline void DeepPixelAccessor::sample( int x, int y, const float* &data, unsigned int &count )
+inline boost::span<const float> DeepPixelAccessor::sample( int x, int y )
 {
 	Imath::V2i p( x, y );
 
@@ -60,9 +60,45 @@ inline void DeepPixelAccessor::sample( int x, int y, const float* &data, unsigne
 		{
 			if( !BufferAlgo::contains( m_dataWindow, p ) )
 			{
-				count = 0;
-				data = nullptr;
-				return;
+				return boost::span<const float>();
+			}
+		}
+		else
+		{
+			p = BufferAlgo::clamp( p, m_dataWindow );
+		}
+	}
+
+	const float *tileData;
+	const int *tileOffsets;
+	int tilePixelIndex;
+	cachedData( p, tileData, tileOffsets, tilePixelIndex );
+
+	assert( tileData );
+	int prev = tilePixelIndex > 0 ? tileOffsets[ tilePixelIndex - 1 ] : 0;
+	return boost::span<const float>( &tileData[ prev ], &tileData[ tileOffsets[ tilePixelIndex ] ] );
+}
+
+inline unsigned int DeepPixelAccessor::sampleCount( int x, int y )
+{
+	Imath::V2i p( x, y );
+
+#ifndef NDEBUG
+
+	// It is the caller's responsibility to ensure that sampling
+	// is only performed within the sample window.
+	assert( BufferAlgo::contains( m_sampleWindow, p ) );
+
+#endif
+
+	if( m_boundingMode != -1 )
+	{
+		// Deal with lookups outside of the data window.
+		if( m_boundingMode == Sampler::Black )
+		{
+			if( !BufferAlgo::contains( m_dataWindow, p ) )
+			{
+				return 0;
 			}
 		}
 		else
@@ -77,8 +113,7 @@ inline void DeepPixelAccessor::sample( int x, int y, const float* &data, unsigne
 	cachedData( p, tileData, tileOffsets, tilePixelIndex );
 
 	int prev = tilePixelIndex > 0 ? tileOffsets[ tilePixelIndex - 1 ] : 0;
-	count = tileOffsets[ tilePixelIndex ] - prev;
-	data = tileData ? &tileData[ prev ] : nullptr;
+	return tileOffsets[ tilePixelIndex ] - prev;
 }
 
 inline void DeepPixelAccessor::cachedData( Imath::V2i p, const float *& tileData, const int *& tileOffsets, int &tilePixelIndex )

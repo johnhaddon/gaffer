@@ -39,6 +39,7 @@
 #include "GafferImage/ImagePlug.h"
 #include "GafferImage/Sampler.h"
 
+#include <boost/core/span.hpp>
 #include <vector>
 
 namespace GafferImage
@@ -67,12 +68,13 @@ class GAFFERIMAGE_API DeepPixelAccessor
 		/// `visitPixels()` to subsequently be called concurrently.
 		void populate();
 
-		/// Gets the list of channel values and number of values at the specified
-		/// integer pixel coordinate. It is the caller's responsibility to ensure
-		/// that this point is contained within the sample window passed to the
-		/// constructor. If this was constructed with an empty channel name, data will
-		/// be set to nullptr
-		void sample( int x, int y, const float* &data, unsigned int &count );
+		/// Gets the list of channel values at the specified integer pixel coordinate.
+		/// It is the caller's responsibility to ensure that this point is contained
+		/// within the sample window passed to the constructor, and that the channel name is set.
+		boost::span<const float> sample( int x, int y );
+
+		/// Like above, but only returns the count, and may be called with an empty channel name.
+		unsigned int sampleCount( int x, int y );
 
 		/// Appends a hash that represent all the pixel
 		/// values within the requested sample area.
