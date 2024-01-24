@@ -37,7 +37,7 @@
 #include "GafferImage/Resample.h"
 
 #include "GafferImage/DeepState.h"
-#include "GafferImage/DeepTileAccessor.h"
+#include "GafferImage/DeepPixelAccessor.h"
 #include "GafferImage/ImageAlgo.h"
 #include "GafferImage/FilterAlgo.h"
 #include "GafferImage/Sampler.h"
@@ -455,7 +455,9 @@ struct SampledDepth
 // Given the channel data for a pixel, and all depths it may be evaluated at, convert it to a list of
 // SampledDepths will all information needed to evaluate it at any of those depths.
 void samplePixelDepths(
-	int count, const float *z, const float *zBack, const float *alpha, const std::vector<float> &depths,
+	int count,
+	const boost::span<const float> &z, const boost::span<const float> &zBack, const boost::span<const float> &alpha,
+	const std::vector<float> &depths,
 	std::vector< SampledDepth > &result
 )
 {
@@ -468,15 +470,15 @@ void samplePixelDepths(
 	unsigned int depthIndex = 0;
 	for( int i = 0; i < count; i++ )
 	{
-		float segmentZ = z ? z[i] : 0.0f;
-		float segmentZBack = zBack ? zBack[i] : segmentZ;
+		float segmentZ = z.size() ? z[i] : 0.0f;
+		float segmentZBack = zBack.size() ? zBack[i] : segmentZ;
 
 		if( std::isnan( segmentZ ) || std::isnan( segmentZBack ) )
 		{
 			continue;
 		}
 
-		float segmentAlpha = alpha ? alpha[i] : 0.0f;
+		float segmentAlpha = alpha.size() ? alpha[i] : 0.0f;
 		if( !( segmentAlpha > 0.0f ) )
 		{
 			// Negative alphas aren't valid, treat them as zero, deal with NaN while we're at it
@@ -1240,7 +1242,7 @@ void Resample::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 	if( hasZ )
 	{
-		DeepTileAccessor( tidyInPlug(), ImageAlgo::channelNameZ, ir, boundingMode ).hash( h );
+		DeepPixelAccessor( tidyInPlug(), ImageAlgo::channelNameZ, ir, boundingMode ).hash( h );
 	}
 	else
 	{
@@ -1248,7 +1250,7 @@ void Resample::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *con
 	}
 	if( hasZBack )
 	{
-		DeepTileAccessor( tidyInPlug(), ImageAlgo::channelNameZBack, ir, boundingMode ).hash( h );
+		DeepPixelAccessor( tidyInPlug(), ImageAlgo::channelNameZBack, ir, boundingMode ).hash( h );
 	}
 	else
 	{
@@ -1256,7 +1258,7 @@ void Resample::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *con
 	}
 	if( hasA )
 	{
-		DeepTileAccessor( tidyInPlug(), ImageAlgo::channelNameA, ir, boundingMode ).hash( h );
+		DeepPixelAccessor( tidyInPlug(), ImageAlgo::channelNameA, ir, boundingMode ).hash( h );
 	}
 	else
 	{
@@ -1302,9 +1304,9 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 	const V2i tileOrigin = context->get<V2i>( ImagePlug::tileOriginContextName );
 	Box2i ir = inputRegion( tileOrigin, Both, ratio, offset, filter, inputFilterScale );
 
-	// Don't think I like this API for requesting a DeepTileAccessor with just sample offsets by passing an
-	// empty channel name, but it should be good enough to get things working.
-	DeepTileAccessor sampleOffsetsSampler( tidyInPlug(), "", ir, boundingMode );
+	// Pass in an empty channel name to only access the sampleOffsets
+	DeepPixelAccessor sampleOffsetsSampler( tidyInPlug(), "", ir, boundingMode );
+	sampleOffsetsSampler.populate();
 
 	bool hasA = false;
 	bool hasZ = false;
@@ -1342,7 +1344,7 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 			hasArbitraryChannel = true;
 		}
 	}
-	std::optional<DeepTileAccessor> zSampler, zBackSampler, alphaSampler;
+	std::optional<DeepPixelAccessor> zSampler, zBackSampler, alphaSampler;
 	if( hasZ )
 	{
 		zSampler.emplace( sampleOffsetsSampler, ImageAlgo::channelNameZ );
@@ -1394,20 +1396,18 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 			// Loop through the other pixels in this row that influence this pixel, collect all depths.
 			for( int j = horizontalMixing[x].min; j < horizontalMixing[x].max; j++ )
 			{
-				const float *zSamples = nullptr;
-				unsigned int count;
-				const float *zBackSamples = nullptr;
+				boost::span<const float> zSamples;
+				boost::span<const float> zBackSamples;
 				if( zSampler )
 				{
-					zSampler->sample( j + inputOrigin.x, y + inputOrigin.y, zSamples, count );
+					zSamples = zSampler->sample( j + inputOrigin.x, y + inputOrigin.y );
 
 					if( zBackSampler )
 					{
-						unsigned int zBackCount;
-						zBackSampler->sample( j + inputOrigin.x, y + inputOrigin.y, zBackSamples, zBackCount );
-						assert( count == zBackCount );
+						zBackSamples = zBackSampler->sample( j + inputOrigin.x, y + inputOrigin.y );
+						assert( zSamples.size() == zBackSamples.size() );
 
-						for( unsigned int k = 0; k < count; k++ )
+						for( unsigned int k = 0; k < zSamples.size(); k++ )
 						{
 							if( !std::isnan( zSamples[k] ) ) curMixDepths.push_back( zSamples[k] );
 							if( !std::isnan( zBackSamples[k] ) ) curMixDepths.push_back( zBackSamples[k] );
@@ -1415,7 +1415,7 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 					}
 					else
 					{
-						for( unsigned int k = 0; k < count; k++ )
+						for( unsigned int k = 0; k < zSamples.size(); k++ )
 						{
 							if( !std::isnan( zSamples[k] ) ) curMixDepths.push_back( zSamples[k] );
 						}
@@ -1464,21 +1464,24 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 
 			// Collect all channel data for this pixel
 			unsigned int pixelCount = 0;
-			const float *pixelZ = nullptr;
-			const float *pixelZBack = nullptr;
-			const float *pixelAlpha = nullptr;
+			boost::span<const float> pixelZ;
+			boost::span<const float> pixelZBack;
+			boost::span<const float> pixelAlpha;
 
 			if( alphaSampler )
 			{
-				alphaSampler->sample( x + inputOrigin.x, y + inputOrigin.y, pixelAlpha, pixelCount );
+				pixelAlpha = alphaSampler->sample( x + inputOrigin.x, y + inputOrigin.y );
+				pixelCount = pixelAlpha.size();
 			}
 			if( zSampler )
 			{
-				zSampler->sample( x + inputOrigin.x, y + inputOrigin.y, pixelZ, pixelCount );
+				pixelZ = zSampler->sample( x + inputOrigin.x, y + inputOrigin.y );
+				pixelCount = pixelZ.size();
 			}
 			if( zBackSampler )
 			{
-				zBackSampler->sample( x + inputOrigin.x, y + inputOrigin.y, pixelZBack, pixelCount );
+				pixelZBack = zBackSampler->sample( x + inputOrigin.x, y + inputOrigin.y );
+				pixelCount = pixelZBack.size();
 			}
 
 			// Sample this pixel at all depths where we may need to evaluate it
@@ -1766,7 +1769,7 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 		}
 		else
 		{
-			DeepTileAccessor( inPlug(), channelName, ir, boundingMode ).hash( h );
+			DeepPixelAccessor( inPlug(), channelName, ir, boundingMode ).hash( h );
 		}
 
 		return;
@@ -1849,7 +1852,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 			std::vector<float> &result = resultData->writable();
 			result.resize( outputSampleOffsetsData->readable().back() );
 
-			DeepTileAccessor sampleOffsetsSampler( tidyInPlug(), channelName, ir, boundingMode );
+			DeepPixelAccessor sampleOffsetsSampler( tidyInPlug(), channelName, ir, boundingMode );
 
 			std::vector<int> iPx;
 			nearestInputPixelX( tileBound.min.x, ratio.x, offset.x, iPx );
@@ -1867,11 +1870,9 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 				Canceller::check( context->canceller() );
 				for( oP.x = tileBound.min.x; oP.x < tileBound.max.x; ++oP.x )
 				{
-					const float *channelSamples;
-					unsigned int count;
-					sampleOffsetsSampler.sample( *iPxIt, iPy, channelSamples, count );
-					memcpy( &result[outputSamplePosition], channelSamples, count * sizeof( float ) );
-					outputSamplePosition += count;
+					boost::span<const float> channelSamples = sampleOffsetsSampler.sample( *iPxIt, iPy );
+					memcpy( &result[outputSamplePosition], &channelSamples[0], channelSamples.size() * sizeof( float ) );
+					outputSamplePosition += channelSamples.size();
 					++iPxIt;
 				}
 			}
@@ -1902,7 +1903,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 		const std::vector<int> &contributionCounts = deepResampleData->contributionCounts;
 		const std::vector<ContributionElement> &contributionElements = deepResampleData->contributionElements;
 
-		DeepTileAccessor deepChannelSampler( tidyInPlug(), channelName, ir, boundingMode );
+		DeepPixelAccessor deepChannelSampler( tidyInPlug(), channelName, ir, boundingMode );
 
 		std::vector<const float *> channelSamples;
 
@@ -1924,10 +1925,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 			{
 				for( int ix = support.min.x; ix < support.max.x; ++ix )
 				{
-					const float *pixelChannelSamples;
-					unsigned int unusedCount;
-					deepChannelSampler.sample( ix, iy, pixelChannelSamples, unusedCount );
-					channelSamples.push_back( pixelChannelSamples );
+					channelSamples.push_back( &deepChannelSampler.sample( ix, iy )[0] );
 				}
 			}
 
@@ -2222,7 +2220,7 @@ void Resample::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Ga
 
 	const V2i tileOrigin = context->get<V2i>( ImagePlug::tileOriginContextName );
 	Box2i ir = inputRegion( tileOrigin, Both, ratio, offset, nullptr, V2f( 0.0f ) );
-	DeepTileAccessor( tidyInPlug(), "", ir, boundingMode ).hash( h );
+	DeepPixelAccessor( tidyInPlug(), "", ir, boundingMode ).hash( h );
 }
 
 IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
@@ -2259,7 +2257,7 @@ IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets( const Imath::V2i &
 	}
 
 	Box2i ir = inputRegion( tileOrigin, Both, ratio, offset, nullptr, V2f( 0.0f ) );
-	DeepTileAccessor sampleOffsetsSampler( tidyInPlug(), "", ir, boundingMode );
+	DeepPixelAccessor sampleOffsetsSampler( tidyInPlug(), "", ir, boundingMode );
 
 	IntVectorDataPtr outputSampleOffsetsData = new IntVectorData();
 	std::vector<int> &outputSampleOffsets = outputSampleOffsetsData->writable();
@@ -2282,10 +2280,7 @@ IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets( const Imath::V2i &
 		Canceller::check( context->canceller() );
 		for( oP.x = tileBound.min.x; oP.x < tileBound.max.x; ++oP.x )
 		{
-			const float *unused;
-			unsigned int count;
-			sampleOffsetsSampler.sample( *iPxIt, iPy, unused, count );
-			sampleOffset += count;
+			sampleOffset += sampleOffsetsSampler.sampleCount( *iPxIt, iPy );
 			++iPxIt;
 			outputSampleOffsets.push_back( sampleOffset );
 		}
