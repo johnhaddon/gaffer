@@ -98,7 +98,11 @@ DeepPixelAccessor::DeepPixelAccessor( const GafferImage::ImagePlug *plug, const 
 
 	m_cacheWidth = int( ceil( float( m_cacheWindow.size().x ) / ImagePlug::tileSize() ) );
 	int cacheHeight = int( ceil( float( m_cacheWindow.size().y ) / ImagePlug::tileSize() ) );
-	m_dataCache.resize( m_cacheWidth * cacheHeight, nullptr );
+
+	if( m_channelName.size() )
+	{
+		m_dataCache.resize( m_cacheWidth * cacheHeight, nullptr );
+	}
 	m_offsetsCache.resize( m_cacheWidth * cacheHeight, nullptr );
 
 	m_cacheOriginIndex = ( m_cacheWindow.min.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( m_cacheWindow.min.y >> ImagePlug::tileSizeLog2() );
@@ -112,7 +116,10 @@ DeepPixelAccessor::DeepPixelAccessor( const DeepPixelAccessor &source, const std
 	m_cacheOriginIndex( source.m_cacheOriginIndex ), m_cacheWidth( source.m_cacheWidth ),
 	m_boundingMode( source.m_boundingMode )
 {
-	m_dataCache.resize( source.m_dataCache.size() );
+	if( m_channelName.size() )
+	{
+		m_dataCache.resize( source.m_offsetsCache.size() );
+	}
 }
 
 void DeepPixelAccessor::populate()

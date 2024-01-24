@@ -125,24 +125,24 @@ inline void DeepPixelAccessor::cachedData( Imath::V2i p, const float *& tileData
 
 	tilePixelIndex = ( p.x & lowMask ) + ( ( p.y & lowMask ) << ImagePlug::tileSizeLog2() );
 
-	if( !m_dataCache[cacheIndex] )
+	if( m_channelName.size() && !m_dataCache[cacheIndex] )
 	{
 		// Get the origin of the tile we want.
 		Imath::V2i tileOrigin( p.x & ~( ImagePlug::tileSize() - 1 ), p.y & ~( ImagePlug::tileSize() - 1 ) );
 
-		if( m_channelName.size() )
-		{
-			m_dataCache[ cacheIndex ] = m_plug->channelData( m_channelName, tileOrigin );
-		}
-		else
-		{
-			// This value doesn't make that much sense, but we are just using it as a flag that this tile has
-			// been initialized when we're not using m_dataCache because m_channelName isn't set.
-			m_dataCache[ cacheIndex ] = ImagePlug::blackTile();
-		}
+		m_dataCache[ cacheIndex ] = m_plug->channelData( m_channelName, tileOrigin );
 
 		if( !m_offsetsCache[ cacheIndex ] )
 		{
+			m_offsetsCache[ cacheIndex ] = m_plug->sampleOffsets( tileOrigin );
+		}
+	}
+	else
+	{
+		if( !m_offsetsCache[ cacheIndex ] )
+		{
+			// Get the origin of the tile we want.
+			Imath::V2i tileOrigin( p.x & ~( ImagePlug::tileSize() - 1 ), p.y & ~( ImagePlug::tileSize() - 1 ) );
 			m_offsetsCache[ cacheIndex ] = m_plug->sampleOffsets( tileOrigin );
 		}
 	}
