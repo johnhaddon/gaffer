@@ -1385,6 +1385,7 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 
 	for( int y = 0; y < inputSize.y; y++ )
 	{
+		Canceller::check( context->canceller() );
 		for( int x = 0; x < inputSize.x; x++ )
 		{
 			horizontallyMixedDepths.push_back( std::vector< float >() );
@@ -1448,6 +1449,7 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 	{
 		for( int x = 0; x < inputSize.x; x++ )
 		{
+			Canceller::check( context->canceller() );
 			// We've already computed the horizontal mixing of depths - select all of those sublists
 			// in this column that contribute to the mixing in this pixel in order to get a full list
 			// of depths.
