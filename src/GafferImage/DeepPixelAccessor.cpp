@@ -34,7 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GafferImage/DeepTileAccessor.h"
+#include "GafferImage/DeepPixelAccessor.h"
 
 #include "GafferImage/ImageAlgo.h"
 
@@ -43,7 +43,7 @@ using namespace Imath;
 using namespace Gaffer;
 using namespace GafferImage;
 
-DeepTileAccessor::DeepTileAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode )
+DeepPixelAccessor::DeepPixelAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode )
 	: m_plug( plug ),
 	m_channelName( channelName ),
 	m_boundingMode( boundingMode )
@@ -104,7 +104,7 @@ DeepTileAccessor::DeepTileAccessor( const GafferImage::ImagePlug *plug, const st
 	m_cacheOriginIndex = ( m_cacheWindow.min.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( m_cacheWindow.min.y >> ImagePlug::tileSizeLog2() );
 }
 
-DeepTileAccessor::DeepTileAccessor( const DeepTileAccessor &source, const std::string &channelName )
+DeepPixelAccessor::DeepPixelAccessor( const DeepPixelAccessor &source, const std::string &channelName )
 	: m_plug( source.m_plug ),
 	m_channelName( channelName ),
 	m_sampleWindow( source.m_sampleWindow ), m_dataWindow( source.m_dataWindow ),
@@ -115,7 +115,7 @@ DeepTileAccessor::DeepTileAccessor( const DeepTileAccessor &source, const std::s
 	m_dataCache.resize( source.m_dataCache.size() );
 }
 
-void DeepTileAccessor::populate()
+void DeepPixelAccessor::populate()
 {
 	ImageAlgo::parallelProcessTiles(
 		m_plug,
@@ -130,7 +130,7 @@ void DeepTileAccessor::populate()
 	);
 }
 
-void DeepTileAccessor::hash( IECore::MurmurHash &h ) const
+void DeepPixelAccessor::hash( IECore::MurmurHash &h ) const
 {
 	for ( int x = m_cacheWindow.min.x; x < m_cacheWindow.max.x; x += GafferImage::ImagePlug::tileSize() )
 	{
@@ -148,7 +148,7 @@ void DeepTileAccessor::hash( IECore::MurmurHash &h ) const
 	h.append( m_sampleWindow );
 }
 
-IECore::MurmurHash DeepTileAccessor::hash() const
+IECore::MurmurHash DeepPixelAccessor::hash() const
 {
 	IECore::MurmurHash h;
 	hash( h );

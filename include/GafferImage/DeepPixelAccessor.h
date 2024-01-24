@@ -46,7 +46,7 @@ namespace GafferImage
 
 /// Utility class for sampling pixel values from a deep image.
 /// The interface mostly matches Sampler for flat images.
-class GAFFERIMAGE_API DeepTileAccessor
+class GAFFERIMAGE_API DeepPixelAccessor
 {
 
 	public :
@@ -56,11 +56,11 @@ class GAFFERIMAGE_API DeepTileAccessor
 		/// @param channelName The channel to sample ( or empty string, if you only need sample counts )
 		/// @param sampleWindow The area from which samples may be requested. It is an error to request samples outside this area.
 		/// @param boundingMode The method of handling samples that fall outside the data window.
-		DeepTileAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode = Sampler::Black );
+		DeepPixelAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode = Sampler::Black );
 
-		/// Construct from another DeepTileAccessor with a different channelName, in order to reuse the
+		/// Construct from another DeepPixelAccessor with a different channelName, in order to reuse the
 		/// sample offsets data.
-		DeepTileAccessor( const DeepTileAccessor &source, const std::string &channelName );
+		DeepPixelAccessor( const DeepPixelAccessor &source, const std::string &channelName );
 
 		/// Uses `parallelProcessTiles()` to fill the internal tile cache
 		/// with all tiles in the sample window. Allows `sample()` and
@@ -106,4 +106,4 @@ class GAFFERIMAGE_API DeepTileAccessor
 
 }; // namespace GafferImage
 
-#include "GafferImage/DeepTileAccessor.inl"
+#include "GafferImage/DeepPixelAccessor.inl"

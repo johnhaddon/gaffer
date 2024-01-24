@@ -41,7 +41,7 @@
 namespace GafferImage
 {
 
-inline void DeepTileAccessor::sample( int x, int y, const float* &data, unsigned int &count )
+inline void DeepPixelAccessor::sample( int x, int y, const float* &data, unsigned int &count )
 {
 	Imath::V2i p( x, y );
 
@@ -81,7 +81,7 @@ inline void DeepTileAccessor::sample( int x, int y, const float* &data, unsigned
 	data = tileData ? &tileData[ prev ] : nullptr;
 }
 
-inline void DeepTileAccessor::cachedData( Imath::V2i p, const float *& tileData, const int *& tileOffsets, int &tilePixelIndex )
+inline void DeepPixelAccessor::cachedData( Imath::V2i p, const float *& tileData, const int *& tileOffsets, int &tilePixelIndex )
 {
 	// Get the smart pointer to the tile we want.
 
