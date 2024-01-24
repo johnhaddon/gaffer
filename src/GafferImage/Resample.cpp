@@ -236,7 +236,7 @@ const OIIO::Filter2D *filterAndScale( const std::string &name, V2f ratio, bool d
 
 inline std::pair< int, int > filterSupport( const float filterRadius, const int x, const float ratio, const float offset )
 {
-	float iX = ( x + 0.5 ) / ratio + offset;
+	float iX = ( x + 0.5f ) / ratio + offset;
 
 	return std::make_pair(
 		(int)ceilf( iX - 0.5f - filterRadius ),
@@ -262,7 +262,7 @@ void filterWeights1D( const OIIO::Filter2D *filter, const float inputFilterScale
 	for( int oX = x, eX = x + ImagePlug::tileSize(); oX < eX; ++oX )
 	{
 		// input pixel position (floating point)
-		float iX = ( oX + 0.5 ) / ratio + offset;
+		float iX = ( oX + 0.5f ) / ratio + offset;
 
 		int minX = ceilf( iX - 0.5f - filterRadius );
 		int maxX = floorf( iX + 0.5f + filterRadius );
@@ -299,7 +299,7 @@ void filterWeights2D( const OIIO::Filter2D *filter, const V2f inputFilterScale, 
 	const V2f filterCoordinateMult( 1.0f / inputFilterScale.x, 1.0f / inputFilterScale.y );
 
 	// input pixel position (floating point)
-	V2f i = ( V2f( p ) + V2f( 0.5 ) ) / ratio + offset;
+	V2f i = ( V2f( p ) + V2f( 0.5f ) ) / ratio + offset;
 
 	support = Box2i(
 		V2i( ceilf( i.x - 0.5f - filterRadius.x ), ceilf( i.y - 0.5f - filterRadius.y ) ),
@@ -308,7 +308,7 @@ void filterWeights2D( const OIIO::Filter2D *filter, const V2f inputFilterScale, 
 
 	for( int fY = support.min.y; fY < support.max.y; ++fY )
 	{
-		const float fy = filterCoordinateMult.y * ( float( fY ) + 0.5 - i.y );
+		const float fy = filterCoordinateMult.y * ( float( fY ) + 0.5f - i.y );
 		for( int fX = support.min.x; fX < support.max.x; ++fX )
 		{
 			const float fx = filterCoordinateMult.x * ( float( fX ) + 0.5f - i.x );
@@ -1554,6 +1554,15 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 			{
 				supportOffset = oP - tileBound.min;
 			}
+
+			// Assert all our accesses are in bounds
+			assert(
+				support.min.x + supportOffset.x >= inputOrigin.x &&
+				support.min.y + supportOffset.y >= inputOrigin.y &&
+				support.max.x + supportOffset.x <= inputOrigin.x + inputSize.x &&
+				support.max.y + supportOffset.y <= inputOrigin.y + inputSize.y
+			);
+
 			Canceller::check( context->canceller() );
 
 			contributingPixels.resize( weights.size() );
@@ -1850,7 +1859,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 
 			for( oP.y = tileBound.min.y; oP.y < tileBound.max.y; ++oP.y )
 			{
-				iPy = floorf( ( oP.y + 0.5 ) / ratio.y + offset.y );
+				iPy = floorf( ( oP.y + 0.5f ) / ratio.y + offset.y );
 				std::vector<int>::const_iterator iPxIt = iPx.begin();
 
 				Canceller::check( context->canceller() );
@@ -1990,7 +1999,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 
 		for( oP.y = tileBound.min.y; oP.y < tileBound.max.y; ++oP.y )
 		{
-			iP.y = ( oP.y + 0.5 ) / ratio.y + offset.y;
+			iP.y = ( oP.y + 0.5f ) / ratio.y + offset.y;
 			int minY = ceilf( iP.y - 0.5f - filterRadius.y );
 			int maxY = floorf( iP.y + 0.5f + filterRadius.y );
 
@@ -1998,7 +2007,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 			{
 				Canceller::check( context->canceller() );
 
-				iP.x = ( oP.x + 0.5 ) / ratio.x + offset.x;
+				iP.x = ( oP.x + 0.5f ) / ratio.x + offset.x;
 
 				int minX = ceilf( iP.x - 0.5f - filterRadius.x );
 				int maxX = floorf( iP.x + 0.5f + filterRadius.x );
@@ -2265,7 +2274,7 @@ IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets( const Imath::V2i &
 	int sampleOffset = 0;
 	for( oP.y = tileBound.min.y; oP.y < tileBound.max.y; ++oP.y )
 	{
-		iPy = floorf( ( oP.y + 0.5 ) / ratio.y + offset.y );
+		iPy = floorf( ( oP.y + 0.5f ) / ratio.y + offset.y );
 		std::vector<int>::const_iterator iPxIt = iPx.begin();
 
 		Canceller::check( context->canceller() );

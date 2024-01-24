@@ -557,26 +557,26 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 			testImageCentered["offset"].setValue( -image.dataWindow().center() )
 
 			# Test a variety of operations
-			for scale, filter, filterScale in [
+			for scale, offset, filter, filterScale in [
 				# Test an upscale using the simple but inaccurate nearest mode
-				( 1.6, "nearest", 0.0 ),
+				( 1.6, 0, "nearest", 0.0 ),
 
 				# Results in kernel of [ 0.333333, 1, 0.333333 ]
 				# Only samples 9 pixels, moderate weights, reasonable for basic tests
-				( 1, "triangle", 1.5 ),
+				( 1, 0, "triangle", 1.5 ),
 
 				# Test a moderate upscale
-				( 1.5, "triangle", 1.5 ),
+				( 1.5, 0, "triangle", 1.5 ),
 
-				# Test a downscale
-				( 0.4, "triangle", 1.5 ),
+				# Test a downscale ( chosen to exercise some weird behaviour at floating point boundaries )
+				( 0.48, 32, "triangle", 1.5 ),
 
 				# Results in kernel of [ 5.99688e-05, 0.21747, 1, 0.21747, 5.99688e-05 ]
 				# Wide, with some tiny filter weights
-				( 1, "blackman-harris", 1.3333334 ),
+				( 1, 0, "blackman-harris", 1.3333334 ),
 			]:
 
-				deepResample["matrix"].setValue( imath.M33f( ( scale, 0, 0 ), ( 0, scale, 0 ), ( 0, 0, 1 ) ) )
+				deepResample["matrix"].setValue( imath.M33f( ( scale, 0, 0 ), ( 0, scale, 0 ), ( offset, offset, 1 ) ) )
 				deepResample["filter"].setValue( filter )
 				deepResample["filterScale"].setValue( imath.V2f( filterScale ) )
 
