@@ -567,20 +567,6 @@ int linearCombineSampledPixels(
 	std::vector< int > *contributionCounts, std::vector< ContributionElement > *contributionElements
 )
 {
-	for( const float &f : weights )
-	{
-		if( f < 0.0f )
-		{
-			throw IECore::Exception( fmt::format(
-				"Filters with negative lobes not supported. Please choose a different filter. "
-				"Negative lobes when filtering deep images are ill-defined because negative alphas "
-				"are not alloweod by the deep EXR spec. If you have a use case where a partially "
-				"correct result would be really helpful here, let us know. Offending filter weight "
-				"is {}.", f
-			) );
-		}
-	}
-
 	const unsigned int numSources = sources.size();
 
 	unsigned int totalSamplesToProcess = 0;
@@ -600,6 +586,17 @@ int linearCombineSampledPixels(
 	// source, so we can quickly find the minimum to know the next thing to output.
 	std::vector<float> sourceNextMandatory( numSources, std::numeric_limits<float>::infinity() );
 
+	// terminateAccumAlpha holds the final accumulated alpha value for this pixel. It is used in
+	// the case of negative lobes to store the value we can never go over. With negative lobes,
+	// it is possible for the true filtered alpha value to go over the final value, and then back
+	// down to it - which we can't do in our output, because a deep alpha must be non-decreasing
+	// in depth. Instead, we stop as soon as we go over the final value, clamp to the final alpha,
+	// and then combine all contributions into that final segment - which results in something
+	// that sums up properly to the final value, even though it omits the part of the curve that
+	// overshoots.
+	double terminateAccumAlpha = 0.0f;
+	bool hasNegativeWeights = false;
+
 	for( unsigned int i = 0; i < numSources; i++ )
 	{
 		if( sources[i]->size() )
@@ -607,7 +604,28 @@ int linearCombineSampledPixels(
 			sourceNextSample[i] = (*sources[i])[0].depth;
 			sourceNextMandatory[i] = (*sources[i])[0].depth;
 			totalSamplesToProcess += sources[i]->size();
+			hasNegativeWeights |= weights[i] < 0.0f;
+			terminateAccumAlpha += ( (double)sources[i]->back().accumAlpha ) * weights[i];
 		}
+	}
+
+	terminateAccumAlpha = std::min( terminateAccumAlpha, 1.0 );
+
+	if( !hasNegativeWeights )
+	{
+		// If we have no negative weights, then we don't need to worry about prematurely going over the
+		// final alpha, before subtracting back down to it. The only way the terminateAccumAlpha
+		// conditional could trip is due to floating point precision issues ... to avoid that, just
+		// set it to something that won't trip prematurely.
+		terminateAccumAlpha = 1.0;
+	}
+
+	if( terminateAccumAlpha < 0.0 )
+	{
+		// Our rule for dealing with negative lobes is that contributions in areas where the curve is decreasing
+		// will be buffered and output once the curve goes positive again. If the curve never goes positive,
+		// we don't output anything.
+		return 0;
 	}
 
 	std::vector<int> sourceIndex( numSources, -1 );
@@ -618,9 +636,11 @@ int linearCombineSampledPixels(
 	float prevDepth = std::numeric_limits<float>::infinity();
 	int numSegments = 0;
 
+	int contributionCount = 0;
+
 	unsigned int totalSamplesDone = 0;
 	unsigned int prevTotalSamplesDone = 0;
-	while( totalSamplesDone < totalSamplesToProcess && totalAccumAlpha < 1.0f )
+	while( totalSamplesDone < totalSamplesToProcess && totalAccumAlpha < terminateAccumAlpha )
 	{
 		// The depth we output something at is the minimum depth required by any source
 		float outputDepth = std::numeric_limits<float>::infinity();
@@ -636,13 +656,6 @@ int linearCombineSampledPixels(
 		// up to the current depth, and then we can output a point sample here before we go back to outputting
 		// volume samples.
 		bool segmentIsVolume = numVolumeSegmentsOpen > 0 && !( outputDepth == prevDepth );
-
-		// If the only samples we find at this depth are Start samples, there's nothing that needs to be
-		// output here - we just need the samples so that prevDepth will be accurate when we find the
-		// next samples in the volume segment.
-		bool onlyStarts = true;
-
-		int contributionCount = 0;
 
 		// Now loop through our sources, and take any samples that match this depth.
 		for( unsigned int i = 0; i < numSources; i++ )
@@ -701,8 +714,6 @@ int linearCombineSampledPixels(
 
 			if( curSamples[curIndex].type != DepthSampleStart )
 			{
-				onlyStarts = false;
-
 				// Rather than keeping a running sum, it would be a bit simpler to reason about this if
 				// we just summed sources[i][sourceIndex[i]] * weights[i] for all i after each segment.
 				// The performance cost of doing that is not actually noticeable, however it seems that
@@ -733,7 +744,7 @@ int linearCombineSampledPixels(
 						// combining these two segments into one ... this is not part of the standard definition
 						// of "tidy" however.
 						contributionCount++;
-						float skippedContribution = curSamples[curIndex-1].linearContribution / ( 1.0f - prevTotalAccumAlpha );
+						float skippedContribution = curSamples[curIndex-1].linearContribution / ( 1.0 - prevTotalAccumAlpha );
 						contributionElements->push_back( ContributionElement {
 							(int)i, sourceSourceIndex[i], weights[i] * skippedContribution
 						} );
@@ -753,7 +764,7 @@ int linearCombineSampledPixels(
 					}
 					float linearContribution =
 						( curSamples[curIndex].linearContribution - prevContribution ) /
-						( 1.0f - prevTotalAccumAlpha );
+						( 1.0 - prevTotalAccumAlpha );
 
 					assert( linearContribution >= 0.0f );
 
@@ -809,8 +820,14 @@ int linearCombineSampledPixels(
 			}
 		}
 
-		// We've processed all the sources at this depth, now we can actually output a segment
-		if( !onlyStarts )
+		// We've processed all the sources at this depth, now we can actually consider outputting a segment.
+		// There are two cases where we don't output a segment, because the totalAccumAlpha has not increased:
+		// * we might have processed just samples of type DepthSampleStart, which are just there to get the
+		//   depth correct, and don't add any contribution.
+		// * if there are negative lobes, we might have had contributions which lowered the alpha. In this
+		//   case, we buffer up those contributions, and don't output them until the alpha goes back up above
+		//   the last valid prevTotalAccumAlpha
+		if( totalAccumAlpha >= prevTotalAccumAlpha )
 		{
 			// For volume segments, the segment starts at the last depth we processed, for point samples,
 			// it starts right her.
@@ -819,15 +836,11 @@ int linearCombineSampledPixels(
 				prevDepth = outputDepth;
 			}
 
-			if( totalAccumAlpha > 1.0f )
-			{
-				// We don't want floating point error to result in this going over 1.0 and making everything wonky
-				totalAccumAlpha = 1.0f;
-			}
+			const double segmentEndAccumAlpha = std::min( totalAccumAlpha, terminateAccumAlpha );
 
-			// The totalAccumAlpha is accumulated additively. We need to convert that into a multiplicative
+			// The accumAlpha is accumulated additively. We need to convert that into a multiplicative
 			// alpha that will composite properly.
-			float segmentAlpha = ( totalAccumAlpha - prevTotalAccumAlpha ) / ( 1 - prevTotalAccumAlpha );
+			float segmentAlpha = ( segmentEndAccumAlpha - prevTotalAccumAlpha ) / ( 1.0 - prevTotalAccumAlpha );
 
 			// Add a value to each of our hardcode output channels
 			outputAlpha.push_back( segmentAlpha );
@@ -839,11 +852,18 @@ int linearCombineSampledPixels(
 			if( contributionCounts )
 			{
 				contributionCounts->push_back( contributionCount );
+				contributionCount = 0;
 			}
 
 			numSegments++;
 
-			prevTotalAccumAlpha = totalAccumAlpha;
+			if( totalAccumAlpha < terminateAccumAlpha )
+			{
+				// If we have more segments left to output, update prevTotalAccumAlpha to be ready for the
+				// next segment. Otherwise, keep the value, so we can use it if we need to cram a few more
+				// samples into the last segment in the final part of this function.
+				prevTotalAccumAlpha = totalAccumAlpha;
+			}
 		}
 
 		// Ready for next loop
@@ -862,6 +882,70 @@ int linearCombineSampledPixels(
 			);
 		}
 		prevTotalSamplesDone = totalSamplesDone;
+	}
+
+	// Negative filter lobes may cause us to terminate the depth traversal prematurely, because the
+	// curve tries to go over the final alpha and then back down. In this case, we stop the traversal
+	// when we first reach the final alpha, and then cram all remaining contributions into that final
+	// segment, which should yield a correct final accumulated value.
+	if( totalSamplesDone < totalSamplesToProcess && contributionElements && prevTotalAccumAlpha < 1.0 )
+	{
+		for( unsigned int i = 0; i < numSources; i++ )
+		{
+			const std::vector<SampledDepth> &curSamples = (*sources[i]);
+
+			// The first segment may be the second half of a volume segment, which is more complex.
+			// After the first segment, we only output full segments during termination.
+			bool firstSegment = true;
+
+			for( int curIndex = sourceIndex[i] + 1; curIndex < (int)curSamples.size(); curIndex++ )
+			{
+				// We don't need to consider partial contributions while cramming in the remaining
+				// contributions - we only take complete contribution represented by Point or End
+				// samples.
+				if( curSamples[curIndex].type == DepthSamplePoint || curSamples[curIndex].type == DepthSampleEnd )
+				{
+					float linearContribution = 0.0f;
+					// The first contribution segment we find may be the end of a segment which we've already
+					// output some interpolated segments from, in which case we need to subtract that.
+					if( firstSegment && curSamples[curIndex].type == DepthSampleEnd && sourceIndex[i] >= 0 && curSamples[sourceIndex[i]].type >= DepthSampleInterpolated )
+					{
+						float prevContribution = curSamples[sourceIndex[i]].linearContribution;
+						linearContribution =
+							( curSamples[curIndex].linearContribution - prevContribution ) /
+							( 1.0f - prevTotalAccumAlpha );
+					}
+					else
+					{
+						linearContribution = curSamples[curIndex].linearContribution / ( 1.0 - prevTotalAccumAlpha );
+					}
+
+					// Add to the list of contributions
+					contributionCount++;
+					contributionElements->push_back( ContributionElement {
+						(int)i, sourceSourceIndex[i], weights[i] * linearContribution
+					} );
+
+					sourceSourceIndex[i]++;
+					firstSegment = false;
+				}
+			}
+		}
+	}
+
+	if( contributionCounts && numSegments )
+	{
+		// Any contributions that haven't been output yet are getting tacked on to the last segment.
+		contributionCounts->back() += contributionCount;
+	}
+	else if( contributionElements && contributionCount )
+	{
+		// I don't think this should ever trigger - if there are contributions left over, and
+		// terminateAccumAlpha is >= 0, so that we didn't early exit, then there should be at least
+		// one segment output, and we'll take the branch above. But just in case there's somehow
+		// some floating point precision issue where we somehow don't output any segments, it feels
+		// safer to discard the unused contributions.
+		contributionElements->resize( contributionElements->size() - contributionCount );
 	}
 
 	return numSegments;

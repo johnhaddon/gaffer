@@ -473,6 +473,21 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 		flatResample["filter"].setInput( deepResample["filter"] )
 		flatResample["filterScale"].setInput( deepResample["filterScale"] )
 
+		flatResampleIsolateNegative = GafferImage.Grade()
+		flatResampleIsolateNegative["in"].setInput( flatResample["out"] )
+		flatResampleIsolateNegative["channels"].setValue( '[A]' )
+		flatResampleIsolateNegative["whitePoint"]["a"].setValue( -1e-10 )
+		flatResampleIsolateNegative["whiteClamp"].setValue( True )
+
+		flatResampleRemoveNegative = GafferImage.Mix()
+		flatResampleRemoveNegative["in"][0].setInput( flatResample["out"] )
+		flatResampleRemoveNegative["mask"].setInput( flatResampleIsolateNegative["out"] )
+
+		flatResampleForceRange = GafferImage.Grade()
+		flatResampleForceRange["in"].setInput( flatResampleRemoveNegative["out"] )
+		flatResampleForceRange["channels"].setValue( '[A]' )
+		flatResampleForceRange["whiteClamp"].setValue( True )
+
 		sliceAfter = GafferImage.DeepSlice()
 		sliceAfter["in"].setInput( deepResample["out"] )
 		sliceAfter["farClip"]["enabled"].setValue( True )
@@ -571,9 +586,10 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 				# Test a downscale ( chosen to exercise some weird behaviour at floating point boundaries )
 				( 0.48, 32, "triangle", 1.5 ),
 
-				# Results in kernel of [ 5.99688e-05, 0.21747, 1, 0.21747, 5.99688e-05 ]
-				# Wide, with some tiny filter weights
-				( 1, 0, "blackman-harris", 1.3333334 ),
+				# An aggressive sharpening filter with negative lobes. Intended to test the sort of thing
+				# we use for downsampling, though scaled down to reduce runtime.
+				# Results in kernel of [ 0.0243171, -0.132871, 1, -0.132871, 0.0243171 ]
+				( 1, 0, "lanczos3", 0.8 ),
 			]:
 
 				deepResample["matrix"].setValue( imath.M33f( ( scale, 0, 0 ), ( 0, scale, 0 ), ( offset, offset, 1 ) ) )
@@ -583,7 +599,26 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 				with self.subTest( scale = scale, filter = filter, filterScale = filterScale, name = image.node().getName() ) :
 					# Most basic test - flattening the resampled deep should have the same result as
 					# flattening and then resampling.
-					self.assertImagesEqual( flattenAfter["out"], flatResample["out"], maxDifference = 6e-6 )
+					if filter != "lanczos3":
+						self.assertImagesEqual( flattenAfter["out"], flatResample["out"], maxDifference = 6e-6 )
+					else:
+						# A filter with negative lobes makes this test a bit more complicated. We need to compare
+						# to a reference that has its alpha forced into a valid range ( by discarding pixels
+						# with alpha < 0, and clamping pixels with alpha > 1 ).
+						#
+						# The negative lobes also result in alphas over 1, which makes the numerical precision
+						# for the RGB channels much trickier - it's possible to reach an alpha of 1 before all
+						# contributions are accounted for, which means that all remaining contributions must
+						# be crammed into the last segment in order preserve the final result ... if the last
+						# segment has low visibility, we end up having to put extremely high RGB values in
+						# the last segment, resulting in poor precision. We could be a bit more specific in
+						# this test about where this poor precision happens, but currently we just use a large
+						# tolerance for everything.
+						self.assertImagesEqual(
+							flattenAfter["out"],
+							flatResampleForceRange["out"],
+							maxDifference = 5e-4
+						)
 
 					# Our output should always be tidy already
 					self.assertImagesEqual( tidyAfterResample["out"], deepResample["out"] )
@@ -596,6 +631,19 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 					#
 					# Since some of our tests have samples at integer depths, test specifically in the neighbourhood
 					# of integer depths, then test at a bunch of random depths as well
+
+					if filter == "lanczos3":
+						# When using a filter with negative lobes, we need shift contributions in depth, because
+						# we can only output valid deep segments where alpha is between 0 and 1. This requires
+						# shifting contributions from negative areas backwards to the next positive part of the
+						# curve, and shifting contributions from areas over one forwards to the segment where
+						# it first reaches one. This means our depth based tests don't apply here, but we
+						# we have validated that the negative lobed filter reaches the correct end value,
+						# and in visual inspection, the results at various depths are reasonable, even though
+						# it would be impossible to produce perfectly accurate results for negative lobes
+						# ( since deep alpha must be non-decreasing ).
+						continue
+
 					for depth in (
 						[ i + o for i in range( zStart, zEnd + 1) for o in [ -5e-7, 0, 5e-7 ] ] +
 						[ random.uniform( zStart, zEnd ) for i in range( 10 ) ]
@@ -771,21 +819,6 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 				with self.subTest( source = source, target = target ) :
 					self.assertImagesEqual( deepResample["out"], postTidy["out"] )
 					self.assertImagesEqual( ignoredChannelsA["out"], ignoredChannelsB["out"], maxDifference = maxDiff )
-
-	def testDeepInvalid( self ):
-
-		representativeDeepImage = GafferImage.ImageReader()
-		representativeDeepImage["fileName"].setValue( self.representativeDeepImagePath )
-
-		deepResample = GafferImage.Resample()
-		deepResample["in"].setInput( representativeDeepImage["out"] )
-		deepResample["expandDataWindow"].setValue( True )
-		deepResample["filter"].setValue( "lanczos3" )
-		deepResample["filterScale"].setValue( imath.V2f( 0.75 ) )
-		deepResample["filterDeep"].setValue( True )
-
-		with self.assertRaisesRegex( RuntimeError, 'Resample.__deepResampleData : Filters with negative lobes not supported.* Offending filter weight is -0.0034299165.' ):
-			GafferImage.ImageAlgo.tiles( deepResample["out"] )
 
 	@GafferTest.TestRunner.PerformanceTestMethod( repeat = 3 )
 	def testDeepPerformance( self ) :
