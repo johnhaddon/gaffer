@@ -299,7 +299,7 @@ void nearestInputPixelX( const int x, const float ratio, const float offset, std
 
 	for( int oX = x, eX = x + ImagePlug::tileSize(); oX < eX; ++oX )
 	{
-		result.push_back( floorf( ( oX + 0.5 ) / ratio + offset ) );
+		result.push_back( floorf( ( oX + 0.5f ) / ratio + offset ) );
 	}
 }
 
@@ -548,20 +548,23 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 	FlatImageProcessor::hashChannelData( parent, context, h );
 
 	V2f ratio, offset;
-	std::string filterName;
-	V2f filterScale;
+
+	V2f inputFilterScale;
+	const OIIO::Filter2D *filter;
+
 	Sampler::BoundingMode boundingMode;
 	{
 		ImagePlug::GlobalScope c( context );
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
-		filterName = filterPlug()->getValue();
-		filterScale = filterScalePlug()->getValue();
+
+		const std::string filterName = filterPlug()->getValue();
+		const V2f filterScale = filterScalePlug()->getValue();
+
+		filter = filterAndScale( filterName, ratio, inputFilterScale );
+		inputFilterScale *= filterScale;
+
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
 	}
-
-	V2f inputFilterScale;
-	const OIIO::Filter2D *filter = filterAndScale( filterName, ratio, inputFilterScale );
-	inputFilterScale *= filterScale;
 
 	filterPlug()->hash( h );
 
@@ -606,20 +609,21 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
 {
 	V2f ratio, offset;
-	std::string filterName;
-	V2f filterScale;
+	V2f inputFilterScale;
+	const OIIO::Filter2D *filter;
 	Sampler::BoundingMode boundingMode;
 	{
 		ImagePlug::GlobalScope c( context );
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
-		filterName = filterPlug()->getValue();
-		filterScale = filterScalePlug()->getValue();
+
+		const std::string filterName = filterPlug()->getValue();
+		const V2f filterScale = filterScalePlug()->getValue();
+
+		filter = filterAndScale( filterName, ratio, inputFilterScale );
+		inputFilterScale *= filterScale;
+
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
 	}
-
-	V2f inputFilterScale;
-	const OIIO::Filter2D *filter = filterAndScale( filterName, ratio, inputFilterScale );
-	inputFilterScale *= filterScale;
 
 	Passes passes = requiredPasses( this, parent, filter, ratio );
 	Box2i ir = inputRegion( tileOrigin, passes, ratio, offset, filter, inputFilterScale );
@@ -650,7 +654,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 
 		for( oP.y = tileBound.min.y; oP.y < tileBound.max.y; ++oP.y )
 		{
-			iPy = floorf( ( oP.y + 0.5 ) / ratio.y + offset.y );
+			iPy = floorf( ( oP.y + 0.5f ) / ratio.y + offset.y );
 			std::vector<int>::const_iterator iPxIt = iPx.begin();
 
 			Canceller::check( context->canceller() );
