@@ -440,7 +440,7 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 		allCombinedUpsize["in"].setInput( allCombined["out"] )
 		allCombinedUpsize["format"].setValue( GafferImage.Format( 128, 128, 1.000 ) )
 		allCombinedUpsize["filter"].setValue( 'box' )
-		allCombinedUpsize["deepMode"].setValue( GafferImage.Resample.DeepMode.Accurate )
+		allCombinedUpsize["filterDeep"].setValue( True )
 
 		rgbError = GafferImage.ImageReader( "deepResampleRGBError" )
 		rgbError["fileName"].setValue( self.deepResampleRGBErrorPath )
@@ -450,7 +450,7 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 		deepResample = GafferImage.Resample()
 		deepResample["in"].setInput( testImageCentered["out"] )
 		deepResample["expandDataWindow"].setValue( True )
-		deepResample["deepMode"].setValue( GafferImage.Resample.DeepMode.Accurate )
+		deepResample["filterDeep"].setValue( True )
 
 		tidyAfterResample = GafferImage.DeepTidy()
 		tidyAfterResample["in"].setInput( deepResample["out"] )
@@ -715,7 +715,7 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 		deepResample["in"].setInput( centered["out"] )
 		deepResample["filter"].setValue( "triangle" )
 		deepResample["filterScale"].setValue( imath.V2f( 1.5 ) )
-		deepResample["deepMode"].setValue( GafferImage.Resample.DeepMode.Accurate )
+		deepResample["filterDeep"].setValue( True )
 
 		postTidy = GafferImage.DeepTidy()
 		postTidy["in"].setInput( deepResample["out"] )
@@ -787,7 +787,7 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 		deepResample["expandDataWindow"].setValue( True )
 		deepResample["filter"].setValue( "lanczos3" )
 		deepResample["filterScale"].setValue( imath.V2f( 0.75 ) )
-		deepResample["deepMode"].setValue( GafferImage.Resample.DeepMode.Accurate )
+		deepResample["filterDeep"].setValue( True )
 
 		with self.assertRaisesRegex( RuntimeError, 'Resample.__deepResampleData : Filters with negative lobes not supported.* Offending filter weight is -0.0034299165.' ):
 			GafferImage.ImageAlgo.tiles( deepResample["out"] )
@@ -802,7 +802,7 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 		resample["in"].setInput( imageReader["out"] )
 		resample["filter"].setValue( 'box' )
 		resample["filterScale"].setValue( imath.V2f( 3.0 ) )
-		resample["deepMode"].setValue( GafferImage.Resample.DeepMode.Accurate )
+		resample["filterDeep"].setValue( True )
 
 		GafferImageTest.processTiles( imageReader["out"] )
 
@@ -824,7 +824,7 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 		resample["in"].setInput( deleteChannels["out"] )
 		resample["filter"].setValue( 'box' )
 		resample["filterScale"].setValue( imath.V2f( 3.0 ) )
-		resample["deepMode"].setValue( GafferImage.Resample.DeepMode.Accurate )
+		resample["filterDeep"].setValue( True )
 
 		GafferImageTest.processTiles( deleteChannels["out"] )
 

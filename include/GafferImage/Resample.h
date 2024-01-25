@@ -72,13 +72,6 @@ class GAFFERIMAGE_API Resample : public ImageProcessor
 			SinglePass
 		};
 
-		enum class DeepMode
-		{
-			Accurate,
-			ForceNearest,
-			ErrorIfSlow
-		};
-
 		/// Atomic plug, since values for this will most
 		/// commonly be computed by a wrapping class, rather
 		/// than set directly by a user. Input matrices must
@@ -101,8 +94,8 @@ class GAFFERIMAGE_API Resample : public ImageProcessor
 		Gaffer::IntPlug *debugPlug();
 		const Gaffer::IntPlug *debugPlug() const;
 
-		Gaffer::IntPlug *deepModePlug();
-		const Gaffer::IntPlug *deepModePlug() const;
+		Gaffer::BoolPlug *filterDeepPlug();
+		const Gaffer::BoolPlug *filterDeepPlug() const;
 
 		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 

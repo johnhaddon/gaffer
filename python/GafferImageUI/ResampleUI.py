@@ -141,27 +141,19 @@ Gaffer.Metadata.registerNode(
 
 		],
 
-		"deepMode" : [
-
+		"filterDeep" : [
 
 			"description",
 			"""
-			Controls what happens if you try to filter a deep image.
-			Accurately filtering deep images is very slow and produces
-			results that are impractically large to save to disk.
-			The options are Accurate, which does the very large and slow
-			filtering option, Force Nearest, which always uses the filter
-			"nearest" if the input is deep, and Error If Slow, which just
-			throws an error if the input is deep and the filter is not
-			nearest ( signalling to the user that they must make a choice
-			between getting an inaccurate result or an extremely slow one ).
+			By default, we use a nearest filter for deep images, because
+			accurately filtering deeps can be extremely expensive, and
+			produces images that are too large to store on disk. If you
+			know what you're doing, turn this on to do accurate filtering
+			( the only manageable use case is probably if you immediately
+			do a merge or holdout after resampling, so the a minimum
+			amount of processing needs to happen to the huge data of the
+			resampled deep ).
 			""",
-
-			"preset:Accurate", GafferImage.Resample.DeepMode.Accurate,
-			"preset:Force Nearest", GafferImage.Resample.DeepMode.ForceNearest,
-			"preset:Error If Slow", GafferImage.Resample.DeepMode.ErrorIfSlow,
-
-			"plugValueWidget:type", "GafferUI.PresetsPlugValueWidget",
 
 		],
 

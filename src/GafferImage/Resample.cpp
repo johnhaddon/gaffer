@@ -186,23 +186,13 @@ Box2i inputRegion( const V2i &tileOrigin, unsigned passes, const V2f &ratio, con
 
 // Given a filter name, the current scaling ratio of input size / output size, and the desired filter scale in
 // output space, return a filter and the correct filter scale in input space
-const OIIO::Filter2D *filterAndScale( const std::string &name, V2f ratio, bool deep, Resample::DeepMode deepMode, V2f &inputFilterScale )
+const OIIO::Filter2D *filterAndScale( const std::string &name, V2f ratio, V2f &inputFilterScale )
 {
 	ratio.x = fabs( ratio.x );
 	ratio.y = fabs( ratio.y );
 
-	if( deep && deepMode == Resample::DeepMode::ErrorIfSlow && name != g_nearestString )
-	{
-		throw IECore::Exception(
-			"Accurately filtering deep images is very slow and produces results that are impractically large "
-			"to save to disk. We recommend switching to the filter \"nearest\", using a more efficient "
-			"approach we haven't implemented yet, or if you know what you're doing, and want a fully "
-			"filtered result, set \"deepMode\" to \"Accurate\"."
-		);
-	}
-
 	const OIIO::Filter2D *result;
-	if( name == g_nearestString || ( deep && deepMode == Resample::DeepMode::ForceNearest ) )
+	if( name == g_nearestString )
 	{
 		inputFilterScale = V2f( 0 );
 		return nullptr;
@@ -987,7 +977,7 @@ Resample::Resample( const std::string &name )
 	addChild( new IntPlug( "boundingMode", Plug::In, Sampler::Black, Sampler::Black, Sampler::Clamp ) );
 	addChild( new BoolPlug( "expandDataWindow" ) );
 	addChild( new IntPlug( "debug", Plug::In, Off, Off, SinglePass ) );
-	addChild( new IntPlug( "deepMode", Plug::In, (int)DeepMode::ForceNearest, (int)DeepMode::Accurate, (int)DeepMode::ErrorIfSlow ) );
+	addChild( new BoolPlug( "filterDeep" ) );
 	addChild( new ImagePlug( "__horizontalPass", Plug::Out ) );
 	addChild( new ImagePlug( "__tidyIn", Plug::In, Plug::Default & ~Plug::Serialisable ) );
 	addChild( new ObjectPlug( "__deepResampleData", Gaffer::Plug::Out, IECore::NullObject::defaultNullObject() ) );
@@ -1078,14 +1068,14 @@ const Gaffer::IntPlug *Resample::debugPlug() const
 	return getChild<IntPlug>( g_firstPlugIndex + 5 );
 }
 
-Gaffer::IntPlug *Resample::deepModePlug()
+Gaffer::BoolPlug *Resample::filterDeepPlug()
 {
-	return getChild<IntPlug>( g_firstPlugIndex + 6 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 6 );
 }
 
-const Gaffer::IntPlug *Resample::deepModePlug() const
+const Gaffer::BoolPlug *Resample::filterDeepPlug() const
 {
-	return getChild<IntPlug>( g_firstPlugIndex + 6 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 6 );
 }
 
 ImagePlug *Resample::horizontalPassPlug()
@@ -1143,7 +1133,7 @@ void Resample::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outpu
 		input == inPlug()->channelDataPlug() ||
 		input == boundingModePlug() ||
 		input == debugPlug() ||
-		input == deepModePlug() ||
+		input == filterDeepPlug() ||
 		input == inPlug()->deepPlug() ||
 		input == deepResampleDataPlug()
 	)
@@ -1172,7 +1162,7 @@ void Resample::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outpu
 		input == matrixPlug() ||
 		input == filterPlug() ||
 		input == boundingModePlug() ||
-		input == deepModePlug() ||
+		input == filterDeepPlug() ||
 		input == inPlug()->deepPlug()
 	)
 	{
@@ -1195,18 +1185,19 @@ void Resample::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *con
 	V2f filterScale;
 	std::string filterName;
 
+	V2f inputFilterScale( 0 );
+	const OIIO::Filter2D *filter = nullptr;
+
 	{
 		ImagePlug::GlobalScope s( context );
 		channelNamesData = inPlug()->channelNamesPlug()->getValue();
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
-		filterName = filterPlug()->getValue();
-		filterScale = filterScalePlug()->getValue();
-	}
 
-	V2f inputFilterScale;
-	const OIIO::Filter2D *filter = filterAndScale( filterName, ratio, true, DeepMode::Accurate, inputFilterScale );
-	inputFilterScale *= filterScale;
+		const std::string filterName = filterPlug()->getValue();
+		filter = filterAndScale( filterName, ratio, inputFilterScale );
+		inputFilterScale *= filterScalePlug()->getValue();
+	}
 
 	filterPlug()->hash( h );
 	h.append( inputFilterScale );
@@ -1285,21 +1276,20 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 	ConstStringVectorDataPtr channelNamesData;
 	V2f ratio, offset;
 	Sampler::BoundingMode boundingMode;
-	std::string filterName;
-	V2f filterScale;
+
+	V2f inputFilterScale(0);
+	const OIIO::Filter2D *filter = nullptr;
 
 	{
 		ImagePlug::GlobalScope s( context );
 		channelNamesData = inPlug()->channelNamesPlug()->getValue();
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
-		filterName = filterPlug()->getValue();
-		filterScale = filterScalePlug()->getValue();
-	}
 
-	V2f inputFilterScale;
-	const OIIO::Filter2D *filter = filterAndScale( filterName, ratio, true, DeepMode::Accurate, inputFilterScale );
-	inputFilterScale *= filterScale;
+		const std::string filterName = filterPlug()->getValue();
+		filter = filterAndScale( filterName, ratio, inputFilterScale );
+		inputFilterScale *= filterScalePlug()->getValue();
+	}
 
 	const V2i tileOrigin = context->get<V2i>( ImagePlug::tileOriginContextName );
 	Box2i ir = inputRegion( tileOrigin, Both, ratio, offset, filter, inputFilterScale );
@@ -1636,7 +1626,7 @@ void Resample::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffe
 	expandDataWindowPlug()->hash( h );
 	filterPlug()->hash( h );
 	filterScalePlug()->hash( h );
-	deepModePlug()->hash( h );
+	filterDeepPlug()->hash( h );
 	debugPlug()->hash( h );
 }
 
@@ -1659,13 +1649,14 @@ Imath::Box2i Resample::computeDataWindow( const Gaffer::Context *context, const 
 		V2f ratio, offset;
 		ratioAndOffset( matrix, ratio, offset );
 
-		V2f inputFilterScale;
-		const OIIO::Filter2D *filter = filterAndScale(
-			filterPlug()->getValue(), ratio,
-			inPlug()->deepPlug()->getValue(), (DeepMode)deepModePlug()->getValue(),
-			inputFilterScale
-		);
-		inputFilterScale *= filterScalePlug()->getValue();
+		V2f inputFilterScale( 0 );
+		const OIIO::Filter2D *filter = nullptr;
+
+		if( filterDeepPlug()->getValue() || !inPlug()->deepPlug()->getValue() )
+		{
+			filter = filterAndScale( filterPlug()->getValue(), ratio, inputFilterScale );
+			inputFilterScale *= filterScalePlug()->getValue();
+		}
 
 		const V2f filterRadius = filter ? V2f( filter->width(), filter->height() ) * inputFilterScale * 0.5f : V2f( 0.0f );
 
@@ -1715,26 +1706,24 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 {
 	ImageProcessor::hashChannelData( parent, context, h );
 
-
-	bool deep;
-	DeepMode deepMode;
 	V2f ratio, offset;
 
-	V2f inputFilterScale;
-	const OIIO::Filter2D *filter;
+	V2f inputFilterScale( 0 );
+	const OIIO::Filter2D *filter = nullptr;
+	bool deep;
 
 	Sampler::BoundingMode boundingMode;
 	{
 		ImagePlug::GlobalScope c( context );
-		deep = inPlug()->deepPlug()->getValue();
-		deepMode = (DeepMode)deepModePlug()->getValue();
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
 
-		const std::string filterName = filterPlug()->getValue();
-		const V2f filterScale = filterScalePlug()->getValue();
-
-		filter = filterAndScale( filterName, ratio, deep, deepMode, inputFilterScale );
-		inputFilterScale *= filterScale;
+		deep = inPlug()->deepPlug()->getValue();
+		if( !deep || filterDeepPlug()->getValue() )
+		{
+			const std::string filterName = filterPlug()->getValue();
+			filter = filterAndScale( filterName, ratio, inputFilterScale );
+			inputFilterScale *= filterScalePlug()->getValue();
+		}
 
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
 	}
@@ -1810,23 +1799,22 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 
 IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	bool deep;
-	DeepMode deepMode;
 	V2f ratio, offset;
-	V2f inputFilterScale;
-	const OIIO::Filter2D *filter;
+	V2f inputFilterScale( 0 );
+	const OIIO::Filter2D *filter = nullptr;
+	bool deep;
 	Sampler::BoundingMode boundingMode;
 	{
 		ImagePlug::GlobalScope c( context );
-		deep = inPlug()->deepPlug()->getValue();
-		deepMode = (DeepMode)deepModePlug()->getValue();
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
 
-		const std::string filterName = filterPlug()->getValue();
-		const V2f filterScale = filterScalePlug()->getValue();
-
-		filter = filterAndScale( filterName, ratio, deep, deepMode, inputFilterScale );
-		inputFilterScale *= filterScale;
+		deep = inPlug()->deepPlug()->getValue();
+		if( !deep || filterDeepPlug()->getValue() )
+		{
+			const std::string filterName = filterPlug()->getValue();
+			filter = filterAndScale( filterName, ratio, inputFilterScale );
+			inputFilterScale *= filterScalePlug()->getValue();
+		}
 
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
 	}
@@ -2190,23 +2178,25 @@ void Resample::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Ga
 
 	ImageProcessor::hashSampleOffsets( parent, context, h );
 
-	bool deep;
-	DeepMode deepMode;
 	V2f ratio, offset;
-	std::string filterName;
-	V2f filterScale;
+
+	const OIIO::Filter2D *filter = nullptr;
+
 	Sampler::BoundingMode boundingMode;
 	{
 		ImagePlug::GlobalScope c( context );
-		deep = inPlug()->deepPlug()->getValue();
-		deepMode = (DeepMode)deepModePlug()->getValue();
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
-		filterName = filterPlug()->getValue();
+
+		if( filterDeepPlug()->getValue() || !inPlug()->deepPlug()->getValue() )
+		{
+			const std::string filterName = filterPlug()->getValue();
+			V2f inputFilterScaleUnused;
+			filter = filterAndScale( filterName, ratio, inputFilterScaleUnused );
+		}
+
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
 	}
 
-	V2f unusedInputFilterScale;
-	const OIIO::Filter2D *filter = filterAndScale( filterName, ratio, deep, deepMode, unusedInputFilterScale );
 
 	if( filter )
 	{
@@ -2230,23 +2220,22 @@ IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets( const Imath::V2i &
 		return ImagePlug::flatTileSampleOffsets();
 	}
 
-	bool deep;
-	DeepMode deepMode;
 	V2f ratio, offset;
-	std::string filterName;
-	V2f filterScale;
+	const OIIO::Filter2D *filter = nullptr;
 	Sampler::BoundingMode boundingMode;
 	{
 		ImagePlug::GlobalScope c( context );
-		deep = inPlug()->deepPlug()->getValue();
-		deepMode = (DeepMode)deepModePlug()->getValue();
 		ratioAndOffset( matrixPlug()->getValue(), ratio, offset );
-		filterName = filterPlug()->getValue();
+
+		if( filterDeepPlug()->getValue() || !inPlug()->deepPlug()->getValue() )
+		{
+			const std::string filterName = filterPlug()->getValue();
+			V2f inputFilterScaleUnused;
+			filter = filterAndScale( filterName, ratio, inputFilterScaleUnused );
+		}
+
 		boundingMode = (Sampler::BoundingMode)boundingModePlug()->getValue();
 	}
-
-	V2f unusedInputFilterScale;
-	const OIIO::Filter2D *filter = filterAndScale( filterName, ratio, deep, deepMode, unusedInputFilterScale );
 
 	if( filter )
 	{
