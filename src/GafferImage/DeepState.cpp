@@ -130,12 +130,12 @@ class SampleMerge
 
 				while( currentSampleId < offset )
 				{
-					float currentSampleZ = m_inZ[currentSampleId];
-					float currentSampleZBack = std::max( currentSampleZ, m_inZBack[currentSampleId] );
+					const float currentSampleZ = m_inZ[currentSampleId];
+					const float currentSampleZBack = std::max( currentSampleZ, m_inZBack[currentSampleId] );
 
 					if( m_openSamples.size() )
 					{
-						int lastOpen = m_openSamples.back();
+						const int lastOpen = m_openSamples.back();
 						// Check if we match the last already open sample, starting with Z
 						if( m_inZ[ lastOpen ] == currentSampleZ && (
 							// Now check if both ZBacks are valid and match
