@@ -80,8 +80,8 @@ class GAFFERIMAGE_API Resize : public ImageProcessor
 		Gaffer::StringPlug *filterPlug();
 		const Gaffer::StringPlug *filterPlug() const;
 
-		Gaffer::IntPlug *deepModePlug();
-		const Gaffer::IntPlug *deepModePlug() const;
+		Gaffer::BoolPlug *filterDeepPlug();
+		const Gaffer::BoolPlug *filterDeepPlug() const;
 
 		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 

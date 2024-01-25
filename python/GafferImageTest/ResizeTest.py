@@ -101,7 +101,7 @@ class ResizeTest( GafferImageTest.ImageTestCase ) :
 		resize = GafferImage.Resize()
 		resize["in"].setInput( representativeDeepImage["out"] )
 		resize["format"].setValue( GafferImage.Format( imath.Box2i( imath.V2i( 0 ), imath.V2i( 200 ) ), 1 ) )
-		resize["deepMode"].setValue( GafferImage.Resample.DeepMode.Accurate )
+		resize["filterDeep"].setValue( True )
 
 		flattenAfterResize = GafferImage.DeepToFlat()
 		flattenAfterResize["in"].setInput( resize["out"] )

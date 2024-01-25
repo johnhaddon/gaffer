@@ -57,7 +57,7 @@ Resize::Resize( const std::string &name )
 	addChild( new FormatPlug( "format" ) );
 	addChild( new IntPlug( "fitMode", Plug::In, Horizontal, Horizontal, Distort ) );
 	addChild( new StringPlug( "filter" ) );
-	addChild( new IntPlug( "deepMode", Plug::In, (int)Resample::DeepMode::ForceNearest, (int)Resample::DeepMode::Accurate, (int)Resample::DeepMode::ErrorIfSlow ) );
+	addChild( new BoolPlug( "filterDeep" ) );
 	addChild( new M33fPlug( "__matrix", Plug::Out ) );
 	addChild( new ImagePlug( "__resampledIn", Plug::In, Plug::Default & ~Plug::Serialisable ) );
 
@@ -71,7 +71,7 @@ Resize::Resize( const std::string &name )
 	resample->inPlug()->setInput( inPlug() );
 
 	resample->filterPlug()->setInput( filterPlug() );
-	resample->deepModePlug()->setInput( deepModePlug() );
+	resample->filterDeepPlug()->setInput( filterDeepPlug() );
 	resample->matrixPlug()->setInput( matrixPlug() );
 	resample->boundingModePlug()->setValue( Sampler::Clamp );
 
@@ -117,14 +117,14 @@ const Gaffer::StringPlug *Resize::filterPlug() const
 	return getChild<StringPlug>( g_firstPlugIndex + 2 );
 }
 
-Gaffer::IntPlug *Resize::deepModePlug()
+Gaffer::BoolPlug *Resize::filterDeepPlug()
 {
-	return getChild<IntPlug>( g_firstPlugIndex + 3 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 3 );
 }
 
-const Gaffer::IntPlug *Resize::deepModePlug() const
+const Gaffer::BoolPlug *Resize::filterDeepPlug() const
 {
-	return getChild<IntPlug>( g_firstPlugIndex + 3 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 3 );
 }
 
 Gaffer::M33fPlug *Resize::matrixPlug()
