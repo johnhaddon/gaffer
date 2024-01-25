@@ -770,12 +770,7 @@ class ResampleTest( GafferImageTest.ImageTestCase ) :
 
 				with self.subTest( source = source, target = target ) :
 					self.assertImagesEqual( deepResample["out"], postTidy["out"] )
-
-					# This particular test doesn't pass due to a fairly nasty bug in DeepState
-					# ( identical pixels flatten to different values depending on their position in the image ).
-					# Should probably look into that, but I'm supposed to be getting this PR up.
-					if not ( source == 'infinity' and target == 'ZBack' ):
-						self.assertImagesEqual( ignoredChannelsA["out"], ignoredChannelsB["out"], maxDifference = maxDiff )
+					self.assertImagesEqual( ignoredChannelsA["out"], ignoredChannelsB["out"], maxDifference = maxDiff )
 
 	def testDeepInvalid( self ):
 
