@@ -186,7 +186,7 @@ class SampleMerge
 
 					currentSampleId++;
 				}
-				closeOpenSamples( outputDepth, numeric_limits<float>::max() );
+				closeOpenSamples( outputDepth, numeric_limits<float>::infinity() );
 				sampleOffsetsOut.push_back( m_contributionOffsetsOut.size() );
 			}
 		}
@@ -239,13 +239,13 @@ class SampleMerge
 		void outputSample( float z, float zBack )
 		{
 			m_zOut.push_back( z );
-			m_zBackOut.push_back( zBack );
-			if( z == zBack )
+			m_zBackOut.push_back( std::max( z, zBack ) );
+			if( zBack <= z )
 			{
 				// Outputting a point sample, it will only contain contributions from matching point samples
 				for( int i = m_openSamples.size() - 1; i >= 0; i-- )
 				{
-					if( m_inZBack[ m_openSamples[i] ] != zBack )
+					if( m_inZBack[ m_openSamples[i] ] > z )
 					{
 						break;
 					}
