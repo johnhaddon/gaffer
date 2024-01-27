@@ -628,8 +628,12 @@ int linearCombineSampledPixels(
 		return 0;
 	}
 
+	// The index of sampled depth we have currently covered up to for each source
 	std::vector<int> sourceIndex( numSources, -1 );
-	std::vector<int> sourceSourceIndex( numSources, 0 );
+
+	// The original index of the segment in the source pixel which the current sample came from for each source.
+	// Because of interpolated samples, there may be many samples per original segment.
+	std::vector<int> sourceOrigIndex( numSources, 0 );
 	double totalAccumAlpha = 0;
 	double prevTotalAccumAlpha = 0;
 
@@ -746,10 +750,10 @@ int linearCombineSampledPixels(
 						contributionCount++;
 						float skippedContribution = curSamples[curIndex-1].linearContribution / ( 1.0 - prevTotalAccumAlpha );
 						contributionElements->push_back( ContributionElement {
-							(int)i, sourceSourceIndex[i], weights[i] * skippedContribution
+							(int)i, sourceOrigIndex[i], weights[i] * skippedContribution
 						} );
 
-						sourceSourceIndex[i]++;
+						sourceOrigIndex[i]++;
 					}
 					contributionCount++;
 
@@ -769,14 +773,14 @@ int linearCombineSampledPixels(
 					assert( linearContribution >= 0.0f );
 
 					contributionElements->push_back( ContributionElement {
-						(int)i, sourceSourceIndex[i], weights[i] * linearContribution
+						(int)i, sourceOrigIndex[i], weights[i] * linearContribution
 					} );
 
 					if( curSamples[curIndex].type < DepthSampleInterpolated )
 					{
 						// We must track the index of the source segment we are adding contributions from. This
 						// goes up for every sample we output, unless it's an interpolated sample.
-						sourceSourceIndex[i]++;
+						sourceOrigIndex[i]++;
 					}
 				}
 			}
@@ -923,10 +927,10 @@ int linearCombineSampledPixels(
 					// Add to the list of contributions
 					contributionCount++;
 					contributionElements->push_back( ContributionElement {
-						(int)i, sourceSourceIndex[i], weights[i] * linearContribution
+						(int)i, sourceOrigIndex[i], weights[i] * linearContribution
 					} );
 
-					sourceSourceIndex[i]++;
+					sourceOrigIndex[i]++;
 					firstSegment = false;
 				}
 			}
