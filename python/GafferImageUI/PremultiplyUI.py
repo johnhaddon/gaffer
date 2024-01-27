@@ -76,6 +76,7 @@ Gaffer.Metadata.registerNode(
 			by multiplying RGB by visibility, and then wiping out the 'A'
 			channel.
 			""",
+			"layout:section", "Advanced",
 
 		],
 
