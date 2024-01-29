@@ -34,11 +34,21 @@
 #
 ##########################################################################
 
+import inspect
 import itertools
 
 import Gaffer
 import GafferUI
 import GafferImage
+
+_filterDeepWarning = """
+> Caution :
+>
+> When deep images are resized using a filter, many additional deep samples are
+> created per pixel. These slow down subsequent image processing and can create
+> prohibitively large files. These overheads should be mitigated by using a
+> DeepToFlat or DeepHoldout node soon after the Resize.
+"""
 
 Gaffer.Metadata.registerNode(
 
@@ -49,6 +59,11 @@ Gaffer.Metadata.registerNode(
 	Resizes the image to a new resolution, scaling the
 	contents to fit the new size.
 	""",
+
+	"layout:customWidget:filterDeepWarning:widgetType", "GafferImageUI.ResizeUI._FilterDeepWarningWidget",
+	"layout:customWidget:filterDeepWarning:section", "Settings",
+	"layout:customWidget:filterDeepWarning:accessory", True,
+	"layout:customWidget:filterDeepWarning:visibilityActivator", lambda node : node["filterDeep"].getValue(),
 
 	plugs = {
 
@@ -136,19 +151,31 @@ Gaffer.Metadata.registerNode(
 		"filterDeep" : [
 
 			"description",
-			"""
-			By default, we use a nearest filter for deep images, because
-			accurately filtering deeps can be extremely expensive, and
-			produces images that are too large to store on disk. If you
-			know what you're doing, turn this on to do accurate filtering
-			( the only manageable use case is probably if you immediately
-			do a merge or holdout after resampling, so the a minimum
-			amount of processing needs to happen to the huge data of the
-			resampled deep ).
-			""",
+			inspect.cleandoc(
+				"""
+				When on, deep images are resized accurately using the same filter
+				as flat images. When off, deep images are resized using the Nearest
+				filter.
+
+				"""
+			) + _filterDeepWarning,
 
 		],
 
 	}
 
 )
+
+class _FilterDeepWarningWidget( GafferUI.ListContainer ) :
+
+	def __init__( self, node, **kw ) :
+
+		GafferUI.ListContainer.__init__( self, GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 )
+
+		with self :
+
+			GafferUI.Image( "warningSmall.png" )
+			GafferUI.Label( "Caution : filtering deep images is expensive" )
+
+		self.setToolTip( _filterDeepWarning )
+
