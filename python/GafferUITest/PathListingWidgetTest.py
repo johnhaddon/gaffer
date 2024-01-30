@@ -1640,6 +1640,61 @@ class PathListingWidgetTest( GafferUITest.TestCase ) :
 		self.assertEqual( changes, [] )
 		self.assertEqual( model.headerData( 0, QtCore.Qt.Horizontal ), "Title 2" )
 
+	def testPathAbove( self ) :
+
+		path = Gaffer.DictPath( { str( i ) : i for i in range( 0, 10 ) }, "/" )
+
+		widget = GafferUI.PathListingWidget(
+			path = path,
+			sortable = True,
+			columns = [ GafferUI.PathListingWidget.defaultNameColumn ],
+		)
+		model = widget._qtWidget().model()
+		self.__expandModel( model )
+
+		# Querying an individual path.
+
+		for i in range( 0, 10 ) :
+			queryPath = path.copy().setFromString( f"/{i}" )
+			if i == 0 :
+				self.assertIsNone( widget.pathAbove( queryPath ) )
+			else :
+				self.assertEqual(
+					widget.pathAbove( queryPath ),
+					path.copy().setFromString( f"/{i-1}" ),
+				)
+
+		# Querying a range of paths
+
+		self.assertEqual(
+			widget.pathAbove(
+				IECore.PathMatcher( [ "/3", "/5" ] )
+			),
+			path.copy().setFromString( "/2" ),
+		)
+
+		# Check with a different sort order
+
+		widget._qtWidget().sortByColumn( 0, QtCore.Qt.DescendingOrder )
+		_GafferUI._pathModelWaitForPendingUpdates( GafferUI._qtAddress( model ) )
+
+		for i in range( 0, 10 ) :
+			queryPath = path.copy().setFromString( f"/{i}" )
+			if i == 9 :
+				self.assertIsNone( widget.pathAbove( queryPath ) )
+			else :
+				self.assertEqual(
+					widget.pathAbove( queryPath ),
+					path.copy().setFromString( f"/{i+1}" ),
+				)
+
+		self.assertEqual(
+			widget.pathAbove(
+				IECore.PathMatcher( [ "/4", "/6" ] )
+			),
+			path.copy().setFromString( "/7" ),
+		)
+
 	@staticmethod
 	def __emitPathChanged( widget ) :
 
