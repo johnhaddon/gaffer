@@ -216,6 +216,36 @@ class PathListingWidget( GafferUI.Widget ) :
 
 		return self.getColumns()[self._qtWidget().columnAt( point.x())]
 
+	## Returns the path immediately above another path
+	# or group of paths.
+	def pathAbove( self, pathOrPaths ) :
+
+		def pathRange( pathOrPaths ) :
+
+			if isinstance( pathOrPaths, Gaffer.Path ) :
+				yield pathOrPaths
+			elif isinstance( pathOrPaths, IECore.PathMatcher ) :
+				pathCopy = self.getPath().copy()
+				for p in pathOrPaths.paths() :
+					pathCopy.setFromString( p )
+					yield pathCopy
+
+		result = None
+		yMin = None
+		for path in pathRange( pathOrPaths ) :
+
+			index = self.__indexForPath( path )
+			index = self._qtWidget().indexAbove( index )
+			if not index.isValid() :
+				continue
+
+			y = self._qtWidget().visualRect( index ).top()
+			if result is None or y < yMin :
+				result = self.__pathForIndex( index )
+				yMin = y
+
+		return result
+
 	## Sets which paths are currently expanded
 	# using an `IECore.PathMatcher` object.
 	def setExpansion( self, paths ) :
