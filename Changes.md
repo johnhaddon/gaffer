@@ -1,10 +1,16 @@
 1.4.x.x (relative to 1.4.0.0b6)
 =======
 
+Improvements
+--------
+
+- 3Delight : Added NSI screen static sampling pattern option (dl:staticsamplingpattern). 
+
 Fixes
 -----
 
 - 3Delight : Fixed failure to change sampling pattern per frame.
+- 3Delight : Fixed Resolution Multiplier support. 
 
 1.4.0.0b6 (relative to 1.4.0.0b5)
 =========
