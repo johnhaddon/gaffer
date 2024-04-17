@@ -36,7 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 // uncomment to get additional debug output when parsing an expression
-// #define BOOST_SPIRIT_DEBUG
+#define BOOST_SPIRIT_DEBUG
 
 #include "GafferScene/SetAlgo.h"
 
@@ -53,6 +53,8 @@
 
 #include "fmt/format.h"
 
+#include <variant>
+
 using namespace IECore;
 using namespace Gaffer;
 using namespace GafferScene;
@@ -68,29 +70,34 @@ struct Nil {};
 
 // Determine which Ops are supported in SetExpressions
 // and provide a way to print them for debugging.
-enum Op { And, Or, AndNot, In, Containing };
+enum Op { In, Containing, Or, And, AndNot };
 
-std::ostream & operator<<( std::ostream &out, const Op &op )
+const char *toString( Op op )
 {
 	switch( op )
 	{
 		case Or :
-			out << "|"; break;
+			return "|";
 		case And :
-			out << "&"; break;
+			return "&";
 		case AndNot :
-			out << "-"; break;
+			return "-";
 		case In :
-			out << "in"; break;
+			return "in";
 		case Containing :
-			out << "containing"; break;
+			return "containing";
 	}
+}
+
+std::ostream & operator<<( std::ostream &out, Op op )
+{
+	out << toString( op );
 	return out;
 }
 
 struct ExpressionAst
 {
-	using type = boost::variant<
+	using type = std::variant<
 		Nil,
 		std::string, // identifier
 		boost::recursive_wrapper<ExpressionAst>,
@@ -488,8 +495,7 @@ void expressionToAST( const std::string &setExpression, ExpressionAst &ast)
 		std::cout << "-------------------------\n";
 		std::cout << "Parsing of '" << setExpression <<"' succeeded.\n";
 		std::cout << "Resulting AST:\n";
-		AstPrinter printer;
-		printer(ast);
+		std::cout << ast;
 		std::cout << "\n-------------------------\n";
 		#endif
 	}
@@ -510,6 +516,53 @@ void expressionToAST( const std::string &setExpression, ExpressionAst &ast)
 		throw IECore::Exception( fmt::format( "Syntax error in indicated part of SetExpression.\n{}\n{}\n.", setExpression, errorIndication ) );
 	}
 }
+
+struct AstSerialiser
+{
+	using result_type = std::string;
+
+	std::string operator()( const std::string &n ) const
+	{
+		return n;
+	}
+
+	std::string operator()( const ExpressionAst &ast ) const
+	{
+		return boost::apply_visitor( *this, ast.expr );
+	}
+
+	std::string operator()( const Nil &nil ) const
+	{
+		return "";
+	}
+
+	std::string operator()( const BinaryOp &expr ) const
+	{
+		// TODO : DROP THE BRACKETS WHEN YOU CAN
+		return
+			"(" + boost::apply_visitor( *this, expr.left.expr ) +
+			")" +
+			toString( expr.op ) +
+			"(" +
+			boost::apply_visitor( *this, expr.right.expr ) +
+			")"
+		;
+	}
+};
+
+std::string astToExpression( const ExpressionAst &ast )
+{
+	return boost::apply_visitor( AstSerialiser(), ast.expr );
+}
+
+// ExpressionAst vectorToAST( const std::vector<std::string> &sets )
+// {
+// 	ExpressionAst result;
+// 	for( const auto &set : sets )
+// 	{
+// 		if( result.expr )
+// 	}
+// }
 
 } // namespace
 
@@ -554,6 +607,13 @@ bool affectsSetExpression( const Plug *scenePlugChild )
 		;
 	}
 	return false;
+}
+
+std::string modifySetExpression( const std::string &expression, const std::vector<std::string> &inclusions, const std::vector<std::string> &exclusions )
+{
+	ExpressionAst ast;
+	expressionToAST( expression, ast );
+	return astToExpression( ast );
 }
 
 } // namespace SetAlgo

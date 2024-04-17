@@ -55,6 +55,8 @@ GAFFERSCENE_API void setExpressionHash( const std::string &setExpression, const 
 
 GAFFERSCENE_API bool affectsSetExpression( const Gaffer::Plug *scenePlugChild );
 
+GAFFERSCENE_API std::string modifySetExpression( const std::string &expression, const std::vector<std::string> &inclusions, const std::vector<std::string> &exclusions );
+
 } // namespace SetAlgo
 
 } // namespace Gaffer

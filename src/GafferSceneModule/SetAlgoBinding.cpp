@@ -40,6 +40,8 @@
 
 #include "IECorePython/ScopedGILRelease.h"
 
+#include "boost/python/suite/indexing/container_utils.hpp"
+
 using namespace boost::python;
 using namespace IECore;
 using namespace GafferScene;
@@ -63,6 +65,15 @@ void setExpressionHashWrapper2( const std::string &setExpression, const ScenePlu
 {
 	IECorePython::ScopedGILRelease r;
 	SetAlgo::setExpressionHash( setExpression, scene, h );
+}
+
+std::string modifySetExpressionWrapper( const std::string &expression, object pythonInclusions, object pythonExclusions )
+{
+	std::vector<std::string> inclusions;
+	std::vector<std::string> exclusions;
+	container_utils::extend_container( inclusions, pythonInclusions );
+	container_utils::extend_container( exclusions, pythonExclusions );
+	return SetAlgo::modifySetExpression( expression, inclusions, exclusions );
 }
 
 } // namespace
@@ -95,6 +106,11 @@ void bindSetAlgo()
 	);
 
 	def( "affectsSetExpression", &SetAlgo::affectsSetExpression );
+
+	def(
+		"modifySetExpression", &modifySetExpressionWrapper,
+		( arg( "expression" ), arg( "inclusions" ) = list(), arg( "exclusions" ) = list() )
+	);
 
 }
 

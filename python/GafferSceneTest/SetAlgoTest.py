@@ -316,5 +316,97 @@ class SetAlgoTest( GafferSceneTest.SceneTestCase ) :
 		result = set( GafferScene.SetAlgo.evaluateSetExpression( expression, scenePlug ).paths() )
 		self.assertEqual( result, set( expectedContents ) )
 
+	def testModifySetExpression( self ) :
+
+		for expression, inclusions, exclusions, expectedResult in [
+			( "A B", [], [], "A B" ),
+			#( "A B C", "D", "", "A B C D" ),
+			#( "( A B C )", "D", "", "A B C D" ),
+			## TODO : MORE MORE MORE!!!
+		] :
+			with self.subTest( expression = expression, inclusions = inclusions, exclusions = exclusions ) :
+				self.assertEqual(
+					GafferScene.SetAlgo.modifySetExpression( expression, inclusions, exclusions ),
+					expectedResult
+				)
+
+	def testModifiedSetExpressionEvaluation( self ) :
+
+		# `modifySetExpression()` parses, modifies the AST and
+		# then serialises the AST back to an expression. Check
+		# that it handles operator precedence appropriately so
+		# that unmodified expressions produce the same results
+		# as before.
+
+		# Location                    Sets
+		# --------                    ----
+		#
+		# /groupA                     A
+		#    /planeA                  A
+		#	 /planeB                  B
+		#    /planeC                  C
+		#    /planeAB                 A B
+		#    /planeBC                 B C
+		#    /planeABC                A B C
+		# /groupB
+		#    ...
+		# /groupC
+		#    ...
+		# /groupAB
+		#	 ...
+		# ...
+
+		script = Gaffer.ScriptNode()
+
+		for sets in ( "A", "B", "C", "AB", "BC", "ABC" ) :
+
+			plane = GafferScene.Plane()
+			plane["name"].setValue( f"plane{sets}" )
+			plane["sets"].setValue( " ".join( sets ) )
+			script[f"plane{sets}"] = plane
+
+			group = GafferScene.Group()
+			group["name"].setValue( f"group{sets}" )
+			group["sets"].setValue( " ".join( sets ) )
+			script[f"group{sets}"] = group
+
+		script["parent"] = GafferScene.Parent()
+		script["parent"]["parent"].setValue( "/" )
+
+		for group in GafferScene.Group.Range( script ) :
+			for plane in GafferScene.Plane.Range( script ) :
+				group["in"].next().setInput( plane["out"] )
+			script["parent"]["children"].next().setInput( group["out"] )
+
+		# Test all permutations of two operators.
+
+		operators = ( "|", "&", "-", "in", "containing" )
+
+		#TODO : ENABLE ME
+		for set1 in "ABC" :
+			for set2 in "ABC" :
+				for set3 in "ABC" :
+					for operator1 in operators :
+						for operator2 in operators :
+							for bracket1, bracket2 in ( "()", "  " ) :
+								expression = f"{bracket1}{set1} {operator1} {set2}{bracket2} {operator2} {set3}"
+								with self.subTest( expression = expression ) :
+									modifiedExpression = GafferScene.SetAlgo.modifySetExpression( expression, [], [] )
+									self.assertEqual(
+										GafferScene.SetAlgo.evaluateSetExpression( expression, script["parent"]["out"] ),
+										GafferScene.SetAlgo.evaluateSetExpression( modifiedExpression, script["parent"]["out"] ),
+									)
+
+		# TODO : REMOVE ME
+		for e in [
+			'(B | A) & A'
+		] :
+			modifiedExpression = GafferScene.SetAlgo.modifySetExpression( e, [], [] )
+			print( e, modifiedExpression )
+			self.assertEqual(
+				set( GafferScene.SetAlgo.evaluateSetExpression( e, script["parent"]["out"] ).paths() ),
+				set( GafferScene.SetAlgo.evaluateSetExpression( modifiedExpression, script["parent"]["out"] ).paths() ),
+			)
+
 if __name__ == "__main__":
 	unittest.main()
