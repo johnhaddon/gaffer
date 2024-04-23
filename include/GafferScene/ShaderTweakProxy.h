@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2024, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,43 +34,47 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/algorithm/string.hpp>
-#include "boost/python.hpp"
+#pragma once
 
-#include "TweaksBinding.h"
+#include "GafferScene/Shader.h"
 
-#include "GafferScene/AttributeTweaks.h"
-#include "GafferScene/CameraTweaks.h"
-#include "GafferScene/OptionTweaks.h"
-#include "GafferScene/ShaderTweaks.h"
-#include "GafferScene/ShaderTweakProxy.h"
+#include "IECoreScene/ShaderNetwork.h"
+#include "IECore/ObjectVector.h"
+#include "IECore/VectorTypedData.h"
 
-#include "GafferBindings/DependencyNodeBinding.h"
-#include "GafferBindings/PlugBinding.h"
-#include "GafferBindings/SerialisationBinding.h"
-#include "GafferBindings/ValuePlugBinding.h"
+#include <unordered_map>
 
-using namespace boost::python;
-using namespace Gaffer;
-using namespace GafferBindings;
-using namespace GafferScene;
-
-void GafferSceneModule::bindTweaks()
+namespace GafferScene
 {
-	DependencyNodeClass<ShaderTweaks>();
-	DependencyNodeClass<CameraTweaks>();
-	DependencyNodeClass<AttributeTweaks>();
-	DependencyNodeClass<OptionTweaks>();
 
-	DependencyNodeClass<ShaderTweakProxy>()
-		.def( boost::python::init<const std::string&, const IECore::StringVectorData *, const IECore::ObjectVector *, const std::string &>(
-				(
-					boost::python::arg_( "sourceNode" ),
-					boost::python::arg_( "outputNames" ),
-					boost::python::arg_( "outputTypes" ),
-					boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<ShaderTweakProxy>()
-				)
-			)
-		)
-	;
-}
+class GAFFERSCENE_API ShaderTweakProxy : public Shader
+{
+
+	public :
+
+		// Create a ShaderTweakProxy, set up to proxy a particular node in the network being tweaked.
+		ShaderTweakProxy( const std::string &sourceNode, const IECore::StringVectorData *outputNames, const IECore::ObjectVector *outputTypes, const std::string &name=defaultName<ShaderTweakProxy>());
+
+		// Should only be called by serializer, to construct ShaderTweakProxies that already have their plugs
+		// set up ( It might be slightly cleaner to make the plugs not dynamic, and instead use a custom
+		// serializer that calls the constructor above, but that seems like more work ).
+		ShaderTweakProxy( const std::string &name );
+
+		~ShaderTweakProxy() override;
+
+		GAFFER_NODE_DECLARE_TYPE( GafferScene::ShaderTweakProxy, ShaderTweakProxyTypeId, Shader );
+
+		// This is implemented to do nothing, because ShaderTweakProxy isn't really a shader, it just
+		// acts like one to store connections before they get replumbed to their actual targets.
+		void loadShader( const std::string &shaderName, bool keepExistingValues=false ) override;
+
+		static const std::string &shaderTweakProxyIdentifier();
+
+	private :
+
+		static size_t g_firstPlugIndex;
+};
+
+IE_CORE_DECLAREPTR( ShaderTweakProxy )
+
+} // namespace GafferScene

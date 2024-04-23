@@ -39,6 +39,8 @@
 #include "GafferOSL/ClosurePlug.h"
 #include "GafferOSL/ShadingEngine.h"
 
+#include "GafferScene/ShaderTweakProxy.h"
+
 #include "Gaffer/CompoundNumericPlug.h"
 #include "Gaffer/Metadata.h"
 #include "Gaffer/NumericPlug.h"
@@ -162,6 +164,10 @@ ShaderTypeSet &compatibleShaders()
 	static ShaderTypeSet g_compatibleShaders;
 	return g_compatibleShaders;
 }
+
+// Allow shader tweak proxy nodes to be connected to OSL shaders
+const bool g_oslShaderTweakProxyRegistration = OSLShader::registerCompatibleShader( ShaderTweakProxy::shaderTweakProxyIdentifier() );
+
 
 } // namespace
 

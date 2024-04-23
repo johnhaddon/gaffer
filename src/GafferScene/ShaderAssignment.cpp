@@ -37,6 +37,8 @@
 
 #include "GafferScene/ShaderAssignment.h"
 
+#include "GafferScene/ShaderTweakProxy.h"
+
 #include "Gaffer/Metadata.h"
 
 #include "IECoreScene/ShaderNetwork.h"
@@ -166,6 +168,16 @@ IECore::ConstCompoundObjectPtr ShaderAssignment::computeProcessedAttributes( con
 
 		if( const auto *network = runTimeCast<IECoreScene::ShaderNetwork>( attribute.second.get() ) )
 		{
+			for( const auto &i : network->shaders() )
+			{
+				if( i.second->getName() == ShaderTweakProxy::shaderTweakProxyIdentifier() )
+				{
+					throw IECore::Exception(
+						"ShaderTweakProxy only works with ShaderTweaks - it doesn't make sense to connect one to a ShaderAssignement"
+					);
+				}
+			}
+
 			if( !labelOverride.empty() )
 			{
 				IECoreScene::ShaderNetworkPtr renamedNetwork = network->copy();

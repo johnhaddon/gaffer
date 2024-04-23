@@ -37,6 +37,7 @@
 #include "GafferScene/ShaderTweaks.h"
 
 #include "GafferScene/Shader.h"
+#include "GafferScene/ShaderTweakProxy.h"
 
 #include "Gaffer/CompoundDataPlug.h"
 #include "Gaffer/TweakPlug.h"
@@ -271,6 +272,11 @@ bool ShaderTweaks::applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Tweak
 		const IECoreScene::Shader *shader = shaderNetwork->getShader( parameter.shader );
 		if( !shader )
 		{
+			// TODO - It feels inconsistent that we don't test if parameters exist here?
+			// Setting a value of a parameter that doesn't exist with a constant using applyTweak is an
+			// error unless ignoreMissing is set, and silent if it is set.
+			// But if you do the same thing by connecting a shader, you get an OSL warning printout
+			// whether or not ignoreMissing is set
 			if( missingMode != TweakPlug::MissingMode::Ignore )
 			{
 				throw IECore::Exception( fmt::format(
@@ -286,13 +292,14 @@ bool ShaderTweaks::applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Tweak
 
 		const TweakPlug::Mode mode = static_cast<TweakPlug::Mode>( tweakPlug->modePlug()->getValue() );
 
-		if( auto input = shaderNetwork->input( parameter )  )
+		ShaderNetwork::Parameter originalInput = shaderNetwork->input( parameter );
+		if( originalInput )
 		{
 			if( mode != TweakPlug::Mode::Replace )
 			{
 				throw IECore::Exception( fmt::format( "Cannot apply tweak to \"{}\" : Mode must be \"Replace\" when a previous connection exists", name ) );
 			}
-			shaderNetwork->removeConnection( { input, parameter } );
+			shaderNetwork->removeConnection( { originalInput, parameter } );
 			removedConnections = true;
 		}
 
@@ -316,8 +323,66 @@ bool ShaderTweaks::applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Tweak
 				{
 					throw IECore::Exception( fmt::format( "Cannot apply tweak to \"{}\" : Mode must be \"Replace\" when inserting a connection", name ) );
 				}
+
 				const auto inputParameter = ShaderNetworkAlgo::addShaders( shaderNetwork, inputNetwork );
 				shaderNetwork->addConnection( { inputParameter, parameter } );
+
+				// TODO - it would be substantially more efficient to search for and process tweak sources
+				// just in `inputNetwork` before merging it to `shaderNetwork` ... but this would require
+				// dealing with weird connections where the input node handle is relative to `shaderNetwork`,
+				// but the output handle is relative to `inputNetwork`. This gets very confusing if there are
+				// nodes in the two networks with the same name, which get uniquified during addShaders.
+				// Doing this after merging simplifies all that.
+				std::vector<IECore::InternedString> shadersToDelete;
+				for( const auto &i : shaderNetwork->shaders() )
+				{
+					if( i.second->getName() == ShaderTweakProxy::shaderTweakProxyIdentifier() )
+					{
+						shadersToDelete.push_back( i.first );
+
+						ShaderNetwork::ConnectionRange range = shaderNetwork->outputConnections( i.first );
+						const std::vector<ShaderNetwork::Connection> outputConnections( range.begin(), range.end() );
+
+						for( const auto &c : outputConnections )
+						{
+							ShaderNetwork::Parameter dest = c.destination;
+
+							StringData *sourceNodeData = nullptr;
+							try
+							{
+								sourceNodeData = IECore::runTimeCast< StringData >(
+									i.second->parameters().at( "shaderTweakProxySourceNode" ).get()
+								);
+							}
+							catch( ... )
+							{
+							}
+
+							if( !sourceNodeData )
+							{
+								throw IECore::Exception( "Cannot find source node parameter on ShaderTweakProxy" );
+							}
+							const std::string sourceNode = sourceNodeData->readable();
+
+							shaderNetwork->removeConnection( c );
+							removedConnections = true;
+
+							if( sourceNode == "" )
+							{
+								if( originalInput )
+								{
+									shaderNetwork->addConnection( { originalInput, dest } );
+								}
+							}
+							else
+							{
+								shaderNetwork->addConnection( { { sourceNode, c.source.name }, dest } );
+							}
+
+						}
+					}
+				}
+
 				appliedTweaks = true;
 			}
 		}

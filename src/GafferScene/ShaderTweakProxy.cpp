@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2024, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,43 +34,62 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/algorithm/string.hpp>
-#include "boost/python.hpp"
-
-#include "TweaksBinding.h"
-
-#include "GafferScene/AttributeTweaks.h"
-#include "GafferScene/CameraTweaks.h"
-#include "GafferScene/OptionTweaks.h"
-#include "GafferScene/ShaderTweaks.h"
 #include "GafferScene/ShaderTweakProxy.h"
 
-#include "GafferBindings/DependencyNodeBinding.h"
-#include "GafferBindings/PlugBinding.h"
-#include "GafferBindings/SerialisationBinding.h"
-#include "GafferBindings/ValuePlugBinding.h"
+#include "Gaffer/StringPlug.h"
+#include "Gaffer/PlugAlgo.h"
 
-using namespace boost::python;
 using namespace Gaffer;
-using namespace GafferBindings;
 using namespace GafferScene;
 
-void GafferSceneModule::bindTweaks()
-{
-	DependencyNodeClass<ShaderTweaks>();
-	DependencyNodeClass<CameraTweaks>();
-	DependencyNodeClass<AttributeTweaks>();
-	DependencyNodeClass<OptionTweaks>();
+GAFFER_NODE_DEFINE_TYPE( ShaderTweakProxy );
 
-	DependencyNodeClass<ShaderTweakProxy>()
-		.def( boost::python::init<const std::string&, const IECore::StringVectorData *, const IECore::ObjectVector *, const std::string &>(
-				(
-					boost::python::arg_( "sourceNode" ),
-					boost::python::arg_( "outputNames" ),
-					boost::python::arg_( "outputTypes" ),
-					boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<ShaderTweakProxy>()
-				)
-			)
-		)
-	;
+size_t ShaderTweakProxy::g_firstPlugIndex;
+
+ShaderTweakProxy::ShaderTweakProxy( const std::string &sourceNode, const IECore::StringVectorData *outputNames, const IECore::ObjectVector *outputTypes, const std::string &name )
+	:	Shader( name )
+{
+	storeIndexOfNextChild( g_firstPlugIndex );
+
+	addChild( new Plug( "out", Plug::Out ) );
+	namePlug()->setValue( shaderTweakProxyIdentifier() );
+	typePlug()->setValue( shaderTweakProxyIdentifier() );
+
+	parametersPlug()->addChild( new StringPlug( "shaderTweakProxySourceNode", Plug::Direction::In, sourceNode, Plug::Flags::Default | Plug::Flags::Dynamic ) );
+
+	if( !outputNames || !outputTypes || outputNames->readable().size() != outputTypes->members().size() )
+	{
+		throw IECore::Exception( "ShaderTweakProxy must be constructed with matching outputNames and outputTypes" );
+	}
+
+	for( unsigned int i = 0; i < outputNames->readable().size(); i++ )
+	{
+		outPlug()->addChild(
+			PlugAlgo::createPlugFromData( outputNames->readable()[i], Plug::Direction::Out, Plug::Flags::Default | Plug::Flags::Dynamic, IECore::runTimeCast<IECore::Data>( outputTypes->members()[i].get() ) )
+		);
+	}
+}
+
+ShaderTweakProxy::ShaderTweakProxy( const std::string &name )
+	:	Shader( name )
+{
+	storeIndexOfNextChild( g_firstPlugIndex );
+
+	addChild( new Plug( "out", Plug::Out ) );
+	namePlug()->setValue( shaderTweakProxyIdentifier() );
+	typePlug()->setValue( shaderTweakProxyIdentifier() );
+}
+
+ShaderTweakProxy::~ShaderTweakProxy()
+{
+}
+
+void ShaderTweakProxy::loadShader( const std::string &shaderName, bool keepExistingValues )
+{
+}
+
+const std::string& ShaderTweakProxy::shaderTweakProxyIdentifier()
+{
+	static const std::string id = "__SHADER_TWEAK_PROXY";
+	return id;
 }
