@@ -1,7 +1,12 @@
 1.4.x.x (relative to 1.4.3.0)
 =======
 
+API
+---
 
+- RenderPassTypeAdaptor :
+  - Added registration methods for defining render pass types and processors.
+  - Added `registerAutoTypeFunction()` method to define a function used to automatically derive the render pass type from the render pass name when the `renderPass:type` option value is "auto".
 
 1.4.3.0 (relative to 1.4.2.0)
 =======
