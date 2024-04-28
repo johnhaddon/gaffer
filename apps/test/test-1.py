@@ -37,11 +37,14 @@
 
 import glob
 import os
+import pathlib
 import sys
+import unittest
 import warnings
 
 import IECore
 import Gaffer
+import GafferDispatch
 import GafferTest
 
 class test( Gaffer.Application ) :
@@ -153,7 +156,7 @@ class test( Gaffer.Application ) :
 
 			testSuite = unittest.TestSuite()
 			for name in args["testCases"] :
-				testCase = unittest.defaultTestLoader.loadTestsFromName( name )
+				testCase = _TestLoader().loadTestsFromName( name )
 				testSuite.addTest( testCase )
 
 			if args["showCategories"].value :
@@ -190,3 +193,100 @@ class test( Gaffer.Application ) :
 		return sorted( result )
 
 IECore.registerRunTimeTyped( test )
+
+class _TestCase( GafferTest.TestCase ) :
+
+	def __init__( self, script, node ) :
+
+		unittest.TestCase.__init__( self )
+
+		self.__script = script
+		self.__node = node
+
+	def __str__( self ) :
+
+		scriptPath = pathlib.Path( self.__script["fileName"].getValue() )
+		for path in sys.path :
+			try :
+				scriptPath = scriptPath.relative_to( pathlib.Path( path ) )
+				break
+			except :
+				pass
+
+		return "{} ({})".format( self.__node.getName(), scriptPath )
+
+	def runTest( self ) :
+
+		dispatcher = GafferDispatch.LocalDispatcher()
+		dispatcher["tasks"][0].setInput( self.__node["task"] )
+		dispatcher["jobsDirectory"].setValue( self.temporaryDirectory() )
+
+		## TODO : FAILURES NOT ERRORS
+		dispatcher["task"].execute()
+
+## TODO : MOVE TO GAFFERTEST MODULE?? NO, I DON'T THINK SO.
+## TODO : MAKE DISPATCH DEPENDENCY SOFT (ONLY IMPORT WHEN RUN)
+## TODO : OR MOVE TO GAFFERDISPATCHTEST??
+##        - THAT IS PURER BUT FORCES TEST.PY TO LOAD THE DISPATCH MODULE ALWAYS
+class _TestLoader( unittest.TestLoader ) :
+
+	def loadTestsFromName( self, name ) :
+
+		baseSuite = unittest.TestLoader.loadTestsFromName( self, name )
+		taskBasedSuite = self.__loadTaskBasedSuite( name )
+
+		if taskBasedSuite is not None :
+			if all( test.__class__.__name__ == "_FailedTest" for test in baseSuite ) :
+				return taskBasedSuite
+			else :
+				return unittest.TestSuite( [ baseSuite, taskBasedSuite ] )
+		else :
+			return baseSuite
+
+	def __loadTaskBasedSuite( self, name ) :
+
+		nodePath = []
+		path = pathlib.Path( *name.split( "." ) )
+		while path.parts :
+
+			for dir in sys.path :
+
+				scriptPath = dir / path.with_suffix( ".gfr" )
+				if scriptPath.is_file() :
+					return self.__makeTaskBasedSuite( scriptPath, nodePath )
+
+				dirPath = dir / path
+				if dirPath.is_dir() :
+
+					suite = unittest.TestSuite()
+					for scriptPath in dirPath.glob( "**/*Test.gfr" ) :
+						suite.addTest( self.__makeTaskBasedSuite( scriptPath, [] ) )
+
+			nodePath.insert( 0, path.name )
+			path = path.parent
+
+		return None
+
+	def __makeTaskBasedSuite( self, scriptPath, nodePath ) :
+
+		script = Gaffer.ScriptNode()
+		script["fileName"].setValue( scriptPath )
+		script.load()
+
+		if nodePath :
+			node = script.descendant( ".".join( nodePath ) )
+			if node is None :
+				return None
+		else :
+			node = script
+
+		suite = unittest.TestSuite()
+
+		if isinstance( node, GafferDispatch.TaskNode ) :
+			suite.addTest( _TestCase( script, node ) )
+		else :
+			for node in GafferDispatch.TaskNode.RecursiveRange( node ) :
+				if node.getName().startswith( "test" ) :
+					suite.addTest( _TestCase( script, node ) )
+
+		return suite

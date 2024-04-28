@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2024, John Haddon. All rights reserved.
+#  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,21 +34,41 @@
 #
 ##########################################################################
 
-__import__( "GafferUI" )
+import IECore
 
-from . import DispatcherUI
-from .DispatchDialogue import DispatchDialogue
-from . import LocalDispatcherUI
-from . import TaskNodeUI
-from . import SystemCommandUI
-from . import TaskListUI
-from . import TaskContextProcessorUI
-from . import WedgeUI
-from . import TaskContextVariablesUI
-from . import TaskSwitchUI
-from . import PythonCommandUI
-from . import FrameMaskUI
-from .LocalJobs import LocalJobs
-from . import AssertionUI
+import Gaffer
+import GafferDispatch
 
-__import__( "IECore" ).loadConfig( "GAFFER_STARTUP_PATHS", subdirectory = "GafferDispatchUI" )
+Gaffer.Metadata.registerNode(
+
+	GafferDispatch.Assertion,
+
+	# "description",
+	# """
+	# Runs system commands via a shell.
+	# """,
+
+	plugs = {
+
+		"mode" : (
+
+			"plugValueWidget:type", "GafferUI.PresetsPlugValueWidget",
+			"presetNames", lambda plug : IECore.StringVectorData( str( x ).partition( ".")[2].replace( "_", "" ) for x in GafferDispatch.Assertion.Mode ),
+			"presetValues", lambda plug : IECore.IntVectorData( int( x ) for x in GafferDispatch.Assertion.Mode ),
+
+		),
+
+		"message" : (
+
+			"description",
+			"""
+			An additional message to be output when the assertion fails.
+			""",
+
+			"plugValueWidget:type", "GafferUI.MultiLineStringPlugValueWidget",
+
+		),
+
+	}
+
+)

@@ -34,21 +34,75 @@
 #
 ##########################################################################
 
-__import__( "GafferUI" )
+import enum
+import unittest
 
-from . import DispatcherUI
-from .DispatchDialogue import DispatchDialogue
-from . import LocalDispatcherUI
-from . import TaskNodeUI
-from . import SystemCommandUI
-from . import TaskListUI
-from . import TaskContextProcessorUI
-from . import WedgeUI
-from . import TaskContextVariablesUI
-from . import TaskSwitchUI
-from . import PythonCommandUI
-from . import FrameMaskUI
-from .LocalJobs import LocalJobs
-from . import AssertionUI
+import IECore
 
-__import__( "IECore" ).loadConfig( "GAFFER_STARTUP_PATHS", subdirectory = "GafferDispatchUI" )
+import Gaffer
+import GafferDispatch
+
+class Assertion( GafferDispatch.TaskNode ) :
+
+	Mode = enum.IntEnum(
+		"Mode",
+		[
+			"Equal",
+			"NotEqual",
+			"Greater",
+			"Less",
+			"True_",
+			"False_",
+		],
+		start = 0
+	)
+
+	def __init__( self, name = "Assertion" ) :
+
+		GafferDispatch.TaskNode.__init__( self, name )
+
+		self["mode"] = Gaffer.IntPlug(
+			minValue = 0,
+			maxValue = max( self.Mode )
+		)
+		self["a"] = Gaffer.IntPlug()
+		self["b"] = Gaffer.IntPlug()
+		self["delta"] = Gaffer.FloatPlug( defaultValue = 0.0001, minValue = 0 )
+		self["message"] = Gaffer.StringPlug()
+
+	def hash( self, context ) :
+
+		h = GafferDispatch.TaskNode.hash( self, context )
+		# Avoid potentially expensive hashing of our input
+		# plugs so that dispatch is quick even if execution
+		# performs expensive queries from scenes or images.
+		h.append( context.hash() )
+		return h
+
+	def execute( self ) :
+
+		test = unittest.TestCase()
+
+		a = self["a"].getValue()
+		b = self["b"].getValue()
+		delate = self["delta"].getValue()
+		message = self["message"].getValue() or None
+
+		## TODO : HOW TO HAVE THIS BE RECOGNISED AS A FAILURE AND NOT AN ERROR???
+
+		match self["mode"].getValue() :
+
+			case self.Mode.Equal :
+				test.assertEqual( a, b, message )
+			case self.Mode.NotEqual :
+				test.assertNotEqual( a, b, message )
+			case self.Mode.Greater :
+				test.assertGreater( a, b, message, delta = delta )
+			case self.Mode.Less :
+				test.assertLess( a, b, message, delta = delta )
+			case self.Mode.True_ :
+				test.assertTrue( a, message )
+			case self.Mode.False_ :
+				test.assertFalse( a, message )
+
+IECore.registerRunTimeTyped( Assertion, typeName = "GafferDispatch::Assertion" )

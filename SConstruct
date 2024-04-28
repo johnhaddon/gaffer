@@ -1142,7 +1142,7 @@ libraries = {
 		"pythonEnvAppends" : {
 			"LIBS" : [ "Gaffer", "GafferDispatch", "GafferBindings", "GafferScene", "GafferSceneTest" ],
 		},
-		"additionalFiles" : glob.glob( "python/GafferSceneTest/*/*" ),
+		"additionalFiles" : glob.glob( "python/GafferSceneTest/*/*" ) + glob.glob( "python/GafferSceneTest/*.gfr" ),
 	},
 
 	"GafferSceneUI" : {
@@ -1923,10 +1923,10 @@ def exportExtensions( target, source, env ) :
 
 	os.unlink( exportScript.name )
 
-exportedFiles = commandEnv.Command( extensionTargets, extensionSources, exportExtensions )
-env.Depends( exportedFiles, "buildCore" )
-env.Alias( "buildExtensions", exportedFiles )
-env.Alias( "build", "buildExtensions" )
+# exportedFiles = commandEnv.Command( extensionTargets, extensionSources, exportExtensions )
+# env.Depends( exportedFiles, "buildCore" )
+# env.Alias( "buildExtensions", exportedFiles )
+# env.Alias( "build", "buildExtensions" )
 
 #########################################################################################################
 # Graphics

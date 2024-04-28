@@ -44,5 +44,6 @@ from .Wedge import Wedge
 from .TaskContextVariables import TaskContextVariables
 from .TaskSwitch import TaskSwitch
 from .PythonCommand import PythonCommand
+from .Assertion import Assertion
 
 __import__( "IECore" ).loadConfig( "GAFFER_STARTUP_PATHS", subdirectory = "GafferDispatch" )
