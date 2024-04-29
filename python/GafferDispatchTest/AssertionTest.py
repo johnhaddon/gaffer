@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) John Haddon, 2014. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,32 +34,54 @@
 #
 ##########################################################################
 
-# Utility classes
+import unittest
 
-from .TextWriter import TextWriter
-from .LoggingTaskNode import LoggingTaskNode
-from .DebugDispatcher import DebugDispatcher
-from .ErroringTaskNode import ErroringTaskNode
+import Gaffer
+import GafferTest
+import GafferDispatch
+import GafferDispatchTest
 
-# Test cases
+class AssertionTest( GafferTest.TestCase ) :
 
-from .DispatcherTest import DispatcherTest
-from .LocalDispatcherTest import LocalDispatcherTest
-from .TaskNodeTest import TaskNodeTest
-from .TaskSwitchTest import TaskSwitchTest
-from .PythonCommandTest import PythonCommandTest
-from .SystemCommandTest import SystemCommandTest
-from .TaskListTest import TaskListTest
-from .WedgeTest import WedgeTest
-from .TaskContextVariablesTest import TaskContextVariablesTest
-from .ExecuteApplicationTest import ExecuteApplicationTest
-from .TaskPlugTest import TaskPlugTest
-from .FrameMaskTest import FrameMaskTest
-from .DispatchApplicationTest import DispatchApplicationTest
-from .ModuleTest import ModuleTest
-from .StatsApplicationTest import StatsApplicationTest
-from .AssertionTest import AssertionTest
+	def testSetup( self ) :
+
+		assertion = GafferDispatch.Assertion()
+		self.assertNotIn( "a", assertion )
+		self.assertNotIn( "b", assertion )
+		self.assertNotIn( "delta", assertion )
+
+		assertion.setup( Gaffer.IntPlug() )
+
+		self.assertIn( "a", assertion )
+		self.assertIn( "b", assertion )
+		self.assertIn( "delta", assertion )
+
+		self.assertIsInstance( assertion["a"], Gaffer.IntPlug )
+		self.assertIsInstance( assertion["b"], Gaffer.IntPlug )
+		self.assertIsInstance( assertion["delta"], Gaffer.IntPlug )
+
+		self.assertRaises( AssertionError, assertion.setup, Gaffer.IntPlug )
+
+	def testSerialisation( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["assertion"] = GafferDispatch.Assertion()
+
+		serialisation = script.serialise()
+		self.assertNotIn( "setup(", serialisation )
+
+		script2 = Gaffer.ScriptNode()
+		script2.execute( serialisation )
+		self.assertEqual( script2["assertion"].keys(), script["assertion"].keys() )
+
+		script["assertion"].setup( Gaffer.StringPlug() )
+
+		serialisation = script.serialise()
+		self.assertIn( "setup(", serialisation )
+
+		script2 = Gaffer.ScriptNode()
+		script2.execute( serialisation )
+		self.assertEqual( script2["assertion"].keys(), script["assertion"].keys() )
 
 if __name__ == "__main__":
-	import unittest
 	unittest.main()

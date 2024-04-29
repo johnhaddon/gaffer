@@ -51,8 +51,6 @@ class Assertion( GafferDispatch.TaskNode ) :
 			"NotEqual",
 			"Greater",
 			"Less",
-			"True_",
-			"False_",
 		],
 		start = 0
 	)
@@ -65,10 +63,40 @@ class Assertion( GafferDispatch.TaskNode ) :
 			minValue = 0,
 			maxValue = max( self.Mode )
 		)
-		self["a"] = Gaffer.IntPlug()
-		self["b"] = Gaffer.IntPlug()
-		self["delta"] = Gaffer.FloatPlug( defaultValue = 0.0001, minValue = 0 )
 		self["message"] = Gaffer.StringPlug()
+
+	def canSetup( self, prototypePlug ) :
+
+		if "a" in self :
+			return False
+
+		return (
+			"a" not in self and
+			isinstance( prototypePlug, Gaffer.ValuePlug ) and
+			hasattr( prototypePlug, "getValue" )
+		)
+
+	def setup( self, prototypePlug ) :
+
+		assert( "a" not in self )
+		assert( "b" not in self )
+		assert( "delta" not in self )
+
+		self.addChild( prototypePlug.createCounterpart( "a", Gaffer.Plug.Direction.In ) )
+		self.addChild( prototypePlug.createCounterpart( "b", Gaffer.Plug.Direction.In ) )
+
+		deltaPrototype = None
+		if isinstance( prototypePlug, ( Gaffer.IntPlug, Gaffer.FloatPlug ) ) :
+			deltaPrototype = prototypePlug
+		elif isinstance( prototypePlug, ( Gaffer.V2iPlug, Gaffer.V3iPlug, Gaffer.V3fPlug, Gaffer.Color3fPlug, Gaffer.Color4fPlug ) ) :
+			deltaProtype = prototypePlug[0]
+		elif isinstance( prototypePlug, ( Gaffer.Box2iPlug, Gaffer.Box3iPlug, Gaffer.Box2fPlug, Gaffer.Box3fPlug ) ) :
+			deltaPrototype = prototypePlug["min"][0]
+
+		if deltaPrototype is not None :
+			self.addChild( deltaPrototype.createCounterpart( "delta", Gaffer.Plug.Direction.In ) )
+
+		## TODO, SERIALISABLE, NONDYNAMIC
 
 	def hash( self, context ) :
 
@@ -85,7 +113,7 @@ class Assertion( GafferDispatch.TaskNode ) :
 
 		a = self["a"].getValue()
 		b = self["b"].getValue()
-		delate = self["delta"].getValue()
+		#delate = self["delta"].getValue()
 		message = self["message"].getValue() or None
 
 		## TODO : HOW TO HAVE THIS BE RECOGNISED AS A FAILURE AND NOT AN ERROR???
@@ -100,9 +128,40 @@ class Assertion( GafferDispatch.TaskNode ) :
 				test.assertGreater( a, b, message, delta = delta )
 			case self.Mode.Less :
 				test.assertLess( a, b, message, delta = delta )
-			case self.Mode.True_ :
-				test.assertTrue( a, message )
-			case self.Mode.False_ :
-				test.assertFalse( a, message )
 
 IECore.registerRunTimeTyped( Assertion, typeName = "GafferDispatch::Assertion" )
+
+class AssertionSerialiser( Gaffer.NodeSerialiser ) :
+
+	def postConstructor( self, node, identifier, serialisation ) :
+
+		result = Gaffer.NodeSerialiser.postConstructor( self, node, identifier, serialisation )
+
+		if "a" not in node :
+			return result
+
+		if result :
+			result += "\n"
+
+		plugSerialiser = Gaffer.Serialisation.acquireSerialiser( node["a"] )
+		prototypeConstructor = plugSerialiser.constructor( node["a"], serialisation )
+		result += f"{identifier}.setup( {prototypeConstructor} )\n"
+
+		return result
+
+	def childNeedsSerialisation( self, child, serialisation ) :
+
+		if child.getName() in ( "a", "b", "delta" ) :
+			return True
+
+		return Gaffer.NodeSerialiser.childNeedsSerialisation( self, child, serialisation )
+
+	def childNeedsConstruction( self, child, serialisation ) :
+
+		if child.getName() in ( "a", "b", "delta" ) :
+			# We'll make these via a `setup()` call.
+			return False
+
+		return Gaffer.NodeSerialiser.childNeedsConstruction( self, child, serialisation )
+
+Gaffer.Serialisation.registerSerialiser( Assertion, AssertionSerialiser() )

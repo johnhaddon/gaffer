@@ -37,6 +37,7 @@
 import IECore
 
 import Gaffer
+import GafferUI
 import GafferDispatch
 
 Gaffer.Metadata.registerNode(
@@ -48,21 +49,41 @@ Gaffer.Metadata.registerNode(
 	# Runs system commands via a shell.
 	# """,
 
+	"noduleLayout:customGadget:setupButton:gadgetType", "GafferDispatchUI.AssertionUI.AssertionPlugAdder",
+	"noduleLayout:customGadget:setupButton:section", "left",
+
 	plugs = {
 
 		"mode" : (
 
 			"plugValueWidget:type", "GafferUI.PresetsPlugValueWidget",
-			"presetNames", lambda plug : IECore.StringVectorData( str( x ).partition( ".")[2].replace( "_", "" ) for x in GafferDispatch.Assertion.Mode ),
+			"presetNames", lambda plug : IECore.StringVectorData( IECore.CamelCase.toSpaced( str( x ).partition( ".")[2] ) for x in GafferDispatch.Assertion.Mode ),
 			"presetValues", lambda plug : IECore.IntVectorData( int( x ) for x in GafferDispatch.Assertion.Mode ),
+
+		),
+
+		"a" : (
+
+
+		),
+
+		"b" : (
+
+		),
+
+		"delta" : (
+
+			"layout:activator", lambda plug : plug.node()["mode"].getValue() == GafferDispatch.Assertion.Mode.Equal,
 
 		),
 
 		"message" : (
 
+			"layout:index", -1, # After the plugs made by `setup()`
+
 			"description",
 			"""
-			An additional message to be output when the assertion fails.
+			An additional message to be included when the assertion fails.
 			""",
 
 			"plugValueWidget:type", "GafferUI.MultiLineStringPlugValueWidget",
@@ -72,3 +93,29 @@ Gaffer.Metadata.registerNode(
 	}
 
 )
+
+class AssertionPlugAdder( GafferUI.PlugAdder ) :
+
+	def __init__( self, node ) :
+
+		GafferUI.PlugAdder.__init__( self )
+
+		self.__node = node
+
+	def canCreateConnection( self, endpoint ) :
+
+		if not GafferUI.PlugAdder.canCreateConnection( self, endpoint ) :
+			return False
+
+		return self.__node.canSetup( endpoint )
+
+	def createConnection( self, endpoint ) :
+
+		with Gaffer.UndoScope( self.__node.scriptNode() ) :
+			self.__node.setup( endpoint )
+			self.__node["a"].setInput( endpoint )
+			## TODO : CAN THIS GO WRONG???
+
+GafferUI.NoduleLayout.registerCustomGadget( "GafferDispatchUI.AssertionUI.AssertionPlugAdder", AssertionPlugAdder )
+
+## TODO : ADD A + BUTTON WIDGET AS WELL
