@@ -1765,6 +1765,14 @@ class InstanceCache : public IECore::RefCounted
 
 		void updateVolumes( const float frame )
 		{
+			// THIS FUNCTION SEEMS TO EXIST SO THAT WE CAN DELAY CREATION OF IMAGES UNTIL
+			// WE HAVE THE SCENE LOCK. BUT :
+			//
+			// 1. LOOKING IN THE CYCLES SOURCE, I DON'T SEE EVIDENCE THAT WE NEED THAT LOCK
+			// 2. IF WE DO NEED THE LOCK, WE COULD GET IT AT CONVERSION TIME ANYWAY
+			//
+			// ALTHOUGH ONE NICE THING ABOUT IT IS THAT WE DON'T NEED TO PASS THE SCENE
+			// TO THE CONVERTERS ANY MORE (WE COULD PASS THE IMAGE MANAGER INSTEAD I SUPPOSE)
 			for( VolumeConvert volume : m_volumesConvert )
 			{
 				GeometryAlgo::convertVoxelGrids( std::get<0>( volume ), std::get<1>( volume ), m_scene, frame, std::get<2>( volume ) );
@@ -3031,7 +3039,7 @@ class CyclesRenderer final : public IECoreScenePreview::Renderer
 			m_shaderCache->nodesCreated( m_shadersCreated );
 
 			m_lightCache->update( m_lightsCreated );
-			m_instanceCache->update( m_objectsCreated, m_geometryCreated, m_frame );
+			m_instanceCache->update( m_objectsCreated, m_geometryCreated, frame() );
 			m_shaderCache->update( m_shadersCreated );
 		}
 

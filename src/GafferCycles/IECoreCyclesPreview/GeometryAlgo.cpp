@@ -402,6 +402,8 @@ void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, ccl::Volume *volu
 	{
 		ccl::AttributeStandard std = ccl::ATTR_STD_NONE;
 
+		// TODO : PRETTY SURE THIS CAN JUST BE `attribute::name_standard()`????
+
 		if( ccl::ustring( gridName.c_str() ) == ccl::Attribute::standard_name( ccl::ATTR_STD_VOLUME_DENSITY ) )
 		{
 			std = ccl::ATTR_STD_VOLUME_DENSITY;
