@@ -1,7 +1,15 @@
 1.4.x.x (relative to 1.4.2.0)
 =======
 
+Improvements
+-----------
 
+- Arnold : If it exists, an `ai:volume` attribute is preferred over an `ai:surface` attribute when resolving shaders for volumes.
+
+Fixes
+-----
+
+- Arnold : Fixed rendering of `ai:volume` shaders loaded from USD (#5830).
 
 1.4.2.0 (relative to 1.4.1.0)
 =======
