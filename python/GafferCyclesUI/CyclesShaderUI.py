@@ -42,6 +42,7 @@ import IECore
 
 import Gaffer
 import GafferUI
+import GafferSceneUI
 import GafferCycles
 import GafferImage
 import GafferImageUI
@@ -233,3 +234,5 @@ Gaffer.Metadata.registerNode(
 		]
 	}
 )
+
+GafferSceneUI.ShaderTweaksUI.registerShaderLoader( "cycles:*", GafferCycles.CyclesShader )

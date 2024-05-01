@@ -529,3 +529,5 @@ for nodeType in ( GafferArnold.ArnoldShader, GafferArnold.ArnoldLight, GafferArn
 Gaffer.Metadata.registerValue( GafferArnold.ArnoldShader, "attributeSuffix", "plugValueWidget:type", "GafferUI.StringPlugValueWidget" )
 Gaffer.Metadata.registerValue( GafferArnold.ArnoldShader, "layout:activator:suffixActivator", lambda parent : parent["type"].getValue() == "ai:lightFilter" )
 Gaffer.Metadata.registerValue( GafferArnold.ArnoldShader, "attributeSuffix", "layout:visibilityActivator", "suffixActivator" )
+
+GafferSceneUI.ShaderTweaksUI.registerShaderLoader( "ai:*", GafferArnold.ArnoldShader )

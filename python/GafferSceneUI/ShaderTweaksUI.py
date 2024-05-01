@@ -414,3 +414,18 @@ def __graphEditorPlugContextMenu( graphEditor, plug, menuDefinition ) :
 	)
 
 GafferUI.GraphEditor.plugContextMenuSignal().connect( __graphEditorPlugContextMenu, scoped = False )
+
+__shaderLoaders = {}
+
+def registerShaderLoader( match, nodeInitializer ) :
+	global __shaderLoaders
+	__shaderLoaders[match] = nodeInitializer
+
+def getShaderLoader( shaderType ) :
+	global __shaderLoaders
+
+	for match, nodeInitializer in __shaderLoaders.items():
+		if IECore.StringAlgo.match( shaderType, match ):
+			return nodeInitializer
+
+	raise IECore.Exception( "No shader loader registered for type %s, options are %s"%(shaderType, list( __shaderLoaders.keys() ) ) )

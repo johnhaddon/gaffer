@@ -40,6 +40,7 @@ import IECore
 
 import Gaffer
 import GafferUI
+import GafferSceneUI
 
 import GafferOSL
 
@@ -231,3 +232,5 @@ Gaffer.Metadata.registerNode(
 	}
 
 )
+
+GafferSceneUI.ShaderTweaksUI.registerShaderLoader( "osl:*", GafferOSL.OSLShader )
