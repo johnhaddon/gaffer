@@ -445,9 +445,11 @@ class _ShaderInputColumn ( GafferUI.PathColumn ) :
 
 class _ShaderPath( Gaffer.Path ) :
 
-	def __init__( self, shaderNetworks, path, root = "/", filter = None ) :
+	def __init__( self, shaderNetworks, path, root = "/", filter = None, includeParameters = True ) :
 
 		Gaffer.Path.__init__( self, path, root, filter )
+
+		self.__includeParameters = includeParameters
 
 		assert( all( [ isinstance( n, IECoreScene.ShaderNetwork ) for n in shaderNetworks ] ) )
 
@@ -458,7 +460,7 @@ class _ShaderPath( Gaffer.Path ) :
 		if len( self ) > 0 and self.__shaders() is None :
 			return False
 
-		if len( self ) > 1 and self[1] not in self.__parameters() :
+		if len( self ) > 1 and self[1] not in self.__parameters():
 			return False
 
 		if len( self ) > 2 :
@@ -524,7 +526,7 @@ class _ShaderPath( Gaffer.Path ) :
 
 	def copy( self ) :
 
-		return _ShaderPath( self.__shaderNetworks, self[:], self.root(), self.getFilter() )
+		return _ShaderPath( self.__shaderNetworks, self[:], self.root(), self.getFilter(), self.__includeParameters )
 
 	def _children( self, canceller ) :
 
@@ -560,7 +562,8 @@ class _ShaderPath( Gaffer.Path ) :
 								self.__shaderNetworks,
 								self[:] + [shaderHandle],
 								self.root(),
-								self.getFilter()
+								self.getFilter(),
+								self.__includeParameters
 							)
 						)
 
@@ -577,7 +580,8 @@ class _ShaderPath( Gaffer.Path ) :
 						self.__shaderNetworks,
 						self[:] + [p],
 						self.root(),
-						self.getFilter()
+						self.getFilter(),
+						self.__includeParameters
 					)
 				)
 
@@ -588,7 +592,7 @@ class _ShaderPath( Gaffer.Path ) :
 	# if multiple shaders in the networks have the same name but different type.
 	def __parameters( self ) :
 
-		if len( self ) == 0 :
+		if len( self ) == 0 or not self.__includeParameters:
 			return []
 
 		return [ p for s in self.__shaders() for p in s.parameters.keys() ]
@@ -851,3 +855,134 @@ class _ShaderParameterDialogue( GafferUI.Dialogue ) :
 	def __updateButtonState( self, *unused ) :
 
 		self.__confirmButton.setEnabled( len( self.__result() ) > 0 )
+
+
+class _ShaderDialogue( GafferUI.Dialogue ) :
+
+	def __init__( self, shaderNetworks, title = None, **kw ) :
+
+		if title is None :
+			title = "Select Shader"
+
+		GafferUI.Dialogue.__init__( self, title, **kw )
+
+		self.__shaderNetworks = shaderNetworks
+
+		self.__path = _ShaderPath( self.__shaderNetworks, path = "/", includeParameters = False )
+
+		self.__filter = _PathMatcherPathFilter( [ "" ], self.__path.copy() )
+		self.__filter.setEnabled( False )
+		self.__filter.userData()["UI"] = {
+			"editable" : True,
+			"label" : "Filter",
+			"propertyFilters" : { "name": "Name", "shader:type": "Type" }
+		}
+
+		self.__path.setFilter( self.__filter )
+
+		with GafferUI.ListContainer( spacing = 4 ) as mainColumn :
+			self.__pathListingWidget = GafferUI.PathListingWidget(
+				self.__path,
+				columns = (
+					_DuplicateIconColumn( "Name", "name" ),
+					GafferUI.PathListingWidget.StandardColumn( "Type", "shader:type" ),
+					GafferUI.PathListingWidget.StandardColumn( "Value", "shader:value" ),
+					_ShaderInputColumn( "Input" ),
+				),
+				allowMultipleSelection = False,
+				displayMode = GafferUI.PathListingWidget.DisplayMode.Tree,
+				sortable = False,
+				horizontalScrollMode = GafferUI.ScrollMode.Automatic
+			)
+
+			GafferUI.PathFilterWidget.create( self.__filter )
+
+		self.__inputNavigateColumn = self.__pathListingWidget.getColumns()[3]
+
+		self._setWidget( mainColumn )
+
+		self.__pathListingWidget.selectionChangedSignal().connect( Gaffer.WeakMethod( self.__updateButtonState ), scoped = False )
+		self.__pathListingWidget.buttonReleaseSignal().connectFront( Gaffer.WeakMethod( self.__buttonRelease ), scoped = False )
+		self.__pathListingWidget.pathSelectedSignal().connect( Gaffer.WeakMethod( self.__pathSelected ), scoped = False )
+
+		self._addButton( "Cancel" )
+		self.__confirmButton = self._addButton( "OK" )
+		self.__confirmButton.clickedSignal().connect( Gaffer.WeakMethod( self.__buttonClicked ), scoped = False )
+
+		self.__shaderSelectedSignal = Gaffer.Signal1()
+
+		self.__updateButtonState()
+
+	def shaderSelectedSignal( self ) :
+
+		return self.__shaderSelectedSignal
+
+	# Causes the dialogue to enter a modal state, returning the handle of the selected shader
+	# once it has been selected by the user. Returns None if the dialogue is cancelled.
+	def waitForShader( self, **kw ) :
+
+		if len( self.__path.children() ) == 0 :
+			dialogue = GafferUI.ConfirmationDialogue(
+				"Shader Browser",
+				"No shaders to browse."
+			)
+			dialogue.waitForConfirmation( **kw )
+
+		else :
+			button = self.waitForButton( **kw )
+
+			if button is self.__confirmButton :
+				return self.__result()
+
+		return None
+
+	def __buttonClicked( self, button ) :
+
+		if button is self.__confirmButton :
+			self.shaderSelectedSignal()( self.__result() )
+
+	def __pathSelected( self, pathListing ) :
+
+		if self.__confirmButton.getEnabled() :
+			self.__confirmButton.clickedSignal()( self.__confirmButton )
+
+	def __buttonRelease( self, pathListing, event ) :
+
+		if event.button != event.Buttons.Left :
+			return False
+
+		path = pathListing.pathAt( event.line.p0 )
+		if path is None :
+			return False
+
+		column = pathListing.columnAt( event.line.p0 )
+		if column == self.__inputNavigateColumn :
+			inputRootPath = path.parent().parent()
+			inputs = path.property( "shader:inputs" )
+
+			if inputs is None :
+				return False
+
+			if len( inputs ) == 0 :
+				return False
+
+			inputPaths = [ inputRootPath.copy().append( i ) for i in inputs ]
+
+			if all( [ i.isValid() for i in inputPaths ] ) :
+				self.__pathListingWidget.setSelection( IECore.PathMatcher( [ str( i ) for i in inputPaths ] ) )
+
+			return True
+
+		return False
+
+	def __result( self ) :
+
+		resultPaths = self.__pathListingWidget.getSelection()
+		if not len( resultPaths.paths() ):
+			return None
+
+		return resultPaths.paths()[0].strip( "/" )
+
+	def __updateButtonState( self, *unused ) :
+
+		self.__confirmButton.setEnabled( self.__result() != None )
