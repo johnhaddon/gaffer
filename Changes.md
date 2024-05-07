@@ -23,6 +23,7 @@ Fixes
   - Fixed rendering of `ai:volume` shaders loaded from USD (#5830).
   - Renamed Arnold/Globals/Imager menu option to Arnold/Globals/Imagers so that the actual ArnoldImager node menu option wasn't overwritten.
 - CodeWidget : Fixed errors handling highlights which spanned more than one line, such as triple-quoted strings in the PythonEditor.
+- MultiLineTextWidget : Stopped spurious `editingFinishedSignal()` emissions when popup menus were shown for the widget.
 
 API
 ---

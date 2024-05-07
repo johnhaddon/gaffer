@@ -449,7 +449,12 @@ class _FocusOutEventFilter( QtCore.QObject ) :
 
 		if qEvent.type()==QtCore.QEvent.FocusOut :
 			widget = GafferUI.Widget._owner( qObject )
-			if widget is not None :
+			# Using `hasFocus()` to distinguish between permanent
+			# loss of focus (the end of editing), and temporary loss
+			# of focus caused by a popup menu. In the latter case we
+			# get a confusing FocusOut event when the menu pops up,
+			# but focus returns to us as soon as it is closed.
+			if widget is not None and not qObject.hasFocus() :
 				widget.editingFinishedSignal()( widget )
 
 		return False
