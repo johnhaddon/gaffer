@@ -166,6 +166,11 @@ def __createShaderTweakProxy( plug, sourceNode, outputNames, outputTypes ):
 				continue
 			break
 
+		# Make sure the target plug on the destination ShaderTweaks is visible if we're connecting to it
+		# ( might not be the case if we're doing this using the menu buttons on ShaderTweaks )
+		if type( plug.node() ) == GafferScene.ShaderTweaks and plug.parent().parent() == plug.node()["tweaks"]:
+			Gaffer.Metadata.registerValue( plug.parent(), "noduleLayout:visible", True )
+
 		# \todo - It's probably bad that I'm doing this manually, instead of using GraphGadget.setNodePosition
 		# ... but it also feels wrong that that is a non-static member of GraphGadget ... it doesn't use
 		# any members of GraphGadget, and when creating a new ShaderTweakProxy from the Node Editor, this totally
