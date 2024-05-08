@@ -48,6 +48,8 @@
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/StringAlgo.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/DataAlgo.h"
 
 #include "fmt/format.h"
 
@@ -76,6 +78,77 @@ std::pair<const GafferScene::Shader *, const Gaffer::Plug *> shaderOutput( const
 		}
 	}
 	return { nullptr, nullptr };
+}
+
+DataPtr castDataToType( const Data* source, const Data *target )
+{
+	DataPtr result;
+	if( source->typeId() == target->typeId() )
+	{
+		result = source->copy();
+	}
+
+	dispatch( target,
+		[source, &result]( const auto *targetTyped )
+		{
+			using TargetType = typename std::remove_const_t<std::remove_pointer_t<decltype( targetTyped )> >;
+			if constexpr( TypeTraits::IsSimpleTypedData<TargetType>::value )
+			{
+				using TargetValueType = typename TargetType::ValueType;
+				if constexpr( std::is_arithmetic_v< TargetValueType > )
+				{
+					dispatch( source,
+						[&result]( const auto *sourceTyped )
+						{
+							using SourceType = typename std::remove_const_t<std::remove_pointer_t<decltype( sourceTyped )> >;
+							if constexpr( TypeTraits::IsNumericSimpleTypedData<SourceType>::value )
+							{
+								result = new TargetType( sourceTyped->readable() );
+							}
+						}
+					);
+					return;
+				}
+
+				if constexpr( TypeTraits::IsVec3<TargetValueType>::value || TypeTraits::IsColor<TargetValueType>::value )
+				{
+					dispatch( source,
+						[&result]( const auto *sourceTyped )
+						{
+							using SourceType = typename std::remove_const_t<std::remove_pointer_t<decltype( sourceTyped )> >;
+							if constexpr( TypeTraits::IsSimpleTypedData<SourceType>::value )
+							{
+								using SourceValueType = typename SourceType::ValueType;
+								if constexpr(
+									TypeTraits::IsVec3TypedData<SourceValueType>::value ||
+									TypeTraits::IsColor<SourceValueType>::value
+								)
+								{
+									typename TargetType::ValueType r;
+									r[0] = sourceTyped->readable()[0];
+									r[1] = sourceTyped->readable()[1];
+									r[2] = sourceTyped->readable()[2];
+									result = new TargetType( r );
+								}
+							}
+						}
+					);
+					return;
+				}
+			}
+
+		}
+	);
+
+	if( !result )
+	{
+		throw IECore::Exception( fmt::format(
+			"Cannot connect auto proxy from \"{}\" tweak to shader input of type \"{}\"",
+			source->typeName(), target->typeName()
+		) );
+	}
+
+	return result;
 }
 
 }  // namespace
@@ -372,6 +445,24 @@ bool ShaderTweaks::applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Tweak
 								if( originalInput )
 								{
 									shaderNetwork->addConnection( { originalInput, dest } );
+								}
+								else
+								{
+									const IECoreScene::Shader *proxyConnectedShader = shaderNetwork->getShader( dest.shader );
+									if( !proxyConnectedShader )
+									{
+										throw IECore::Exception( fmt::format( "ShaderTweakProxy connected to non-existent shader \"{}\"", dest.shader.string() ) );
+									}
+
+									// Regular tweak
+									auto modifiedShader = modifiedShaders.insert( { dest.shader, nullptr } );
+									if( modifiedShader.second )
+									{
+										modifiedShader.first->second = proxyConnectedShader->copy();
+									}
+
+									const IECore::Data *origDestParameter = modifiedShader.first->second->parameters().at(dest.name).get();
+									modifiedShader.first->second->parameters()[dest.name] = castDataToType( shader->parameters().at(parameter.name).get(), origDestParameter );
 								}
 							}
 							else
