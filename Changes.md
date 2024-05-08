@@ -6,6 +6,11 @@ Features
 
 - RenderPassShader : Added new node for overriding a shader used by a render pass type.
 
+Fixes
+-----
+
+- OptionQuery : Fixed bug which allowed the `scene:path` context variable to leak into the context used to evaluate the globals.
+
 API
 ---
 
