@@ -445,11 +445,11 @@ class _ShaderInputColumn ( GafferUI.PathColumn ) :
 
 class _ShaderPath( Gaffer.Path ) :
 
-	def __init__( self, shaderNetworks, path, root = "/", filter = None, includeParameters = True ) :
+	def __init__( self, shaderNetworks, path, root = "/", filter = None, connectedParametersOnly = False ) :
 
 		Gaffer.Path.__init__( self, path, root, filter )
 
-		self.__includeParameters = includeParameters
+		self.__connectedParametersOnly = connectedParametersOnly
 
 		assert( all( [ isinstance( n, IECoreScene.ShaderNetwork ) for n in shaderNetworks ] ) )
 
@@ -526,7 +526,7 @@ class _ShaderPath( Gaffer.Path ) :
 
 	def copy( self ) :
 
-		return _ShaderPath( self.__shaderNetworks, self[:], self.root(), self.getFilter(), self.__includeParameters )
+		return _ShaderPath( self.__shaderNetworks, self[:], self.root(), self.getFilter(), self.__connectedParametersOnly )
 
 	def _children( self, canceller ) :
 
@@ -563,7 +563,7 @@ class _ShaderPath( Gaffer.Path ) :
 								self[:] + [shaderHandle],
 								self.root(),
 								self.getFilter(),
-								self.__includeParameters
+								self.__connectedParametersOnly
 							)
 						)
 
@@ -581,7 +581,7 @@ class _ShaderPath( Gaffer.Path ) :
 						self[:] + [p],
 						self.root(),
 						self.getFilter(),
-						self.__includeParameters
+						self.__connectedParametersOnly
 					)
 				)
 
@@ -592,8 +592,16 @@ class _ShaderPath( Gaffer.Path ) :
 	# if multiple shaders in the networks have the same name but different type.
 	def __parameters( self ) :
 
-		if len( self ) == 0 or not self.__includeParameters:
+		if len( self ) == 0:
 			return []
+
+		if self.__connectedParametersOnly:
+			connectedParams = set()
+			for n in self.__shaderNetworks:
+				if self[0] in n.shaders():
+					for c in n.inputConnections( self[0] ):
+						connectedParams.add( c.destination.name )
+			return list( connectedParams )
 
 		return [ p for s in self.__shaders() for p in s.parameters.keys() ]
 
@@ -868,7 +876,7 @@ class _ShaderDialogue( GafferUI.Dialogue ) :
 
 		self.__shaderNetworks = shaderNetworks
 
-		self.__path = _ShaderPath( self.__shaderNetworks, path = "/", includeParameters = False )
+		self.__path = _ShaderPath( self.__shaderNetworks, path = "/", connectedParametersOnly = True )
 
 		self.__filter = _PathMatcherPathFilter( [ "" ], self.__path.copy() )
 		self.__filter.setEnabled( False )
@@ -905,7 +913,7 @@ class _ShaderDialogue( GafferUI.Dialogue ) :
 		self.__pathListingWidget.buttonReleaseSignal().connectFront( Gaffer.WeakMethod( self.__buttonRelease ), scoped = False )
 		self.__pathListingWidget.pathSelectedSignal().connect( Gaffer.WeakMethod( self.__pathSelected ), scoped = False )
 
-		self._addButton( "Cancel" )
+		self._addButton( "Cancel" ).clickedSignal().connect( Gaffer.WeakMethod( self.__buttonClicked ), scoped = False )
 		self.__confirmButton = self._addButton( "OK" )
 		self.__confirmButton.clickedSignal().connect( Gaffer.WeakMethod( self.__buttonClicked ), scoped = False )
 
@@ -929,17 +937,30 @@ class _ShaderDialogue( GafferUI.Dialogue ) :
 			dialogue.waitForConfirmation( **kw )
 
 		else :
-			button = self.waitForButton( **kw )
-
-			if button is self.__confirmButton :
-				return self.__result()
+			self.setModal( True, **kw )
+			return self.__result()
 
 		return None
 
 	def __buttonClicked( self, button ) :
 
 		if button is self.__confirmButton :
-			self.shaderSelectedSignal()( self.__result() )
+			result = self.__result()
+			if "/" in self.__result():
+				handle = tuple( result.split( "/" ) )
+				sourceNode = None
+				for n in self.__shaderNetworks:
+					i = n.input( handle )
+					if i:
+						sourceNode = i.shader
+				if sourceNode:
+					resultPaths = self.__pathListingWidget.setSelection( IECore.PathMatcher( [ sourceNode ] ) )
+					return
+			else:
+				self.shaderSelectedSignal()( self.__result() )
+
+		if self.getModal():
+			self.setModal( False )
 
 	def __pathSelected( self, pathListing ) :
 
@@ -985,4 +1006,11 @@ class _ShaderDialogue( GafferUI.Dialogue ) :
 
 	def __updateButtonState( self, *unused ) :
 
-		self.__confirmButton.setEnabled( self.__result() != None )
+		result = self.__result()
+
+		if result == None:
+			self.__confirmButton.setEnabled( False )
+			self.__confirmButton.setText( "OK" )
+		else:
+			self.__confirmButton.setEnabled( True )
+			self.__confirmButton.setText( "Select Input Node" if "/" in result else "OK" )
