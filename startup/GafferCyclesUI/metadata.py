@@ -379,6 +379,9 @@ parameterMetadata = {
         "rotation" : {
             "layout:index" : 5,
         },
+        "angle" : {
+            "layout:visibilityActivator" : lambda plug : plug.node()["parameters"]["rotate_type"].getValue() != "euler_xyz"
+        }
     },
     "clamp" : {
         "clamp_type" : {
@@ -811,13 +814,18 @@ def metadata( plug, name ) :
     parameterDict = shaderDict.get( plug.getName() )
     if parameterDict is None :
         return None
-    return parameterDict.get( name )
+
+    value = parameterDict.get( name )
+    if callable( value ) :
+        return value( plug )
+    else :
+        return value
 
 ### CyclesShader ###
 
 ### main metadata assignments ###
 
-for name in ( "label", "layout:section", "layout:index", "userDefault" ) :
+for name in ( "label", "layout:section", "layout:index", "userDefault", "layout:visibilityActivator" ) :
     Gaffer.Metadata.registerValue( GafferCycles.CyclesShader, "parameters.*", name, functools.partial( metadata, name = name ) )
 
 ### parameter visibility in principled_hair_bsdf and vector_rotate ### 
