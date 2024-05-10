@@ -67,9 +67,6 @@ class Assertion( GafferDispatch.TaskNode ) :
 
 	def canSetup( self, prototypePlug ) :
 
-		if "a" in self :
-			return False
-
 		return (
 			"a" not in self and
 			isinstance( prototypePlug, Gaffer.ValuePlug ) and
@@ -89,7 +86,7 @@ class Assertion( GafferDispatch.TaskNode ) :
 		if isinstance( prototypePlug, ( Gaffer.IntPlug, Gaffer.FloatPlug ) ) :
 			deltaPrototype = prototypePlug
 		elif isinstance( prototypePlug, ( Gaffer.V2iPlug, Gaffer.V3iPlug, Gaffer.V3fPlug, Gaffer.Color3fPlug, Gaffer.Color4fPlug ) ) :
-			deltaProtype = prototypePlug[0]
+			deltaPrototype = prototypePlug[0]
 		elif isinstance( prototypePlug, ( Gaffer.Box2iPlug, Gaffer.Box3iPlug, Gaffer.Box2fPlug, Gaffer.Box3fPlug ) ) :
 			deltaPrototype = prototypePlug["min"][0]
 
@@ -113,7 +110,6 @@ class Assertion( GafferDispatch.TaskNode ) :
 
 		a = self["a"].getValue()
 		b = self["b"].getValue()
-		#delate = self["delta"].getValue()
 		message = self["message"].getValue() or None
 
 		## TODO : HOW TO HAVE THIS BE RECOGNISED AS A FAILURE AND NOT AN ERROR???
@@ -121,13 +117,17 @@ class Assertion( GafferDispatch.TaskNode ) :
 		match self["mode"].getValue() :
 
 			case self.Mode.Equal :
-				test.assertEqual( a, b, message )
+				delta = self["delta"].getValue() if "delta" in self else 0
+				if delta :
+					test.assertAlmostEqual( a, b, message, delta = delta )
+				else :
+					test.assertEqual( a, b, message )
 			case self.Mode.NotEqual :
 				test.assertNotEqual( a, b, message )
 			case self.Mode.Greater :
-				test.assertGreater( a, b, message, delta = delta )
+				test.assertGreater( a, b, message )
 			case self.Mode.Less :
-				test.assertLess( a, b, message, delta = delta )
+				test.assertLess( a, b, message )
 
 IECore.registerRunTimeTyped( Assertion, typeName = "GafferDispatch::Assertion" )
 

@@ -64,10 +64,15 @@ Gaffer.Metadata.registerNode(
 
 		"a" : (
 
+			"nodule:type", "GafferUI::StandardNodule",
+			"noduleLayout:section", "left",
 
 		),
 
 		"b" : (
+
+			"nodule:type", "GafferUI::StandardNodule",
+			"noduleLayout:section", "left",
 
 		),
 
@@ -102,6 +107,9 @@ class AssertionPlugAdder( GafferUI.PlugAdder ) :
 
 		self.__node = node
 
+		self.__node.childAddedSignal().connect( Gaffer.WeakMethod( self.__updateVisibility ), scoped = False )
+		self.__node.childRemovedSignal().connect( Gaffer.WeakMethod( self.__updateVisibility ), scoped = False )
+
 	def canCreateConnection( self, endpoint ) :
 
 		if not GafferUI.PlugAdder.canCreateConnection( self, endpoint ) :
@@ -114,7 +122,10 @@ class AssertionPlugAdder( GafferUI.PlugAdder ) :
 		with Gaffer.UndoScope( self.__node.scriptNode() ) :
 			self.__node.setup( endpoint )
 			self.__node["a"].setInput( endpoint )
-			## TODO : CAN THIS GO WRONG???
+
+	def __updateVisibility( self, *unused ) :
+
+		self.setVisible( "a" not in self.__node )
 
 GafferUI.NoduleLayout.registerCustomGadget( "GafferDispatchUI.AssertionUI.AssertionPlugAdder", AssertionPlugAdder )
 
