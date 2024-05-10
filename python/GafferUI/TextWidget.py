@@ -394,6 +394,15 @@ class _LineEdit( QtWidgets.QLineEdit ) :
 
 	def event(self, event):
 
+		# THIS IS INTENDED TO AVOID SWALLING UNDO SHORTCUTS WHEN THERE IS NO
+		# UNDO QUEUE IN THE WIDGET, THUS ALLOWING GAFFER'S GLOBAL SHORTCUTS TO
+		# DO UNDO VIA GAFFER'S OWN QUEUE. STRINGPLUGVALUEWIDGET CALLS `clearUndo()`
+		# WHEN SETTING THE PLUG VALUE, SO THAT WE TRANSITION FROM ONE UNDO QUEUE
+		# TO THE OTHER.
+		#
+		# BUT IT DOESN'T WORK AT ALL ANY MORE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		# I'M NOT SURE WHY. EITHER A QT CHANGE, OR THE MENUBAR EVENT FILTER? SOMETHING
+		# ELSE???
 		if event.type() == event.ShortcutOverride :
 			if event == QtGui.QKeySequence.Undo :
 				if not self.isModified() or not self.isUndoAvailable() :
