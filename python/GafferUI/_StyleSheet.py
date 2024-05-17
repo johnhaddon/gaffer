@@ -38,6 +38,8 @@
 import os
 import string
 
+import imath
+
 from Qt import QtCore
 from Qt import QtGui
 
@@ -70,11 +72,17 @@ _styleColors = {
 	# The 'alt' suffixed colors are for use in UI elements such as table views
 	# that require subtle variation of the base background color.
 
-	"backgroundDarkest" : (0, 0, 0),
+	"baseBackground" : ( 20, 20, 20 ),
+	"containerBackground" : ( 60, 60, 60, 160 ),
 
-	"backgroundDarker" : (35, 35, 35),
+	"tableViewBackground" : ( 60, 60, 60 ),
+	"tableViewBackgroundAlt" : ( 55, 55, 55 ),
 
-	"backgroundDark" : (52, 52, 52),
+	"controlBackground" : ( 75, 75, 75 ),
+	"controlBackgroundReadOnly" : ( 70, 70, 70 ),
+
+	"lineColor" : ( 20, 20, 20, 128 ),
+
 	"backgroundDarkTransparent" : (52, 52, 52, 100),
 	"backgroundDarkHighlight" : (62, 62, 62),
 
@@ -218,8 +226,14 @@ _styleSheet = string.Template(
 		color: $foreground;
 		font: 10px;
 		etch-disabled-text: 0;
-		background-color: $backgroundDarker;
+		background-color: $baseBackground;
 		border: 1px solid #555555;
+	}
+
+	/* TODO : TO BRIGHT? THINK THE TRANSPARENCY MAY NOT BE WORKING HERE */
+
+	*[gafferClasses~="GafferUI.Window"] *[gafferClasses~="GafferUI.Window"] {
+		background-color: $containerBackground;
 	}
 
 	QWidget {
@@ -258,22 +272,22 @@ _styleSheet = string.Template(
 	}
 
 	QMenuBar {
-		background-color: $backgroundDarkest;
+		background-color: $baseBackground;
 		font-weight: bold;
 		padding: 0px;
 		margin: 0px;
 	}
 
 	QMenuBar::item {
-		background-color: $backgroundDarkest;
+		background-color: transparent;
 		padding: 5px 8px 5px 8px;
 	}
 
 	QMenu {
-		border: 1px solid $backgroundDark;
+		border: 1px solid $lineColor;
 		padding-bottom: 5px;
 		padding-top: 5px;
-		background-color: $backgroundLight;
+		background-color: $controlBackground;
 	}
 
 	QMenu::icon {
@@ -292,7 +306,7 @@ _styleSheet = string.Template(
 	}
 
 	QLabel#gafferMenuTitle {
-		background-color: $backgroundDarkest;
+		background-color: $baseBackground;
 		font-weight: bold;
 		padding: 5px 25px 5px 20px;
 		margin-bottom: 6px;
@@ -371,13 +385,13 @@ _styleSheet = string.Template(
 		border: 1px solid transparent;
 		border-bottom-color: $tintDarkerStronger;
 		border-right-color: $tintDarkerStronger;
-		background-color: $backgroundLight;
+		background-color: $controlBackground;
 		border-radius: $controlCornerRadius;
 	}
 
 	QLineEdit[readOnly="true"], QPlainTextEdit[readOnly="true"] {
 		padding: 0px;
-		background-color: $tintLighterSubtle;
+		background-color: $controlBackgroundReadOnly;
 		border-color: transparent;
 	}
 
@@ -394,7 +408,7 @@ _styleSheet = string.Template(
 	QPlainTextEdit[gafferRole="Code"] {
 		font-family: $monospaceFontFamily;
 		font-size: 11px;
-		background-color: $backgroundDark;
+		background-color: red; /* TODO */
 	}
 
 	QLineEdit:focus, QPlainTextEdit[readOnly="false"]:focus, QLineEdit[gafferHighlighted="true"] {
@@ -418,7 +432,7 @@ _styleSheet = string.Template(
 	}
 
 	QWidget[gafferClass="GafferUI.SplineWidget"] {
-		border: 1px solid $backgroundDark;
+		border: 1px solid $lineColor;
 	}
 
 	QWidget[gafferClass="GafferUI.SplineWidget"][gafferHighlighted="true"] {
@@ -429,7 +443,7 @@ _styleSheet = string.Template(
 		background-color: $backgroundLighter;
 		padding: 1px;
 		margin: 0px;
-		border: 1px solid $backgroundDark;
+		border: 1px solid $lineColor;
 	}
 
 	QDateTimeEdit::drop-down {
@@ -457,17 +471,17 @@ _styleSheet = string.Template(
 		font-size : 14pt;
 		selection-background-color: $brightColor;
 		background-color : $backgroundLighter;
-		gridline-color: $backgroundDark;
+		gridline-color: $lineColor;
 	}
 
 	/* buttons */
 
 	QPushButton[gafferWithFrame="true"],
 	QComboBox {
-		border: 1px solid $backgroundDarkHighlight;
-		border-top-color: $backgroundLightHighlight;
-		border-left-color: $backgroundLightHighlight;
-		background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 $backgroundLightHighlight, stop: 0.1 $backgroundLight, stop: 0.90 $backgroundLightLowlight);
+		border: 1px solid $lineColor;
+		/* border-top-color: $backgroundLightHighlight;
+		border-left-color: $backgroundLightHighlight; TODO */
+		background-color : $controlBackground;
 		border-radius: 4px;
 		padding: 4px;
 		margin: 1px;
@@ -479,12 +493,12 @@ _styleSheet = string.Template(
 	}
 
 	QPushButton[gafferWithFrame="true"][gafferThinButton="true"] {
-		background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 $backgroundLighter, stop: 0.1 $backgroundLightHighlight, stop: 0.90 $backgroundLightLowlight);
+		background-color : $controlBackground;
 		padding: 2px;
 	}
 
 	*[gafferPlugValueWidget="true"] QPushButton[gafferWithFrame="true"][gafferClass="GafferUI.MenuButton"] {
-		background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 $backgroundLighter, stop: 0.1 $backgroundLightHighlight, stop: 0.90 $backgroundLightLowlight);
+		background-color : $controlBackground;
 		font-weight: normal;
 		text-align: left;
 	}
@@ -553,7 +567,7 @@ _styleSheet = string.Template(
 	}
 
 	QComboBox QAbstractItemView {
-		border: 1px solid $backgroundDark;
+		border: 1px solid $lineColor;
 		selection-background-color: $backgroundLighter;
 		background-color: $background;
 		height:40px;
@@ -594,9 +608,7 @@ _styleSheet = string.Template(
 		border-top-right-radius: 4px;
 		margin: 0px;
 		margin-right: 1px;
-		border: 1px solid $backgroundHighlight;
-		border-right-color: $backgroundLowlight;
-		border-bottom-color: $background /* blend into frame below */
+		border-color: transparent;
 	}
 
 	QTabBar[gafferHasTabCloseButtons="true"]::tab {
@@ -608,67 +620,38 @@ _styleSheet = string.Template(
 	}
 
 	QTabBar::tab:disabled {
-		color: $tintLighter;
+		color: $tintLighter; /* TODO */
 	}
 
 	QTabBar::tab:selected {
-		background-color: $background;
-	}
-
-	QTabWidget QTabWidget > QTabBar::tab:selected {
-		background-color: $backgroundRaised;
-		border-color: $backgroundRaisedHighlight;
-		border-right-color: $backgroundRaisedLowlight;
-		border-bottom-color: $backgroundRaised; /* blend into frame below */
+		background-color: $containerBackground;
 	}
 
 	QTabBar::tab:!selected {
 		color: $tintLighterStronger;
 		background-color: transparent;
 		border-color: transparent;
-		border-bottom-color: $backgroundHighlight;
+		/*border-bottom-color: $backgroundHighlight; TODO */
 	}
 
 	QTabBar::tab:!selected:hover {
 		background-color: $tintLighter;
 	}
 
-	QTabWidget QTabWidget > QTabBar::tab:!selected {
-		color: $tintLighterStronger;
-		background-color: transparent;
-		border-color: transparent;
-		border-bottom-color: $backgroundRaisedHighlight;
-	}
-
-	QTabWidget QTabWidget > QTabBar::tab:!selected:hover {
-		background-color: $tintLighterSubtle;
-	}
-
 	QTabWidget::pane {
-		background-color: $background;
+		background-color: $containerBackground;
 		/* tab widget frame has a line at the top, tweaked up 1 pixel */
 		/* so that it sits underneath the bottom of the tabs.         */
 		/* this means the active tab can blend into the frame.        */
-		top: -1px;
+		/*top: -1px;*/
 		border-radius: 2px;
 		border-top-left-radius: 0;
-		border: 1px solid $backgroundHighlight;
-		border-right-color: $backgroundLowlight;
-		border-bottom-color: $backgroundLowlight;
+		border: none;
 	}
 
 	QTabWidget[gafferNumChildren="0"]::pane {
 		background-color: transparent;
 		border-color: transparent;
-	}
-
-	QTabWidget QTabWidget::pane {
-		background-color: $backgroundRaised;
-		border-radius: $widgetCornerRadius;
-		border-top-left-radius: 0;
-		border-color: $backgroundRaisedHighlight;
-		border-right-color: $backgroundRaisedLowlight;
-		border-bottom-color: $backgroundRaisedLowlight;
 	}
 
 	QTabWidget[gafferHighlighted="true"]::pane {
@@ -680,11 +663,6 @@ _styleSheet = string.Template(
 	QTabWidget[gafferHighlighted="true"] > QTabBar::tab:selected {
 		border-color: $brightColor;
 		border-bottom-color: $background; /* blend into frame below */
-	}
-
-	QTabWidget QTabWidget[gafferHighlighted="true"] > QTabBar::tab:selected {
-		border-color: $brightColor;
-		border-bottom-color: $backgroundRaised; /* blend into frame below */
 	}
 
 	QTabWidget[gafferHighlighted="true"] > QTabBar::tab:!selected {
@@ -752,7 +730,7 @@ _styleSheet = string.Template(
 
 	QTabBar[gafferClass="GafferUI.SpreadsheetUI._SectionChooser"] QToolButton {
 		background: $backgroundHighlight;
-		border: 1px solid $backgroundDark;
+		border: 1px solid $lineColor;
 	}
 
 	QTabBar[gafferClass="GafferUI.SpreadsheetUI._SectionChooser"] QToolButton::left-arrow {
@@ -1208,7 +1186,7 @@ _styleSheet = string.Template(
 		spacing: 0px;
 		width: 30px;
 		height: 30px;
-		border: 1px solid $backgroundDark;
+		border: 1px solid $lineColor;
 		padding-left: 4px;
 	}
 
@@ -1231,7 +1209,7 @@ _styleSheet = string.Template(
 	}
 
 	*[gafferBorderStyle="Flat"] {
-		border: 1px solid $backgroundDark;
+		border: 1px solid $lineColor;
 		border-radius: $widgetCornerRadius;
 		padding: 2px;
 	}
@@ -1252,7 +1230,7 @@ _styleSheet = string.Template(
 
 	QToolTip {
 		background-clip: border;
-		color: $backgroundDarkest;
+		color: $baseBackground;
 		background-color: $foreground;
 		padding: 2px;
 	}
@@ -1261,12 +1239,13 @@ _styleSheet = string.Template(
 	/* Tree/Table views */
 
 	QTreeView {
-		background-color: $backgroundRaised;
-		border: 1px solid $backgroundRaisedHighlight;
+		background-color: $tableViewBackground;
+		border: none;
+		/*border: 1px solid $backgroundRaisedHighlight;
 		border-bottom-color: $backgroundRaisedLowlight;
-		border-right-color: $backgroundRaisedLowlight;
+		border-right-color: $backgroundRaisedLowlight;*/
 		padding: 0;
-		alternate-background-color: $tintDarker;
+		alternate-background-color: $tableViewBackgroundAlt;
 		paint-alternating-row-colors-for-empty-area: 1;
 	}
 
@@ -1310,11 +1289,11 @@ _styleSheet = string.Template(
 	}
 
 	*[gafferClass="GafferUI.SpreadsheetUI._PlugTableView"]::item {
-		background-color: $background;
+		background-color: $tableViewBackground;
 	}
 
 	*[gafferClass="GafferUI.SpreadsheetUI._PlugTableView"]::item:alternate {
-		background-color: $backgroundAlt;
+		background-color: $tableViewBackgroundAlt;
 	}
 
 	*[gafferClass="GafferUI.SpreadsheetUI._PlugTableView"]::item:selected {
@@ -1322,11 +1301,11 @@ _styleSheet = string.Template(
 	}
 
 	*[gafferClass="GafferUI.SpreadsheetUI._PlugTableView"][gafferReverseRowColors="true"]::item {
-		background-color: $backgroundAlt;
+		background-color: $tableViewBackgroundAlt;
 	}
 
 	*[gafferClass="GafferUI.SpreadsheetUI._PlugTableView"][gafferReverseRowColors="true"]::item:alternate {
-		background-color: $background;
+		background-color: $tableViewBackground;
 	}
 
 	*[gafferClass="GafferUI.SpreadsheetUI._PlugTableView"][gafferReverseRowColors="true"]::item:selected {
@@ -1336,7 +1315,7 @@ _styleSheet = string.Template(
 	_TableView {
 		gridline-color: $backgroundLowlight;
 		padding: 0px;
-		background-color: $backgroundRaised;
+		background-color: $tableViewBackground;
 	}
 
 	_TableView:disabled {
@@ -1436,8 +1415,8 @@ _styleSheet = string.Template(
 	/* progress bars */
 
 	QProgressBar {
-		border: 1px solid $backgroundDark;
-		background: $backgroundLighter;
+		border: 1px solid $lineColor;
+		background: $controlBackground;
 		padding: 1px;
 		text-align: center;
 	}
@@ -1512,7 +1491,7 @@ _styleSheet = string.Template(
 		border: 1px solid rgb( 46, 75, 107 );
 		border-top-color: rgb( 75, 113, 155 );
 		border-left-color: rgb( 75, 113, 155 );
-		background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb( 69, 113, 161 ), stop: 0.1 rgb( 48, 99, 153 ), stop: 0.90 rgb( 54, 88, 125 ));
+		background-color : $controlBackground;
 	}
 
 	*[gafferClass="GafferSceneUI.InteractiveRenderUI._ViewRenderControlUI"] QPushButton[gafferWithFrame="true"] {
@@ -1602,45 +1581,29 @@ _styleSheet = string.Template(
 	QPushButton[gafferAdjoinedTop="true"] {
 		border-top-left-radius: 1px;
 		border-top-right-radius: 1px;
-		border-top-color: $backgroundLightHighlightAdjoined;
+		/* border-top-color: $backgroundLightHighlightAdjoined; TODO */
 		margin-top: 0;
 	}
 
 	QPushButton[gafferAdjoinedBottom="true"] {
 		border-bottom-left-radius: 1px;
 		border-bottom-right-radius: 1px;
-		border-bottom-color: $backgroundDarkHighlightAdjoined;
+		/* border-bottom-color: $backgroundDarkHighlightAdjoined; TODO */
 		margin-bottom: 0;
 	}
 
 	QPushButton[gafferAdjoinedLeft="true"] {
 		border-top-left-radius: 1px;
 		border-bottom-left-radius: 1px;
-		border-left-color: $backgroundLightHighlightAdjoined;
+		/* border-left-color: $backgroundLightHighlightAdjoined; TODO */
 		margin-left: 0;
 	}
 
 	QPushButton[gafferAdjoinedRight="true"] {
 		border-top-right-radius: 1px;
 		border-bottom-right-radius: 1px;
-		border-right-color: $backgroundDarkHighlightAdjoined;
+		/* border-right-color: $backgroundDarkHighlightAdjoined; TODO */
 		margin-right: 0;
-	}
-
-	/* PathChooserWidget */
-
-	*[gafferClass="GafferUI.PathChooserWidget"] #gafferPathListingContainer {
-		border-radius: $widgetCornerRadius;
-		background-color: $background;
-		border: 1px solid $backgroundHighlight;
-		border-right-color: $backgroundLowlight;
-		border-bottom-color: $backgroundLowlight;
-	}
-
-	*[gafferClass="GafferUI.PathChooserWidget"] QTreeView::item {
-		height: 22px;
-		padding-top: 0px;
-		padding-bottom: 0px;
 	}
 
 	/* SceneInspector */
@@ -1716,12 +1679,12 @@ _styleSheet = string.Template(
 		padding: 2px;
 		padding-left: 4px;
 		border-radius: 2px;
-		border: 1px solid $backgroundDarkHighlight;
-		border-top-color: $backgroundLightHighlight;
-		background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 $backgroundLighter, stop: 0.1 $backgroundLightHighlight, stop: 0.90 $backgroundLightLowlight);
+		border: 1px solid $lineColor;
+		/* border-top-color: $backgroundLightHighlight; TODO */
+		background-color : $controlBackground;
 		border-top-left-radius: 1px;
 		border-bottom-left-radius: 1px;
-		border-left-color: $backgroundLightHighlightAdjoined;
+		/* border-left-color: $backgroundLightHighlightAdjoined; TODO */
 		border-top-right-radius: 4px;
 		border-bottom-right-radius: 4px;
 	}
