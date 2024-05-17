@@ -1183,7 +1183,7 @@ class _TreeView( QtWidgets.QTreeView ) :
 		QtWidgets.QTreeView.paintEvent( self, event )
 
 		painter = QtGui.QPainter( self.viewport() )
-		painter.setPen( QtGui.QColor( *GafferUI._StyleSheet._styleColors["tintDarker"] ) )
+		painter.setPen( QtGui.QColor( *GafferUI._StyleSheet._styleColors["tableViewLines"] ) )
 
 		header = self.header()
 		height = self.viewport().height()
@@ -1220,7 +1220,7 @@ class _TreeView( QtWidgets.QTreeView ) :
 		# partially-transparent backgrounds to be drawn too heavy. Refill with the
 		# default background colour before drawing our highlight and deferring the
 		# rest to Qt.
-		painter.fillRect( rect, QtGui.QColor( *(_styleColors["backgroundRaised"]) ) )
+		painter.fillRect( rect, QtGui.QColor( *(_styleColors["tableViewBackground"]) ) )
 
 		self.__drawBranchSelectionHighlight( painter, rect, index )
 
