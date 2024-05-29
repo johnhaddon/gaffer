@@ -294,16 +294,19 @@ def __plugContextMenuSignal( graphEditor, plug, menuDefinition ) :
 	if plug.direction() != Gaffer.Plug.Direction.In:
 		return
 
-	# Find the actual node if we're looking at something like a box input
-	# NOTE : This could fail if a shader output is connected to 2 things, and the first thing is not a shader,
-	# but that seems like a pretty weird case, and we want to get to the early out without doing too much traversal
-	destPlug = Gaffer.PlugAlgo.findDestination( plug, lambda plug : plug if not plug.outputs() else None )
+	def isParameterOrTweak( plug ) :
 
-	destNode = destPlug.node()
-	if not (
-			( isinstance( destNode, GafferScene.Shader ) and destPlug.parent() == destNode["parameters"] ) or
-			( isinstance( destNode, GafferScene.ShaderTweaks ) and destPlug.getName() == "value" and destPlug.parent().parent() == destNode["tweaks"] )
-		):
+		node = plug.node()
+		if isinstance( node, GafferScene.Shader ) and plug.parent() == node["parameters"] :
+			return True
+		elif isinstance( node, GafferScene.ShaderTweaks ) and plug.getName() == "value" and plug.parent().parent() == node["tweaks"] :
+			return True
+
+		return False
+
+	if not Gaffer.PlugAlgo.findDestination( plug, isParameterOrTweak ) :
+		# Plug is not a shader parameter or tweak, and doesn't have
+		# any connected as outputs either.
 		return
 
 	menuDefinition.append( "/Create ShaderTweakProxy",
