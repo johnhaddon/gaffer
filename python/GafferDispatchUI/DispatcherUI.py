@@ -147,6 +147,12 @@ Gaffer.Metadata.registerNode(
 
 		),
 
+		"deduplicate" : (
+
+			"description", "TODO"
+
+		),
+
 	}
 
 )
