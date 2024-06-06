@@ -181,6 +181,7 @@ Dispatcher::Dispatcher( const std::string &name )
 	addChild( new StringPlug( "frameRange", Plug::In, "1-100x10" ) );
 	addChild( new StringPlug( "jobName", Plug::In, "" ) );
 	addChild( new StringPlug( "jobsDirectory", Plug::In, "" ) );
+	addChild( new BoolPlug( "deduplicate", Plug::In, true ) );
 }
 
 Dispatcher::~Dispatcher()
@@ -839,22 +840,30 @@ IECore::MurmurHash Dispatcher::hash( const Gaffer::Context *context ) const
 {
 	MurmurHash h = TaskNode::hash( context );
 
-	std::vector<int64_t> frames;
-	frameRange()->asList( frames );
-
-	Context::EditableScope jobContext( context );
-
-	Batcher batcher;
-	for( auto frame : frames )
+	if( getChild<BoolPlug>( "deduplicate" ) )
 	{
-		jobContext.setFrame( frame );
-		for( auto &task : TaskNode::TaskPlug::Range( *tasksPlug() ) )
-		{
-			batcher.addTask( TaskNode::Task( task, Context::current() ) );
-		}
-	}
+		std::vector<int64_t> frames;
+		frameRange()->asList( frames );
 
-	h.append( batcher.hash() );
+		Context::EditableScope jobContext( context );
+
+		Batcher batcher;
+		for( auto frame : frames )
+		{
+			jobContext.setFrame( frame );
+			for( auto &task : TaskNode::TaskPlug::Range( *tasksPlug() ) )
+			{
+				batcher.addTask( TaskNode::Task( task, Context::current() ) );
+			}
+		}
+
+		h.append( batcher.hash() );
+	}
+	else
+	{
+		h.append( context->hash() );
+		h.append( (uintptr_t)this );
+	}
 
 	return h;
 }
