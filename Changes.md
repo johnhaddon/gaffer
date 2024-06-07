@@ -11,6 +11,11 @@ Improvements
   - The decay range indicators are now scaled by the light's `gl:visualiser:scale` attribute.
   - The decay range is now ignored when framing a light in the Viewer.
 
+Fixes
+-----
+
+- UI : Fixed hangs caused by garbage collection of removed Editors. One common example involved viewing a Catalogue in the NodeEditor after removing the ImageInspector (#5877).
+
 API
 ---
 
