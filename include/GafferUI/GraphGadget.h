@@ -322,7 +322,7 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 		void dirtyActive();
 
 		// Used to run updateActive()
-		std::shared_ptr<Gaffer::BackgroundTask> m_activeStateTask;
+		std::unique_ptr<Gaffer::BackgroundTask> m_activeStateTask;
 
 		// Does the actual calculation of the active state, then calls applyActive.
 		// Should be run on background thread
