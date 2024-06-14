@@ -505,10 +505,7 @@ GraphGadget::GraphGadget( Gaffer::NodePtr root, Gaffer::SetPtr filter )
 GraphGadget::~GraphGadget()
 {
 	removeChild( auxiliaryConnectionsGadget() );
-	if( m_activeStateTask )
-	{
-		m_activeStateTask->cancelAndWait();
-	}
+	m_activeStateTask.reset();
 }
 
 Gaffer::Node *GraphGadget::getRoot()
@@ -1015,22 +1012,14 @@ ConnectionGadget *GraphGadget::reconnectionGadgetAt( const NodeGadget *gadget, c
 
 void GraphGadget::dirtyActive()
 {
-	if( m_activeStateTask )
-	{
-		m_activeStateTask->cancelAndWait();
-		m_activeStateTask.reset();
-	}
+	m_activeStateTask.reset();
 	m_activeStateDirty = true;
 	dirty( DirtyType::Render );
 }
 
 void GraphGadget::updateActive()
 {
-	if( m_activeStateTask )
-	{
-		m_activeStateTask->cancelAndWait();
-		m_activeStateTask.reset();
-	}
+	m_activeStateTask.reset();
 
 	const Gaffer::Node *focusNode = m_scriptNode->getFocus();
 	std::vector<Gaffer::ConstPlugPtr> focusPlugs;
@@ -1133,16 +1122,8 @@ void GraphGadget::applyActive(
 	}
 
 	m_activeStateDirty = false;
-
-	if( m_activeStateTask )
-	{
-		// This is probably unnecessary, since launching this function in a UI thread is the last thing activeStateTask
-		// does - it should definitely be finished by now, but seems safer to cancelAndWait before resetting.
-		m_activeStateTask->cancelAndWait();
-
-		// Clear the task, so that a new task will run next time activeStateDirty is set
-		m_activeStateTask.reset();
-	}
+	// Clear the task, so that a new task will run next time activeStateDirty is set
+	m_activeStateTask.reset();
 
 	// TODO - this const_cast is pretty ugly
 	const_cast< GraphGadget*>( this )->dirty( DirtyType::Render );
