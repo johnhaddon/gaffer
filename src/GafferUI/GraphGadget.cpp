@@ -1065,6 +1065,8 @@ void GraphGadget::updateActive()
 		return;
 	}
 
+	Gaffer::Context::Scope scopedContext( m_scriptNode->context() );
+
 	m_activeStateTask = Gaffer::ParallelAlgo::callOnBackgroundThread(
 		// TODO - if we make cancellation for graph edits more granular ( instead of for the whole graph ),
 		// we may need to somehow pass all focusPlugs as the subject
@@ -1077,24 +1079,10 @@ void GraphGadget::updateActive()
 
 			Canceller::check( Gaffer::Context::current()->canceller() );
 
-			const Gaffer::ScriptNode *script = focusPlugs[0]->ancestor<Gaffer::ScriptNode>();
-			// Take the context from the script, which has various variables set, including the correct frame.
-			// But take the canceller from the current context, which has been set by the BackgroundTask
-
-			Gaffer::ContextPtr context;
-			if( script && script->context() )
-			{
-				context = new Gaffer::Context( *script->context(), *Gaffer::Context::current()->canceller() );
-			}
-			else
-			{
-				context = new Gaffer::Context( Gaffer::Context(), *Gaffer::Context::current()->canceller() );
-			}
-
 			for( const Gaffer::ConstPlugPtr &focusPlug : focusPlugs )
 			{
 				activePlugsAndNodes(
-					focusPlug.get(), context.get(),
+					focusPlug.get(), Gaffer::Context::current(),
 					*activePlugs, *activeNodes
 				);
 			}
