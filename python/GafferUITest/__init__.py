@@ -131,6 +131,7 @@ from .StandardNodeToolbarTest import StandardNodeToolbarTest
 from .LabelPlugValueWidgetTest import LabelPlugValueWidgetTest
 from .PythonEditorTest import PythonEditorTest
 from .BoxIOUITest import BoxIOUITest
+from .UpstreamContextsTest import UpstreamContextsTest
 
 if __name__ == "__main__":
 	unittest.main()
