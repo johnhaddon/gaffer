@@ -48,6 +48,7 @@
 #include "GafferUI/GraphLayout.h"
 #include "GafferUI/NodeGadget.h"
 #include "GafferUI/StandardGraphLayout.h"
+#include "GafferUI/UpstreamContexts.h"
 
 #include "GafferBindings/SignalBinding.h"
 
@@ -214,6 +215,28 @@ void layoutNodes( const GraphLayout &layout, GraphGadget &graph, Gaffer::Set *no
 	layout.layoutNodes( &graph, nodes );
 }
 
+// TODO : DO WE NEED GIL RELEASES? WILL DEPEND ON HOW WE HANDLE THREADING ETC.
+
+ContextPtr contextWrapper1( const UpstreamContexts &upstreamContexts, const Node &node, bool copy = false )
+{
+	ConstContextPtr c = upstreamContexts.context( &node );
+	if( !c )
+	{
+		return nullptr;
+	}
+	return copy ? new Context( *c ) : boost::const_pointer_cast<Context>( c );
+}
+
+ContextPtr contextWrapper2( const UpstreamContexts &upstreamContexts, const Plug &plug, bool copy = false )
+{
+	ConstContextPtr c = upstreamContexts.context( &plug );
+	if( !c )
+	{
+		return nullptr;
+	}
+	return copy ? new Context( *c ) : boost::const_pointer_cast<Context>( c );
+}
+
 } // namespace
 
 namespace GafferUIModule
@@ -314,6 +337,12 @@ void GafferUIModule::bindGraphGadget()
 		.def( "getConnectionScale", &StandardGraphLayout::getConnectionScale )
 		.def( "setNodeSeparationScale", &StandardGraphLayout::setNodeSeparationScale )
 		.def( "getNodeSeparationScale", &StandardGraphLayout::getNodeSeparationScale )
+	;
+
+	IECorePython::RefCountedClass<UpstreamContexts, IECore::RefCounted>( "UpstreamContexts" )
+		.def( init<const ConstNodePtr &, const ConstContextPtr &>() )
+		.def( "context", &contextWrapper1, ( arg( "node" ), arg( "_copy" ) = true ) )
+		.def( "context", &contextWrapper2, ( arg( "plug" ), arg( "_copy" ) = true ) )
 	;
 
 }

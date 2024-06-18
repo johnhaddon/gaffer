@@ -47,7 +47,7 @@ namespace Gaffer
 {
 
 class Plug;
-class Node;
+IE_CORE_FORWARDDECLARE( Node );
 IE_CORE_FORWARDDECLARE( Context )
 
 } // namespace Gaffer
@@ -60,9 +60,9 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, Gaffer::S
 
 	public :
 
-		UpstreamContexts( const Gaffer::Plug *plug );
-		UpstreamContexts( const Gaffer::Node *node );
-		UpstreamContexts( const Gaffer::Set *set );
+		//UpstreamContexts( const Gaffer::Plug *plug ); // TODO : DO WE NEED THIS ONE?
+		UpstreamContexts( const Gaffer::ConstNodePtr &node, const Gaffer::ConstContextPtr &context );
+		//UpstreamContexts( const Gaffer::Set *set );
 
 		IE_CORE_DECLAREMEMBERPTR( UpstreamContexts );
 
@@ -75,11 +75,24 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, Gaffer::S
 		using ChangedSignal = Gaffer::Signals::Signal<void()>;
 		ChangedSignal &changedSignal();
 
-		ConstPtr acquire( const Gaffer::Plug *plug );
-		ConstPtr acquire( const Gaffer::Node *node );
-		ConstPtr acquire( const Gaffer::Set *set );  // ?? MAYBE `acquireForFocus()`?
+		//ConstPtr acquire( const Gaffer::Plug *plug ); // TODO : DO WE NEED THIS ONE???
+		static ConstPtr acquire( const Gaffer::Node *node );
 
-	private :
+		// COULD WE MAKE THIS ONE SHARE WORK WITH ONES ACQUIRED FROM A NODE???
+		//static ConstPtr acquire( const Gaffer::Set *set );  // ?? MAYBE `acquireForFocus()`?
+
+	//private : TODO
+
+		void update();
+
+		Gaffer::ConstNodePtr m_node;
+		Gaffer::ConstContextPtr m_context;
+
+		/// TODO : IS THERE ANY WAY WE COULD USE RAW POINTER?
+		//std::unordered_map<IECore::MurmurHash,
+		// TODO : DOCUMENT SPARSENESS
+		std::unordered_map<Gaffer::ConstPlugPtr, const Gaffer::Context *> m_plugContexts;
+		std::unordered_map<Gaffer::ConstNodePtr, Gaffer::ConstContextPtr> m_nodeContexts;
 
 };
 

@@ -43,8 +43,10 @@
 // #include "GafferUI/Style.h"
 
 #include "Gaffer/Context.h"
+#include "Gaffer/ContextVariables.h"
+#include "Gaffer/Loop.h"
 // #include "Gaffer/MetadataAlgo.h"
-// #include "Gaffer/ScriptNode.h"
+#include "Gaffer/Switch.h"
 
 // #include "boost/algorithm/string/predicate.hpp"
 // #include "boost/bind/bind.hpp"
@@ -92,10 +94,143 @@ struct ContextPool
 // AnnotationsGadget
 //////////////////////////////////////////////////////////////////////////
 
+UpstreamContexts::UpstreamContexts( const Gaffer::ConstNodePtr &node, const Gaffer::ConstContextPtr &context )
+	:	m_node( node ), m_context( context )
+{
+}
+
 // UpstreamContexts::UpstreamContexts()
 // {
 // }
 
 UpstreamContexts::~UpstreamContexts()
 {
+}
+
+Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Plug *plug ) const
+{
+	const_cast<UpstreamContexts *>( this )->update(); // TODO : REMOVE?
+	const GraphComponent *parent = nullptr;
+	while( plug )
+	{
+		auto it = m_plugContexts.find( plug );
+		if( it != m_plugContexts.find( plug ) )
+		{
+			return it->second;
+		}
+
+		parent = plug->parent();
+		plug = runTimeCast<const Plug>( parent );
+	}
+
+	if( auto node = runTimeCast<const Node>( parent ) )
+	{
+		// TODO : SHOULD THIS ONLY BE FOR INPUT PLUGS?
+		return context( node );
+	}
+
+	return nullptr;
+}
+
+Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Node *node ) const
+{
+	const_cast<UpstreamContexts *>( this )->update(); // TODO : REMOVE?
+
+	auto it = m_nodeContexts.find( node );
+	return it != m_nodeContexts.end() ? it->second : nullptr;
+}
+
+void UpstreamContexts::update()
+{
+	m_nodeContexts.clear();
+
+	// TODO : RAW POINTER FOR CONTEXT?
+	std::deque<std::pair<const Plug *, ConstContextPtr>> toVisit;
+
+	for( Plug::RecursiveOutputIterator it( m_node.get() ); !it.done(); ++it )
+	{
+		toVisit.push_back( { it->get(), m_context } );
+		it.prune();
+	}
+
+	while( !toVisit.empty() )
+	{
+		auto [plug, context] = toVisit.front();
+		toVisit.pop_front();
+
+		// TODO : CANCELLATION CHECK
+		// TODO : IF VISITED ALREADY, THEN BAIL
+
+		Context::Scope scopedContext( context.get() );
+		m_nodeContexts.insert( { plug->node(), context } ); // TODO : IGNORE INPUT PLUGS?
+
+		if( auto input = plug->getInput() )
+		{
+			toVisit.push_back( { input, context } );
+		}
+		else
+		{
+			for( Plug::RecursiveInputIterator it( plug ); !it.done(); ++it )
+			{
+				if( auto input = (*it)->getInput() )
+				{
+					toVisit.push_back( { input, context } );
+					it.prune();
+				}
+			}
+		}
+
+		if( plug->direction() != Plug::Out || !plug->node() )
+		{
+			continue;
+		}
+
+		// TODO : DISABLED DEPENDENCYNODE
+
+		// TODO : DO YOU NEED TO USE GLOBAL SCOPES ANYWHERE HERE?
+
+		if( auto switchNode = runTimeCast<const Switch>( plug->node() ) )
+		{
+			if( const Plug *activeIn = switchNode->activeInPlug( plug ) )
+			{
+				toVisit.push_back( { activeIn, context } );
+			}
+			else
+			{
+				// DON'T CARE : DOCUMENT WHY
+			}
+		}
+		else if( auto contextProcessor = runTimeCast<const ContextProcessor>( plug->node() ) )
+		{
+			if( plug == contextProcessor->outPlug() )
+			{
+				ConstContextPtr inContext = contextProcessor->inPlugContext();
+				toVisit.push_back( { contextProcessor->inPlug(), inContext } );
+			}
+			else
+			{
+				// DON'T CARE
+			}
+		}
+		else if( auto loop = runTimeCast<const Loop>( plug->node() ) )
+		{
+			if( plug == loop->outPlug() )
+			{
+				toVisit.push_back( { loop->inPlug(), context } );
+				toVisit.push_back( { loop->nextPlug(), loop->nextIterationContext() } );
+			}
+		}
+		else
+		{
+			// TODO : MIGHT NEED TO GET HERE FOR OTHER INPUTS OF THE SPECIAL-CASE NODES ABOVE?
+			// CAN WE USE `m_plugContexts` to BLOCK PROCESSING OF ALREADY-PROCESSED THINGS?
+			for( const auto &inputPlug : Plug::InputRange( *plug->node() ) )
+			{
+				if( inputPlug != plug )
+				{
+					toVisit.push_back( { inputPlug.get(), context } );
+				}
+			}
+		}
+	}
 }

@@ -152,6 +152,16 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		return True
 
+	def setContext( self, context ) :
+
+		GafferUI.PlugValueWidget.setContext( self, context )
+		#self.__updateUpstreamContexts()
+
+	def setPlugs( self, plugs ) :
+
+		GafferUI.PlugValueWidget.setPlugs( self, plugs )
+		#self.__updateUpstreamContexts()
+
 	# We don't actually display values, but this is also called whenever the
 	# input changes, which is when we need to update.
 	def _updateFromValues( self, values, exception ) :

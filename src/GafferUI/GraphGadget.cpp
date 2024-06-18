@@ -47,6 +47,7 @@
 #include "GafferUI/Pointer.h"
 #include "GafferUI/StandardGraphLayout.h"
 #include "GafferUI/Style.h"
+#include "GafferUI/UpstreamContexts.h"
 #include "GafferUI/ViewportGadget.h"
 #include "DragEditGadget.h"
 
@@ -1136,11 +1137,20 @@ void GraphGadget::activePlugsAndNodes(
 	std::unordered_set<const Gaffer::Node*> &activeNodes
 )
 {
+#if 0
+	GafferUI::UpstreamContexts c( plug->node(), context );
+
+	for( const auto &n : c.m_nodeContexts )
+	{
+		activeNodes.insert( n.first.get() );
+	}
+#else
 	// TODO - we seem to be prefering std::unordered_set.  We should probably add
 	// a specialization of std::hash to include/IECore/MurmurHash.h so that we can
 	// use it here
 	boost::unordered_set<IECore::MurmurHash> plugContextsVisited;
 	activeWalkOutput( plug, context, context->canceller(), activePlugs, activeNodes, plugContextsVisited );
+#endif
 }
 
 void GraphGadget::renderLayer( Layer layer, const Style *style, RenderReason reason ) const
