@@ -7,6 +7,11 @@ Fixes
 - Cycles : Fixed rendering to the Catalogue using the batch Render node (#5905). Note that rendering a mixture of Catalogue and file outputs is still not supported, and in this case any file outputs will be ignored.
 - Loop : Fixed handling of empty `indexVariable`. This now disables the Loop instead of creating an unnamed context variable.
 
+API
+---
+
+- Loop : Added `nextIterationContext()` method.
+
 1.4.7.0 (relative to 1.4.6.0)
 =======
 
