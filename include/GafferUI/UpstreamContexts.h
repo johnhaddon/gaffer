@@ -91,7 +91,7 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, Gaffer::S
 		/// TODO : IS THERE ANY WAY WE COULD USE RAW POINTER?
 		//std::unordered_map<IECore::MurmurHash,
 		// TODO : DOCUMENT SPARSENESS
-		std::unordered_map<Gaffer::ConstPlugPtr, const Gaffer::Context *> m_plugContexts;
+		std::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr> m_plugContexts;
 		std::unordered_map<Gaffer::ConstNodePtr, Gaffer::ConstContextPtr> m_nodeContexts;
 
 };

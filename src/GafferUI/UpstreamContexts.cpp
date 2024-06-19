@@ -114,7 +114,7 @@ Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Plug *plug ) co
 	while( plug )
 	{
 		auto it = m_plugContexts.find( plug );
-		if( it != m_plugContexts.find( plug ) )
+		if( it != m_plugContexts.end() )
 		{
 			return it->second;
 		}
@@ -143,6 +143,7 @@ Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Node *node ) co
 void UpstreamContexts::update()
 {
 	m_nodeContexts.clear();
+	m_plugContexts.clear();
 
 	// TODO : RAW POINTER FOR CONTEXT?
 	std::deque<std::pair<const Plug *, ConstContextPtr>> toVisit;
@@ -161,8 +162,15 @@ void UpstreamContexts::update()
 		// TODO : CANCELLATION CHECK
 		// TODO : IF VISITED ALREADY, THEN BAIL
 
-		Context::Scope scopedContext( context.get() );
-		m_nodeContexts.insert( { plug->node(), context } ); // TODO : IGNORE INPUT PLUGS?
+		const Node *node = plug->node();
+		if( node )
+		{
+			m_nodeContexts.insert( { plug->node(), context } ); // TODO : IGNORE INPUT PLUGS?
+		}
+		else
+		{
+			m_plugContexts.insert( { plug, context } );
+		}
 
 		if( auto input = plug->getInput() )
 		{
@@ -185,14 +193,43 @@ void UpstreamContexts::update()
 			continue;
 		}
 
+		Context::Scope scopedContext( context.get() );
+
 		// TODO : DISABLED DEPENDENCYNODE
 
 		// TODO : DO YOU NEED TO USE GLOBAL SCOPES ANYWHERE HERE?
+		if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
+		{
+			if( auto enabledPlug = dependencyNode->enabledPlug() )
+			{
+				if( !enabledPlug->getValue() )
+				{
+					if( auto inPlug = dependencyNode->correspondingInput( plug ) )
+					{
+						toVisit.push_back( { inPlug, context } );
+						toVisit.push_back( { enabledPlug, context } );
+					}
+					continue;
+				}
+			}
+		}
 
-		if( auto switchNode = runTimeCast<const Switch>( plug->node() ) )
+		if( auto switchNode = runTimeCast<const Switch>( node ) )
 		{
 			if( const Plug *activeIn = switchNode->activeInPlug( plug ) )
 			{
+				for( auto &inPlug : Plug::Range( *switchNode->inPlugs() ) )
+				{
+					// Initialises to `nullptr` if not present already. This is
+					// what we want for inputs which are not active.
+					auto &inPlugContext = m_plugContexts[inPlug];
+					// If not already visited in another context, then assign
+					// context for the active plug.
+					if( !inPlugContext && ( inPlug == activeIn || inPlug->isAncestorOf( activeIn ) ) )
+					{
+						inPlugContext = context;
+					}
+				}
 				toVisit.push_back( { activeIn, context } );
 			}
 			else
@@ -200,7 +237,7 @@ void UpstreamContexts::update()
 				// DON'T CARE : DOCUMENT WHY
 			}
 		}
-		else if( auto contextProcessor = runTimeCast<const ContextProcessor>( plug->node() ) )
+		else if( auto contextProcessor = runTimeCast<const ContextProcessor>( node ) )
 		{
 			if( plug == contextProcessor->outPlug() )
 			{
@@ -212,7 +249,7 @@ void UpstreamContexts::update()
 				// DON'T CARE
 			}
 		}
-		else if( auto loop = runTimeCast<const Loop>( plug->node() ) )
+		else if( auto loop = runTimeCast<const Loop>( node ) )
 		{
 			if( plug == loop->outPlug() )
 			{
@@ -224,7 +261,7 @@ void UpstreamContexts::update()
 		{
 			// TODO : MIGHT NEED TO GET HERE FOR OTHER INPUTS OF THE SPECIAL-CASE NODES ABOVE?
 			// CAN WE USE `m_plugContexts` to BLOCK PROCESSING OF ALREADY-PROCESSED THINGS?
-			for( const auto &inputPlug : Plug::InputRange( *plug->node() ) )
+			for( const auto &inputPlug : Plug::InputRange( *node ) )
 			{
 				if( inputPlug != plug )
 				{

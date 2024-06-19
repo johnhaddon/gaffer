@@ -69,6 +69,15 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertIsNone( contexts.context( unconnected["op2"] ) )
 		self.assertIsNone( contexts.context( unconnected["sum"] ) )
 
+		add3["enabled"].setValue( False )
+
+		self.assertEqual( contexts.context( add4 ), context )
+		self.assertEqual( contexts.context( add3 ), context )
+		self.assertEqual( contexts.context( add3["op1"] ), context )
+		self.assertIsNone( contexts.context( add3["op2"] ) )
+		self.assertEqual( contexts.context( add1 ), context )
+		self.assertIsNone( contexts.context( add2 ) )
+
 	def testSwitch( self ) :
 
 		# Static case - switch will have internal pass-through connections.
@@ -87,21 +96,25 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertEqual( contexts.context( switch ), context )
 		self.assertEqual( contexts.context( switch["out"] ), context )
 		self.assertEqual( contexts.context( switch["in"][0] ), context )
-		#self.assertIsNone( contexts.context( switch["in"][1] ), context ) TODO
+		self.assertIsNone( contexts.context( switch["in"][1] ) )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertIsNone( contexts.context( add2 ) )
-
-		# TODO : ASSERT THAT PER-PLUG CONTEXT IS NULL FOR UNUSED INPUT ^ AND V
 
 		switch["index"].setValue( 1 )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertIsNone( contexts.context( switch["in"][0] ) )
+		self.assertEqual( contexts.context( switch["in"][1] ), context )
 		self.assertIsNone( contexts.context( add1 ) )
 		self.assertEqual( contexts.context( add2 ), context )
 
 		switch["enabled"].setValue( False )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertEqual( contexts.context( switch["in"][0] ), context )
+		self.assertIsNone( contexts.context( switch["in"][1] ) )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertIsNone( contexts.context( add2 ) )
 
@@ -112,17 +125,20 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		switch["enabled"].setValue( True )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertEqual( contexts.context( switch["in"][0] ), context )
+		self.assertIsNone( contexts.context( switch["in"][1] ) )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertIsNone( contexts.context( add2 ) )
 
 		add3["op1"].setValue( 1 )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertIsNone( contexts.context( switch["in"][0] ) )
+		self.assertEqual( contexts.context( switch["in"][1] ), context )
 		self.assertIsNone( contexts.context( add1 ) )
 		self.assertEqual( contexts.context( add2 ), context )
-
-		## TODO : MAKE SURE WE CAN HAVE BOTH INPUTS BE ACTIVE AT ONCE
-		# IF THE SWITCH IS EVALUATED IN TWO CONTEXTS.
 
 	def testNameSwitch( self ) :
 
@@ -141,6 +157,9 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		contexts = GafferUI.UpstreamContexts( switch, context )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertEqual( contexts.context( switch["in"][0] ), context )
+		self.assertIsNone( contexts.context( switch["in"][1] ) )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertIsNone( contexts.context( add2 ) )
 
@@ -149,12 +168,18 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		switch["selector"].setValue( "add2" )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertIsNone( contexts.context( switch["in"][0] ) )
+		self.assertEqual( contexts.context( switch["in"][1] ), context )
 		self.assertIsNone( contexts.context( add1 ) )
 		self.assertEqual( contexts.context( add2 ), context )
 
 		switch["enabled"].setValue( False )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertEqual( contexts.context( switch["in"][0] ), context )
+		self.assertIsNone( contexts.context( switch["in"][1] ) )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertIsNone( contexts.context( add2 ) )
 
@@ -165,12 +190,18 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		switch["enabled"].setValue( True )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertEqual( contexts.context( switch["in"][0] ), context )
+		self.assertIsNone( contexts.context( switch["in"][1] ) )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertIsNone( contexts.context( add2 ) )
 
 		stringNode["in"].setValue( "add2" )
 
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["out"] ), context )
+		self.assertIsNone( contexts.context( switch["in"][0] ) )
+		self.assertEqual( contexts.context( switch["in"][1] ), context )
 		self.assertIsNone( contexts.context( add1 ) )
 		self.assertEqual( contexts.context( add2 ), context )
 
@@ -200,6 +231,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertEqual( contexts.context( add3 ), context )
 		self.assertEqual( contexts.context( switch ), context )
+		self.assertEqual( contexts.context( switch["in"][0] ), context )
+		self.assertEqual( contexts.context( switch["in"][1] ), contextVariables.inPlugContext() )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertEqual( contexts.context( add2 ), contextVariables.inPlugContext() )
 
@@ -237,8 +270,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		contexts = GafferUI.UpstreamContexts( node, context )
 
 		self.assertEqual( contexts.context( node ), context )
-
-		# TODO : ASSERT WE HAVE A CONTEXT FOR THE PLUG? OR EXPLAIN WHY WE DON'T
+		self.assertEqual( contexts.context( node["op1"] ), context )
+		self.assertEqual( contexts.context( plug ), context )
 
 	def testLoop( self ) :
 
