@@ -340,7 +340,7 @@ void GafferUIModule::bindGraphGadget()
 	;
 
 	IECorePython::RefCountedClass<UpstreamContexts, IECore::RefCounted>( "UpstreamContexts" )
-		.def( init<const ConstNodePtr &, const ConstContextPtr &>() )
+		.def( init<const NodePtr &, const ContextPtr &>() )
 		.def( "context", &contextWrapper1, ( arg( "node" ), arg( "_copy" ) = true ) )
 		.def( "context", &contextWrapper2, ( arg( "plug" ), arg( "_copy" ) = true ) )
 	;

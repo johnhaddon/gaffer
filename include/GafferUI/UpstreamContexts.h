@@ -55,18 +55,33 @@ IE_CORE_FORWARDDECLARE( Context )
 namespace GafferUI
 {
 
-class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, Gaffer::Signals::Trackable
+class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
 	public :
 
 		//UpstreamContexts( const Gaffer::Plug *plug ); // TODO : DO WE NEED THIS ONE?
-		UpstreamContexts( const Gaffer::ConstNodePtr &node, const Gaffer::ConstContextPtr &context );
+		UpstreamContexts( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context );
 		//UpstreamContexts( const Gaffer::Set *set );
 
 		IE_CORE_DECLAREMEMBERPTR( UpstreamContexts );
 
 		~UpstreamContexts() override;
+
+		//????
+		bool isActive( const Gaffer::Plug *plug ) const;
+		bool isActive( const Gaffer::Node *node ) const;
+
+		enum class Status
+		{
+			Inactive,
+			Disabled, // Makes less sense for plugs
+			Enabled
+		};
+
+		// ???
+		Status status( const Gaffer::Plug *plug ) const;
+
 
 		// TODO : ARE WE HAPPY WITH JUST ONE CONTEXT? WHAT WOULD WE DO WITH MORE???
 		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const; // TODO : DO THESE WAIT???
@@ -83,10 +98,15 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, Gaffer::S
 
 	//private : TODO
 
+		void plugDirtied( const Gaffer::Plug *plug );
+		void contextChanged( IECore::InternedString variable );
 		void update();
 
 		Gaffer::ConstNodePtr m_node;
 		Gaffer::ConstContextPtr m_context;
+
+		bool m_dirty;
+		ChangedSignal m_changedSignal;
 
 		/// TODO : IS THERE ANY WAY WE COULD USE RAW POINTER?
 		//std::unordered_map<IECore::MurmurHash,

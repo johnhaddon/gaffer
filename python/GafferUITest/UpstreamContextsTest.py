@@ -297,10 +297,46 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertEqual( contexts.context( loopBody ), loop.nextIterationContext() )
 
+		# TODO : ASSERT DISABLED LOOP STUFF - ESP THAT NEXT IS NOT ACTIVE
+		# TODO : ASSERT STUFF FOR LOOP ITERATIONS == 0
 
-	## TODO :
-	#
-	# - test connection to plug without node
+	def testMultiplexedBox( self ) :
+
+		addA = GafferTest.AddNode()
+		addB = GafferTest.AddNode()
+
+		box = Gaffer.Box()
+		box["addA"] = GafferTest.AddNode()
+		box["addB"] = GafferTest.AddNode()
+
+		Gaffer.PlugAlgo.promoteWithName( box["addA"]["op1"], "opA" )
+		Gaffer.PlugAlgo.promoteWithName( box["addB"]["op1"], "opB" )
+		box["opA"].setInput( addA["sum"] )
+		box["opB"].setInput( addB["sum"] )
+
+		Gaffer.PlugAlgo.promoteWithName( box["addA"]["sum"], "sumA" )
+		Gaffer.PlugAlgo.promoteWithName( box["addB"]["sum"], "sumB" )
+		box["sumA"].setInput( box["addA"]["sum"] )
+		box["sumB"].setInput( box["addB"]["sum"] )
+
+		resultA = GafferTest.AddNode()
+		resultA["op1"].setInput( box["sumA"] )
+
+		resultB = GafferTest.AddNode()
+		resultB["op1"].setInput( box["sumB"] )
+
+		context = Gaffer.Context()
+		contexts = GafferUI.UpstreamContexts( resultA, context )
+
+		contexts.active = contexts.context # TODO : REMOVE
+
+		self.assertTrue( contexts.active( resultA ) )
+		self.assertFalse( contexts.active( resultB ) )
+		self.assertTrue( contexts.active( box ) )
+		self.assertTrue( contexts.active( box["addA"] ) )
+		self.assertFalse( contexts.active( box["addB"] ) )
+		self.assertTrue( contexts.active( addA ) )
+		self.assertFalse( contexts.active( addB ) )
 
 if __name__ == "__main__":
 	unittest.main()

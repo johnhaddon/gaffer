@@ -49,14 +49,15 @@
 #include "Gaffer/Switch.h"
 
 // #include "boost/algorithm/string/predicate.hpp"
-// #include "boost/bind/bind.hpp"
-// #include "boost/bind/placeholders.hpp"
+#include "boost/bind/bind.hpp"
+#include "boost/bind/placeholders.hpp"
+
+#include <unordered_set>
 
 using namespace Gaffer;
 using namespace GafferUI;
 using namespace IECore;
-// using namespace Imath;
-// using namespace boost::placeholders;
+using namespace boost::placeholders;
 // using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
@@ -94,9 +95,11 @@ struct ContextPool
 // AnnotationsGadget
 //////////////////////////////////////////////////////////////////////////
 
-UpstreamContexts::UpstreamContexts( const Gaffer::ConstNodePtr &node, const Gaffer::ConstContextPtr &context )
-	:	m_node( node ), m_context( context )
+UpstreamContexts::UpstreamContexts( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context )
+	:	m_node( node ), m_context( context ), m_dirty( true )
 {
+	node->plugDirtiedSignal().connect( boost::bind( &UpstreamContexts::plugDirtied, this, ::_1 ) );
+	context->changedSignal().connect( boost::bind( &UpstreamContexts::contextChanged, this, ::_2 ) );
 }
 
 // UpstreamContexts::UpstreamContexts()
@@ -140,8 +143,36 @@ Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Node *node ) co
 	return it != m_nodeContexts.end() ? it->second : nullptr;
 }
 
+UpstreamContexts::ChangedSignal &UpstreamContexts::changedSignal()
+{
+	return m_changedSignal;
+}
+
+void UpstreamContexts::plugDirtied( const Gaffer::Plug *plug )
+{
+	m_dirty = true;
+	//update();
+	changedSignal()();
+}
+
+void UpstreamContexts::contextChanged( IECore::InternedString variable )
+{
+	m_dirty = true;
+	/// TODO : CHECK HASH, MANAGE DIRTINESS ETC
+	//update();
+	changedSignal()();
+}
+
 void UpstreamContexts::update()
 {
+	if( !m_dirty )
+	{
+		return;
+	}
+
+	m_dirty = false;// TODO MOVE TO END
+	std::cerr << "UPDATING " <<  std::endl;
+
 	m_nodeContexts.clear();
 	m_plugContexts.clear();
 
@@ -154,13 +185,23 @@ void UpstreamContexts::update()
 		it.prune();
 	}
 
+	std::unordered_set<MurmurHash> visited;
+
 	while( !toVisit.empty() )
 	{
 		auto [plug, context] = toVisit.front();
 		toVisit.pop_front();
 
+		MurmurHash h = context->hash();
+		h.append( (uintptr_t)plug );
+		if( !visited.insert( h ).second )
+		{
+			continue;
+		}
+
+	std::cerr << "VISITING " << plug->fullName() <<  std::endl;
+
 		// TODO : CANCELLATION CHECK
-		// TODO : IF VISITED ALREADY, THEN BAIL
 
 		const Node *node = plug->node();
 		if( node )

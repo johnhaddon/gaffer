@@ -69,6 +69,7 @@ IE_CORE_FORWARDDECLARE( Nodule );
 IE_CORE_FORWARDDECLARE( ConnectionGadget );
 IE_CORE_FORWARDDECLARE( GraphLayout );
 IE_CORE_FORWARDDECLARE( AuxiliaryConnectionsGadget );
+IE_CORE_FORWARDDECLARE( UpstreamContexts );
 
 /// Aliases that define the intended use of each
 /// Gadget::Layer by the GraphGadget components.
@@ -215,7 +216,9 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 		void selectionMemberAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
 		void selectionMemberRemoved( Gaffer::Set *set, IECore::RunTimeTyped *member );
 		void updateFocusPlugDirtiedConnection();
+		void focusContextsChanged();
 		void focusChanged();
+		void applyUpstreamContexts();
 		void focusPlugDirtied( Gaffer::Plug *plug );
 		void scriptContextChanged( const Gaffer::Context *context, const IECore::InternedString& );
 		void filterMemberAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
@@ -322,7 +325,9 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 		void dirtyActive();
 
 		// Used to run updateActive()
-		std::unique_ptr<Gaffer::BackgroundTask> m_activeStateTask;
+		std::unique_ptr<Gaffer::BackgroundTask> m_activeStateTask; // TODO : REMOVE
+
+		UpstreamContextsPtr m_focusContexts;
 
 		// Does the actual calculation of the active state, then calls applyActive.
 		// Should be run on background thread

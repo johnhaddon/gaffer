@@ -1087,11 +1087,28 @@ void GraphGadget::updateActive()
 
 }
 
+void GraphGadget::applyUpstreamContexts()
+{
+	std::cerr << "USING NEW" << std::endl;
+	for( auto &g : children() )
+	{
+		if( ConnectionGadget *c = runTimeCast<ConnectionGadget>( g.get() ) )
+		{
+			c->activeForFocusNode( m_focusContexts ? (bool)m_focusContexts->context( c->dstNodule()->plug() ) : true );
+		}
+		else if( NodeGadget *n = runTimeCast<NodeGadget>( g.get() ) )
+		{
+			n->activeForFocusNode( m_focusContexts ? (bool)m_focusContexts->context( n->node() ) : true );
+		}
+	}
+}
+
 void GraphGadget::applyActive(
 	std::shared_ptr< std::unordered_set<const Gaffer::Plug*> > activePlugs,
 	std::shared_ptr< std::unordered_set<const Gaffer::Node*> > activeNodes
 )
 {
+	std::cerr << "USING OLD" << std::endl;
 	if( activePlugs && activeNodes )
 	{
 		for( auto &g : children() )
@@ -1155,15 +1172,15 @@ void GraphGadget::activePlugsAndNodes(
 
 void GraphGadget::renderLayer( Layer layer, const Style *style, RenderReason reason ) const
 {
-	if(
-		m_activeStateDirty &&
-		!( m_activeStateTask && ( m_activeStateTask->status() != Gaffer::BackgroundTask::Cancelled ) )
-	)
-	{
-		// It's slightly naughty to trigger updateActive from the const renderLayer - it could be moved to
-		// anything that gets called regularly on the UI thread
-		const_cast< GraphGadget*>( this )->updateActive();
-	}
+// 	if(
+// 		m_activeStateDirty &&
+// 		!( m_activeStateTask && ( m_activeStateTask->status() != Gaffer::BackgroundTask::Cancelled ) )
+// 	)
+// 	{
+// 		// It's slightly naughty to trigger updateActive from the const renderLayer - it could be moved to
+// 		// anything that gets called regularly on the UI thread
+// 		const_cast< GraphGadget*>( this )->updateActive();
+// 	}
 
 	glDisable( GL_DEPTH_TEST );
 
@@ -1312,16 +1329,33 @@ void GraphGadget::selectionMemberRemoved( Gaffer::Set *set, IECore::RunTimeTyped
 
 void GraphGadget::updateFocusPlugDirtiedConnection()
 {
-	if( Gaffer::Node *node = m_scriptNode->getFocus() )
+	if( m_scriptNode->getFocus() )
 	{
-		m_focusPlugDirtiedConnection = node->plugDirtiedSignal().connect(
-			boost::bind( &GraphGadget::focusPlugDirtied, this, ::_1 )
-		);
+		m_focusContexts = new UpstreamContexts( m_scriptNode->getFocus(), m_scriptNode->context() );
+		m_focusContexts->changedSignal().connect( boost::bind( &GraphGadget::focusContextsChanged, this ) );
+		focusContextsChanged();
 	}
 	else
 	{
-		m_focusPlugDirtiedConnection.disconnect();
+		m_focusContexts = nullptr;
+		focusContextsChanged();
 	}
+
+	// if( Gaffer::Node *node = m_scriptNode->getFocus() )
+	// {
+	// 	m_focusPlugDirtiedConnection = node->plugDirtiedSignal().connect(
+	// 		boost::bind( &GraphGadget::focusPlugDirtied, this, ::_1 )
+	// 	);
+	// }
+	// else
+	// {
+	// 	m_focusPlugDirtiedConnection.disconnect();
+	// }
+}
+
+void GraphGadget::focusContextsChanged()
+{
+	applyUpstreamContexts();
 }
 
 void GraphGadget::focusChanged()
