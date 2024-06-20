@@ -1332,7 +1332,7 @@ void GraphGadget::updateFocusPlugDirtiedConnection()
 	if( m_scriptNode->getFocus() )
 	{
 		m_focusContexts = new UpstreamContexts( m_scriptNode->getFocus(), m_scriptNode->context() );
-		m_focusContexts->changedSignal().connect( boost::bind( &GraphGadget::focusContextsChanged, this ) );
+		//m_focusContexts->changedSignal().connect( boost::bind( &GraphGadget::focusContextsChanged, this ) );
 		focusContextsChanged();
 	}
 	else

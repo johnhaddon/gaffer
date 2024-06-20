@@ -36,19 +36,11 @@
 
 #include "GafferUI/UpstreamContexts.h"
 
-// #include "GafferUI/GraphGadget.h"
-// #include "GafferUI/ImageGadget.h"
-// #include "GafferUI/NodeGadget.h"
-// #include "GafferUI/StandardNodeGadget.h"
-// #include "GafferUI/Style.h"
-
 #include "Gaffer/Context.h"
 #include "Gaffer/ContextVariables.h"
 #include "Gaffer/Loop.h"
-// #include "Gaffer/MetadataAlgo.h"
 #include "Gaffer/Switch.h"
 
-// #include "boost/algorithm/string/predicate.hpp"
 #include "boost/bind/bind.hpp"
 #include "boost/bind/placeholders.hpp"
 
@@ -60,54 +52,17 @@ using namespace IECore;
 using namespace boost::placeholders;
 using namespace std;
 
-//////////////////////////////////////////////////////////////////////////
-// Internal utilities
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-// Used to uniquefy the Contexts held by UpstreamContexts objects.
-/// TODO : USE A STATIC ONE, OR MOVE TO MAIN CLASS?
-struct ContextPool
-{
-
-	ConstContextPtr acquireUnique( const Context *context )
-	{
-		auto [it, inserted] = m_contexts.insert( { context->hash(), nullptr } );
-		if( inserted )
-		{
-			it->second = new Context( *context, /* omitCanceller = */ true );
-		}
-
-		return it->second;
-	}
-
-	private :
-
-		std::unordered_map<IECore::MurmurHash, ConstContextPtr> m_contexts;
-
-};
-
-} // namespace
-
-//////////////////////////////////////////////////////////////////////////
-// AnnotationsGadget
-//////////////////////////////////////////////////////////////////////////
-
 UpstreamContexts::UpstreamContexts( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context )
-	:	m_node( node ), m_context( context ), m_dirty( true )
+	:	m_node( node ), m_context( context )
 {
 	node->plugDirtiedSignal().connect( boost::bind( &UpstreamContexts::plugDirtied, this, ::_1 ) );
 	context->changedSignal().connect( boost::bind( &UpstreamContexts::contextChanged, this, ::_2 ) );
+	update();
 }
-
-// UpstreamContexts::UpstreamContexts()
-// {
-// }
 
 UpstreamContexts::~UpstreamContexts()
 {
+	disconnectTrackedConnections();
 }
 
 bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
@@ -119,7 +74,7 @@ bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
 	}
 
 	auto it = m_nodeContexts.find( plug->node() );
-	return it != m_nodeContexts.end() && it->second.enabled;
+	return it != m_nodeContexts.end() && ( plug->direction() == Plug::Out || it->second.enabled );
 }
 
 bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
@@ -129,61 +84,36 @@ bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
 
 Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Plug *plug ) const
 {
-	const_cast<UpstreamContexts *>( this )->update(); // TODO : REMOVE?
-	const GraphComponent *parent = nullptr;
-	while( plug )
+	optional<const Context *> c = findPlugContext( plug );
+	if( c && *c )
 	{
-		auto it = m_plugContexts.find( plug );
-		if( it != m_plugContexts.end() )
-		{
-			return it->second;
-		}
-
-		parent = plug->parent();
-		plug = runTimeCast<const Plug>( parent );
+		return *c;
 	}
 
-	if( auto node = runTimeCast<const Node>( parent ) )
-	{
-		// TODO : SHOULD THIS ONLY BE FOR INPUT PLUGS?
-		return context( node );
-	}
-
-	return nullptr;
+	return context( plug->node() );
 }
 
 Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Node *node ) const
 {
-	const_cast<UpstreamContexts *>( this )->update(); // TODO : REMOVE?
-
 	auto it = m_nodeContexts.find( node );
-	return it != m_nodeContexts.end() ? it->second.context : nullptr;
+	return it != m_nodeContexts.end() ? it->second.context : m_context;
 }
 
 void UpstreamContexts::plugDirtied( const Gaffer::Plug *plug )
 {
-	m_dirty = true;
+	update();
 }
 
 void UpstreamContexts::contextChanged( IECore::InternedString variable )
 {
-	m_dirty = true;
+	update();
 }
 
 void UpstreamContexts::update()
 {
-	if( !m_dirty )
-	{
-		return;
-	}
-
-	m_dirty = false;// TODO MOVE TO END
-	std::cerr << "UPDATING " <<  std::endl;
-
 	m_nodeContexts.clear();
 	m_plugContexts.clear();
 
-	// TODO : RAW POINTER FOR CONTEXT?
 	std::deque<std::pair<const Plug *, ConstContextPtr>> toVisit;
 
 	for( Plug::RecursiveOutputIterator it( m_node.get() ); !it.done(); ++it )
@@ -205,8 +135,6 @@ void UpstreamContexts::update()
 		{
 			continue;
 		}
-
-	std::cerr << "VISITING " << plug->fullName() <<  std::endl;
 
 		// TODO : CANCELLATION CHECK
 
@@ -315,7 +243,15 @@ void UpstreamContexts::update()
 			if( plug == loop->outPlug() )
 			{
 				toVisit.push_back( { loop->inPlug(), context } );
-				toVisit.push_back( { loop->nextPlug(), loop->nextIterationContext() } );
+				if( auto nextContext = loop->nextIterationContext() )
+				{
+					m_plugContexts.insert( { loop->nextPlug(), nextContext } ); // TODO : DO THIS AUTOMAGICALLY (SAME FOR OTHERS)
+					toVisit.push_back( { loop->nextPlug(), nextContext } );
+				}
+				else
+				{
+					m_plugContexts.insert( { loop->nextPlug(), nullptr } );
+				}
 			}
 		}
 		else

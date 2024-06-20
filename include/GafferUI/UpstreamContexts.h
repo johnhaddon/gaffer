@@ -83,7 +83,6 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 
 		Gaffer::ConstNodePtr m_node;
 		Gaffer::ConstContextPtr m_context;
-		bool m_dirty;
 
 		struct NodeData
 		{
