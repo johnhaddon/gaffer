@@ -55,6 +55,7 @@ IE_CORE_FORWARDDECLARE( Context )
 namespace GafferUI
 {
 
+/// TODO : MAYBE RENAME TO ACTIVECONTEXTS?
 class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
@@ -70,7 +71,7 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 
 		//????
 		bool isActive( const Gaffer::Plug *plug ) const;
-		bool isActive( const Gaffer::Node *node ) const;
+		bool isActive( const Gaffer::Node *node ) const; // << FEELS PRETTY DECENT. LET'S USE THIS.
 
 		enum class Status
 		{
