@@ -43,6 +43,8 @@
 
 #include "IECore/RefCounted.h"
 
+#include <unordered_map>
+
 namespace Gaffer
 {
 
