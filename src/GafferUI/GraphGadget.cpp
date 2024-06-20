@@ -1094,11 +1094,11 @@ void GraphGadget::applyUpstreamContexts()
 	{
 		if( ConnectionGadget *c = runTimeCast<ConnectionGadget>( g.get() ) )
 		{
-			c->activeForFocusNode( m_focusContexts ? (bool)m_focusContexts->context( c->dstNodule()->plug() ) : true );
+			c->activeForFocusNode( m_focusContexts ? m_focusContexts->isActive( c->dstNodule()->plug() ) : true );
 		}
 		else if( NodeGadget *n = runTimeCast<NodeGadget>( g.get() ) )
 		{
-			n->activeForFocusNode( m_focusContexts ? (bool)m_focusContexts->context( n->node() ) : true );
+			n->activeForFocusNode( m_focusContexts ? m_focusContexts->isActive( n->node() ) : true );
 		}
 	}
 }
