@@ -141,6 +141,7 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 				)
 				GafferUI.Spacer( imath.V2i( 4, 1 ), imath.V2i( 4, 1 ) )
 
+		plug.node().plugInputChangedSignal().connect( Gaffer.WeakMethod( self.__plugInputChanged ), scoped = False )
 		self.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ), scoped = False )
 		self.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ), scoped = False )
 		self.dragEndSignal().connect( Gaffer.WeakMethod( self.__dragEnd ), scoped = False )
@@ -150,9 +151,21 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 		# run the default dropSignal handler from PlugValueWidget.
 		self.dropSignal().connectFront( Gaffer.WeakMethod( self.__drop ), scoped = False )
 
+		self.__acquireUpstreamContexts()
+
 	def hasLabel( self ) :
 
 		return True
+
+	def setContext( self, context ) :
+
+		GafferUI.PlugValueWidget.setContext( self, context )
+		self.__acquireUpstreamContexts()
+
+	def setPlugs( self, plugs ) :
+
+		GafferUI.PlugValueWidget.setPlugs( self, plugs )
+		self.__acquireUpstreamContexts()
 
 	# We don't actually display values, but this is also called whenever the
 	# input changes, which is when we need to update.
@@ -176,6 +189,15 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 		if self._qtWidget().property( "editScopeActive" ) != editScopeActive :
 			self._qtWidget().setProperty( "editScopeActive", GafferUI._Variant.toVariant( editScopeActive ) )
 			self._repolish()
+
+	def __acquireUpstreamContexts( self ) :
+
+		node = self.__inputNode() # TODO : NOT QUITE RIGHT, DUE TO SHENANIGANS WITH BOX INTERNALS
+		if node is None :
+			self.__upstreamContexts = None
+		else :
+			## TODO : USE ACQUIRE
+			self.__upstreamContexts = GafferUI.UpstreamContexts( node, self.getContext() )
 
 	def __updateMenuButton( self, editScope ) :
 
@@ -209,6 +231,12 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 	def __connectEditScope( self, editScope, *ignored ) :
 
 		self.getPlug().setInput( editScope["out"] )
+
+	def __plugInputChanged( self, plug ) :
+
+		if plug.getName() == "in" and plug.parent() == self.getPlug().node() :
+			# The result of `__inputNode()` will have changed.
+			self.__acquireUpstreamContexts()
 
 	def __inputNode( self ) :
 
@@ -295,6 +323,8 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 			upstream = Gaffer.NodeAlgo.findAllUpstream( node, self.__editScopePredicate )
 			if self.__editScopePredicate( node ) :
 				upstream.insert( 0, node )
+			if self.__upstreamContexts is not None :
+				upstream = [ u for u in upstream if self.__upstreamContexts.isActive( u ) ] ## TODO : WHAT ABOUT DISABLED NODES?
 
 			downstream = Gaffer.NodeAlgo.findAllDownstream( node, self.__editScopePredicate )
 		else :
@@ -456,7 +486,7 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 					GafferUI.Label( "<h4>The Edit Scope cannot be set while nothing is viewed</h4>" )
 			self.__popup.popup( parent = self )
 		elif dropNode :
-			upstream = Gaffer.NodeAlgo.findAllUpstream( inputNode, self.__editScopePredicate )
+			upstream = Gaffer.NodeAlgo.findAllUpstream( inputNode, self.__editScopePredicate ) # TODO : NEED TO DO THE SAME THING HERE
 			if self.__editScopePredicate( inputNode ) :
 				upstream.insert( 0, inputNode )
 
