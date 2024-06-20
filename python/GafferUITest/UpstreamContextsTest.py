@@ -45,11 +45,11 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 	def testSimpleNodes( self ) :
 
-		add1 = GafferTest.AddNode()
-		add2 = GafferTest.AddNode()
-		add3 = GafferTest.AddNode()
-		add4 = GafferTest.AddNode()
-		unconnected = GafferTest.AddNode()
+		add1 = GafferTest.AddNode( "add1" )
+		add2 = GafferTest.AddNode( "add2" )
+		add3 = GafferTest.AddNode( "add3" )
+		add4 = GafferTest.AddNode( "add4" )
+		unconnected = GafferTest.AddNode( "unconnected" )
 
 		add3["op1"].setInput( add1["sum"] )
 		add3["op2"].setInput( add2["sum"] )
@@ -59,24 +59,22 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		contexts = GafferUI.UpstreamContexts( add4, context )
 
 		for node in [ add1, add2, add3, add4 ] :
-			self.assertEqual( contexts.context( node ), context )
-			self.assertEqual( contexts.context( node["op1"] ), context )
-			self.assertEqual( contexts.context( node["op2"] ), context )
-			self.assertEqual( contexts.context( node["sum"] ), context )
+			for graphComponent in [ node, node["op1"], node["op2"], node["sum"], node["enabled"] ] :
+				self.assertTrue( contexts.isActive( graphComponent ), graphComponent.fullName() )
+				#self.assertEqual( contexts.context( graphComponent ), context )
 
-		self.assertIsNone( contexts.context( unconnected ) )
-		self.assertIsNone( contexts.context( unconnected["op1"] ) )
-		self.assertIsNone( contexts.context( unconnected["op2"] ) )
-		self.assertIsNone( contexts.context( unconnected["sum"] ) )
+		for graphComponent in [ unconnected, unconnected["op1"], unconnected["op2"], unconnected["sum"], unconnected["enabled"] ] :
+			self.assertFalse( contexts.isActive( graphComponent ) )
+			#self.assertEqual( contexts.context( graphComponent ), None ) # CHANGE ME
 
 		add3["enabled"].setValue( False )
 
-		self.assertEqual( contexts.context( add4 ), context )
-		self.assertEqual( contexts.context( add3 ), context )
-		self.assertEqual( contexts.context( add3["op1"] ), context )
-		self.assertIsNone( contexts.context( add3["op2"] ) )
-		self.assertEqual( contexts.context( add1 ), context )
-		self.assertIsNone( contexts.context( add2 ) )
+		self.assertTrue( contexts.isActive( add4 ) )
+		self.assertTrue( contexts.isActive( add3 ) )
+		self.assertTrue( contexts.isActive( add3["op1"] ) )
+		self.assertFalse( contexts.isActive( add3["op2"] ) )
+		self.assertTrue( contexts.isActive( add1 ) )
+		self.assertFalse( contexts.isActive( add2 ) )
 
 	def testSwitch( self ) :
 

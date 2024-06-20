@@ -63,59 +63,36 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 
 	public :
 
-		//UpstreamContexts( const Gaffer::Plug *plug ); // TODO : DO WE NEED THIS ONE?
 		UpstreamContexts( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context );
-		//UpstreamContexts( const Gaffer::Set *set );
+		~UpstreamContexts() override;
 
 		IE_CORE_DECLAREMEMBERPTR( UpstreamContexts );
 
-		~UpstreamContexts() override;
-
-		//????
 		bool isActive( const Gaffer::Plug *plug ) const;
-		bool isActive( const Gaffer::Node *node ) const; // << FEELS PRETTY DECENT. LET'S USE THIS.
+		bool isActive( const Gaffer::Node *node ) const;
 
-		enum class Status
-		{
-			Inactive,
-			Disabled, // Makes less sense for plugs
-			Enabled
-		};
-
-		// ???
-		Status status( const Gaffer::Plug *plug ) const;
-
-
-		// TODO : ARE WE HAPPY WITH JUST ONE CONTEXT? WHAT WOULD WE DO WITH MORE???
-		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const; // TODO : DO THESE WAIT???
+		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const;
 		Gaffer::ConstContextPtr context( const Gaffer::Node *node ) const;
 
-		using ChangedSignal = Gaffer::Signals::Signal<void()>;
-		ChangedSignal &changedSignal();
-
-		//ConstPtr acquire( const Gaffer::Plug *plug ); // TODO : DO WE NEED THIS ONE???
-		static ConstPtr acquire( const Gaffer::Node *node );
-
-		// COULD WE MAKE THIS ONE SHARE WORK WITH ONES ACQUIRED FROM A NODE???
-		//static ConstPtr acquire( const Gaffer::Set *set );  // ?? MAYBE `acquireForFocus()`?
-
-	//private : TODO
+	private :
 
 		void plugDirtied( const Gaffer::Plug *plug );
 		void contextChanged( IECore::InternedString variable );
 		void update();
+		std::optional<const Gaffer::Context *> findPlugContext( const Gaffer::Plug *plug ) const;
 
 		Gaffer::ConstNodePtr m_node;
 		Gaffer::ConstContextPtr m_context;
-
 		bool m_dirty;
-		ChangedSignal m_changedSignal;
 
-		/// TODO : IS THERE ANY WAY WE COULD USE RAW POINTER?
-		//std::unordered_map<IECore::MurmurHash,
-		// TODO : DOCUMENT SPARSENESS
+		struct NodeData
+		{
+			Gaffer::ConstContextPtr context = nullptr;
+			bool enabled = false;
+		};
+
+		std::unordered_map<Gaffer::ConstNodePtr, NodeData> m_nodeContexts;
 		std::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr> m_plugContexts;
-		std::unordered_map<Gaffer::ConstNodePtr, Gaffer::ConstContextPtr> m_nodeContexts;
 
 };
 

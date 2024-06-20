@@ -58,7 +58,7 @@ using namespace Gaffer;
 using namespace GafferUI;
 using namespace IECore;
 using namespace boost::placeholders;
-// using namespace std;
+using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
 // Internal utilities
@@ -110,6 +110,23 @@ UpstreamContexts::~UpstreamContexts()
 {
 }
 
+bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
+{
+	optional<const Context *> c = findPlugContext( plug );
+	if( c )
+	{
+		return *c;
+	}
+
+	auto it = m_nodeContexts.find( plug->node() );
+	return it != m_nodeContexts.end() && it->second.enabled;
+}
+
+bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
+{
+	return m_nodeContexts.find( node ) != m_nodeContexts.end();
+}
+
 Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Plug *plug ) const
 {
 	const_cast<UpstreamContexts *>( this )->update(); // TODO : REMOVE?
@@ -140,27 +157,17 @@ Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Node *node ) co
 	const_cast<UpstreamContexts *>( this )->update(); // TODO : REMOVE?
 
 	auto it = m_nodeContexts.find( node );
-	return it != m_nodeContexts.end() ? it->second : nullptr;
-}
-
-UpstreamContexts::ChangedSignal &UpstreamContexts::changedSignal()
-{
-	return m_changedSignal;
+	return it != m_nodeContexts.end() ? it->second.context : nullptr;
 }
 
 void UpstreamContexts::plugDirtied( const Gaffer::Plug *plug )
 {
 	m_dirty = true;
-	//update();
-	changedSignal()();
 }
 
 void UpstreamContexts::contextChanged( IECore::InternedString variable )
 {
 	m_dirty = true;
-	/// TODO : CHECK HASH, MANAGE DIRTINESS ETC
-	//update();
-	changedSignal()();
 }
 
 void UpstreamContexts::update()
@@ -203,10 +210,23 @@ void UpstreamContexts::update()
 
 		// TODO : CANCELLATION CHECK
 
+		Context::Scope scopedContext( context.get() );
+
 		const Node *node = plug->node();
+		bool nodeEnabled = true; // TODO : USE DOWN BELOW
+
 		if( node )
 		{
-			m_nodeContexts.insert( { plug->node(), context } ); // TODO : IGNORE INPUT PLUGS?
+			if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
+			{
+				if( auto enabledPlug = dependencyNode->enabledPlug() )
+				{
+					nodeEnabled = enabledPlug->getValue();
+				}
+			}
+
+			// TODO : OVERRIDE IF PREVIOUSLY DISABLED
+			m_nodeContexts.insert( { plug->node(), { context, nodeEnabled } } ); // TODO : IGNORE INPUT PLUGS?
 		}
 		else
 		{
@@ -234,8 +254,6 @@ void UpstreamContexts::update()
 			continue;
 		}
 
-		Context::Scope scopedContext( context.get() );
-
 		// TODO : DISABLED DEPENDENCYNODE
 
 		// TODO : DO YOU NEED TO USE GLOBAL SCOPES ANYWHERE HERE?
@@ -247,6 +265,8 @@ void UpstreamContexts::update()
 				{
 					if( auto inPlug = dependencyNode->correspondingInput( plug ) )
 					{
+						m_plugContexts.insert( { inPlug, context } );
+						m_plugContexts.insert( { enabledPlug, context } );
 						toVisit.push_back( { inPlug, context } );
 						toVisit.push_back( { enabledPlug, context } );
 					}
@@ -311,4 +331,20 @@ void UpstreamContexts::update()
 			}
 		}
 	}
+}
+
+std::optional<const Gaffer::Context *> UpstreamContexts::findPlugContext( const Gaffer::Plug *plug ) const
+{
+	while( plug )
+	{
+		auto it = m_plugContexts.find( plug );
+		if( it != m_plugContexts.end() )
+		{
+			return it->second.get();
+		}
+
+		plug = plug->parent<Plug>();
+	}
+
+	return std::nullopt;
 }
