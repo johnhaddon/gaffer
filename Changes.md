@@ -19,6 +19,7 @@ Fixes
 API
 ---
 
+- LightEditor : Added `deregisterColumn()` method for removing columns.
 - AnnotationsGadget : Added `annotationText()` method.
 - ParallelAlgoTest : Added `UIThreadCallHandler.receive()` method.
 
