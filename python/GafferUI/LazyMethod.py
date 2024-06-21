@@ -60,6 +60,8 @@ class LazyMethod( object ) :
 		def wrapper( widget, *args, **kw ) :
 
 			assert( isinstance( widget, GafferUI.Widget ) )
+			if not GafferUI._qtObjectIsValid( widget._qtWidget() ) :
+				return
 
 			# Update the list of pending method calls for this widget.
 
