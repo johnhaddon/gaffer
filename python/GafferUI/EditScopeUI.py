@@ -196,8 +196,10 @@ class EditScopePlugValueWidget( GafferUI.PlugValueWidget ) :
 		if node is None :
 			self.__upstreamContexts = None
 		else :
-			## TODO : USE ACQUIRE
-			self.__upstreamContexts = GafferUI.UpstreamContexts( node, self.getContext() )
+			print( node.fullName() )
+			print( self.getContext().keys() )
+			assert( self.getContext().isSame( node.scriptNode().context() ) )
+			self.__upstreamContexts = GafferUI.UpstreamContexts.acquire( node )
 
 	def __updateMenuButton( self, editScope ) :
 
