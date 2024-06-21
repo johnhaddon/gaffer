@@ -404,5 +404,81 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertTrue( contexts.isActive( addA ) )
 		self.assertFalse( contexts.isActive( addB ) )
 
+	def testAcquire( self ) :
+
+		add1 = GafferTest.AddNode()
+		add2 = GafferTest.AddNode()
+
+		contexts1 = GafferUI.UpstreamContexts.acquire( add1 )
+		self.assertTrue( contexts1.isSame( GafferUI.UpstreamContexts.acquire( add1 ) ) )
+		self.assertTrue( contexts1.isActive( add1 ) )
+		self.assertFalse( contexts1.isActive( add2 ) )
+
+		contexts2 = GafferUI.UpstreamContexts.acquire( add2 )
+		self.assertTrue( contexts2.isSame( GafferUI.UpstreamContexts.acquire( add2 ) ) )
+		self.assertTrue( contexts2.isActive( add2 ) )
+		self.assertFalse( contexts2.isActive( add1 ) )
+
+	def testAcquireLifetime( self ) :
+
+		node = GafferTest.MultiplyNode()
+		nodeSlots = node.plugDirtiedSignal().numSlots()
+		nodeRefCount = node.refCount()
+
+		contexts = GafferUI.UpstreamContexts.acquire( node )
+		del contexts
+
+		# Indicates that `contexts` was truly destroyed.
+		self.assertEqual( node.plugDirtiedSignal().numSlots(), nodeSlots )
+		self.assertEqual( node.refCount(), nodeRefCount )
+
+		# Should be a whole new instance.
+		contexts = GafferUI.UpstreamContexts.acquire( node )
+		self.assertTrue( contexts.isActive( node ) )
+
+	def testAcquireForFocus( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		script["add1"] = GafferTest.AddNode()
+		script["add2"] = GafferTest.AddNode()
+
+		contexts = GafferUI.UpstreamContexts.acquireForFocus( script )
+		self.assertTrue( contexts.isSame( GafferUI.UpstreamContexts.acquireForFocus( script ) ) )
+
+		self.assertFalse( contexts.isActive( script["add1" ] ) )
+		self.assertFalse( contexts.isActive( script["add2" ] ) )
+
+		script.setFocus( script["add1"] )
+		self.assertTrue( contexts.isActive( script["add1" ] ) )
+		self.assertFalse( contexts.isActive( script["add2" ] ) )
+
+		script.setFocus( script["add2"] )
+		self.assertFalse( contexts.isActive( script["add1" ] ) )
+		self.assertTrue( contexts.isActive( script["add2" ] ) )
+
+		script.setFocus( None )
+		self.assertFalse( contexts.isActive( script["add1" ] ) )
+		self.assertFalse( contexts.isActive( script["add2" ] ) )
+
+	def testAcquireForFocusLifetime( self ) :
+
+		script = Gaffer.ScriptNode()
+		contextSlots = script.context().changedSignal().numSlots()
+		contextRefCount = script.context().refCount()
+
+		contexts = GafferUI.UpstreamContexts.acquireForFocus( script )
+		del contexts
+
+		# Indicates that `contexts` was truly destroyed.
+		self.assertEqual( script.context().changedSignal().numSlots(), contextSlots )
+		self.assertEqual( script.context().refCount(), contextRefCount )
+
+		# Should be a whole new instance.
+		script["node"] = GafferTest.MultiplyNode()
+		script.setFocus( script["node"] )
+		contexts = GafferUI.UpstreamContexts.acquireForFocus( script )
+		self.assertTrue( contexts.isActive( script["node"] ) )
+
 if __name__ == "__main__":
 	unittest.main()

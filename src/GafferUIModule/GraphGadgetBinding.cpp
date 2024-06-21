@@ -53,6 +53,7 @@
 #include "GafferBindings/SignalBinding.h"
 
 #include "Gaffer/Node.h"
+#include "Gaffer/ScriptNode.h"
 
 using namespace boost::python;
 using namespace IECorePython;
@@ -237,6 +238,16 @@ ContextPtr contextWrapper2( const UpstreamContexts &upstreamContexts, const Plug
 	return copy ? new Context( *c ) : boost::const_pointer_cast<Context>( c );
 }
 
+UpstreamContextsPtr acquireWrapper( Node &node )
+{
+	return boost::const_pointer_cast<UpstreamContexts>( UpstreamContexts::acquire( &node ) );
+}
+
+UpstreamContextsPtr acquireForFocusWrapper( ScriptNode &script )
+{
+	return boost::const_pointer_cast<UpstreamContexts>( UpstreamContexts::acquireForFocus( &script ) );
+}
+
 } // namespace
 
 namespace GafferUIModule
@@ -346,6 +357,8 @@ void GafferUIModule::bindGraphGadget()
 		.def( "isActive", (bool (UpstreamContexts::*)( const Node *node ) const)&UpstreamContexts::isActive )
 		.def( "context", &contextWrapper1, ( arg( "node" ), arg( "_copy" ) = true ) )
 		.def( "context", &contextWrapper2, ( arg( "plug" ), arg( "_copy" ) = true ) )
+		.def( "acquire", &acquireWrapper ).staticmethod( "acquire" )
+		.def( "acquireForFocus", &acquireForFocusWrapper ).staticmethod( "acquireForFocus" )
 	;
 
 }

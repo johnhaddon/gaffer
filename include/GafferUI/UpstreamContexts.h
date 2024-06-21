@@ -49,6 +49,7 @@ namespace Gaffer
 {
 
 class Plug;
+class ScriptNode;
 IE_CORE_FORWARDDECLARE( Node );
 IE_CORE_FORWARDDECLARE( Context )
 
@@ -74,8 +75,27 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const;
 		Gaffer::ConstContextPtr context( const Gaffer::Node *node ) const;
 
+		/// Shared instances
+		/// ================
+		///
+		/// Tracking the upstream contexts can involve significant computation,
+		/// so it is recommended that UpstreamContexts instances are shared
+		/// between UI components. The `aquire()` methods maintain a pool of
+		/// instances for this purpose. Acquisition and destruction of shared
+		/// instances is not threadsafe, and must always be done on the UI
+		/// thread.
+		///
+		/// Returns a shared instance for `node`. The node must belong to a
+		/// ScriptNode, so that `ScriptNode::context()` can be used to provide
+		/// the context.
+		static ConstPtr acquire( const Gaffer::NodePtr &node );
+		/// Returns an shared instance that will automatically track the focus
+		/// node in the specified `script`.
+		static ConstPtr acquireForFocus( Gaffer::ScriptNode *script );
+
 	private :
 
+		void updateNode( const Gaffer::NodePtr &node );
 		void plugDirtied( const Gaffer::Plug *plug );
 		void contextChanged( IECore::InternedString variable );
 		void update();
@@ -92,6 +112,8 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 
 		std::unordered_map<Gaffer::ConstNodePtr, NodeData> m_nodeContexts;
 		std::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr> m_plugContexts;
+
+		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
 
 };
 
