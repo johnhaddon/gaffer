@@ -68,11 +68,11 @@ class RenderPassEditor( GafferUI.NodeSetEditor ) :
 	#   defaults.
 	# - The PlugLayout we use to display the settings allows users to add
 	#   their own widgets to the UI.
-	class Settings( Gaffer.Node ) :
+	class Settings( GafferUI.Editor.Settings ) :
 
-		def __init__( self ) :
+		def __init__( self, script ) :
 
-			Gaffer.Node.__init__( self, "Settings" )
+			GafferUI.Editor.Settings.__init__( self, "RenderPassEditorSettings", script )
 
 			self["in"] = GafferScene.ScenePlug()
 			self["tabGroup"] = Gaffer.StringPlug( defaultValue = "Cycles" )
@@ -88,7 +88,7 @@ class RenderPassEditor( GafferUI.NodeSetEditor ) :
 
 		GafferUI.NodeSetEditor.__init__( self, mainColumn, scriptNode, nodeSet = scriptNode.focusSet(), **kw )
 
-		self.__settingsNode = self.Settings()
+		self.__settingsNode = self.Settings( scriptNode )
 		Gaffer.NodeAlgo.applyUserDefaults( self.__settingsNode )
 
 		searchFilter = _GafferSceneUI._RenderPassEditor.SearchFilter()
