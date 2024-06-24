@@ -320,6 +320,7 @@ void GafferUIModule::bindGraphGadget()
 		.def( "isActive", (bool (UpstreamContexts::*)( const Node *node ) const)&UpstreamContexts::isActive )
 		.def( "context", &contextWrapper1, ( arg( "node" ), arg( "_copy" ) = true ) )
 		.def( "context", &contextWrapper2, ( arg( "plug" ), arg( "_copy" ) = true ) )
+		.def( "updatedSignal", &UpstreamContexts::updatedSignal, return_internal_reference<1>() )
 		.def( "acquire", &acquireWrapper ).staticmethod( "acquire" )
 		.def( "acquireForFocus", &acquireForFocusWrapper ).staticmethod( "acquireForFocus" )
 	;
