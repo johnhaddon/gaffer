@@ -215,12 +215,7 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 		void rootChildRemoved( Gaffer::GraphComponent *root, Gaffer::GraphComponent *child );
 		void selectionMemberAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
 		void selectionMemberRemoved( Gaffer::Set *set, IECore::RunTimeTyped *member );
-		void updateFocusPlugDirtiedConnection();
-		void focusContextsChanged();
-		void focusChanged();
-		void applyUpstreamContexts();
-		void focusPlugDirtied( Gaffer::Plug *plug );
-		void scriptContextChanged( const Gaffer::Context *context, const IECore::InternedString& );
+		void focusContextsUpdated();
 		void filterMemberAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
 		void filterMemberRemoved( Gaffer::Set *set, IECore::RunTimeTyped *member );
 		void inputChanged( Gaffer::Plug *dstPlug );
@@ -271,12 +266,11 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 		Gaffer::NodePtr m_root;
 		Gaffer::ScriptNodePtr m_scriptNode;
 		RootChangedSignal m_rootChangedSignal;
-		IECore::MurmurHash m_scriptContextHash;
 		Gaffer::Signals::ScopedConnection m_rootChildAddedConnection;
 		Gaffer::Signals::ScopedConnection m_rootChildRemovedConnection;
 		Gaffer::Signals::ScopedConnection m_selectionMemberAddedConnection;
 		Gaffer::Signals::ScopedConnection m_selectionMemberRemovedConnection;
-		Gaffer::Signals::ScopedConnection m_focusChangedConnection;
+		Gaffer::Signals::ScopedConnection m_focusContextsUpdatedConnection;
 		Gaffer::Signals::ScopedConnection m_focusPlugDirtiedConnection;
 		Gaffer::Signals::ScopedConnection m_scriptContextChangedConnection;
 
@@ -318,37 +312,8 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 
 		GraphLayoutPtr m_layout;
 
-		// Track if we need to run an active state update.  If true, then if there isn't already an
-		// m_activeTask running, we need to start one.  ( Helpful to track separately so we know
-		// we need to restart if the task gets cancelled somehow )
-		bool m_activeStateDirty;
-		void dirtyActive();
+		ConstUpstreamContextsPtr m_focusContexts;
 
-		// Used to run updateActive()
-		std::unique_ptr<Gaffer::BackgroundTask> m_activeStateTask; // TODO : REMOVE
-
-		UpstreamContextsPtr m_focusContexts;
-
-		// Does the actual calculation of the active state, then calls applyActive.
-		// Should be run on background thread
-		void updateActive();
-
-		// Applies the active state to the child Gadgets ( must be called on UI thread )
-		void applyActive(
-			std::shared_ptr< std::unordered_set<const Gaffer::Plug*> > activePlugs,
-			std::shared_ptr< std::unordered_set<const Gaffer::Node*> > activeNodes
-		);
-
-		// Given a plug and context, returns all nodes and plugs which contribute to evaluating that
-		// plug
-		static void activePlugsAndNodes(
-			const Gaffer::Plug *plug,
-			const Gaffer::Context *context,
-			std::unordered_set<const Gaffer::Plug*> &activePlugs,
-			std::unordered_set<const Gaffer::Node*> &activeNodes
-		);
-
-		friend GafferUIModule::ActivePlugsWrapperClassToUseAsFriend;
 };
 
 IE_CORE_DECLAREPTR( GraphGadget );

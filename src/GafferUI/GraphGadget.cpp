@@ -480,7 +480,7 @@ void activeWalkOutput(
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( GraphGadget );
 
 GraphGadget::GraphGadget( Gaffer::NodePtr root, Gaffer::SetPtr filter )
-	:	m_dragStartPosition( 0 ), m_lastDragPosition( 0 ), m_dragMode( None ), m_dragReconnectCandidate( nullptr ), m_dragReconnectSrcNodule( nullptr ), m_dragReconnectDstNodule( nullptr ), m_dragMergeGroupId( 0 ), m_activeStateDirty( false )
+	:	m_dragStartPosition( 0 ), m_lastDragPosition( 0 ), m_dragMode( None ), m_dragReconnectCandidate( nullptr ), m_dragReconnectSrcNodule( nullptr ), m_dragReconnectDstNodule( nullptr ), m_dragMergeGroupId( 0 )
 {
 	keyPressSignal().connect( boost::bind( &GraphGadget::keyPressed, this, ::_1,  ::_2 ) );
 	buttonPressSignal().connect( boost::bind( &GraphGadget::buttonPress, this, ::_1,  ::_2 ) );
@@ -506,7 +506,6 @@ GraphGadget::GraphGadget( Gaffer::NodePtr root, Gaffer::SetPtr filter )
 GraphGadget::~GraphGadget()
 {
 	removeChild( auxiliaryConnectionsGadget() );
-	m_activeStateTask.reset();
 }
 
 Gaffer::Node *GraphGadget::getRoot()
@@ -553,20 +552,17 @@ void GraphGadget::setRoot( Gaffer::NodePtr root, Gaffer::SetPtr filter )
 			m_selectionMemberRemovedConnection = m_scriptNode->selection()->memberRemovedSignal().connect(
 				boost::bind( &GraphGadget::selectionMemberRemoved, this, ::_1, ::_2 )
 			);
-			m_focusChangedConnection = m_scriptNode->focusChangedSignal().connect(
-				boost::bind( &GraphGadget::focusChanged, this )
-			);
-			m_scriptContextChangedConnection = m_scriptNode->context()->changedSignal().connect(
-				boost::bind( &GraphGadget::scriptContextChanged, this, ::_1, ::_2 )
+			m_focusContexts = UpstreamContexts::acquireForFocus( m_scriptNode.get() );
+			m_focusContextsUpdatedConnection = m_focusContexts->updatedSignal().connect(
+				boost::bind( &GraphGadget::focusContextsUpdated, this )
 			);
 		}
 		else
 		{
 			m_selectionMemberAddedConnection.disconnect();
 			m_selectionMemberAddedConnection.disconnect();
-			m_focusChangedConnection.disconnect();
+			m_focusContextsUpdatedConnection.disconnect();
 		}
-		updateFocusPlugDirtiedConnection();
 	}
 
 	if( filter != m_filter )
@@ -582,7 +578,6 @@ void GraphGadget::setRoot( Gaffer::NodePtr root, Gaffer::SetPtr filter )
 	if( rootChanged )
 	{
 		m_rootChangedSignal( this, previousRoot.get() );
-		dirtyActive();
 	}
 }
 
@@ -1011,163 +1006,20 @@ ConnectionGadget *GraphGadget::reconnectionGadgetAt( const NodeGadget *gadget, c
 	return nullptr;
 }
 
-void GraphGadget::dirtyActive()
+void GraphGadget::focusContextsUpdated()
 {
-	m_activeStateTask.reset();
-	m_activeStateDirty = true;
-	dirty( DirtyType::Render );
-}
-
-void GraphGadget::updateActive()
-{
-	m_activeStateTask.reset();
-
-	const Gaffer::Node *focusNode = m_scriptNode->getFocus();
-	std::vector<Gaffer::ConstPlugPtr> focusPlugs;
-	if( focusNode )
-	{
-		Gaffer::ConstPlugPtr hiddenFocusPlug = nullptr;
-		for( auto &plug : Gaffer::Plug::OutputRange( *focusNode ) )
-		{
-			const std::string &n = plug->getName();
-			if( n.size() >= 2 && n[0] == '_' && n[1] == '_' )
-			{
-				if( !hiddenFocusPlug )
-				{
-					hiddenFocusPlug = plug;
-				}
-				continue;
-			}
-
-			focusPlugs.push_back( plug );
-		}
-
-		if( !focusPlugs.size() && hiddenFocusPlug )
-		{
-			// If we couldn't find any visible output plug, take the hidden one
-			focusPlugs.push_back( hiddenFocusPlug );
-		}
-	}
-
-	if( !focusPlugs.size() )
-	{
-		applyActive( nullptr, nullptr );
-		return;
-	}
-
-	Gaffer::Context::Scope scopedContext( m_scriptNode->context() );
-
-	m_activeStateTask = Gaffer::ParallelAlgo::callOnBackgroundThread(
-		// TODO - if we make cancellation for graph edits more granular ( instead of for the whole graph ),
-		// we may need to somehow pass all focusPlugs as the subject
-		focusPlugs[0].get(),
-		// Must hold a reference to stop us dying before our UI thread call is scheduled.
-		[focusPlugs, thisRef = GraphGadgetPtr( this ) ] {
-
-			std::shared_ptr< std::unordered_set<const Gaffer::Plug*> > activePlugs( new std::unordered_set<const Gaffer::Plug*> );
-			std::shared_ptr< std::unordered_set<const Gaffer::Node*> > activeNodes( new std::unordered_set<const Gaffer::Node*> );
-
-			Canceller::check( Gaffer::Context::current()->canceller() );
-
-			for( const Gaffer::ConstPlugPtr &focusPlug : focusPlugs )
-			{
-				activePlugsAndNodes(
-					focusPlug.get(), Gaffer::Context::current(),
-					*activePlugs, *activeNodes
-				);
-			}
-
-			Gaffer::ParallelAlgo::callOnUIThread(
-				[thisRef, activePlugs, activeNodes] {
-					thisRef->applyActive( activePlugs, activeNodes );
-				}
-			);
-		}
-	);
-
-}
-
-void GraphGadget::applyUpstreamContexts()
-{
-	std::cerr << "USING NEW" << std::endl;
+	const bool haveFocus = m_scriptNode->getFocus();
 	for( auto &g : children() )
 	{
 		if( ConnectionGadget *c = runTimeCast<ConnectionGadget>( g.get() ) )
 		{
-			c->activeForFocusNode( m_focusContexts ? m_focusContexts->isActive( c->dstNodule()->plug() ) : true );
+			c->activeForFocusNode( haveFocus ? m_focusContexts->isActive( c->dstNodule()->plug() ) : true );
 		}
 		else if( NodeGadget *n = runTimeCast<NodeGadget>( g.get() ) )
 		{
-			n->activeForFocusNode( m_focusContexts ? m_focusContexts->isActive( n->node() ) : true );
+			n->activeForFocusNode( haveFocus ? m_focusContexts->isActive( n->node() ) : true );
 		}
 	}
-}
-
-void GraphGadget::applyActive(
-	std::shared_ptr< std::unordered_set<const Gaffer::Plug*> > activePlugs,
-	std::shared_ptr< std::unordered_set<const Gaffer::Node*> > activeNodes
-)
-{
-	std::cerr << "USING OLD" << std::endl;
-	if( activePlugs && activeNodes )
-	{
-		for( auto &g : children() )
-		{
-			if( ConnectionGadget *c = runTimeCast<ConnectionGadget>( g.get() ) )
-			{
-				c->activeForFocusNode( activePlugs->count( c->dstNodule()->plug() ) );
-			}
-			else if( NodeGadget *n = runTimeCast<NodeGadget>( g.get() ) )
-			{
-				n->activeForFocusNode( activeNodes->count( n->node() ) );
-			}
-		}
-	}
-	else
-	{
-		// If we haven't got a focus node to trigger active state visualisation, just show everything active
-		for( auto &g : children() )
-		{
-			if( ConnectionGadget *c = runTimeCast<ConnectionGadget>( g.get() ) )
-			{
-				c->activeForFocusNode( true );
-			}
-			else if( NodeGadget *n = runTimeCast<NodeGadget>( g.get() ) )
-			{
-				n->activeForFocusNode( true );
-			}
-		}
-	}
-
-	m_activeStateDirty = false;
-	// Clear the task, so that a new task will run next time activeStateDirty is set
-	m_activeStateTask.reset();
-
-	// TODO - this const_cast is pretty ugly
-	const_cast< GraphGadget*>( this )->dirty( DirtyType::Render );
-}
-
-void GraphGadget::activePlugsAndNodes(
-	const Gaffer::Plug *plug,
-	const Gaffer::Context *context,
-	std::unordered_set<const Gaffer::Plug*> &activePlugs,
-	std::unordered_set<const Gaffer::Node*> &activeNodes
-)
-{
-#if 0
-	GafferUI::UpstreamContexts c( plug->node(), context );
-
-	for( const auto &n : c.m_nodeContexts )
-	{
-		activeNodes.insert( n.first.get() );
-	}
-#else
-	// TODO - we seem to be prefering std::unordered_set.  We should probably add
-	// a specialization of std::hash to include/IECore/MurmurHash.h so that we can
-	// use it here
-	boost::unordered_set<IECore::MurmurHash> plugContextsVisited;
-	activeWalkOutput( plug, context, context->canceller(), activePlugs, activeNodes, plugContextsVisited );
-#endif
 }
 
 void GraphGadget::renderLayer( Layer layer, const Style *style, RenderReason reason ) const
@@ -1290,7 +1142,7 @@ void GraphGadget::rootChildAdded( Gaffer::GraphComponent *root, Gaffer::GraphCom
 
 				// Needed in case there is no focus node, where we set all nodes as active
 				// and can't rely on the focus node being dirtied to update active state
-				dirtyActive();
+				// dirtyActive(); TODO : FIX IN ADDCONNECTIONGADGETS?
 			}
 		}
 	}
@@ -1324,59 +1176,6 @@ void GraphGadget::selectionMemberRemoved( Gaffer::Set *set, IECore::RunTimeTyped
 		{
 			nodeGadget->setHighlighted( false );
 		}
-	}
-}
-
-void GraphGadget::updateFocusPlugDirtiedConnection()
-{
-	if( m_scriptNode->getFocus() )
-	{
-		m_focusContexts = new UpstreamContexts( m_scriptNode->getFocus(), m_scriptNode->context() );
-		//m_focusContexts->changedSignal().connect( boost::bind( &GraphGadget::focusContextsChanged, this ) );
-		focusContextsChanged();
-	}
-	else
-	{
-		m_focusContexts = nullptr;
-		focusContextsChanged();
-	}
-
-	// if( Gaffer::Node *node = m_scriptNode->getFocus() )
-	// {
-	// 	m_focusPlugDirtiedConnection = node->plugDirtiedSignal().connect(
-	// 		boost::bind( &GraphGadget::focusPlugDirtied, this, ::_1 )
-	// 	);
-	// }
-	// else
-	// {
-	// 	m_focusPlugDirtiedConnection.disconnect();
-	// }
-}
-
-void GraphGadget::focusContextsChanged()
-{
-	applyUpstreamContexts();
-}
-
-void GraphGadget::focusChanged()
-{
-	updateFocusPlugDirtiedConnection();
-	dirtyActive();
-}
-
-
-void GraphGadget::focusPlugDirtied( Gaffer::Plug *plug )
-{
-	dirtyActive();
-}
-
-void GraphGadget::scriptContextChanged( const Gaffer::Context *context, const IECore::InternedString & )
-{
-	IECore::MurmurHash newHash = context->hash();
-	if( newHash != m_scriptContextHash )
-	{
-		m_scriptContextHash = newHash;
-		dirtyActive();
 	}
 }
 
@@ -2268,7 +2067,7 @@ void GraphGadget::addConnectionGadget( Nodule *dstNodule )
 
 	// Needed in case there is no focus node, where we set all nodes as active
 	// and can't rely on the focus node being dirtied to update active state
-	dirtyActive();
+	// dirtyActive(); TODO : FIX SOMEWHERE ELSE
 }
 
 void GraphGadget::removeConnectionGadgets( const NodeGadget *nodeGadget )
