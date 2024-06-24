@@ -157,6 +157,11 @@ Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Node *node ) co
 	return it != m_nodeContexts.end() ? it->second.context : m_context;
 }
 
+UpstreamContexts::Signal &UpstreamContexts::updatedSignal() const
+{
+	return m_updatedSignal;
+}
+
 ConstUpstreamContextsPtr UpstreamContexts::acquire( const Gaffer::NodePtr &node )
 {
 	auto &instances = sharedInstances();
@@ -394,6 +399,8 @@ void UpstreamContexts::update()
 			}
 		}
 	}
+
+	updatedSignal()();
 }
 
 std::optional<const Gaffer::Context *> UpstreamContexts::findPlugContext( const Gaffer::Plug *plug ) const

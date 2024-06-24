@@ -76,6 +76,9 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const;
 		Gaffer::ConstContextPtr context( const Gaffer::Node *node ) const;
 
+		using Signal = Gaffer::Signals::Signal<void ()>;
+		Signal &updatedSignal() const;
+
 		/// Shared instances
 		/// ================
 		///
@@ -115,7 +118,7 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 		std::unordered_map<Gaffer::ConstNodePtr, NodeData> m_nodeContexts;
 		std::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr> m_plugContexts;
 
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
+		mutable Signal m_updatedSignal;
 
 };
 
