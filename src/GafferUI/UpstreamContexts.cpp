@@ -123,14 +123,16 @@ UpstreamContexts::~UpstreamContexts()
 
 bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
 {
+	std::cerr << plug->fullName() << std::endl;
 	optional<const Context *> c = findPlugContext( plug );
 	if( c )
 	{
+		std::cerr << "  " << *c << std::endl;
 		return *c;
 	}
-
-	auto it = m_nodeContexts.find( plug->node() );
-	return it != m_nodeContexts.end() && ( plug->direction() == Plug::Out || it->second.enabled );
+	return false;
+	//auto it = m_nodeContexts.find( plug->node() );
+	//return it != m_nodeContexts.end() && ( plug->direction() == Plug::Out || it->second.enabled );
 }
 
 bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
@@ -243,10 +245,12 @@ void UpstreamContexts::update()
 		auto [plug, context] = toVisit.front();
 		toVisit.pop_front();
 
-		MurmurHash h = context->hash();
-		h.append( (uintptr_t)plug );
-		if( !visited.insert( h ).second )
+		MurmurHash visitHash = context->hash();
+		visitHash.append( (uintptr_t)plug );
+		if( !visited.insert( visitHash ).second )
 		{
+			// Already visited this plug in this context. No need to do it
+			// again.
 			continue;
 		}
 
@@ -255,25 +259,30 @@ void UpstreamContexts::update()
 		Context::Scope scopedContext( context.get() );
 
 		const Node *node = plug->node();
-		bool nodeEnabled = true; // TODO : USE DOWN BELOW
 
-		if( node )
-		{
-			if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
-			{
-				if( auto enabledPlug = dependencyNode->enabledPlug() )
-				{
-					nodeEnabled = enabledPlug->getValue();
-				}
-			}
 
-			// TODO : OVERRIDE IF PREVIOUSLY DISABLED
-			m_nodeContexts.insert( { plug->node(), { context, nodeEnabled } } ); // TODO : IGNORE INPUT PLUGS?
-		}
-		else
-		{
-			m_plugContexts.insert( { plug, context } );
-		}
+
+
+		// bool nodeEnabled = true; // TODO : USE DOWN BELOW
+
+		// if( node )
+		// {
+		// 	if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
+		// 	{
+		// 		if( auto enabledPlug = dependencyNode->enabledPlug() )
+		// 		{
+		// 			nodeEnabled = enabledPlug->getValue();
+		// 		}
+		// 	}
+
+		// 	// TODO : OVERRIDE IF PREVIOUSLY DISABLED
+		m_nodeContexts.insert( { plug->node(), { context, false } } ); // TODO : IGNORE INPUT PLUGS?
+		m_plugContexts.insert( { plug, context } );
+		// }
+		// else
+		// {
+		// 	m_plugContexts.insert( { plug, context } );
+		// }
 
 		if( auto input = plug->getInput() )
 		{
@@ -334,6 +343,8 @@ void UpstreamContexts::update()
 					}
 				}
 				toVisit.push_back( { activeIn, context } );
+				toVisit.push_back( { switchNode->enabledPlug(), context } );
+				toVisit.push_back( { switchNode->indexPlug(), context } );
 			}
 			else
 			{
@@ -368,14 +379,16 @@ void UpstreamContexts::update()
 				}
 			}
 		}
-		else
+
+		else if( runTimeCast<const ComputeNode>( node ) )
 		{
 			// TODO : MIGHT NEED TO GET HERE FOR OTHER INPUTS OF THE SPECIAL-CASE NODES ABOVE?
 			// CAN WE USE `m_plugContexts` to BLOCK PROCESSING OF ALREADY-PROCESSED THINGS?
 			for( const auto &inputPlug : Plug::InputRange( *node ) )
 			{
-				if( inputPlug != plug )
+				if( inputPlug != plug ) // TODO : SHOULDN'T BE NEEDED? WE'RE ALREADY AN OUTPUT PLUG?
 				{
+					// TODO : ONLY PUSH IF WE HAVE A CONNECTION?
 					toVisit.push_back( { inputPlug.get(), context } );
 				}
 			}
