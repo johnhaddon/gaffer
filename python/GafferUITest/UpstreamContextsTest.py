@@ -93,8 +93,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		# Static case - switch will have internal pass-through connections.
 
-		add1 = GafferTest.AddNode()
-		add2 = GafferTest.AddNode()
+		add1 = GafferTest.AddNode( "add1" )
+		add2 = GafferTest.AddNode( "add2" )
 
 		switch = Gaffer.Switch()
 		switch.setup( add1["sum"] )
@@ -110,14 +110,16 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 			# context, so everything has the same context.
 
 			for node in [ add1, add2, switch ] :
-				self.assertEqual( contexts.context( node ), context )
+				self.assertEqual( contexts.context( node ), context, node.fullName() )
 				for plug in Gaffer.Plug.RecursiveRange( node ) :
-					self.assertEqual( contexts.context( plug ), context )
+					self.assertEqual( contexts.context( plug ), context, plug.fullName() )
 
 		assertExpectedContexts()
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["index"] ) )
+		self.assertTrue( contexts.isActive( switch["enabled"] ) )
 		self.assertTrue( contexts.isActive( switch["in"][0] ) )
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
@@ -129,6 +131,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["index"] ) )
+		self.assertTrue( contexts.isActive( switch["enabled"] ) )
 		self.assertFalse( contexts.isActive( switch["in"][0] ) )
 		self.assertTrue( contexts.isActive( switch["in"][1] ) )
 		self.assertFalse( contexts.isActive( add1 ) )
@@ -140,6 +144,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertFalse( contexts.isActive( switch["index"] ) )
+		self.assertTrue( contexts.isActive( switch["enabled"] ) )
 		self.assertTrue( contexts.isActive( switch["in"][0] ) )
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
@@ -155,6 +161,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["index"] ) )
+		self.assertTrue( contexts.isActive( switch["enabled"] ) )
 		self.assertTrue( contexts.isActive( switch["in"][0] ) )
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
@@ -166,6 +174,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["index"] ) )
+		self.assertTrue( contexts.isActive( switch["enabled"] ) )
 		self.assertFalse( contexts.isActive( switch["in"][0] ) )
 		self.assertTrue( contexts.isActive( switch["in"][1] ) )
 		self.assertFalse( contexts.isActive( add1 ) )
@@ -201,6 +211,7 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["selector"] ) )
 		self.assertTrue( contexts.isActive( switch["in"][0] ) )
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
@@ -212,6 +223,7 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["selector"] ) )
 		self.assertFalse( contexts.isActive( switch["in"][0] ) )
 		self.assertTrue( contexts.isActive( switch["in"][1] ) )
 		self.assertFalse( contexts.isActive( add1 ) )
@@ -223,6 +235,7 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["selector"] ) )
 		self.assertTrue( contexts.isActive( switch["in"][0] ) )
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
@@ -238,10 +251,12 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["selector"] ) )
 		self.assertTrue( contexts.isActive( switch["in"][0] ) )
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
 		self.assertFalse( contexts.isActive( add2 ) )
+		self.assertTrue( contexts.isActive( stringNode ) )
 
 		stringNode["in"].setValue( "add2" )
 
@@ -249,10 +264,12 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
+		self.assertTrue( contexts.isActive( switch["selector"] ) )
 		self.assertFalse( contexts.isActive( switch["in"][0] ) )
 		self.assertTrue( contexts.isActive( switch["in"][1] ) )
 		self.assertFalse( contexts.isActive( add1 ) )
 		self.assertTrue( contexts.isActive( add2 ) )
+		self.assertTrue( contexts.isActive( stringNode ) )
 
 	def testMultipleActiveNameSwitchBranches( self ) :
 
@@ -296,17 +313,35 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		context = Gaffer.Context()
 		contexts = GafferUI.UpstreamContexts( contextVariables, context )
 
+		self.assertTrue( contexts.isActive( contextVariables ) )
+		self.assertTrue( contexts.isActive( contextVariables["enabled"] ) )
+		self.assertTrue( contexts.isActive( contextVariables["variables"] ) )
 		self.assertEqual( contexts.context( contextVariables ), context )
+		self.assertTrue( contexts.isActive( add ) )
 		self.assertEqual( contexts.context( add ), context )
 
 		contextVariables["variables"].addChild( Gaffer.NameValuePlug( "test", 2 ) )
 
+		self.assertTrue( contexts.isActive( contextVariables ) )
+		self.assertTrue( contexts.isActive( contextVariables["enabled"] ) )
+		self.assertTrue( contexts.isActive( contextVariables["variables"] ) )
+		self.assertTrue( contexts.isActive( contextVariables["variables"][0] ) )
+		self.assertTrue( contexts.isActive( contextVariables["variables"][0]["name"] ) )
+		self.assertTrue( contexts.isActive( contextVariables["variables"][0]["value"] ) )
 		self.assertEqual( contexts.context( contextVariables ), context )
+		self.assertTrue( contexts.isActive( add ) )
 		self.assertEqual( contexts.context( add ), contextVariables.inPlugContext() )
 
 		contextVariables["enabled"].setValue( False )
 
+		self.assertTrue( contexts.isActive( contextVariables ) )
+		self.assertTrue( contexts.isActive( contextVariables["enabled"] ) )
+		self.assertFalse( contexts.isActive( contextVariables["variables"] ) )
+		self.assertFalse( contexts.isActive( contextVariables["variables"][0] ) )
+		self.assertFalse( contexts.isActive( contextVariables["variables"][0]["name"] ) )
+		self.assertFalse( contexts.isActive( contextVariables["variables"][0]["value"] ) )
 		self.assertEqual( contexts.context( contextVariables ), context )
+		self.assertTrue( contexts.isActive( add ) )
 		self.assertEqual( contexts.context( add ), context )
 
 	def testPlugWithoutNode( self ) :
@@ -343,6 +378,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( loop ) )
 		self.assertEqual( contexts.context( loop ), context )
+		self.assertTrue( contexts.isActive( loop["iterations"] ) )
+		self.assertEqual( contexts.context( loop["iterations"] ), context )
 		self.assertTrue( contexts.isActive( loopSource ) )
 		self.assertEqual( contexts.context( loopSource ), context )
 		self.assertTrue( contexts.isActive( loop["next"] ) )
@@ -354,6 +391,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 			self.assertTrue( contexts.isActive( loop ) )
 			self.assertEqual( contexts.context( loop ), context )
+			self.assertFalse( contexts.isActive( loop["iterations"] ) )
+			self.assertEqual( contexts.context( loop["iterations"] ), context )
 			self.assertTrue( contexts.isActive( loopSource ) )
 			self.assertEqual( contexts.context( loopSource ), context )
 			self.assertFalse( contexts.isActive( loop["next"] ) )
@@ -398,9 +437,13 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( resultA ) )
 		self.assertFalse( contexts.isActive( resultB ) )
+		self.assertTrue( contexts.isActive( box["sumA"] ) )
+		self.assertFalse( contexts.isActive( box["sumB"] ) )
 		self.assertTrue( contexts.isActive( box ) )
 		self.assertTrue( contexts.isActive( box["addA"] ) )
 		self.assertFalse( contexts.isActive( box["addB"] ) )
+		self.assertTrue( contexts.isActive( box["opA"] ) )
+		self.assertFalse( contexts.isActive( box["opB"] ) )
 		self.assertTrue( contexts.isActive( addA ) )
 		self.assertFalse( contexts.isActive( addB ) )
 
