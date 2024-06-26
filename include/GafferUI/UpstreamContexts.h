@@ -69,7 +69,6 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 
 		IE_CORE_DECLAREMEMBERPTR( UpstreamContexts );
 
-		// TODO : DOCUMENT
 		bool isActive( const Gaffer::Plug *plug ) const;
 		bool isActive( const Gaffer::Node *node ) const;
 
@@ -107,7 +106,6 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 
 		Gaffer::ConstNodePtr m_node;
 		Gaffer::ConstContextPtr m_context;
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
 
 		struct NodeData
 		{
