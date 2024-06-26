@@ -129,10 +129,15 @@ bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
 	optional<const Context *> c = findPlugContext( plug );
 	if( c )
 	{
+		std::cerr << "isActive " << plug->fullName() << " has stored context" << std::endl;
 		return *c;
 	}
 
 	auto it = m_nodeContexts.find( plug->node() );
+	if( it != m_nodeContexts.end() )
+	{
+		std::cerr << "isActive " << plug->fullName() << " has NODE context " << it->second.enabled << std::endl;
+	}
 	return it != m_nodeContexts.end() && plug->direction() == Plug::In && it->second.enabled;
 }
 
@@ -271,26 +276,38 @@ void UpstreamContexts::update()
 		Context::Scope scopedContext( context.get() );
 
 		const Node *node = plug->node();
-		bool nodeEnabled = true; // TODO : USE DOWN BELOW
+		//bool nodeEnabled = true; // TODO : USE DOWN BELOW
 
-		if( node )
+		// if( node )
+		// {
+		// 	if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
+		// 	{
+		// 		if( auto enabledPlug = dependencyNode->enabledPlug() )
+		// 		{
+		// 			nodeEnabled = enabledPlug->getValue();
+		// 		}
+		// 	}
+
+		// 	// TODO : OVERRIDE IF PREVIOUSLY DISABLED
+		// 	//m_nodeContexts.insert( { plug->node(), { context, nodeEnabled && !plug->getInput() } } ); // TODO : IGNORE INPUT PLUGS?
+		// }
+
+		NodeData &nodeData = m_nodeContexts[node];
+		if( !nodeData.context )
 		{
-			if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
-			{
-				if( auto enabledPlug = dependencyNode->enabledPlug() )
-				{
-					nodeEnabled = enabledPlug->getValue();
-				}
-			}
-
-			// TODO : OVERRIDE IF PREVIOUSLY DISABLED
-			m_nodeContexts.insert( { plug->node(), { context, nodeEnabled && !plug->getInput() } } ); // TODO : IGNORE INPUT PLUGS?
+			nodeData.context = context;
+			//nodeData.enabled = nodeEnabled && plug->direction() == Plug::Out && !plug->getInput();
 		}
 
-		if( !node || plug->direction() == Plug::Out )
+		if( !node || plug->direction() == Plug::Out || *context != *m_nodeContexts[node].context || !m_nodeContexts[node].enabled )
 		{
 			m_plugContexts.insert( { plug, context } );
 		}
+
+		// if( !node || plug->direction() == Plug::Out )
+		// {
+		// 	m_plugContexts.insert( { plug, context } );
+		// }
 
 		if( auto input = plug->getInput() )
 		{
@@ -313,11 +330,6 @@ void UpstreamContexts::update()
 			continue;
 		}
 
-
-		std::cerr << plug->fullName() << std::endl;
-
-		// TODO : DISABLED DEPENDENCYNODE
-
 		// TODO : DO YOU NEED TO USE GLOBAL SCOPES ANYWHERE HERE?
 		if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
 		{
@@ -327,8 +339,8 @@ void UpstreamContexts::update()
 				{
 					if( auto inPlug = dependencyNode->correspondingInput( plug ) )
 					{
-						m_plugContexts.insert( { inPlug, context } );
-						m_plugContexts.insert( { enabledPlug, context } );
+						//m_plugContexts.insert( { inPlug, context } );
+						//m_plugContexts.insert( { enabledPlug, context } );
 						toVisit.push_back( { inPlug, context } );
 						toVisit.push_back( { enabledPlug, context } );
 					}
@@ -341,6 +353,7 @@ void UpstreamContexts::update()
 		{
 			if( const Plug *activeIn = switchNode->activeInPlug( plug ) )
 			{
+				std::cerr << "ACTIVE IN PLUG " << activeIn << std::endl;
 				for( auto &inPlug : Plug::Range( *switchNode->inPlugs() ) )
 				{
 					// Initialises to `nullptr` if not present already. This is
@@ -350,7 +363,7 @@ void UpstreamContexts::update()
 					// context for the active plug.
 					if( !inPlugContext && ( inPlug == activeIn || inPlug->isAncestorOf( activeIn ) ) )
 					{
-						inPlugContext = context;
+						inPlugContext = context; // TODO : CAN THIS BE DONE GENERICALLY?
 					}
 				}
 				toVisit.push_back( { switchNode->enabledPlug(), context } );
@@ -361,9 +374,24 @@ void UpstreamContexts::update()
 				{
 					toVisit.push_back( { nameSwitch->selectorPlug(), context } );
 				}
+
 			}
+			nodeData.enabled = switchNode->enabledPlug()->getValue();
+			std::cerr << "CONTINUING" << std::endl;
 			continue;
 		}
+
+
+		if( plug->getInput() )
+		{
+			continue;
+		}
+
+		nodeData.enabled = true;
+
+		std::cerr << plug->fullName() << std::endl;
+
+		// TODO : DISABLED DEPENDENCYNODE
 
 
 
@@ -387,7 +415,7 @@ void UpstreamContexts::update()
 				if( auto nextContext = loop->nextIterationContext() )
 				{
 					//toVisit.push_back( { loop->iterationsPlug(), context } );
-					m_plugContexts.insert( { loop->nextPlug(), nextContext } ); // TODO : DO THIS AUTOMAGICALLY (SAME FOR OTHERS)
+					//m_plugContexts.insert( { loop->nextPlug(), nextContext } ); // TODO : DO THIS AUTOMAGICALLY (SAME FOR OTHERS)
 					toVisit.push_back( { loop->nextPlug(), nextContext } );
 				}
 				else
@@ -411,6 +439,8 @@ void UpstreamContexts::update()
 					toVisit.push_back( { inputPlug.get(), context } );
 				}
 			}
+			nodeData.enabled = true;
+			//m_nodeContexts[plug->node()].enabled = true;
 		}
 	}
 
