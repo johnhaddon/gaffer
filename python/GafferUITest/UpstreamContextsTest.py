@@ -56,7 +56,6 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		add4["op1"].setInput( add3["sum"] )
 
 		context = Gaffer.Context()
-		context["id"] = 10 # Distinguish from default context
 		contexts = GafferUI.UpstreamContexts( add4, context )
 
 		def assertExpectedContexts() :
@@ -167,6 +166,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
 		self.assertFalse( contexts.isActive( add2 ) )
+		self.assertTrue( contexts.isActive( add3 ) )
+		self.assertEqual( contexts.context( add3 ), context )
 
 		add3["op1"].setValue( 1 )
 
@@ -180,6 +181,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertTrue( contexts.isActive( switch["in"][1] ) )
 		self.assertFalse( contexts.isActive( add1 ) )
 		self.assertTrue( contexts.isActive( add2 ) )
+		self.assertTrue( contexts.isActive( add3 ) )
+		self.assertEqual( contexts.context( add3 ), context )
 
 	def testNameSwitch( self ) :
 
@@ -235,7 +238,7 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertTrue( contexts.isActive( switch ) )
 		self.assertTrue( contexts.isActive( switch["out"] ) )
-		self.assertTrue( contexts.isActive( switch["selector"] ) )
+		self.assertFalse( contexts.isActive( switch["selector"] ) )
 		self.assertTrue( contexts.isActive( switch["in"][0] ) )
 		self.assertFalse( contexts.isActive( switch["in"][1] ) )
 		self.assertTrue( contexts.isActive( add1 ) )
@@ -257,6 +260,7 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertTrue( contexts.isActive( add1 ) )
 		self.assertFalse( contexts.isActive( add2 ) )
 		self.assertTrue( contexts.isActive( stringNode ) )
+		self.assertEqual( contexts.context( stringNode ), context )
 
 		stringNode["in"].setValue( "add2" )
 
@@ -270,6 +274,7 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertFalse( contexts.isActive( add1 ) )
 		self.assertTrue( contexts.isActive( add2 ) )
 		self.assertTrue( contexts.isActive( stringNode ) )
+		self.assertEqual( contexts.context( stringNode ), context )
 
 	def testMultipleActiveNameSwitchBranches( self ) :
 
@@ -353,8 +358,11 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		context = Gaffer.Context()
 		contexts = GafferUI.UpstreamContexts( node, context )
 
+		self.assertTrue( contexts.isActive( node ) )
 		self.assertEqual( contexts.context( node ), context )
+		self.assertTrue( contexts.isActive( node["op1"] ) )
 		self.assertEqual( contexts.context( node["op1"] ), context )
+		self.assertTrue( contexts.isActive( plug ) )
 		self.assertEqual( contexts.context( plug ), context )
 
 	def testLoop( self ) :
@@ -380,6 +388,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertEqual( contexts.context( loop ), context )
 		self.assertTrue( contexts.isActive( loop["iterations"] ) )
 		self.assertEqual( contexts.context( loop["iterations"] ), context )
+		self.assertTrue( contexts.isActive( loop["indexVariable"] ) )
+		self.assertEqual( contexts.context( loop["indexVariable"] ), context )
 		self.assertTrue( contexts.isActive( loopSource ) )
 		self.assertEqual( contexts.context( loopSource ), context )
 		self.assertTrue( contexts.isActive( loop["next"] ) )
@@ -391,8 +401,10 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 			self.assertTrue( contexts.isActive( loop ) )
 			self.assertEqual( contexts.context( loop ), context )
-			self.assertFalse( contexts.isActive( loop["iterations"] ) )
+			self.assertEqual( contexts.isActive( loop["iterations"] ), loop["enabled"].getValue() )
 			self.assertEqual( contexts.context( loop["iterations"] ), context )
+			self.assertFalse( contexts.isActive( loop["indexVariable"] ) )
+			self.assertEqual( contexts.context( loop["indexVariable"] ), context )
 			self.assertTrue( contexts.isActive( loopSource ) )
 			self.assertEqual( contexts.context( loopSource ), context )
 			self.assertFalse( contexts.isActive( loop["next"] ) )
@@ -409,8 +421,8 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 	def testMultiplexedBox( self ) :
 
-		addA = GafferTest.AddNode()
-		addB = GafferTest.AddNode()
+		addA = GafferTest.AddNode( "addA" )
+		addB = GafferTest.AddNode( "addB" )
 
 		box = Gaffer.Box()
 		box["addA"] = GafferTest.AddNode()

@@ -39,9 +39,12 @@
 #include "Gaffer/Context.h"
 #include "Gaffer/ContextVariables.h"
 #include "Gaffer/Loop.h"
+#include "Gaffer/NameSwitch.h"
 #include "Gaffer/ScriptNode.h"
 #include "Gaffer/Switch.h"
 
+#include "boost/algorithm/string.hpp"
+#include "boost/algorithm/string/predicate.hpp"
 #include "boost/bind/bind.hpp"
 #include "boost/bind/placeholders.hpp"
 #include "boost/multi_index/member.hpp"
@@ -130,7 +133,7 @@ bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
 	}
 
 	auto it = m_nodeContexts.find( plug->node() );
-	return it != m_nodeContexts.end() && ( plug->direction() == Plug::Out || it->second.enabled );
+	return it != m_nodeContexts.end() && plug->direction() == Plug::In && it->second.enabled;
 }
 
 bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
@@ -233,11 +236,16 @@ void UpstreamContexts::update()
 		return;
 	}
 
+	std::cerr << "UPDATING ------------------------------------------" << std::endl;
+
 	std::deque<std::pair<const Plug *, ConstContextPtr>> toVisit;
 
 	for( Plug::RecursiveOutputIterator it( m_node.get() ); !it.done(); ++it )
 	{
-		toVisit.push_back( { it->get(), m_context } );
+		//if( !boost::starts_with( (*it)->getName().string(), "__" ) )
+		{
+			toVisit.push_back( { it->get(), m_context } );
+		}
 		it.prune();
 	}
 
@@ -245,6 +253,9 @@ void UpstreamContexts::update()
 
 	while( !toVisit.empty() )
 	{
+		// Get next plug, and early out if we've already visited it in this
+		// context.
+
 		auto [plug, context] = toVisit.front();
 		toVisit.pop_front();
 
@@ -273,9 +284,10 @@ void UpstreamContexts::update()
 			}
 
 			// TODO : OVERRIDE IF PREVIOUSLY DISABLED
-			m_nodeContexts.insert( { plug->node(), { context, nodeEnabled } } ); // TODO : IGNORE INPUT PLUGS?
+			m_nodeContexts.insert( { plug->node(), { context, nodeEnabled && !plug->getInput() } } ); // TODO : IGNORE INPUT PLUGS?
 		}
-		else
+
+		if( !node || plug->direction() == Plug::Out )
 		{
 			m_plugContexts.insert( { plug, context } );
 		}
@@ -300,6 +312,9 @@ void UpstreamContexts::update()
 		{
 			continue;
 		}
+
+
+		std::cerr << plug->fullName() << std::endl;
 
 		// TODO : DISABLED DEPENDENCYNODE
 
@@ -338,48 +353,60 @@ void UpstreamContexts::update()
 						inPlugContext = context;
 					}
 				}
+				toVisit.push_back( { switchNode->enabledPlug(), context } );
+				toVisit.push_back( { switchNode->indexPlug(), context } );
 				toVisit.push_back( { activeIn, context } );
+
+				if( auto nameSwitch = runTimeCast<const NameSwitch>( node ) )
+				{
+					toVisit.push_back( { nameSwitch->selectorPlug(), context } );
+				}
 			}
-			else
-			{
-				// DON'T CARE : DOCUMENT WHY
-			}
+			continue;
 		}
-		else if( auto contextProcessor = runTimeCast<const ContextProcessor>( node ) )
+
+
+
+		// TODO : SHOULDN'T NEED ELSE
+		if( auto contextProcessor = runTimeCast<const ContextProcessor>( node ) )
 		{
 			if( plug == contextProcessor->outPlug() )
 			{
+				std::cerr << "DOING IT! " << plug->fullName() << std::endl;
 				ConstContextPtr inContext = contextProcessor->inPlugContext();
 				toVisit.push_back( { contextProcessor->inPlug(), inContext } );
 			}
-			else
-			{
-				// DON'T CARE
-			}
+			continue;
 		}
-		else if( auto loop = runTimeCast<const Loop>( node ) )
+
+		if( auto loop = runTimeCast<const Loop>( node ) )
 		{
 			if( plug == loop->outPlug() )
 			{
 				toVisit.push_back( { loop->inPlug(), context } );
 				if( auto nextContext = loop->nextIterationContext() )
 				{
+					//toVisit.push_back( { loop->iterationsPlug(), context } );
 					m_plugContexts.insert( { loop->nextPlug(), nextContext } ); // TODO : DO THIS AUTOMAGICALLY (SAME FOR OTHERS)
 					toVisit.push_back( { loop->nextPlug(), nextContext } );
 				}
 				else
 				{
+					m_plugContexts.insert( { loop->indexVariablePlug(), nullptr } );
 					m_plugContexts.insert( { loop->nextPlug(), nullptr } );
 				}
 			}
+			continue;
 		}
-		else
+
+		if( plug->direction() == Plug::Out ) // TODO : REDUNDANT
 		{
+			std::cerr << "GENERIC " << plug->fullName() << std::endl;
 			// TODO : MIGHT NEED TO GET HERE FOR OTHER INPUTS OF THE SPECIAL-CASE NODES ABOVE?
 			// CAN WE USE `m_plugContexts` to BLOCK PROCESSING OF ALREADY-PROCESSED THINGS?
 			for( const auto &inputPlug : Plug::InputRange( *node ) )
 			{
-				if( inputPlug != plug )
+				if( inputPlug != plug ) // TODO : DON'T NEED?
 				{
 					toVisit.push_back( { inputPlug.get(), context } );
 				}
