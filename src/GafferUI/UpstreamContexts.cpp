@@ -281,7 +281,7 @@ void UpstreamContexts::update()
 			m_plugContexts.insert( { plug, context } );
 		}
 
-		// Arrange to visit any inputs to this plug next, including
+		// Arrange to visit any inputs to this plug, including
 		// inputs to its descendants.
 
 		if( auto input = plug->getInput() )
@@ -300,12 +300,17 @@ void UpstreamContexts::update()
 			}
 		}
 
-		Context::Scope scopedContext( context.get() );
-
 		if( plug->direction() != Plug::Out || !plug->node() )
 		{
 			continue;
 		}
+
+		// Plug is an output whose value may be computed. We want to visit the
+		// plugs that will be used by the compute in the context used by the compute.
+		// A few special cases for the most common nodes are sufficient to provide
+		// the user good feedback about what parts of the graph are active.
+
+		Context::Scope scopedContext( context.get() );
 
 		if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
 		{
@@ -313,6 +318,8 @@ void UpstreamContexts::update()
 			{
 				if( !enabledPlug->getValue() )
 				{
+					// Node is disabled, so we only need to visit the
+					// pass-through input, if any.
 					if( auto inPlug = dependencyNode->correspondingInput( plug ) )
 					{
 						toVisit.push_back( { inPlug, context } );
@@ -336,7 +343,7 @@ void UpstreamContexts::update()
 					// context for the active plug.
 					if( !inPlugContext && ( inPlug == activeIn || inPlug->isAncestorOf( activeIn ) ) )
 					{
-						inPlugContext = context; // TODO : CAN THIS BE DONE GENERICALLY?
+						inPlugContext = context;
 					}
 				}
 				toVisit.push_back( { switchNode->enabledPlug(), context } );
@@ -347,12 +354,10 @@ void UpstreamContexts::update()
 				{
 					toVisit.push_back( { nameSwitch->selectorPlug(), context } );
 				}
-
 			}
 			nodeData.allInputsActive = switchNode->enabledPlug()->getValue(); // TODO : CAN THIS BE MOVED?
 			continue;
 		}
-
 
 		if( plug->getInput() )
 		{
@@ -373,6 +378,9 @@ void UpstreamContexts::update()
 
 		if( auto loop = runTimeCast<const Loop>( node ) )
 		{
+			// Visit the `next` plug using the context for the first iteration
+			// of the loop, so that nodes in the loop body have access to the loop
+			// index context variable.
 			if( plug == loop->outPlug() )
 			{
 				toVisit.push_back( { loop->inPlug(), context } );
@@ -388,6 +396,9 @@ void UpstreamContexts::update()
 			}
 			continue;
 		}
+
+		// Generic behaviour for all other nodes : assume the compute depends on
+		// every input plug.
 
 		for( const auto &inputPlug : Plug::InputRange( *node ) )
 		{
