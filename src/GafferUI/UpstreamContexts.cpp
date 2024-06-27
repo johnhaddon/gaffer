@@ -129,16 +129,11 @@ bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
 	optional<const Context *> c = findPlugContext( plug );
 	if( c )
 	{
-		std::cerr << "isActive " << plug->fullName() << " has stored context" << std::endl;
-		return *c;
+		return *c; // TODO : DO WE NEED OPTIONAL??
 	}
 
 	auto it = m_nodeContexts.find( plug->node() );
-	if( it != m_nodeContexts.end() )
-	{
-		std::cerr << "isActive " << plug->fullName() << " has NODE context " << it->second.enabled << std::endl;
-	}
-	return it != m_nodeContexts.end() && plug->direction() == Plug::In && it->second.enabled;
+	return it != m_nodeContexts.end() && plug->direction() == Plug::In && it->second.allInputsActive;
 }
 
 bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
@@ -299,7 +294,7 @@ void UpstreamContexts::update()
 			//nodeData.enabled = nodeEnabled && plug->direction() == Plug::Out && !plug->getInput();
 		}
 
-		if( !node || plug->direction() == Plug::Out || *context != *m_nodeContexts[node].context || !m_nodeContexts[node].enabled )
+		if( !node || plug->direction() == Plug::Out || *context != *m_nodeContexts[node].context || !m_nodeContexts[node].allInputsActive )
 		{
 			m_plugContexts.insert( { plug, context } );
 		}
@@ -376,7 +371,7 @@ void UpstreamContexts::update()
 				}
 
 			}
-			nodeData.enabled = switchNode->enabledPlug()->getValue();
+			nodeData.allInputsActive = switchNode->enabledPlug()->getValue(); // TODO : CAN THIS BE MOVED?
 			std::cerr << "CONTINUING" << std::endl;
 			continue;
 		}
@@ -387,7 +382,7 @@ void UpstreamContexts::update()
 			continue;
 		}
 
-		nodeData.enabled = true;
+		nodeData.allInputsActive = true;
 
 		std::cerr << plug->fullName() << std::endl;
 
@@ -439,7 +434,7 @@ void UpstreamContexts::update()
 					toVisit.push_back( { inputPlug.get(), context } );
 				}
 			}
-			nodeData.enabled = true;
+			nodeData.allInputsActive = true;
 			//m_nodeContexts[plug->node()].enabled = true;
 		}
 	}

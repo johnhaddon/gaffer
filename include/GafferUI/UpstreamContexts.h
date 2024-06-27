@@ -110,7 +110,7 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 		struct NodeData
 		{
 			Gaffer::ConstContextPtr context = nullptr;
-			bool enabled = false;
+			bool allInputsActive = false;
 		};
 
 		std::unordered_map<Gaffer::ConstNodePtr, NodeData> m_nodeContexts;
