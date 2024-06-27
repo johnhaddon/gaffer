@@ -236,16 +236,11 @@ void UpstreamContexts::update()
 		return;
 	}
 
-	std::cerr << "UPDATING ------------------------------------------" << std::endl;
-
 	std::deque<std::pair<const Plug *, ConstContextPtr>> toVisit;
 
 	for( Plug::RecursiveOutputIterator it( m_node.get() ); !it.done(); ++it )
 	{
-		//if( !boost::starts_with( (*it)->getName().string(), "__" ) )
-		{
-			toVisit.push_back( { it->get(), m_context } );
-		}
+		toVisit.push_back( { it->get(), m_context } );
 		it.prune();
 	}
 
@@ -253,45 +248,27 @@ void UpstreamContexts::update()
 
 	while( !toVisit.empty() )
 	{
-		// Get next plug, and early out if we've already visited it in this
-		// context.
+		// Get next plug to visit, and early out if we've already visited it in
+		// this context.
 
 		auto [plug, context] = toVisit.front();
 		toVisit.pop_front();
 
-		MurmurHash h = context->hash();
-		h.append( (uintptr_t)plug );
-		if( !visited.insert( h ).second )
+		MurmurHash visitHash = context->hash();
+		visitHash.append( (uintptr_t)plug );
+		if( !visited.insert( visitHash ).second )
 		{
 			continue;
 		}
 
-		// TODO : CANCELLATION CHECK
-
-		Context::Scope scopedContext( context.get() );
+		// If this is the first time we have visited the node and/or plug, then
+		// record the context.
 
 		const Node *node = plug->node();
-		//bool nodeEnabled = true; // TODO : USE DOWN BELOW
-
-		// if( node )
-		// {
-		// 	if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
-		// 	{
-		// 		if( auto enabledPlug = dependencyNode->enabledPlug() )
-		// 		{
-		// 			nodeEnabled = enabledPlug->getValue();
-		// 		}
-		// 	}
-
-		// 	// TODO : OVERRIDE IF PREVIOUSLY DISABLED
-		// 	//m_nodeContexts.insert( { plug->node(), { context, nodeEnabled && !plug->getInput() } } ); // TODO : IGNORE INPUT PLUGS?
-		// }
-
 		NodeData &nodeData = m_nodeContexts[node];
 		if( !nodeData.context )
 		{
 			nodeData.context = context;
-			//nodeData.enabled = nodeEnabled && plug->direction() == Plug::Out && !plug->getInput();
 		}
 
 		if( !node || plug->direction() == Plug::Out || *context != *m_nodeContexts[node].context || !m_nodeContexts[node].allInputsActive )
@@ -299,10 +276,8 @@ void UpstreamContexts::update()
 			m_plugContexts.insert( { plug, context } );
 		}
 
-		// if( !node || plug->direction() == Plug::Out )
-		// {
-		// 	m_plugContexts.insert( { plug, context } );
-		// }
+		// Arrange to visit any inputs to this plug next, including
+		// inputs to its descendants.
 
 		if( auto input = plug->getInput() )
 		{
@@ -319,6 +294,8 @@ void UpstreamContexts::update()
 				}
 			}
 		}
+
+		Context::Scope scopedContext( context.get() );
 
 		if( plug->direction() != Plug::Out || !plug->node() )
 		{
