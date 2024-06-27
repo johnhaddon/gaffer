@@ -302,7 +302,6 @@ void UpstreamContexts::update()
 			continue;
 		}
 
-		// TODO : DO YOU NEED TO USE GLOBAL SCOPES ANYWHERE HERE?
 		if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
 		{
 			if( auto enabledPlug = dependencyNode->enabledPlug() )
@@ -311,8 +310,6 @@ void UpstreamContexts::update()
 				{
 					if( auto inPlug = dependencyNode->correspondingInput( plug ) )
 					{
-						//m_plugContexts.insert( { inPlug, context } );
-						//m_plugContexts.insert( { enabledPlug, context } );
 						toVisit.push_back( { inPlug, context } );
 						toVisit.push_back( { enabledPlug, context } );
 					}
@@ -349,7 +346,6 @@ void UpstreamContexts::update()
 
 			}
 			nodeData.allInputsActive = switchNode->enabledPlug()->getValue(); // TODO : CAN THIS BE MOVED?
-			std::cerr << "CONTINUING" << std::endl;
 			continue;
 		}
 
@@ -361,13 +357,6 @@ void UpstreamContexts::update()
 
 		nodeData.allInputsActive = true;
 
-		std::cerr << plug->fullName() << std::endl;
-
-		// TODO : DISABLED DEPENDENCYNODE
-
-
-
-		// TODO : SHOULDN'T NEED ELSE
 		if( auto contextProcessor = runTimeCast<const ContextProcessor>( node ) )
 		{
 			if( plug == contextProcessor->outPlug() )
@@ -401,9 +390,6 @@ void UpstreamContexts::update()
 
 		if( plug->direction() == Plug::Out ) // TODO : REDUNDANT
 		{
-			std::cerr << "GENERIC " << plug->fullName() << std::endl;
-			// TODO : MIGHT NEED TO GET HERE FOR OTHER INPUTS OF THE SPECIAL-CASE NODES ABOVE?
-			// CAN WE USE `m_plugContexts` to BLOCK PROCESSING OF ALREADY-PROCESSED THINGS?
 			for( const auto &inputPlug : Plug::InputRange( *node ) )
 			{
 				if( inputPlug != plug ) // TODO : DON'T NEED?
@@ -412,7 +398,6 @@ void UpstreamContexts::update()
 				}
 			}
 			nodeData.allInputsActive = true;
-			//m_nodeContexts[plug->node()].enabled = true;
 		}
 	}
 
