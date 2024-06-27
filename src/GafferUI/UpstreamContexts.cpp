@@ -271,7 +271,7 @@ void UpstreamContexts::update()
 			nodeData.context = context;
 		}
 
-		if( !node || plug->direction() == Plug::Out || *context != *m_nodeContexts[node].context || !m_nodeContexts[node].allInputsActive )
+		if( !node || plug->direction() == Plug::Out || !nodeData.allInputsActive || *context != *nodeData.context  )
 		{
 			m_plugContexts.insert( { plug, context } );
 		}
