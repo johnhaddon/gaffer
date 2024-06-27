@@ -322,7 +322,6 @@ void UpstreamContexts::update()
 		{
 			if( const Plug *activeIn = switchNode->activeInPlug( plug ) )
 			{
-				std::cerr << "ACTIVE IN PLUG " << activeIn << std::endl;
 				for( auto &inPlug : Plug::Range( *switchNode->inPlugs() ) )
 				{
 					// Initialises to `nullptr` if not present already. This is
@@ -361,7 +360,6 @@ void UpstreamContexts::update()
 		{
 			if( plug == contextProcessor->outPlug() )
 			{
-				std::cerr << "DOING IT! " << plug->fullName() << std::endl;
 				ConstContextPtr inContext = contextProcessor->inPlugContext();
 				toVisit.push_back( { contextProcessor->inPlug(), inContext } );
 			}
@@ -375,8 +373,6 @@ void UpstreamContexts::update()
 				toVisit.push_back( { loop->inPlug(), context } );
 				if( auto nextContext = loop->nextIterationContext() )
 				{
-					//toVisit.push_back( { loop->iterationsPlug(), context } );
-					//m_plugContexts.insert( { loop->nextPlug(), nextContext } ); // TODO : DO THIS AUTOMAGICALLY (SAME FOR OTHERS)
 					toVisit.push_back( { loop->nextPlug(), nextContext } );
 				}
 				else
@@ -388,16 +384,9 @@ void UpstreamContexts::update()
 			continue;
 		}
 
-		if( plug->direction() == Plug::Out ) // TODO : REDUNDANT
+		for( const auto &inputPlug : Plug::InputRange( *node ) )
 		{
-			for( const auto &inputPlug : Plug::InputRange( *node ) )
-			{
-				if( inputPlug != plug ) // TODO : DON'T NEED?
-				{
-					toVisit.push_back( { inputPlug.get(), context } );
-				}
-			}
-			nodeData.allInputsActive = true;
+			toVisit.push_back( { inputPlug.get(), context } );
 		}
 	}
 
