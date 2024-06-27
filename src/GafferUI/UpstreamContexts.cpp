@@ -129,11 +129,16 @@ bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
 	optional<const Context *> c = findPlugContext( plug );
 	if( c )
 	{
-		return *c; // TODO : DO WE NEED OPTIONAL??
+		return *c;
+	}
+
+	if( plug->direction() != Plug::In )
+	{
+		return false;
 	}
 
 	auto it = m_nodeContexts.find( plug->node() );
-	return it != m_nodeContexts.end() && plug->direction() == Plug::In && it->second.allInputsActive;
+	return it != m_nodeContexts.end() && it->second.allInputsActive;
 }
 
 bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
