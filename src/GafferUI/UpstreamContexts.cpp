@@ -306,9 +306,10 @@ void UpstreamContexts::update()
 		}
 
 		// Plug is an output whose value may be computed. We want to visit the
-		// plugs that will be used by the compute in the context used by the compute.
-		// A few special cases for the most common nodes are sufficient to provide
-		// the user good feedback about what parts of the graph are active.
+		// plugs that will be used by the compute in the context used by the
+		// compute. A few special cases for the most common nodes are sufficient
+		// to provide the user with good feedback about what parts of the graph
+		// are active.
 
 		Context::Scope scopedContext( context.get() );
 
