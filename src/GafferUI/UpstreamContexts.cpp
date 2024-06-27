@@ -300,18 +300,42 @@ void UpstreamContexts::update()
 			}
 		}
 
+		// If the plug isn't an output plug on a node, or it has an input
+		// connection, then we're done here and can continue to the next one.
+
 		if( plug->direction() != Plug::Out || !plug->node() )
 		{
 			continue;
 		}
 
-		// Plug is an output whose value may be computed. We want to visit the
-		// plugs that will be used by the compute in the context used by the
-		// compute. A few special cases for the most common nodes are sufficient
-		// to provide the user with good feedback about what parts of the graph
-		// are active.
-
 		Context::Scope scopedContext( context.get() );
+
+		if( plug->getInput() )
+		{
+			// The plug value isn't computed, so we _should_ be done. But
+			// there's a wrinkle : switches have an optimisation where they make
+			// a pass-through connection to avoid the compute when the index is
+			// constant. We still consider the `index` plug to be active in this
+			// case, so need to manually add it to the traversal.
+			if( auto switchNode = runTimeCast<const Switch>( node ) )
+			{
+				if( plug == switchNode->outPlug() || switchNode->outPlug()->isAncestorOf( plug ) )
+				{
+					toVisit.push_back( { switchNode->enabledPlug(), context } );
+					if( switchNode->enabledPlug()->getValue() )
+					{
+						toVisit.push_back( { switchNode->indexPlug(), context } );
+					}
+				}
+			}
+			continue;
+		}
+
+		// Plug is an output whose value may be computed. We want to visit only
+		// the input plugs that will be used by the compute, accounting for any
+		// changes in context the compute will make. A few special cases for the
+		// most common nodes are sufficient to provide the user with good
+		// feedback about what parts of the graph are active.
 
 		if( auto dependencyNode = runTimeCast<const DependencyNode>( node ) )
 		{
