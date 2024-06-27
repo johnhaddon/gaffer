@@ -307,6 +307,30 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertEqual( contexts.context( add2 ), contextVariables.inPlugContext() )
 
+	def testNameSwitchNamesAlwaysActive( self ) :
+
+		add1 = GafferTest.AddNode( "add1" )
+		add2 = GafferTest.AddNode( "add2" )
+
+		switch = Gaffer.NameSwitch()
+		switch.setup( add1["sum"] )
+		switch["in"][0]["value"].setInput( add1["sum"] )
+		switch["in"][1]["value"].setInput( add2["sum"] )
+		switch["selector"].setValue( "test" )
+
+		context = Gaffer.Context()
+		contexts = GafferUI.UpstreamContexts( switch, context )
+
+		for plug in Gaffer.NameValuePlug.Range( switch["in"] ) :
+			self.assertTrue( contexts.isActive( plug["name"] ), plug["name"].fullName() )
+			self.assertTrue( contexts.isActive( plug["enabled"] ), plug["enabled"].fullName() )
+
+		switch["enabled"].setValue( False )
+
+		for plug in Gaffer.NameValuePlug.Range( switch["in"] ) :
+			self.assertFalse( contexts.isActive( plug["name"] ), plug["name"].fullName() )
+			self.assertFalse( contexts.isActive( plug["enabled"] ), plug["enabled"].fullName() )
+
 	def testContextProcessors( self ) :
 
 		add = GafferTest.AddNode()
