@@ -355,46 +355,54 @@ void UpstreamContexts::update()
 			}
 		}
 
+		if( auto nameSwitch = runTimeCast<const NameSwitch>( node ) )
+		{
+			if( plug == nameSwitch->getChild<Plug>( "__outIndex" ) )
+			{
+				toVisit.push_back( { nameSwitch->selectorPlug(), context } );
+				const string selector = nameSwitch->selectorPlug()->getValue();
+				if( const ArrayPlug *in = nameSwitch->inPlugs() )
+				{
+					for( int i = 1, e = in->children().size(); i < e; ++i )
+					{
+						auto p = in->getChild<NameValuePlug>( i );
+						toVisit.push_back( { p->enabledPlug(), context } );
+						if( !p->enabledPlug()->getValue() )
+						{
+							continue;
+						}
+						const string name = p->namePlug()->getValue();
+						toVisit.push_back( { p->namePlug(), context } );
+						if( !name.empty() && StringAlgo::matchMultiple( selector, name ) )
+						{
+							break;
+						}
+					}
+				}
+				continue;
+			}
+			// Fall through so other outputs are covered by the Switch
+			// base class handling below.
+		}
+
 		if( auto switchNode = runTimeCast<const Switch>( node ) )
 		{
 			if( const Plug *activeIn = switchNode->activeInPlug( plug ) )
 			{
-				for( auto &inPlug : Plug::Range( *switchNode->inPlugs() ) )
-				{
-					// Initialises to `nullptr` if not present already. This is
-					// what we want for inputs which are not active.
-					auto &inPlugContext = m_plugContexts[inPlug];
-					// If not already visited in another context, then assign
-					// context for the active plug.
-					if( !inPlugContext && ( inPlug == activeIn || inPlug->isAncestorOf( activeIn ) ) )
-					{
-						inPlugContext = context;
-					}
-				}
 				toVisit.push_back( { switchNode->enabledPlug(), context } );
 				toVisit.push_back( { switchNode->indexPlug(), context } );
 				toVisit.push_back( { activeIn, context } );
-
-				if( auto nameSwitch = runTimeCast<const NameSwitch>( node ) )
-				{
-					toVisit.push_back( { nameSwitch->selectorPlug(), context } );
-				}
 			}
-			nodeData.allInputsActive = switchNode->enabledPlug()->getValue(); // TODO : CAN THIS BE MOVED?
 			continue;
 		}
-
-		if( plug->getInput() )
-		{
-			continue;
-		}
-
-		nodeData.allInputsActive = true;
 
 		if( auto contextProcessor = runTimeCast<const ContextProcessor>( node ) )
 		{
 			if( plug == contextProcessor->outPlug() )
 			{
+				// Assume all input plugs are used to generate the context.
+				nodeData.allInputsActive = true;
+				// Visit main input in processed context.
 				ConstContextPtr inContext = contextProcessor->inPlugContext();
 				toVisit.push_back( { contextProcessor->inPlug(), inContext } );
 			}
@@ -409,14 +417,15 @@ void UpstreamContexts::update()
 			if( plug == loop->outPlug() )
 			{
 				toVisit.push_back( { loop->inPlug(), context } );
-				if( auto nextContext = loop->nextIterationContext() )
+				toVisit.push_back( { loop->enabledPlug(), context } );
+				if( loop->enabledPlug()->getValue() )
 				{
-					toVisit.push_back( { loop->nextPlug(), nextContext } );
-				}
-				else
-				{
-					m_plugContexts.insert( { loop->indexVariablePlug(), nullptr } );
-					m_plugContexts.insert( { loop->nextPlug(), nullptr } );
+					toVisit.push_back( { loop->iterationsPlug(), context } );
+					if( auto nextContext = loop->nextIterationContext() )
+					{
+						toVisit.push_back( { loop->indexVariablePlug(), context } );
+						toVisit.push_back( { loop->nextPlug(), nextContext } );
+					}
 				}
 			}
 			continue;
@@ -427,6 +436,7 @@ void UpstreamContexts::update()
 
 		for( const auto &inputPlug : Plug::InputRange( *node ) )
 		{
+			nodeData.allInputsActive = true;
 			toVisit.push_back( { inputPlug.get(), context } );
 		}
 	}

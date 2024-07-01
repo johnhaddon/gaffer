@@ -302,34 +302,74 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 
 		self.assertEqual( contexts.context( add3 ), context )
 		self.assertEqual( contexts.context( switch ), context )
-		self.assertEqual( contexts.context( switch["in"][0] ), context )
-		self.assertEqual( contexts.context( switch["in"][1] ), contextVariables.inPlugContext() )
+		self.assertEqual( contexts.context( switch["in"][0]["value"] ), context )
+		self.assertEqual( contexts.context( switch["in"][1]["value"] ), contextVariables.inPlugContext() )
 		self.assertEqual( contexts.context( add1 ), context )
 		self.assertEqual( contexts.context( add2 ), contextVariables.inPlugContext() )
 
-	def testNameSwitchNamesAlwaysActive( self ) :
+	def testNameSwitchNamesAndEnabled( self ) :
 
 		add1 = GafferTest.AddNode( "add1" )
 		add2 = GafferTest.AddNode( "add2" )
+		add3 = GafferTest.AddNode( "add3" )
+		add4 = GafferTest.AddNode( "add4" )
+		add5 = GafferTest.AddNode( "add5" )
 
 		switch = Gaffer.NameSwitch()
+		switch["selector"].setValue( "four" )
 		switch.setup( add1["sum"] )
+		switch["in"].resize( 5 )
 		switch["in"][0]["value"].setInput( add1["sum"] )
+		switch["in"][0]["name"].setValue( "one" )
 		switch["in"][1]["value"].setInput( add2["sum"] )
-		switch["selector"].setValue( "test" )
+		switch["in"][1]["name"].setValue( "two" )
+		switch["in"][2]["value"].setInput( add3["sum"] )
+		switch["in"][2]["name"].setValue( "three" )
+		switch["in"][2]["enabled"].setValue( False )
+		switch["in"][3]["value"].setInput( add4["sum"] )
+		switch["in"][3]["name"].setValue( "four" )
+		switch["in"][4]["value"].setInput( add5["sum"] )
+		switch["in"][4]["name"].setValue( "five" )
+
+		add6 = GafferTest.AddNode( "add6" )
+		add6["op1"].setInput( switch["out"]["value"] )
 
 		context = Gaffer.Context()
-		contexts = GafferUI.UpstreamContexts( switch, context )
+		contexts = GafferUI.UpstreamContexts( add6, context )
 
-		for plug in Gaffer.NameValuePlug.Range( switch["in"] ) :
-			self.assertTrue( contexts.isActive( plug["name"] ), plug["name"].fullName() )
-			self.assertTrue( contexts.isActive( plug["enabled"] ), plug["enabled"].fullName() )
+		# Default input `name` and `enabled` are never evaluated and `value`
+		# isn't currently active.
+		self.assertFalse( contexts.isActive( switch["in"][0]["enabled"] ) )
+		self.assertFalse( contexts.isActive( switch["in"][0]["name"] ) )
+		self.assertFalse( contexts.isActive( switch["in"][0]["value"] ) )
+		# Next input should be evaluated, but it doesn't match so `value`
+		# won't be active.
+		self.assertTrue( contexts.isActive( switch["in"][1]["enabled"] ) )
+		self.assertTrue( contexts.isActive( switch["in"][1]["name"] ) )
+		self.assertFalse( contexts.isActive( switch["in"][1]["value"] ) )
+		# Next input would be evaluated, but it is disabled so `name` isn't evaluated.
+		self.assertTrue( contexts.isActive( switch["in"][2]["enabled"] ) )
+		self.assertFalse( contexts.isActive( switch["in"][2]["name"] ) )
+		self.assertFalse( contexts.isActive( switch["in"][2]["value"] ) )
+		# Next input will be evaluated and will match, so `value` will be active too.
+		self.assertTrue( contexts.isActive( switch["in"][3]["enabled"] ) )
+		self.assertTrue( contexts.isActive( switch["in"][3]["name"] ) )
+		self.assertTrue( contexts.isActive( switch["in"][3]["value"] ) )
+		# Last input will be ignored because a match has already been found.
+		self.assertFalse( contexts.isActive( switch["in"][4]["enabled"] ) )
+		self.assertFalse( contexts.isActive( switch["in"][4]["name"] ) )
+		self.assertFalse( contexts.isActive( switch["in"][4]["value"] ) )
 
 		switch["enabled"].setValue( False )
 
-		for plug in Gaffer.NameValuePlug.Range( switch["in"] ) :
+		for plug in list( Gaffer.NameValuePlug.Range( switch["in"] ) ) :
 			self.assertFalse( contexts.isActive( plug["name"] ), plug["name"].fullName() )
 			self.assertFalse( contexts.isActive( plug["enabled"] ), plug["enabled"].fullName() )
+			self.assertEqual(
+				contexts.isActive( plug["value"] ),
+				plug["value"].isSame( switch["in"][0]["value"] ),
+				plug["value"].fullName()
+			)
 
 	def testContextProcessors( self ) :
 
