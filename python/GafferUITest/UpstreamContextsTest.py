@@ -413,6 +413,25 @@ class UpstreamContextsTest( GafferUITest.TestCase ) :
 		self.assertTrue( contexts.isActive( add ) )
 		self.assertEqual( contexts.context( add ), context )
 
+	def testContextForInactiveInputs( self ) :
+
+		add = GafferTest.AddNode()
+		add["enabled"].setValue( False )
+
+		contextVariables = Gaffer.ContextVariables()
+		contextVariables.setup( add["sum"] )
+		contextVariables["in"].setInput( add["sum"] )
+		contextVariables["variables"].addChild( Gaffer.NameValuePlug( "test", 2 ) )
+
+		context = Gaffer.Context()
+		contexts = GafferUI.UpstreamContexts( contextVariables, context )
+
+		# Even though `op2` is inactive, it still makes most sense to evaluate it
+		# in the modified context, because that is the context it will be active in
+		# if the node is enabled.
+		self.assertFalse( contexts.isActive( add["op2"] ) )
+		self.assertEqual( contexts.context( add["op2"] ), contextVariables.inPlugContext() )
+
 	def testPlugWithoutNode( self ) :
 
 		plug = Gaffer.IntPlug()

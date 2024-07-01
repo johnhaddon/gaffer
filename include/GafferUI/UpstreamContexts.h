@@ -58,7 +58,8 @@ IE_CORE_FORWARDDECLARE( Context )
 namespace GafferUI
 {
 
-/// TODO : MAYBE RENAME TO ACTIVECONTEXTS?
+/// Utility class for UI components which display context-sensitive information
+/// to users. This is a non-trivial problem because the
 class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
@@ -72,6 +73,9 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 		bool isActive( const Gaffer::Plug *plug ) const;
 		bool isActive( const Gaffer::Node *node ) const;
 
+		/// Returns the most suitable context for the UI to evaluate a plug or node
+		/// in. This will always return a valid context, even if `isActive()` returns
+		/// false.
 		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const;
 		Gaffer::ConstContextPtr context( const Gaffer::Node *node ) const;
 
@@ -110,10 +114,14 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 		struct NodeData
 		{
 			Gaffer::ConstContextPtr context = nullptr;
+			// If `true`, then all input plugs on the node are assumed to be
+			// active in the Node's context. This is just an optimisation that
+			// allows us to keep the size of `m_plugContexts` to a minimum.
 			bool allInputsActive = false;
 		};
 
 		std::unordered_map<Gaffer::ConstNodePtr, NodeData> m_nodeContexts;
+		// Stores plug-specific contexts, which take precedence over `m_nodeContexts`.
 		std::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr> m_plugContexts;
 
 		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
