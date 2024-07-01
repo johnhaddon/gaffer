@@ -59,23 +59,33 @@ namespace GafferUI
 {
 
 /// Utility class for UI components which display context-sensitive information
-/// to users. This is a non-trivial problem because the
+/// to users. This tracks which upstream nodes contribute to the result at a
+/// particular target node, and also what context they should be evaluated in
+/// with respect to that node.
 class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
 	public :
 
+		/// Constructs an instance that will track the graph upstream of the
+		/// target `node`, taking into account what connections are active in
+		/// the target `context`.
 		UpstreamContexts( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context );
 		~UpstreamContexts() override;
 
 		IE_CORE_DECLAREMEMBERPTR( UpstreamContexts );
 
+		/// Queries
+		/// =======
+
+		/// Returns true if the specified plug or node is active with respect to
+		/// the target node and context.
 		bool isActive( const Gaffer::Plug *plug ) const;
 		bool isActive( const Gaffer::Node *node ) const;
 
-		/// Returns the most suitable context for the UI to evaluate a plug or node
-		/// in. This will always return a valid context, even if `isActive()` returns
-		/// false.
+		/// Returns the most suitable context for the UI to evaluate a plug or
+		/// node in. This will always return a valid context, even if
+		/// `isActive()` returns false.
 		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const;
 		Gaffer::ConstContextPtr context( const Gaffer::Node *node ) const;
 
