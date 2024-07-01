@@ -126,10 +126,9 @@ UpstreamContexts::~UpstreamContexts()
 
 bool UpstreamContexts::isActive( const Gaffer::Plug *plug ) const
 {
-	optional<const Context *> c = findPlugContext( plug );
-	if( c )
+	if( findPlugContext( plug ) )
 	{
-		return *c;
+		return true;
 	}
 
 	if( plug->direction() != Plug::In )
@@ -148,10 +147,9 @@ bool UpstreamContexts::isActive( const Gaffer::Node *node ) const
 
 Gaffer::ConstContextPtr UpstreamContexts::context( const Gaffer::Plug *plug ) const
 {
-	optional<const Context *> c = findPlugContext( plug );
-	if( c && *c )
+	if( const Context *c = findPlugContext( plug ) )
 	{
-		return *c;
+		return c;
 	}
 
 	return context( plug->node() );
@@ -444,7 +442,7 @@ void UpstreamContexts::update()
 	updatedSignal()();
 }
 
-std::optional<const Gaffer::Context *> UpstreamContexts::findPlugContext( const Gaffer::Plug *plug ) const
+const Gaffer::Context *UpstreamContexts::findPlugContext( const Gaffer::Plug *plug ) const
 {
 	while( plug )
 	{
@@ -457,5 +455,5 @@ std::optional<const Gaffer::Context *> UpstreamContexts::findPlugContext( const 
 		plug = plug->parent<Plug>();
 	}
 
-	return std::nullopt;
+	return nullptr;
 }

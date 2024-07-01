@@ -102,7 +102,7 @@ class GAFFERUI_API UpstreamContexts final : public IECore::RefCounted, public Ga
 		void plugDirtied( const Gaffer::Plug *plug );
 		void contextChanged( IECore::InternedString variable );
 		void update();
-		std::optional<const Gaffer::Context *> findPlugContext( const Gaffer::Plug *plug ) const;
+		const Gaffer::Context *findPlugContext( const Gaffer::Plug *plug ) const;
 
 		Gaffer::ConstNodePtr m_node;
 		Gaffer::ConstContextPtr m_context;
