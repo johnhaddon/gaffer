@@ -1,13 +1,14 @@
-name: Branch check
+name: Version check
 on: [ push ]
 jobs:
   check:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v4
-      # So that we get the branch for `base_ref`.
-      fetch-depth: 0
-    - name: Check branch
+      with:
+        # So that we get the branch for `GITHUB_HEAD_REF`.
+        fetch-depth: 0
+    - name: Check version
       run: |
         import os
         import re
