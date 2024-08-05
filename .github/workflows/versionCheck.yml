@@ -32,23 +32,20 @@ jobs:
             int( versions["gafferMajorVersion"] ),
           ]
 
-        # Get version number from the merge commit and from the
-        # pull request source branch.
+        # Check that versions match between source and target branches, to avoid
+        # common mistake of targeting a PR to `main` rather than a maintenance branch.
+        #
+        # > Note : We compare the source version to the merged version rather than the
+        # > version from the target branch itself, to allow a PR to change version number
+        # > if necessary. That will just be subject to the usual human review process.
 
         mergeVersion = version()
         subprocess.check_call( [ "git", "checkout", "1.4_maintenance" ] ) #os.environ["GITHUB_HEAD_REF"] ] )
         sourceVersion = version()
 
-        # These versions should match. The common case is that the pull request
-        # source branch doesn't change the version, in which case we're just
-        # checking that the pull request targets the appropriate maintenance branch
-        # (the one with the matching version). But we also want to allow a PR to
-        # change the version, which is why we check against the merge version rather
-        # than against the target branch version.
-
         if sourceVersion != mergeVersion :
           sys.stderr.write(
-            "Source branch version {} does not match merged version {}. Did you choose the wrong target branch?\n".format(
+            "ERROR : Source version {} does not match target version {}. Did you choose the wrong target branch?\n".format(
               ".".join( str( v ) for v in sourceVersion ),
               ".".join( str( v ) for v in mergeVersion )
             )
