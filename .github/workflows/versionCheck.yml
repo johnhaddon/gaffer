@@ -44,12 +44,16 @@ jobs:
         sourceVersion = version()
 
         if sourceVersion != mergeVersion :
-          sys.stderr.write(
-            "ERROR : Source version {} does not match target version {}. Did you choose the wrong target branch?\n".format(
-              ".".join( str( v ) for v in sourceVersion ),
-              ".".join( str( v ) for v in mergeVersion )
-            )
+
+          message = "ERROR : Source version {} does not match target version {}. Did you choose the wrong target branch?\n".format(
+            ".".join( str( v ) for v in sourceVersion ),
+            ".".join( str( v ) for v in mergeVersion )
           )
+
+          sys.stderr.write( message )
+          with open( os.environ["GITHUB_STEP_SUMMARY"], "a" ) as summary :
+            summary.write( message )
+
           sys.exit( 1 )
 
       shell: python
