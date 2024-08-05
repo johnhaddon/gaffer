@@ -32,7 +32,7 @@ jobs:
         print( mergedVersion )
 
         sourceBranch = "main" #os.environ["GITHUB_HEAD_REF"]
-        subprocess.check_call( [ "git", "checkout", targetBranch ] )
+        subprocess.check_call( [ "git", "checkout", sourceBranch ] )
         sourceVersion = version()
 
         if sourceVersion != mergedVersion :
