@@ -45,14 +45,14 @@ jobs:
 
         if sourceVersion != mergeVersion :
 
-          message = "ERROR : Source version {} does not match target version {}. Did you choose the wrong target branch?\n".format(
+          message = "Source version {} does not match target version {}. Did you choose the wrong target branch?\n".format(
             ".".join( str( v ) for v in sourceVersion ),
             ".".join( str( v ) for v in mergeVersion )
           )
 
-          sys.stderr.write( message )
+          sys.stderr.write( f"FAIL : {message}" )
           with open( os.environ["GITHUB_STEP_SUMMARY"], "a" ) as summary :
-            summary.write( message )
+            summary.write( f"> [!CAUTION]\n> {message}" )
 
           sys.exit( 1 )
 
