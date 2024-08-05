@@ -10,11 +10,13 @@ jobs:
         fetch-depth: 0
     - name: Check version
       run: |
+
         import os
         import re
         import subprocess
         import sys
 
+        # Parses version number from the SConstruct file.
         def version() :
 
           versions = {}
@@ -32,21 +34,27 @@ jobs:
             int( versions["gafferPatchVersion"] ),
           ]
 
-        mergedVersion = version()
-        print( mergedVersion )
+        # Get version number from the merge commit and from the
+        # pull request source branch.
 
-        sourceBranch = "main" #os.environ["GITHUB_HEAD_REF"]
-        subprocess.check_call( [ "git", "checkout", sourceBranch ] )
+        mergeVersion = version()
+        subprocess.check_call( [ "git", "checkout", "1.4_maintenance" ] ) #os.environ["GITHUB_HEAD_REF"] ] )
         sourceVersion = version()
 
-        if sourceVersion != mergedVersion :
+        # These versions should match. The common case is that the pull request
+        # source branch doesn't change the version, in which case we're just
+        # checking that the pull request targets the appropriate maintenance branch
+        # (the one with the matching version). But we also want to allow a PR to
+        # change the version, which is why we check against the merge version rather
+        # than against the target branch version.
+
+        if sourceVersion != mergeVersion :
           sys.stderr.write(
-            "Source branch version {} does not match merged version {}\n".format(
-              sourceVersion, mergedVersion
+            "Source branch version {} does not match merged version {}. Did you choose the wrong target branch?\n".format(
+              ".".join( sourceVersion ),
+              ".".join( mergeVersion )
             )
           )
           sys.exit( 1 )
-
-        print( os.environ )
 
       shell: python
