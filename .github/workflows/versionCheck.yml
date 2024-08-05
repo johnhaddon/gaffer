@@ -30,8 +30,6 @@ jobs:
           return [
             int( versions["gafferMilestoneVersion"] ),
             int( versions["gafferMajorVersion"] ),
-            int( versions["gafferMinorVersion"] ),
-            int( versions["gafferPatchVersion"] ),
           ]
 
         # Get version number from the merge commit and from the
@@ -51,8 +49,8 @@ jobs:
         if sourceVersion != mergeVersion :
           sys.stderr.write(
             "Source branch version {} does not match merged version {}. Did you choose the wrong target branch?\n".format(
-              ".".join( sourceVersion ),
-              ".".join( mergeVersion )
+              ".".join( str( v ) for v in sourceVersion ),
+              ".".join( str( v ) for v in mergeVersion )
             )
           )
           sys.exit( 1 )
