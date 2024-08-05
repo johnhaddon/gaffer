@@ -1,7 +1,5 @@
 name: Branch check
-on: pull_request:
-    branches:
-      - '*'
+on: [ push ]
 jobs:
   check:
     runs-on: ubuntu-20.04
@@ -23,19 +21,24 @@ jobs:
               if versionMatch :
                 versions[versionMatch.group( 1 )] = versionMatch.group( 2 ).strip( "'\"" )
 
-          return [ int( versions["gafferMilestoneVersion"] ), int( versions["gafferMajorVersion"] ) ]
+          return [
+            int( versions["gafferMilestoneVersion"] ),
+            int( versions["gafferMajorVersion"] ),
+            int( versions["gafferMinorVersion"] ),
+            int( versions["gafferPatchVersion"] ),
+          ]
 
-        currentVersion = version()
-        print( currentVersion )
+        mergedVersion = version()
+        print( mergedVersion )
 
-        targetBranch = os.environ["GITHUB_BASE_REF"]
+        sourceBranch = "main" #os.environ["GITHUB_HEAD_REF"]
         subprocess.check_call( [ "git", "checkout", targetBranch ] )
-        targetVersion = version()
+        sourceVersion = version()
 
-        if targetVersion != currentVersion :
+        if sourceVersion != mergedVersion :
           sys.stderr.write(
-            "Current version {} does not match target branch version {}\n".format(
-              currentVersion, targetVersion
+            "Source branch version {} does not match merged version {}\n".format(
+              sourceVersion, mergedVersion
             )
           )
           sys.exit( 1 )
