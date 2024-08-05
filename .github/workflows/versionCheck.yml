@@ -13,6 +13,7 @@ jobs:
         import os
         import re
         import subprocess
+        import sys
 
         def version() :
 
