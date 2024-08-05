@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v4
+      # So that we get the branch for `base_ref`.
+      fetch-depth: 0
     - name: Check branch
       run: |
         import os
