@@ -37,41 +37,18 @@
 import Gaffer
 import GafferUITest
 import GafferScene
-import GafferSceneUI
+from GafferSceneUI import _GafferSceneUI
 
 class SceneInspectorTest( GafferUITest.TestCase ) :
 
-	def testTarget( self ) :
+	def testInspectorPathWithNonExistentLocation( self ) :
 
-		g = GafferScene.Grid()
-		t = GafferSceneUI.SceneInspector.Target( g["out"], "/grid" )
+		plane = GafferScene.Plane()
+		context = Gaffer.Context()
+		context["scene:path"] = GafferScene.ScenePlug.stringToPath( "/i/don't/exist" )
+		path = _GafferSceneUI._SceneInspector.InspectorPath( plane["out"], [ context, context ], None, "/Selection" )
 
-		self.assertTrue( t.scene.isSame( g["out"] ) )
-		self.assertEqual( t.path, "/grid" )
-
-		p = GafferScene.Plane()
-
-		# Targets are read only
-		self.assertRaises( AttributeError, setattr, t, "scene", p["out"] )
-		self.assertRaises( AttributeError, setattr, t, "path", "/plane" )
-
-		# Targets cache their lookups
-		self.assertTrue( t.attributes().isSame( t.attributes() ) )
-		self.assertTrue( t.fullAttributes().isSame( t.fullAttributes() ) )
-		self.assertTrue( t.object().isSame( t.object() ) )
-		self.assertTrue( t.globals().isSame( t.globals() ) )
-
-	def testTargetPathsAccessors( self ) :
-
-		script = Gaffer.ScriptNode()
-
-		inspector = GafferSceneUI.SceneInspector( script )
-		self.assertEqual( inspector.getTargetPaths(), None )
-
-		inspector.setTargetPaths( [ "/plane" ] )
-		self.assertEqual( inspector.getTargetPaths(), [ "/plane" ] )
-
-		self.assertRaises( Exception, inspector.setTargetPaths, [ "/too", "/many", "/paths" ] )
+		self.assertEqual( path.children(), [] )
 
 if __name__ == "__main__":
 	unittest.main()
