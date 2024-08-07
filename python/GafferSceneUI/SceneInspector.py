@@ -1135,7 +1135,7 @@ class DiffColumn( GafferUI.Widget ) :
 ## Base class for widgets which make up a section of the SceneInspector.
 class Section( GafferUI.Widget ) :
 
-	def __init__( self, collapsed = False, label = None, **kw ) :
+	def __init__( self, settings, collapsed = False, label = None, **kw ) :
 
 		self.__mainColumn = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Vertical, spacing = 0 )
 		self.__collapsible = None
@@ -1145,6 +1145,7 @@ class Section( GafferUI.Widget ) :
 
 		GafferUI.Widget.__init__( self, self.__collapsible if self.__collapsible is not None else self.__mainColumn, **kw )
 
+		self.__settings = settings
 		self.__numRows = 0
 
 	## Should be implemented by derived classes to update the
@@ -1182,11 +1183,15 @@ class Section( GafferUI.Widget ) :
 
 		return self.__mainColumn
 
+	def _settings( self ) :
+
+		return self.__settings
+
 ## Base class for sections which display information about
 #  scene locations.
 class LocationSection( Section ) :
 
-	def __init__( self, collapsed = False, label = None, **kw ) :
+	def __init__( self, settings, collapsed = False, label = None, **kw ) :
 
 		Section.__init__( self, collapsed, label, **kw )
 
@@ -1829,45 +1834,59 @@ class __AttributesSection( LocationSection ) :
 
 		LocationSection.__init__( self, collapsed = True, label = "Attributes" )
 
+		self.__node = Gaffer.Node()
+		self.__node["in"] = GafferScene.ScenePlug()
+		self.__node["editScope"] = Gaffer.Plug()
+
 		with self._mainColumn() :
-			self.__diffColumn = DiffColumn( self.__Inspector(), filterable=True )
+			self.__pathListing = GafferUI.PathListingWidget(
+				Gaffer.DictPath( { "a": 10, "b" : 20 }, "/" ),
+				columns = [
+					GafferUI.PathListingWidget.defaultNameColumn,
+					GafferSceneUI.Private.InspectorColumn(
+						GafferSceneUI.Private.AttributeInspector( self.__node["in"], self.__node["editScope"], "myAttribute" )
+					)
+				],
+			)
+			self.__pathListing.setHeaderVisible( False )
 
 	def update( self, targets ) :
 
 		LocationSection.update( self, targets )
 
-		self.__diffColumn.update( targets )
+		print( "UPDATE" )
+		#self.__diffColumn.update( targets )
 
-	class __Inspector( Inspector ) :
+	# class __Inspector( Inspector ) :
 
-		def __init__( self, attributeName = None ) :
+	# 	def __init__( self, attributeName = None ) :
 
-			self.__attributeName = attributeName
+	# 		self.__attributeName = attributeName
 
-		def name( self ) :
+	# 	def name( self ) :
 
-			return self.__attributeName or ""
+	# 		return self.__attributeName or ""
 
-		def supportsInheritance( self ) :
+	# 	def supportsInheritance( self ) :
 
-			return True
+	# 		return True
 
-		def __call__( self, target, ignoreInheritance = False ) :
+	# 	def __call__( self, target, ignoreInheritance = False ) :
 
-			if target.path is None :
-				return None
+	# 		if target.path is None :
+	# 			return None
 
-			if ignoreInheritance :
-				attributes = target.attributes()
-			else :
-				attributes = target.fullAttributes()
+	# 		if ignoreInheritance :
+	# 			attributes = target.attributes()
+	# 		else :
+	# 			attributes = target.fullAttributes()
 
-			return attributes.get( self.__attributeName )
+	# 		return attributes.get( self.__attributeName )
 
-		def children( self, target ) :
+	# 	def children( self, target ) :
 
-			attributeNames = target.fullAttributes().keys() if target.path else []
-			return [ self.__class__( attributeName ) for attributeName in attributeNames ]
+	# 		attributeNames = target.fullAttributes().keys() if target.path else []
+	# 		return [ self.__class__( attributeName ) for attributeName in attributeNames ]
 
 SceneInspector.registerSection( __AttributesSection, tab = "Selection" )
 
