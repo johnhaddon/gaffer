@@ -153,6 +153,8 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 			GafferSceneUI.SceneEditor.Settings.__init__( self, numInputs = 2 )
 
+			self["editScope"] = Gaffer.Plug()
+
 	IECore.registerRunTimeTyped( Settings, typeName = "GafferSceneUI::SceneInspector::Settings" )
 
 	## A list of Section instances may be passed to create a custom inspector,
@@ -181,7 +183,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 				tabbedContainer = GafferUI.TabbedContainer()
 
 			for registration in self.__sectionRegistrations :
-				section = registration.section()
+				section = registration.section( self.settings() )
 				column = columns.get( registration.tab )
 				if column is None :
 					with tabbedContainer :
@@ -1135,7 +1137,7 @@ class DiffColumn( GafferUI.Widget ) :
 ## Base class for widgets which make up a section of the SceneInspector.
 class Section( GafferUI.Widget ) :
 
-	def __init__( self, collapsed = False, label = None, **kw ) :
+	def __init__( self, settings, collapsed = False, label = None, **kw ) :
 
 		self.__mainColumn = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Vertical, spacing = 0 )
 		self.__collapsible = None
@@ -1145,6 +1147,7 @@ class Section( GafferUI.Widget ) :
 
 		GafferUI.Widget.__init__( self, self.__collapsible if self.__collapsible is not None else self.__mainColumn, **kw )
 
+		self.__settings = settings
 		self.__numRows = 0
 
 	## Should be implemented by derived classes to update the
@@ -1182,13 +1185,17 @@ class Section( GafferUI.Widget ) :
 
 		return self.__mainColumn
 
+	def _settings( self ) :
+
+		return self.__settings
+
 ## Base class for sections which display information about
 #  scene locations.
 class LocationSection( Section ) :
 
-	def __init__( self, collapsed = False, label = None, **kw ) :
+	def __init__( self, settings, collapsed = False, label = None, **kw ) :
 
-		Section.__init__( self, collapsed, label, **kw )
+		Section.__init__( self, settings, collapsed, label, **kw )
 
 	def update( self, targets ) :
 
@@ -1589,9 +1596,9 @@ SceneInspector.HistorySection = _HistorySection ## REMOVE ME!!
 
 class __NodeSection( Section ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		Section.__init__( self, collapsed = None )
+		Section.__init__( self, settings, collapsed = None )
 
 		with self._mainColumn() :
 			with Row().listContainer() :
@@ -1644,9 +1651,9 @@ SceneInspector.registerSection( __NodeSection, tab = None )
 
 class __PathSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = None )
+		LocationSection.__init__( self, settings, collapsed = None )
 
 		with self._mainColumn() :
 			with Row().listContainer() :
@@ -1691,9 +1698,9 @@ SceneInspector.registerSection( __PathSection, tab = "Selection" )
 
 class __TransformSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Transform" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Transform" )
 
 		with self._mainColumn() :
 			index = 0
@@ -1781,9 +1788,9 @@ SceneInspector.registerSection( __TransformSection, tab = "Selection" )
 
 class __BoundSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Bounding box" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Bounding box" )
 
 		with self._mainColumn() :
 			self.__localBoundRow = DiffRow( self.__Inspector() )
@@ -1823,51 +1830,189 @@ SceneInspector.registerSection( __BoundSection, tab = "Selection" )
 # Attributes section
 ##########################################################################
 
-class __AttributesSection( LocationSection ) :
+## \todo
+# - HOW DOES THIS RELATE TO THE REAL INSPECTORCOLUMN?
+# - CAN WE MAKE ALL THE SAME EDITING AND HISTORY MENU ITEMS "JUST WORK"?
+# - NEW BASE CLASS?
+# - ADD PRESENTATION FOR SHADERNETWORKS
+#    - COLOR CAN GO IN ICON
+class _InspectorColumn( GafferUI.PathColumn ) :
 
 	def __init__( self ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Attributes" )
+		GafferUI.PathColumn.__init__( self )
+
+	def cellData( self, path, canceller = None ) :
+
+		result = self.CellData()
+
+		inspector = path.property( "inspector" )
+		if inspector is None :
+			return result
+
+		inspectionContext = path.inspectionContext()
+		if inspectionContext is None :
+			return result
+
+		with inspectionContext :
+			inspectorResult = inspector.inspect()
+
+		result.value = inspectorResult.value()
+		if isinstance( result.value, IECore.Color3fData ) :
+			result.icon = result.value
+
+		return result
+
+	def headerData( self, canceller = None ) :
+
+		return self.CellData()
+
+## TODO :
+#
+# - NEED TO TAKE ATTRIBUTE NAMES FROM BOTH SCENES
+# - HOW TO YIELD TWO INSPECTION CONTEXTS?
+#	- COLUMN JUST ADDS THAT MAYBE?
+# - SHOULD INSPECTION CONTEXTS JUST BE A PROPERTY?
+class _AttributesPath( Gaffer.Path ) :
+
+	def __init__( self, scene, context, scenePath, path = "/", root = "/", filter = None ) :
+
+		Gaffer.Path.__init__( self, path, root, filter )
+
+		self.__editScope = Gaffer.Plug() ## TODO
+		self.__scene = scene
+		self.__context = context
+		self.__scenePath = scenePath
+
+		self.__plugDirtiedConnection = self.__scene.node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self.__plugDirtied ), scoped = True )
+
+	# def isValid( self, canceller ) :
+
+	# 	return True
+
+	# def isLeaf( self, canceller ) :
+
+	# 	return False
+
+	def property( self, name, canceller = None ) :
+
+		if name == "inspector" :
+			if len( self ) :
+				## TODO : THIS WOULDN'T BE ALLOWED IN C++ - NOT A RUNTIMETYPED CLASS
+				return GafferSceneUI.Private.AttributeInspector( self.__scene, self.__editScope, self[-1] )
+
+		return Gaffer.Path.property( self, name, canceller )
+
+	def setScenePath( self, scenePath ) :
+
+		print( "SET SCENE PATH", scenePath )
+
+		if self.__scenePath != scenePath :
+			print( "CHANGING SCENE PATH", scenePath )
+			self.__scenePath = scenePath
+			self._emitPathChanged()
+
+	def getScenePath( self ) :
+
+		return self.__scenePath
+
+	def copy( self ) :
+
+		return _AttributesPath( self.__scene, self.__context, self.__scenePath, self[:], self.root(), self.getFilter() )
+
+	def cancellationSubject( self ) :
+
+		return self.__scene
+
+	def inspectionContext( self, canceller = None ) :
+
+		result = Gaffer.Context( self.__context, canceller )
+		result["scene:path"] = GafferScene.ScenePlug.stringToPath( self.__scenePath )
+
+		return result
+
+	def _children( self, canceller ) :
+
+		if self.__scenePath is None :
+			return []
+
+		## TODO : USE CANCELLER!!!
+
+		with Gaffer.Context( self.__context ) as context :
+			#context["scene:path"] = GafferScene.ScenePlug.stringToPath( self.__scenePath )
+			attributes = self.__scene.attributes( self.__scenePath )
+
+		print( "CHILDREN", self.__scenePath, attributes.keys(), self.__scene.source().fullName() )
+
+		return [
+			_AttributesPath( self.__scene, self.__context, self.__scenePath, self[:] + [ name ], self.root(), self.getFilter() )
+			for name in sorted( attributes.keys() )
+		]
+
+	def __plugDirtied( self, plug ) :
+
+		if plug.isSame( self.__scene["attributes"] ) :
+			self._emitPathChanged()
+
+class __AttributesSection( LocationSection ) :
+
+	def __init__( self, settings ) :
+
+		LocationSection.__init__( self, settings, collapsed = True, label = "Attributes" )
 
 		with self._mainColumn() :
-			self.__diffColumn = DiffColumn( self.__Inspector(), filterable=True )
+			self.__pathListing = GafferUI.PathListingWidget(
+				_AttributesPath( settings["in"][0], Gaffer.Context(), "/" ),
+				columns = [
+					GafferUI.PathListingWidget.defaultNameColumn,
+					_InspectorColumn(),
+					_InspectorColumn(),
+				],
+			)
+			self.__pathListing.setHeaderVisible( False )
+
+		print( "INSPECTOR", self.__pathListing.getPath().property( "inspector") )
 
 	def update( self, targets ) :
 
 		LocationSection.update( self, targets )
 
-		self.__diffColumn.update( targets )
+		if len( targets ) :
+			self.__pathListing.getPath().setScenePath( targets[0].path )
 
-	class __Inspector( Inspector ) :
+		print( "UPDATE" )
+		#self.__diffColumn.update( targets )
 
-		def __init__( self, attributeName = None ) :
+	# class __Inspector( Inspector ) :
 
-			self.__attributeName = attributeName
+	# 	def __init__( self, attributeName = None ) :
 
-		def name( self ) :
+	# 		self.__attributeName = attributeName
 
-			return self.__attributeName or ""
+	# 	def name( self ) :
 
-		def supportsInheritance( self ) :
+	# 		return self.__attributeName or ""
 
-			return True
+	# 	def supportsInheritance( self ) :
 
-		def __call__( self, target, ignoreInheritance = False ) :
+	# 		return True
 
-			if target.path is None :
-				return None
+	# 	def __call__( self, target, ignoreInheritance = False ) :
 
-			if ignoreInheritance :
-				attributes = target.attributes()
-			else :
-				attributes = target.fullAttributes()
+	# 		if target.path is None :
+	# 			return None
 
-			return attributes.get( self.__attributeName )
+	# 		if ignoreInheritance :
+	# 			attributes = target.attributes()
+	# 		else :
+	# 			attributes = target.fullAttributes()
 
-		def children( self, target ) :
+	# 		return attributes.get( self.__attributeName )
 
-			attributeNames = target.fullAttributes().keys() if target.path else []
-			return [ self.__class__( attributeName ) for attributeName in attributeNames ]
+	# 	def children( self, target ) :
+
+	# 		attributeNames = target.fullAttributes().keys() if target.path else []
+	# 		return [ self.__class__( attributeName ) for attributeName in attributeNames ]
 
 SceneInspector.registerSection( __AttributesSection, tab = "Selection" )
 
@@ -1946,9 +2091,9 @@ class _SubdivisionTextDiff( TextDiff ) :
 
 class __ObjectSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Object" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Object" )
 
 		with self._mainColumn() :
 
@@ -2250,9 +2395,9 @@ class _SetMembershipDiff( SideBySideDiff ) :
 
 class __SetMembershipSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Set Membership" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Set Membership" )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector(), _SetMembershipDiff, filterable = True )
@@ -2313,9 +2458,9 @@ SceneInspector.registerSection( __SetMembershipSection, tab = "Selection" )
 
 class __GlobalsSection( Section ) :
 
-	def __init__( self, prefix, label ) :
+	def __init__( self, settings, prefix, label ) :
 
-		Section.__init__( self, collapsed = True, label = label )
+		Section.__init__( self, settings, collapsed = True, label = label )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector( prefix ), filterable=True )
@@ -2349,8 +2494,8 @@ class __GlobalsSection( Section ) :
 
 			return [ self.__class__( self.__prefix, key ) for key in keys ]
 
-SceneInspector.registerSection( lambda : __GlobalsSection( "option:", "Options" ), tab = "Globals" )
-SceneInspector.registerSection( lambda : __GlobalsSection( "attribute:", "Attributes" ), tab = "Globals" )
+SceneInspector.registerSection( lambda settings : __GlobalsSection( settings, "option:", "Options" ), tab = "Globals" )
+SceneInspector.registerSection( lambda settings : __GlobalsSection( settings, "attribute:", "Attributes" ), tab = "Globals" )
 
 ##########################################################################
 # Outputs section
@@ -2424,9 +2569,9 @@ class _OutputRow( Row ) :
 
 class __OutputsSection( Section ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		Section.__init__( self, collapsed = True, label = "Outputs" )
+		Section.__init__( self, settings, collapsed = True, label = "Outputs" )
 
 		self.__rows = {} # mapping from output name to row
 
@@ -2553,9 +2698,9 @@ class _SetDiff( Diff ) :
 
 class _SetsSection( Section ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		Section.__init__( self, collapsed = True, label = "Sets" )
+		Section.__init__( self, settings, collapsed = True, label = "Sets" )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector(), _SetDiff, filterable = True )
