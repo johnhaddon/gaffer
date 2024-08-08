@@ -153,6 +153,8 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 			GafferSceneUI.SceneEditor.Settings.__init__( self, numInputs = 2 )
 
+			self["editScope"] = Gaffer.Plug()
+
 	IECore.registerRunTimeTyped( Settings, typeName = "GafferSceneUI::SceneInspector::Settings" )
 
 	## A list of Section instances may be passed to create a custom inspector,
@@ -181,7 +183,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 				tabbedContainer = GafferUI.TabbedContainer()
 
 			for registration in self.__sectionRegistrations :
-				section = registration.section()
+				section = registration.section( self.settings() )
 				column = columns.get( registration.tab )
 				if column is None :
 					with tabbedContainer :
@@ -1193,7 +1195,7 @@ class LocationSection( Section ) :
 
 	def __init__( self, settings, collapsed = False, label = None, **kw ) :
 
-		Section.__init__( self, collapsed, label, **kw )
+		Section.__init__( self, settings, collapsed, label, **kw )
 
 	def update( self, targets ) :
 
@@ -1594,9 +1596,9 @@ SceneInspector.HistorySection = _HistorySection ## REMOVE ME!!
 
 class __NodeSection( Section ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		Section.__init__( self, collapsed = None )
+		Section.__init__( self, settings, collapsed = None )
 
 		with self._mainColumn() :
 			with Row().listContainer() :
@@ -1649,9 +1651,9 @@ SceneInspector.registerSection( __NodeSection, tab = None )
 
 class __PathSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = None )
+		LocationSection.__init__( self, settings, collapsed = None )
 
 		with self._mainColumn() :
 			with Row().listContainer() :
@@ -1696,9 +1698,9 @@ SceneInspector.registerSection( __PathSection, tab = "Selection" )
 
 class __TransformSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Transform" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Transform" )
 
 		with self._mainColumn() :
 			index = 0
@@ -1786,9 +1788,9 @@ SceneInspector.registerSection( __TransformSection, tab = "Selection" )
 
 class __BoundSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Bounding box" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Bounding box" )
 
 		with self._mainColumn() :
 			self.__localBoundRow = DiffRow( self.__Inspector() )
@@ -1828,23 +1830,72 @@ SceneInspector.registerSection( __BoundSection, tab = "Selection" )
 # Attributes section
 ##########################################################################
 
+class _AttributesPath( Gaffer.Path ) :
+
+	def __init__( self, scene, context, scenePath, path = "/", root = "/", filter = None ) :
+
+		Gaffer.Path.__init__( self, path, root, filter )
+
+		self.__scene = scene
+		self.__context = context
+		self.__scenePath = scenePath
+
+	# def isValid( self, canceller ) :
+
+	# 	return True
+
+	# def isLeaf( self, canceller ) :
+
+	# 	return False
+
+	def setScenePath( self, scenePath ) :
+
+		print( "SET SCENE PATH", scenePath )
+
+		if self.__scenePath != scenePath :
+			print( "CHANGING SCENE PATH", scenePath )
+			self.__scenePath = scenePath
+			self._emitPathChanged()
+
+	def getScenePath( self ) :
+
+		return self.__scenePath
+
+	def copy( self ) :
+
+		return _AttributesPath( self.__scene, self.__context, self.__scenePath, self[:], self.root(), self.getFilter() )
+
+	def _children( self, canceller ) :
+
+		if self.__scenePath is None :
+			return []
+
+		## TODO : USE CANCELLER!!!
+
+		with Gaffer.Context( self.__context ) as context :
+			#context["scene:path"] = GafferScene.ScenePlug.stringToPath( self.__scenePath )
+			attributes = self.__scene.attributes( self.__scenePath )
+
+		print( "CHILDREN", self.__scenePath, attributes.keys(), self.__scene.source().fullName() )
+
+		return [
+			_AttributesPath( self.__scene, self.__context, self.__scenePath, self[:] + [ name ], self.root(), self.getFilter() )
+			for name in sorted( attributes.keys() )
+		]
+
 class __AttributesSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Attributes" )
-
-		self.__node = Gaffer.Node()
-		self.__node["in"] = GafferScene.ScenePlug()
-		self.__node["editScope"] = Gaffer.Plug()
+		LocationSection.__init__( self, settings, collapsed = True, label = "Attributes" )
 
 		with self._mainColumn() :
 			self.__pathListing = GafferUI.PathListingWidget(
-				Gaffer.DictPath( { "a": 10, "b" : 20 }, "/" ),
+				_AttributesPath( settings["in"][0], Gaffer.Context(), "/" ),
 				columns = [
 					GafferUI.PathListingWidget.defaultNameColumn,
 					GafferSceneUI.Private.InspectorColumn(
-						GafferSceneUI.Private.AttributeInspector( self.__node["in"], self.__node["editScope"], "myAttribute" )
+						GafferSceneUI.Private.AttributeInspector( settings["in"][0], settings["editScope"], "myAttribute" )
 					)
 				],
 			)
@@ -1853,6 +1904,9 @@ class __AttributesSection( LocationSection ) :
 	def update( self, targets ) :
 
 		LocationSection.update( self, targets )
+
+		if len( targets ) :
+			self.__pathListing.getPath().setScenePath( targets[0].path )
 
 		print( "UPDATE" )
 		#self.__diffColumn.update( targets )
@@ -1965,9 +2019,9 @@ class _SubdivisionTextDiff( TextDiff ) :
 
 class __ObjectSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Object" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Object" )
 
 		with self._mainColumn() :
 
@@ -2269,9 +2323,9 @@ class _SetMembershipDiff( SideBySideDiff ) :
 
 class __SetMembershipSection( LocationSection ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Set Membership" )
+		LocationSection.__init__( self, settings, collapsed = True, label = "Set Membership" )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector(), _SetMembershipDiff, filterable = True )
@@ -2332,9 +2386,9 @@ SceneInspector.registerSection( __SetMembershipSection, tab = "Selection" )
 
 class __GlobalsSection( Section ) :
 
-	def __init__( self, prefix, label ) :
+	def __init__( self, settings, prefix, label ) :
 
-		Section.__init__( self, collapsed = True, label = label )
+		Section.__init__( self, settings, collapsed = True, label = label )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector( prefix ), filterable=True )
@@ -2368,8 +2422,8 @@ class __GlobalsSection( Section ) :
 
 			return [ self.__class__( self.__prefix, key ) for key in keys ]
 
-SceneInspector.registerSection( lambda : __GlobalsSection( "option:", "Options" ), tab = "Globals" )
-SceneInspector.registerSection( lambda : __GlobalsSection( "attribute:", "Attributes" ), tab = "Globals" )
+SceneInspector.registerSection( lambda settings : __GlobalsSection( settings, "option:", "Options" ), tab = "Globals" )
+SceneInspector.registerSection( lambda settings : __GlobalsSection( settings, "attribute:", "Attributes" ), tab = "Globals" )
 
 ##########################################################################
 # Outputs section
@@ -2443,9 +2497,9 @@ class _OutputRow( Row ) :
 
 class __OutputsSection( Section ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		Section.__init__( self, collapsed = True, label = "Outputs" )
+		Section.__init__( self, settings, collapsed = True, label = "Outputs" )
 
 		self.__rows = {} # mapping from output name to row
 
@@ -2572,9 +2626,9 @@ class _SetDiff( Diff ) :
 
 class _SetsSection( Section ) :
 
-	def __init__( self ) :
+	def __init__( self, settings ) :
 
-		Section.__init__( self, collapsed = True, label = "Sets" )
+		Section.__init__( self, settings, collapsed = True, label = "Sets" )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector(), _SetDiff, filterable = True )
