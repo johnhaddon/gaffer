@@ -1830,15 +1830,61 @@ SceneInspector.registerSection( __BoundSection, tab = "Selection" )
 # Attributes section
 ##########################################################################
 
+## \todo
+# - HOW DOES THIS RELATE TO THE REAL INSPECTORCOLUMN?
+# - CAN WE MAKE ALL THE SAME EDITING AND HISTORY MENU ITEMS "JUST WORK"?
+# - NEW BASE CLASS?
+# - ADD PRESENTATION FOR SHADERNETWORKS
+#    - COLOR CAN GO IN ICON
+class _InspectorColumn( GafferUI.PathColumn ) :
+
+	def __init__( self ) :
+
+		GafferUI.PathColumn.__init__( self )
+
+	def cellData( self, path, canceller = None ) :
+
+		result = self.CellData()
+
+		inspector = path.property( "inspector" )
+		if inspector is None :
+			return result
+
+		inspectionContext = path.inspectionContext()
+		if inspectionContext is None :
+			return result
+
+		with inspectionContext :
+			inspectorResult = inspector.inspect()
+
+		result.value = inspectorResult.value()
+		if isinstance( result.value, IECore.Color3fData ) :
+			result.icon = result.value
+
+		return result
+
+	def headerData( self, canceller = None ) :
+
+		return self.CellData()
+
+## TODO :
+#
+# - NEED TO TAKE ATTRIBUTE NAMES FROM BOTH SCENES
+# - HOW TO YIELD TWO INSPECTION CONTEXTS?
+#	- COLUMN JUST ADDS THAT MAYBE?
+# - SHOULD INSPECTION CONTEXTS JUST BE A PROPERTY?
 class _AttributesPath( Gaffer.Path ) :
 
 	def __init__( self, scene, context, scenePath, path = "/", root = "/", filter = None ) :
 
 		Gaffer.Path.__init__( self, path, root, filter )
 
+		self.__editScope = Gaffer.Plug() ## TODO
 		self.__scene = scene
 		self.__context = context
 		self.__scenePath = scenePath
+
+		self.__plugDirtiedConnection = self.__scene.node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self.__plugDirtied ), scoped = True )
 
 	# def isValid( self, canceller ) :
 
@@ -1847,6 +1893,15 @@ class _AttributesPath( Gaffer.Path ) :
 	# def isLeaf( self, canceller ) :
 
 	# 	return False
+
+	def property( self, name, canceller = None ) :
+
+		if name == "inspector" :
+			if len( self ) :
+				## TODO : THIS WOULDN'T BE ALLOWED IN C++ - NOT A RUNTIMETYPED CLASS
+				return GafferSceneUI.Private.AttributeInspector( self.__scene, self.__editScope, self[-1] )
+
+		return Gaffer.Path.property( self, name, canceller )
 
 	def setScenePath( self, scenePath ) :
 
@@ -1864,6 +1919,17 @@ class _AttributesPath( Gaffer.Path ) :
 	def copy( self ) :
 
 		return _AttributesPath( self.__scene, self.__context, self.__scenePath, self[:], self.root(), self.getFilter() )
+
+	def cancellationSubject( self ) :
+
+		return self.__scene
+
+	def inspectionContext( self, canceller = None ) :
+
+		result = Gaffer.Context( self.__context, canceller )
+		result["scene:path"] = GafferScene.ScenePlug.stringToPath( self.__scenePath )
+
+		return result
 
 	def _children( self, canceller ) :
 
@@ -1883,6 +1949,11 @@ class _AttributesPath( Gaffer.Path ) :
 			for name in sorted( attributes.keys() )
 		]
 
+	def __plugDirtied( self, plug ) :
+
+		if plug.isSame( self.__scene["attributes"] ) :
+			self._emitPathChanged()
+
 class __AttributesSection( LocationSection ) :
 
 	def __init__( self, settings ) :
@@ -1894,12 +1965,13 @@ class __AttributesSection( LocationSection ) :
 				_AttributesPath( settings["in"][0], Gaffer.Context(), "/" ),
 				columns = [
 					GafferUI.PathListingWidget.defaultNameColumn,
-					GafferSceneUI.Private.InspectorColumn(
-						GafferSceneUI.Private.AttributeInspector( settings["in"][0], settings["editScope"], "myAttribute" )
-					)
+					_InspectorColumn(),
+					_InspectorColumn(),
 				],
 			)
 			self.__pathListing.setHeaderVisible( False )
+
+		print( "INSPECTOR", self.__pathListing.getPath().property( "inspector") )
 
 	def update( self, targets ) :
 
