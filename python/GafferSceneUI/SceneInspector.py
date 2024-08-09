@@ -58,12 +58,14 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 	## Simple class to specify the target of an inspection,
 	# and provide cached queries for that target.
+	## TODO : REPLACE WITH JUST A CONTEXT? INIT WITH JUST CONTEXT AND SETTINGS?
 	class Target( object ) :
 
-		def __init__( self, scene, path ) :
+		def __init__( self, scene, path, context ) : ## TODO : JUST PASS CONTEXT?
 
 			self.__scene = scene
 			self.__path = path
+			self.__context = context
 			self.__bound = None
 			self.__transform = None
 			self.__fullTransform = None
@@ -74,15 +76,22 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			self.__setNames = None
 			self.__sets = {}
 
+		## TODO : DOESN'T MAKE SENSE
 		@property
 		def scene( self ) :
 
 			return self.__scene
 
+		## TODO : REDUNDANT
 		@property
 		def path( self ) :
 
 			return self.__path
+
+		@property
+		def context( self ) :
+
+			return self.__context
 
 		def bound( self ) :
 
@@ -154,6 +163,17 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			GafferSceneUI.SceneEditor.Settings.__init__( self, numInputs = 2 )
 
 			self["editScope"] = Gaffer.Plug()
+			self["__switchedIn"] = GafferScene.ScenePlug()
+
+			self["__switchIndexQuery"] = Gaffer.ContextQuery()
+			self["__switchIndexQuery"].addQuery( Gaffer.IntPlug(), "__sceneInspector:inputIndex" )
+
+			self["__switch"] = Gaffer.Switch()
+			self["__switch"].setup( self["in"][0] )
+			self["__switch"]["in"].setInput( self["in"] )
+			self["__switch"]["index"].setInput( self["__switchIndexQuery"]["out"][0]["value"] )
+			self["__switch"]["deleteContextVariables"].setValue( "__sceneInspector:inputIndex" )
+			self["__switchedIn"].setInput( self["__switch"]["out"] )
 
 	IECore.registerRunTimeTyped( Settings, typeName = "GafferSceneUI::SceneInspector::Settings" )
 
@@ -183,7 +203,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 				tabbedContainer = GafferUI.TabbedContainer()
 
 			for registration in self.__sectionRegistrations :
-				section = registration.section( self.settings() )
+				section = registration.section()
 				column = columns.get( registration.tab )
 				if column is None :
 					with tabbedContainer :
@@ -233,6 +253,8 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 	def _updateFromSettings( self, plug ) :
 
 		if plug.isSame( self.settings()["in"] ) :
+			## \todo Don't need this for new-style sections, because they will monitor
+			# dirtiness themselves. Maybe they just need a different method?
 			self.__updateLazily()
 
 	def _updateFromContext( self, modifiedItems ) :
@@ -269,15 +291,19 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 				paths = [ paths[-1] ]
 
 			targets = []
-			for scene in scenes :
+			for sceneIndex, scene in enumerate( scenes ) :
 				for path in paths :
-					if path is not None and not scene.exists( path ) :
+					if path is not None and not scene.exists( path ) : ## TODO : DOES THIS BELONG HERE? IT'S IN THE FOREGROUND WHICH IS NOT GREAT. MOVE TO PATH?
 						# selection may not be valid for both scenes,
 						# and we can't inspect invalid paths.
 						path = None
-					targets.append( self.Target( scene, path ) )
+					targetContext = Gaffer.Context( self.context() )
+					if path is not None :
+						targetContext["scene:path"] = GafferScene.ScenePlug.stringToPath( path )
+					targetContext["__sceneInspector:inputIndex"] = sceneIndex
+					targets.append( self.Target( scene, path, targetContext ) )
 
-			if next( (target.path for target in targets if target.path is not None), None ) is None :
+			if next( (target.path for target in targets if target.path is not None), None ) is None : # TODO : WILL HE HAVE ANY SECTIONWINDOWS AFTER THIS?
 				# all target paths have become invalid - if we're
 				# in a popup window then close it.
 				window = self.ancestor( _SectionWindow )
@@ -1126,7 +1152,7 @@ class DiffColumn( GafferUI.Widget ) :
 ## Base class for widgets which make up a section of the SceneInspector.
 class Section( GafferUI.Widget ) :
 
-	def __init__( self, settings, collapsed = False, label = None, **kw ) :
+	def __init__( self, collapsed = False, label = None, **kw ) :
 
 		self.__mainColumn = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Vertical, spacing = 0 )
 		self.__collapsible = None
@@ -1136,7 +1162,6 @@ class Section( GafferUI.Widget ) :
 
 		GafferUI.Widget.__init__( self, self.__collapsible if self.__collapsible is not None else self.__mainColumn, **kw )
 
-		self.__settings = settings
 		self.__numRows = 0
 
 	## Should be implemented by derived classes to update the
@@ -1176,15 +1201,15 @@ class Section( GafferUI.Widget ) :
 
 	def _settings( self ) :
 
-		return self.__settings
+		return self.ancestor( SceneInspector ).settings()
 
 ## Base class for sections which display information about
 #  scene locations.
 class LocationSection( Section ) :
 
-	def __init__( self, settings, collapsed = False, label = None, **kw ) :
+	def __init__( self, collapsed = False, label = None, **kw ) :
 
-		Section.__init__( self, settings, collapsed, label, **kw )
+		Section.__init__( self, collapsed, label, **kw )
 
 	def update( self, targets ) :
 
@@ -1244,6 +1269,7 @@ class _SectionWindow( GafferUI.Window ) :
 
 from Qt import QtWidgets
 
+## TODO : REMOVE ICONS WHEN YOU REMOVE THIS
 class _Rail( GafferUI.ListContainer ) :
 
 	Type = enum.Enum( "Type", [ "Top", "Middle", "Gap", "Bottom", "Single" ] )
@@ -1300,6 +1326,7 @@ class _InheritanceSection( Section ) :
 		for i in range( 0, len( fullPath ) + 1 ) :
 
 			path = "/" + "/".join( fullPath[:i] )
+			## TODO : UPDATE TO NEW API. OR MAYBE WE CAN JUST DITCH THIS BIT???
 			value = self.__inspector( SceneInspector.Target( self.__target.scene, path ), ignoreInheritance=True )
 			fullValue = value if value is not None else fullValue
 
@@ -1459,7 +1486,7 @@ class _ShaderSection( LocationSection ) :
 # History section
 ##########################################################################
 
-class _HistorySection( Section ) :
+class _HistorySection( Section ) : ## TODO : SHOULD DEFINITELY DITCH THIS I THINK
 
 	__HistoryItem = collections.namedtuple( "__HistoryItem", [ "target", "value" ] )
 
@@ -1587,9 +1614,9 @@ SceneInspector.HistorySection = _HistorySection ## REMOVE ME!!
 
 class __NodeSection( Section ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		Section.__init__( self, settings, collapsed = None )
+		Section.__init__( self, collapsed = None )
 
 		with self._mainColumn() :
 			with Row().listContainer() :
@@ -1642,9 +1669,9 @@ SceneInspector.registerSection( __NodeSection, tab = None )
 
 class __PathSection( LocationSection ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		LocationSection.__init__( self, settings, collapsed = None )
+		LocationSection.__init__( self, collapsed = None )
 
 		with self._mainColumn() :
 			with Row().listContainer() :
@@ -1689,9 +1716,9 @@ SceneInspector.registerSection( __PathSection, tab = "Selection" )
 
 class __TransformSection( LocationSection ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		LocationSection.__init__( self, settings, collapsed = True, label = "Transform" )
+		LocationSection.__init__( self, collapsed = True, label = "Transform" )
 
 		with self._mainColumn() :
 			index = 0
@@ -1777,43 +1804,93 @@ SceneInspector.registerSection( __TransformSection, tab = "Selection" )
 # Bound section
 ##########################################################################
 
+class _BoundPath( Gaffer.Path ) :
+
+	def __init__( self, scene, contexts, path = "/", root = "/", filter = None ) :
+
+		Gaffer.Path.__init__( self, path, root, filter )
+
+		self.__editScope = Gaffer.Plug() ## TODO
+		self.__scene = scene
+		self.__contexts = contexts
+
+		## TODO : COULD JUST DROP THIS, AND RELY ON THE MAIN UPDATE CALL?
+		## MAYBE THAT MAKES THE MOST SENSE IN THE SHORT TERM?
+		self.__plugDirtiedConnection = self.__scene.node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self.__plugDirtied ), scoped = True )
+
+	# def isValid( self, canceller ) :
+
+	# 	return True
+
+	# def isLeaf( self, canceller ) :
+
+	# 	return False
+
+	# def propertNames()
+
+	def property( self, name, canceller = None ) :
+
+		if name == "inspector" :
+			if len( self ) == 1 :
+				return GafferSceneUI.Private.BoundInspector( self.__scene, self.__editScope, GafferSceneUI.Private.BoundInspector.Space.names[self[-1]] )
+		elif name == "inspector:contextA" : ## TODO : COULD HAVE A BASE CLASS FOR MOST OF THIS
+			return self.__contexts[0] if len( self.__contexts ) else None
+		elif name == "inspector:contextB" : ## TODO : AND THIS IS `inspector:diffContext`?
+			return self.__contexts[1] if len( self.__contexts ) > 1 else None
+
+		return Gaffer.Path.property( self, name, canceller )
+
+	def copy( self ) :
+
+		## TODO : BASE CLASS?
+		return _BoundPath( self.__scene, self.__contexts, self[:], self.root(), self.getFilter() )
+
+	def cancellationSubject( self ) : ## TODO : BASE CLASS
+
+		return self.__scene
+
+	def _children( self, canceller ) :
+
+		if len( self ) :
+			return []
+
+		return [
+			_BoundPath( self.__scene, self.__contexts, self[:] + [ name ], self.root(), self.getFilter() )
+			for name in [ "Local", "World" ]
+		]
+
+	def __plugDirtied( self, plug ) :
+
+		if plug.isSame( self.__scene["bound"] or plug.isSame( self.__scene["transform"] ) ) :
+			self._emitPathChanged()
+
 class __BoundSection( LocationSection ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		LocationSection.__init__( self, settings, collapsed = True, label = "Bounding box" )
+		LocationSection.__init__( self, collapsed = True, label = "Bound" )
 
 		with self._mainColumn() :
-			self.__localBoundRow = DiffRow( self.__Inspector() )
-			self.__worldBoundRow = DiffRow( self.__Inspector( world = True ), alternate = True )
+			self.__pathListing = GafferUI.PathListingWidget(
+				Gaffer.DictPath( {}, "/" ),
+				columns = [
+					GafferUI.StandardPathColumn( "Name", "name" ),
+					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.A ),
+					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.B ),
+				],
+			)
+			self.__pathListing.setHeaderVisible( False )
 
 	def update( self, targets ) :
 
 		LocationSection.update( self, targets )
 
-		self.__localBoundRow.update( targets )
-		self.__worldBoundRow.update( targets )
-
-	class __Inspector( Inspector ) :
-
-		def __init__( self, world=False ) :
-
-			self.__world = world
-
-		def name( self ) :
-
-			return "World" if self.__world else "Local"
-
-		def __call__( self, target ) :
-
-			if target.path is None :
-				return None
-
-			bound = target.bound()
-			if self.__world :
-				bound = bound * target.fullTransform()
-
-			return bound
+		self.__pathListing.setPath(
+			_BoundPath(
+				self._settings()["__switchedIn"], ## TODO : PLUG MAYBE NOT PRIVATE?
+				[ t.context for t in targets ]
+			)
+		)
 
 SceneInspector.registerSection( __BoundSection, tab = "Selection" )
 
@@ -1823,34 +1900,71 @@ SceneInspector.registerSection( __BoundSection, tab = "Selection" )
 
 ## \todo
 # - HOW DOES THIS RELATE TO THE REAL INSPECTORCOLUMN?
+#	- I THINK IT COULD DERIVE FROM IT
+#		- IF WE MAKE EVERYTHING PROPERTY-BASED
 # - CAN WE MAKE ALL THE SAME EDITING AND HISTORY MENU ITEMS "JUST WORK"?
-# - NEW BASE CLASS?
 # - ADD PRESENTATION FOR SHADERNETWORKS
 #    - COLOR CAN GO IN ICON
-class _InspectorColumn( GafferUI.PathColumn ) :
+class _InspectorDiffColumn( GafferUI.PathColumn ) :
 
-	def __init__( self ) :
+	DiffContext = enum.Enum( "Context", [ "A", "B" ] )
+
+	__backgroundColors = {
+		DiffContext.A : imath.Color4f( 0.7, 0.12, 0, 0.3 ),
+		DiffContext.B : imath.Color4f( 0.13, 0.62, 0, 0.3 ),
+	}
+
+	def __init__( self, diffContext ) :
 
 		GafferUI.PathColumn.__init__( self )
+
+		self.__diffContext = diffContext
 
 	def cellData( self, path, canceller = None ) :
 
 		result = self.CellData()
 
-		inspector = path.property( "inspector" )
+		inspector = path.property( "inspector", canceller )
 		if inspector is None :
 			return result
 
-		inspectionContext = path.inspectionContext()
-		if inspectionContext is None :
+		inspectorContext = path.property( "inspector:context{}".format( self.__diffContext.name ), canceller )
+		if inspectorContext is None :
 			return result
 
-		with inspectionContext :
+		with Gaffer.Context( inspectorContext, canceller ) :
 			inspectorResult = inspector.inspect()
 
-		result.value = inspectorResult.value()
-		if isinstance( result.value, IECore.Color3fData ) :
-			result.icon = result.value
+		if inspectorResult is not None :
+			if isinstance( inspectorResult.value(), IECoreScene.ShaderNetwork ) :
+				shader = inspectorResult.value().outputShader()
+				if shader is None :
+					result.value = "Missing output shader"
+					result.icon = "warningSmall.png"
+				else :
+					result.value = shader.name
+					## TODO : DUNNO HOW WE CAN DO IT, BUT THIS SHOULDN'T HAVE THE DISPLAY TRANSFORM APPLIED
+					result.icon = shader.blindData().get( "gaffer:nodeColor", None )
+			else :
+				result.value = inspectorResult.value()
+				if isinstance( result.value, IECore.Color3fData ) :
+					result.icon = result.value
+
+		diffContext = path.property( "inspector:context{}".format( "A" if self.__diffContext == self.DiffContext.B else "B" ), canceller )
+		if diffContext is None :
+			return result
+
+		with Gaffer.Context( diffContext, canceller ) :
+			diffResult = inspector.inspect()
+
+		different = False
+		if inspectorResult :
+			different = diffResult is None or diffResult.value() != inspectorResult.value()
+		else :
+			different = diffResult is not None
+
+		if different :
+			result.background = self.__backgroundColors[self.__diffContext]
 
 		return result
 
@@ -1866,15 +1980,16 @@ class _InspectorColumn( GafferUI.PathColumn ) :
 # - SHOULD INSPECTION CONTEXTS JUST BE A PROPERTY?
 class _AttributesPath( Gaffer.Path ) :
 
-	def __init__( self, scene, context, scenePath, path = "/", root = "/", filter = None ) :
+	def __init__( self, scene, contexts, path = "/", root = "/", filter = None ) :
 
 		Gaffer.Path.__init__( self, path, root, filter )
 
 		self.__editScope = Gaffer.Plug() ## TODO
 		self.__scene = scene
-		self.__context = context
-		self.__scenePath = scenePath
+		self.__contexts = contexts
 
+		## TODO : COULD JUST DROP THIS, AND RELY ON THE MAIN UPDATE CALL?
+		## MAYBE THAT MAKES THE MOST SENSE IN THE SHORT TERM?
 		self.__plugDirtiedConnection = self.__scene.node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self.__plugDirtied ), scoped = True )
 
 	# def isValid( self, canceller ) :
@@ -1885,59 +2000,44 @@ class _AttributesPath( Gaffer.Path ) :
 
 	# 	return False
 
+	# def propertNames()
+
 	def property( self, name, canceller = None ) :
 
 		if name == "inspector" :
 			if len( self ) :
 				## TODO : THIS WOULDN'T BE ALLOWED IN C++ - NOT A RUNTIMETYPED CLASS
 				return GafferSceneUI.Private.AttributeInspector( self.__scene, self.__editScope, self[-1] )
+		elif name == "inspector:contextA" : ## TODO : IS PATH.INSPECTIONCONTEXT JUST A PROPERTY?
+			return self.__contexts[0] if len( self.__contexts ) else None
+		elif name == "inspector:contextB" : ## TODO : AND THIS IS `inspector:diffContext`?
+			return self.__contexts[1] if len( self.__contexts ) > 1 else None
 
 		return Gaffer.Path.property( self, name, canceller )
 
-	def setScenePath( self, scenePath ) :
-
-		print( "SET SCENE PATH", scenePath )
-
-		if self.__scenePath != scenePath :
-			print( "CHANGING SCENE PATH", scenePath )
-			self.__scenePath = scenePath
-			self._emitPathChanged()
-
-	def getScenePath( self ) :
-
-		return self.__scenePath
-
 	def copy( self ) :
 
-		return _AttributesPath( self.__scene, self.__context, self.__scenePath, self[:], self.root(), self.getFilter() )
+		return _AttributesPath( self.__scene, self.__contexts, self[:], self.root(), self.getFilter() )
 
 	def cancellationSubject( self ) :
 
 		return self.__scene
 
-	def inspectionContext( self, canceller = None ) :
-
-		result = Gaffer.Context( self.__context, canceller )
-		result["scene:path"] = GafferScene.ScenePlug.stringToPath( self.__scenePath )
-
-		return result
-
 	def _children( self, canceller ) :
 
-		if self.__scenePath is None :
-			return []
+		names = set()
 
-		## TODO : USE CANCELLER!!!
-
-		with Gaffer.Context( self.__context ) as context :
-			#context["scene:path"] = GafferScene.ScenePlug.stringToPath( self.__scenePath )
-			attributes = self.__scene.attributes( self.__scenePath )
-
-		print( "CHILDREN", self.__scenePath, attributes.keys(), self.__scene.source().fullName() )
+		for context in self.__contexts :
+			if "scene:path" not in context :
+				continue
+			with Gaffer.Context( context, canceller ) :
+				if self.__scene["exists"].getValue() : ## TODO : NOT STRICTLY NECESSARY NOW, BUT MAKES SENSE I THINK
+					attributes = self.__scene.fullAttributes( context["scene:path"] )
+					names.update( attributes.keys() )
 
 		return [
-			_AttributesPath( self.__scene, self.__context, self.__scenePath, self[:] + [ name ], self.root(), self.getFilter() )
-			for name in sorted( attributes.keys() )
+			_AttributesPath( self.__scene, self.__contexts, self[:] + [ name ], self.root(), self.getFilter() )
+			for name in sorted( names )
 		]
 
 	def __plugDirtied( self, plug ) :
@@ -1947,63 +2047,31 @@ class _AttributesPath( Gaffer.Path ) :
 
 class __AttributesSection( LocationSection ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		LocationSection.__init__( self, settings, collapsed = True, label = "Attributes" )
+		LocationSection.__init__( self, collapsed = True, label = "Attributes" )
 
 		with self._mainColumn() :
 			self.__pathListing = GafferUI.PathListingWidget(
-				_AttributesPath( settings["in"][0], Gaffer.Context(), "/" ),
+				Gaffer.DictPath( {}, "/" ),
 				columns = [
-					GafferUI.PathListingWidget.defaultNameColumn,
-					_InspectorColumn(),
-					_InspectorColumn(),
+					GafferUI.StandardPathColumn( "Name", "name" ),
+					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.A ),
+					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.B ),
 				],
 			)
 			self.__pathListing.setHeaderVisible( False )
-
-		print( "INSPECTOR", self.__pathListing.getPath().property( "inspector") )
 
 	def update( self, targets ) :
 
 		LocationSection.update( self, targets )
 
-		if len( targets ) :
-			self.__pathListing.getPath().setScenePath( targets[0].path )
-
-		print( "UPDATE" )
-		#self.__diffColumn.update( targets )
-
-	# class __Inspector( Inspector ) :
-
-	# 	def __init__( self, attributeName = None ) :
-
-	# 		self.__attributeName = attributeName
-
-	# 	def name( self ) :
-
-	# 		return self.__attributeName or ""
-
-	# 	def supportsInheritance( self ) :
-
-	# 		return True
-
-	# 	def __call__( self, target, ignoreInheritance = False ) :
-
-	# 		if target.path is None :
-	# 			return None
-
-	# 		if ignoreInheritance :
-	# 			attributes = target.attributes()
-	# 		else :
-	# 			attributes = target.fullAttributes()
-
-	# 		return attributes.get( self.__attributeName )
-
-	# 	def children( self, target ) :
-
-	# 		attributeNames = target.fullAttributes().keys() if target.path else []
-	# 		return [ self.__class__( attributeName ) for attributeName in attributeNames ]
+		self.__pathListing.setPath(
+			_AttributesPath(
+				self._settings()["__switchedIn"], ## TODO : PLUG MAYBE NOT PRIVATE?
+				[ t.context for t in targets ]
+			)
+		)
 
 SceneInspector.registerSection( __AttributesSection, tab = "Selection" )
 
@@ -2082,9 +2150,9 @@ class _SubdivisionTextDiff( TextDiff ) :
 
 class __ObjectSection( LocationSection ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		LocationSection.__init__( self, settings, collapsed = True, label = "Object" )
+		LocationSection.__init__( self, collapsed = True, label = "Object" )
 
 		with self._mainColumn() :
 
@@ -2386,9 +2454,9 @@ class _SetMembershipDiff( SideBySideDiff ) :
 
 class __SetMembershipSection( LocationSection ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		LocationSection.__init__( self, settings, collapsed = True, label = "Set Membership" )
+		LocationSection.__init__( self, collapsed = True, label = "Set Membership" )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector(), _SetMembershipDiff, filterable = True )
@@ -2449,9 +2517,9 @@ SceneInspector.registerSection( __SetMembershipSection, tab = "Selection" )
 
 class __GlobalsSection( Section ) :
 
-	def __init__( self, settings, prefix, label ) :
+	def __init__( self, prefix, label ) :
 
-		Section.__init__( self, settings, collapsed = True, label = label )
+		Section.__init__( self, collapsed = True, label = label )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector( prefix ), filterable=True )
@@ -2485,8 +2553,8 @@ class __GlobalsSection( Section ) :
 
 			return [ self.__class__( self.__prefix, key ) for key in keys ]
 
-SceneInspector.registerSection( lambda settings : __GlobalsSection( settings, "option:", "Options" ), tab = "Globals" )
-SceneInspector.registerSection( lambda settings : __GlobalsSection( settings, "attribute:", "Attributes" ), tab = "Globals" )
+SceneInspector.registerSection( lambda : __GlobalsSection( "option:", "Options" ), tab = "Globals" )
+SceneInspector.registerSection( lambda : __GlobalsSection( "attribute:", "Attributes" ), tab = "Globals" )
 
 ##########################################################################
 # Outputs section
@@ -2560,9 +2628,9 @@ class _OutputRow( Row ) :
 
 class __OutputsSection( Section ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		Section.__init__( self, settings, collapsed = True, label = "Outputs" )
+		Section.__init__( self, collapsed = True, label = "Outputs" )
 
 		self.__rows = {} # mapping from output name to row
 
@@ -2691,9 +2759,9 @@ class _SetDiff( Diff ) :
 
 class _SetsSection( Section ) :
 
-	def __init__( self, settings ) :
+	def __init__( self ) :
 
-		Section.__init__( self, settings, collapsed = True, label = "Sets" )
+		Section.__init__( self, collapsed = True, label = "Sets" )
 
 		with self._mainColumn() :
 			self.__diffColumn = DiffColumn( self.__Inspector(), _SetDiff, filterable = True )
