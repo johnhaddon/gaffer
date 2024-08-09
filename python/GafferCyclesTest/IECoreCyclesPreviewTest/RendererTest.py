@@ -35,6 +35,7 @@
 ##########################################################################
 
 import math
+import pathlib
 import time
 import unittest
 
@@ -43,6 +44,7 @@ import imath
 import IECore
 import IECoreScene
 import IECoreImage
+import IECoreVDB
 
 import GafferScene
 import GafferCycles
@@ -2741,6 +2743,67 @@ class RendererTest( GafferTest.TestCase ) :
 		self.assertEqual( testPixel.b, 0 )
 
 		del light, plane
+
+	def testVDB( self ) :
+
+		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
+			"Cycles",
+			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive,
+		)
+
+		camera = renderer.camera(
+			"testCamera",
+			IECoreScene.Camera(
+				parameters = {
+					"resolution" : imath.V2i( 128, 128 ),
+				}
+			),
+			renderer.attributes( IECore.CompoundObject() )
+		)
+		camera.transform( imath.M44f().translate( imath.V3f( 0, 50, 150 ) ) )
+
+		renderer.option( "camera", IECore.StringData( "testCamera" ) )
+
+		renderer.output(
+			"testOutput",
+			IECoreScene.Output(
+				"test",
+				"ieDisplay",
+				"rgba",
+				{
+					"driverType" : "ImageDisplayDriver",
+					"handle" : "testVDB",
+				}
+			)
+		)
+
+		vdb = renderer.object(
+			"/vdb",
+			IECoreVDB.VDBObject( str( pathlib.Path( __file__ ).parent / ".." / ".." / "GafferVDBTest" / "data" / "smoke.vdb" ) ),
+			renderer.attributes( IECore.CompoundObject ( {
+				"cycles:volume" : IECoreScene.ShaderNetwork(
+					shaders = {
+						"output" : IECoreScene.Shader( "principled_volume", "cycles:volume", { "density_attribute" : "density" } )
+					},
+					output = "output",
+				)
+			} ) )
+		)
+
+		renderer.render()
+		time.sleep( 10 )
+
+		image = IECoreImage.ImageDisplayDriver.storedImage( "testVDB" )
+		self.assertIsInstance( image, IECoreImage.ImagePrimitive )
+
+		IECoreImage.ImageWriter( image, "/tmp/test.exr" ).write()
+
+		testPixel = self.__colorAtUV( image, imath.V2f( 0.5 ) )
+		self.assertGreater( testPixel.r, 0 )
+		self.assertGreater( testPixel.g, 0 )
+		self.assertGreater( testPixel.b, 0 )
+
+		del camera, vdb
 
 if __name__ == "__main__":
 	unittest.main()
