@@ -40,6 +40,7 @@
 
 #include "GafferSceneUI/Private/Inspector.h"
 #include "GafferSceneUI/Private/AttributeInspector.h"
+#include "GafferSceneUI/Private/BoundInspector.h"
 #include "GafferSceneUI/Private/ParameterInspector.h"
 #include "GafferSceneUI/Private/SetMembershipInspector.h"
 #include "GafferSceneUI/Private/OptionInspector.h"
@@ -144,6 +145,22 @@ void GafferSceneUIModule::bindInspector()
 			.value( "Other", Inspector::Result::SourceType::Other )
 			.value( "Fallback", Inspector::Result::SourceType::Fallback )
 		;
+	}
+
+	{
+		RefCountedClass<BoundInspector, Inspector> boundClass( "BoundInspector" );
+		scope boundInspectorScope = boundClass;
+
+		enum_<BoundInspector::Space>( "Space" )
+			.value( "Local", BoundInspector::Space::Local )
+			.value( "World", BoundInspector::Space::World )
+		;
+
+		boundClass.def(
+			init<const ScenePlugPtr &, const PlugPtr &, BoundInspector::Space>(
+				( arg( "scene" ), arg( "edit" ), arg( "space" ) = BoundInspector::Space::Local )
+			)
+		);
 	}
 
 	RefCountedClass<ParameterInspector, Inspector>( "ParameterInspector" )
