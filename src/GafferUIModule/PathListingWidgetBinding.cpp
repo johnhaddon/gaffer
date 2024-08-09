@@ -220,6 +220,12 @@ QString vectorToString( const T &v )
 	return result;
 }
 
+template<typename T>
+QString boxToString( const T &v )
+{
+	return vectorToString( v.min ) + ", " + vectorToString( v.max );
+}
+
 QVariant dataToVariant( const IECore::Data *value, int role )
 {
 	if( !value )
@@ -333,6 +339,14 @@ QVariant dataToVariant( const IECore::Data *value, int role )
 			return vectorToString( static_cast<const IECore::Color3fData *>( value )->readable() );
 		case IECore::Color4fDataTypeId :
 			return vectorToString( static_cast<const IECore::Color4fData *>( value )->readable() );
+		case IECore::Box2fDataTypeId :
+			return boxToString( static_cast<const IECore::Box2fData *>( value )->readable() );
+		case IECore::Box3fDataTypeId :
+			return boxToString( static_cast<const IECore::Box3fData *>( value )->readable() );
+		case IECore::Box2iDataTypeId :
+			return boxToString( static_cast<const IECore::Box2iData *>( value )->readable() );
+		case IECore::Box3iDataTypeId :
+			return boxToString( static_cast<const IECore::Box3iData *>( value )->readable() );
 		case IECore::DateTimeDataTypeId :
 		{
 			const IECore::DateTimeData *d = static_cast<const IECore::DateTimeData *>( value );
