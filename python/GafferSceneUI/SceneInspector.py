@@ -249,8 +249,6 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 	def __update( self ) :
 
-		# The SceneInspector's internal context is not necessarily bound at this point, which can lead to errors
-		# if nodes in the graph are expecting special context variables, so we make sure it is:
 		with self.context():
 
 			scenes = [ s.getInput() for s in self.settings()["in"] if s.getInput() is not None ]
