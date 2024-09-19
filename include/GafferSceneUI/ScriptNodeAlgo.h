@@ -112,6 +112,15 @@ GAFFERSCENEUI_API std::vector<IECore::InternedString> getLastSelectedPath( const
 /// Returns a signal emitted when either the selected paths or last selected path change for `script`.
 GAFFERSCENEUI_API ChangedSignal &selectedPathsChangedSignal( Gaffer::ScriptNode *script );
 
+/// Current Render Pass
+/// ===================
+///
+/// These functions manage the `${renderPass}` variable in the ScriptNode's context,
+/// denoting the current render pass to be displayed in the UI.
+
+GAFFERSCENEUI_API void setCurrentRenderPass( Gaffer::ScriptNode *script, const std::string &renderPass );
+GAFFERSCENEUI_API std::string getCurrentRenderPass( const Gaffer::ScriptNode *script );
+
 } // namespace ScriptNodeAlgo
 
 } // namespace GafferSceneUI

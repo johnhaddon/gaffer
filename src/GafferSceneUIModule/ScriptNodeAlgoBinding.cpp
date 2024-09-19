@@ -98,6 +98,17 @@ std::string getLastSelectedPathWrapper( const ScriptNode &script )
 	return result;
 }
 
+void setCurrentRenderPassWrapper( ScriptNode &script, const std::string &renderPass )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	setCurrentRenderPass( &script, renderPass );
+}
+
+std::string getCurrentRenderPassWrapper( ScriptNode &script )
+{
+	return getCurrentRenderPass( &script );
+}
+
 } // namespace
 
 void GafferSceneUIModule::bindScriptNodeAlgo()
@@ -117,4 +128,7 @@ void GafferSceneUIModule::bindScriptNodeAlgo()
 	def( "setLastSelectedPath", &setLastSelectedPathWrapper );
 	def( "getLastSelectedPath", &getLastSelectedPathWrapper );
 	def( "selectedPathsChangedSignal", &selectedPathsChangedSignal, return_value_policy<reference_existing_object>() );
+
+	def( "setCurrentRenderPass", &setCurrentRenderPassWrapper );
+	def( "getCurrentRenderPass", &getCurrentRenderPassWrapper );
 }

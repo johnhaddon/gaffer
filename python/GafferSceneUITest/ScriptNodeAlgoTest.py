@@ -204,5 +204,12 @@ class ScriptNodeAlgoTest( GafferUITest.TestCase ) :
 		self.assertEqual( GafferSceneUI.ScriptNodeAlgo.getVisibleSet( script ).expansions, IECore.PathMatcher( [ "/", "/A", "/A/C" ] ) )
 		self.assertEqual( newLeafs, IECore.PathMatcher( [ "/A/C/G", "/A/C/F" ] ) )
 
+	def testCurrentRenderPass( self ) :
+
+		script = Gaffer.ScriptNode()
+		self.assertEqual( GafferSceneUI.ScriptNodeAlgo.setCurrentRenderPass( ) )
+
+		# TEST ME! INCLUDING SERIALISATION!
+
 if __name__ == "__main__":
 	unittest.main()

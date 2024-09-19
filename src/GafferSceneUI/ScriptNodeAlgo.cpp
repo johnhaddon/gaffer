@@ -38,7 +38,10 @@
 
 #include "GafferSceneUI/ContextAlgo.h"
 
+#include "Gaffer/CompoundDataPlug.h"
 #include "Gaffer/Context.h"
+#include "Gaffer/MetadataAlgo.h"
+#include "Gaffer/NameValuePlug.h"
 #include "Gaffer/ScriptNode.h"
 
 #include "boost/bind/bind.hpp"
@@ -86,6 +89,8 @@ ChangedSignals &changedSignals( ScriptNode *script )
 	}
 	return result;
 }
+
+const IECore::InternedString g_renderPass( "renderPass" );
 
 } // namespace
 
@@ -147,4 +152,30 @@ ScriptNodeAlgo::ChangedSignal &ScriptNodeAlgo::selectedPathsChangedSignal( Gaffe
 {
 	return changedSignals( script ).selectedPathsChangedSignal;
 
+}
+
+void ScriptNodeAlgo::setCurrentRenderPass( Gaffer::ScriptNode *script, const std::string &renderPass )
+{
+	NameValuePlugPtr renderPassPlug = script->variablesPlug()->getChild<NameValuePlug>( g_renderPass );
+	if( !renderPassPlug )
+	{
+		renderPassPlug = new NameValuePlug( "renderPass", new StringPlug( "value" ), "renderPass", Plug::Flags::Default | Plug::Flags::Dynamic );
+		script->variablesPlug()->addChild( renderPassPlug );
+		MetadataAlgo::setReadOnly( renderPassPlug->namePlug(), true );
+	}
+
+	if( auto valuePlug = renderPassPlug->valuePlug<StringPlug>() )
+	{
+		// The ScriptNode will synchronise this into the context.
+		valuePlug->setValue( renderPass );
+	}
+	else
+	{
+		throw( IECore::Exception( "Expected a StringPlug" ) );
+	}
+}
+
+std::string ScriptNodeAlgo::getCurrentRenderPass( const Gaffer::ScriptNode *script )
+{
+	return script->context()->get<std::string>( g_renderPass, "" );
 }
