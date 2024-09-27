@@ -563,6 +563,7 @@ if os.environ.get( "ONNX_ROOT" ) and moduleSearchPath.find( "GafferML" ) :
 	import GafferML
 	import GafferMLUI
 
+	nodeMenu.append( "/ML/Tensor Reader", GafferML.TensorReader, searchText = "TensorReader" )
 	nodeMenu.append( "/ML/Data To Tensor", GafferML.DataToTensor, searchText = "DataToTensor" )
 	nodeMenu.append( "/ML/Image To Tensor", GafferML.ImageToTensor, searchText = "ImageToTensor" )
 	nodeMenu.append( "/ML/Tensor To Image", GafferML.TensorToImage, searchText = "TensorToImage" )
