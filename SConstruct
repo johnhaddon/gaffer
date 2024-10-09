@@ -1383,6 +1383,10 @@ libraries = {
 	"GafferRenderMan" : {
 		"envAppends" : {
 			"CPPPATH" : [ "$RENDERMAN_ROOT/include" ],
+			# The RenderMan headers contain deprecated functionality that we don't use,
+			# but which nonetheless emit compilation warnings. We turn them off so we
+			# can continue to compile with warnings as errors.
+			"CPPDEFINES" : [ "RMAN_RIX_NO_WARN_DEPRECATED" ],
 			"LIBS" : [ "Iex$OPENEXR_LIB_SUFFIX", "Gaffer", "GafferDispatch", "GafferScene", "IECoreScene$CORTEX_LIB_SUFFIX", "prman", "pxrcore" ],
 			"LIBPATH" : [ "$RENDERMAN_ROOT/lib" ],
 		},
