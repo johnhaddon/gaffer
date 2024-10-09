@@ -1322,6 +1322,18 @@ libraries = {
 
 	"GafferRenderManUITest" : {},
 
+	"GafferRenderManDisplay" : {
+		"envAppends" : {
+			"LIBS" : [ "IECoreImage$CORTEX_LIB_SUFFIX" ],
+			"CPPPATH" : [ "$RENDERMAN_ROOT/include" ],
+		},
+		"envReplacements" : {
+			"SHLIBPREFIX" : "",
+		},
+		"installName" : "renderManPlugins/ieDisplay",
+		"requiredOptions" : [ "RENDERMAN_ROOT" ],
+	},
+
 	"GafferTractor" : {},
 
 	"GafferTractorTest" : {},
