@@ -335,6 +335,7 @@ if [[ -n $RMANTREE ]] ; then
 	appendToPath "$GAFFER_ROOT/renderManPlugins" RMAN_DISPLAYS_PATH
 	appendToPath "$RMANTREE/lib/shaders" OSL_SHADER_PATHS
 	appendToPath "$RMANTREE/lib/usd_plugins/usdRiPxr/Resources" PXR_PLUGINPATH_NAME
+	appendToPath "$RMANTREE/lib/shaders" OSL_SHADER_PATHS
 
 fi
 
