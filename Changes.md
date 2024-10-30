@@ -9,6 +9,11 @@ Fixes
   - Fixed handling of shader colour component to float connections in Cycles.
   - Added `CORTEX_STARTUP_PATHS` to match the Linux wrapper.
 
+API
+---
+
+- Metadata : Added `targetsWithMetadata()` function, returning all the string targets which match a pattern and have a specific metadata key.
+
 1.5.0.0 (relative to 1.4.15.0)
 =======
 
