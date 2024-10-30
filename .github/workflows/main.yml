@@ -75,7 +75,7 @@ jobs:
 
     container:
       image: ${{ matrix.containerImage }}
-      options: --mac-address a4:bb:6d:cf:40:7a
+      options: --mac-address ${{ secrets.MAC_ADDRESS }}
 
     env:
       ARNOLD_LICENSE_ORDER: none # Don't waste time looking for a license that doesn't exist
