@@ -179,6 +179,11 @@ Fixes
 - PlugPopup : Fixed error when displaying a popup with no PlugValueWidget.
 - Instancer : Fixed issue where wrong prototypes were sometimes used in encapsulated renders.
 
+API
+---
+
+- Metadata : Added `targetsWithMetadata()` function, returning all the string targets which match a pattern and have a specific metadata key.
+
 1.5.0.0 (relative to 1.4.15.0)
 =======
 
