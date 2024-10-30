@@ -38,6 +38,7 @@ API
 ---
 
 - EditScopeAlgo : Added `renameRenderPass()` and `renameRenderPassNonEditableReason()` functions.
+- Options : Added a protected constructor that automatically adds option plugs based on renderer metadata registrations.
 
 1.5.4.1 (relative to 1.5.4.0)
 =======
@@ -278,6 +279,11 @@ Fixes
   - Added `CORTEX_STARTUP_PATHS` to match the Linux wrapper.
 - PlugPopup : Fixed error when displaying a popup with no PlugValueWidget.
 - Instancer : Fixed issue where wrong prototypes were sometimes used in encapsulated renders.
+
+API
+---
+
+- Metadata : Added `targetsWithMetadata()` function, returning all the string targets which match a pattern and have a specific metadata key.
 
 1.5.0.0 (relative to 1.4.15.0)
 =======
