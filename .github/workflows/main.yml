@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - '*'
@@ -72,7 +73,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    container: ${{ matrix.containerImage }}
+    container:
+      image: ${{ matrix.containerImage }}
+      options: --mac-address a4:bb:6d:cf:40:7a
 
     env:
       ARNOLD_LICENSE_ORDER: none # Don't waste time looking for a license that doesn't exist
@@ -99,6 +102,7 @@ jobs:
 
     - name: Install toolchain (Linux)
       run: |
+        ifconfig
         Xvfb :99 -screen 0 1280x1024x24 &
         metacity --display :99.0 &
         useradd -m testUser
