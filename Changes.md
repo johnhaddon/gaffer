@@ -3,6 +3,11 @@
 
 
 
+API
+---
+
+- Options, Attributes : Added a protected constructor that automatically adds plugs based on renderer metadata registrations.
+
 1.5.0.1 (relative to 1.5.0.0)
 =======
 
@@ -20,7 +25,6 @@ API
 ---
 
 - Metadata : Added `targetsWithMetadata()` function, returning all the string targets which match a pattern and have a specific metadata key.
-- Options : Added a protected constructor that automatically adds option plugs based on renderer metadata registrations.
 
 1.5.0.0 (relative to 1.4.15.0)
 =======
