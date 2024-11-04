@@ -271,6 +271,51 @@ class RendererTest( GafferTest.TestCase ) :
 			self.assertAlmostEqual( c[i], 0.5, delta = 0.01 )
 		self.assertEqual( c[3], 1.0 )
 
+	def __testAOV( self, output, expectedColor ) :
+
+		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
+			"RenderMan",
+			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch
+		)
+
+		renderer.output( "test", output )
+
+		renderer.object(
+			"sphere",
+			IECoreScene.SpherePrimitive(),
+			renderer.attributes( IECore.CompoundObject( {
+				"ri:surface" : IECoreScene.ShaderNetwork(
+					shaders = {
+						"output" : IECoreScene.Shader( "PxrDiffuse" )
+					},
+					output = "output",
+				)
+			} ) )
+		).transform( imath.M44f().translate( imath.V3f( 0, 0, -3 ) ) )
+
+		renderer.render()
+
+		image = IECoreImage.ImageDisplayDriver.storedImage( "test" )
+		print( image.keys() )
+		c = self.__colorAtUV( image, imath.V2f( 0.5 ) )
+		self.assertEqual( c, expectedColor )
+
+	def testSampleCountAOV( self ) :
+
+		self.__testAOV(
+			IECoreScene.Output(
+				"test",
+				"ieDisplay",
+				"float sampleCount",
+				{
+					"driverType" : "ImageDisplayDriver",
+					"handle" : "test",
+					"ri:accumulationRule" : "sum",
+				}
+			),
+			imath.Color4f( 1, 0, 0, 1 )
+		)
+
 	def __colorAtUV( self, image, uv ) :
 
 		dimensions = image.dataWindow.size() + imath.V2i( 1 )

@@ -41,6 +41,7 @@
 #include "IECoreScene/ShaderNetwork.h"
 
 #include "IECore/SimpleTypedData.h"
+#include "IECore/StringAlgo.h"
 
 #include "RixPredefinedStrings.hpp"
 
@@ -79,6 +80,25 @@ T *optionCast( const IECore::RunTimeTyped *v, const IECore::InternedString &name
 
 	IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer", fmt::format( "Expected {} but got {} for option \"{}\".", T::staticTypeName(), v->typeName(), name.c_str() ) );
 	return nullptr;
+}
+
+template<typename T>
+T parameter( const CompoundDataMap &parameters, const IECore::InternedString &name, const T &defaultValue )
+{
+	auto it = parameters.find( name );
+	if( it == parameters.end() )
+	{
+		return defaultValue;
+	}
+
+	using DataType = IECore::TypedData<T>;
+	if( auto data = runTimeCast<DataType>( it->second.get() ) )
+	{
+		return data->readable();
+	}
+
+	IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer", fmt::format( "Expected {} but got {} for parameter \"{}\".", DataType::staticTypeName(), it->second->typeName(), name.c_str() ) );
+	return defaultValue;
 }
 
 } // namespace
@@ -360,6 +380,36 @@ void Globals::updateRenderView()
 			type = riley::RenderOutputType::k_Color;
 			source = RtUString( "Ci" );
 		}
+		else
+		{
+			vector<string> tokens;
+			StringAlgo::tokenize( output->getData(), ' ', tokens );
+			if( tokens.size() == 2 )
+			{
+				source = RtUString( tokens[1].c_str() );
+				if( tokens[0] == "color" )
+				{
+					type = riley::RenderOutputType::k_Color;
+				}
+				else if( tokens[0] == "float" )
+				{
+					type = riley::RenderOutputType::k_Float;
+				}
+				else if( tokens[0] == "int" )
+				{
+					type = riley::RenderOutputType::k_Integer;
+				}
+				else if( tokens[0] == "vector" )
+				{
+					type = riley::RenderOutputType::k_Vector;
+				}
+				else if( tokens[0] == "lpe" )
+				{
+					type = riley::RenderOutputType::k_Color;
+					source = RtUString( ( "lpe:" + tokens[1] ).c_str() );
+				}
+			}
+		}
 
 		if( !type )
 		{
@@ -367,10 +417,11 @@ void Globals::updateRenderView()
 			continue;
 		}
 
-		const RtUString accumulationRule( "filter" );
+		const RtUString accumulationRule( parameter<string>( output->parameters(), "ri:accumulationRule", "filter" ).c_str() );
+
 		const RtUString filter = Rix::k_gaussian;
 		const riley::FilterSize filterSize = { 2.0, 2.0 };
-		const float relativePixelVariance = 1.0f;
+		const float relativePixelVariance = 1.0f; // TODO : ZERO? READ FROM PARAMETER
 
 		m_renderOutputs.push_back(
 			m_session->riley->CreateRenderOutput(

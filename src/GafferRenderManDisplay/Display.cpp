@@ -104,6 +104,8 @@ PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, con
 
 	for( int p = 0; p < paramcount; p++ )
 	{
+		std::cerr << "P " << p << " " << parameters[p].name << std::endl;
+
 		if ( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].vtype == (char)'i' && parameters[p].vcount == (char)2 && parameters[p].nbytes == (int) (parameters[p].vcount * sizeof(int)) )
 		{
 			originalSize.x = static_cast<const int *>(parameters[p].value)[0];
@@ -117,6 +119,7 @@ PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, con
 		else if( 0 == strcmp( parameters[p].name, "layername" ) && parameters[p].vtype == 's' )
 		{
 			const string layerName = *(const char **)(parameters[p].value);
+			std::cerr << "LAYER NAME " << layerName << std::endl;
 			if( !layerName.empty() )
 			{
 				if( channels.size() == 1 )
@@ -195,6 +198,7 @@ PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, con
 				if ( parameters[p].vcount == 1 )
 				{
 					newParam = new StringData( pChar[0] );
+					std::cerr << "   " << pChar[0] << std::endl;
 				}
 				else
 				{
@@ -202,6 +206,7 @@ PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, con
 					for ( int s = 0; s < parameters[p].vcount; s++ )
 					{
 						newStringVec->writable().push_back( pChar[s] );
+						std::cerr << "   " << pChar[s] << std::endl;
 					}
 					newParam = newStringVec;
 				}
