@@ -77,6 +77,11 @@ const vector<InternedString> g_rejectedOutputFilterParameters = {
 	"filterwidth"
 };
 
+const vector<InternedString> g_rejectedOutputFilterParameters = {
+	"filter",
+	"filterwidth"
+};
+
 template<typename T>
 T *optionCast( const IECore::RunTimeTyped *v, const IECore::InternedString &name )
 {
