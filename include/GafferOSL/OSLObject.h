@@ -43,6 +43,7 @@
 #include "GafferScene/Deformer.h"
 #include "GafferScene/ShaderPlug.h"
 
+#include "Gaffer/ArrayPlug.h"
 #include "Gaffer/NumericPlug.h"
 #include "Gaffer/StringPlug.h"
 
@@ -69,6 +70,9 @@ class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 
 		Gaffer::BoolPlug *useAttributesPlug();
 		const Gaffer::BoolPlug *useAttributesPlug() const;
+
+		Gaffer::ArrayPlug *pointCloudsPlug();
+		const Gaffer::ArrayPlug *pointCloudsPlug() const;
 
 		Gaffer::Plug *primitiveVariablesPlug();
 		const Gaffer::Plug *primitiveVariablesPlug() const;

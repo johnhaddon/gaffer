@@ -277,6 +277,87 @@ Gaffer.Metadata.registerNode(
 
 		],
 
+		"pointClouds" : [
+
+			"description",
+			"""
+			Provides input data for the `pointcloud_search()` and `pointcloud_get()` OSL functions.
+			""",
+
+			"layout:section", "Point Clouds",
+			"plugValueWidget:type", "GafferUI.LayoutPlugValueWidget",
+
+			"layout:customWidget:addButton:widgetType", "GafferOSLUI.OSLObjectUI._PointCloudsAddButton",
+			"layout:customWidget:addButton:index", -1,
+
+		],
+
+		"pointClouds.*" : [
+
+			"deletable", True,
+
+		],
+
+		"pointClouds.*.name" : [
+
+			"description",
+			"""
+			The name to give to the pointcloud. This name should be passed to the `pointcloud_search()` and `pointloud_get()`
+			OSL functions to access this pointcloud.
+			""",
+
+		],
+
+		"pointClouds.*.enabled" : [
+
+			"description",
+			"""
+			Enables the pointcloud. When disabled, the pointcloud will not be available in `pointcloud_search()` or
+			`pointcloud_get()`.
+			""",
+
+		],
+
+		"pointClouds.*.value" : [
+
+			"description",
+			"""
+			The location of the pointcloud in the input scene. The location should contain a primitive
+			with a position ('P') primitive variable.
+			""",
+
+			"plugValueWidget:type", "GafferSceneUI.ScenePathPlugValueWidget",
+
+		],
+
 	}
 
 )
+
+## \todo This is practically identical to the button in CreateViewsUI.py, and
+# the two could probably be consolidated into one.
+class _PointCloudsAddButton( GafferUI.PlugValueWidget ) :
+
+	def __init__( self, plug ) :
+
+		row = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal )
+
+		GafferUI.PlugValueWidget.__init__( self, row, plug )
+
+		with row :
+
+			GafferUI.Spacer( imath.V2i( GafferUI.PlugWidget.labelWidth(), 1 ) )
+
+			self.__button = GafferUI.Button( image = "plus.png", hasFrame = False )
+			self.__button.clickedSignal().connect( Gaffer.WeakMethod( self.__buttonClicked ) )
+
+			GafferUI.Spacer( imath.V2i( 1 ), imath.V2i( 999999, 1 ), parenting = { "expand" : True } )
+
+	def _updateFromEditable( self ) :
+
+		self.__button.setEnabled( self._editable() )
+
+	def __buttonClicked( self, widget ) :
+
+		with Gaffer.UndoScope( self.getPlug().ancestor( Gaffer.ScriptNode ) ) :
+			self.getPlug().resize( len( self.getPlug() ) + 1 )
