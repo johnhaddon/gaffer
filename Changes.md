@@ -12,7 +12,7 @@ API
 - SceneAlgo :
   - Added `parallelReduceLocations()` for implementing functions that need to combine results while traversing a ScenePlug.
   - Added `hierarchyHash()` for hashing all children of a scene location.
-
+- ShadingEngine : Added support for passing custom pointclouds to the `shade()` call.
 
 1.5.5.0 (relative to 1.5.4.1)
 =======
