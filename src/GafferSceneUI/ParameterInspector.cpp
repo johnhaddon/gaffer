@@ -74,6 +74,7 @@ GafferScene::SceneAlgo::History::ConstPtr ParameterInspector::history() const
 	// if the specific attribute we want doesn't exist.
 	if( !attributeExists() )
 	{
+		std::cerr << "NO ATTRIBUTE" << std::endl;
 		return nullptr;
 	}
 

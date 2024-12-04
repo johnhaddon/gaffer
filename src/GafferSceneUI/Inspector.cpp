@@ -249,6 +249,8 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 {
 	Node *node = history->scene->node();
 
+	std::cerr << "VISITING " << history->scene->fullName() << std::endl;
+
 	// If we haven't found the source yet, call `source()`
 	// to see if we can find one here.
 
@@ -273,6 +275,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 					}
 					else if( result->m_editScope && node->ancestor<EditScope>() == result->m_editScope )
 					{
+						std::cerr << "FOUND SOURCE IN EDITSCOPE" << std::endl;
 						result->m_sourceType = Result::SourceType::EditScope;
 						result->m_editScopeInHistory = true;
 					}
@@ -292,7 +295,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 					if( !result->m_editScope && node->ancestor<EditScope>() )
 					{
 						// We don't allow editing if the user hasn't requested a specific scope
-						// (they have selected "None" from the Menu) and the upstream edit is
+						// (they have selected "Source" from the Menu) and the upstream edit is
 						// inside _any_ EditScope.
 						result->m_editFunction = fmt::format(
 							"Source is in an EditScope. Change scope to {} to edit.",

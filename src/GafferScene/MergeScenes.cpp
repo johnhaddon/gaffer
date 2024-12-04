@@ -945,7 +945,7 @@ MergeScenes::InputMask MergeScenes::connectedInputs() const
 	InputMask result;
 	for( size_t i = 0, e = inPlugs()->children().size(); i < e; ++i )
 	{
-		result[i] = (bool)inPlugs()->getChild<ScenePlug>( i )->getInput();
+		result[i] = inPlugs()->getChild<ScenePlug>( i )->source()->direction() == Plug::Out;
 	}
 
 	if( !result.count() )

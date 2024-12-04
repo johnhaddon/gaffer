@@ -1088,6 +1088,56 @@ class ParameterInspectorTest( GafferUITest.TestCase ) :
 			editWarning = "Edits to box.add may affect other locations in the scene."
 		)
 
+	def testLightCreatedInEditScope( self ) :
+
+		light = GafferSceneTest.TestLight()
+
+		editScope1 = Gaffer.EditScope( "EditScope1" )
+		editScope1.setup( light["out"] )
+
+		editScope1["light"] = light
+		editScope1["mergeScenes"] = GafferScene.MergeScenes()
+		editScope1["mergeScenes"]["in"][0].setInput( editScope1["BoxIn"]["out"] )
+		editScope1["mergeScenes"]["in"][1].setInput( editScope1["light"]["out"] )
+
+		editScope1["BoxOut"]["in"].setInput( editScope1["mergeScenes"]["out"] )
+
+		editScope2 = Gaffer.EditScope( "EditScope2" )
+		editScope2.setup( editScope1["out"] )
+		editScope2["in"].setInput( editScope1["out"] )
+
+		# Make edit in EditScope2.
+
+		i = self.__inspect( editScope2["out"], "/light", "exposure", editScope2 )
+		edit = i.acquireEdit()
+		edit["enabled"].setValue( True )
+		edit["value"].setValue( 2 )
+
+		# Check that we can still edit in EditScope1.
+		print( "===========================================" )
+		i = self.__inspect( editScope2["out"], "/light", "exposure", editScope1 )
+		self.assertTrue( i.source().isSame( edit ) )
+		self.assertTrue( i.editable() )
+		## TODO : ASSERT EDIT WARNING
+
+		# scope1Edit["enabled"].setValue( True )
+		# self.assertEqual( scope1Edit.ancestor( Gaffer.EditScope ), editScope1 )
+
+		# editScope2 = Gaffer.EditScope( "EditScope2" )
+		# editScope2.setup( light["out"] )
+		# editScope1.addChild( editScope2 )
+		# editScope2["in"].setInput( scope1Edit.ancestor( GafferScene.SceneProcessor )["out"] )
+		# editScope1["BoxOut"]["in"].setInput( editScope2["out"] )
+
+		# i = self.__inspect( editScope1["out"], "/light", "intensity", editScope2 )
+		# scope2Edit = i.acquireEdit()
+		# scope2Edit["enabled"].setValue( True )
+		# self.assertEqual( scope2Edit.ancestor( Gaffer.EditScope ), editScope2 )
+
+		# # Check we still find the edit in scope 1
+
+		# i = self.__inspect( editScope1["out"], "/light", "intensity", editScope1 )
+		# self.assertEqual( i.acquireEdit()[0].ancestor( Gaffer.EditScope ), editScope1 )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -232,6 +232,7 @@ GafferScene::SceneAlgo::History::ConstPtr AttributeInspector::history() const
 {
 	if( !m_scene->existsPlug()->getValue() )
 	{
+		std::cerr << "NO EXISTS" << std::endl;
 		return nullptr;
 	}
 
