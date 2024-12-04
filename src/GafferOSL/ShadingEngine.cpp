@@ -577,8 +577,7 @@ class RenderState
 
 		std::optional<int> pointCloudSearch(
 			ustringhash filename, const OSL::Vec3 &center, float radius, int maxPoints,
-			size_t *outIndices, float *outDistances,
-			int derivsOffset
+			size_t *outIndices, float *outDistances
 		) const
 		{
 			auto it = m_pointClouds.find( filename );
@@ -755,9 +754,32 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 			return false;
 		}
 
+		void pointcloud_search( BatchedShaderGlobals *sg,  ustringhash filename, const void *wcenter, Wide<const float> wradius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
+		{
+			// const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+			// if( !threadRenderState )
+			// {
+			// 	// See comments in the non-batched `RendererServices::pointcloud_search()`.
+			// 	IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_search()` can not be constant folded." );
+			// 	return;
+			// }
+
+			// Wide<const OSL::Vec3> wideCenter( wcenter );
+			// results.mask().foreach(
+
+			// 	[&] ( ActiveLane lane ) {
+
+			// 		const OSL::Vec3 center = wideCenter[lane];
+			// 		std::optional<int> r = threadRenderState->renderState.pointCloudSearch( filename, center, wradius[lane], maxPoints, outIndices, outDistances );
+
+			// 	}
+
+			// );
+		}
+
 		bool is_overridden_pointcloud_search() const override
 		{
-			return false;
+			return true;
 		}
 
 		bool is_overridden_pointcloud_get() const override
@@ -963,7 +985,9 @@ class RendererServices : public OSL::RendererServices
 				return 0;
 			}
 
-			std::optional<int> r = threadRenderState->renderState.pointCloudSearch( filename, center, radius, maxPoints, outIndices, outDistances, derivsOffset );
+			// TODO : WHAT IS `derivsOffset`?????
+
+			std::optional<int> r = threadRenderState->renderState.pointCloudSearch( filename, center, radius, maxPoints, outIndices, outDistances );
 			if( r )
 			{
 				return *r;
