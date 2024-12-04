@@ -1019,5 +1019,70 @@ class ShadingEngineTest( GafferOSLTest.OSLTestCase ) :
 			for y in range( 0, 10 ) :
 				self.assertEqual( r["Ci"][y*10+x].r, 1 if x == y else 0 )
 
+	def testPointCloudSearch( self ) :
+
+		shader = self.compileShader( pathlib.Path( __file__ ).parent / "shaders" / "pointCloudSearch.osl" )
+		engine = GafferOSL.ShadingEngine( IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader( shader, "osl:surface", { "name" : "test", "radius" : 1.5 } )
+			},
+			output = "output"
+		) )
+
+		points = IECore.V3fVectorData( [ imath.V3f( i, 0, 0 ) for i in range( 0, 10 ) ] )
+
+		results = engine.shade(
+			IECore.CompoundData( { "P" : IECore.V3fVectorData( [ p + imath.V3f( 0.1, 0, 0 ) for p in points ] ) } ),
+			{}, { "test" : IECoreScene.PointsPrimitive( points ) }
+		)
+
+		for i, c in enumerate( results["Ci"] ) :
+			self.assertEqual( c[0], 2 )
+			self.assertEqual( c[1], i )
+			self.assertEqual( c[2], i + 1 if i < 9 else i - 1 )
+
+	def testPointCloudGet( self ) :
+
+		shader = self.compileShader( pathlib.Path( __file__ ).parent / "shaders" / "pointCloudGet.osl" )
+
+		pointCloud = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 10 ) ] ) )
+		pointCloud["c"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.Color3fVectorData( [ imath.Color3f( i ) for i in range( 0, 10 ) ] )
+		)
+		pointCloud["f"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( range( 0, 10 ) )
+		)
+		pointCloud["i"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.IntVectorData( range( 0, 10 ) )
+		)
+
+		for attr in [ "c", "f", "i" ] :
+			for index in range( 0, 10 ) :
+				with self.subTest( attr = attr, index = index ) :
+
+					outputShader = IECoreScene.Shader( shader, "osl:surface", { "name" : "test", "index" : index } )
+					if attr == "c" :
+						outputShader.parameters["colorAttr"] = IECore.StringData( attr )
+					elif attr == "f" :
+						outputShader.parameters["floatAttr"] = IECore.StringData( attr )
+					elif attr == "i" :
+						outputShader.parameters["intAttr"] = IECore.StringData( attr )
+
+					engine = GafferOSL.ShadingEngine( IECoreScene.ShaderNetwork(
+						shaders = { "output" : outputShader },
+						output = "output"
+					) )
+
+					results = engine.shade(
+						IECore.CompoundData( { "P" : IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) } ),
+						{}, { "test" : pointCloud }
+					)
+
+					self.assertEqual( len( results["Ci"] ), 1 )
+					self.assertEqual( results["Ci"][0], imath.Color3f( index, index, index ) )
+
 if __name__ == "__main__":
 	unittest.main()

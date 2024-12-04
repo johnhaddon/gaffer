@@ -6,6 +6,11 @@ Improvements
 
 - DeleteAttributes : Optimised case where all attributes are deleted. The input attributes are no longer accessed at all in this case.
 
+API
+---
+
+- ShadingEngine : Added support for passing custom pointclouds to the `shade()` call.
+
 Breaking Changes
 ----------------
 
