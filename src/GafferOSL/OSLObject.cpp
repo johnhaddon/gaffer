@@ -142,6 +142,20 @@ OSLObject::OSLObject( const std::string &name )
 	addChild( new IntPlug( "interpolation", Plug::In, PrimitiveVariable::Vertex, PrimitiveVariable::Invalid, PrimitiveVariable::FaceVarying ) );
 	addChild( new BoolPlug( "useTransform", Plug::In, false ) );
 	addChild( new BoolPlug( "useAttributes", Plug::In, false ) );
+	addChild(
+		new ArrayPlug(
+			"pointClouds", Plug::In,
+			new NameValuePlug(
+				"",
+				new StringPlug(),
+				true,
+				"pointClouds0",
+				Plug::Default
+			),
+			0, std::numeric_limits<size_t>::max(), Plug::Default,
+			/* resizeWhenInputsChange = */ false
+		)
+	);
 	addChild( new ScenePlug( "__resampledIn", Plug::In, Plug::Default & ~Plug::Serialisable ) );
 	addChild( new StringPlug( "__resampleNames", Plug::Out ) );
 	addChild( new Plug( "primitiveVariables", Plug::In, Plug::Default & ~Plug::AcceptsInputs ) );
@@ -206,44 +220,54 @@ const Gaffer::BoolPlug *OSLObject::useAttributesPlug() const
 	return getChild<BoolPlug>( g_firstPlugIndex + 3 );
 }
 
+Gaffer::ArrayPlug *OSLObject::pointCloudsPlug()
+{
+	return getChild<ArrayPlug>( g_firstPlugIndex + 4 );
+}
+
+const Gaffer::ArrayPlug *OSLObject::pointCloudsPlug() const
+{
+	return getChild<ArrayPlug>( g_firstPlugIndex + 4 );
+}
+
 ScenePlug *OSLObject::resampledInPlug()
 {
-	return getChild<ScenePlug>( g_firstPlugIndex + 4 );
+	return getChild<ScenePlug>( g_firstPlugIndex + 5 );
 }
 
 const ScenePlug *OSLObject::resampledInPlug() const
 {
-	return getChild<ScenePlug>( g_firstPlugIndex + 4 );
+	return getChild<ScenePlug>( g_firstPlugIndex + 5 );
 }
 
 StringPlug *OSLObject::resampledNamesPlug()
 {
-	return getChild<StringPlug>( g_firstPlugIndex + 5 );
+	return getChild<StringPlug>( g_firstPlugIndex + 6 );
 }
 
 const StringPlug *OSLObject::resampledNamesPlug() const
 {
-	return getChild<StringPlug>( g_firstPlugIndex + 5 );
+	return getChild<StringPlug>( g_firstPlugIndex + 6 );
 }
 
 Gaffer::Plug *OSLObject::primitiveVariablesPlug()
 {
-	return getChild<Gaffer::Plug>( g_firstPlugIndex + 6 );
+	return getChild<Gaffer::Plug>( g_firstPlugIndex + 7 );
 }
 
 const Gaffer::Plug *OSLObject::primitiveVariablesPlug() const
 {
-	return getChild<Gaffer::Plug>( g_firstPlugIndex + 6 );
+	return getChild<Gaffer::Plug>( g_firstPlugIndex + 7 );
 }
 
 GafferOSL::OSLCode *OSLObject::oslCode()
 {
-	return getChild<GafferOSL::OSLCode>( g_firstPlugIndex + 7 );
+	return getChild<GafferOSL::OSLCode>( g_firstPlugIndex + 8 );
 }
 
 const GafferOSL::OSLCode *OSLObject::oslCode() const
 {
-	return getChild<GafferOSL::OSLCode>( g_firstPlugIndex + 7 );
+	return getChild<GafferOSL::OSLCode>( g_firstPlugIndex + 8 );
 }
 
 void OSLObject::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
@@ -269,7 +293,15 @@ bool OSLObject::affectsProcessedObject( const Gaffer::Plug *input ) const
 		( input == inPlug()->transformPlug() && !useTransformPlug()->isSetToDefault() ) ||
 		input == useAttributesPlug() ||
 		( input == inPlug()->attributesPlug() && !useAttributesPlug()->isSetToDefault() ) ||
-		input == resampledInPlug()->objectPlug()
+		input == resampledInPlug()->objectPlug() ||
+		pointCloudsPlug()->isAncestorOf( input ) ||
+		(
+			pointCloudsPlug()->children().size() &&
+			(
+				input == inPlug()->objectPlug() ||
+				input == inPlug()->existsPlug()
+			)
+		)
 	;
 }
 
@@ -294,7 +326,8 @@ void OSLObject::hashProcessedObject( const ScenePath &path, const Gaffer::Contex
 	interpolationPlug()->hash( h );
 	h.append( resampledInPlug()->objectPlug()->hash() );
 
-	if( useTransformPlug()->getValue() )
+	const bool useTransform = useTransformPlug()->getValue();
+	if( useTransform )
 	{
 		h.append( inPlug()->fullTransformHash( path ) );
 	}
@@ -308,6 +341,35 @@ void OSLObject::hashProcessedObject( const ScenePath &path, const Gaffer::Contex
 				h.append( name );
 				value->hash( h );
 			}
+		}
+	}
+
+	for( const auto &p : NameValuePlug::Range( *pointCloudsPlug() ) )
+	{
+		if( !p->enabledPlug()->getValue() )
+		{
+			continue;
+		}
+		const std::string name = p->namePlug()->getValue();
+		if( name.empty() )
+		{
+			continue;
+		}
+		const std::string pathString = p->valuePlug<StringPlug>()->getValue();
+		if( pathString.empty() )
+		{
+			continue;
+		}
+		ScenePlug::ScenePath path = ScenePlug::stringToPath( pathString );
+		if( !inPlug()->exists( path ) )
+		{
+			continue;
+		}
+		h.append( name );
+		h.append( inPlug()->objectHash( path ) );
+		if( useTransform )
+		{
+			h.append( inPlug()->transformHash( path ) );
 		}
 	}
 }
@@ -344,7 +406,8 @@ IECore::ConstObjectPtr OSLObject::computeProcessedObject( const ScenePath &path,
 
 	ShadingEngine::Transforms transforms;
 
-	if( useTransformPlug()->getValue() )
+	const bool useTransform = useTransformPlug()->getValue();
+	if( useTransform )
 	{
 		transforms[ g_world ] = ShadingEngine::Transform( inPlug()->fullTransform( path ));
 	}
@@ -353,7 +416,45 @@ IECore::ConstObjectPtr OSLObject::computeProcessedObject( const ScenePath &path,
 		transforms[ g_world ] = ShadingEngine::Transform( Imath::M44f(), Imath::M44f() );
 	}
 
-	CompoundDataPtr shadedPoints = shadingEngine->shade( shadingPoints.get(), transforms );
+	ShadingEngine::PointClouds pointClouds;
+	for( const auto &p : NameValuePlug::Range( *pointCloudsPlug() ) )
+	{
+		if( !p->enabledPlug()->getValue() )
+		{
+			continue;
+		}
+		const std::string name = p->namePlug()->getValue();
+		if( name.empty() )
+		{
+			continue;
+		}
+
+		const std::string pathString = p->valuePlug<StringPlug>()->getValue();
+		if( pathString.empty() )
+		{
+			continue;
+		}
+		ScenePlug::ScenePath path = ScenePlug::stringToPath( pathString );
+		if( !inPlug()->exists( path ) )
+		{
+			continue;
+		}
+
+		ConstObjectPtr object = inPlug()->object( path );
+		if( ConstPrimitivePtr primitive = runTimeCast<const Primitive>( object ) )
+		{
+			pointClouds[name] = primitive;
+			transforms[name] = ShadingEngine::Transform(
+				transforms[g_world].fromObjectSpace * inPlug()->fullTransform( path ).inverse()
+			);
+		}
+		else
+		{
+			IECore::msg( IECore::Msg::Warning, "OSLObject", fmt::format( "No primitive at \"{}\"", pathString ) );
+		}
+	}
+
+	CompoundDataPtr shadedPoints = shadingEngine->shade( shadingPoints.get(), transforms, pointClouds );
 	for( CompoundDataMap::const_iterator it = shadedPoints->readable().begin(), eIt = shadedPoints->readable().end(); it != eIt; ++it )
 	{
 
