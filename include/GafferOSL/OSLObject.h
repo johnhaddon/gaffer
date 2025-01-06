@@ -71,6 +71,13 @@ class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 		Gaffer::BoolPlug *useAttributesPlug();
 		const Gaffer::BoolPlug *useAttributesPlug() const;
 
+		class SourceLocationsPlug : public Gaffer::ValuePlug
+		{
+
+
+
+		};
+
 		Gaffer::ArrayPlug *pointCloudsPlug();
 		const Gaffer::ArrayPlug *pointCloudsPlug() const;
 
