@@ -104,6 +104,11 @@ Documentation
 
 - 3Delight : Added GafferDelight to the node reference section.
 
+Documentation
+-------------
+
+- 3Delight : Added GafferDelight to the node reference section.
+
 1.5.3.0 (relative to 1.5.2.0)
 =======
 
