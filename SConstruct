@@ -167,6 +167,12 @@ options.Add(
 )
 
 options.Add(
+	"RENDERMAN_ROOT",
+	"The directory in which RenderMan is installed",
+	"",
+)
+
+options.Add(
 	"VTUNE_ROOT",
 	"The directory in which VTune is installed.",
 	""
@@ -774,11 +780,15 @@ else:
 
 commandEnv["ENV"]["PYTHONPATH"] = commandEnv.subst( os.path.pathsep.join( [ "$BUILD_DIR/python" ] + split( commandEnv["LOCATE_DEPENDENCY_PYTHONPATH"] ) ) )
 
-# SIP on MacOS prevents DYLD_LIBRARY_PATH being passed down so we make sure
-# we also pass through to gaffer the other base vars it uses to populate paths
-# for third-party support.
-for v in ( 'ARNOLD_ROOT', 'DELIGHT_ROOT', 'ONNX_ROOT' ) :
-	commandEnv["ENV"][ v ] = commandEnv[ v ]
+# Set up the environment variables that the Gaffer wrapper will use to
+# populate paths used to support third-party software.
+for option, envVar in {
+	"ARNOLD_ROOT" : "ARNOLD_ROOT",
+	"DELIGHT_ROOT" : "DELIGHT",
+	"ONNX_ROOT" : "ONNX_ROOT",
+	"RENDERMAN_ROOT" : "RMANTREE",
+}.items() :
+	commandEnv["ENV"][envVar] = commandEnv[option]
 
 def runCommand( command ) :
 
@@ -1329,6 +1339,26 @@ libraries = {
 	"GafferCyclesUI" : { "requiredOptions" : [ "CYCLES_ROOT" ], },
 
 	"GafferCyclesUITest" : { "requiredOptions" : [ "CYCLES_ROOT" ], },
+
+	"IECoreRenderMan" : {
+		"envAppends" : {
+			"CPPPATH" : [ "$RENDERMAN_ROOT/include" ],
+			# The RenderMan headers contain deprecated functionality that we don't use,
+			# but which nonetheless emit compilation warnings. We turn them off so we
+			# can continue to compile with warnings as errors.
+			"CPPDEFINES" : [ "RMAN_RIX_NO_WARN_DEPRECATED" ],
+			"LIBS" : [
+				"GafferScene", "IECoreScene",
+				"prman" if env["PLATFORM"] != "win32" else "libprman",
+				"pxrcore" if env["PLATFORM"] != "win32" else "libpxrcore",
+			],
+			"LIBPATH" : [ "$RENDERMAN_ROOT/lib" ],
+		},
+		"pythonEnvAppends" : {
+			"LIBS" : [ "IECoreRenderMan" ],
+		},
+		"requiredOptions" : [ "RENDERMAN_ROOT" ],
+	},
 
 	"GafferTractor" : {},
 
