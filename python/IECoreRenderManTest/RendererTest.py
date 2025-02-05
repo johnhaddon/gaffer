@@ -156,9 +156,11 @@ class RendererTest( GafferTest.TestCase ) :
 
 	def testMissingLightShader( self ) :
 
+		messageHandler = IECore.CapturingMessageHandler()
 		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
 			"RenderMan",
-			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive
+			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive,
+			messageHandler = messageHandler
 		)
 
 		lightShader = IECoreScene.ShaderNetwork( { "light" : IECoreScene.Shader( "BadShader", "ri:light" ), }, output = ( "light", "out" ) )
@@ -170,6 +172,10 @@ class RendererTest( GafferTest.TestCase ) :
 		# doesn't have a valid shader.
 		light = renderer.light( "/light", None, lightAttributes )
 		light.transform( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
+
+		self.assertEqual( len( messageHandler.messages ), 1 )
+		self.assertEqual( messageHandler.messages[0].level, IECore.MessageHandler.Level.Warning )
+		self.assertEqual( messageHandler.messages[0].message, "Unable to find shader \"BadShader\"." )
 
 		del light
 		del renderer
@@ -560,7 +566,7 @@ class RendererTest( GafferTest.TestCase ) :
 								"type" : "color",
 							}
 						),
-						"output" : IECoreScene.Shader( "PxrConstant", "ri:surface", { "emitColor" : imath.Color3f( 0 ) } ),
+						"output" : IECoreScene.Shader( "PxrConstant", "ri:surface" ),
 					},
 					connections = [
 						( ( "attribute", "resultRGB" ), ( "output", "emitColor" ) )
@@ -746,9 +752,11 @@ class RendererTest( GafferTest.TestCase ) :
 		# a connection to a missing shader doesn't throw an exception or
 		# crash. Both of which we did at one point.
 
+		messageHandler = IECore.CapturingMessageHandler()
 		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
 			"RenderMan",
-			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch
+			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch,
+			messageHandler = messageHandler
 		)
 
 		renderer.output(
@@ -769,7 +777,7 @@ class RendererTest( GafferTest.TestCase ) :
 				"ri:surface" : IECoreScene.ShaderNetwork(
 					shaders = {
 						"attribute" : IECoreScene.Shader( "PxrAttribute", "osl:shader", {} ),
-						"output" : IECoreScene.Shader( "MissingShader", "ri:surface", { "emitColor" : imath.Color3f( 0 ) } ),
+						"output" : IECoreScene.Shader( "MissingShader", "ri:surface" ),
 					},
 					connections = [
 						( ( "attribute", "resultRGB" ), ( "output", "emitColor" ) )
@@ -780,6 +788,11 @@ class RendererTest( GafferTest.TestCase ) :
 		).transform( imath.M44f().translate( imath.V3f( 0, 0, -3 ) ) )
 
 		renderer.render()
+
+		self.assertEqual( len( messageHandler.messages ), 1 )
+		self.assertEqual( messageHandler.messages[0].level, IECore.MessageHandler.Level.Warning )
+		self.assertEqual( messageHandler.messages[0].message, "Unable to find shader \"MissingShader\"." )
+
 		del renderer
 
 	def testConnectionToOSLShader( self ) :
@@ -808,8 +821,8 @@ class RendererTest( GafferTest.TestCase ) :
 				"ri:surface" : IECoreScene.ShaderNetwork(
 					shaders = {
 						"mix" : IECoreScene.Shader( "PxrMix", "osl:shader", { "color1" : imath.Color3f( 1, 1, 0 ) } ),
-						"correct" : IECoreScene.Shader( "PxrColorCorrect", "osl:shader", { "inputRGB" : imath.Color3f( 0 ) } ),
-						"output" : IECoreScene.Shader( "PxrConstant", "ri:surface", { "emitColor" : imath.Color3f( 0 ) } ),
+						"correct" : IECoreScene.Shader( "PxrColorCorrect", "osl:shader" ),
+						"output" : IECoreScene.Shader( "PxrConstant", "ri:surface" ),
 					},
 					connections = [
 						( ( "mix", "resultRGB" ), ( "correct", "inputRGB" ) ),
