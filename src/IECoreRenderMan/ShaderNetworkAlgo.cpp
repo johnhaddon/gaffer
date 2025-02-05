@@ -39,9 +39,14 @@
 #include "ParamListAlgo.h"
 
 #include "IECore/DataAlgo.h"
+#include "IECore/LRUCache.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/SearchPath.h"
+
+#include "OSL/oslquery.h"
 
 #include "boost/container/flat_map.hpp"
+#include "boost/property_tree/xml_parser.hpp"
 
 #include "fmt/format.h"
 
@@ -59,46 +64,236 @@ using namespace IECoreRenderMan;
 namespace
 {
 
-std::optional<pxrcore::DataType> parameterType( const IECoreScene::Shader *shader, InternedString name )
+struct ShaderInfo
 {
-	const Data *value = shader->parametersData()->member( name );
-	if( !value )
-	{
-		return std::nullopt;
-	}
+	riley::ShadingNode::Type type = riley::ShadingNode::Type::k_Invalid;
+	using ParameterTypeMap = std::unordered_map<InternedString, pxrcore::DataType>;
+	ParameterTypeMap parameterTypes;
+};
 
-	switch( value->typeId() )
+using ConstShaderInfoPtr = std::shared_ptr<const ShaderInfo>;
+
+void loadParameterTypes( const boost::property_tree::ptree &tree, ShaderInfo::ParameterTypeMap &typeMap )
+{
+	for( const auto &child : tree )
 	{
-		case IntDataTypeId :
-			return pxrcore::DataType::k_integer;
-		case FloatDataTypeId :
-			return pxrcore::DataType::k_float;
-		case V3fDataTypeId : {
-			switch( static_cast<const V3fData *>( value )->getInterpretation() )
+		if( child.first == "param" )
+		{
+			const string name = child.second.get<string>( "<xmlattr>.name" );
+			const string type = child.second.get<string>( "<xmlattr>.type" );
+			if( type == "int" )
 			{
-				case GeometricData::Vector :
-					return pxrcore::DataType::k_vector;
-				case GeometricData::Normal :
-					return pxrcore::DataType::k_normal;
-				default :
-					return pxrcore::DataType::k_point;
+				typeMap[name] = pxrcore::DataType::k_integer;
+			}
+			else if( type == "float" )
+			{
+				typeMap[name] = pxrcore::DataType::k_float;
+			}
+			else if( type == "color" )
+			{
+				typeMap[name] = pxrcore::DataType::k_color;
+			}
+			else if( type == "point" )
+			{
+				typeMap[name] = pxrcore::DataType::k_point;
+			}
+			else if( type == "vector" )
+			{
+				typeMap[name] = pxrcore::DataType::k_vector;
+			}
+			else if( type == "normal" )
+			{
+				typeMap[name] = pxrcore::DataType::k_normal;
+			}
+			else if( type == "matrix" )
+			{
+				typeMap[name] = pxrcore::DataType::k_matrix;
+			}
+			else if( type == "string" )
+			{
+				typeMap[name] = pxrcore::DataType::k_string;
+			}
+			else if( type == "bxdf" )
+			{
+				typeMap[name] = pxrcore::DataType::k_bxdf;
+			}
+			else if( type == "lightfilter" )
+			{
+				typeMap[name] = pxrcore::DataType::k_lightfilter;
+			}
+			else if( type == "samplefilter" )
+			{
+				typeMap[name] = pxrcore::DataType::k_samplefilter;
+			}
+			else if( type == "displayfilter" )
+			{
+				typeMap[name] = pxrcore::DataType::k_displayfilter;
+			}
+			else if( type == "struct" )
+			{
+				typeMap[name] = pxrcore::DataType::k_struct;
+			}
+			else
+			{
+				IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "Unknown type `{}` for parameter \"{}\".", type, name ) );
 			}
 		}
-		case Color3fDataTypeId :
-			return pxrcore::DataType::k_color;
-		case StringDataTypeId :
-			return pxrcore::DataType::k_string;
-		default :
-			return std::nullopt;
+		else if( child.first == "page" )
+		{
+			loadParameterTypes( child.second, typeMap );
+		}
 	}
 }
 
-using HandleSet = std::unordered_set<InternedString>;
-
-void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection, const IECoreScene::Shader *shader, RtParamList &paramList )
+ConstShaderInfoPtr shaderInfoFromArgsFile( const boost::filesystem::path file )
 {
-	std::optional<pxrcore::DataType> type = parameterType( shader, connection.destination.name );
-	if( !type )
+	std::ifstream argsStream( file.string() );
+
+	boost::property_tree::ptree tree;
+	boost::property_tree::read_xml( argsStream, tree );
+
+	auto result = std::make_shared<ShaderInfo>();
+
+	// Get type
+
+	const string shaderType = tree.get<string>( "args.shaderType.tag.<xmlattr>.value" );
+	if( shaderType == "pattern" )
+	{
+		result->type = riley::ShadingNode::Type::k_Pattern;
+	}
+	else if( shaderType == "bxdf" )
+	{
+		result->type = riley::ShadingNode::Type::k_Bxdf;
+	}
+	else if( shaderType == "integrator" )
+	{
+		result->type = riley::ShadingNode::Type::k_Integrator;
+	}
+	else if( shaderType == "light" )
+	{
+		result->type = riley::ShadingNode::Type::k_Light;
+	}
+	else if( shaderType == "lightfilter" )
+	{
+		result->type = riley::ShadingNode::Type::k_LightFilter;
+	}
+	else if( shaderType == "projection" )
+	{
+		result->type = riley::ShadingNode::Type::k_Projection;
+	}
+	else if( shaderType == "displacement" )
+	{
+		result->type = riley::ShadingNode::Type::k_Displacement;
+	}
+	else if( shaderType == "samplefilter" )
+	{
+		result->type = riley::ShadingNode::Type::k_SampleFilter;
+	}
+	else if( shaderType == "displayfilter" )
+	{
+		result->type = riley::ShadingNode::Type::k_DisplayFilter;
+	}
+
+	// Load parameters
+
+	loadParameterTypes( tree.get_child( "args" ), result->parameterTypes );
+
+	return result;
+}
+
+ConstShaderInfoPtr shaderInfoFromOSLQuery( OSL::OSLQuery &query )
+{
+	auto result = std::make_shared<ShaderInfo>();
+	result->type = riley::ShadingNode::Type::k_Pattern;
+
+	for( const auto &parameter : query )
+	{
+		if( parameter.type == OIIO::TypeInt )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_integer;
+		}
+		else if( parameter.type == OIIO::TypeFloat )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_float;
+		}
+		else if( parameter.type == OIIO::TypeColor )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_color;
+		}
+		else if( parameter.type == OIIO::TypePoint )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_point;
+		}
+		else if( parameter.type == OIIO::TypeVector )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_vector;
+		}
+		else if( parameter.type == OIIO::TypeNormal )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_normal;
+		}
+		else if( parameter.type == OIIO::TypeMatrix44 )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_matrix;
+		}
+		else if( parameter.type == OIIO::TypeString )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_string;
+		}
+		else if( parameter.isstruct )
+		{
+			result->parameterTypes[parameter.name.c_str()] = pxrcore::DataType::k_struct;
+		}
+		else
+		{
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreRenderMan",
+				fmt::format(
+					"Unknown type `{}` for parameter \"{}\" on shader \"{}\".",
+					parameter.type, parameter.name, query.shadername()
+				)
+			);
+		}
+	}
+
+	return result;
+}
+
+using ShaderInfoCache = IECore::LRUCache<string, ConstShaderInfoPtr>;
+
+ShaderInfoCache g_shaderInfoCache(
+
+	[]( const std::string &shaderName, size_t &cost ) -> ConstShaderInfoPtr {
+
+		cost = 1;
+
+		const char *rixPluginPath = getenv( "RMAN_RIXPLUGINPATH" );
+		SearchPath rixSearchPath( rixPluginPath ? rixPluginPath : "" );
+		boost::filesystem::path argsFileName = rixSearchPath.find( "Args/" + shaderName + ".args" );
+		if( !argsFileName.empty() )
+		{
+			return shaderInfoFromArgsFile( argsFileName );
+		}
+
+		const char *oslSearchPath = getenv( "OSL_SHADER_PATHS" );
+		OSL::OSLQuery oslQuery;
+		if( oslQuery.open( shaderName, oslSearchPath ? oslSearchPath : "" ) )
+		{
+			return shaderInfoFromOSLQuery( oslQuery );
+		}
+
+		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "Unable to find shader \"{}\".", shaderName ) );
+		return nullptr;
+	},
+
+	/* maxCost = */ 10000
+
+);
+
+void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection, const ShaderInfo *shaderInfo, RtParamList &paramList )
+{
+	auto it = shaderInfo->parameterTypes.find( connection.destination.name );
+	if( it == shaderInfo->parameterTypes.end() )
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "IECoreRenderMan",
@@ -120,7 +315,7 @@ void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection
 
 	RtParamList::ParamInfo const info = {
 		RtUString( connection.destination.name.c_str() ),
-		*type,
+		it->second,
 		pxrcore::DetailType::k_reference,
 		1,
 		false,
@@ -131,6 +326,8 @@ void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection
 	paramList.SetParam( info, &referenceU );
 }
 
+using HandleSet = std::unordered_set<InternedString>;
+
 void convertShaderNetworkWalk( const ShaderNetwork::Parameter &outputParameter, const IECoreScene::ShaderNetwork *shaderNetwork, vector<riley::ShadingNode> &shadingNodes, HandleSet &visited )
 {
 	if( !visited.insert( outputParameter.shader ).second )
@@ -139,43 +336,25 @@ void convertShaderNetworkWalk( const ShaderNetwork::Parameter &outputParameter, 
 	}
 
 	const IECoreScene::Shader *shader = shaderNetwork->getShader( outputParameter.shader );
-	RtUString shaderName = RtUString( shader->getName().c_str() );
+	ConstShaderInfoPtr shaderInfo = g_shaderInfoCache.get( shader->getName() );
+	if( !shaderInfo )
+	{
+		return;
+	}
 
 	riley::ShadingNode node = {
-		riley::ShadingNode::Type::k_Pattern,
-		shaderName,
+		shaderInfo->type,
+		RtUString( shader->getName().c_str() ),
 		RtUString( outputParameter.shader.c_str() ),
 		RtParamList()
 	};
-
-	if( shader->getType() == "light" || shader->getType() == "ri:light" )
-	{
-		node.type = riley::ShadingNode::Type::k_Light;
-	}
-	else if( shader->getType() == "surface" || shader->getType() == "ri:surface" )
-	{
-		node.type = riley::ShadingNode::Type::k_Bxdf;
-	}
-	else if( shader->getType() == "displacement" || shader->getType() == "ri:displacement" || shader->getType() == "osl:displacement" )
-	{
-		node.type = riley::ShadingNode::Type::k_Displacement;
-	}
-	else if( shader->getType() == "ri:shader" && visited.size() == 1 )
-	{
-		// Work around failure of IECoreUSD to round-trip surface shader type.
-		/// \todo Either fix the round-trip in IECoreUSD, or derive `node.type`
-		/// from the `.args` file instead. The latter might be preferable in the
-		/// long term, because we're trying to phase out the concept of shader
-		/// type.
-		node.type = riley::ShadingNode::Type::k_Bxdf;
-	}
 
 	ParamListAlgo::convertParameters( shader->parameters(), node.params );
 
 	for( const auto &connection : shaderNetwork->inputConnections( outputParameter.shader ) )
 	{
 		convertShaderNetworkWalk( connection.source, shaderNetwork, shadingNodes, visited );
-		convertConnection( connection, shader, node.params );
+		convertConnection( connection, shaderInfo.get(), node.params );
 	}
 
 	shadingNodes.push_back( node );
