@@ -202,6 +202,17 @@ struct PrimitiveVariableConverter
 		);
 	}
 
+	void operator()( const StringVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex=0 ) const
+	{
+		PrimitiveVariable::IndexedView<string> view( primitiveVariable );
+		vector<RtUString> value; value.reserve( view.size() );
+		for( size_t i = 0; i < view.size(); ++i )
+		{
+			value.push_back( RtUString( view[i].c_str() ) );
+		}
+		primVarList.SetStringDetail( name, value.data(), detail( primitiveVariable.interpolation ), sampleIndex );
+	}
+
 	void operator()( const V2fVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex=0 ) const
 	{
 		emit(
