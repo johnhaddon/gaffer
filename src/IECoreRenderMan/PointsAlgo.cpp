@@ -57,17 +57,17 @@ void convertPointsTopology( const IECoreScene::PointsPrimitive *points, RtPrimVa
 	);
 }
 
-RtUString convertStaticPoints( const IECoreScene::PointsPrimitive *points, RtPrimVarList &primVars )
+RtUString convertStaticPoints( const IECoreScene::PointsPrimitive *points, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	convertPointsTopology( points, primVars );
-	GeometryAlgo::convertPrimitiveVariables( points, primVars );
+	GeometryAlgo::convertPrimitiveVariables( points, primVars, messageContext );
 	return Rix::k_Ri_Points;
 }
 
-RtUString convertAnimatedPoints( const std::vector<const IECoreScene::PointsPrimitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars )
+RtUString convertAnimatedPoints( const std::vector<const IECoreScene::PointsPrimitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	convertPointsTopology( samples[0], primVars );
-	GeometryAlgo::convertPrimitiveVariables( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars );
+	GeometryAlgo::convertPrimitiveVariables( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars, messageContext );
 	return Rix::k_Ri_Points;
 }
 

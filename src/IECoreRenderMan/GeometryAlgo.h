@@ -52,15 +52,15 @@ namespace IECoreRenderMan::GeometryAlgo
 /// Converts the specified `IECore::Object` into arguments for
 /// `Riley::CreateGeometryPrototype()`. Fills `primVars` and returns the
 /// geometry `type`. Returns an empty string if no converter is available.
-RtUString convert( const IECore::Object *object, RtPrimVarList &primVars );
+RtUString convert( const IECore::Object *object, RtPrimVarList &primVars, const std::string &messageContext = "GeometryAlgo::convert" );
 
 /// As above, but converting a moving object. If no motion converter
 /// is available, the first sample is converted instead.
-RtUString convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars );
+RtUString convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext = "GeometryAlgo::convert" );
 
 /// Signature of a function which can convert an IECore::Object into a geometry prototype.
-using Converter = RtUString (*)( const IECore::Object *object, RtParamList &primVars );
-using MotionConverter = RtUString (*)( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars );
+using Converter = RtUString (*)( const IECore::Object *object, RtParamList &primVars, const std::string &messageContext );
+using MotionConverter = RtUString (*)( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext );
 
 /// Registers a converter for a specific type. Use the ConverterDescription
 /// utility class in preference to this, since it provides additional type
@@ -76,8 +76,8 @@ class ConverterDescription
 	public :
 
 		/// Type-specific conversion functions.
-		using Converter = RtUString (*)( const T *object, RtPrimVarList &primVars );
-		using MotionConverter = RtUString (*)( const std::vector<const T *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars );
+		using Converter = RtUString (*)( const T *object, RtPrimVarList &primVars, const std::string &messageContext );
+		using MotionConverter = RtUString (*)( const std::vector<const T *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext );
 
 		ConverterDescription( Converter converter, MotionConverter motionConverter = nullptr )
 		{
@@ -93,7 +93,7 @@ class ConverterDescription
 /// PrimitiveVariable conversion
 /// ============================
 
-void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, RtPrimVarList &primVarList );
-void convertPrimitiveVariables( const std::vector<const IECoreScene::Primitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVarList );
+void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, RtPrimVarList &primVarList, const std::string &messageContext = "GeometryAlgo::convertPrimitiveVariables" );
+void convertPrimitiveVariables( const std::vector<const IECoreScene::Primitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVarList, const std::string &messageContext = "GeometryAlgo::convertPrimitiveVariables" );
 
 } // namespace IECoreRenderMan::GeometryAlgo

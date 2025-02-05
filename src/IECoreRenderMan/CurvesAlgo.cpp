@@ -48,7 +48,7 @@ using namespace IECoreRenderMan;
 namespace
 {
 
-void convertCurvesTopology( const IECoreScene::CurvesPrimitive *curves, RtPrimVarList &primVars )
+void convertCurvesTopology( const IECoreScene::CurvesPrimitive *curves, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	primVars.SetDetail(
 		curves->variableSize( PrimitiveVariable::Uniform ),
@@ -59,7 +59,7 @@ void convertCurvesTopology( const IECoreScene::CurvesPrimitive *curves, RtPrimVa
 
 	if( curves->basis().standardBasis() == StandardCubicBasis::Unknown )
 	{
-		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", "Unsupported CubicBasis" );
+		IECore::msg( IECore::Msg::Warning, messageContext, "Unsupported CubicBasis" );
 		primVars.SetString( Rix::k_Ri_type, Rix::k_linear );
 	}
 	else if( curves->basis().standardBasis() == StandardCubicBasis::Linear )
@@ -90,17 +90,17 @@ void convertCurvesTopology( const IECoreScene::CurvesPrimitive *curves, RtPrimVa
 	primVars.SetIntegerDetail( Rix::k_Ri_nvertices, curves->verticesPerCurve()->readable().data(), RtDetailType::k_uniform );
 }
 
-RtUString convertStaticCurves( const IECoreScene::CurvesPrimitive *curves, RtPrimVarList &primVars )
+RtUString convertStaticCurves( const IECoreScene::CurvesPrimitive *curves, RtPrimVarList &primVars, const std::string &messageContext )
 {
-	convertCurvesTopology( curves, primVars );
-	GeometryAlgo::convertPrimitiveVariables( curves, primVars );
+	convertCurvesTopology( curves, primVars, messageContext );
+	GeometryAlgo::convertPrimitiveVariables( curves, primVars, messageContext );
 	return Rix::k_Ri_Curves;
 }
 
-RtUString convertAnimatedCurves( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars )
+RtUString convertAnimatedCurves( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
 {
-	convertCurvesTopology( samples[0], primVars );
-	GeometryAlgo::convertPrimitiveVariables( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars );
+	convertCurvesTopology( samples[0], primVars, messageContext );
+	GeometryAlgo::convertPrimitiveVariables( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars, messageContext );
 	return Rix::k_Ri_Curves;
 }
 

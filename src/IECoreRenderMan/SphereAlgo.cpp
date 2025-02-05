@@ -46,7 +46,7 @@ using namespace IECoreRenderMan;
 namespace
 {
 
-RtUString convertStaticSphere( const IECoreScene::SpherePrimitive *sphere, RtPrimVarList &primVars )
+RtUString convertStaticSphere( const IECoreScene::SpherePrimitive *sphere, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	primVars.SetDetail(
 		sphere->variableSize( PrimitiveVariable::Uniform ),

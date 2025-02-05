@@ -111,6 +111,11 @@ RtDataType dataType( IECore::GeometricData::Interpretation interpretation )
 struct PrimitiveVariableConverter
 {
 
+	PrimitiveVariableConverter( const std::string &messageContext )
+		:	m_messageContext( messageContext )
+	{
+	}
+
 	// Simple data
 
 	void operator()( const BoolData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex=0 ) const
@@ -258,12 +263,14 @@ struct PrimitiveVariableConverter
 	{
 		IECore::msg(
 			IECore::Msg::Warning,
-			"IECoreRenderMan",
+			m_messageContext,
 			fmt::format( "Unsupported primitive variable of type \"{}\"", data->typeName() )
 		);
 	}
 
 	private :
+
+		const std::string &m_messageContext;
 
 		template<typename T>
 		void emit( const T *data, const RtPrimVarList::ParamInfo &paramInfo, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex=0 ) const
@@ -301,7 +308,7 @@ struct PrimitiveVariableConverter
 // Implementation of external API
 //////////////////////////////////////////////////////////////////////////
 
-RtUString IECoreRenderMan::GeometryAlgo::convert( const IECore::Object *object, RtPrimVarList &primVars )
+RtUString IECoreRenderMan::GeometryAlgo::convert( const IECore::Object *object, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	Registry &r = registry();
 	auto it = r.find( object->typeId() );
@@ -309,10 +316,10 @@ RtUString IECoreRenderMan::GeometryAlgo::convert( const IECore::Object *object, 
 	{
 		return RtUString();
 	}
-	return it->second.converter( object, primVars );
+	return it->second.converter( object, primVars, messageContext );
 }
 
-RtUString IECoreRenderMan::GeometryAlgo::convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars )
+RtUString IECoreRenderMan::GeometryAlgo::convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	Registry &r = registry();
 	auto it = r.find( samples.front()->typeId() );
@@ -322,11 +329,11 @@ RtUString IECoreRenderMan::GeometryAlgo::convert( const std::vector<const IECore
 	}
 	if( it->second.motionConverter )
 	{
-		return it->second.motionConverter( samples, sampleTimes, primVars );
+		return it->second.motionConverter( samples, sampleTimes, primVars, messageContext );
 	}
 	else
 	{
-		return it->second.converter( samples.front(), primVars );
+		return it->second.converter( samples.front(), primVars, messageContext );
 	}
 }
 
@@ -335,17 +342,20 @@ void IECoreRenderMan::GeometryAlgo::registerConverter( IECore::TypeId fromType, 
 	registry()[fromType] = { converter, motionConverter };
 }
 
-void IECoreRenderMan::GeometryAlgo::convertPrimitiveVariables( const IECoreScene::Primitive *primitive, RtPrimVarList &primVarList )
+void IECoreRenderMan::GeometryAlgo::convertPrimitiveVariables( const IECoreScene::Primitive *primitive, RtPrimVarList &primVarList, const std::string &messageContext )
 {
+	const PrimitiveVariableConverter converter( messageContext );
 	for( const auto &[name, primitiveVariable] : primitive->variables )
 	{
 		const RtUString convertedName( name == "uv" ? "st" : name.c_str() );
-		dispatch( primitiveVariable.data.get(), PrimitiveVariableConverter(), convertedName, primitiveVariable, primVarList );
+		dispatch( primitiveVariable.data.get(), converter, convertedName, primitiveVariable, primVarList );
 	}
 }
 
-void IECoreRenderMan::GeometryAlgo::convertPrimitiveVariables( const std::vector<const IECoreScene::Primitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVarList )
+void IECoreRenderMan::GeometryAlgo::convertPrimitiveVariables( const std::vector<const IECoreScene::Primitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVarList, const std::string &messageContext )
 {
+	const PrimitiveVariableConverter converter( messageContext );
+
 	bool haveSetTimes = false;
 	for( const auto &[name, primitiveVariable] : samples[0]->variables )
 	{
@@ -377,12 +387,12 @@ void IECoreRenderMan::GeometryAlgo::convertPrimitiveVariables( const std::vector
 			{
 				auto it = samples[i]->variables.find( name );
 				assert( it != samples[i]->variables.end() );
-				dispatch( it->second.data.get(), PrimitiveVariableConverter(), convertedName, primitiveVariable, primVarList, i );
+				dispatch( it->second.data.get(), converter, convertedName, primitiveVariable, primVarList, i );
 			}
 		}
 		else
 		{
-			dispatch( primitiveVariable.data.get(), PrimitiveVariableConverter(), convertedName, primitiveVariable, primVarList );
+			dispatch( primitiveVariable.data.get(), converter, convertedName, primitiveVariable, primVarList );
 		}
 	}
 }

@@ -50,19 +50,19 @@ GeometryPrototypeCache::GeometryPrototypeCache( const Session *session )
 {
 }
 
-GeometryPrototypePtr GeometryPrototypeCache::get( const IECore::Object *object, const Attributes *attributes )
+GeometryPrototypePtr GeometryPrototypeCache::get( const IECore::Object *object, const Attributes *attributes, const std::string &messageContext )
 {
 	if( !object )
 	{
 		return nullptr;
 	}
 
-	return get( { object }, { 0.0f }, attributes );
+	return get( { object }, { 0.0f }, attributes, messageContext );
 }
 
-GeometryPrototypePtr GeometryPrototypeCache::get( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, const Attributes *attributes )
+GeometryPrototypePtr GeometryPrototypeCache::get( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes, const Attributes *attributes, const std::string &messageContext )
 {
-	auto converter = [] ( const vector<const IECore::Object *> &samples, const vector<float> &sampleTimes, const Attributes *attributes, const Session *session, GeometryPrototypePtr &result ) {
+	auto converter = [&] ( const vector<const IECore::Object *> &samples, const vector<float> &sampleTimes, const Attributes *attributes, const Session *session, GeometryPrototypePtr &result ) {
 
 		riley::DisplacementId displacement;
 		if( auto d = attributes->displacement() )
@@ -75,11 +75,11 @@ GeometryPrototypePtr GeometryPrototypeCache::get( const std::vector<const IECore
 		if( samples.size() == 1 )
 		{
 			/// \todo Remove static conversions from GeometryAlgo?
-			type = GeometryAlgo::convert( samples[0], primVars );
+			type = GeometryAlgo::convert( samples[0], primVars, messageContext );
 		}
 		else
 		{
-			type = GeometryAlgo::convert( samples, sampleTimes, primVars );
+			type = GeometryAlgo::convert( samples, sampleTimes, primVars, messageContext );
 		}
 
 		if( !type.Empty() )

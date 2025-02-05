@@ -51,7 +51,7 @@ using namespace IECoreRenderMan;
 namespace
 {
 
-int interpolateBoundary( const IECoreScene::MeshPrimitive *mesh )
+int interpolateBoundary( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext  )
 {
 	const InternedString s = mesh->getInterpolateBoundary();
 	if( s == IECoreScene::MeshPrimitive::interpolateBoundaryNone )
@@ -68,12 +68,12 @@ int interpolateBoundary( const IECoreScene::MeshPrimitive *mesh )
 	}
 	else
 	{
-		msg( Msg::Error, "GeometryAlgo", fmt::format( "Unknown boundary interpolation \"{}\"", s.string() ) );
+		msg( Msg::Error, messageContext, fmt::format( "Unknown boundary interpolation \"{}\"", s.string() ) );
 		return 0;
 	}
 }
 
-int faceVaryingInterpolateBoundary( const IECoreScene::MeshPrimitive *mesh )
+int faceVaryingInterpolateBoundary( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext  )
 {
 	const InternedString s = mesh->getFaceVaryingLinearInterpolation();
 	if( s == IECoreScene::MeshPrimitive::faceVaryingLinearInterpolationNone )
@@ -98,12 +98,12 @@ int faceVaryingInterpolateBoundary( const IECoreScene::MeshPrimitive *mesh )
 	}
 	else
 	{
-		msg( Msg::Error, "GeometryAlgo", fmt::format( "Unknown facevarying linear interpolation \"{}\"", s.string() ) );
+		msg( Msg::Error, messageContext, fmt::format( "Unknown facevarying linear interpolation \"{}\"", s.string() ) );
 		return 0;
 	}
 }
 
-int smoothTriangles( const IECoreScene::MeshPrimitive *mesh )
+int smoothTriangles( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext  )
 {
 	const InternedString s = mesh->getTriangleSubdivisionRule();
 	if( s == IECoreScene::MeshPrimitive::triangleSubdivisionRuleCatmullClark )
@@ -116,12 +116,12 @@ int smoothTriangles( const IECoreScene::MeshPrimitive *mesh )
 	}
 	else
 	{
-		msg( Msg::Error, "GeometryAlgo", fmt::format( "Unknown triangle subdivision rule \"{}\"", s.string() ) );
+		msg( Msg::Error, messageContext, fmt::format( "Unknown triangle subdivision rule \"{}\"", s.string() ) );
 		return 0;
 	}
 }
 
-RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars )
+RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars, const std::string &messageContext  )
 {
 	primVars.SetDetail(
 		mesh->variableSize( PrimitiveVariable::Uniform ),
@@ -147,7 +147,7 @@ RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVar
 		}
 		else
 		{
-			msg( Msg::Error, "GeometryAlgo", fmt::format( "Unknown mesh interpolation \"{}\"", mesh->interpolation() ) );
+			msg( Msg::Error, messageContext, fmt::format( "Unknown mesh interpolation \"{}\"", mesh->interpolation() ) );
 			primVars.SetString( Rix::k_Ri_scheme, Rix::k_catmullclark );
 		}
 
@@ -186,15 +186,15 @@ RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVar
 
 		tagNames.push_back( Rix::k_interpolateboundary );
 		tagArgCounts.insert( tagArgCounts.end(), { 1, 0, 0 } );
-		tagIntArgs.push_back( interpolateBoundary( mesh ) );
+		tagIntArgs.push_back( interpolateBoundary( mesh, messageContext ) );
 
 		tagNames.push_back( Rix::k_facevaryinginterpolateboundary );
 		tagArgCounts.insert( tagArgCounts.end(), { 1, 0, 0 } );
-		tagIntArgs.push_back( faceVaryingInterpolateBoundary( mesh ) );
+		tagIntArgs.push_back( faceVaryingInterpolateBoundary( mesh, messageContext ) );
 
 		tagNames.push_back( Rix::k_smoothtriangles );
 		tagArgCounts.insert( tagArgCounts.end(), { 1, 0, 0 } );
-		tagIntArgs.push_back( smoothTriangles( mesh ) );
+		tagIntArgs.push_back( smoothTriangles( mesh, messageContext ) );
 
 		// Pseudo-primvars to hold the tags
 
@@ -207,17 +207,17 @@ RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVar
 	return geometryType;
 }
 
-RtUString convertStaticMesh( const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars )
+RtUString convertStaticMesh( const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars, const std::string &messageContext )
 {
-	const RtUString result = convertMeshTopology( mesh, primVars );
-	GeometryAlgo::convertPrimitiveVariables( mesh, primVars );
+	const RtUString result = convertMeshTopology( mesh, primVars, messageContext );
+	GeometryAlgo::convertPrimitiveVariables( mesh, primVars, messageContext );
 	return result;
 }
 
-RtUString convertAnimatedMesh( const std::vector<const IECoreScene::MeshPrimitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars )
+RtUString convertAnimatedMesh( const std::vector<const IECoreScene::MeshPrimitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
 {
-	const RtUString result = convertMeshTopology( samples[0], primVars );
-	GeometryAlgo::convertPrimitiveVariables( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars );
+	const RtUString result = convertMeshTopology( samples[0], primVars, messageContext );
+	GeometryAlgo::convertPrimitiveVariables( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars, messageContext );
 	return result;
 }
 
