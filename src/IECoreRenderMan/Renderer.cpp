@@ -69,7 +69,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 	public :
 
 		RenderManRenderer( RenderType renderType, const std::string &fileName, const MessageHandlerPtr &messageHandler )
-			:	m_session( nullptr )
+			:	m_messageHandler( messageHandler ), m_session( nullptr )
 		{
 			if( renderType == SceneDescription )
 			{
@@ -110,12 +110,14 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		Renderer::AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			acquireSession();
 			return new Attributes( attributes, m_materialCache.get() );
 		}
 
 		ObjectInterfacePtr camera( const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes ) override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			IECoreRenderMan::CameraPtr result = new IECoreRenderMan::Camera( name, camera, acquireSession() );
 			result->attributes( attributes );
 			return result;
@@ -123,6 +125,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		ObjectInterfacePtr light( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes ) override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			acquireSession();
 			auto typedAttributes = static_cast<const Attributes *>( attributes );
 			/// \todo Mesh lights
@@ -131,6 +134,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		ObjectInterfacePtr lightFilter( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes ) override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			return nullptr;
 		}
 
@@ -141,9 +145,11 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				return nullptr;
 			}
 
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			acquireSession();
+
 			auto typedAttributes = static_cast<const Attributes *>( attributes );
-			ConstGeometryPrototypePtr geometryPrototype = m_geometryPrototypeCache->get( object, typedAttributes );
+			ConstGeometryPrototypePtr geometryPrototype = m_geometryPrototypeCache->get( object, typedAttributes, /* messageContext = */ name );
 			if( !geometryPrototype )
 			{
 				return nullptr;
@@ -154,10 +160,11 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		ObjectInterfacePtr object( const std::string &name, const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, const AttributesInterface *attributes ) override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			acquireSession();
 
 			auto typedAttributes = static_cast<const Attributes *>( attributes );
-			ConstGeometryPrototypePtr geometryPrototype = m_geometryPrototypeCache->get( samples, times, typedAttributes );
+			ConstGeometryPrototypePtr geometryPrototype = m_geometryPrototypeCache->get( samples, times, typedAttributes, /* messageContext = */ name );
 			if( !geometryPrototype )
 			{
 				return nullptr;
@@ -168,6 +175,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		void render() override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			acquireSession();
 			m_materialCache->clearUnused();
 			m_globals->render();
@@ -175,16 +183,19 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		void pause() override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			m_globals->pause();
 		}
 
 		IECore::DataPtr command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters ) override
 		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 			return nullptr;
 		}
 
 	private :
 
+		IECore::MessageHandlerPtr m_messageHandler;
 		std::unique_ptr<Globals> m_globals;
 
 		// Used to acquire the Session via `m_globals` at the first point we need it.
