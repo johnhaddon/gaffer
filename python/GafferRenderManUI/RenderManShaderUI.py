@@ -208,6 +208,8 @@ def __lightsSubMenu( plugins ) :
 			{
 				"command" : GafferUI.NodeMenu.nodeCreatorWrapper(
 					functools.partial( __loadShader, name, GafferRenderMan.RenderManLight )
+					if name != "PxrMeshLight" else
+					GafferRenderMan.RenderManMeshLight
 				)
 			}
 		)

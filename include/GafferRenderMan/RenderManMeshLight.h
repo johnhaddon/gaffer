@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2018, John Haddon. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,19 +36,30 @@
 
 #pragma once
 
+#include "GafferRenderMan/Export.h"
+#include "GafferRenderMan/TypeIds.h"
+
+#include "GafferScene/FilteredSceneProcessor.h"
+
 namespace GafferRenderMan
 {
 
-enum TypeId
+class GAFFERRENDERMAN_API RenderManMeshLight : public GafferScene::FilteredSceneProcessor
 {
-	RenderManShaderTypeId = 110400,
-	RenderManLightTypeId = 110401,
-	RenderManIntegratorTypeId = 110402,
-	RenderManAttributesTypeId = 110403,
-	RenderManOptionsTypeId = 110404,
-	TagPlugTypeId = 110405,
-	RenderManMeshLightTypeId = 110406,
-	LastTypeId = 110450
+
+	public :
+
+		explicit RenderManMeshLight( const std::string &name=defaultName<RenderManMeshLight>() );
+		~RenderManMeshLight() override;
+
+		GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManMeshLight, RenderManMeshLightTypeId, FilteredSceneProcessor );
+
+	private :
+
+		static size_t g_firstPlugIndex;
+
 };
+
+IE_CORE_DECLAREPTR( RenderManMeshLight )
 
 } // namespace GafferRenderMan
