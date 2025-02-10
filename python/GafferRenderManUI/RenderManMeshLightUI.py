@@ -50,23 +50,23 @@ Gaffer.Metadata.registerNode(
 	"description",
 	"""
 	Turns mesh primitives into RenderMan mesh lights by assigning
-	a mesh_light shader, turning off all visibility except for camera rays,
+	a PxrMeshLight shader, turning off all visibility except for camera rays,
 	and adding the meshes to the default lights set.
 	""",
 
 	plugs = {
 
-		# "cameraVisibility" : [
+		"cameraVisibility" : [
 
-		# 	"description",
-		# 	"""
-		# 	Whether or not the mesh light is visible to camera
-		# 	rays.
-		# 	""",
+			"description",
+			"""
+			Whether or not the mesh light is visible to camera
+			rays.
+			""",
 
-		# 	"nameValuePlugPlugValueWidget:ignoreNamePlug", True,
+			"nameValuePlugPlugValueWidget:ignoreNamePlug", True,
 
-		# ],
+		],
 
 		"parameters" : [
 
@@ -104,7 +104,7 @@ Gaffer.Metadata.registerNode(
 			"description",
 			"""
 			Whether this light illuminates all geometry by default. When
-			toggled, the light will be added to the \"defaultLights\" set, which
+			toggled, the light will be added to the `defaultLights` set, which
 			can be referenced in set expressions and manipulated by downstream
 			nodes.
 			""",
