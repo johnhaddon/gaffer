@@ -57,37 +57,32 @@ RenderManMeshLight::RenderManMeshLight( const std::string &name )
 	:	GafferScene::FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 
-	// // RenderManAttributes node. This hides the objects from the majority
-	// // of ray types, since we don't want to add the poor sampling of the
-	// // object on top of the nice sampling of the light. The only visibility
-	// // option we don't turn off is camera visibility - instead we promote
-	// // so the user can decide whether or not the mesh should be visible in
-	// // the render.
+	// RenderManAttributes node. We use this to hide the objects to everything
+	// except camera rays, since that seems a reasonable default behaviour for
+	// a mesh light. The user can turn this back on with a RenderManAttributes
+	// node, in which case the surface shader is used for ray hits.
 
-	// RenderManAttributesPtr attributes = new RenderManAttributes( "__attributes" );
-	// attributes->inPlug()->setInput( inPlug() );
-	// attributes->filterPlug()->setInput( filterPlug() );
-	// for( NameValuePlug::Iterator it( attributes->attributesPlug() ); !it.done(); ++it )
-	// {
-	// 	if(
-	// 		boost::ends_with( (*it)->getName().string(), "Visibility" ) &&
-	// 		(*it)->getName().string().find( "AutoBump" ) == std::string::npos &&
-	// 		(*it)->getName() != "cameraVisibility"
-	// 	)
-	// 	{
-	// 		(*it)->enabledPlug()->setValue( true );
-	// 		(*it)->valuePlug<BoolPlug>()->setValue( false );
-	// 	}
-	// }
+	RenderManAttributesPtr attributes = new RenderManAttributes( "__attributes" );
+	attributes->inPlug()->setInput( inPlug() );
+	attributes->filterPlug()->setInput( filterPlug() );
+	for( const auto &name : { "ri:visibility:indirect", "ri:visibility:transmission" } )
+	{
+		auto plug = attributes->attributesPlug()->getChild<NameValuePlug>( name );
+		plug->enabledPlug()->setValue( true );
+		plug->valuePlug<IntPlug>()->setValue( 0 );
+	}
 
-	// addChild( attributes );
+	addChild( attributes );
 
-	// Plug *internalCameraVisibilityPlug = attributes->attributesPlug()->getChild<Plug>( "cameraVisibility" );
-	// PlugPtr cameraVisibilityPlug = internalCameraVisibilityPlug->createCounterpart( "cameraVisibility", Plug::In );
-	// addChild( cameraVisibilityPlug );
-	// internalCameraVisibilityPlug->setInput( cameraVisibilityPlug );
+	// Promote the camera visibility plug, since that is more like to be used
+	// than the others.
 
-	// Shader node. This loads the RenderMan mesh_light shader.
+	Plug *internalCameraVisibilityPlug = attributes->attributesPlug()->getChild<Plug>( "ri:visibility:camera" );
+	PlugPtr cameraVisibilityPlug = internalCameraVisibilityPlug->createCounterpart( "cameraVisibility", Plug::In );
+	addChild( cameraVisibilityPlug );
+	internalCameraVisibilityPlug->setInput( cameraVisibilityPlug );
+
+	// Shader node. This loads the PxrMeshLight shader.
 
 	RenderManShaderPtr shader = new RenderManShader( "__shader" );
 	shader->loadShader( "PxrMeshLight" );
@@ -103,11 +98,11 @@ RenderManMeshLight::RenderManMeshLight( const std::string &name )
 		(*srcIt)->setFlags( Plug::Dynamic, false );
 	}
 
-	// ShaderAssignment node. This assigns the mesh_light shader
+	// ShaderAssignment node. This assigns the PxrMeshLight shader
 	// to the objects chosen by the filter.
 
 	ShaderAssignmentPtr shaderAssignment = new ShaderAssignment( "__shaderAssignment" );
-	shaderAssignment->inPlug()->setInput( inPlug() ); //attributes->outPlug() );
+	shaderAssignment->inPlug()->setInput( attributes->outPlug() );
 	shaderAssignment->filterPlug()->setInput( filterPlug() );
 	shaderAssignment->shaderPlug()->setInput( shader->outPlug() );
 	addChild( shaderAssignment );
