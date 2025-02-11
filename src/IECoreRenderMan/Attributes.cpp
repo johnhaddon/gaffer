@@ -309,4 +309,3 @@ const IECoreScene::ShaderNetwork *Attributes::lightShader() const
 {
 	return m_lightShader.get();
 }
-
