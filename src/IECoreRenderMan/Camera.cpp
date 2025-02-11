@@ -94,11 +94,11 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 	}
 
 	RtParamList projectionParamList;
-	for( const auto &[name, value] : camera->parameters() )
+	for( const auto &[parameterName, parameterValue] : camera->parameters() )
 	{
 		if( boost::starts_with( name.c_str(), "ri:" ) )
 		{
-			ParamListAlgo::convertParameter( RtUString( name.c_str() + 3 ), value.get(), projectionParamList );
+			ParamListAlgo::convertParameter( RtUString( parameterName.c_str() + 3 ), parameterValue.get(), projectionParamList );
 		}
 	}
 
