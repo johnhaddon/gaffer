@@ -45,13 +45,19 @@ import OpenImageIO
 import IECore
 import IECoreImage
 import IECoreScene
-import IECoreRenderMan
 import IECoreRenderManTest
 
 import GafferTest
 import GafferScene
 
+@unittest.skipIf( GafferTest.inCI(), "RenderMan license not available" )
 class RendererTest( GafferTest.TestCase ) :
+
+	def setUp( self ) :
+
+		GafferTest.TestCase.setUp( self )
+		# Get "RenderMan" Renderer registered.
+		import IECoreRenderMan
 
 	def testFactory( self ) :
 
