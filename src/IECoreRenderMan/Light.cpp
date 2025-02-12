@@ -88,9 +88,10 @@ Light::Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attribut
 		return;
 	}
 
+	const Material *material = attributes->lightMaterial();
 	m_lightInstance = m_session->createLightInstance(
 		m_geometryPrototype ? m_geometryPrototype->id() : riley::GeometryPrototypeId(),
-		m_attributes->lightMaterial()->id(), m_lightShader, IdentityTransform(), attributes->instanceAttributes()
+		material ? material->id() : riley::MaterialId(), m_lightShader, IdentityTransform(), attributes->instanceAttributes()
 	);
 }
 
@@ -192,9 +193,10 @@ bool Light::attributes( const IECoreScenePreview::Renderer::AttributesInterface 
 		return true;
 	}
 
+	const Material *material = renderManAttributes->lightMaterial();
 	const riley::LightInstanceResult result = m_session->modifyLightInstance(
 		m_lightInstance,
-		/* material = */ &renderManAttributes->lightMaterial()->id(),
+		/* material = */ material ? &material->id() : nullptr,
 		/* light shader = */ &m_lightShader,
 		/* xform = */ nullptr,
 		&renderManAttributes->instanceAttributes()
