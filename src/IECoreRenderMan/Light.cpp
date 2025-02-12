@@ -90,7 +90,7 @@ Light::Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attribut
 
 	m_lightInstance = m_session->createLightInstance(
 		m_geometryPrototype ? m_geometryPrototype->id() : riley::GeometryPrototypeId(),
-		m_attributes->lightMaterial()->id(), m_lightShader, StaticTransform(), attributes->instanceAttributes()
+		m_attributes->lightMaterial()->id(), m_lightShader, IdentityTransform(), attributes->instanceAttributes()
 	);
 }
 
