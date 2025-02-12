@@ -167,6 +167,12 @@ T attributeValue( const CompoundObject::ObjectMap &attributes, IECore::InternedS
 	return data ? data->readable() : defaultValue;
 }
 
+bool isMeshLight( const IECoreScene::ShaderNetwork *lightShader )
+{
+	const IECoreScene::Shader *outputShader = lightShader->outputShader();
+	return outputShader && outputShader->getName() == "PxrMeshLight";
+}
+
 IECoreScene::ConstShaderNetworkPtr g_facingRatio = []() {
 
 	ShaderNetworkPtr result = new ShaderNetwork;
@@ -208,7 +214,6 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 	const ShaderNetwork *surface = attribute<ShaderNetwork>( attributes->members(), g_renderManSurfaceAttributeName );
 	surface = surface ? surface : attribute<ShaderNetwork>( attributes->members(), g_surfaceAttributeName );
 	m_surfaceMaterial = materialCache->getMaterial( surface ? surface : g_facingRatio.get() );
-	m_lightMaterial = materialCache->getMaterial( surface ? surface : g_black.get() );
 
 	const ShaderNetwork *displacement = attribute<ShaderNetwork>( attributes->members(), g_renderManDisplacementAttributeName );
 	displacement = displacement ? displacement : attribute<ShaderNetwork>( attributes->members(), g_oslDisplacementAttributeName );
@@ -220,6 +225,13 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 
 	m_lightShader = attribute<ShaderNetwork>( attributes->members(), g_renderManLightShaderAttributeName );
 	m_lightShader = m_lightShader ? m_lightShader : attribute<ShaderNetwork>( attributes->members(), g_lightShaderAttributeName );
+	if( m_lightShader && isMeshLight( m_lightShader.get() ) )
+	{
+		// Mesh lights default to having a black material so they don't appear
+		// in indirect rays, but the user can override with a surface assignment
+		// if they want further control. Other lights don't have materials.
+		m_lightMaterial = materialCache->getMaterial( surface ? surface : g_black.get() );
+	}
 
 	if( attributeValue<bool>( attributes->members(), g_automaticInstancingAttributeName, true ) )
 	{

@@ -65,12 +65,13 @@ class Attributes : public IECoreScenePreview::Renderer::AttributesInterface
 		const RtParamList &instanceAttributes() const;
 
 		const Material *surfaceMaterial() const;
-		/// Material to be assigned to mesh lights. RenderMan uses this to
-		/// shade ray hits on the mesh, while using `lightShader()` for
-		/// light emission.
-		const Material *lightMaterial() const;
 		const Displacement *displacement() const { return m_displacement.get(); }
+
 		const IECoreScene::ShaderNetwork *lightShader() const;
+		/// Material to be assigned to lights. RenderMan uses this to
+		/// shade ray hits on mesh lights, while using `lightShader()` for
+		/// light emission. Returns `nullptr` for all non-mesh lights.
+		const Material *lightMaterial() const;
 
 	private :
 
@@ -78,10 +79,10 @@ class Attributes : public IECoreScenePreview::Renderer::AttributesInterface
 		RtParamList m_prototypeAttributes;
 		RtParamList m_instanceAttributes;
 		ConstMaterialPtr m_surfaceMaterial;
-		ConstMaterialPtr m_lightMaterial;
 		ConstDisplacementPtr m_displacement;
 		/// \todo Could we use the material cache for these too?
 		IECoreScene::ConstShaderNetworkPtr m_lightShader;
+		ConstMaterialPtr m_lightMaterial;
 
 };
 
