@@ -134,7 +134,7 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 	m_cameraId = m_session->createCamera(
 		RtUString( name.c_str() ),
 		projectionShader,
-		StaticTransform(),
+		IdentityTransform(),
 		cameraParamList,
 		options
 	);

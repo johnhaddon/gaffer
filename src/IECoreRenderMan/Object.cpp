@@ -57,7 +57,7 @@ Object::Object( const ConstGeometryPrototypePtr &geometryPrototype, const Attrib
 		m_geometryPrototype->id(),
 		m_attributes->surfaceMaterial()->id(),
 		g_emptyCoordinateSystems,
-		StaticTransform(),
+		IdentityTransform(),
 		m_attributes->instanceAttributes()
 	);
 }
