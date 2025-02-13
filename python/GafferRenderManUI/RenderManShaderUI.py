@@ -71,12 +71,13 @@ def appendShaders( menuDefinition, prefix = "/RenderMan" ) :
 		}
 	)
 
-	menuDefinition.append(
-		prefix + "/Light Filter",
-		{
-			"subMenu" : functools.partial( __lightFiltersSubMenu, plugins ),
-		}
-	)
+	# Disabled until functionality is fully plumbed in
+	# menuDefinition.append(
+	# 	prefix + "/Light Filter",
+	# 	{
+	# 		"subMenu" : functools.partial( __lightFiltersSubMenu, plugins ),
+	# 	}
+	# )
 
 def __plugins() :
 
