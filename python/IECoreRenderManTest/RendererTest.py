@@ -1321,6 +1321,21 @@ class RendererTest( GafferTest.TestCase ) :
 			self.assertGreaterEqual( self.__colorAtUV( image, imath.V2f( u, 0.5 ) ).a, 0.1 )
 			self.assertEqual( self.__colorAtUV( image, imath.V2f( u, 0.9 ) ).a, 0 )
 
+	def testNoOutputs( self ) :
+
+		messageHandler = IECore.CapturingMessageHandler()
+		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
+			"RenderMan",
+			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch,
+			messageHandler = messageHandler
+		)
+		renderer.render()
+
+		self.assertEqual( len( messageHandler.messages ), 1 )
+		self.assertEqual( messageHandler.messages[0].level, IECore.Msg.Level.Warning )
+		self.assertEqual( messageHandler.messages[0].context, "IECoreRenderMan" )
+		self.assertEqual( messageHandler.messages[0].message, "No outputs defined." )
+
 	def __assertParameterEqual( self, paramList, name, data ) :
 
 		p = next( x for x in paramList if x["info"]["name"] == name )
