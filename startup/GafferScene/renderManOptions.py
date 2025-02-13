@@ -172,3 +172,58 @@ if "RMANTREE" in os.environ :
 	)
 	Gaffer.Metadata.registerValue( "option:ri:interactiveDenoiser:minSamples", "label", "Min Samples" )
 	Gaffer.Metadata.registerValue( "option:ri:interactiveDenoiser:minSamples", "layout:section", "Interactive Denoiser" )
+
+	# Add options used to define custom LPE lobes. RenderMan does understand these, but they aren't
+	# reported in `PRManOptions.args` for some reason. Furthermore, they don't actually have the
+	# default values that are documented here :
+	#
+	#    https://rmanwiki-26.pixar.com/space/REN26/19661883/Light+Path+Expressions#Per-Lobe-LPEs
+	#
+	# And curiously, those "defaults" are not the same as the defaults
+	# implemented in RenderMan for Blender, which adds on a bunch of lower-case
+	# variations in several cases and omits others completely. Until we get some
+	# guidance to the contrary, we follow RenderMan for Blender except where
+	# there are omissions.
+	#
+	# > Note : These must be kept in sync with the list in `src/IECoreRenderMan/Globals.cpp`, where
+	# > we actually apply the "defaults".
+
+	for name, lobe, defaultValue in [
+		# RfB adds "diffuse,translucent,hair4,irradiance"
+		( "lpe:diffuse2", "D2", "Diffuse,HairDiffuse,diffuse,translucent,hair4,irradiance" ),
+		# RfB adds "subsurface"
+		( "lpe:diffuse3", "D3", "Subsurface,subsurface" ),
+		( "lpe:diffuse4", "D4", "" ),
+		# RfB adds "specular,hair1"
+		( "lpe:specular2", "S2", "Specular,HairSpecularR,specular,hair1" ),
+		# RfB adds "hair3"
+		( "lpe:specular3", "S3", "RoughSpecular,HairSpecularTRT,hair3" ),
+		( "lpe:specular4", "S4", "Clearcoat" ),
+		( "lpe:specular5", "S5", "Iridescence" ),
+		( "lpe:specular6", "S6", "Fuzz,HairSpecularGLINTS" ),
+		# RfB adds "hair2"
+		( "lpe:specular7", "S7", "SingleScatter,HairSpecularTT,hair2" ),
+		# RfB adds "specular"
+		( "lpe:specular8", "S8", "Glass,specular" ),
+		( "lpe:user2", "U2", "Albedo,DiffuseAlbedo,SubsurfaceAlbedo,HairAlbedo" ),
+		# Not defined in RfB
+		( "lpe:user3", "U3", "Position" ),
+		# Not defined in RfB
+		( "lpe:user4", "U4", "UserColor" ),
+		( "lpe:user5", "U5", "" ),
+		# Not defined in RfB, but required by the default denoising outputs.
+		( "lpe:user6", "U6", "Normal,DiffuseNormal,HairTangent,SubsurfaceNormal,SpecularNormal,RoughSpecularNormal,SingleScatterNormal,FuzzNormal,IridescenceNormal,GlassNormal" ),
+		( "lpe:user7", "U7", "" ),
+		( "lpe:user8", "U8", "" ),
+		# RfB goes up to 12, but if folks really need to indulge that much
+		# they can use a CustomOptions node.
+	] :
+
+		Gaffer.Metadata.registerValue( f"option:ri:{name}", "defaultValue", defaultValue )
+		Gaffer.Metadata.registerValue( f"option:ri:{name}", "description",
+			f"""
+			Defines the contents of the `{lobe}` custom LPE lobe.
+			"""
+		)
+		Gaffer.Metadata.registerValue( f"option:ri:{name}", "label", lobe )
+		Gaffer.Metadata.registerValue( f"option:ri:{name}", "layout:section", "Custom LPE Lobes" )
