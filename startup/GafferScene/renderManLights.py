@@ -38,7 +38,7 @@ import Gaffer
 
 for type in [
 	"PxrCyclinderLight", "PxrDomeLight", "PxrDiskLight", "PxrDistantLight",
-	"PxrMeshLight",  "PxrRectLight", "PxrSphereLight",
+	"PxrEnvDayLight", "PxrMeshLight",  "PxrRectLight", "PxrSphereLight",
 ] :
 
 	Gaffer.Metadata.registerValue( "ri:light:" + type, "intensityParameter", "intensity" )
@@ -48,6 +48,7 @@ for type in [
 Gaffer.Metadata.registerValue( "ri:light:PxrCylinderLight", "type", "cylinder" )
 Gaffer.Metadata.registerValue( "ri:light:PxrDomeLight", "type", "environment" )
 Gaffer.Metadata.registerValue( "ri:light:PxrDiskLight", "type", "disk" )
+Gaffer.Metadata.registerValue( "ri:light:PxrEnvDayLight", "type", "environment" )
 Gaffer.Metadata.registerValue( "ri:light:PxrDistantLight", "type", "distant" )
 Gaffer.Metadata.registerValue( "ri:light:PxrMeshLight", "type", "mesh" )
 Gaffer.Metadata.registerValue( "ri:light:PxrPortalLight", "type", "portal" )
