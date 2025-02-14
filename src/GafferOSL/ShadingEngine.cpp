@@ -754,7 +754,7 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 			return false;
 		}
 
-		void pointcloud_search( BatchedShaderGlobals *sg,  ustringhash filename, const void *wcenter, Wide<const float> wradius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
+		void pointcloud_search( BatchedShaderGlobals *sg, ustringhash filename, const void *wcenter, Wide<const float> wradius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
 		{
 			// const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
 			// if( !threadRenderState )
