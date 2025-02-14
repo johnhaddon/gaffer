@@ -277,56 +277,92 @@ Gaffer.Metadata.registerNode(
 
 		],
 
-		"pointClouds" : [
+		"sourceLocations" : [
 
 			"description",
 			"""
-			Provides input data for the `pointcloud_search()` and `pointcloud_get()` OSL functions.
+			Defines additional scene locations to be made accessible via the `pointcloud_search()`,
+			`pointcloud_get()` and `transform()` OSL functions.
 			""",
 
-			"layout:section", "Point Clouds",
+			"layout:section", "Source Locations",
 			"plugValueWidget:type", "GafferUI.LayoutPlugValueWidget",
 
-			"layout:customWidget:addButton:widgetType", "GafferOSLUI.OSLObjectUI._PointCloudsAddButton",
+			"layout:customWidget:addButton:widgetType", "GafferOSLUI.OSLObjectUI._SourceLocationsAddButton",
 			"layout:customWidget:addButton:index", -1,
 
 		],
 
-		"pointClouds.*" : [
+		"sourceLocations.*" : [
 
 			"deletable", True,
+			"label", "",
+
+			"layout:activator:isEnabled", lambda plug : plug["enabled"].getValue(),
 
 		],
 
-		"pointClouds.*.name" : [
+		"sourceLocations.*.name" : [
 
 			"description",
 			"""
-			The name to give to the pointcloud. This name should be passed to the `pointcloud_search()` and `pointloud_get()`
-			OSL functions to access this pointcloud.
+			The name to give to the location. This is how it will be referred to from OSL
+			in the `pointcloud_search()`, `pointcloud_get()` and `transform()` functions.
 			""",
+
+			"label", "",
+			"layout:activator", "isEnabled",
 
 		],
 
-		"pointClouds.*.enabled" : [
+		"sourceLocations.*.enabled" : [
 
 			"description",
 			"""
-			Enables the pointcloud. When disabled, the pointcloud will not be available in `pointcloud_search()` or
-			`pointcloud_get()`.
+			Enables the location for access in OSL.
 			""",
+
+			"label", "",
+			"boolPlugValueWidget:displayMode", "switch",
 
 		],
 
-		"pointClouds.*.value" : [
+		"sourceLocations.*.location" : [
 
 			"description",
 			"""
-			The location of the pointcloud in the input scene. The location should contain a primitive
-			with a position ('P') primitive variable.
+			The location to be made accessibe from OSL.
 			""",
 
+			"label", "",
+			"layout:activator", "isEnabled",
 			"plugValueWidget:type", "GafferSceneUI.ScenePathPlugValueWidget",
+
+		],
+
+		"sourceLocations.*.pointCloud" : [
+
+			"description",
+			"""
+			Makes the location accessible via the `pointcloud_search()` and
+			`pointcloud_get()` OSL functions. The location should contain a primitive
+			with at least a position ('P') primitive variable.
+			""",
+
+			"label", "",
+			"layout:activator", "isEnabled",
+
+		],
+
+		"sourceLocations.*.transform" : [
+
+			"description",
+			"""
+			Makes the location's transform accessible via the `transform()` OSL functions.
+			""",
+
+			"label", "",
+			"layout:activator", "isEnabled",
 
 		],
 
@@ -336,7 +372,7 @@ Gaffer.Metadata.registerNode(
 
 ## \todo This is practically identical to the button in CreateViewsUI.py, and
 # the two could probably be consolidated into one.
-class _PointCloudsAddButton( GafferUI.PlugValueWidget ) :
+class _SourceLocationsAddButton( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plug ) :
 
@@ -361,3 +397,6 @@ class _PointCloudsAddButton( GafferUI.PlugValueWidget ) :
 
 		with Gaffer.UndoScope( self.getPlug().ancestor( Gaffer.ScriptNode ) ) :
 			self.getPlug().resize( len( self.getPlug() ) + 1 )
+
+Gaffer.Metadata.registerValue( GafferOSL.OSLObject.SourceLocationPlug, "plugValueWidget:type", "GafferUI.LayoutPlugValueWidget" )
+Gaffer.Metadata.registerValue( GafferOSL.OSLObject.SourceLocationPlug, "layoutPlugValueWidget:orientation", "horizontal" )

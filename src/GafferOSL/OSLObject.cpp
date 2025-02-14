@@ -134,6 +134,87 @@ CompoundDataPtr prepareShadingPoints( const Primitive *primitive, const ShadingE
 
 } // namespace
 
+//////////////////////////////////////////////////////////////////////////
+// SourceLocationPlug
+//////////////////////////////////////////////////////////////////////////
+
+GAFFER_PLUG_DEFINE_TYPE( OSLObject::SourceLocationPlug );
+
+OSLObject::SourceLocationPlug::SourceLocationPlug( const std::string &name, Direction direction, unsigned flags )
+	:	ValuePlug( name, direction, flags )
+{
+	addChild( new StringPlug( "name" ) );
+	addChild( new BoolPlug( "enabled" ) );
+	addChild( new StringPlug( "location" ) );
+	addChild( new BoolPlug( "pointCloud" ) );
+	addChild( new BoolPlug( "transform" ) );
+
+}
+
+Gaffer::StringPlug *OSLObject::SourceLocationPlug::namePlug()
+{
+	return getChild<StringPlug>( 0 );
+}
+
+const Gaffer::StringPlug *OSLObject::SourceLocationPlug::namePlug() const
+{
+	return getChild<StringPlug>( 0 );
+}
+
+Gaffer::BoolPlug *OSLObject::SourceLocationPlug::enabledPlug()
+{
+	return getChild<BoolPlug>( 1 );
+}
+
+const Gaffer::BoolPlug *OSLObject::SourceLocationPlug::enabledPlug() const
+{
+	return getChild<BoolPlug>( 1 );
+}
+
+Gaffer::StringPlug *OSLObject::SourceLocationPlug::locationPlug()
+{
+	return getChild<StringPlug>( 2 );
+}
+
+const Gaffer::StringPlug *OSLObject::SourceLocationPlug::locationPlug() const
+{
+	return getChild<StringPlug>( 2 );
+}
+
+Gaffer::BoolPlug *OSLObject::SourceLocationPlug::pointCloudPlug()
+{
+	return getChild<BoolPlug>( 3 );
+}
+
+const Gaffer::BoolPlug *OSLObject::SourceLocationPlug::pointCloudPlug() const
+{
+	return getChild<BoolPlug>( 3 );
+}
+
+Gaffer::BoolPlug *OSLObject::SourceLocationPlug::transformPlug()
+{
+	return getChild<BoolPlug>( 4 );
+}
+
+const Gaffer::BoolPlug *OSLObject::SourceLocationPlug::transformPlug() const
+{
+	return getChild<BoolPlug>( 4 );
+}
+
+bool OSLObject::SourceLocationPlug::acceptsChild( const GraphComponent *potentialChild ) const
+{
+	return children().size() < 5;
+}
+
+Gaffer::PlugPtr OSLObject::SourceLocationPlug::createCounterpart( const std::string &name, Direction direction ) const
+{
+	return new SourceLocationPlug( name, direction, getFlags() );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// OSLObject
+//////////////////////////////////////////////////////////////////////////
+
 OSLObject::OSLObject( const std::string &name )
 	:	Deformer( name )
 {
@@ -144,14 +225,8 @@ OSLObject::OSLObject( const std::string &name )
 	addChild( new BoolPlug( "useAttributes", Plug::In, false ) );
 	addChild(
 		new ArrayPlug(
-			"pointClouds", Plug::In,
-			new NameValuePlug(
-				"",
-				new StringPlug(),
-				true,
-				"pointClouds0",
-				Plug::Default
-			),
+			"sourceLocations", Plug::In,
+			new SourceLocationPlug( "sourceLocations0" ),
 			0, std::numeric_limits<size_t>::max(), Plug::Default,
 			/* resizeWhenInputsChange = */ false
 		)
@@ -220,12 +295,12 @@ const Gaffer::BoolPlug *OSLObject::useAttributesPlug() const
 	return getChild<BoolPlug>( g_firstPlugIndex + 3 );
 }
 
-Gaffer::ArrayPlug *OSLObject::pointCloudsPlug()
+Gaffer::ArrayPlug *OSLObject::sourceLocationsPlug()
 {
 	return getChild<ArrayPlug>( g_firstPlugIndex + 4 );
 }
 
-const Gaffer::ArrayPlug *OSLObject::pointCloudsPlug() const
+const Gaffer::ArrayPlug *OSLObject::sourceLocationsPlug() const
 {
 	return getChild<ArrayPlug>( g_firstPlugIndex + 4 );
 }
@@ -294,9 +369,9 @@ bool OSLObject::affectsProcessedObject( const Gaffer::Plug *input ) const
 		input == useAttributesPlug() ||
 		( input == inPlug()->attributesPlug() && !useAttributesPlug()->isSetToDefault() ) ||
 		input == resampledInPlug()->objectPlug() ||
-		pointCloudsPlug()->isAncestorOf( input ) ||
+		sourceLocationsPlug()->isAncestorOf( input ) ||
 		(
-			pointCloudsPlug()->children().size() &&
+			sourceLocationsPlug()->children().size() &&
 			(
 				input == inPlug()->objectPlug() ||
 				input == inPlug()->existsPlug()
@@ -344,7 +419,7 @@ void OSLObject::hashProcessedObject( const ScenePath &path, const Gaffer::Contex
 		}
 	}
 
-	for( const auto &p : NameValuePlug::Range( *pointCloudsPlug() ) )
+	for( const auto &p : SourceLocationPlug::Range( *sourceLocationsPlug() ) )
 	{
 		if( !p->enabledPlug()->getValue() )
 		{
@@ -355,7 +430,8 @@ void OSLObject::hashProcessedObject( const ScenePath &path, const Gaffer::Contex
 		{
 			continue;
 		}
-		const std::string pathString = p->valuePlug<StringPlug>()->getValue();
+
+		const std::string pathString = p->locationPlug()->getValue();
 		if( pathString.empty() )
 		{
 			continue;
@@ -365,9 +441,14 @@ void OSLObject::hashProcessedObject( const ScenePath &path, const Gaffer::Contex
 		{
 			continue;
 		}
+
 		h.append( name );
-		h.append( inPlug()->objectHash( path ) );
-		if( useTransform )
+		if( p->pointCloudPlug()->getValue() )
+		{
+			h.append( inPlug()->objectHash( path ) );
+		}
+
+		if( p->transformPlug()->getValue() )
 		{
 			h.append( inPlug()->transformHash( path ) );
 		}
@@ -417,7 +498,7 @@ IECore::ConstObjectPtr OSLObject::computeProcessedObject( const ScenePath &path,
 	}
 
 	ShadingEngine::PointClouds pointClouds;
-	for( const auto &p : NameValuePlug::Range( *pointCloudsPlug() ) )
+	for( const auto &p : SourceLocationPlug::Range( *sourceLocationsPlug() ) )
 	{
 		if( !p->enabledPlug()->getValue() )
 		{
@@ -429,7 +510,7 @@ IECore::ConstObjectPtr OSLObject::computeProcessedObject( const ScenePath &path,
 			continue;
 		}
 
-		const std::string pathString = p->valuePlug<StringPlug>()->getValue();
+		const std::string pathString = p->locationPlug()->getValue();
 		if( pathString.empty() )
 		{
 			continue;
@@ -440,17 +521,24 @@ IECore::ConstObjectPtr OSLObject::computeProcessedObject( const ScenePath &path,
 			continue;
 		}
 
-		ConstObjectPtr object = inPlug()->object( path );
-		if( ConstPrimitivePtr primitive = runTimeCast<const Primitive>( object ) )
+		if( p->pointCloudPlug()->getValue() )
 		{
-			pointClouds[name] = primitive;
+			ConstObjectPtr object = inPlug()->object( path );
+			if( ConstPrimitivePtr primitive = runTimeCast<const Primitive>( object ) )
+			{
+				pointClouds[name] = primitive;
+			}
+			else
+			{
+				IECore::msg( IECore::Msg::Warning, "OSLObject", fmt::format( "No primitive at \"{}\"", pathString ) );
+			}
+		}
+
+		if( p->transformPlug()->getValue() )
+		{
 			transforms[name] = ShadingEngine::Transform(
 				transforms[g_world].fromObjectSpace * inPlug()->fullTransform( path ).inverse()
 			);
-		}
-		else
-		{
-			IECore::msg( IECore::Msg::Warning, "OSLObject", fmt::format( "No primitive at \"{}\"", pathString ) );
 		}
 	}
 
