@@ -756,25 +756,44 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 
 		void pointcloud_search( BatchedShaderGlobals *sg, ustringhash filename, const void *wcenter, Wide<const float> wradius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
 		{
-			// const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
-			// if( !threadRenderState )
-			// {
-			// 	// See comments in the non-batched `RendererServices::pointcloud_search()`.
-			// 	IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_search()` can not be constant folded." );
-			// 	return;
-			// }
+			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+			if( !threadRenderState )
+			{
+				// See comments in the non-batched `RendererServices::pointcloud_search()`.
+				IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_search()` can not be constant folded." );
+				return;
+			}
 
-			// Wide<const OSL::Vec3> wideCenter( wcenter );
-			// results.mask().foreach(
+			vector<size_t> tmpIndices( maxPoints );
+			vector<float> tmpDistances( maxPoints );
 
-			// 	[&] ( ActiveLane lane ) {
+			auto wideIndices = results.windices();
+			auto wideNumPoints = results.wnum_points();
+			auto wideDistances = results.wdistances();
 
-			// 		const OSL::Vec3 center = wideCenter[lane];
-			// 		std::optional<int> r = threadRenderState->renderState.pointCloudSearch( filename, center, wradius[lane], maxPoints, outIndices, outDistances );
+			Wide<const OSL::Vec3> wideCenter( wcenter );
+			results.mask().foreach(
 
-			// 	}
+				[&] ( ActiveLane lane ) {
 
-			// );
+					const OSL::Vec3 center = wideCenter[lane];
+					/// \todo Single map lookup, instead of lookup per point
+					int numPoints = threadRenderState->renderState.pointCloudSearch(
+						filename, center, wradius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
+					);
+
+					auto distances = wideDistances[lane];
+					auto indices = wideIndices[lane];
+					for( int i = 0; i < numPoints; ++i )
+					{
+						distances[i] = tmpDistances[i];
+						indices[i] = tmpIndices[i];
+					}
+
+					wideNumPoints[lane] = numPoints;
+				}
+
+			);
 		}
 
 		bool is_overridden_pointcloud_search() const override
