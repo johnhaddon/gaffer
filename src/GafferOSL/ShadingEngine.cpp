@@ -575,7 +575,7 @@ class RenderState
 			return false;
 		}
 
-		std::optional<int> pointCloudSearch(
+		int pointCloudSearch(
 			ustringhash filename, const OSL::Vec3 &center, float radius, int maxPoints,
 			size_t *outIndices, float *outDistances
 		) const
@@ -583,7 +583,7 @@ class RenderState
 			auto it = m_pointClouds.find( filename );
 			if( it == m_pointClouds.end() )
 			{
-				return std::nullopt; // RendererServices will fall back to Partio implementation for files on disk.
+				return 0;
 			}
 
 			vector<IECore::V3fTree::Neighbour> neighbours;
@@ -608,12 +608,12 @@ class RenderState
 			return n;
 		}
 
-		std::optional<int> pointCloudGet( ustringhash filename, size_t *indices, int count, ustringhash attrName, TypeDesc attrType, void *outData ) const
+		int pointCloudGet( ustringhash filename, size_t *indices, int count, ustringhash attrName, TypeDesc attrType, void *outData ) const
 		{
 			auto it = m_pointClouds.find( filename );
 			if( it == m_pointClouds.end() )
 			{
-				return std::nullopt; // RendererServices will fall back to Partio implementation for files on disk.
+				return 0;
 			}
 
 			auto attrIt = it->second.attributes.find( attrName );
@@ -987,14 +987,7 @@ class RendererServices : public OSL::RendererServices
 
 			// TODO : WHAT IS `derivsOffset`?????
 
-			std::optional<int> r = threadRenderState->renderState.pointCloudSearch( filename, center, radius, maxPoints, outIndices, outDistances );
-			if( r )
-			{
-				return *r;
-			}
-
-			// Fall back to Partio implementation for disk-based pointclouds.
-			return OSL::RendererServices::pointcloud_search( sg, filename, center, radius, maxPoints, sort, outIndices, outDistances, derivsOffset );
+			return threadRenderState->renderState.pointCloudSearch( filename, center, radius, maxPoints, outIndices, outDistances );
 		}
 
 		virtual int pointcloud_get(
@@ -1011,14 +1004,7 @@ class RendererServices : public OSL::RendererServices
 				return 0;
 			}
 
-			std::optional<int> r = threadRenderState->renderState.pointCloudGet( filename, indices, count, attrName, attrType, outData );
-			if( r )
-			{
-				return *r;
-			}
-
-			// Fall back to Partio implementation for disk-based pointclouds.
-			return OSL::RendererServices::pointcloud_get( sg, filename, indices, count, attrName, attrType, outData );
+			return threadRenderState->renderState.pointCloudGet( filename, indices, count, attrName, attrType, outData );
 		}
 
 #if OSL_USE_BATCHED
