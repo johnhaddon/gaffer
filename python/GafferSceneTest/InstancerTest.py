@@ -3601,7 +3601,10 @@ parent["radius"] = ( 2 + context.getFrame() ) * 15
 		# It should be very cheap to retrieve the cached capsule since we've only changed something irrelevant
 		with GafferTest.TestRunner.PerformanceScope() :
 
-			instancer["out"].object( "/plane/instances" )
+			with Gaffer.PerformanceMonitor() as pm :
+				instancer["out"].object( "/plane/instances" )
+
+		self.assertEqual( pm.combinedStatistics().computeCount, 0 )
 
 if __name__ == "__main__":
 	unittest.main()
