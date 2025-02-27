@@ -2584,10 +2584,17 @@ IECore::ConstInternedStringVectorDataPtr Instancer::computeBranchChildNames( con
 		ids.reserve( pointIndicesForPrototype.size() );
 
 		const EngineData *engineData = esp->engine();
-		const ScenePlug::ScenePath *prototypeRoot = engineData->prototypeRoot( branchPath[1] );
-		if( !prototypesPlug()->exists( *prototypeRoot ) )
+
+		PrototypeScope scope( engineData, context, &sourcePath, &branchPath );
+
+		if( !prototypesPlug()->existsPlug()->getValue() )
 		{
-			throw IECore::Exception( fmt::format( "Prototype root \"{}\" does not exist in the `prototypes` scene", ScenePlug::pathToString( *prototypeRoot ) ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Prototype root \"{}\" does not exist in the `prototypes` scene",
+					ScenePlug::pathToString( scope.context()->get<ScenePath>( ScenePlug::scenePathContextName ) )
+				)
+			);
 		}
 
 		for( size_t q : pointIndicesForPrototype )
