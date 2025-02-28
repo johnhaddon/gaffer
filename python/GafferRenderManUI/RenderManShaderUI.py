@@ -64,6 +64,20 @@ def appendShaders( menuDefinition, prefix = "/RenderMan" ) :
 		}
 	)
 
+	menuDefinition.append(
+		prefix + "/Light",
+		{
+			"subMenu" : functools.partial( __lightsSubMenu, plugins ),
+		}
+	)
+
+	menuDefinition.append(
+		prefix + "/Light Filter",
+		{
+			"subMenu" : functools.partial( __lightFiltersSubMenu, plugins ),
+		}
+	)
+
 def __plugins() :
 
 	result = {}
@@ -119,7 +133,11 @@ def __loadShader( shaderName, nodeType ) :
 	node = nodeType( nodeName )
 	node.loadShader( shaderName )
 
-	if isinstance( node, GafferOSL.OSLShader ) :
+	if isinstance( node, ( GafferRenderMan.RenderManLight, GafferRenderMan.RenderManLightFilter ) ) :
+		node["name"].setValue(
+			shaderName.replace( "Pxr", "pxr" )
+		)
+	elif isinstance( node, GafferOSL.OSLShader ) :
 		if "matchCppPattern" in node["parameters"] :
 			# This parameter is only useful for compatibility with RenderMan 23,
 			# which is not a concern for us since we are starting with RenderMan
@@ -171,6 +189,62 @@ def __shadersSubMenu( plugins ) :
 
 GafferSceneUI.ShaderUI.hideShaders( IECore.PathMatcher( [ "/Pxr*" ] ) )
 
+def __lightsSubMenu( plugins ) :
+
+	result = IECore.MenuDefinition()
+
+	for name, plugin in plugins.items() :
+
+		if plugin["type"] != "light" :
+			continue
+
+		result.append(
+			"/" + name,
+			{
+				"command" : GafferUI.NodeMenu.nodeCreatorWrapper(
+					functools.partial( __loadShader, name, GafferRenderMan.RenderManLight )
+					if name != "PxrMeshLight" else
+					GafferRenderMan.RenderManMeshLight
+				)
+			}
+		)
+
+	return result
+
+def __lightFiltersSubMenu( plugins ) :
+
+	result = IECore.MenuDefinition()
+
+	for name, plugin in plugins.items() :
+
+		if plugin["type"] != "lightfilter" :
+			continue
+
+		if name in [
+			# These two are deprecated in RenderMan 26, so best
+			# not to let folks get used to them.
+			"PxrGoboLightFilter",
+			"PxrBlockerLightFilter",
+			# This one only seems useful when linked to specific
+			# _objects_ (rather than lights), and I'm not sure how
+			# to do that yet.
+			"PxrIntMultLightFilter",
+			# Seems more like this isn't intended to be user facing.
+			"PxrCombinerLightFilter",
+		] :
+			continue
+
+		result.append(
+			"/" + name,
+			{
+				"command" : GafferUI.NodeMenu.nodeCreatorWrapper(
+					functools.partial( __loadShader, name, GafferRenderMan.RenderManLightFilter )
+				)
+			}
+		)
+
+	return result
+
 ##########################################################################
 # Metadata. We register dynamic Gaffer.Metadata entries which are
 # implemented as lookups to data queried from .args files.
@@ -181,7 +255,10 @@ def __shaderMetadata( node ) :
 
 	global __metadataCache
 
-	shaderName = node["name"].getValue()
+	if isinstance( node, GafferRenderMan.RenderManLight ) :
+		shaderName = node["__shader"]["name"].getValue()
+	else :
+		shaderName = node["name"].getValue()
 
 	try :
 		return __metadataCache[shaderName]
@@ -204,25 +281,32 @@ def __parameterMetadata( plug, key ) :
 
 def __nodeDescription( node ) :
 
-	defaultDescription = """Loads RenderMan shaders. Use the ShaderAssignment node to assign shaders to objects in the scene."""
+	if isinstance( node, GafferRenderMan.RenderManShader ) :
+		defaultDescription = """Loads RenderMan shaders. Use the ShaderAssignment node to assign shaders to objects in the scene."""
+	else :
+		defaultDescription = """Loads RenderMan lights."""
+
 	metadata = __shaderMetadata( node )
 	return metadata.get( "description", defaultDescription )
 
-Gaffer.Metadata.registerValue( GafferRenderMan.RenderManShader, "description", __nodeDescription )
+for nodeType in ( GafferRenderMan.RenderManShader, GafferRenderMan.RenderManLight ) :
 
-for key in [
-	"label",
-	"description",
-	"layout:section",
-	"plugValueWidget:type",
-	"presetNames",
-	"presetValues",
-	"nodule:type",
-] :
+	Gaffer.Metadata.registerValue( nodeType, "description", __nodeDescription )
 
-	Gaffer.Metadata.registerValue(
-		GafferRenderMan.RenderManShader, "parameters.*", key,
-		functools.partial( __parameterMetadata, key = key )
-	)
+	for key in [
+		"label",
+		"description",
+		"layout:section",
+		"plugValueWidget:type",
+		"presetNames",
+		"presetValues",
+		"nodule:type",
+	] :
+
+		Gaffer.Metadata.registerValue(
+			nodeType, "parameters.*", key,
+			functools.partial( __parameterMetadata, key = key )
+		)
 
 Gaffer.Metadata.registerValue( GafferRenderMan.RenderManShader, "out", "nodule:type", lambda plug : "GafferUI::CompoundNodule" if len( plug ) else "GafferUI::StandardNodule" )
+Gaffer.Metadata.registerValue( GafferRenderMan.RenderManLight, "parameters", "layout:section:Basic:collapsed", False )
