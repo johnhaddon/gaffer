@@ -73,6 +73,8 @@ class Light : public IECoreScenePreview::Renderer::ObjectInterface
 		ConstAttributesPtr m_attributes;
 		/// Used to keep geometry prototype alive as long as we need it.
 		ConstGeometryPrototypePtr m_geometryPrototype;
+		// NOT SURE WHY WE NEED THIS. DO WE EVEN?
+		IECoreScenePreview::Renderer::ConstObjectSetPtr m_linkedLightFilters;
 
 };
 

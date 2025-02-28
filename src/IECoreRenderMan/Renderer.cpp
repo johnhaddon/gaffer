@@ -40,6 +40,7 @@
 #include "GeometryPrototypeCache.h"
 #include "Globals.h"
 #include "Light.h"
+#include "LightFilter.h"
 #include "MaterialCache.h"
 #include "Globals.h"
 #include "Object.h"
@@ -158,7 +159,10 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		ObjectInterfacePtr lightFilter( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes ) override
 		{
 			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
-			return nullptr;
+			acquireSession();
+			auto typedAttributes = static_cast<const Attributes *>( attributes );
+			std::cerr << "Renderer::lightFilter" << std::endl;
+			return new LightFilter( name, typedAttributes, m_session );
 		}
 
 		Renderer::ObjectInterfacePtr object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes ) override

@@ -119,6 +119,7 @@ const InternedString g_oslDisplacementAttributeName( "osl:displacement" );
 const InternedString g_renderManDisplacementAttributeName( "ri:displacement" );
 const InternedString g_renderManLightShaderAttributeName( "ri:light" );
 const InternedString g_renderManSurfaceAttributeName( "ri:surface" );
+const InternedString g_renderManLightFilterAttributeName( "ri:lightfilter:filter" ); // TODO : SIMPLIFY NAME
 const InternedString g_surfaceAttributeName( "surface" );
 
 template<typename T>
@@ -286,6 +287,9 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 
 		}
 	}
+
+	m_lightFilter = attribute<ShaderNetwork>( attributes->members(), g_renderManLightFilterAttributeName );
+	std::cerr << "INITIALISED LGHT FITLER " << m_lightFilter << std::endl;
 }
 
 Attributes::~Attributes()
@@ -320,4 +324,9 @@ const Material *Attributes::lightMaterial() const
 const IECoreScene::ShaderNetwork *Attributes::lightShader() const
 {
 	return m_lightShader.get();
+}
+
+const IECoreScene::ShaderNetwork *Attributes::lightFilter() const
+{
+	return m_lightFilter.get();
 }

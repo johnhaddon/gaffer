@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2024, Cinesite VFX Ltd. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,18 +36,44 @@
 
 #pragma once
 
-#include "IECoreScene/ShaderNetwork.h"
+#include "GafferScene/Private/IECoreScenePreview/Renderer.h"
+
+#include "Attributes.h"
+//#include "Session.h"
 
 #include "Riley.h"
 
-namespace IECoreRenderMan::ShaderNetworkAlgo
+namespace IECoreRenderMan
 {
 
-std::vector<riley::ShadingNode> convert( const IECoreScene::ShaderNetwork *network );
-/// Merges multiple light filters into a single PxrCombinerLightFilter according to
-/// the rules documented for the `combineMode` parameter. The Riley API only allows
-/// a single filter per light, so it becomes the responsibility of every host to do
-/// this combining.
-std::vector<riley::ShadingNode> convertLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> networks, const std::vector<RtUString> &coordSysNames );
+class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
+{
 
-} // namespace IECoreRenderMan::ShaderNetworkAlgo
+	public :
+
+		LightFilter( const std::string &name, const Attributes *attributes, Session *session );
+		~LightFilter();
+
+		void transform( const Imath::M44f &transform ) override;
+		void transform( const std::vector<Imath::M44f> &samples, const std::vector<float> &times ) override;
+		bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
+		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
+		void assignID( uint32_t id ) override;
+
+		/// Unlike light and geometry instances, light filters in RenderMan
+		/// don't have a first class transform. Instead we must use a coordinate
+		/// system and pass its name to a parameter on the light filter.
+		riley::CoordinateSystemId coordinateSystem() const;
+		RtUString coordinateSystemName() const;
+		const IECoreScene::ShaderNetwork *shader() const;
+
+	private :
+
+		Session *m_session;
+		RtUString m_coordinateSystemName;
+		riley::CoordinateSystemId m_coordinateSystem;
+		IECoreScene::ConstShaderNetworkPtr m_shader;
+
+};
+
+} // namespace IECoreRenderMan

@@ -36,6 +36,7 @@
 
 #include "Light.h"
 
+#include "LightFilter.h"
 #include "ShaderNetworkAlgo.h"
 #include "Transform.h"
 
@@ -72,6 +73,8 @@ M44f correctiveTransform( const Attributes *attributes )
 		return M44f().scale( V3f( 1, 1, -1 ) );
 	}
 }
+
+const IECore::InternedString g_lightFilters( "lightFilters" );
 
 } // namespace
 
@@ -214,6 +217,71 @@ bool Light::attributes( const IECoreScenePreview::Renderer::AttributesInterface 
 
 void Light::link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects )
 {
+	if( type != g_lightFilters || objects == m_linkedLightFilters )
+	{
+		return;
+	}
+
+	vector<const IECoreScene::ShaderNetwork *> filterNetworks;
+	vector<RtUString> coordinateSystemNames;
+	vector<riley::CoordinateSystemId> filterCoordinateSystems;
+	for( const auto &s : *objects )
+	{
+		auto lightFilter = static_cast<const LightFilter *>( s.get() );
+		if( !lightFilter->shader() )
+		{
+			std::cerr << "NO SHADER" << std::endl;
+			continue;
+		}
+		filterNetworks.push_back( lightFilter->shader() );
+		coordinateSystemNames.push_back( lightFilter->coordinateSystemName() );
+		filterCoordinateSystems.push_back( lightFilter->coordinateSystem() );
+	}
+
+	if( !filterNetworks.size() )
+	{
+		std::cerr << "NO FILTER NETWORKS " << std::endl;
+		return; // WOULD THIS CRASH PRMAN? IF SO, HOW DO WE REMOVE FILTERS?
+	}
+
+	std::cerr << "Calling convertLightFilters" << std::endl;
+
+	vector<riley::ShadingNode> filterNodes = ShaderNetworkAlgo::convertLightFilters( filterNetworks, coordinateSystemNames );
+
+	std::cerr << "Called convertLightFilters " << filterNodes.size() << std::endl;
+
+	riley::ShadingNetwork filterNetwork = { (uint32_t)filterNodes.size(), filterNodes.data() };
+
+	// SEEMS LIKE RENDERMAN CRASHES IF WE DON'T PROVIDE THE LIGHT SHADER TO MODIFYLIGHTSHADER
+	std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( m_attributes->lightShader() );
+	riley::ShadingNetwork nodeNetwork = { (uint32_t)nodes.size(), nodes.data() };
+
+	auto r = m_session->riley->ModifyLightShader(
+		m_lightShader, &nodeNetwork, &filterNetwork
+	);
+
+	if( r != riley::LightShaderResult::k_Success )
+	{
+		std::cerr << "OOPS : LIGHT SHADER EDIT FAILED" << std::endl;
+	}
+	else
+	{
+		std::cerr << "Modified light shader" << std::endl;
+	}
+
+	riley::CoordinateSystemList coordinateSystemList = { (uint32_t)filterCoordinateSystems.size(), filterCoordinateSystems.data() };
+	auto rr = m_session->riley->ModifyLightInstance( // TODO : SHOULD GO THROUGH SESSION
+		riley::GeometryPrototypeId(), m_lightInstance, nullptr, nullptr, &coordinateSystemList, nullptr, nullptr
+	);
+
+	if( rr != riley::LightInstanceResult::k_Success )
+	{
+		std::cerr << "OOPS : LIGHT INSTANCE EDIT FAILED" << std::endl;
+	}
+	else
+	{
+		std::cerr << "Modified light instance" << std::endl;
+	}
 }
 
 void Light::assignID( uint32_t id )
