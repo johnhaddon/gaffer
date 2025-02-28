@@ -2238,9 +2238,33 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 			const ThreadState &threadState = ThreadState::current();
 
-			tbb::parallel_for(
+			struct OrderIndepentHashAccum
+			{
+				OrderIndepentHashAccum() : h1( 0 ), h2( 0 ) {}
+				void add( const IECore::MurmurHash &h )
+				{
+					h1 += h.h1();
+					h2 += h.h2();
+				}
+
+				OrderIndepentHashAccum operator+( const OrderIndepentHashAccum &other ) const
+				{
+					OrderIndepentHashAccum result;
+					result.h1 = h1 + other.h1;
+					result.h2 = h2 + other.h2;
+					return result;
+				}
+
+				uint64_t h1, h2;
+
+			};
+
+
+			OrderIndepentHashAccum hashAccum;
+			hashAccum = tbb::parallel_reduce(
 				tbb::blocked_range<size_t>( 0, engineData->numValidPrototypes() ),
-				[&]( const tbb::blocked_range<size_t> &r )
+				OrderIndepentHashAccum(),
+				[&]( const tbb::blocked_range<size_t> &r, OrderIndepentHashAccum accum )
 				{
 					Context::EditableScope threadScope( threadState );
 
@@ -2258,19 +2282,24 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 						// in the parallel_for
 						localH.append( i );
 
-						h1Accum += localH.h1();
-						h2Accum += localH.h2();
+						accum.add( localH );
 					}
+					return accum;
+				},
+				[] ( const OrderIndepentHashAccum &a, const OrderIndepentHashAccum &b ) {
+					return a + b;
 				},
 				taskGroupContext
 			);
 
 			const auto &prototypeSetNames = prototypesPlug()->setNames()->readable();
-			tbb::parallel_for(
+			hashAccum = hashAccum + tbb::parallel_reduce(
 				tbb::blocked_range<size_t>( 0, prototypeSetNames.size() ),
-				[&]( const tbb::blocked_range<size_t> &r )
+				OrderIndepentHashAccum(),
+				[&]( const tbb::blocked_range<size_t> &r, OrderIndepentHashAccum accum )
 				{
 					ScenePlug::SetScope setScope( threadState );
+
 					for( size_t i = r.begin(); i != r.end(); ++i )
 					{
 						const InternedString &setName = prototypeSetNames[i];
@@ -2283,14 +2312,17 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 						prototypesPlug()->setPlug()->hash( localH );
 						localH.append( setName );
 
-						h1Accum += localH.h1();
-						h2Accum += localH.h2();
+						accum.add( localH );
 					}
+					return accum;
+				},
+				[] ( const OrderIndepentHashAccum &a, const OrderIndepentHashAccum &b ) {
+					return a + b;
 				},
 				taskGroupContext
 			);
 
-			h.append( IECore::MurmurHash( h1Accum, h2Accum ) );
+			h.append( IECore::MurmurHash( hashAccum.h1, hashAccum.h2 ) );
 		}
 
 		Int64VectorDataPtr resultData = new Int64VectorData( { (int64_t)h.h1(), (int64_t)h.h2() } );
