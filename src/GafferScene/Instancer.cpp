@@ -2293,12 +2293,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			h.append( IECore::MurmurHash( h1Accum, h2Accum ) );
 		}
 
-		Int64VectorDataPtr resultData = new Int64VectorData();
-		auto &result = resultData->writable();
-
-		result.reserve( 2 );
-		result.push_back( h.h1() );
-		result.push_back( h.h2() );
+		Int64VectorDataPtr resultData = new Int64VectorData( { (int64_t)h.h1(), (int64_t)h.h2() } );
 		static_cast<Int64VectorDataPlug *>( output )->setValue( resultData );
 	}
 
