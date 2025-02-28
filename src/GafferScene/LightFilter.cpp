@@ -82,7 +82,7 @@ void LightFilter::loadShader( const std::string &shaderName, bool keepExistingVa
 {
 	shaderNode()->loadShader( shaderName, keepExistingValues );
 	shaderPlug()->setInput( shaderNode()->outPlug() );
-	shaderNode()->attributeSuffixPlug()->setValue( "filter" );
+	shaderNode()->attributeSuffixPlug()->setValue( "filter" ); /// TODO : DO NOT WANT FOR RENDERMAN.
 }
 
 GafferScene::Shader *LightFilter::shaderNode()
