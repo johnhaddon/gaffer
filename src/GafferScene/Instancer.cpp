@@ -3099,8 +3099,10 @@ void Instancer::PrototypeScope::setPrototype( const EngineData *engine, const Sc
 {
 	assert( branchPath->size() >= 2 );
 
-	ScenePlug::ScenePath prototypeRootStorage;
-	const ScenePlug::ScenePath *prototypeRoot = engine->prototypeRoot( (*branchPath)[1], *sourcePath, prototypeRootStorage );
+	// We pass in m_prototypePath as the storage to prototypeRoot() - it may or may not be set,
+	// becaues prototypeRoot can sometimes just return a pointer without needing to do any allocation.
+	m_prototypePath.resize( 0 );
+	const ScenePlug::ScenePath *prototypeRoot = engine->prototypeRoot( (*branchPath)[1], *sourcePath, m_prototypePath );
 
 	if( branchPath->size() >= 3 && engine->hasContextVariables() )
 	{
@@ -3110,21 +3112,14 @@ void Instancer::PrototypeScope::setPrototype( const EngineData *engine, const Sc
 
 	if( branchPath->size() > 3 )
 	{
-		m_prototypePath = *prototypeRoot;
+		if( !m_prototypePath.size() )
+		{
+			// If prototypeRoot didn't need to do an allocation, we have to do it now so we can modify
+			// m_prototypePath.
+			m_prototypePath = *prototypeRoot;
+		}
 		m_prototypePath.reserve( prototypeRoot->size() + branchPath->size() - 3 );
 		m_prototypePath.insert( m_prototypePath.end(), branchPath->begin() + 3, branchPath->end() );
-		set( ScenePlug::scenePathContextName, &m_prototypePath );
-	}
-	else if( prototypeRootStorage.size() )
-	{
-		// Slightly awkward case here: prototypeRoot may need to allocate storage for the prototype root path.
-		// ( This happens when it's a relative path, and we need to prepend the source path ).
-		// If we had to allocate the path, we need to make sure we store it, rather than leaving a dangling
-		// pointer.
-		//
-		// If we didn't need to allocate, the engine will hold the memory for the path, and we don't want to
-		// copy it, so we can take the branch below.
-		m_prototypePath = prototypeRootStorage;
 		set( ScenePlug::scenePathContextName, &m_prototypePath );
 	}
 	else
