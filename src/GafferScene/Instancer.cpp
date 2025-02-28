@@ -699,7 +699,7 @@ class Instancer::EngineData : public Data
 
 		const ScenePlug::ScenePath *prototypeRoot( int prototypeId, const ScenePlug::ScenePath &enginePath, ScenePlug::ScenePath &storage ) const
 		{
-			if( m_roots[prototypeId].rel )
+			if( m_roots[prototypeId].relative )
 			{
 				const ScenePlug::ScenePath &prototypePath = m_roots[prototypeId].path->readable();
 				storage.resize( 0 );
@@ -794,7 +794,7 @@ class Instancer::EngineData : public Data
 				// reused.  This seems suboptimal, but is simpler, and the more complex version doesn't
 				// appear to make any performance difference in practice
 				totalHash.append( &(rootPath.path->readable())[0], rootPath.path->readable().size() );
-				totalHash.append( rootPath.rel );
+				totalHash.append( rootPath.relative );
 				for( unsigned int j = 0; j < m_prototypeContextVariables.size(); j++ )
 				{
 					IECore::MurmurHash r; // TODO - if we're using this in inner loops, the constructor should probably be inlined?
@@ -1067,27 +1067,28 @@ class Instancer::EngineData : public Data
 			m_prototypeIndexRemap.reserve( rootStrings->size() );
 
 
-			const static bool gafferSceneInstancerExplicitAbsolutePaths = checkEnvFlag( "GAFFERSCENE_INSTANCER_EXPLICITABSOLUTEPATHS", false );
+			const static bool g_explicitAbsolutePaths = checkEnvFlag( "GAFFERSCENE_INSTANCER_EXPLICIT_ABSOLUTE_PATHS", false );
 
 			size_t i = 0;
 			ScenePlug::ScenePath path;
 
 			for( const auto &root : *rootStrings )
 			{
-				InternedStringVectorDataPtr pathData = new InternedStringVectorData();
-				ScenePlug::ScenePath &path = pathData->writable();
-
-				bool rel = false;
 				if( !root.size() )
 				{
 					m_prototypeIndexRemap.emplace_back( -1 );
 					continue;
 				}
-				else if( root[0] == '/' )
+
+				InternedStringVectorDataPtr pathData = new InternedStringVectorData();
+				ScenePlug::ScenePath &path = pathData->writable();
+
+				bool relative = false;
+				if( root[0] == '/' )
 				{
 					ScenePlug::stringToPath( root, path );
 				}
-				else if( root[0] == '.' || gafferSceneInstancerExplicitAbsolutePaths )
+				else if( root[0] == '.' || g_explicitAbsolutePaths )
 				{
 					if( root[0] == '.' && root.size() >= 2 && root[1] == '/' )
 					{
@@ -1098,7 +1099,7 @@ class Instancer::EngineData : public Data
 					{
 						ScenePlug::stringToPath( root, path );
 					}
-					rel = true;
+					relative = true;
 				}
 				else
 				{
@@ -1114,7 +1115,7 @@ class Instancer::EngineData : public Data
 					inputNames.emplace_back( new InternedStringVectorData( { path.back() } ) );
 				}
 
-				m_roots.emplace_back( rel, std::move( pathData ) );
+				m_roots.emplace_back( relative, std::move( pathData ) );
 				m_prototypeIndexRemap.emplace_back( i++ );
 			}
 
@@ -1130,13 +1131,13 @@ class Instancer::EngineData : public Data
 		size_t m_numPrototypes;
 		size_t m_numValidPrototypes;
 		Private::ChildNamesMapPtr m_names;
-		struct ProtoRoot {
-			ProtoRoot( bool rel, ConstInternedStringVectorDataPtr path ) : rel( rel ), path( path ) {};
+		struct PrototypeRoot {
+			PrototypeRoot( bool relative, ConstInternedStringVectorDataPtr path ) : relative( relative ), path( path ) {};
 
-			bool rel;
+			bool relative;
 			ConstInternedStringVectorDataPtr path;
 		};
-		std::vector<ProtoRoot> m_roots;
+		std::vector<PrototypeRoot> m_roots;
 		std::vector<int> m_prototypeIndexRemap;
 		std::vector<int> m_prototypeIndicesAlloc;
 		const std::vector<int> *m_prototypeIndices;
