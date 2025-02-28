@@ -39,6 +39,7 @@
 #include "GafferRenderMan/RenderManAttributes.h"
 #include "GafferRenderMan/RenderManIntegrator.h"
 #include "GafferRenderMan/RenderManLight.h"
+#include "GafferRenderMan/RenderManMeshLight.h"
 #include "GafferRenderMan/RenderManOptions.h"
 #include "GafferRenderMan/RenderManShader.h"
 
@@ -67,4 +68,5 @@ BOOST_PYTHON_MODULE( _GafferRenderMan )
 	GafferBindings::DependencyNodeClass<RenderManOptions>();
 	GafferBindings::DependencyNodeClass<RenderManShader>();
 	GafferBindings::DependencyNodeClass<RenderManIntegrator>();
+	GafferBindings::DependencyNodeClass<RenderManMeshLight>();
 }
