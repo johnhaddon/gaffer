@@ -1436,6 +1436,9 @@ class RendererTest( GafferTest.TestCase ) :
 		self.assertEqual( messageHandler.messages[0].context, "IECoreRenderMan" )
 		self.assertEqual( messageHandler.messages[0].message, "No outputs defined." )
 
+	def testLightFilterParameterEdits( self ) :
+
+		pass
 
 	def testLPELobeOptions( self ) :
 
