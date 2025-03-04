@@ -34,48 +34,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#pragma once
-
-#include "GafferScene/Private/IECoreScenePreview/Renderer.h"
-
-#include "Attributes.h"
 #include "LightFilterLinks.h"
-#include "Session.h"
 
-#include "Riley.h"
+using namespace std;
+using namespace Imath;
+using namespace IECoreRenderMan;
 
-namespace IECoreRenderMan
+void LightFilterLinks::registerLink( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters )
 {
 
-class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
-{
-
-	public :
-
-		LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightFilterLinks *links );
-		~LightFilter();
-
-		void transform( const Imath::M44f &transform ) override;
-		void transform( const std::vector<Imath::M44f> &samples, const std::vector<float> &times ) override;
-		bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
-		void assignID( uint32_t id ) override;
-
-		/// Unlike light and geometry instances, light filters in RenderMan
-		/// don't have a first class transform. Instead we must use a coordinate
-		/// system and pass its name to a parameter on the light filter.
-		riley::CoordinateSystemId coordinateSystem() const;
-		RtUString coordinateSystemName() const;
-		const IECoreScene::ShaderNetwork *shader() const;
-
-	private :
-
-		Session *m_session;
-		RtUString m_coordinateSystemName;
-		riley::CoordinateSystemId m_coordinateSystem;
-		IECoreScene::ConstShaderNetworkPtr m_shader;
-		LightFilterLinks *m_links;
-
-};
-
-} // namespace IECoreRenderMan
+}

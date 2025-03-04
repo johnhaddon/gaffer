@@ -50,8 +50,8 @@ const RtUString g_name( "name" );
 
 } // namespace
 
-LightFilter::LightFilter( const std::string &name, const Attributes *attributes, Session *session )
-	 :	m_session( session ), m_coordinateSystemName( name.c_str() )
+LightFilter::LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightFilterLinks *links )
+	 :	m_session( session ), m_coordinateSystemName( name.c_str() ), m_links( links )
 {
 	std::cerr << "MAKING LIGHT FILTER" << std::endl;
 	RtParamList params;

@@ -78,10 +78,11 @@ const IECore::InternedString g_lightFilters( "lightFilters" );
 
 } // namespace
 
-Light::Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, Session *session )
+Light::Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, Session *session, LightFilterLinks *filterLinks )
 	:	m_session( session ), m_lightShader( riley::LightShaderId::InvalidId() ),
 		m_lightInstance( riley::LightInstanceId::InvalidId() ), m_correctiveTransform( correctiveTransform( attributes ) ),
-		m_attributes( attributes ), m_geometryPrototype( geometryPrototype )
+		m_attributes( attributes ), m_geometryPrototype( geometryPrototype ),
+		m_filterLinks( filterLinks )
 {
 	updateLightShader( attributes );
 	if( m_lightShader == riley::LightShaderId::InvalidId() )
@@ -217,7 +218,7 @@ bool Light::attributes( const IECoreScenePreview::Renderer::AttributesInterface 
 
 void Light::link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects )
 {
-	if( type != g_lightFilters || objects == m_linkedLightFilters )
+	if( type != g_lightFilters )
 	{
 		return;
 	}
@@ -282,6 +283,8 @@ void Light::link( const IECore::InternedString &type, const IECoreScenePreview::
 	{
 		std::cerr << "Modified light instance" << std::endl;
 	}
+
+	m_filterLinks->registerLink( this, objects );
 }
 
 void Light::assignID( uint32_t id )

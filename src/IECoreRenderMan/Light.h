@@ -40,6 +40,7 @@
 
 #include "Attributes.h"
 #include "GeometryPrototypeCache.h"
+#include "LightFilterLinks.h"
 #include "Session.h"
 
 #include "Riley.h"
@@ -52,7 +53,7 @@ class Light : public IECoreScenePreview::Renderer::ObjectInterface
 
 	public :
 
-		Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, Session *session );
+		Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, Session *session, LightFilterLinks *filterLinks );
 		~Light();
 
 		void transform( const Imath::M44f &transform ) override;
@@ -73,8 +74,7 @@ class Light : public IECoreScenePreview::Renderer::ObjectInterface
 		ConstAttributesPtr m_attributes;
 		/// Used to keep geometry prototype alive as long as we need it.
 		ConstGeometryPrototypePtr m_geometryPrototype;
-		// NOT SURE WHY WE NEED THIS. DO WE EVEN?
-		IECoreScenePreview::Renderer::ConstObjectSetPtr m_linkedLightFilters;
+		LightFilterLinks *m_filterLinks;
 
 };
 

@@ -41,6 +41,7 @@
 #include "Globals.h"
 #include "Light.h"
 #include "LightFilter.h"
+#include "LightFilterLinks.h"
 #include "MaterialCache.h"
 #include "Globals.h"
 #include "Object.h"
@@ -153,7 +154,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				geometryPrototype = m_geometryPrototypeCache->get( meshCopy.get(), typedAttributes, /* messageContext = */ name );
 			}
 
-			return new IECoreRenderMan::Light( geometryPrototype, typedAttributes, m_session );
+			return new IECoreRenderMan::Light( geometryPrototype, typedAttributes, m_session, m_lightFilterLinks.get() );
 		}
 
 		ObjectInterfacePtr lightFilter( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes ) override
@@ -162,7 +163,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 			acquireSession();
 			auto typedAttributes = static_cast<const Attributes *>( attributes );
 			std::cerr << "Renderer::lightFilter" << std::endl;
-			return new LightFilter( name, typedAttributes, m_session );
+			return new LightFilter( name, typedAttributes, m_session, m_lightFilterLinks.get() );
 		}
 
 		Renderer::ObjectInterfacePtr object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes ) override
@@ -243,6 +244,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 					m_session = m_globals->acquireSession();
 					m_materialCache = std::make_unique<MaterialCache>( m_session );
 					m_geometryPrototypeCache = std::make_unique<GeometryPrototypeCache>( m_session );
+					m_lightFilterLinks = std::make_unique<LightFilterLinks>();
 				}
 			}
 			return m_session;
@@ -254,6 +256,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		Session *m_session;
 		std::unique_ptr<MaterialCache> m_materialCache;
 		std::unique_ptr<GeometryPrototypeCache> m_geometryPrototypeCache;
+		std::unique_ptr<LightFilterLinks> m_lightFilterLinks;
 
 		static Renderer::TypeDescription<RenderManRenderer> g_typeDescription;
 		static std::atomic_bool g_haveInstance;

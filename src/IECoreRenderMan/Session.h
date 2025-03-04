@@ -120,6 +120,7 @@ struct Session
 	/// Should be called before rendering to update the links between
 	/// portal lights and the associated dome light.
 	void updatePortals();
+	void updateLightFilterLinks();
 
 	private :
 

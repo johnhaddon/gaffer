@@ -38,14 +38,13 @@
 
 #include "GafferScene/Private/IECoreScenePreview/Renderer.h"
 
-#include "Light.h"
-#include "LightFilter.h"
-
 #include "Riley.h"
 
 namespace IECoreRenderMan
 {
 
+class Light;
+class LightFilter;
 /// - DONT'T NEED OWNERSHIP OF LIGHTS OR LIGHTFILTERS
 ///		- JUST REMOVE FROM DATA STRUCTURES ON DESTRUCTION
 ///
@@ -62,16 +61,36 @@ namespace IECoreRenderMan
 ///		- RENDER :
 ///			- UPDATE LIGHTS
 ///			- CLEAR SETS THAT WE ARE THE SOLE OWNER OF
+///
+/// EVEN WHEN WE DON'T _NEED_ THIS, WILL IT STILL BE USEFUL AS A
+/// CACHE OF CONVERTED FILTER NODES??? MAYBE THE CONVERSION IS SO FAST WE DON'T CARE?
+/// - NAH, BECAUSE WHEN WE DON'T NEED THIS, THE LIGHT FILTER OBJECTS WILL MANAGE THEIR OWN STATE
+
+/// Light filters aren't first-class objects in Riley. Instead they are just
+/// extra shaders bolted on to the shader owned by the light. So we need extra
+/// tracking to update the lights when the filters are edited.
 class LightFilterLinks
 {
 
 	public :
 
-		void link( const Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
-		void dirty( const LightFilter *lightFilter );
-		void preRender();
+		void registerLink( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
+		//void dirtyLinks( const LightFilter *lightFilter );
+		void updateDirtyLinks();
 
 	private :
+
+		struct LinkData
+		{
+			std::atomic_bool dirty; // OR A SEPARATE CONTAINER OF DIRTY SETS? THAT WOULD AVOID LINEAR WORK IN UPDATEDIRTYLINKS.
+			std::vector<Light *> affectedLights; // How to remove???
+			//std::vector<riley::CoordinateSystemId>
+		};
+
+		using SetsToLights = std::unordered_map<IECoreScenePreview::Renderer::ConstObjectSetPtr, LinkData>;
+
+		/// NEED TO ACTAULLY MAP TO A SET OF SETS
+		using FiltersToSets = std::unordered_map<const LightFilter *, IECoreScenePreview::Renderer::ConstObjectSetPtr>;
 
 		// m_filtersToSets;
 		// m_setsToLights;
