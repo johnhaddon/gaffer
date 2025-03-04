@@ -1436,9 +1436,114 @@ class RendererTest( GafferTest.TestCase ) :
 		self.assertEqual( messageHandler.messages[0].context, "IECoreRenderMan" )
 		self.assertEqual( messageHandler.messages[0].message, "No outputs defined." )
 
-	def testLightFilterParameterEdits( self ) :
+	def testLightFilter( self ) :
 
-		pass
+		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
+			"RenderMan",
+			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive
+		)
+
+		renderer.output(
+			"test",
+			IECoreScene.Output(
+				"test",
+				"ieDisplay",
+				"rgba",
+				{
+					"driverType" : "ImageDisplayDriver",
+					"handle" : "lightFilterTest",
+				}
+			)
+		)
+
+		sphere = renderer.object(
+			"sphere",
+			IECoreScene.SpherePrimitive(),
+			renderer.attributes( IECore.CompoundObject( {
+				"ri:surface" : IECoreScene.ShaderNetwork(
+					shaders = {
+						"output" : IECoreScene.Shader(
+							"PxrDiffuse",
+							parameters = {
+								"diffuseColor" : imath.Color3f( 1.0 )
+							}
+						)
+					},
+					output = "output",
+				)
+			} ) )
+		)
+		sphere.transform( imath.M44f().translate( imath.V3f( 0, 0, -2 ) ) )
+
+		lightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader( "PxrDomeLight", "ri:light" ),
+			},
+			output = "output",
+		)
+
+		light = renderer.light(
+			"light", None,
+			renderer.attributes(
+				IECore.CompoundObject( {
+					"ri:light" : lightShader,
+					"ri:visibility:camera" : IECore.BoolData( False ),
+				} )
+			)
+		)
+
+		renderer.render()
+		time.sleep( 1 )
+		renderer.pause()
+
+		# No light filter yet. Sphere should appear white.
+
+		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 1 ), 0.01 ) )
+
+		# Add a green light filter. Sphere should appear green.
+
+		def lightFilterAttributes( tint ) :
+
+			return renderer.attributes(
+				IECore.CompoundObject( {
+					"ri:lightfilter:filter" : IECoreScene.ShaderNetwork(
+						shaders = {
+							"output" : IECoreScene.Shader(
+								"PxrIntMultLightFilter", "ri:lightfilter",
+								parameters = { "tint" : tint }
+							),
+						},
+						output = "output",
+					)
+				} )
+			)
+			return
+
+		lightFilter = renderer.lightFilter( "filter", None, lightFilterAttributes( imath.Color3f( 1, 0, 0 ) ) )
+		light.link( "lightFilters", { lightFilter } )
+
+		renderer.render()
+		time.sleep( 1 )
+		renderer.pause()
+
+		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 1, 0, 0 ), 0.01 ) )
+
+		# Edit light filter tint. Sphere should update.
+
+		lightFilter.attributes( lightFilterAttributes( imath.Color3f( 0, 0, 1 ) ) )
+
+		renderer.render()
+		time.sleep( 1 )
+		renderer.pause()
+
+		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+		print( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ) ) ## TODO : REMOVE ME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0, 0, 1 ), 0.01 ) )
+
+		del sphere, light, lightFilter
+		del renderer
 
 	def testLPELobeOptions( self ) :
 
@@ -1524,6 +1629,11 @@ class RendererTest( GafferTest.TestCase ) :
 		i = iy * dimensions.x + ix
 
 		return imath.Color4f( image["R"][i], image["G"][i], image["B"][i], image["A"][i] if "A" in image.keys() else 0.0 )
+
+	def __color3AtUV( self, image, uv ) :
+
+		c = self.__colorAtUV( image, uv )
+		return imath.Color3f( c.r, c.g, c.b )
 
 if __name__ == "__main__":
 	unittest.main()
