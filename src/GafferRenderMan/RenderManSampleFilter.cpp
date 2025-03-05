@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2018, John Haddon. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,53 +34,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
-#include "GafferRenderMan/RenderManAttributes.h"
-#include "GafferRenderMan/RenderManDisplayFilter.h"
-#include "GafferRenderMan/RenderManIntegrator.h"
-#include "GafferRenderMan/RenderManLight.h"
-#include "GafferRenderMan/RenderManMeshLight.h"
-#include "GafferRenderMan/RenderManOptions.h"
 #include "GafferRenderMan/RenderManSampleFilter.h"
-#include "GafferRenderMan/RenderManShader.h"
 
-#include "GafferBindings/DependencyNodeBinding.h"
-
-using namespace boost::python;
 using namespace GafferRenderMan;
 
-namespace
-{
+GAFFER_NODE_DEFINE_TYPE( RenderManSampleFilter );
 
-void loadShader( RenderManLight &l, const std::string &shaderName )
+RenderManSampleFilter::RenderManSampleFilter( const std::string &name )
+	:	RenderManOutputFilter( name, FilterType::Sample )
 {
-	IECorePython::ScopedGILRelease gilRelease;
-	l.loadShader( shaderName );
 }
 
-} // namespace
-
-BOOST_PYTHON_MODULE( _GafferRenderMan )
+RenderManSampleFilter::~RenderManSampleFilter()
 {
-	GafferBindings::DependencyNodeClass<RenderManLight>()
-		.def( "loadShader", &loadShader )
-	;
-	GafferBindings::DependencyNodeClass<RenderManAttributes>();
-	GafferBindings::DependencyNodeClass<RenderManOptions>();
-	GafferBindings::DependencyNodeClass<RenderManShader>();
-	GafferBindings::DependencyNodeClass<RenderManIntegrator>();
-	GafferBindings::DependencyNodeClass<RenderManMeshLight>();
-
-	{
-		scope s = GafferBindings::DependencyNodeClass<RenderManOutputFilter>( nullptr, no_init );
-		enum_<RenderManOutputFilter::Mode>( "Mode" )
-			.value( "Replace", RenderManOutputFilter::Mode::Replace )
-			.value( "InsertFirst", RenderManOutputFilter::Mode::InsertFirst )
-			.value( "InsertLast", RenderManOutputFilter::Mode::InsertLast )
-		;
-	}
-
-	GafferBindings::DependencyNodeClass<RenderManSampleFilter>();
-	GafferBindings::DependencyNodeClass<RenderManDisplayFilter>();
 }

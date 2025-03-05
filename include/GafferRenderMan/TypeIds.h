@@ -47,6 +47,10 @@ enum TypeId
 	RenderManLightTypeId = 110403,
 	RenderManIntegratorTypeId = 110404,
 	RenderManMeshLightTypeId = 110405,
+	RenderManOutputFilterTypeId = 110406,
+	RenderManDisplayFilterTypeId = 110407,
+	RenderManSampleFilterTypeId = 110408,
+
 	LastTypeId = 110450
 };
 

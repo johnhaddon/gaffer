@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2018, John Haddon. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,53 +34,65 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#pragma once
 
-#include "GafferRenderMan/RenderManAttributes.h"
-#include "GafferRenderMan/RenderManDisplayFilter.h"
-#include "GafferRenderMan/RenderManIntegrator.h"
-#include "GafferRenderMan/RenderManLight.h"
-#include "GafferRenderMan/RenderManMeshLight.h"
-#include "GafferRenderMan/RenderManOptions.h"
-#include "GafferRenderMan/RenderManSampleFilter.h"
-#include "GafferRenderMan/RenderManShader.h"
+#include "GafferRenderMan/Export.h"
+#include "GafferRenderMan/TypeIds.h"
 
-#include "GafferBindings/DependencyNodeBinding.h"
+#include "GafferScene/GlobalsProcessor.h"
+#include "GafferScene/ShaderPlug.h"
 
-using namespace boost::python;
-using namespace GafferRenderMan;
-
-namespace
+namespace GafferRenderMan
 {
 
-void loadShader( RenderManLight &l, const std::string &shaderName )
+/// Base class which contains all the shared implementation for RenderManDisplayFilter
+/// and RenderManSampleFilter.
+class GAFFERRENDERMAN_API RenderManOutputFilter : public GafferScene::GlobalsProcessor
 {
-	IECorePython::ScopedGILRelease gilRelease;
-	l.loadShader( shaderName );
-}
 
-} // namespace
+	public :
 
-BOOST_PYTHON_MODULE( _GafferRenderMan )
-{
-	GafferBindings::DependencyNodeClass<RenderManLight>()
-		.def( "loadShader", &loadShader )
-	;
-	GafferBindings::DependencyNodeClass<RenderManAttributes>();
-	GafferBindings::DependencyNodeClass<RenderManOptions>();
-	GafferBindings::DependencyNodeClass<RenderManShader>();
-	GafferBindings::DependencyNodeClass<RenderManIntegrator>();
-	GafferBindings::DependencyNodeClass<RenderManMeshLight>();
+		~RenderManOutputFilter() override;
 
-	{
-		scope s = GafferBindings::DependencyNodeClass<RenderManOutputFilter>( nullptr, no_init );
-		enum_<RenderManOutputFilter::Mode>( "Mode" )
-			.value( "Replace", RenderManOutputFilter::Mode::Replace )
-			.value( "InsertFirst", RenderManOutputFilter::Mode::InsertFirst )
-			.value( "InsertLast", RenderManOutputFilter::Mode::InsertLast )
-		;
-	}
+		GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManOutputFilter, RenderManOutputFilterTypeId, GafferScene::GlobalsProcessor );
 
-	GafferBindings::DependencyNodeClass<RenderManSampleFilter>();
-	GafferBindings::DependencyNodeClass<RenderManDisplayFilter>();
-}
+		enum class Mode
+		{
+			Replace,
+			InsertFirst,
+			InsertLast
+		};
+
+		GafferScene::ShaderPlug *shaderPlug();
+		const GafferScene::ShaderPlug *shaderPlug() const;
+
+		Gaffer::IntPlug *modePlug();
+		const Gaffer::IntPlug *modePlug() const;
+
+		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+
+	protected :
+
+		enum class FilterType
+		{
+			Display,
+			Sample
+		};
+
+		RenderManOutputFilter( const std::string &name, FilterType filterType );
+
+		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+
+		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+
+	private :
+
+		const FilterType m_filterType;
+		static size_t g_firstPlugIndex;
+
+};
+
+IE_CORE_DECLAREPTR( RenderManOutputFilter )
+
+} // namespace GafferRenderMan
