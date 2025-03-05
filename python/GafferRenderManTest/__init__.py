@@ -42,6 +42,8 @@ from .RenderManLightTest import RenderManLightTest
 from .RenderManMeshLightTest import RenderManMeshLightTest
 from .RenderManRenderTest import RenderManRenderTest
 from .InteractiveRenderManRenderTest import InteractiveRenderManRenderTest
+from .RenderManDisplayFilterTest import RenderManDisplayFilterTest
+from .RenderManSampleFilterTest import RenderManSampleFilterTest
 
 if __name__ == "__main__":
 	import unittest
