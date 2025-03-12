@@ -278,5 +278,10 @@ if os.environ.get( "GAFFERRENDERMAN_HIDE_UI", "" ) != "1" :
 
 		] )
 
+	GafferSceneUI.SceneView.registerRenderer(
+		"RenderMan",
+		functools.partial( __loadRendererSettings, os.path.join( os.path.dirname( __file__ ), "renderManViewerSettings.gfr" ) )
+	)
+
 # Add catalogue hotkeys to viewers, eg: up/down navigation
 GafferUI.Editor.instanceCreatedSignal().connect( GafferSceneUI.CatalogueUI.addCatalogueHotkeys )
