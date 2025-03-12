@@ -385,11 +385,19 @@ void Globals::output( const IECore::InternedString &name, const Output *output )
 	{
 		OutputPtr copy = output->copy();
 
-		// Conform "standard" ID output defined by Gaffer's OutputBuffer class
+		// Conform "standard" outputs defined by Gaffer's OutputBuffer class
 		// (used in the raytraced viewport).
 		if( copy->getData() == "float id" && parameter<string>( copy->parameters(), "filter", "" ) == "closest" )
 		{
 			copy->setData( "int id" );
+			copy->parameters()["ri:accumulationRule"] = new StringData( "zmin" );
+			copy->parameters().erase( "filter" );
+		}
+		else if( copy->getData() == "float Z" && parameter<string>( copy->parameters(), "filter", "" ) == "box" )
+		{
+			copy->setData( "float z" );
+			// We'd like this to be `average`, but then all the samples accumulate.
+			// It's not clear how we're meant to normalize that.
 			copy->parameters()["ri:accumulationRule"] = new StringData( "zmin" );
 			copy->parameters().erase( "filter" );
 		}
@@ -844,7 +852,7 @@ const std::vector<riley::RenderOutputId> &Globals::acquireRenderOutputs( const I
 
 	// Additional parameters.
 
-	const RtUString accumulationRule( parameter( output->parameters(), "ri:accumulationRule", string( "filter" ) ).c_str() );
+	RtUString accumulationRule( parameter( output->parameters(), "ri:accumulationRule", string( "filter" ) ).c_str() );
 	const float relativePixelVariance = parameter( output->parameters(), "ri:relativePixelVariance", 0.0f );
 
 	// Hash.
