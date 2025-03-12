@@ -276,6 +276,11 @@ with IECore.IgnoredExceptions( ImportError ) :
 
 	] )
 
+	GafferSceneUI.SceneView.registerRenderer(
+		"RenderMan",
+		functools.partial( __loadRendererSettings, os.path.join( os.path.dirname( __file__ ), "renderManViewerSettings.gfr" ) )
+	)
+
 # Add catalogue hotkeys to viewers, eg: up/down navigation
 GafferUI.Editor.instanceCreatedSignal().connect( GafferImageUI.CatalogueUI.addCatalogueHotkeys )
 GafferUI.Editor.instanceCreatedSignal().connect( GafferSceneUI.EditScopeUI.addPruningActions )
