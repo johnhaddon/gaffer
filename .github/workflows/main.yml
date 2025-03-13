@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - '*'
@@ -46,6 +47,7 @@ jobs:
             # test user rather than as root. We also run with `libSegFault.so` loaded
             # to get more information from any crashes which occur.
             testRunner: LD_PRELOAD=libSegFault.so su testUser -c
+            testArguments: IECoreRenderManTest.RendererTest
             sconsCacheMegabytes: 400
             jobs: 4
 

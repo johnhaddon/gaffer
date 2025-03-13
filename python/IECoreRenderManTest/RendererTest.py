@@ -193,61 +193,69 @@ class RendererTest( GafferTest.TestCase ) :
 
 	def testIntegratorEdit( self ) :
 
-		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
-			"RenderMan",
-			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive
-		)
+		try :
 
-		renderer.output(
-			"test",
-			IECoreScene.Output(
+			renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
+				"RenderMan",
+				GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive
+			)
+
+			renderer.output(
 				"test",
-				"ieDisplay",
-				"rgba",
-				{
-					"driverType" : "ImageDisplayDriver",
-					"handle" : "myLovelySphere",
-				}
+				IECoreScene.Output(
+					"test",
+					"ieDisplay",
+					"rgba",
+					{
+						"driverType" : "ImageDisplayDriver",
+						"handle" : "myLovelySphere",
+					}
+				)
 			)
-		)
 
-		object = renderer.object(
-			"sphere",
-			IECoreScene.SpherePrimitive(),
-			renderer.attributes( IECore.CompoundObject() )
-		)
-
-		renderer.render()
-		time.sleep( 1 )
-		renderer.pause()
-
-		image = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
-		self.assertEqual( self.__colorAtUV( image, imath.V2i( 0.5 ) ), imath.Color4f( 1 ) )
-
-		renderer.option(
-			"ri:integrator",
-			IECoreScene.ShaderNetwork(
-				shaders = {
-					"integrator" : IECoreScene.Shader(
-						"PxrVisualizer", "ri:integrator",
-						{
-							"style" : "objectnormals",
-							"wireframe" : False,
-						}
-					),
-				},
-				output = "integrator"
+			object = renderer.object(
+				"sphere",
+				IECoreScene.SpherePrimitive(),
+				renderer.attributes( IECore.CompoundObject() )
 			)
-		)
 
-		renderer.render()
-		time.sleep( 1 )
+			renderer.render()
+			time.sleep( 1 )
+			renderer.pause()
 
-		image = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
-		self.assertNotEqual( self.__colorAtUV( image, imath.V2i( 0.5 ) ), imath.Color4f( 0, 0.514117, 0.515205, 1 ) )
+			image = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
+			self.assertEqual( self.__colorAtUV( image, imath.V2i( 0.5 ) ), imath.Color4f( 1 ) )
 
-		del object
-		del renderer
+			renderer.option(
+				"ri:integrator",
+				IECoreScene.ShaderNetwork(
+					shaders = {
+						"integrator" : IECoreScene.Shader(
+							"PxrVisualizer", "ri:integrator",
+							{
+								"style" : "objectnormals",
+								"wireframe" : False,
+							}
+						),
+					},
+					output = "integrator"
+				)
+			)
+
+			renderer.render()
+			time.sleep( 1 )
+
+			image = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
+			self.assertNotEqual( self.__colorAtUV( image, imath.V2i( 0.5 ) ), imath.Color4f( 0, 0.514117, 0.515205, 1 ) )
+
+			del object
+			del renderer
+
+		except :
+
+			import traceback
+			traceback.print_exc()
+			raise
 
 	def testEXRLayerNames( self ) :
 
