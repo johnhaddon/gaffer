@@ -41,6 +41,12 @@ shader pointCloudSearch
 )
 {
 	int indices[2];
+
+	// Workaround for presumed OSL batch shading bug. It seems
+	// like OSL thinks the output `indices` will be uniform if
+	// we don't make it clear that they are varying.
+	indices[0] = (int)P[0];
+
 	int numFound = pointcloud_search( name, P, radius, /* maxpoints = */ 2, "index", indices );
 	Ci = color( numFound, indices[0], indices[1] ) * emission();
 }
