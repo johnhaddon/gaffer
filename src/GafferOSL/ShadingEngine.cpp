@@ -754,7 +754,7 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 			return false;
 		}
 
-		void pointcloud_search( BatchedShaderGlobals *sg, ustringhash filename, const void *wcenter, Wide<const float> wradius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
+		void pointcloud_search( BatchedShaderGlobals *sg, ustringhash filename, const void *wideCenterVoid, Wide<const float> wideRadius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
 		{
 			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
 			if( !threadRenderState )
@@ -764,14 +764,13 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 				return;
 			}
 
-			vector<size_t> tmpIndices( maxPoints );
-			vector<float> tmpDistances( maxPoints );
+			vector<size_t> tmpIndices( maxPoints ); tmpIndices.resize( maxPoints );
+			vector<float> tmpDistances( maxPoints ); tmpDistances.resize( maxPoints );
 
 			auto wideIndices = results.windices();
 			auto wideNumPoints = results.wnum_points();
-			auto wideDistances = results.wdistances();
 
-			Wide<const OSL::Vec3> wideCenter( wcenter );
+			Wide<const OSL::Vec3> wideCenter( wideCenterVoid );
 			results.mask().foreach(
 
 				[&] ( ActiveLane lane ) {
@@ -779,21 +778,30 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 					const OSL::Vec3 center = wideCenter[lane];
 					/// \todo Single map lookup, instead of lookup per point
 					int numPoints = threadRenderState->renderState.pointCloudSearch(
-						filename, center, wradius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
+						filename, center, wideRadius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
 					);
 
-					auto distances = wideDistances[lane];
 					auto indices = wideIndices[lane];
 					for( int i = 0; i < numPoints; ++i )
 					{
-						distances[i] = tmpDistances[i];
 						indices[i] = tmpIndices[i];
+					}
+
+					if( results.has_distances() )
+					{
+						auto wideDistances = results.wdistances();
+						auto distances = wideDistances[lane];
+						for( int i = 0; i < numPoints; ++i )
+						{
+							distances[i] = tmpDistances[i];
+						}
 					}
 
 					wideNumPoints[lane] = numPoints;
 				}
 
 			);
+
 		}
 
 		bool is_overridden_pointcloud_search() const override
@@ -801,9 +809,44 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 			return true;
 		}
 
+		Mask pointcloud_get( BatchedShaderGlobals * sg, ustringhash filename, Wide<const int[]> wideIndices, Wide<const int> wideNumPoints, ustringhash attrName, MaskedData wideOutData ) override
+		{
+			Mask result( false );
+			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+			if( !threadRenderState )
+			{
+				// See comments in the non-batched `RendererServices::pointcloud_search()`.
+				IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_get()` can not be constant folded." );
+				return result;
+			}
+
+			vector<char> tmpData(); tmpData.resize( sizeof( float ) * 3 ); // TODO : MORE ACCURATE? BIGGER? ALLOCA?
+			vector<size_t> tmpIndices;
+
+			wideOutData.mask().foreach(
+
+				[&] ( ActiveLane lane ) {
+
+					if( !wideNumPoints[lane] )
+					{
+						result.set_on( lane );
+						return;
+					}
+
+					auto indices = wideIndices[lane];
+
+
+
+				}
+
+			);
+
+			return result;
+		}
+
 		bool is_overridden_pointcloud_get() const override
 		{
-			return false;
+			return true;
 		}
 
 		bool is_overridden_pointcloud_write() const override

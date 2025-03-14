@@ -1077,9 +1077,8 @@ class ShadingEngineTest( GafferOSLTest.OSLTestCase ) :
 		)
 
 		for attr in [ "c", "f", "i" ] :
-			for index in range( 0, 10 ) :
-				with self.subTest( attr = attr, index = index ) :
-
+			with self.subTest( attr = attr ) :
+				for index in range( 0, 10 ) :
 					outputShader = IECoreScene.Shader( shader, "osl:surface", { "name" : "test", "index" : index } )
 					if attr == "c" :
 						outputShader.parameters["colorAttr"] = IECore.StringData( attr )
