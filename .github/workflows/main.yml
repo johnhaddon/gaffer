@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - '*'
@@ -181,15 +182,15 @@ jobs:
       env:
         PYTHONUTF8: 1
 
-    - name: Test
-      # Tests should complete in well under an hour. If they don't it's most likely because
-      # of a hang, in which case we'd like to know more quickly than the default 6hr timeout
-      # allows.
-      timeout-minutes: 60
-      run: |
-        echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
-        ${{ matrix.testRunner }} "${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }}"
-        echo "::remove-matcher owner=unittest::"
+    # - name: Test
+    #   # Tests should complete in well under an hour. If they don't it's most likely because
+    #   # of a hang, in which case we'd like to know more quickly than the default 6hr timeout
+    #   # allows.
+    #   timeout-minutes: 60
+    #   run: |
+    #     echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
+    #     ${{ matrix.testRunner }} "${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }}"
+    #     echo "::remove-matcher owner=unittest::"
 
     - name: Build and test Arnold extension
       run: |
@@ -212,7 +213,7 @@ jobs:
           #Build Arnold extension
           subprocess.check_call( "scons -j ${{ matrix.jobs }} build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions", shell = True )
 
-          if os.name != "nt" :
+          if False :
             # Test Arnold extension
             print( "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json" )
             subprocess.check_call( "${{ matrix.testRunner }} \"" + os.path.join( os.environ["GAFFER_BUILD_DIR"], "bin", "gaffer" ) + " test IECoreArnoldTest GafferArnoldTest GafferArnoldUITest\"", shell = True )

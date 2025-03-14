@@ -2308,6 +2308,8 @@ if haveSphinx and haveInkscape :
 	docCommandEnv["ENV"]["GAFFER_REFERENCE_PATHS"] = os.path.abspath( "doc/references" )
 	docCommandEnv["ENV"]["GAFFER_STARTUP_PATHS"] = os.path.abspath( "doc/startup" )
 
+	docCommandEnv["ENV"]["LD_PRELOAD"] = "libSegFault.so"
+
 	# Ensure that Arnold and 3delight are available in the documentation
 	# environment.
 
