@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - '*'
@@ -180,6 +181,7 @@ jobs:
 
     - name: Build Gaffer
       run: |
+       env
        scons -j ${{ matrix.jobs }} build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
       env:
         PYTHONUTF8: 1
