@@ -14,6 +14,7 @@ API
 Breaking Changes
 ----------------
 
+- OSLObject, OSLImage, Expression : Remove support for file-based pointclouds.
 - StandardNodule : Removed deprecated `setCompatibleLabelsVisible()`.
 - DeleteAttributes : Changed base class and marked as `final`.
 
