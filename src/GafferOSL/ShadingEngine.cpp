@@ -608,7 +608,7 @@ class RenderState
 			return n;
 		}
 
-		int pointCloudGet( ustringhash filename, size_t *indices, int count, ustringhash attrName, TypeDesc attrType, void *outData ) const
+		int pointCloudGet( ustringhash filename, size_t index, ustringhash attrName, TypeDesc attrType, void *outData ) const
 		{
 			auto it = m_pointClouds.find( filename );
 			if( it == m_pointClouds.end() )
@@ -622,28 +622,24 @@ class RenderState
 				return 0;
 			}
 
-			for( int i = 0; i < count; ++i )
+			if( index >= it->second.size )
 			{
-				size_t index = indices[i];
-				if( index >= it->second.size )
-				{
-					return 0;
-				}
-				if( attrIt->second.indices )
-				{
-					index = (*attrIt->second.indices)[index];
-				}
+				return 0;
+			}
+			if( attrIt->second.indices )
+			{
+				index = (*attrIt->second.indices)[index];
+			}
 
-				const char *src = static_cast<const char *>( attrIt->second.dataView.data );
-				src += index * attrIt->second.dataView.type.elementsize();
+			const char *src = static_cast<const char *>( attrIt->second.dataView.data );
+			src += index * attrIt->second.dataView.type.elementsize();
 
-				char *dst = static_cast<char *>( outData );
-				dst += attrType.elementsize() * i;
+			char *dst = static_cast<char *>( outData );
+			//	dst += attrType.elementsize() * i;
 
-				if( !convertValue( dst, attrType.elementtype(), src, attrIt->second.dataView.type ) )
-				{
-					return 0;
-				}
+			if( !convertValue( dst, attrType.elementtype(), src, attrIt->second.dataView.type ) )
+			{
+				return 0;
 			}
 
 			return 1;
@@ -820,23 +816,33 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 				return result;
 			}
 
-			vector<char> tmpData(); tmpData.resize( sizeof( float ) * 3 ); // TODO : MORE ACCURATE? BIGGER? ALLOCA?
-			vector<size_t> tmpIndices;
+			const TypeDesc attrType = wideOutData.type();
+			vector<char> tmpData( wideOutData.type().size() ); // TODO : ALLOCA?
 
 			wideOutData.mask().foreach(
 
 				[&] ( ActiveLane lane ) {
 
-					if( !wideNumPoints[lane] )
+					const int numPoints = wideNumPoints[lane];
+					if( !numPoints )
 					{
-						result.set_on( lane );
+						result.set_on( lane ); // TODO : PROBABLY DON'T NEED.
 						return;
 					}
 
 					auto indices = wideIndices[lane];
+					char *outData = tmpData.data();
+					for( int i = 0; i < numPoints; ++i )
+					{
+						if( !threadRenderState->renderState.pointCloudGet( filename, indices[i], attrName, attrType, outData ) )
+						{
+							//return 0;
+						}
+						outData += attrType.elementsize();
+					}
 
-
-
+					wideOutData.assign_val_lane_from_scalar( lane, tmpData.data() );
+					result.set_on( lane ); // TODO : ACTUAL RESULT
 				}
 
 			);
@@ -1066,7 +1072,18 @@ class RendererServices : public OSL::RendererServices
 				return 0;
 			}
 
-			return threadRenderState->renderState.pointCloudGet( filename, indices, count, attrName, attrType, outData );
+			/// \todo LIFT LOOKUPS OUT
+
+			for( int i = 0; i < count; ++i )
+			{
+				if( !threadRenderState->renderState.pointCloudGet( filename, indices[i], attrName, attrType, outData ) )
+				{
+					return 0;
+				}
+				outData = static_cast<char *>( outData ) + attrType.elementsize();
+			}
+
+			return 1;
 		}
 
 #if OSL_USE_BATCHED
