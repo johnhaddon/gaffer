@@ -332,9 +332,9 @@ struct PointCloud
 			throw std::runtime_error( fmt::format( "Point cloud \"{}\" has no \"P\" primitive variable", name ) );
 		}
 
-		kdTree.init( pData->readable().begin(), pData->readable().end() );
-		firstPoint = pData->readable().begin();
-		size = primitive->variableSize( PrimitiveVariable::Vertex );
+		m_kdTree.init( pData->readable().begin(), pData->readable().end() );
+		m_firstPoint = pData->readable().begin();
+		m_size = primitive->variableSize( PrimitiveVariable::Vertex );
 
 		for( auto &[primVarName, primVar] : primitive->variables )
 		{
@@ -367,11 +367,11 @@ struct PointCloud
 			if( dataView.type.arraylen )
 			{
 				// We unarray the TypeDesc so we can use it directly with
-				// `convertValue()` in `pointCloudGet()`.
+				// `convertValue()` in `get()`.
 				dataView.type.unarray();
 			}
 
-			attributes[ustringhash(primVarName.c_str())] = {
+			m_attributes[ustringhash(primVarName.c_str())] = {
 				dataView,
 				primVar.indices ? &primVar.indices->readable() : nullptr
 			};
@@ -383,7 +383,7 @@ struct PointCloud
 	{
 		vector<IECore::V3fTree::Neighbour> neighbours;
 		neighbours.reserve( maxPoints );
-		int n = kdTree.nearestNNeighbours(
+		int n = m_kdTree.nearestNNeighbours(
 			V3f( center.x, center.y, center.z ),
 			maxPoints, neighbours
 		);
@@ -392,7 +392,7 @@ struct PointCloud
 		{
 			if( outIndices )
 			{
-				*outIndices++ = neighbours[i].point - firstPoint;
+				*outIndices++ = neighbours[i].point - m_firstPoint;
 			}
 			if( outDistances )
 			{
@@ -411,13 +411,13 @@ struct PointCloud
 
 	const Attribute *attribute( ustringhash name ) const
 	{
-		auto it = attributes.find( name );
-		return it != attributes.end() ? &it->second : nullptr;
+		auto it = m_attributes.find( name );
+		return it != m_attributes.end() ? &it->second : nullptr;
 	}
 
 	int get( const Attribute &attribute, int index, TypeDesc outType, void *outData ) const
 	{
-		if( (size_t)index >= size )
+		if( (size_t)index >= m_size )
 		{
 			return 0;
 		}
@@ -438,11 +438,12 @@ struct PointCloud
 		return 1;
 	}
 
-	IECore::V3fTree kdTree;
-	IECore::V3fTree::Iterator firstPoint;
-	size_t size;
+	private :
 
-	container::flat_map<ustringhash, Attribute> attributes;
+		IECore::V3fTree m_kdTree;
+		IECore::V3fTree::Iterator m_firstPoint;
+		size_t m_size;
+		container::flat_map<ustringhash, Attribute> m_attributes;
 
 };
 
