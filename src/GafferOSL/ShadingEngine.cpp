@@ -824,25 +824,25 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 				[&] ( ActiveLane lane ) {
 
 					const int numPoints = wideNumPoints[lane];
-					if( !numPoints )
-					{
-						result.set_on( lane ); // TODO : PROBABLY DON'T NEED.
-						return;
-					}
-
 					auto indices = wideIndices[lane];
 					char *outData = tmpData.data();
+					bool success = true;
+
 					for( int i = 0; i < numPoints; ++i )
 					{
 						if( !threadRenderState->renderState.pointCloudGet( filename, indices[i], attrName, attrType, outData ) )
 						{
-							//return 0;
+							success = false;
+							break;
 						}
 						outData += attrType.elementsize();
 					}
 
 					wideOutData.assign_val_lane_from_scalar( lane, tmpData.data() );
-					result.set_on( lane ); // TODO : ACTUAL RESULT
+					if( success )
+					{
+						result.set_on( lane );
+					}
 				}
 
 			);
