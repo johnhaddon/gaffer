@@ -322,6 +322,130 @@ void maskedDataInitWithZeroDerivs( MaskedData<WidthT> &wval )
 }
 #endif
 
+struct PointCloud
+{
+	PointCloud( const IECoreScene::Primitive *primitive, const std::string &name )
+	{
+		const V3fVectorData *pData = primitive->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+		if( !pData )
+		{
+			throw std::runtime_error( fmt::format( "Point cloud \"{}\" has no \"P\" primitive variable", name ) );
+		}
+
+		kdTree.init( pData->readable().begin(), pData->readable().end() );
+		firstPoint = pData->readable().begin();
+		size = primitive->variableSize( PrimitiveVariable::Vertex );
+
+		for( auto &[primVarName, primVar] : primitive->variables )
+		{
+			if(
+				primVar.interpolation != IECoreScene::PrimitiveVariable::Vertex &&
+				!(
+					primVar.interpolation == IECoreScene::PrimitiveVariable::Varying &&
+					primitive->variableSize( PrimitiveVariable::Vertex ) == primitive->variableSize( PrimitiveVariable::Varying )
+				)
+			)
+			{
+				continue;
+			}
+
+			if( !primitive->isPrimitiveVariableValid( primVar ) )
+			{
+				IECore::msg(
+					IECore::Msg::Warning, "ShadingEngine",
+					fmt::format( "Ignoring invalid primitive variable \"{}\" on point cloud \"{}\"", primVarName, name )
+				);
+				continue;
+			}
+
+			IECoreImage::OpenImageIOAlgo::DataView dataView( primVar.data.get(), /* createUStrings = */ true );
+			if( !dataView.data )
+			{
+				continue;
+			}
+
+			if( dataView.type.arraylen )
+			{
+				// We unarray the TypeDesc so we can use it directly with
+				// `convertValue()` in `pointCloudGet()`.
+				dataView.type.unarray();
+			}
+
+			attributes[ustringhash(primVarName.c_str())] = {
+				dataView,
+				primVar.indices ? &primVar.indices->readable() : nullptr
+			};
+		}
+
+	}
+
+	int search( const OSL::Vec3 &center, float radius, int maxPoints, size_t *outIndices, float *outDistances ) const
+	{
+		vector<IECore::V3fTree::Neighbour> neighbours;
+		neighbours.reserve( maxPoints );
+		int n = kdTree.nearestNNeighbours(
+			V3f( center.x, center.y, center.z ),
+			maxPoints, neighbours
+		);
+
+		for( int i = 0; i < n; ++i )
+		{
+			if( outIndices )
+			{
+				*outIndices++ = neighbours[i].point - firstPoint;
+			}
+			if( outDistances )
+			{
+				*outDistances++ = std::sqrt( neighbours[i].distSquared );
+			}
+		}
+
+		return n;
+	}
+
+	struct Attribute
+	{
+		IECoreImage::OpenImageIOAlgo::DataView dataView;
+		const std::vector<int> *indices;
+	};
+
+	const Attribute *attribute( ustringhash name ) const
+	{
+		auto it = attributes.find( name );
+		return it != attributes.end() ? &it->second : nullptr;
+	}
+
+	int get( const Attribute &attribute, int index, TypeDesc outType, void *outData ) const
+	{
+		if( (size_t)index >= size )
+		{
+			return 0;
+		}
+		if( attribute.indices )
+		{
+			index = (*attribute.indices)[index];
+		}
+
+		const char *src = static_cast<const char *>( attribute.dataView.data );
+		src += index * attribute.dataView.type.elementsize();
+
+		char *dst = static_cast<char *>( outData );
+		if( !convertValue( dst, outType.elementtype(), src, attribute.dataView.type ) )
+		{
+			return 0;
+		}
+
+		return 1;
+	}
+
+	IECore::V3fTree kdTree;
+	IECore::V3fTree::Iterator firstPoint;
+	size_t size;
+
+	container::flat_map<ustringhash, Attribute> attributes;
+
+};
+
 class RenderState
 {
 
@@ -376,57 +500,13 @@ class RenderState
 
 			for( const auto &[name, primitive] : pointClouds )
 			{
-				const V3fVectorData *pData = primitive->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-				if( !pData )
+				try
 				{
-					IECore::msg( IECore::Msg::Warning, "ShadingEngine", fmt::format( "Point cloud \"{}\" has no \"P\" primitive variable", name.string() ) );
-					continue;
+					m_pointClouds[ustringhash(name.c_str())] = std::make_unique<PointCloud>( primitive.get(), name.string() );
 				}
-
-				PointCloud &pointCloud = m_pointClouds[ustringhash(name.c_str())];
-				pointCloud.kdTree.init( pData->readable().begin(), pData->readable().end() );
-				pointCloud.firstPoint = pData->readable().begin();
-				pointCloud.size = primitive->variableSize( PrimitiveVariable::Vertex );
-
-				for( auto &[primVarName, primVar] : primitive->variables )
+				catch( const std::exception &e )
 				{
-					if(
-						primVar.interpolation != IECoreScene::PrimitiveVariable::Vertex &&
-						!(
-							primVar.interpolation == IECoreScene::PrimitiveVariable::Varying &&
-							primitive->variableSize( PrimitiveVariable::Vertex ) == primitive->variableSize( PrimitiveVariable::Varying )
-						)
-					)
-					{
-						continue;
-					}
-
-					if( !primitive->isPrimitiveVariableValid( primVar ) )
-					{
-						IECore::msg(
-							IECore::Msg::Warning, "ShadingEngine",
-							fmt::format( "Ignoring invalid primitive variable \"{}\" on point cloud \"{}\"", primVarName, name.string() )
-						);
-						continue;
-					}
-
-					IECoreImage::OpenImageIOAlgo::DataView dataView( primVar.data.get(), /* createUStrings = */ true );
-					if( !dataView.data )
-					{
-						continue;
-					}
-
-					if( dataView.type.arraylen )
-					{
-						// We unarray the TypeDesc so we can use it directly with
-						// `convertValue()` in `pointCloudGet()`.
-						dataView.type.unarray();
-					}
-
-					pointCloud.attributes[ustringhash(primVarName.c_str())] = {
-						dataView,
-						primVar.indices ? &primVar.indices->readable() : nullptr
-					};
+					IECore::msg( IECore::Msg::Warning, fmt::format( "Point cloud \"{}\"", name.c_str() ), e.what() );
 				}
 			}
 		}
@@ -575,74 +655,10 @@ class RenderState
 			return false;
 		}
 
-		int pointCloudSearch(
-			ustringhash filename, const OSL::Vec3 &center, float radius, int maxPoints,
-			size_t *outIndices, float *outDistances
-		) const
+		const PointCloud *pointCloud( OIIO::ustringhash filename ) const
 		{
 			auto it = m_pointClouds.find( filename );
-			if( it == m_pointClouds.end() )
-			{
-				return 0;
-			}
-
-			vector<IECore::V3fTree::Neighbour> neighbours;
-			neighbours.reserve( maxPoints );
-			int n = it->second.kdTree.nearestNNeighbours(
-				V3f( center.x, center.y, center.z ),
-				maxPoints, neighbours
-			);
-
-			for( int i = 0; i < n; ++i )
-			{
-				if( outIndices )
-				{
-					*outIndices++ = neighbours[i].point - it->second.firstPoint;
-				}
-				if( outDistances )
-				{
-					*outDistances++ = std::sqrt( neighbours[i].distSquared );
-				}
-			}
-
-			return n;
-		}
-
-		int pointCloudGet( ustringhash filename, size_t index, ustringhash attrName, TypeDesc attrType, void *outData ) const
-		{
-			auto it = m_pointClouds.find( filename );
-			if( it == m_pointClouds.end() )
-			{
-				return 0;
-			}
-
-			auto attrIt = it->second.attributes.find( attrName );
-			if( attrIt == it->second.attributes.end() )
-			{
-				return 0;
-			}
-
-			if( index >= it->second.size )
-			{
-				return 0;
-			}
-			if( attrIt->second.indices )
-			{
-				index = (*attrIt->second.indices)[index];
-			}
-
-			const char *src = static_cast<const char *>( attrIt->second.dataView.data );
-			src += index * attrIt->second.dataView.type.elementsize();
-
-			char *dst = static_cast<char *>( outData );
-			//	dst += attrType.elementsize() * i;
-
-			if( !convertValue( dst, attrType.elementtype(), src, attrIt->second.dataView.type ) )
-			{
-				return 0;
-			}
-
-			return 1;
+			return it != m_pointClouds.end() ? it->second.get() : nullptr;
 		}
 
 	private :
@@ -662,22 +678,9 @@ class RenderState
 			ConstDataPtr dataStorage;
 		};
 
-		struct PointCloud
-		{
-			IECore::V3fTree kdTree;
-			IECore::V3fTree::Iterator firstPoint;
-			size_t size;
-			struct Attribute
-			{
-				IECoreImage::OpenImageIOAlgo::DataView dataView;
-				const std::vector<int> *indices;
-			};
-			container::flat_map<ustringhash, Attribute> attributes;
-		};
-
 		container::flat_map<ustringhash, UserData> m_userData;
 		container::flat_map<ustringhash, ContextData> m_contextVariables;
-		container::flat_map<ustringhash, PointCloud> m_pointClouds;
+		container::flat_map<ustringhash, std::unique_ptr<PointCloud>> m_pointClouds;
 
 };
 
@@ -760,6 +763,13 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 				return;
 			}
 
+			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+			if( !pointCloud )
+			{
+				assign_all( results.wnum_points(), 0 );
+				return;
+			}
+
 			vector<size_t> tmpIndices( maxPoints ); tmpIndices.resize( maxPoints );
 			vector<float> tmpDistances( maxPoints ); tmpDistances.resize( maxPoints );
 
@@ -772,9 +782,8 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 				[&] ( ActiveLane lane ) {
 
 					const OSL::Vec3 center = wideCenter[lane];
-					/// \todo Single map lookup, instead of lookup per point
-					int numPoints = threadRenderState->renderState.pointCloudSearch(
-						filename, center, wideRadius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
+					int numPoints = pointCloud->search(
+						center, wideRadius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
 					);
 
 					auto indices = wideIndices[lane];
@@ -816,6 +825,18 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 				return result;
 			}
 
+			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+			if( !pointCloud )
+			{
+				return result;
+			}
+
+			const PointCloud::Attribute *attribute = pointCloud->attribute( attrName );
+			if( !attribute )
+			{
+				return result;
+			}
+
 			const TypeDesc attrType = wideOutData.type();
 			vector<char> tmpData( wideOutData.type().size() ); // TODO : ALLOCA?
 
@@ -830,7 +851,7 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 
 					for( int i = 0; i < numPoints; ++i )
 					{
-						if( !threadRenderState->renderState.pointCloudGet( filename, indices[i], attrName, attrType, outData ) )
+						if( !pointCloud->get( *attribute, indices[i], attrType, outData ) )
 						{
 							success = false;
 							break;
@@ -1055,7 +1076,13 @@ class RendererServices : public OSL::RendererServices
 
 			// TODO : WHAT IS `derivsOffset`?????
 
-			return threadRenderState->renderState.pointCloudSearch( filename, center, radius, maxPoints, outIndices, outDistances );
+			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+			if( !pointCloud )
+			{
+				return 0;
+			}
+
+			return pointCloud->search( center, radius, maxPoints, outIndices, outDistances );
 		}
 
 		virtual int pointcloud_get(
@@ -1072,11 +1099,21 @@ class RendererServices : public OSL::RendererServices
 				return 0;
 			}
 
-			/// \todo LIFT LOOKUPS OUT
+			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+			if( !pointCloud )
+			{
+				return 0;
+			}
+
+			const PointCloud::Attribute *attribute = pointCloud->attribute( attrName );
+			if( !attribute )
+			{
+				return 0;
+			}
 
 			for( int i = 0; i < count; ++i )
 			{
-				if( !threadRenderState->renderState.pointCloudGet( filename, indices[i], attrName, attrType, outData ) )
+				if( !pointCloud->get( *attribute, indices[i], attrType, outData ) )
 				{
 					return 0;
 				}
