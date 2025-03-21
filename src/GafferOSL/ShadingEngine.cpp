@@ -787,7 +787,7 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 						center, wideRadius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
 					);
 
-					auto indices = wideIndices[lane];
+					auto indices = wideIndices[lane]; // TODO : CRASHES IF INDICES NOT PASSED TO BATCHED VERSION (THOUGHT THEY FIXED THIS?)
 					for( int i = 0; i < numPoints; ++i )
 					{
 						indices[i] = tmpIndices[i];
