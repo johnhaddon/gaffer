@@ -144,11 +144,10 @@ OSLObject::SourceLocationPlug::SourceLocationPlug( const std::string &name, Dire
 	:	ValuePlug( name, direction, flags )
 {
 	addChild( new StringPlug( "name" ) );
-	addChild( new BoolPlug( "enabled" ) );
+	addChild( new BoolPlug( "enabled", direction, true ) );
 	addChild( new StringPlug( "location" ) );
 	addChild( new BoolPlug( "pointCloud" ) );
 	addChild( new BoolPlug( "transform" ) );
-
 }
 
 Gaffer::StringPlug *OSLObject::SourceLocationPlug::namePlug()
