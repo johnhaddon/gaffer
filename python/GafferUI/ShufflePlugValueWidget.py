@@ -88,15 +88,6 @@ class ShufflePlugValueWidget( GafferUI.PlugValueWidget ) :
 			verticalAlignment = GafferUI.Label.VerticalAlignment.Top,
 		)
 
-		# Work around annoying Qt behaviour whereby QHBoxLayout expands vertically if all children
-		# have a vertical alignment. This appears to ultimately be the fault of `qSmartMaxSize` in
-		# `qlayoutengine.cpp`, which sets the maximum height to `QLAYOUTSIZE_MAX` when there is _any_
-		# vertical alignment flag set.
-		self.__row.append(
-			GafferUI.Spacer( imath.V2i( 0 ), maximumSize = imath.V2i( 0 ) ),
-			# Note : no `verticalAlignment` argument
-		)
-
 	def setPlugs( self, plugs ) :
 
 		GafferUI.PlugValueWidget.setPlugs( self, plugs )
