@@ -286,10 +286,7 @@ Gaffer.Metadata.registerNode(
 			""",
 
 			"layout:section", "Source Locations",
-			"plugValueWidget:type", "GafferUI.LayoutPlugValueWidget",
-
-			"layout:customWidget:addButton:widgetType", "GafferOSLUI.OSLObjectUI._SourceLocationsAddButton",
-			"layout:customWidget:addButton:index", -1,
+			"plugValueWidget:type", "GafferOSLUI.OSLObjectUI._SourceLocationsPlugValueWidget",
 
 		],
 
@@ -312,6 +309,7 @@ Gaffer.Metadata.registerNode(
 
 			"label", "",
 			"layout:activator", "isEnabled",
+			"layout:width", GafferUI.PlugWidget.labelWidth(),
 
 		],
 
@@ -351,6 +349,7 @@ Gaffer.Metadata.registerNode(
 
 			"label", "",
 			"layout:activator", "isEnabled",
+			"layout:width", 100,
 
 		],
 
@@ -363,6 +362,7 @@ Gaffer.Metadata.registerNode(
 
 			"label", "",
 			"layout:activator", "isEnabled",
+			"layout:width", 100,
 
 		],
 
@@ -370,30 +370,41 @@ Gaffer.Metadata.registerNode(
 
 )
 
-## \todo This is practically identical to the button in CreateViewsUI.py, and
-# the two could probably be consolidated into one.
-class _SourceLocationsAddButton( GafferUI.PlugValueWidget ) :
+class _SourceLocationsPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plug ) :
 
-		row = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal )
+		column = GafferUI.ListContainer( spacing = 4 )
+		GafferUI.PlugValueWidget.__init__( self, column, plug )
 
-		GafferUI.PlugValueWidget.__init__( self, row, plug )
+		with column :
+			with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
+				GafferUI.Label( "<h4><b>Name</b></h4>" )._qtWidget().setFixedWidth( GafferUI.PlugWidget.labelWidth() )
+				GafferUI.Spacer( imath.V2i( 25, 2 ), maximumSize = imath.V2i( 25, 2 ) ) # approximate width of a BoolWidget Switch
+				GafferUI.Label( "<h4><b>Location</b></h4>" )
+				GafferUI.Spacer( imath.V2i( 0 ) )
+				GafferUI.Label( "<h4><b>Pointcloud</b></h4>" )._qtWidget().setFixedWidth( 100 )
+				GafferUI.Label( "<h4><b>Transform</b></h4>" )._qtWidget().setFixedWidth( 100 )
 
-		with row :
+			self.__plugLayout = GafferUI.PlugLayout( plug )
+			self.__addButton = GafferUI.Button( image = "plus.png", hasFrame = False )
+			GafferUI.Spacer( imath.V2i( 0 ), parenting = { "expand" : True } )
 
-			GafferUI.Spacer( imath.V2i( GafferUI.PlugWidget.labelWidth(), 1 ) )
+		self.__addButton.clickedSignal().connect( Gaffer.WeakMethod( self.__addButtonClicked ) )
 
-			self.__button = GafferUI.Button( image = "plus.png", hasFrame = False )
-			self.__button.clickedSignal().connect( Gaffer.WeakMethod( self.__buttonClicked ) )
+	def hasLabel( self ) :
 
-			GafferUI.Spacer( imath.V2i( 1 ), imath.V2i( 999999, 1 ), parenting = { "expand" : True } )
+		return True
+
+	def childPlugValueWidget( self, childPlug ) :
+
+		return self.__plugLayout.plugValueWidget( childPlug )
 
 	def _updateFromEditable( self ) :
 
-		self.__button.setEnabled( self._editable() )
+		self.__addButton.setEnabled( self._editable() )
 
-	def __buttonClicked( self, widget ) :
+	def __addButtonClicked( self, button ) :
 
 		with Gaffer.UndoScope( self.getPlug().ancestor( Gaffer.ScriptNode ) ) :
 			self.getPlug().resize( len( self.getPlug() ) + 1 )
