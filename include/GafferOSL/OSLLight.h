@@ -40,7 +40,6 @@
 #include "GafferOSL/TypeIds.h"
 
 #include "GafferScene/Light.h"
-#include "GafferScene/ShaderPlug.h"
 
 #include "Gaffer/CompoundDataPlug.h"
 
@@ -86,23 +85,12 @@ class GAFFEROSL_API OSLLight : public GafferScene::Light
 
 		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		void loadShader( const std::string &shaderName );
-
 	protected :
 
 		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-		void hashLight( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECoreScene::ConstShaderNetworkPtr computeLight( const Gaffer::Context *context ) const override;
-
 	private :
-
-		OSLShader *shaderNode();
-		const OSLShader *shaderNode() const;
-
-		GafferScene::ShaderPlug *shaderInPlug();
-		const GafferScene::ShaderPlug *shaderInPlug() const;
 
 		static size_t g_firstPlugIndex;
 

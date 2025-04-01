@@ -61,7 +61,7 @@ GAFFER_NODE_DEFINE_TYPE( Light );
 
 size_t Light::g_firstPlugIndex = 0;
 
-Light::Light( const std::string &name )
+Light::Light( const GafferScene::ShaderPtr &shader, const std::string &name )
 	:	ObjectSource( name, "light" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -89,6 +89,11 @@ Light::Light( const std::string &name )
 	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:light:lookThroughClippingPlanes", new IECore::V2fData( Imath::V2f( -100000, 100000 ) ), false, "lookThroughClippingPlanes" ) );
 
 	addChild( visualiserAttr  );
+
+	addChild( new ShaderPlug( "__shaderIn", Plug::In, Plug::Default & ~Plug::Serialisable ) );
+	setChild( "__shader", shader );
+	shaderNode()->parametersPlug()->setFlags( Plug::AcceptsInputs, true );
+	shaderNode()->parametersPlug()->setInput( parametersPlug() );
 }
 
 Light::~Light()
@@ -145,15 +150,42 @@ const Gaffer::CompoundDataPlug *Light::visualiserAttributesPlug() const
 	return getChild<Gaffer::CompoundDataPlug>( g_firstPlugIndex + 4 );
 }
 
+GafferScene::ShaderPlug *Light::shaderPlug()
+{
+	return getChild<ShaderPlug>( g_firstPlugIndex + 5 );
+}
+
+const GafferScene::ShaderPlug *Light::shaderPlug() const
+{
+	return getChild<ShaderPlug>( g_firstPlugIndex + 5 );
+}
+
+GafferScene::Shader *Light::shaderNode()
+{
+	return getChild<Shader>( g_firstPlugIndex + 6 );
+}
+
+const GafferScene::Shader *Light::shaderNode() const
+{
+	return getChild<Shader>( g_firstPlugIndex + 6 );
+}
+
+void Light::loadShader( const std::string &shaderName, bool keepExistingValues )
+{
+	shaderNode()->loadShader( shaderName, keepExistingValues );
+	/// TODO : SOME DERIVED CLASSES WERE SETTING TYPE
+	shaderPlug()->setInput( shaderNode()->outPlug() );
+}
+
 void Light::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ObjectSource::affects( input, outputs );
 
 	if(
-		parametersPlug()->isAncestorOf( input )
-		|| attributesPlug()->isAncestorOf( input )
-		|| visualiserAttributesPlug()->isAncestorOf( input )
-		|| mutePlug()->isAncestorOf( input )
+		input == shaderPlug() ||
+		attributesPlug()->isAncestorOf( input ) ||
+		visualiserAttributesPlug()->isAncestorOf( input ) ||
+		mutePlug()->isAncestorOf( input )
 	) {
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
@@ -185,7 +217,8 @@ IECore::ConstObjectPtr Light::computeSource( const Context *context ) const
 
 void Light::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	hashLight( context, h );
+	// TODO : CHECK BASE CLASS CALL
+	h.append( shaderPlug()->attributesHash() );
 	attributesPlug()->hash( h );
 	visualiserAttributesPlug()->hash( h );
 	mutePlug()->hash( h );
@@ -194,17 +227,7 @@ void Light::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Cont
 IECore::ConstCompoundObjectPtr Light::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
 {
 	IECore::CompoundObjectPtr result = new IECore::CompoundObject;
-
-	std::string lightAttribute = "light";
-
-	IECoreScene::ConstShaderNetworkPtr lightShaders = computeLight( context );
-	if( const IECoreScene::Shader *shader = lightShaders->outputShader() )
-	{
-		lightAttribute = shader->getType();
-	}
-
-	// As we output as const, then this just lets us get through the next few lines...
-	result->members()[lightAttribute] = const_cast<IECoreScene::ShaderNetwork*>( lightShaders.get() );
+	result->members() = shaderPlug()->attributes()->members();
 
 	attributesPlug()->fillCompoundObject( result->members() );
 	visualiserAttributesPlug()->fillCompoundObject( result->members() );

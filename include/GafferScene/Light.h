@@ -38,9 +38,10 @@
 
 #include "GafferScene/ObjectSource.h"
 
-#include "Gaffer/CompoundDataPlug.h"
+#include "GafferScene/Shader.h"
+#include "GafferScene/ShaderPlug.h"
 
-#include "IECoreScene/ShaderNetwork.h"
+#include "Gaffer/CompoundDataPlug.h"
 
 namespace GafferScene
 {
@@ -52,7 +53,6 @@ class GAFFERSCENE_API Light : public ObjectSource
 
 		GAFFER_NODE_DECLARE_TYPE( GafferScene::Light, LightTypeId, ObjectSource );
 
-		explicit Light( const std::string &name=defaultName<Light>() );
 		~Light() override;
 
 		Gaffer::CompoundDataPlug *attributesPlug();
@@ -72,9 +72,14 @@ class GAFFERSCENE_API Light : public ObjectSource
 		Gaffer::CompoundDataPlug *visualiserAttributesPlug();
 		const Gaffer::CompoundDataPlug *visualiserAttributesPlug() const;
 
+		/// TODO : CHECK THE DEFAULT VALUE FOR `keepExistingValues` AGAINST OLD IMPLEMENTATIONS.
+		void loadShader( const std::string &shaderName, bool keepExistingValues = false );
+
 		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
 	protected :
+
+		Light( const GafferScene::ShaderPtr &shader, const std::string &name=defaultName<Light>() );
 
 		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
@@ -88,12 +93,13 @@ class GAFFERSCENE_API Light : public ObjectSource
 		void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 		IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 
-		/// Must be implemented by derived classes to hash and generate the light to be placed
-		/// in the scene graph.
-		virtual void hashLight( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
-		virtual IECoreScene::ConstShaderNetworkPtr computeLight( const Gaffer::Context *context ) const = 0;
-
 	private :
+
+		GafferScene::ShaderPlug *shaderPlug();
+		const GafferScene::ShaderPlug *shaderPlug() const;
+
+		GafferScene::Shader *shaderNode();
+		const GafferScene::Shader *shaderNode() const;
 
 		static size_t g_firstPlugIndex;
 

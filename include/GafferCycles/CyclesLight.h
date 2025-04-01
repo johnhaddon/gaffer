@@ -40,8 +40,6 @@
 #include "GafferCycles/TypeIds.h"
 
 #include "GafferScene/Light.h"
-#include "GafferScene/Shader.h"
-#include "GafferScene/ShaderPlug.h"
 
 namespace GafferCycles
 {
@@ -55,25 +53,6 @@ class GAFFERCYCLES_API CyclesLight : public GafferScene::Light
 
 		explicit CyclesLight( const std::string &name=defaultName<CyclesLight>() );
 		~CyclesLight() override;
-
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
-
-		void loadShader( const std::string &shaderName );
-
-	protected :
-
-		void hashLight( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECoreScene::ConstShaderNetworkPtr computeLight( const Gaffer::Context *context ) const override;
-
-	private :
-
-		GafferScene::Shader *shaderNode();
-		const GafferScene::Shader *shaderNode() const;
-
-		GafferScene::ShaderPlug *shaderInPlug();
-		const GafferScene::ShaderPlug *shaderInPlug() const;
-
-		static size_t g_firstPlugIndex;
 
 };
 

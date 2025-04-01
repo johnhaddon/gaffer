@@ -112,7 +112,9 @@ TestShader::TestShader( const std::string &name )
 
 	addChild( new Color3fPlug( "out", Plug::Out ) );
 
-	loadShader( "simpleShader" );
+	/// TODO : UPDATE TESTS. DO THIS IN A SEPARATE COMMIT BEFORE EVERYTHING ELSE.
+	/// AND STOP TESTLIGHT LOADING AUTOMATICALLY IN THE CONSTRUCTOR TOO.
+	//loadShader( "simpleShader" );
 }
 
 TestShader::~TestShader()
