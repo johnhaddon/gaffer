@@ -152,16 +152,6 @@ const Gaffer::CompoundDataPlug *OSLLight::geometryParametersPlug() const
 	return getChild<CompoundDataPlug>( g_firstPlugIndex + 5 );
 }
 
-Gaffer::CompoundDataPlug *OSLLight::attributesPlug()
-{
-	return Light::attributesPlug();
-}
-
-const Gaffer::CompoundDataPlug *OSLLight::attributesPlug() const
-{
-	return Light::attributesPlug();
-}
-
 OSLShader *OSLLight::shaderNode()
 {
 	return getChild<OSLShader>( g_firstPlugIndex + 6 );
@@ -238,16 +228,6 @@ IECore::ConstObjectPtr OSLLight::computeSource( const Gaffer::Context *context )
 		}
 	}
 	return NullObject::defaultNullObject();
-}
-
-void OSLLight::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const
-{
-	Light::hashAttributes( path, context, parent, h );
-}
-
-IECore::ConstCompoundObjectPtr OSLLight::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent ) const
-{
-	return Light::computeAttributes( path, context, parent );
 }
 
 void OSLLight::hashLight( const Gaffer::Context *context, IECore::MurmurHash &h ) const
