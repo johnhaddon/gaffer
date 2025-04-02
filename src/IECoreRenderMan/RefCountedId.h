@@ -73,6 +73,11 @@ class RefCountedId : public IECore::RefCounted
 			{
 				m_session->riley->DeleteDisplacement( m_id );
 			}
+			else if constexpr( std::is_same_v<T, riley::LightShaderId> )
+			{
+				/// TODO : REMOVE CAST
+				const_cast<Session *>( m_session )->deleteLightShader( m_id );
+			}
 			// Deliberately not checking type for the last case, so that we get
 			// a compilation error if compiled for types we haven't added a
 			// delete for.
