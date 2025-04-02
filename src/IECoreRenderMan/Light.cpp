@@ -222,21 +222,33 @@ void Light::assignID( uint32_t id )
 {
 }
 
-void Light::applyLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> &networks, const std::vector<RtUString> &coordSysNames )
+void Light::applyCoordinateSystems( const std::vector<riley::CoordinateSystemId> &coordinateSystems )
+{
+	const riley::CoordinateSystemList list = { (uint32_t)coordinateSystems.size(), coordinateSystems.data() };
+	m_session->modifyLightInstance(
+		m_lightInstance,
+		/* material = */ nullptr,
+		/* light shader = */ nullptr,
+		&list,
+		/* transform = */ nullptr,
+		/* attributes = */ nullptr
+
+	);
+}
+
+void Light::applyLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> &shaders )
 {
 	// TODO : HOW DOES THIS RELATE TO `updateLightShader()`????????????
 
 	if( m_attributes->lightShader() )
 	{
-		std::cerr << "APPLYING LIGHT FILTERS " << networks.size() << std::endl;
-
-		//std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( attributes->lightShader() );
-		ConstLightShaderPtr newLightShader = m_materialCache->getLightShader( m_attributes->lightShader(), networks );
+		ConstLightShaderPtr newLightShader = m_materialCache->getLightShader( m_attributes->lightShader(), shaders );
 
 		m_session->modifyLightInstance(
 			m_lightInstance,
 			/* material = */ nullptr,
 			/* light shader = */ &newLightShader->id(),
+			/* coordinateSystems = */ nullptr,
 			/* xform = */ nullptr,
 			nullptr
 		);

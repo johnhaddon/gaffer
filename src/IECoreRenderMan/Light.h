@@ -67,8 +67,10 @@ class Light : public IECoreScenePreview::Renderer::ObjectInterface
 		void assignID( uint32_t id ) override;
 
 		// Interface used by LightLinker
+		// =============================
 
-		void applyLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> &networks, const std::vector<RtUString> &coordSysNames ); // TODO : CAN LIGHTFILTER DO THE COORDSYS BIT INTERNALLY?
+		void applyCoordinateSystems( const std::vector<riley::CoordinateSystemId> &coordinateSystems );
+		void applyLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> &shaders );
 
 	private :
 

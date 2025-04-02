@@ -40,6 +40,8 @@
 
 #include "Transform.h"
 
+#include "IECore/SimpleTypedData.h"
+
 using namespace std;
 using namespace Imath;
 using namespace IECoreRenderMan;
@@ -54,19 +56,13 @@ const RtUString g_name( "name" );
 LightFilter::LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker )
 	:	m_session( session ), m_coordinateSystemName( name.c_str() ), m_lightLinker( lightLinker )
 {
-	const Attributes *typedAttributes = static_cast<const Attributes *>( attributes );
-
-	// OLD ===========================================
-
-	m_shader = typedAttributes->lightFilter();
-	//std::cerr << "MAKING LIGHT FILTER" << std::endl;
 	RtParamList params;
 	params.SetString( g_name, m_coordinateSystemName );
 	m_coordinateSystem = session->riley->CreateCoordinateSystem(
 		riley::UserId(), IdentityTransform(), params
 	);
 
-	//this->attributes( attributes ); // TODO : DON'T NEED???
+	this->attributes( attributes );
 }
 
 LightFilter::~LightFilter()
@@ -109,8 +105,18 @@ void LightFilter::transform( const std::vector<Imath::M44f> &samples, const std:
 bool LightFilter::attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes )
 {
 	const Attributes *typedAttributes = static_cast<const Attributes *>( attributes );
-
-	m_shader = typedAttributes->lightFilter();
+	if( !typedAttributes->lightFilter() || !typedAttributes->lightFilter()->outputShader() )
+	{
+		m_shader = nullptr;
+	}
+	else
+	{
+		IECoreScene::ShaderNetworkPtr network = typedAttributes->lightFilter()->copy();
+		IECoreScene::ShaderPtr outputShader = network->outputShader()->copy();
+		outputShader->parameters()["coordsys"] = new IECore::StringData( m_coordinateSystemName.CStr() );
+		network->setShader( network->getOutput().shader, std::move( outputShader ) );
+		m_shader = network;
+	}
 
 	/// \todo I bet this is going to be a pain - we need to update the fricking linked lights now don't we?
 	return true;

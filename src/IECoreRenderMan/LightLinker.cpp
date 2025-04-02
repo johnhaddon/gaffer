@@ -66,7 +66,7 @@ void LightLinker::link( Light *light, const IECore::InternedString &type, const 
 	// OLD =======================================================================
 
 	vector<const IECoreScene::ShaderNetwork *> filterNetworks;
-	vector<RtUString> coordinateSystemNames;
+	vector<riley::CoordinateSystemId> coordinateSystems;
 	for( const auto &s : *objects )
 	{
 		auto lightFilter = static_cast<const LightFilter *>( s.get() );
@@ -75,7 +75,7 @@ void LightLinker::link( Light *light, const IECore::InternedString &type, const 
 			continue;
 		}
 		filterNetworks.push_back( lightFilter->shader() );
-		coordinateSystemNames.push_back( lightFilter->coordinateSystemName() );
+		coordinateSystems.push_back( lightFilter->coordinateSystem() );
 	}
 
 	// if( !filterNetworks.size() )
@@ -85,7 +85,8 @@ void LightLinker::link( Light *light, const IECore::InternedString &type, const 
 	// }
 
 	// std::cerr << "Calling convertLightFilters" << std::endl;
-	light->applyLightFilters( filterNetworks, coordinateSystemNames );
+	light->applyCoordinateSystems( coordinateSystems );
+	light->applyLightFilters( filterNetworks );
 }
 
 void LightLinker::dirtyLightFilter( LightFilter *lightFilter )
