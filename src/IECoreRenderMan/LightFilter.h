@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2024, Cinesite VFX Ltd. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -39,9 +39,7 @@
 #include "GafferScene/Private/IECoreScenePreview/Renderer.h"
 
 #include "Attributes.h"
-#include "GeometryPrototypeCache.h"
 #include "LightLinker.h"
-#include "MaterialCache.h"
 #include "Session.h"
 
 #include "Riley.h"
@@ -49,16 +47,13 @@
 namespace IECoreRenderMan
 {
 
-class Light : public IECoreScenePreview::Renderer::ObjectInterface
+class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
 	public :
 
-		Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session );
-		~Light();
-
-		// ObjectInterface overrides
-		// =========================
+		LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker );
+		~LightFilter();
 
 		void transform( const Imath::M44f &transform ) override;
 		void transform( const std::vector<Imath::M44f> &samples, const std::vector<float> &times ) override;
@@ -66,25 +61,28 @@ class Light : public IECoreScenePreview::Renderer::ObjectInterface
 		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
 		void assignID( uint32_t id ) override;
 
-		// Interface used by LightLinker
+		Session::LightFilterId lightFilterId() const { return m_lightFilter; };
 
-		void applyLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> &networks, const std::vector<RtUString> &coordSysNames ); // TODO : CAN LIGHTFILTER DO THE COORDSYS BIT INTERNALLY?
+
+		/// TODO : REMOVE
+
+		/// Unlike light and geometry instances, light filters in RenderMan
+		/// don't have a first class transform. Instead we must use a coordinate
+		/// system and pass its name to a parameter on the light filter.
+		riley::CoordinateSystemId coordinateSystem() const;
+		RtUString coordinateSystemName() const;
+		const IECoreScene::ShaderNetwork *shader() const;
 
 	private :
 
-		void updateLightShader( const Attributes *attributes );
-
-		MaterialCache *m_materialCache;
 		Session *m_session;
-		//riley::LightShaderId m_lightShader;
-		ConstLightShaderPtr m_lightShader;
-		riley::LightInstanceId m_lightInstance;
-		Imath::M44f m_correctiveTransform;
-		/// Used to keep material etc alive as long as we need it.
-		ConstAttributesPtr m_attributes;
-		/// Used to keep geometry prototype alive as long as we need it.
-		ConstGeometryPrototypePtr m_geometryPrototype;
-		LightLinker *m_lightLinker; // TODO : PUT UP TOP
+		Session::LightFilterId m_lightFilter;
+
+		/// TODO : REMOVE REMOVE REMOVE
+		RtUString m_coordinateSystemName;
+		riley::CoordinateSystemId m_coordinateSystem;
+		IECoreScene::ConstShaderNetworkPtr m_shader;
+		LightLinker *m_lightLinker;
 
 };
 

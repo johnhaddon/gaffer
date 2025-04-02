@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2024, Cinesite VFX Ltd. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,53 +38,39 @@
 
 #include "GafferScene/Private/IECoreScenePreview/Renderer.h"
 
-#include "Attributes.h"
-#include "GeometryPrototypeCache.h"
-#include "LightLinker.h"
-#include "MaterialCache.h"
-#include "Session.h"
+#include "tbb/concurrent_hash_map.h"
+#include "tbb/concurrent_unordered_set.h"
 
-#include "Riley.h"
+#include <unordered_set>
 
 namespace IECoreRenderMan
 {
 
-class Light : public IECoreScenePreview::Renderer::ObjectInterface
+class Light;
+class LightFilter;
+
+class LightLinker
 {
 
 	public :
 
-		Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session );
-		~Light();
+		LightLinker( IECoreScenePreview::Renderer::RenderType renderType );
 
-		// ObjectInterface overrides
-		// =========================
+		void link( Light *light, const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects );
+		void dirtyLightFilter( LightFilter *lightFilter );
 
-		void transform( const Imath::M44f &transform ) override;
-		void transform( const std::vector<Imath::M44f> &samples, const std::vector<float> &times ) override;
-		bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
-		void assignID( uint32_t id ) override;
-
-		// Interface used by LightLinker
-
-		void applyLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> &networks, const std::vector<RtUString> &coordSysNames ); // TODO : CAN LIGHTFILTER DO THE COORDSYS BIT INTERNALLY?
+		void updateDirtyLinks();
 
 	private :
 
-		void updateLightShader( const Attributes *attributes );
+		IECoreScenePreview::Renderer::RenderType m_renderType;
 
-		MaterialCache *m_materialCache;
-		Session *m_session;
-		//riley::LightShaderId m_lightShader;
-		ConstLightShaderPtr m_lightShader;
-		riley::LightInstanceId m_lightInstance;
-		Imath::M44f m_correctiveTransform;
-		/// Used to keep material etc alive as long as we need it.
-		ConstAttributesPtr m_attributes;
-		/// Used to keep geometry prototype alive as long as we need it.
-		ConstGeometryPrototypePtr m_geometryPrototype;
-		LightLinker *m_lightLinker; // TODO : PUT UP TOP
+		using FilteredLights = tbb::concurrent_hash_map<LightFilter *, std::unordered_set<Light *>>;
+		FilteredLights m_filteredLights;
+
+		/// TODO : REMOVE LIGHTS WHEN THEY ARE DELETED
+		using LightSet = tbb::concurrent_unordered_set<Light *>;
+		LightSet m_dirtyLights;
 
 };
 
