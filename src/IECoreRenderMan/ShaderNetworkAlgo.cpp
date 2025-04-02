@@ -718,19 +718,16 @@ void convertUSDShaders( ShaderNetwork *shaderNetwork )
 	IECoreScene::ShaderNetworkAlgo::removeUnusedShaders( shaderNetwork );
 }
 
-} // namespace IECoreRenderMan::ShaderNetworkAlgo
-std::vector<riley::ShadingNode> IECoreRenderMan::ShaderNetworkAlgo::convertLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> networks, const std::vector<RtUString> &coordSysNames )
+std::vector<riley::ShadingNode> convertLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> networks )
 {
 	if( networks.empty() )
 	{
 		return {};
 	}
 
-	if( networks.size() == 1 ) //TODO : REINTRODUCE
+	if( networks.size() == 1 )
 	{
-		auto result = convert( networks[0] );
-		result.back().params.SetString( RtUString( "coordsys" ), coordSysNames[0] );
-		return result;
+		return convert( networks[0] );
 	}
 
 	unordered_map<string, size_t> numConnections;
@@ -743,8 +740,6 @@ std::vector<riley::ShadingNode> IECoreRenderMan::ShaderNetworkAlgo::convertLight
 
 	for( auto network : networks )
 	{
-		// TODO : COORDINATE SYSTEM NAMES
-
 		const Shader *outputShader = network->outputShader();
 		if( !outputShader )
 		{
@@ -767,3 +762,5 @@ std::vector<riley::ShadingNode> IECoreRenderMan::ShaderNetworkAlgo::convertLight
 
 	return convert( combinedNetwork.get() );
 }
+
+} // namespace IECoreRenderMan::ShaderNetworkAlgo
