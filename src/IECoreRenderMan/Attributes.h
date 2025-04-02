@@ -73,6 +73,8 @@ class Attributes : public IECoreScenePreview::Renderer::AttributesInterface
 		/// light emission. Returns `nullptr` for all non-mesh lights.
 		const Material *lightMaterial() const;
 
+		const IECoreScene::ShaderNetwork *lightFilter() const;
+
 	private :
 
 		std::optional<IECore::MurmurHash> m_prototypeHash;
@@ -81,8 +83,10 @@ class Attributes : public IECoreScenePreview::Renderer::AttributesInterface
 		ConstMaterialPtr m_surfaceMaterial;
 		ConstDisplacementPtr m_displacement;
 		/// \todo Could we use the material cache for these too?
+		/// Possibly, but we'd need to include light filters too.
 		IECoreScene::ConstShaderNetworkPtr m_lightShader;
 		ConstMaterialPtr m_lightMaterial;
+		IECoreScene::ConstShaderNetworkPtr m_lightFilter;
 
 };
 
