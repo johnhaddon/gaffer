@@ -61,11 +61,6 @@ class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
 		void assignID( uint32_t id ) override;
 
-		Session::LightFilterId lightFilterId() const { return m_lightFilter; };
-
-
-		/// TODO : REMOVE
-
 		/// Unlike light and geometry instances, light filters in RenderMan
 		/// don't have a first class transform. Instead we must use a coordinate
 		/// system and pass its name to a parameter on the light filter.
@@ -76,9 +71,7 @@ class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 	private :
 
 		Session *m_session;
-		Session::LightFilterId m_lightFilter;
 
-		/// TODO : REMOVE REMOVE REMOVE
 		RtUString m_coordinateSystemName;
 		riley::CoordinateSystemId m_coordinateSystem;
 		IECoreScene::ConstShaderNetworkPtr m_shader;

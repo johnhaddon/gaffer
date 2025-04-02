@@ -55,13 +55,6 @@ LightFilter::LightFilter( const std::string &name, const Attributes *attributes,
 	:	m_session( session ), m_coordinateSystemName( name.c_str() ), m_lightLinker( lightLinker )
 {
 	const Attributes *typedAttributes = static_cast<const Attributes *>( attributes );
-	std::vector<riley::ShadingNode> shaders;
-	if( auto network = typedAttributes->lightFilter() )
-	{
-		shaders = ShaderNetworkAlgo::convert( network );
-	}
-
-	m_lightFilter = session->createLightFilter( RtUString( name.c_str() ), { (uint32_t)shaders.size(), shaders.data() }, IdentityTransform() );
 
 	// OLD ===========================================
 
@@ -80,7 +73,7 @@ LightFilter::~LightFilter()
 {
 	if( m_session->renderType == IECoreScenePreview::Renderer::Interactive )
 	{
-		m_session->deleteLightFilter( m_lightFilter );
+		m_session->riley->DeleteCoordinateSystem( m_coordinateSystem );
 	}
 }
 
@@ -89,19 +82,11 @@ void LightFilter::transform( const Imath::M44f &transform )
 	/// \todo DO WE NEED TO FLIP IN Z???
 	StaticTransform staticTransform( transform );
 
-	const auto result = m_session->modifyLightFilter( m_lightFilter, nullptr, &staticTransform );
-	if( result != riley::CoordinateSystemResult::k_Success )
-	{
-		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::LightFilter::transform", "Unexpected edit failure" );
-	}
-
-	// OLD ===========================================
-
-	const riley::CoordinateSystemResult result2 = m_session->riley->ModifyCoordinateSystem(
+	const riley::CoordinateSystemResult result = m_session->riley->ModifyCoordinateSystem(
 		m_coordinateSystem, &staticTransform, /* attributes = */ nullptr
 	);
 
-	if( result2 != riley::CoordinateSystemResult::k_Success )
+	if( result != riley::CoordinateSystemResult::k_Success )
 	{
 		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::LightFilter::transform", "Unexpected edit failure" );
 	}
@@ -111,19 +96,11 @@ void LightFilter::transform( const std::vector<Imath::M44f> &samples, const std:
 {
 	AnimatedTransform animatedTransform( samples, times );
 
-	const auto result = m_session->modifyLightFilter( m_lightFilter, nullptr, &animatedTransform );
-	if( result != riley::CoordinateSystemResult::k_Success )
-	{
-		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::LightFilter::transform", "Unexpected edit failure" );
-	}
-
-	// OLD ===========================================
-
-	const riley::CoordinateSystemResult result2 = m_session->riley->ModifyCoordinateSystem(
+	const riley::CoordinateSystemResult result = m_session->riley->ModifyCoordinateSystem(
 		m_coordinateSystem, &animatedTransform, /* attributes = */ nullptr
 	);
 
-	if( result2 != riley::CoordinateSystemResult::k_Success )
+	if( result != riley::CoordinateSystemResult::k_Success )
 	{
 		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::LightFilter::transform", "Unexpected edit failure" );
 	}
@@ -132,18 +109,6 @@ void LightFilter::transform( const std::vector<Imath::M44f> &samples, const std:
 bool LightFilter::attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes )
 {
 	const Attributes *typedAttributes = static_cast<const Attributes *>( attributes );
-
-	std::vector<riley::ShadingNode> shaders;
-	if( auto network = typedAttributes->lightFilter() )
-	{
-		shaders = ShaderNetworkAlgo::convert( network );
-	}
-
-	/// TODO : DON'T BOTHER WHEN THE SHADER DIDN'T CHANGE
-	riley::ShadingNetwork network = { (uint32_t)shaders.size(), shaders.data() };
-	m_session->modifyLightFilter( m_lightFilter, &network, /* transform = */ nullptr );
-
-	// OLD ===========================================
 
 	m_shader = typedAttributes->lightFilter();
 
