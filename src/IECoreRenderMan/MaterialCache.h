@@ -65,7 +65,7 @@ class MaterialCache
 		// Can be called concurrently with other calls to `get()`
 		ConstMaterialPtr getMaterial( const IECoreScene::ShaderNetwork *network );
 		ConstDisplacementPtr getDisplacement( const IECoreScene::ShaderNetwork *network );
-		ConstLightShaderPtr getLightShader( const IECoreScene::ShaderNetwork *network, const std::vector<const IECoreScene::ShaderNetwork *> &lightFilters, const std::vector<RtUString> &lightFilterCoordinateSystems );
+		ConstLightShaderPtr getLightShader( const IECoreScene::ShaderNetwork *network, const std::vector<const IECoreScene::ShaderNetwork *> &lightFilters );
 
 		// Must not be called concurrently with anything.
 		void clearUnused();

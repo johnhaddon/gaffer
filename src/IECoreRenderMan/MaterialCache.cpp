@@ -74,16 +74,12 @@ ConstDisplacementPtr MaterialCache::getDisplacement( const IECoreScene::ShaderNe
 	return a->second;
 }
 
-ConstLightShaderPtr MaterialCache::getLightShader( const IECoreScene::ShaderNetwork *network, const std::vector<const IECoreScene::ShaderNetwork *> &lightFilters, const std::vector<RtUString> &lightFilterCoordinateSystems )
+ConstLightShaderPtr MaterialCache::getLightShader( const IECoreScene::ShaderNetwork *network, const std::vector<const IECoreScene::ShaderNetwork *> &lightFilters )
 {
 	IECore::MurmurHash h = network->Object::hash();
 	for( const auto &lightFilter : lightFilters )
 	{
 		lightFilter->hash( h );
-	}
-	for( const auto &coordinateSystem : lightFilterCoordinateSystems )
-	{
-		h.append( coordinateSystem.CStr() );
 	}
 
 	LightShaderCache::accessor a;
@@ -91,7 +87,7 @@ ConstLightShaderPtr MaterialCache::getLightShader( const IECoreScene::ShaderNetw
 	if( !a->second )
 	{
 		std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( network );
-		std::vector<riley::ShadingNode> filterNodes = ShaderNetworkAlgo::convertLightFilters( lightFilters, lightFilterCoordinateSystems );
+		std::vector<riley::ShadingNode> filterNodes = ShaderNetworkAlgo::convertLightFilters( lightFilters );
 		riley::LightShaderId id = m_session->createLightShader( { (uint32_t)nodes.size(), nodes.data() }, { (uint32_t)filterNodes.size(), filterNodes.data() } );
 		a->second = new LightShader( id, m_session );
 	}
