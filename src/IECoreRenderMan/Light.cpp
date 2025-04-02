@@ -231,7 +231,7 @@ void Light::applyLightFilters( const std::vector<const IECoreScene::ShaderNetwor
 		std::cerr << "APPLYING LIGHT FILTERS " << networks.size() << std::endl;
 
 		//std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( attributes->lightShader() );
-		ConstLightShaderPtr newLightShader = m_materialCache->getLightShader( m_attributes->lightShader(), networks, coordSysNames );
+		ConstLightShaderPtr newLightShader = m_materialCache->getLightShader( m_attributes->lightShader(), networks );
 
 		m_session->modifyLightInstance(
 			m_lightInstance,
@@ -262,7 +262,7 @@ void Light::updateLightShader( const Attributes *attributes )
 	if( attributes->lightShader() )
 	{
 		//std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( attributes->lightShader() );
-		m_lightShader = m_materialCache->getLightShader( attributes->lightShader(), {}, {} );
+		m_lightShader = m_materialCache->getLightShader( attributes->lightShader(), {} );
 	}
 	else
 	{
