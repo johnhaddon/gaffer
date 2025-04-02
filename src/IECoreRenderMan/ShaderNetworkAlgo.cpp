@@ -719,3 +719,51 @@ void convertUSDShaders( ShaderNetwork *shaderNetwork )
 }
 
 } // namespace IECoreRenderMan::ShaderNetworkAlgo
+std::vector<riley::ShadingNode> IECoreRenderMan::ShaderNetworkAlgo::convertLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> networks, const std::vector<RtUString> &coordSysNames )
+{
+	if( networks.empty() )
+	{
+		return {};
+	}
+
+	if( networks.size() == 1 ) //TODO : REINTRODUCE
+	{
+		auto result = convert( networks[0] );
+		result.back().params.SetString( RtUString( "coordsys" ), coordSysNames[0] );
+		return result;
+	}
+
+	unordered_map<string, size_t> numConnections;
+
+	ShaderNetworkPtr combinedNetwork = new ShaderNetwork;
+	auto combinerHandle = combinedNetwork->addShader(
+		"combiner", new Shader( "PxrCombinerLightFilter", "lightFilter" )
+	);
+	combinedNetwork->setOutput( { combinerHandle, "out" } );
+
+	for( auto network : networks )
+	{
+		// TODO : COORDINATE SYSTEM NAMES
+
+		const Shader *outputShader = network->outputShader();
+		if( !outputShader )
+		{
+			continue;
+		}
+
+		string combineMode = "mult";
+		if( auto combineModeData = outputShader->parametersData()->member<StringData>( "combineMode" ) )
+		{
+			combineMode = combineModeData->readable();
+		}
+
+		ShaderNetwork::Parameter filterHandle = IECoreScene::ShaderNetworkAlgo::addShaders( combinedNetwork.get(), network );
+
+		const size_t connectionIndex = numConnections[combineMode]++;
+		combinedNetwork->addConnection(
+			ShaderNetwork::Connection( filterHandle, { combinerHandle, fmt::format( "{}[{}]", combineMode, connectionIndex ) } )
+		);
+	}
+
+	return convert( combinedNetwork.get() );
+}
