@@ -49,6 +49,9 @@ namespace IECoreRenderMan
 class Light;
 class LightFilter;
 
+/// Light filters aren't first-class objects in Riley. Instead they are just
+/// extra shaders bolted on to the shader owned by the light. So we need our own
+/// centralised tracking to update the lights when the filters are edited.
 class LightLinker
 {
 
