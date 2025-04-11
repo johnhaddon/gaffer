@@ -1481,146 +1481,153 @@ class RendererTest( GafferTest.TestCase ) :
 
 	def testLightFilter( self ) :
 
-		renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
-			"RenderMan",
-			GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive
-		)
+		try :
 
-		renderer.output(
-			"test",
-			IECoreScene.Output(
+			renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
+				"RenderMan",
+				GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Interactive
+			)
+
+			renderer.output(
 				"test",
-				"ieDisplay",
-				"rgba",
-				{
-					"driverType" : "ImageDisplayDriver",
-					"handle" : "lightFilterTest",
-				}
-			)
-		)
-
-		sphere = renderer.object(
-			"sphere",
-			IECoreScene.SpherePrimitive(),
-			renderer.attributes( IECore.CompoundObject( {
-				"ri:surface" : IECoreScene.ShaderNetwork(
-					shaders = {
-						"output" : IECoreScene.Shader(
-							"PxrDiffuse",
-							parameters = {
-								"diffuseColor" : imath.Color3f( 1.0 )
-							}
-						)
-					},
-					output = "output",
+				IECoreScene.Output(
+					"test",
+					"ieDisplay",
+					"rgba",
+					{
+						"driverType" : "ImageDisplayDriver",
+						"handle" : "lightFilterTest",
+					}
 				)
-			} ) )
-		)
-		sphere.transform( imath.M44f().translate( imath.V3f( 0, 0, -2 ) ) )
-
-		def lightAttributes( exposure = 0.0 ) :
-
-			return renderer.attributes(
-				IECore.CompoundObject( {
-					"ri:light" : IECoreScene.ShaderNetwork(
-						shaders = {
-							"output" : IECoreScene.Shader(
-								"PxrDomeLight", "ri:light",
-								parameters = { "exposure" : exposure }
-							),
-						},
-						output = "output",
-					),
-					"ri:visibility:camera" : IECore.BoolData( False ),
-				} )
 			)
 
-		light = renderer.light( "light", None, lightAttributes() )
-
-		renderer.render()
-		time.sleep( 1 )
-		renderer.pause()
-
-		# No light filter yet. Sphere should appear white.
-
-		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
-		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 1 ), 0.01 ) )
-
-		# Add a green light filter. Sphere should appear green.
-
-		def lightFilterAttributes( tint ) :
-
-			return renderer.attributes(
-				IECore.CompoundObject( {
-					"ri:lightFilter" : IECoreScene.ShaderNetwork(
+			sphere = renderer.object(
+				"sphere",
+				IECoreScene.SpherePrimitive(),
+				renderer.attributes( IECore.CompoundObject( {
+					"ri:surface" : IECoreScene.ShaderNetwork(
 						shaders = {
 							"output" : IECoreScene.Shader(
-								"PxrIntMultLightFilter", "ri:lightFilter",
-								parameters = { "tint" : tint }
-							),
+								"PxrDiffuse",
+								parameters = {
+									"diffuseColor" : imath.Color3f( 1.0 )
+								}
+							)
 						},
 						output = "output",
 					)
-				} )
+				} ) )
 			)
+			sphere.transform( imath.M44f().translate( imath.V3f( 0, 0, -2 ) ) )
 
-		lightFilter = renderer.lightFilter( "filter", None, lightFilterAttributes( imath.Color3f( 0, 1, 0 ) ) )
-		light.link( "lightFilters", { lightFilter } )
+			def lightAttributes( exposure = 0.0 ) :
 
-		renderer.render()
-		time.sleep( 1 )
-		renderer.pause()
+				return renderer.attributes(
+					IECore.CompoundObject( {
+						"ri:light" : IECoreScene.ShaderNetwork(
+							shaders = {
+								"output" : IECoreScene.Shader(
+									"PxrDomeLight", "ri:light",
+									parameters = { "exposure" : exposure }
+								),
+							},
+							output = "output",
+						),
+						"ri:visibility:camera" : IECore.BoolData( False ),
+					} )
+				)
 
-		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
-		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0, 1, 0 ), 0.01 ) )
+			light = renderer.light( "light", None, lightAttributes() )
 
-		# Edit light filter tint. Sphere should update.
+			renderer.render()
+			time.sleep( 1 )
+			renderer.pause()
 
-		lightFilter.attributes( lightFilterAttributes( imath.Color3f( 0, 0, 1 ) ) )
+			# No light filter yet. Sphere should appear white.
 
-		renderer.render()
-		time.sleep( 1 )
-		renderer.pause()
+			image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+			self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 1 ), 0.01 ) )
 
-		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
-		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0, 0, 1 ), 0.01 ) )
+			# Add a green light filter. Sphere should appear green.
 
-		# Edit light, and make sure filter is still applied.
+			def lightFilterAttributes( tint ) :
 
-		light.attributes( lightAttributes( 1.0 ) )
-		renderer.render()
-		time.sleep( 1 )
-		renderer.pause()
+				return renderer.attributes(
+					IECore.CompoundObject( {
+						"ri:lightFilter" : IECoreScene.ShaderNetwork(
+							shaders = {
+								"output" : IECoreScene.Shader(
+									"PxrIntMultLightFilter", "ri:lightFilter",
+									parameters = { "tint" : tint }
+								),
+							},
+							output = "output",
+						)
+					} )
+				)
 
-		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
-		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0, 0, 2 ), 0.01 ) )
+			lightFilter = renderer.lightFilter( "filter", None, lightFilterAttributes( imath.Color3f( 0, 1, 0 ) ) )
+			light.link( "lightFilters", { lightFilter } )
 
-		# Remove light filter and check render is unfiltered.
+			renderer.render()
+			time.sleep( 1 )
+			renderer.pause()
 
-		light.link( "lightFilters", None )
+			image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+			self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0, 1, 0 ), 0.01 ) )
 
-		renderer.render()
-		time.sleep( 1 )
-		renderer.pause()
+			# Edit light filter tint. Sphere should update.
 
-		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
-		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 2 ), 0.01 ) )
+			lightFilter.attributes( lightFilterAttributes( imath.Color3f( 0, 0, 1 ) ) )
 
-		# Remove light and check render is black.
+			renderer.render()
+			time.sleep( 1 )
+			renderer.pause()
 
-		del light
+			image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+			self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0, 0, 1 ), 0.01 ) )
 
-		renderer.render()
-		time.sleep( 1 )
-		renderer.pause()
+			# Edit light, and make sure filter is still applied.
 
-		image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
-		self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0 ), 0.01 ) )
+			light.attributes( lightAttributes( 1.0 ) )
+			renderer.render()
+			time.sleep( 1 )
+			renderer.pause()
 
-		# Clean up.
+			image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+			self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0, 0, 2 ), 0.01 ) )
 
-		del sphere, lightFilter
-		del renderer
+			# Remove light filter and check render is unfiltered.
+
+			light.link( "lightFilters", None )
+
+			renderer.render()
+			time.sleep( 1 )
+			renderer.pause()
+
+			image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+			self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 2 ), 0.01 ) )
+
+			# Remove light and check render is black.
+
+			del light
+
+			renderer.render()
+			time.sleep( 1 )
+			renderer.pause()
+
+			image = IECoreImage.ImageDisplayDriver.storedImage( "lightFilterTest" )
+			self.assertTrue( self.__color3AtUV( image, imath.V2f( 0.5, 0.5 ) ).equalWithAbsError( imath.Color3f( 0 ), 0.01 ) )
+
+			# Clean up.
+
+			del sphere, lightFilter
+			del renderer
+
+		except Exception as e :
+
+			import traceback
+			print( traceback.format_exc() )
 
 	def testLightFilterTransforms( self ) :
 

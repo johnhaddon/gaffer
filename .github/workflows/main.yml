@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - '*'
@@ -45,6 +45,7 @@ jobs:
             # respect permissions. So we run the final test suite as a dedicated
             # test user rather than as root.
             testRunner: sudo -E -u testUser
+            testArguments: IECoreRenderManTest
             sconsCacheMegabytes: 400
             jobs: 4
 
