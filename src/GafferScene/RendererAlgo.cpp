@@ -932,7 +932,7 @@ void LightLinks::addFilterLink( const IECoreScenePreview::Renderer::ObjectInterf
 		a->second.filteredLightsDirty = true;
 		a->second.lightFilters = std::make_shared<IECoreScenePreview::Renderer::ObjectSet>();
 	}
-	else if( !a->second.lightFilters.unique() )
+	else if( a->second.lightFilters.use_count() > 1 )
 	{
 		// We have already published the current set to a renderer via
 		// `ObjectInterface::link()`. We don't want to mutate it in place
@@ -954,7 +954,7 @@ void LightLinks::removeFilterLink( const IECoreScenePreview::Renderer::ObjectInt
 	FilterLinkMap::accessor a;
 	bool found = m_filterLinks.find( a, filteredLightsExpression );
 	assert( found ); (void)found;
-	if( !a->second.lightFilters.unique() )
+	if( a->second.lightFilters.use_count() > 1 )
 	{
 		// See comment in `addFilterLink()`.
 		a->second.lightFilters = std::make_shared<IECoreScenePreview::Renderer::ObjectSet>( *a->second.lightFilters );
