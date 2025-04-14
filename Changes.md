@@ -18,6 +18,13 @@ Fixes
 - RenderMan :
   - Fixed interactive denoiser configuration on Windows.
   - Fixed error when interactive denoising is enabled and no beauty output is found.
+- LocalDispatcher, SystemCommand, `gaffer env` : Fixed unwanted upper-casing of environment variable names on Windows (#6371).
+
+API
+---
+
+- Gaffer module : Added `environment()` method, returning a dictionary containing all current environment variables. Unlike `os.environ`, this preserves
+  case on Windows.
 
 1.5.10.1 (relative to 1.5.10.0)
 ========
