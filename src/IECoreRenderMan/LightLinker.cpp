@@ -93,7 +93,18 @@ void LightLinker::dirtyLightFilter( const LightFilter *lightFilter )
 	m_dirtyFilterSets.insert( lightFilter->setMemberships().begin(), lightFilter->setMemberships().end() );
 }
 
+const RtUString LightLinker::registerLightLinks( const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights )
+{
+	return RtUString();
+}
+
 void LightLinker::updateDirtyLinks()
+{
+	updateDirtyFilterLinks();
+	updateDirtyLightLinks();
+}
+
+void LightLinker::updateDirtyFilterLinks()
 {
 	// Not taking any locks, because we're not advertised as being
 	// concurrency-safe.
@@ -134,4 +145,15 @@ IECoreScene::ConstShaderNetworkPtr LightLinker::lightFilterShader( const IECoreS
 		networks.push_back( lightFilter->shader() );
 	}
 	return ShaderNetworkAlgo::combineLightFilters( networks );
+}
+
+void LightLinker::updateDirtyLightLinks()
+{
+	std::lock_guard lock( m_lightLinksMutex );
+	if( !m_lightLinksDirty )
+	{
+		return;
+	}
+
+	m_lightLinksDirty = false;
 }
