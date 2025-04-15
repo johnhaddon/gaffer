@@ -40,6 +40,8 @@
 #include "LightFilter.h"
 #include "Transform.h"
 
+#include "RixPredefinedStrings.hpp"
+
 using namespace std;
 using namespace Imath;
 using namespace IECoreRenderMan;
@@ -300,6 +302,37 @@ void Light::updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &l
 		/* xform = */ nullptr,
 		nullptr
 	);
+}
+
+void Light::updateGroupingMemberships( RtUString memberships )
+{
+	m_extraAttributes.SetString( Rix::k_grouping_membership, memberships );
+
+	if( m_lightInstance == riley::LightInstanceId::InvalidId() )
+	{
+		return;
+	}
+
+	RtParamList allAttributes;
+	if( m_attributes )
+	{
+		allAttributes = m_attributes->instanceAttributes();
+	}
+	allAttributes.Update( m_extraAttributes );
+
+	const riley::LightInstanceResult result = m_session->modifyLightInstance(
+		m_lightInstance,
+		/* material = */ nullptr,
+		/* light shader = */ nullptr,
+		/* coordinateSystems = */ nullptr,
+		/* xform = */ nullptr,
+		&allAttributes
+	);
+
+	if( result != riley::LightInstanceResult::k_Success )
+	{
+		IECore::msg( IECore::Msg::Warning, "RenderManLight::updateGroupingMemberships", "Unexpected edit failure" );
+	}
 }
 
 void Light::updateLightShader( const Attributes *attributes )

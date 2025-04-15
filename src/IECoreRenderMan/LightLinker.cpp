@@ -95,6 +95,8 @@ void LightLinker::dirtyLightFilter( const LightFilter *lightFilter )
 
 const RtUString LightLinker::registerLightLinks( const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights )
 {
+	std::lock_guard lock( m_lightLinksMutex );
+
 	return RtUString();
 }
 
