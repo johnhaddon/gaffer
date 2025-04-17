@@ -41,6 +41,8 @@
 #include "Light.h"
 #include "LightFilter.h"
 
+#include "fmt/format.h"
+
 using namespace std;
 using namespace Imath;
 using namespace IECoreRenderMan;
@@ -96,8 +98,15 @@ void LightLinker::dirtyLightFilter( const LightFilter *lightFilter )
 const RtUString LightLinker::registerLightLinks( const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights )
 {
 	std::lock_guard lock( m_lightLinksMutex );
+	auto [it, inserted] = m_lightLinks.emplace( lights, RtUString() );
+	if( inserted )
+	{
+		const string groupName = fmt::format( "group{}", m_nextLightLinkGroup++ );
+		it->second = RtUString( groupName.c_str() );
+		m_lightLinksDirty = true;
+	}
 
-	return RtUString();
+	return it->second;
 }
 
 void LightLinker::updateDirtyLinks()
@@ -155,6 +164,36 @@ void LightLinker::updateDirtyLightLinks()
 	if( !m_lightLinksDirty )
 	{
 		return;
+	}
+
+	std::cerr << "updateDirtyLightLinks" << std::endl;
+
+	std::unordered_map<Light *, string> lightMemberships;
+	for( auto it = m_lightLinks.begin(); it != m_lightLinks.end(); )
+	{
+		auto set = it->first.lock();
+		if( !set )
+		{
+			it = m_lightLinks.erase( it );
+		}
+		else
+		{
+			for( auto &light : *set )
+			{
+				auto &memberships = lightMemberships[static_cast<Light *>( light.get() )];
+				if( memberships.size() )
+				{
+					memberships += " ";
+				}
+				memberships += it->second.CStr();
+			}
+			it++;
+		}
+	}
+
+	for( auto &[light, memberships] : lightMemberships )
+	{
+		light->updateGroupingMemberships( RtUString( memberships.c_str() ) );
 	}
 
 	m_lightLinksDirty = false;

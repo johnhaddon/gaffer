@@ -155,7 +155,7 @@ void Object::link( const IECore::InternedString &type, const IECoreScenePreview:
 	m_linkedLights = objects;
 
 	RtUString lightingSubset;
-	if( !objects || !objects->size() )
+	if( objects )
 	{
 		lightingSubset = m_lightLinker->registerLightLinks( objects );
 	}

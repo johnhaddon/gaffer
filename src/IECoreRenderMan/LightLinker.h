@@ -134,12 +134,13 @@ class LightLinker
 
 		void updateDirtyLightLinks();
 
+		// Maps from a set of lights to its group name.
 		/// \todo As above, use an unordered container when it becomes available.
-		using LightLinks = std::map<WeakObjectSetPtr, RtUString>;
+		using LightLinks = std::map<WeakObjectSetPtr, RtUString, std::owner_less<WeakObjectSetPtr>>;
 		std::mutex m_lightLinksMutex;
 		LightLinks m_lightLinks;
+		size_t m_nextLightLinkGroup;
 		bool m_lightLinksDirty = false;
-
 
 };
 

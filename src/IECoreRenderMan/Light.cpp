@@ -202,6 +202,13 @@ bool Light::attributes( const IECoreScenePreview::Renderer::AttributesInterface 
 		return true;
 	}
 
+	RtParamList allAttributes;
+	if( m_attributes )
+	{
+		allAttributes = renderManAttributes->instanceAttributes();
+	}
+	allAttributes.Update( m_extraAttributes );
+
 	const Material *material = renderManAttributes->lightMaterial();
 	const riley::LightInstanceResult result = m_session->modifyLightInstance(
 		m_lightInstance,
@@ -209,7 +216,7 @@ bool Light::attributes( const IECoreScenePreview::Renderer::AttributesInterface 
 		/* light shader = */ &m_lightShader->id(),
 		/* coordinateSystems = */ nullptr,
 		/* xform = */ nullptr,
-		&renderManAttributes->instanceAttributes()
+		&allAttributes
 	);
 
 	m_attributes = renderManAttributes;
