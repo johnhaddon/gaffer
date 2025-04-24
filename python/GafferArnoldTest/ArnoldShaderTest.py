@@ -773,6 +773,20 @@ class ArnoldShaderTest( GafferSceneTest.SceneTestCase ) :
 					attributes2["ai:surface"].getShader( "s" ).parameters[key]
 				)
 
+	def testTypeConversionInPassThrough( self ) :
+
+		cross = GafferArnold.ArnoldShader( "cross" )
+		cross.loadShader( "cross" )
+		cross["parameters"]["input1"].setValue( imath.V3f( 1, 2, 3 ) )
+		cross["enabled"].setValue( False )
+
+		flat = GafferArnold.ArnoldShader( "flat" )
+		flat.loadShader( "flat" )
+		flat["parameters"]["color"].setInput( cross["out"] )
+
+		network = flat.attributes()["ai:surface"]
+		self.assertEqual( network.getShader( "flat" ).parameters["color"], IECore.Color3fData( imath.Color3f( 1, 2, 3 ) ) )
+
 	def testShaderSwitch( self ) :
 
 		l = GafferArnold.ArnoldShader()
