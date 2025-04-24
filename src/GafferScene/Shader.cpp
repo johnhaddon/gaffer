@@ -127,19 +127,6 @@ bool isParameter( const Gaffer::Plug *parameterPlug )
 	return isInputParameter( parameterPlug ) || isOutputParameter( parameterPlug );
 }
 
-bool isLeafParameter( const Gaffer::Plug *parameterPlug )
-{
-	const IECore::TypeId typeId = parameterPlug->typeId();
-	if( typeId == Plug::staticTypeId() || typeId == ValuePlug::staticTypeId() )
-	{
-		if( !parameterPlug->children().empty() )
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
 bool isCompoundNumericPlug( const Gaffer::Plug *plug )
 {
 	switch( (Gaffer::TypeId)plug->typeId() )
@@ -384,7 +371,7 @@ class Shader::NetworkBuilder
 				shaderNode->nodeNamePlug()->hash( h );
 				shaderNode->nodeColorPlug()->hash( h );
 
-				hashParameterWalk( shaderNode->parametersPlug(), h );
+				hashParameterWalk( shaderNode->parametersPlug(), h, false, false );
 			}
 
 			return it->second;
@@ -443,28 +430,58 @@ class Shader::NetworkBuilder
 			return handle;
 		}
 
-		void hashParameterWalk( const Gaffer::Plug *parameter, IECore::MurmurHash &h )
+		void hashParameterWalk( const Gaffer::Plug *parameter, IECore::MurmurHash &h, bool foundValue, bool foundConnection )
 		{
-			if( !isLeafParameter( parameter ) || parameter->parent<Node>() )
+			if( !foundValue )
 			{
-				// Compound parameter - recurse
-				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
+				const IECore::MurmurHash hc = h;
+				static_cast<const Shader *>( parameter->node() )->parameterHash( parameter, h );
+				foundValue = h != hc;
+			}
+
+			if( !foundConnection )
+			{
+				OptionalScopedContext sourceContext;
+				if( auto source = this->connectionSource( parameter, sourceContext ) )
 				{
-					hashParameterWalk( it->get(), h );
+					parameterHashForPlug( source, h );
+					foundConnection = true;
 				}
 			}
-			else if( const Gaffer::ArrayPlug *arrayParameter = IECore::runTimeCast<const Gaffer::ArrayPlug>( parameter ) )
+
+			if( foundValue && foundConnection )
 			{
-				// Array parameter
-				for( Plug::InputIterator it( arrayParameter ); !it.done(); ++it )
-				{
-					hashParameter( it->get(), h );
-				}
+				return;
+			}
+
+			if( auto splineFF = IECore::runTimeCast<const SplineffPlug>( parameter ) )
+			{
+				hashSplineParameterWalk( splineFF, h );
+			}
+			else if( auto splineFColor3f = IECore::runTimeCast<const SplinefColor3fPlug>( parameter ) )
+			{
+				hashSplineParameterWalk( splineFColor3f, h );
+			}
+			else if( auto splineFColor4f = IECore::runTimeCast<const SplinefColor4fPlug>( parameter ) )
+			{
+				hashSplineParameterWalk( splineFColor4f, h );
 			}
 			else
 			{
-				// Leaf parameter
-				hashParameter( parameter, h );
+				for( const auto &childParameter : Plug::InputRange( *parameter ) )
+				{
+					const Plug *valuePlug = childParameter.get();
+					if( auto optionalPlug = IECore::runTimeCast<const OptionalValuePlug>( valuePlug ) )
+					{
+						if( !optionalPlug->enabledPlug()->getValue() )
+						{
+							continue;
+						}
+						valuePlug = optionalPlug->valuePlug();
+					}
+
+					hashParameterWalk( valuePlug, h, foundValue, foundConnection );
+				}
 			}
 		}
 
@@ -554,51 +571,8 @@ class Shader::NetworkBuilder
 			}
 		}
 
-		void hashParameter( const Gaffer::Plug *parameter, IECore::MurmurHash &h )
-		{
-			static_cast<const Shader *>( parameter->node() )->parameterHash( parameter, h );
-
-			OptionalScopedContext sourceContext;
-			if( auto source = this->connectionSource( parameter, sourceContext ) )
-			{
-				parameterHashForPlug( source, h );
-			}
-			else
-			{
-				hashParameterComponentConnections( parameter, h );
-			}
-		}
-
-		void hashParameterComponentConnections( const Gaffer::Plug *parameter, IECore::MurmurHash &h )
-		{
-			if( isCompoundNumericPlug( parameter ) )
-			{
-				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
-				{
-					OptionalScopedContext sourceContext;
-					if( auto source = connectionSource( it->get(), sourceContext ) )
-					{
-						parameterHashForPlug( source, h );
-						h.append( (*it)->getName() );
-					}
-				}
-			}
-			else if( (Gaffer::TypeId)parameter->typeId() == SplineffPlugTypeId )
-			{
-				hashSplineParameterComponentConnections< SplineffPlug >( (const SplineffPlug*)parameter, h );
-			}
-			else if( (Gaffer::TypeId)parameter->typeId() == SplinefColor3fPlugTypeId )
-			{
-				hashSplineParameterComponentConnections< SplinefColor3fPlug >( (const SplinefColor3fPlug*)parameter, h );
-			}
-			else if( (Gaffer::TypeId)parameter->typeId() == SplinefColor4fPlugTypeId )
-			{
-				hashSplineParameterComponentConnections< SplinefColor4fPlug >( (const SplinefColor4fPlug*)parameter, h );
-			}
-		}
-
-		template< typename T >
-		void hashSplineParameterComponentConnections( const T *parameter, IECore::MurmurHash &h )
+		template<typename T>
+		void hashSplineParameterWalk( const T *parameter, IECore::MurmurHash &h )
 		{
 			checkNoShaderInput( parameter->interpolationPlug() );
 
@@ -1075,10 +1049,6 @@ void Shader::parameterHash( const Gaffer::Plug *parameterPlug, IECore::MurmurHas
 	if( auto valuePlug = IECore::runTimeCast<const ValuePlug>( parameterPlug ) )
 	{
 		valuePlug->hash( h );
-	}
-	else
-	{
-		h.append( parameterPlug->typeId() );
 	}
 }
 
