@@ -103,7 +103,7 @@ Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output )
 
 const Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output ) const
 {
-	if( output != outPlug() )
+	if( !outPlug() || ( output != outPlug() && !outPlug()->isAncestorOf( output ) ) )
 	{
 		return Shader::correspondingInput( output );
 	}
@@ -125,6 +125,11 @@ const Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output
 	{
 		IECore::msg( IECore::Msg::Error, "ArnoldShader::correspondingInput", fmt::format( "Parameter \"{}\" does not exist", primaryInput->readable() ) );
 		return nullptr;
+	}
+
+	if( output != outPlug() )
+	{
+		result = result->descendant<Plug>( output->relativeName( outPlug() ) );
 	}
 
 	return result;

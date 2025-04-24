@@ -705,6 +705,21 @@ class ArnoldShaderTest( GafferSceneTest.SceneTestCase ) :
 		self.assertTrue( s2["n2"]["parameters"]["color"].getInput().isSame( s2["n1"]["out"] ) )
 		self.assertTrue( s2["a"]["shader"].getInput().isSame( s2["n2"]["out"] ) )
 
+	def testCorrespondingInputWithoutLoadShader( self ) :
+
+		shader = GafferArnold.ArnoldShader()
+		self.assertIsNone( shader.correspondingInput( shader["__outAttributes"] ) )
+
+	def testCorrespondingInput( self ) :
+
+		shader = GafferArnold.ArnoldShader()
+		shader.loadShader( "abs" )
+
+		self.assertEqual( shader.correspondingInput( shader["out"] ), shader["parameters"]["input"] )
+		self.assertEqual( shader.correspondingInput( shader["out"]["r"] ), shader["parameters"]["input"]["r"] )
+		self.assertEqual( shader.correspondingInput( shader["out"]["g"] ), shader["parameters"]["input"]["g"] )
+		self.assertEqual( shader.correspondingInput( shader["out"]["b"] ), shader["parameters"]["input"]["b"] )
+
 	def testDisabledShaderPassesThroughExternalValue( self ) :
 
 		s = GafferArnold.ArnoldShader( "s" )
