@@ -222,14 +222,11 @@ class Shader::NetworkBuilder
 		IECore::MurmurHash networkHash()
 		{
 			OptionalScopedContext outputContext;
-			if( const Gaffer::Plug *p = effectiveParameter( m_output, outputContext ) )
+			if( const Gaffer::Plug *p = connectionSource( m_output, outputContext ) )
 			{
-				if( isOutputParameter( p ) )
-				{
-					IECore::MurmurHash result;
-					parameterHashForPlug( p, result );
-					return result;
-				}
+				IECore::MurmurHash result;
+				parameterHashForPlug( p, result );
+				return result;
 			}
 
 			return IECore::MurmurHash();
@@ -243,12 +240,9 @@ class Shader::NetworkBuilder
 			{
 				m_network = new IECoreScene::ShaderNetwork;
 				OptionalScopedContext outputContext;
-				if( const Gaffer::Plug *p = effectiveParameter( m_output, outputContext ) )
+				if( const Gaffer::Plug *p = connectionSource( m_output, outputContext ) )
 				{
-					if( isOutputParameter( p ) )
-					{
-						m_network->setOutput( outputParameterForPlug( p ) );
-					}
+					m_network->setOutput( outputParameterForPlug( p ) );
 				}
 			}
 
@@ -274,10 +268,11 @@ class Shader::NetworkBuilder
 
 	private :
 
-		// Returns the effective shader parameter that should be used taking into account
-		// enabledPlug() and correspondingInput(). Accepts either output or input parameters
-		// and may return either an output or input parameter.
-		const Gaffer::Plug *effectiveParameter( const Gaffer::Plug *parameterPlug, OptionalScopedContext &parameterContext ) const
+		// Returns the shader output plug that is the source for
+		// `parameterPlug`, taking into account pass-throughs for disabled
+		// shaders, and intermediate Switches and ContextProcessors. Returns
+		// `nullptr` if no such source exists.
+		const Gaffer::Plug *connectionSource( const Gaffer::Plug *parameterPlug, OptionalScopedContext &parameterContext ) const
 		{
 			while( true )
 			{
@@ -308,7 +303,7 @@ class Shader::NetworkBuilder
 
 					if( source == parameterPlug || !isParameter( source ) )
 					{
-						return parameterPlug;
+						return nullptr;
 					}
 					else
 					{
@@ -364,8 +359,7 @@ class Shader::NetworkBuilder
 		void checkNoShaderInput( const Gaffer::Plug *parameterPlug )
 		{
 			OptionalScopedContext parameterContext;
-			const Gaffer::Plug *effectiveParameter = this->effectiveParameter( parameterPlug, parameterContext );
-			if( effectiveParameter && isOutputParameter( effectiveParameter ) )
+			if( connectionSource( parameterPlug, parameterContext ) )
 			{
 				throw IECore::Exception( fmt::format( "Shader connections to {} are not supported.", parameterPlug->fullName() ) );
 			}
@@ -513,24 +507,14 @@ class Shader::NetworkBuilder
 		{
 			static_cast<const Shader *>( parameter->node() )->parameterHash( parameter, h );
 
-			OptionalScopedContext parameterContext;
-			const Gaffer::Plug *effectiveParameter = this->effectiveParameter( parameter, parameterContext );
-			if( !effectiveParameter )
+			OptionalScopedContext sourceContext;
+			if( auto source = this->connectionSource( parameter, sourceContext ) )
 			{
-				return;
-			}
-
-			const Shader *effectiveShader = static_cast<const Shader *>( effectiveParameter->node() );
-			if( isInputParameter( effectiveParameter ) )
-			{
-				effectiveShader->parameterHash( effectiveParameter, h );
-				hashParameterComponentConnections( parameter, h );
+				parameterHashForPlug( source, h );
 			}
 			else
 			{
-				assert( isOutputParameter( effectiveParameter ) );
-				parameterHashForPlug( effectiveParameter, h );
-				return;
+				hashParameterComponentConnections( parameter, h );
 			}
 		}
 
@@ -544,24 +528,18 @@ class Shader::NetworkBuilder
 				shader->parameters()[parameterName] = value;
 			}
 
-			OptionalScopedContext parameterContext;
-			const Gaffer::Plug *effectiveParameter = this->effectiveParameter( parameter, parameterContext );
-			if( !effectiveParameter )
+			OptionalScopedContext sourceContext;
+			if( auto source = this->connectionSource( parameter, sourceContext ) )
 			{
-				return;
-			}
-
-			if( isInputParameter( effectiveParameter ) )
-			{
-				// The children may be driven by actual connections
-				addParameterComponentConnections( parameter, parameterName, connections );
+				connections.push_back( {
+					outputParameterForPlug( source ),
+					{ IECore::InternedString(), parameterName }
+				} );
 			}
 			else
 			{
-				connections.push_back( {
-					outputParameterForPlug( effectiveParameter ),
-					{ IECore::InternedString(), parameterName }
-				} );
+				// The parent doesn't have an input connection, but the children might.
+				addParameterComponentConnections( parameter, parameterName, connections );
 			}
 		}
 
@@ -571,11 +549,10 @@ class Shader::NetworkBuilder
 			{
 				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
 				{
-					OptionalScopedContext parameterContext;
-					const Gaffer::Plug *effectiveParameter = this->effectiveParameter( it->get(), parameterContext );
-					if( effectiveParameter && isOutputParameter( effectiveParameter ) )
+					OptionalScopedContext sourceContext;
+					if( auto source = connectionSource( it->get(), sourceContext ) )
 					{
-						parameterHashForPlug( effectiveParameter, h );
+						parameterHashForPlug( source, h );
 						h.append( (*it)->getName() );
 					}
 				}
@@ -606,24 +583,22 @@ class Shader::NetworkBuilder
 				checkNoShaderInput( parameter->pointXPlug( i ) );
 
 				const auto* yPlug = parameter->pointYPlug( i );
-				OptionalScopedContext parameterContext;
-				const Gaffer::Plug *effectiveParameter = this->effectiveParameter( yPlug, parameterContext );
-				if( effectiveParameter && isOutputParameter( effectiveParameter ) )
+				OptionalScopedContext sourceContext;
+				if( auto source = connectionSource( yPlug, sourceContext ) )
 				{
 					hasInput = true;
-					parameterHashForPlug( effectiveParameter, h );
+					parameterHashForPlug( source, h );
 					h.append( i );
 				}
 				else if( isCompoundNumericPlug( yPlug ) )
 				{
 					for( Plug::InputIterator it( yPlug ); !it.done(); ++it )
 					{
-						parameterContext.scope.reset();
-						const Gaffer::Plug *effectiveCompParameter = this->effectiveParameter( it->get(), parameterContext );
-						if( effectiveCompParameter && isOutputParameter( effectiveCompParameter ) )
+						sourceContext.scope.reset();
+						if( auto sourceComponent = connectionSource( it->get(), sourceContext ) )
 						{
 							hasInput = true;
-							parameterHashForPlug( effectiveCompParameter, h );
+							parameterHashForPlug( sourceComponent, h );
 							h.append( i );
 							h.append( (*it)->getName() );
 						}
@@ -646,14 +621,13 @@ class Shader::NetworkBuilder
 			{
 				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
 				{
-					OptionalScopedContext parameterContext;
-					const Gaffer::Plug *effectiveParameter = this->effectiveParameter( it->get(), parameterContext );
-					if( effectiveParameter && isOutputParameter( effectiveParameter ) )
+					OptionalScopedContext sourceContext;
+					if( auto source = connectionSource( it->get(), sourceContext ) )
 					{
 						IECore::InternedString inputName = parameterName.string() + "." + (*it)->getName().string();
 
 						connections.push_back( {
-							outputParameterForPlug( effectiveParameter ),
+							outputParameterForPlug( source ),
 							{ IECore::InternedString(), inputName }
 						} );
 					}
@@ -682,21 +656,19 @@ class Shader::NetworkBuilder
 			for( int i = 0; i < n; i++ )
 			{
 				const auto* yPlug = parameter->pointYPlug( i );
-				OptionalScopedContext parameterContext;
-				const Gaffer::Plug *effectiveParameter = this->effectiveParameter( yPlug, parameterContext );
-				if( effectiveParameter && isOutputParameter( effectiveParameter ) )
+				OptionalScopedContext sourceContext;
+				if( auto source = connectionSource( yPlug, sourceContext ) )
 				{
-					inputs.push_back( std::make_tuple( i, "", outputParameterForPlug( effectiveParameter ) ) );
+					inputs.push_back( std::make_tuple( i, "", outputParameterForPlug( source ) ) );
 				}
 				else if( isCompoundNumericPlug( yPlug ) )
 				{
 					for( Plug::InputIterator it( yPlug ); !it.done(); ++it )
 					{
-						parameterContext.scope.reset();
-						const Gaffer::Plug *effectiveCompParameter = this->effectiveParameter( it->get(), parameterContext );
-						if( effectiveCompParameter && isOutputParameter( effectiveCompParameter ) )
+						sourceContext.scope.reset();
+						if( auto sourceComponent = connectionSource( it->get(), sourceContext ) )
 						{
-							inputs.push_back( std::make_tuple( i, "." + (*it)->getName().string(), outputParameterForPlug( effectiveCompParameter ) ) );
+							inputs.push_back( std::make_tuple( i, "." + (*it)->getName().string(), outputParameterForPlug( sourceComponent ) ) );
 						}
 					}
 				}
