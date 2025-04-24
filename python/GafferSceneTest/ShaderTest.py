@@ -719,6 +719,28 @@ class ShaderTest( GafferSceneTest.SceneTestCase ) :
 		shader = node.attributes()["test:surface"].outputShader()
 		self.assertNotIn( "optionalString", shader.parameters )
 
+	def testOptionalParameterConnections( self ) :
+
+		shader1 = GafferSceneTest.TestShader( "shader1" )
+		shader2 = GafferSceneTest.TestShader( "shader2" )
+		shader2["type"].setValue( "test:surface" )
+
+		shader2["parameters"]["optionalColor"] = Gaffer.OptionalValuePlug( valuePlug = Gaffer.Color3fPlug() )
+		shader2["parameters"]["optionalColor"]["value"].setInput( shader1["out"] )
+
+		# Parameter isn't enabled, so the connection should be ignored.
+
+		network = shader2.attributes()["test:surface"]
+		self.assertEqual( len( network.shaders() ), 1 )
+		self.assertFalse( network.input( ( "shader2", "optionalColor" ) ) )
+
+		# Parameter is enabled, so connection should be used.
+
+		shader2["parameters"]["optionalColor"]["enabled"].setValue( True )
+		network = shader2.attributes()["test:surface"]
+		self.assertEqual( len( network.shaders() ), 2 )
+		self.assertEqual( network.input( ( "shader2", "optionalColor" ) ), ( "shader1", "out" ) )
+
 	@GafferTest.TestRunner.PerformanceTestMethod()
 	def testNetworkBuilderPerformance( self ) :
 

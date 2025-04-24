@@ -432,7 +432,7 @@ class Shader::NetworkBuilder
 			shader->blindData()->writable()[g_gafferNodeColor] = new IECore::Color3fData( shaderNode->nodeColorPlug()->getValue() );
 
 			vector<IECoreScene::ShaderNetwork::Connection> inputConnections;
-			addParameterWalk( shaderNode->parametersPlug(), IECore::InternedString(), shader.get(), inputConnections );
+			addParameterWalk( shaderNode->parametersPlug(), IECore::InternedString(), shader.get(), inputConnections, false, false );
 
 			handle = m_network->addShader( nodeName, std::move( shader ) );
 			for( const auto &c : inputConnections )
@@ -468,38 +468,89 @@ class Shader::NetworkBuilder
 			}
 		}
 
-		void addParameterWalk( const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, IECoreScene::Shader *shader, vector<IECoreScene::ShaderNetwork::Connection> &connections )
+		void addParameterWalk( const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, IECoreScene::Shader *shader, vector<IECoreScene::ShaderNetwork::Connection> &connections, bool foundValue, bool foundConnection )
 		{
-			if( !isLeafParameter( parameter ) || parameter->parent<Node>() )
+			// Store the value of the parameter whether or not we have a
+			// connection, so parameter type information is always available
+			// from the ShaderNetwork.
+			if( !foundValue )
 			{
-				// Compound parameter - recurse
-				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
+				if( IECore::DataPtr value = static_cast<const Shader *>( parameter->node() )->parameterValue( parameter ) )
 				{
-					IECore::InternedString childParameterName;
-					if( parameterName.string().size() )
-					{
-						childParameterName = parameterName.string() + "." + (*it)->getName().string();
-					}
-					else
-					{
-						childParameterName = (*it)->getName();
-					}
-
-					addParameterWalk( it->get(), childParameterName, shader, connections );
+					shader->parameters()[parameterName] = value;
+					foundValue = true;
 				}
 			}
-			else if( const Gaffer::ArrayPlug *array = IECore::runTimeCast<const Gaffer::ArrayPlug>( parameter ) )
+
+			if( !foundConnection )
 			{
-				int i = 0;
-				for( Plug::InputIterator it( array ); !it.done(); ++it, ++i )
+				OptionalScopedContext sourceContext;
+				if( auto source = this->connectionSource( parameter, sourceContext ) )
 				{
-					IECore::InternedString childParameterName = parameterName.string() + "[" + std::to_string( i ) + "]";
-					addParameter( it->get(), childParameterName, shader, connections );
+					connections.push_back( {
+						outputParameterForPlug( source ),
+						{ IECore::InternedString(), parameterName }
+					} );
+					foundConnection = true;
 				}
+			}
+
+			if( foundValue && foundConnection )
+			{
+				return;
+			}
+
+			// Recurse to handle children
+			// ==========================
+			//
+			// These might be the individual fields of a struct, elements of an ArrayPlug,
+			// components of a CompoundNumericPlug, or the points of a SplinePlug.
+
+			if( auto splineFF = IECore::runTimeCast<const SplineffPlug>( parameter ) )
+			{
+				addSplineParameterWalk( splineFF, parameterName, connections );
+			}
+			else if( auto splineFColor3f = IECore::runTimeCast<const SplinefColor3fPlug>( parameter ) )
+			{
+				addSplineParameterWalk( splineFColor3f, parameterName, connections );
+			}
+			else if( auto splineFColor4f = IECore::runTimeCast<const SplinefColor4fPlug>( parameter ) )
+			{
+				addSplineParameterWalk( splineFColor4f, parameterName, connections );
 			}
 			else
 			{
-				addParameter( parameter, parameterName, shader, connections );
+				int arrayIndex = IECore::runTimeCast<const ArrayPlug>( parameter ) ? 0 : -1;
+				for( const auto &childParameter : Plug::InputRange( *parameter ) )
+				{
+					const Plug *valuePlug = childParameter.get();
+					if( auto optionalPlug = IECore::runTimeCast<const OptionalValuePlug>( valuePlug ) )
+					{
+						if( !optionalPlug->enabledPlug()->getValue() )
+						{
+							continue;
+						}
+						valuePlug = optionalPlug->valuePlug();
+					}
+
+					IECore::InternedString childParameterName;
+					if( arrayIndex != -1 )
+					{
+						childParameterName = parameterName.string() + "[" + std::to_string( arrayIndex++ ) + "]";
+					}
+					else
+					{
+						if( parameterName.string().size() )
+						{
+							childParameterName = parameterName.string() + "." + childParameter->getName().string();
+						}
+						else
+						{
+							childParameterName = childParameter->getName();
+						}
+					}
+					addParameterWalk( valuePlug, childParameterName, shader, connections, foundValue, foundConnection );
+				}
 			}
 		}
 
@@ -515,31 +566,6 @@ class Shader::NetworkBuilder
 			else
 			{
 				hashParameterComponentConnections( parameter, h );
-			}
-		}
-
-		void addParameter( const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, IECoreScene::Shader *shader, vector<IECoreScene::ShaderNetwork::Connection> &connections )
-		{
-			// Store the value of the parameter whether or not we have a
-			// connection, so parameter type information is always available
-			// from the ShaderNetwork.
-			if( IECore::DataPtr value = static_cast<const Shader *>( parameter->node() )->parameterValue( parameter ) )
-			{
-				shader->parameters()[parameterName] = value;
-			}
-
-			OptionalScopedContext sourceContext;
-			if( auto source = this->connectionSource( parameter, sourceContext ) )
-			{
-				connections.push_back( {
-					outputParameterForPlug( source ),
-					{ IECore::InternedString(), parameterName }
-				} );
-			}
-			else
-			{
-				// The parent doesn't have an input connection, but the children might.
-				addParameterComponentConnections( parameter, parameterName, connections );
 			}
 		}
 
@@ -615,40 +641,8 @@ class Shader::NetworkBuilder
 			}
 		}
 
-		void addParameterComponentConnections( const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, vector<IECoreScene::ShaderNetwork::Connection> &connections )
-		{
-			if( isCompoundNumericPlug( parameter ) )
-			{
-				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
-				{
-					OptionalScopedContext sourceContext;
-					if( auto source = connectionSource( it->get(), sourceContext ) )
-					{
-						IECore::InternedString inputName = parameterName.string() + "." + (*it)->getName().string();
-
-						connections.push_back( {
-							outputParameterForPlug( source ),
-							{ IECore::InternedString(), inputName }
-						} );
-					}
-				}
-			}
-			else if( (Gaffer::TypeId)parameter->typeId() == SplineffPlugTypeId )
-			{
-				addSplineParameterComponentConnections< SplineffPlug >( (const SplineffPlug*) parameter, parameterName, connections );
-			}
-			else if( (Gaffer::TypeId)parameter->typeId() == SplinefColor3fPlugTypeId )
-			{
-				addSplineParameterComponentConnections< SplinefColor3fPlug >( (const SplinefColor3fPlug*)parameter, parameterName, connections );
-			}
-			else if( (Gaffer::TypeId)parameter->typeId() == SplinefColor4fPlugTypeId )
-			{
-				addSplineParameterComponentConnections< SplinefColor4fPlug >( (const SplinefColor4fPlug*)parameter, parameterName, connections );
-			}
-		}
-
-		template< typename T >
-		void addSplineParameterComponentConnections( const T *parameter, const IECore::InternedString &parameterName, vector<IECoreScene::ShaderNetwork::Connection> &connections )
+		template<typename T>
+		void addSplineParameterWalk( const T *parameter, const IECore::InternedString &parameterName, vector<IECoreScene::ShaderNetwork::Connection> &connections )
 		{
 			const int n = parameter->numPoints();
 			std::vector< std::tuple<int, std::string, IECoreScene::ShaderNetwork::Parameter> > inputs;
@@ -1078,14 +1072,7 @@ void Shader::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context 
 
 void Shader::parameterHash( const Gaffer::Plug *parameterPlug, IECore::MurmurHash &h ) const
 {
-	if( auto optionalValuePlug = IECore::runTimeCast<const OptionalValuePlug>( parameterPlug ) )
-	{
-		if( optionalValuePlug->enabledPlug()->getValue() )
-		{
-			optionalValuePlug->valuePlug()->hash( h );
-		}
-	}
-	else if( auto valuePlug = IECore::runTimeCast<const ValuePlug>( parameterPlug ) )
+	if( auto valuePlug = IECore::runTimeCast<const ValuePlug>( parameterPlug ) )
 	{
 		valuePlug->hash( h );
 	}
@@ -1097,18 +1084,7 @@ void Shader::parameterHash( const Gaffer::Plug *parameterPlug, IECore::MurmurHas
 
 IECore::DataPtr Shader::parameterValue( const Gaffer::Plug *parameterPlug ) const
 {
-	if( auto optionalValuePlug = IECore::runTimeCast<const OptionalValuePlug>( parameterPlug ) )
-	{
-		if( optionalValuePlug->enabledPlug()->getValue() )
-		{
-			return Gaffer::PlugAlgo::getValueAsData( optionalValuePlug->valuePlug() );
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-	else if( auto valuePlug = IECore::runTimeCast<const Gaffer::ValuePlug>( parameterPlug ) )
+	if( auto valuePlug = IECore::runTimeCast<const Gaffer::ValuePlug>( parameterPlug ) )
 	{
 		return Gaffer::PlugAlgo::getValueAsData( valuePlug );
 	}
