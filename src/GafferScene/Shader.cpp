@@ -453,10 +453,6 @@ class Shader::NetworkBuilder
 		{
 			if( !isLeafParameter( parameter ) || parameter->parent<Node>() )
 			{
-				if( !parameter->parent<Node>() )
-				{
-					hashParameter( parameter, h );
-				}
 				// Compound parameter - recurse
 				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
 				{
@@ -482,11 +478,6 @@ class Shader::NetworkBuilder
 		{
 			if( !isLeafParameter( parameter ) || parameter->parent<Node>() )
 			{
-				if( !parameter->parent<Node>() )
-				{
-					addParameter( parameter, parameterName, shader, connections );
-				}
-
 				// Compound parameter - recurse
 				for( Plug::InputIterator it( parameter ); !it.done(); ++it )
 				{
