@@ -17,6 +17,7 @@ Fixes
   - Fixed formatting of parameter tooltips, and Node Reference descriptions.
 - RenderManShader : Fixed loading of C++ pattern shaders such as `aaOceanPrmanShader`.
 - ArnoldShader : Fixed `correspondingInput()` to handle children of the main output plug.
+- Shader : Disabled shaders now compute the appropriate pass-through value for their outputs.
 
 API
 ---

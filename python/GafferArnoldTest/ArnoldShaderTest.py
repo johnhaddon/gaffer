@@ -720,6 +720,20 @@ class ArnoldShaderTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( shader.correspondingInput( shader["out"]["g"] ), shader["parameters"]["input"]["g"] )
 		self.assertEqual( shader.correspondingInput( shader["out"]["b"] ), shader["parameters"]["input"]["b"] )
 
+	def testCorrespondingInputProvidesOutputValue( self ) :
+
+		shader = GafferArnold.ArnoldShader()
+		shader.loadShader( "abs" )
+		shader["parameters"]["input"].setValue( imath.Color3f( 1, 2, 3 ) )
+
+		# Shader is enabled. We can't run it to get the result, so we get a
+		# default value.
+		self.assertEqual( shader["out"].getValue(), imath.Color3f( 0 ) )
+
+		# Shader is disabled. We should get the value from the pass-through.
+		shader["enabled"].setValue( False )
+		self.assertEqual( shader["out"].getValue(), imath.Color3f( 1, 2, 3 ) )
+
 	def testDisabledShaderPassesThroughExternalValue( self ) :
 
 		s = GafferArnold.ArnoldShader( "s" )

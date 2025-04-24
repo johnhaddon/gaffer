@@ -1067,9 +1067,19 @@ void Shader::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	{
 		if( output == o || o->isAncestorOf( output ) )
 		{
-			ComputeNode::hash( output, context, h );
-			namePlug()->hash( h );
-			typePlug()->hash( h );
+			if( !enabledPlug()->getValue() )
+			{
+				if( auto input = IECore::runTimeCast<const ValuePlug>( correspondingInput( output ) ) )
+				{
+					ComputeNode::hash( output, context, h );
+					input->hash( h );
+					// Account for potential type conversions.
+					h.append( input->typeId() );
+					h.append( output->typeId() );
+					return;
+				}
+			}
+			h = output->defaultHash();
 			return;
 		}
 	}
@@ -1096,6 +1106,14 @@ void Shader::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context 
 	{
 		if( output == o || o->isAncestorOf( output ) )
 		{
+			if( !enabledPlug()->getValue() )
+			{
+				if( auto input = IECore::runTimeCast<const ValuePlug>( correspondingInput( output ) ) )
+				{
+					output->setFrom( input );
+					return;
+				}
+			}
 			output->setToDefault();
 			return;
 		}
