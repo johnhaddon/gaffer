@@ -44,6 +44,9 @@
 
 #include "onnxruntime_cxx_api.h"
 
+#include "boost/algorithm/string.hpp"
+#include "boost/algorithm/string/predicate.hpp"
+
 #include <mutex>
 #include <condition_variable>
 
@@ -60,21 +63,14 @@ using namespace GafferML;
 namespace
 {
 
-std::vector<std::string> customOpLibraryPaths()
+std::vector<std::filesystem::path> customOpLibraryPaths()
 {
-	std::vector<std::string> pathList;
-
-	const char *envVar = std::getenv( "GAFFERML_CUSTOM_OPS_LIBRARIES" );
-	if( !envVar )
+	std::vector<std::filesystem::path> paths;
+	if( const char *envVar = std::getenv( "GAFFERML_CUSTOM_OPS_LIBRARIES" ) )
 	{
-		// silent return because this is optional only when using model
-		// that might requires some components from the onnx runtime extensions
-		return pathList;
+		boost::split( paths, envVar, boost::is_any_of( "," ) );
 	}
-
-	StringAlgo::tokenize( envVar, ',', pathList );
-
-	return pathList;
+	return paths;
 }
 
 Ort::Env &acquireEnv()
@@ -116,7 +112,7 @@ Ort::Session &acquireSession( const std::string &fileName )
 	{
 		sessionOpt.RegisterCustomOpsLibrary( customLibraryPath.c_str() );
 	}
-	it = g_map.try_emplace( fileName, acquireEnv(), path.string().c_str(), sessionOpt ).first;
+	it = g_map.try_emplace( fileName, acquireEnv(), path.c_str(), sessionOpt ).first;
 	return it->second;
 }
 
