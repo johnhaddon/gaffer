@@ -54,6 +54,9 @@ ArnoldAttributes::ArnoldAttributes( const std::string &name )
 
 	attributes->addChild( new Gaffer::NameValuePlug( "ai:visibility:camera", new IECore::BoolData( true ), false, "cameraVisibility" ) );
 	attributes->addChild( new Gaffer::NameValuePlug( "ai:visibility:shadow", new IECore::BoolData( true ), false, "shadowVisibility" ) );
+	/// \todo We could change the attribute name to "shadowedLights" so that old
+	/// scenes author the new standard attribute instead of the old
+	/// Arnold-specific one.
 	attributes->addChild( new Gaffer::NameValuePlug( "ai:visibility:shadow_group", new IECore::StringData( "" ), false, "shadowGroup" ) );
 	attributes->addChild( new Gaffer::NameValuePlug( "ai:visibility:diffuse_reflect", new IECore::BoolData( true ), false, "diffuseReflectionVisibility" ) );
 	attributes->addChild( new Gaffer::NameValuePlug( "ai:visibility:specular_reflect", new IECore::BoolData( true ), false, "specularReflectionVisibility" ) );
