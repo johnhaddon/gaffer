@@ -1703,6 +1703,7 @@ for libraryName, libraryDef in libraries.items() :
 	libEnv = baseLibEnv.Clone()
 	if libraryDef.get( "libraryDependsOnPython" ) :
 		libEnv = basePythonEnv.Clone()
+		libEnv.Append( LIBS = "usd_python" ) # DON'T ACTUALLY WANT BOOST PYTHON AS WELL THOUGH, SO CAN WE MAKE THIS CLEANER?
 
 	libEnv.Append( CXXFLAGS = "-D{0}_EXPORTS".format( libraryName ) )
 	libEnv.Append( **(libraryDef.get( "envAppends", {} )) )
