@@ -311,9 +311,12 @@ void Light::updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &l
 	);
 }
 
-void Light::updateGroupingMemberships( RtUString memberships )
+void Light::updateGroupingMemberships( RtUString memberships, RtUString shadowSubset )
 {
 	m_extraAttributes.SetString( Rix::k_grouping_membership, memberships );
+	m_extraAttributes.SetString( Rix::k_trace_shadowsubset, shadowSubset );
+
+	std::cerr << "Setting shadow subset " << shadowSubset.CStr() << std::endl;
 
 	if( m_lightInstance == riley::LightInstanceId::InvalidId() )
 	{

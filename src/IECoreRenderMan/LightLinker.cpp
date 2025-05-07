@@ -210,7 +210,7 @@ void LightLinker::updateDirtyLightLinks()
 
 	for( auto &[light, memberships] : lightMemberships )
 	{
-		light->updateGroupingMemberships( RtUString( memberships.c_str() ) );
+		light->updateGroupingMemberships( RtUString( memberships.c_str() ), RtUString() );
 	}
 
 	m_lightLinksDirty = false;

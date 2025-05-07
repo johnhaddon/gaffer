@@ -40,6 +40,8 @@
 
 #include "RixPredefinedStrings.hpp"
 
+#include "fmt/format.h"
+
 using namespace std;
 using namespace IECoreRenderMan;
 
@@ -48,6 +50,7 @@ namespace
 
 const riley::CoordinateSystemList g_emptyCoordinateSystems = { 0, nullptr };
 const IECore::InternedString g_lights( "lights" );
+const IECore::InternedString g_shadowedLights( "ai:visibility:shadow_group" );
 
 } // namespace
 
@@ -82,6 +85,7 @@ Object::~Object()
 		{
 			m_lightLinker->deregisterLightLinks( m_linkedLights );
 		}
+		// TODO : DEREGISTER SHADOWS
 	}
 }
 
@@ -151,26 +155,44 @@ bool Object::attributes( const IECoreScenePreview::Renderer::AttributesInterface
 
 void Object::link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects )
 {
-	if( type != g_lights )
+	std::cerr << "LINK " << type << " " << ( objects ? objects->size() : 0 ) << std::endl;
+
+	if( type == g_lights )
 	{
-		return;
-	}
+		if( m_linkedLights )
+		{
+			m_lightLinker->deregisterLightLinks( m_linkedLights );
+		}
 
-	if( m_linkedLights )
+		m_linkedLights = objects;
+
+		RtUString lightingSubset;
+		if( objects )
+		{
+			lightingSubset = m_lightLinker->registerLightLinks( objects );
+		}
+
+		m_extraAttributes.SetString( Rix::k_lighting_subset, lightingSubset );
+		attributes( m_attributes.get() );
+	}
+	else if( type == g_shadowedLights )
 	{
-		m_lightLinker->deregisterLightLinks( m_linkedLights );
+		m_shadowedLights = objects;
+		RtUString groupingMembership;
+		if( objects )
+		{
+			groupingMembership = m_lightLinker->registerLightLinks( objects );
+			groupingMembership = RtUString( fmt::format( "{}BLAH", groupingMembership.CStr() ).c_str() );
+		}
+
+		RtUString name;
+		m_extraAttributes.GetString( Rix::k_identifier_name, name );
+
+		std::cerr << "Object::link shadow : " << name.CStr() << ": " << ( groupingMembership.CStr() ? groupingMembership.CStr() : "" ) << std::endl;
+
+		m_extraAttributes.SetString( Rix::k_grouping_membership, groupingMembership );
+		attributes( m_attributes.get() );
 	}
-
-	m_linkedLights = objects;
-
-	RtUString lightingSubset;
-	if( objects )
-	{
-		lightingSubset = m_lightLinker->registerLightLinks( objects );
-	}
-
-	m_extraAttributes.SetString( Rix::k_lighting_subset, lightingSubset );
-	attributes( m_attributes.get() );
 }
 
 void Object::assignID( uint32_t id )
