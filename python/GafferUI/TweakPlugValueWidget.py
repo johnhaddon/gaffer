@@ -72,6 +72,9 @@ class TweakPlugValueWidget( GafferUI.PlugValueWidget ) :
 			),
 			verticalAlignment = GafferUI.Label.VerticalAlignment.Top,
 		)
+		self.__row[-1].boolWidget().stateChangedSignal().connect(
+			Gaffer.WeakMethod( self.__boolWidgetStateChanged )
+		)
 
 		modeWidget = GafferUI.PlugValueWidget.create( self.__childPlugs( plugs, "mode" ) )
 		modeWidget._qtWidget().setFixedWidth( 105 )
@@ -122,6 +125,13 @@ class TweakPlugValueWidget( GafferUI.PlugValueWidget ) :
 		enabled = all( values )
 		for i in ( 0, 2, 3 ) :
 			self.__row[i].setEnabled( enabled )
+
+	def __boolWidgetStateChanged( self, boolWidget ) :
+
+		print( "CHANGED" )
+		if boolWidget.getState() == True :
+			print( "FOCUSSING" )
+			GafferUI.WidgetAlgo.focusFirstTextWidget( self )
 
 	@staticmethod
 	def __childPlugs( plugs, childName ) :

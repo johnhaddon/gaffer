@@ -84,6 +84,9 @@ class NameValuePlugValueWidget( GafferUI.PlugValueWidget ) :
 				),
 				verticalAlignment = GafferUI.Label.VerticalAlignment.Top,
 			)
+			self.__row[-1].boolWidget().stateChangedSignal().connect(
+				Gaffer.WeakMethod( self.__boolWidgetStateChanged )
+			)
 
 		self.__row.append( GafferUI.PlugValueWidget.create( { plug["value"] for plug in self.getPlugs() } ), expand = True )
 
@@ -132,6 +135,7 @@ class NameValuePlugValueWidget( GafferUI.PlugValueWidget ) :
 	def _updateFromValues( self, values, exception ) :
 
 		enabled = all( values )
+		print( "_updateFromValues", enabled )
 		if isinstance( self.__row[0], GafferUI.StringPlugValueWidget ) :
 			self.__row[0].setEnabled( enabled )
 		self.__row[-1].setEnabled( enabled )
@@ -156,6 +160,13 @@ class NameValuePlugValueWidget( GafferUI.PlugValueWidget ) :
 						c.setInput( event.data[c.getName()] )
 
 		return True
+
+	def __boolWidgetStateChanged( self, boolWidget ) :
+
+		print( "CHANGED" )
+		if boolWidget.getState() == True :
+			print( "FOCUSSING", GafferUI.WidgetAlgo.focusFirstTextWidget( self ) )
+
 
 GafferUI.PlugValueWidget.registerType( Gaffer.NameValuePlug, NameValuePlugValueWidget )
 
