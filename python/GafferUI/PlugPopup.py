@@ -152,14 +152,7 @@ class PlugPopup( GafferUI.PopupWindow ) :
 		# the window visible, as we check child widget visibility to avoid
 		# attempting to focus hidden widgets.
 
-		textWidget = self.__firstTextWidget( self.__plugValueWidget )
-		if textWidget is not None :
-			textWidget.setSelection( 0, len( textWidget.getText() ) )
-			if isinstance( textWidget, GafferUI.TextWidget ) :
-				textWidget.grabFocus()
-			else : # MultiLineTextWidget
-				textWidget.setFocussed( True )
-			textWidget._qtWidget().activateWindow()
+		GafferUI.WidgetAlgo.focusFirstTextWidget( self.__plugValueWidget )
 
 	def plugValueWidget( self ) :
 
@@ -193,36 +186,6 @@ class PlugPopup( GafferUI.PopupWindow ) :
 	def __activated( self, unused ) :
 
 		self.close()
-
-	@classmethod
-	def __firstTextWidget( cls, plugValueWidget ) :
-
-		if plugValueWidget is None :
-			return None
-
-		def widgetUsable( w ) :
-			return w.visible() and w.enabled() and w.getEditable()
-
-		widget = None
-
-		if isinstance( plugValueWidget, GafferUI.NumericPlugValueWidget ) :
-			widget = plugValueWidget.numericWidget()
-		elif isinstance( plugValueWidget, GafferUI.PathPlugValueWidget ) :
-			widget = plugValueWidget.pathWidget()
-		elif hasattr( plugValueWidget, "textWidget" ) :
-			widget = plugValueWidget.textWidget()
-
-		if widget is not None and widgetUsable( widget ) :
-			return widget
-
-		for childPlug in Gaffer.Plug.Range( next( iter( plugValueWidget.getPlugs() ) ) ) :
-			childWidget = plugValueWidget.childPlugValueWidget( childPlug )
-			if childWidget is not None :
-				childTextWidget = cls.__firstTextWidget( childWidget )
-				if childTextWidget is not None :
-					return childTextWidget
-
-		return None
 
 	@classmethod
 	def __colorPlugValueWidget( cls, plugValueWidget ) :

@@ -38,6 +38,7 @@ import functools
 import os
 import sys
 
+import Gaffer
 import GafferUI
 
 import Qt
@@ -135,3 +136,51 @@ def keepUntilIdle( widget ) :
 		return False # Removes idle callback
 
 	GafferUI.EventLoop.addIdleCallback( functools.partial( keep, widget ) )
+
+## Finds the first TextWidget or MultiLineTextWidget in `plugValueWidget`,
+# and focusses it and selects all the text for editing. Returns the text
+# widget on success and `None` on failure.
+def focusFirstTextWidget( plugValueWidget ) :
+
+	textWidget = __firstTextWidget( plugValueWidget )
+	if textWidget is None :
+		return None
+
+	if isinstance( textWidget, GafferUI.TextWidget ) :
+		textWidget.grabFocus()
+		textWidget.setSelection( 0, len( textWidget.getText() ) )
+	else : # MultiLineTextWidget
+		textWidget.setFocussed( True )
+		textWidget.setSelection( 0, len( textWidget.getText() ) )
+	textWidget._qtWidget().activateWindow()
+
+	return textWidget
+
+def __firstTextWidget( plugValueWidget ) :
+
+	if plugValueWidget is None :
+		return None
+
+	def widgetUsable( w ) :
+		return w.visible() and w.enabled() and w.getEditable()
+
+	widget = None
+
+	if isinstance( plugValueWidget, GafferUI.NumericPlugValueWidget ) :
+		widget = plugValueWidget.numericWidget()
+	elif isinstance( plugValueWidget, GafferUI.PathPlugValueWidget ) :
+		widget = plugValueWidget.pathWidget()
+	elif hasattr( plugValueWidget, "textWidget" ) :
+		widget = plugValueWidget.textWidget()
+
+	if widget is not None and widgetUsable( widget ) :
+		return widget
+
+	for childPlug in Gaffer.Plug.Range( next( iter( plugValueWidget.getPlugs() ) ) ) :
+		childWidget = plugValueWidget.childPlugValueWidget( childPlug )
+		if childWidget is not None :
+			childTextWidget = __firstTextWidget( childWidget )
+			if childTextWidget is not None :
+				return childTextWidget
+
+	return None
