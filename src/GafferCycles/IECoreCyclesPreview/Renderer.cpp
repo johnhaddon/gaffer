@@ -438,7 +438,7 @@ class CyclesShader : public IECore::RefCounted
 		)
 			:	m_hash( h )
 		{
-			ccl::ShaderGraph *graph = ShaderNetworkAlgo::convertGraph( surfaceShader, displacementShader, volumeShader, scene->shader_manager, name );
+			ccl::ShaderGraph *graph = ShaderNetworkAlgo::convertGraph( surfaceShader, displacementShader, volumeShader, scene->shader_manager.get(), name );
 			if( surfaceShader && singleSided )
 			{
 				ShaderNetworkAlgo::setSingleSided( graph );
@@ -446,7 +446,7 @@ class CyclesShader : public IECore::RefCounted
 
 			for( const IECoreScene::ShaderNetwork *aovShader : aovShaders )
 			{
-				ShaderNetworkAlgo::convertAOV( aovShader, graph, scene->shader_manager, name );
+				ShaderNetworkAlgo::convertAOV( aovShader, graph, scene->shader_manager.get(), name );
 			}
 
 			m_shader = new ccl::Shader();
