@@ -479,11 +479,11 @@ void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, ccl::Volume *volu
 			volume->attributes.add( std ) :
 			volume->attributes.add( ccl::ustring( gridName.c_str() ), ctype, ccl::ATTR_ELEMENT_VOXEL );
 
-		ccl::ImageLoader *loader = new IEVolumeLoader( vdbObject, gridName, precision );
+		std::unique_ptr<ccl::ImageLoader> loader = std::make_unique<IEVolumeLoader>( vdbObject, gridName, precision );
 		ccl::ImageParams params;
 		params.frame = 0.0f;
 
-		attr->data_voxel() = scene->image_manager->add_image( loader, params, false );
+		attr->data_voxel() = scene->image_manager->add_image( std::move( loader ), params, false );
 	}
 }
 
