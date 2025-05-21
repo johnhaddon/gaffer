@@ -126,7 +126,7 @@ bool getAttributeInternal( OSL::ShaderGlobals *sg, bool derivatives, ustringhash
 		memset( (char*)value + type.size(), 0, 2 * type.size() );
 	}
 
-	IECoreImage::OpenImageIOAlgo::DataView dataView( data.get(), /* createUStrings = */ true );
+	IECoreImage::OpenImageIOAlgo::DataView dataView( data.get() );
 	if( !dataView.data )
 	{
 		if( auto b = runTimeCast<BoolData>( data.get() ) )
@@ -154,10 +154,22 @@ bool getAttributeInternal( OSL::ShaderGlobals *sg, bool derivatives, ustringhash
 		dataView.type.arraylen = 0;
 	}
 
+	const char *sourceData = (char *)dataView.data + dataView.type.size() * effectiveIndex;
+
+	if( type == OIIO::TypeString )
+	{
+		// When OSL asks for a string, it actually wants a `ustringhash` instead,
+		// and unfortunately doesn't signify that using `OIIO::TypeUstringhash`.
+		// This breaks the assumptions in `convert_value()`, so we have to do
+		// the conversion ourselves.
+		*(ustringhash *)value = ustringhash( *(const char **)sourceData );
+		return true;
+	}
+
 	return ShadingSystem::convert_value(
 		value,
 		type,
-		(char *)dataView.data + dataView.type.size() * effectiveIndex,
+		sourceData,
 		dataView.type
 	);
 }
@@ -252,8 +264,8 @@ class RendererServices : public OSL::RendererServices
 							return true;
 						case StringPlugTypeId :
 						{
-							ustring s( static_cast<const StringPlug *>( plug )->getValue() );
-							*(const char **)value = s.c_str();
+							const ustring s( static_cast<const StringPlug *>( plug )->getValue() );
+							*(ustringhash *)value = s;
 							return true;
 						}
 						default :
@@ -483,7 +495,8 @@ class OSLExpressionEngine : public Gaffer::Expression::Engine
 				}
 				else if( type == OIIO::TypeString )
 				{
-					result->members().push_back( new StringData( *(const char **)storage ) );
+					const ustringhash *s = (const ustringhash *)storage;
+					result->members().push_back( new StringData( s->c_str() ) );
 				}
 			}
 
