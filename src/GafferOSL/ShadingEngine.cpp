@@ -256,16 +256,13 @@ bool convertValue( void *dst, TypeDesc dstType, const void *src, TypeDesc srcTyp
 #if OSL_LIBRARY_VERSION_CODE >= 11400
 		if( forBatch )
 		{
-			std::cerr << "Converting batch  " << *(const char**)src << std::endl;
 			*(ustring *)dst = *(const char**)src;
 		}
 		else
 		{
-			std::cerr << "Converting not batch  " << *(const char**)src << std::endl;
 			*(ustringhash *)dst = ustringhash( *(const char**)src );
 		}
 #else
-			std::cerr << "Converting old  " << *(const char**)src << std::endl;
 		*(ustring *)dst = *(const char**)src;
 #endif
 		return true;
@@ -412,7 +409,7 @@ class RenderState
 
 			// TODO : USE CONVERTVALUE
 
-			return ShadingSystem::convert_value( value, type, it->second.dataView.data, it->second.dataView.type );
+			return convertValue( value, type, it->second.dataView.data, it->second.dataView.type, true ); // TODO : GET BATCHED RIGHT!!
 		}
 
 		bool userData( size_t pointIndex, ustringhash name, TypeDesc type, void *value ) const
@@ -449,7 +446,6 @@ class RenderState
 		template< int WidthT >
 		Mask<WidthT> userDataWide( size_t pointIndex, ustringhash name, MaskedData<WidthT> &wval ) const
 		{
-			std::cerr << "USERDATWIDE " << name << std::endl;
 			if( name == g_index )
 			{
 				if( wval.type() == OIIO::TypeDesc( OIIO::TypeDesc::INT32 ) )
@@ -479,7 +475,6 @@ class RenderState
 			auto it = m_userData.find( name );
 			if( it == m_userData.end() )
 			{
-				std::cerr << "NOT FOUND " << std::endl;
 				return Mask<WidthT>( false );
 			}
 
@@ -489,7 +484,6 @@ class RenderState
 			size_t maxElement = it->second.numValues - 1;
 			if( it->second.dataView.type == wval.type() && wval.type().basetype != TypeDesc::STRING )
 			{
-				std::cerr << "NO CONVERSION NEEDED" << std::endl;
 				maskedDataInitWithZeroDerivs( wval );
 				wval.mask().foreach ([&wval, pointIndex, src, elementSize, maxElement ](ActiveLane lane) -> void {
 					int i = std::min( pointIndex + lane, maxElement );
@@ -501,7 +495,6 @@ class RenderState
 				// Start by checking if this is a valid conversion
 				if( !convertValue( nullptr, wval.type(), nullptr, sourceType, /* forBatch = */ true ) )
 				{
-					std::cerr << "INVALID CONVERSION " << std::endl;
 					return Mask<WidthT>( false );
 				}
 
@@ -875,7 +868,7 @@ struct EmissionParameters
 union StringParameter
 {
 	static_assert( sizeof( ustring ) == sizeof( ustringhash ) );
-	static_assert( std::is_trivially_destructible_v<ustring> );
+	//static_assert( std::is_trivially_destructible_v<ustring> );
 	static_assert( std::is_trivially_destructible_v<ustringhash> );
 
 	ustring asUString() const

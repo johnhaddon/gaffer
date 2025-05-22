@@ -162,7 +162,11 @@ bool getAttributeInternal( OSL::ShaderGlobals *sg, bool derivatives, ustringhash
 		// and unfortunately doesn't signify that using `OIIO::TypeUstringhash`.
 		// This breaks the assumptions in `convert_value()`, so we have to do
 		// the conversion ourselves.
+#if OSL_LIBRARY_VERSION_CODE >= 11400
 		*(ustringhash *)value = ustringhash( *(const char **)sourceData );
+#else
+		*(ustring *)value = *(const char **)sourceData;
+#endif
 		return true;
 	}
 
@@ -264,8 +268,12 @@ class RendererServices : public OSL::RendererServices
 							return true;
 						case StringPlugTypeId :
 						{
+#if OSL_LIBRARY_VERSION_CODE >= 11400 // TODO : CAN YOU SIMPLIFY BY USING A SINGLE TYPEDEF SOMEWHERE?
 							const ustring s( static_cast<const StringPlug *>( plug )->getValue() );
 							*(ustringhash *)value = s;
+#else
+							*(ustring *)value = static_cast<const StringPlug *>( plug )->getValue();
+#endif
 							return true;
 						}
 						default :
@@ -495,7 +503,11 @@ class OSLExpressionEngine : public Gaffer::Expression::Engine
 				}
 				else if( type == OIIO::TypeString )
 				{
+#if OSL_LIBRARY_VERSION_CODE >= 11400
 					const ustringhash *s = (const ustringhash *)storage;
+#else
+					const ustring *s = (const ustring *)storage;
+#endif
 					result->members().push_back( new StringData( s->c_str() ) );
 				}
 			}
