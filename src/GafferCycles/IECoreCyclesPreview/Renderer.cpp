@@ -1635,8 +1635,11 @@ class InstanceCache : public IECore::RefCounted
 				}
 			}
 
-			removeNodesInSet( toEraseObjs, m_objects );
-			m_scene->delete_nodes( toEraseObjs, m_scene );
+			if( !toEraseObjs.empty() )
+			{
+				removeNodesInSet( toEraseObjs, m_objects );
+				m_scene->delete_nodes( toEraseObjs, m_scene );
+			}
 
 			ccl::set<ccl::Geometry*> toEraseGeos;
 
@@ -1652,7 +1655,10 @@ class InstanceCache : public IECore::RefCounted
 				}
 			}
 
-			removeNodesInSet( toEraseGeos, m_uniqueGeometry );
+			if( !toEraseGeos.empty() )
+			{
+				removeNodesInSet( toEraseGeos, m_uniqueGeometry );
+			}
 
 			vector<IECore::MurmurHash> toErase;
 
@@ -1673,7 +1679,10 @@ class InstanceCache : public IECore::RefCounted
 				m_geometry.erase( *it );
 			}
 
-			m_scene->delete_nodes( toEraseGeos, m_scene );
+			if( !toEraseGeos.empty() )
+			{
+				m_scene->delete_nodes( toEraseGeos, m_scene );
+			}
 		}
 
 		void nodesCreated( NodesCreated &objects, NodesCreated &geometry )
@@ -1883,8 +1892,11 @@ class LightCache : public IECore::RefCounted
 				}
 			}
 
-			removeNodesInSet( toErase, m_lights );
-			m_scene->delete_nodes( toErase, m_scene );
+			if( !toErase.empty() )
+			{
+				removeNodesInSet( toErase, m_lights );
+				m_scene->delete_nodes( toErase, m_scene );
+			}
 		}
 
 		void nodesCreated( NodesCreated &nodes ) const
@@ -2548,6 +2560,7 @@ class CyclesCamera : public IECoreScenePreview::Renderer::ObjectInterface
 				return;
 			Imath::M44f ctransform = transform;
 			ctransform.scale( Imath::V3f( 1.0f, -1.0f, -1.0f ) );
+			std::cerr << "DID CAMERA TRANSFORM" << std::endl;
 			camera->set_matrix( SocketAlgo::setTransform( ctransform ) );
 			camera->tag_modified();
 		}
@@ -3718,15 +3731,18 @@ class CyclesRenderer final : public IECoreScenePreview::Renderer
 				else
 				{
 					ccl::Camera *ccamera = m_cameraCache->get( cameraIt->second.get(), cameraIt->first ).get();
-					if( m_scene->camera->name != cameraName || ccamera->is_modified() )
-					{
-						ccl::Camera prevcam = *m_scene->camera;
-						*m_scene->camera = *ccamera;
-						m_scene->camera->shutter_table_offset = prevcam.shutter_table_offset;
-						m_scene->camera->need_flags_update = prevcam.need_flags_update;
-						m_scene->camera->update( m_scene );
-						*ccamera = *m_scene->camera;
-					}
+					std::cerr << "GOT CAMERA FROM CACHE " << ccamera << std::endl;
+					m_scene->camera = ccamera;
+					// if( m_scene->camera->name != cameraName || ccamera->is_modified() )
+					// {
+					// 	ccl::Camera prevcam = *m_scene->camera;
+					// 	*m_scene->camera = *ccamera;
+					// 	m_scene->camera->shutter_table_offset = prevcam.shutter_table_offset;
+					// 	m_scene->camera->need_flags_update = prevcam.need_flags_update;
+					// 	m_scene->camera->update( m_scene );
+					// 	*ccamera = *m_scene->camera;
+					// 	std::cerr << "CLOBBERED CAMERA " << m_scene->camera->is_modified() << std::endl;
+					// }
 				}
 			}
 
