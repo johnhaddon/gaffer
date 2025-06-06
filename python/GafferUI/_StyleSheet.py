@@ -491,7 +491,7 @@ QComboBox {{
 	border: 1px solid {backgroundDarkHighlight};
 	border-top-color: {backgroundLightHighlight};
 	border-left-color: {backgroundLightHighlight};
-	background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {backgroundLightHighlight}, stop: 0.1 {backgroundLight}, stop: 0.90 {backgroundLightLowlight});
+	background-color : red;
 	border-radius: 4px;
 	padding: 4px;
 	margin: 1px;
@@ -1609,71 +1609,19 @@ QGraphicsView {{
 	border-top-right-radius: 1px;
 }}
 
-*[gafferAdjoinedTop="false"] {{
-	border-top-left-radius: {widgetCornerRadius};
-	border-top-right-radius: {widgetCornerRadius};
-}}
-
 *[gafferAdjoinedBottom="true"] {{
 	border-bottom-left-radius: 1px;
 	border-bottom-right-radius: 1px;
 }}
 
-*[gafferAdjoinedBottom="false"] {{
-	border-bottom-left-radius: {widgetCornerRadius};
-	border-bottom-right-radius: {widgetCornerRadius};
-}}
-
-*[gafferAdjoinedLeft="true"] {{
+*[gafferAdjoinedLeft="true"][a=""][b=""][c=""][d=""] {{
 	border-top-left-radius: 1px;
 	border-bottom-left-radius: 1px;
 }}
 
-*[gafferAdjoinedLeft="false"] {{
-	border-top-left-radius: {widgetCornerRadius};
-	border-bottom-left-radius: {widgetCornerRadius};
-}}
-
-*[gafferAdjoinedRight="true"] {{
+*[gafferAdjoinedRight="true"][a=""][b=""][c=""][d=""] {{
 	border-top-right-radius: 1px;
 	border-bottom-right-radius: 1px;
-}}
-
-*[gafferAdjoinedRight="false"] {{
-	border-top-right-radius: {widgetCornerRadius};
-	border-bottom-right-radius: {widgetCornerRadius};
-}}
-
-/* Adjoined buttons */
-/* Selector specificity requires radius to be re-specified as the base */
-/* QPushButton[gafferWithFrame="true"] radius overrides those above. */
-
-QPushButton[gafferAdjoinedTop="true"] {{
-	border-top-left-radius: 1px;
-	border-top-right-radius: 1px;
-	border-top-color: {backgroundLightHighlightAdjoined};
-	margin-top: 0;
-}}
-
-QPushButton[gafferAdjoinedBottom="true"] {{
-	border-bottom-left-radius: 1px;
-	border-bottom-right-radius: 1px;
-	border-bottom-color: {backgroundDarkHighlightAdjoined};
-	margin-bottom: 0;
-}}
-
-QPushButton[gafferAdjoinedLeft="true"] {{
-	border-top-left-radius: 1px;
-	border-bottom-left-radius: 1px;
-	border-left-color: {backgroundLightHighlightAdjoined};
-	margin-left: 0;
-}}
-
-QPushButton[gafferAdjoinedRight="true"] {{
-	border-top-right-radius: 1px;
-	border-bottom-right-radius: 1px;
-	border-right-color: {backgroundDarkHighlightAdjoined};
-	margin-right: 0;
 }}
 
 /* PathChooserWidget */
