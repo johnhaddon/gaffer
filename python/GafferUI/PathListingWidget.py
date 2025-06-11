@@ -141,12 +141,14 @@ class PathListingWidget( GafferUI.Widget ) :
 
 		self._qtWidget().model().selectionChanged.connect( Gaffer.WeakMethod( self.__selectionChanged ) )
 		self._qtWidget().model().expansionChanged.connect( Gaffer.WeakMethod( self.__expansionChanged ) )
+		self._qtWidget().model().updateStarted.connect( Gaffer.WeakMethod( self.__updateStarted ) )
 		self._qtWidget().model().updateFinished.connect( Gaffer.WeakMethod( self.__updateFinished ) )
 
 		self.__pathSelectedSignal = GafferUI.WidgetSignal()
 		self.__selectionChangedSignal = GafferUI.WidgetSignal()
 		self.__displayModeChangedSignal = GafferUI.WidgetSignal()
 		self.__expansionChangedSignal = GafferUI.WidgetSignal()
+		self.__updateStartedSignal = GafferUI.WidgetSignal()
 		self.__updateFinishedSignal = GafferUI.WidgetSignal()
 		self.__columnContextMenuSignal = Gaffer.Signal3()
 
@@ -285,6 +287,10 @@ class PathListingWidget( GafferUI.Widget ) :
 	def expansionChangedSignal( self ) :
 
 		return self.__expansionChangedSignal
+
+	def updateStartedSignal( self ) :
+
+		return self.__updateStartedSignal
 
 	def updateFinishedSignal( self ) :
 
@@ -584,6 +590,10 @@ class PathListingWidget( GafferUI.Widget ) :
 	def __expansionChanged( self ) :
 
 		self.__expansionChangedSignal( self )
+
+	def __updateStarted( self ) :
+
+		self.__updateStartedSignal( self )
 
 	def __updateFinished( self ) :
 

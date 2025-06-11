@@ -99,9 +99,6 @@ class _BusyWidget( QtWidgets.QWidget ) :
 
 	def paintEvent( self, event ) :
 
-		if not self.getBusy() :
-			return
-
 		painter = QtGui.QPainter( self )
 		painter.setRenderHint( QtGui.QPainter.Antialiasing )
 
@@ -114,11 +111,17 @@ class _BusyWidget( QtWidgets.QWidget ) :
 
 		for i in range( 0, numCircles ) :
 
-			theta = i * 360.0 / numCircles + time.time() * 10
+			theta = i * 360.0 / numCircles
+			if self.getBusy() :
+				theta += time.time() * 10
+
 			circleCentreX = centreX - (radius - circleRadius - penWidth) * math.cos( math.radians( theta ) )
 			circleCentreY = centreY + (radius - circleRadius - penWidth) * math.sin( math.radians( theta ) )
 
-			alpha =  1 - ( ( math.fmod( theta + time.time() * 270, 360 ) ) / 360 )
+			if self.getBusy() :
+				alpha =  1 - ( ( math.fmod( theta + time.time() * 270, 360 ) ) / 360 )
+			else :
+				alpha = 0.2
 
 			## \todo Colours (and maybe even drawing) should come from style
 			brush = QtGui.QBrush( QtGui.QColor( 119, 156, 189, alpha * 255 ) )

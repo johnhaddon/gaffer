@@ -781,6 +781,7 @@ class PathModel : public QAbstractItemModel
 
 		void expansionChanged();
 		void selectionChanged();
+		void updateStarted();
 		void updateFinished();
 
 		///////////////////////////////////////////////////////////////////
@@ -1012,6 +1013,7 @@ class PathModel : public QAbstractItemModel
 					}
 				}
 			);
+			updateStarted();
 			m_updateScheduled = false;
 		}
 

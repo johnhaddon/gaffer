@@ -71,9 +71,8 @@ class HierarchyView( GafferSceneUI.SceneEditor ) :
 
 			with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
 
+				busyWidget = GafferUI.BusyWidget( size = 20 )
 				_VisibleSetBookmarkWidget()
-				GafferUI.Divider( GafferUI.Divider.Orientation.Vertical )
-
 				_SearchFilterWidget( searchFilter )
 				_SetFilterWidget( setFilter )
 
@@ -102,6 +101,9 @@ class HierarchyView( GafferSceneUI.SceneEditor ) :
 		self.__selectedPathsChangedConnection = GafferSceneUI.ScriptNodeAlgo.selectedPathsChangedSignal( scriptNode ).connect(
 			Gaffer.WeakMethod( self.__selectedPathsChanged )
 		)
+
+		self.__pathListing.updateStartedSignal().connect( lambda w : busyWidget.setBusy( True ) )
+		self.__pathListing.updateFinishedSignal().connect( lambda w : busyWidget.setBusy( False ) )
 
 		self._updateFromSet()
 		self.__setPathListingPath()
