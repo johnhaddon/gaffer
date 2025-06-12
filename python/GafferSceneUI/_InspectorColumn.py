@@ -37,6 +37,7 @@
 import enum
 import functools
 
+import GafferUI.PopupWindow
 import IECore
 
 import Gaffer
@@ -318,6 +319,24 @@ def __validateSelection( pathListing ) :
 	for columnSelection, column in zip( selection, pathListing.getColumns() ) :
 		if not columnSelection.isEmpty() and not isinstance( column, GafferSceneUI.Private.InspectorColumn ) :
 			return False
+
+	return True
+
+def __buttonPress( column, path, pathListing, event ) :
+
+	if event.buttons != event.Buttons.Middle or event.modifiers != event.Modifiers.Alt :
+		return False
+
+	# Alt + Middle click
+
+	with path.inspectionContext() :
+		inspection = column.inspector().inspect()
+
+	if inspection is None :
+		return True
+
+	pathListing.__inspectionPopupWindow = __InspectionPopupWindow( inspection )
+	pathListing.__inspectionPopupWindow.popup( parent = pathListing )
 
 	return True
 
@@ -624,6 +643,64 @@ def __columnMetadata( column, metadataKey ) :
 	return Gaffer.Metadata.value( prefixMap.get( type( column.inspector() ) ) + column.inspector().name(), metadataKey )
 
 ##########################################################################
+# __InspectionPopupWindow
+##########################################################################
+
+class __InspectionPopupWindow( GafferUI.PopupWindow ) :
+
+	def __init__( self, inspection, **kw ) :
+
+		GafferUI.PopupWindow.__init__( self, **kw )
+
+		self.__inspection = inspection
+
+		with self :
+
+			with GafferUI.GridContainer( spacing = 4 ) :
+
+				GafferUI.Label( "<b>Source</b>", parenting = { "index" : ( 0, 0 ) } )
+
+				if inspection.source() is not None :
+					nameLabel = GafferUI.NameLabel(
+						inspection.source(),
+						numComponents = inspection.source().relativeName( inspection.source().ancestor( Gaffer.ScriptNode ) ).count( "." ) + 1,
+						parenting = { "index" : ( 1, 0 ) }
+					)
+					nameLabel.setFormatter( lambda l : ".".join( x.getName() for x in l if isinstance( x, Gaffer.Node ) ) )
+				elif inspection.sourceType == inspection.SourceType.Fallback :
+					GafferUI.Label( inspection.fallbackDescription(), parenting = { "index" : ( 1, 0 ) } )
+
+				GafferUI.Label( "<b>Value</b>", parenting = { "index" : ( 0, 1 ), "alignment" : ( GafferUI.HorizontalAlignment.None_, GafferUI.VerticalAlignment.Top ) } )
+
+				valueLabel = GafferUI.Label(
+					f"{inspection.value()}",
+					parenting = { "index" : ( 1, 1 ), "alignment" : ( GafferUI.HorizontalAlignment.None_, GafferUI.VerticalAlignment.Top ) }
+				)
+
+				valueLabel.buttonPressSignal().connect( lambda widget, event : True )
+				valueLabel.dragBeginSignal().connect( Gaffer.WeakMethod( self.__valueDragBegin ) )
+				valueLabel.dragEndSignal().connect( Gaffer.WeakMethod( self.__valueDragEnd  ))
+				button = GafferUI.Button( image = "duplicate.png", hasFrame = False, toolTip = "Copy Value", parenting = { "index" : ( 2, 1 ), "alignment" : ( GafferUI.HorizontalAlignment.None_, GafferUI.VerticalAlignment.Top ) } )
+				button.clickedSignal().connect( Gaffer.WeakMethod( self.__valueCopyClicked ) )
+
+	def __valueDragBegin( self, widget, event ) :
+
+		GafferUI.Pointer.setCurrent( "values" )
+		return self.__inspection.value()
+
+	def __valueDragEnd( self, widget, event ) :
+
+		GafferUI.Pointer.setCurrent( None )
+		return True
+
+	def __valueCopyClicked( self, widget ) :
+
+		application = self.ancestor( GafferUI.Editor ).scriptNode().ancestor( Gaffer.ApplicationRoot )
+		application.setClipboardContents( self.__inspection.value() )
+		self.close()
+		return True
+
+##########################################################################
 # Copy and paste
 ##########################################################################
 
@@ -816,6 +893,8 @@ def __orderedSelection( pathListing ) :
 def __inspectorColumnCreated( column ) :
 
 	if isinstance( column, GafferSceneUI.Private.InspectorColumn ) :
+		## \todo `buttonPressSignal` should provide the column for us.
+		column.buttonPressSignal().connectFront( functools.partial( __buttonPress, column ) )
 		column.buttonDoubleClickSignal().connectFront( __buttonDoubleClick )
 		column.contextMenuSignal().connectFront( __contextMenu )
 		column.keyPressSignal().connectFront( __keyPress )
