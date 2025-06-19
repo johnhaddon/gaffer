@@ -172,7 +172,9 @@ IECore::ConstRunTimeTypedPtr ScenePath::property( const IECore::InternedString &
 {
 	if( name == g_inspectorContextPropertyName )
 	{
-		return m_context;
+		ContextPtr result = new Context( *getContext() );
+		result->set( ScenePlug::scenePathContextName, names() );
+		return result;
 	}
 	return Path::property( name, canceller );
 }
