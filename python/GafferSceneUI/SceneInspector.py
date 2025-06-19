@@ -1871,48 +1871,45 @@ class _BoundPath( Gaffer.Path ) :
 		if plug.isSame( self.__scene["bound"] or plug.isSame( self.__scene["transform"] ) ) :
 			self._emitPathChanged()
 
-class __BoundSection( LocationSection ) :
+# class __BoundSection( LocationSection ) :
 
-	def __init__( self ) :
+# 	def __init__( self ) :
 
-		LocationSection.__init__( self, collapsed = True, label = "Bound" )
+# 		LocationSection.__init__( self, collapsed = True, label = "Bound" )
 
-		with self._mainColumn() :
-			self.__pathListing = GafferUI.PathListingWidget(
-				Gaffer.DictPath( {}, "/" ),
-				columns = [
-					GafferUI.StandardPathColumn( "Name", "name" ),
-					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.A ),
-					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.B ),
-				],
-			)
-			self.__pathListing.setHeaderVisible( False )
+# 		with self._mainColumn() :
+# 			self.__pathListing = GafferUI.PathListingWidget(
+# 				Gaffer.DictPath( {}, "/" ),
+# 				columns = [
+# 					GafferUI.StandardPathColumn( "Name", "name" ),
+# 					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.A ),
+# 					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.B ),
+# 				],
+# 			)
+# 			self.__pathListing.setHeaderVisible( False )
 
-	def update( self, targets ) :
+# 	def update( self, targets ) :
 
-		LocationSection.update( self, targets )
+# 		LocationSection.update( self, targets )
 
-		self.__pathListing.setPath(
-			_BoundPath(
-				self._settings()["__switchedIn"], ## TODO : PLUG MAYBE NOT PRIVATE?
-				[ t.context for t in targets ]
-			)
-		)
+# 		self.__pathListing.setPath(
+# 			_BoundPath(
+# 				self._settings()["__switchedIn"], ## TODO : PLUG MAYBE NOT PRIVATE?
+# 				[ t.context for t in targets ]
+# 			)
+# 		)
 
-SceneInspector.registerSection( __BoundSection, tab = "Selection" )
+# SceneInspector.registerSection( __BoundSection, tab = "Selection" )
 
 ##########################################################################
 # Attributes section
 ##########################################################################
 
 ## \todo
-# - HOW DOES THIS RELATE TO THE REAL INSPECTORCOLUMN?
-#	- I THINK IT COULD DERIVE FROM IT
-#		- IF WE MAKE EVERYTHING PROPERTY-BASED
 # - CAN WE MAKE ALL THE SAME EDITING AND HISTORY MENU ITEMS "JUST WORK"?
 # - ADD PRESENTATION FOR SHADERNETWORKS
 #    - COLOR CAN GO IN ICON
-class _InspectorDiffColumn( GafferUI.PathColumn ) :
+class _InspectorDiffColumn( GafferSceneUI.Private.InspectorColumn ) :
 
 	DiffContext = enum.Enum( "Context", [ "A", "B" ] )
 
@@ -1921,63 +1918,67 @@ class _InspectorDiffColumn( GafferUI.PathColumn ) :
 		DiffContext.B : imath.Color4f( 0.13, 0.62, 0, 0.3 ),
 	}
 
-	def __init__( self, diffContext ) :
+	def __init__( self, diffContext, headerData, sizeMode = GafferUI.PathColumn.SizeMode.Default ) :
 
-		GafferUI.PathColumn.__init__( self )
+		print( diffContext.name )
 
-		self.__diffContext = diffContext
+		GafferSceneUI.Private.InspectorColumn.__init__(
+			self, inspector = None, headerData = headerData,
+			contextProperty = "inspector:context{}".format( diffContext.name ),
+			sizeMode = sizeMode
+		)
 
-	def cellData( self, path, canceller = None ) :
+	# def cellData( self, path, canceller = None ) :
 
-		result = self.CellData()
+	# 	result = self.CellData()
 
-		inspector = path.property( "inspector", canceller )
-		if inspector is None :
-			return result
+	# 	inspector = path.property( "inspector", canceller )
+	# 	if inspector is None :
+	# 		return result
 
-		inspectorContext = path.property( "inspector:context{}".format( self.__diffContext.name ), canceller )
-		if inspectorContext is None :
-			return result
+	# 	inspectorContext = path.property( "inspector:context{}".format( self.__diffContext.name ), canceller )
+	# 	if inspectorContext is None :
+	# 		return result
 
-		with Gaffer.Context( inspectorContext, canceller ) :
-			inspectorResult = inspector.inspect()
+	# 	with Gaffer.Context( inspectorContext, canceller ) :
+	# 		inspectorResult = inspector.inspect()
 
-		if inspectorResult is not None :
-			if isinstance( inspectorResult.value(), IECoreScene.ShaderNetwork ) :
-				shader = inspectorResult.value().outputShader()
-				if shader is None :
-					result.value = "Missing output shader"
-					result.icon = "warningSmall.png"
-				else :
-					result.value = shader.name
-					## TODO : DUNNO HOW WE CAN DO IT, BUT THIS SHOULDN'T HAVE THE DISPLAY TRANSFORM APPLIED
-					result.icon = shader.blindData().get( "gaffer:nodeColor", None )
-			else :
-				result.value = inspectorResult.value()
-				if isinstance( result.value, IECore.Color3fData ) :
-					result.icon = result.value
+	# 	if inspectorResult is not None :
+	# 		if isinstance( inspectorResult.value(), IECoreScene.ShaderNetwork ) :
+	# 			shader = inspectorResult.value().outputShader()
+	# 			if shader is None :
+	# 				result.value = "Missing output shader"
+	# 				result.icon = "warningSmall.png"
+	# 			else :
+	# 				result.value = shader.name
+	# 				## TODO : DUNNO HOW WE CAN DO IT, BUT THIS SHOULDN'T HAVE THE DISPLAY TRANSFORM APPLIED. MAYBE COLOR3i?
+	# 				result.icon = shader.blindData().get( "gaffer:nodeColor", None )
+	# 		else :
+	# 			result.value = inspectorResult.value()
+	# 			if isinstance( result.value, IECore.Color3fData ) :
+	# 				result.icon = result.value
 
-		diffContext = path.property( "inspector:context{}".format( "A" if self.__diffContext == self.DiffContext.B else "B" ), canceller )
-		if diffContext is None :
-			return result
+	# 	diffContext = path.property( "inspector:context{}".format( "A" if self.__diffContext == self.DiffContext.B else "B" ), canceller )
+	# 	if diffContext is None :
+	# 		return result
 
-		with Gaffer.Context( diffContext, canceller ) :
-			diffResult = inspector.inspect()
+	# 	with Gaffer.Context( diffContext, canceller ) :
+	# 		diffResult = inspector.inspect()
 
-		different = False
-		if inspectorResult :
-			different = diffResult is None or diffResult.value() != inspectorResult.value()
-		else :
-			different = diffResult is not None
+	# 	different = False
+	# 	if inspectorResult :
+	# 		different = diffResult is None or diffResult.value() != inspectorResult.value()
+	# 	else :
+	# 		different = diffResult is not None
 
-		if different :
-			result.background = self.__backgroundColors[self.__diffContext]
+	# 	if different :
+	# 		result.background = self.__backgroundColors[self.__diffContext]
 
-		return result
+	# 	return result
 
-	def headerData( self, canceller = None ) :
+	# def headerData( self, canceller = None ) :
 
-		return self.CellData()
+	# 	return self.CellData()
 
 ## TODO :
 #
@@ -2010,15 +2011,16 @@ class _AttributesPath( Gaffer.Path ) :
 
 	# def propertNames()
 
+	# TODO IMPLEMENT ME
+
 	def property( self, name, canceller = None ) :
 
-		if name == "inspector" :
+		if name == "inspector:inspector" :
 			if len( self ) :
-				## TODO : THIS WOULDN'T BE ALLOWED IN C++ - NOT A RUNTIMETYPED CLASS
 				return GafferSceneUI.Private.AttributeInspector( self.__scene, self.__editScope, self[-1] )
-		elif name == "inspector:contextA" : ## TODO : IS PATH.INSPECTIONCONTEXT JUST A PROPERTY?
-			return self.__contexts[0] if len( self.__contexts ) else None
-		elif name == "inspector:contextB" : ## TODO : AND THIS IS `inspector:diffContext`?
+		elif name == "inspector:contextA" :
+			return self.__contexts[0]
+		elif name == "inspector:contextB" :
 			return self.__contexts[1] if len( self.__contexts ) > 1 else None
 
 		return Gaffer.Path.property( self, name, canceller )
@@ -2026,6 +2028,10 @@ class _AttributesPath( Gaffer.Path ) :
 	def copy( self ) :
 
 		return _AttributesPath( self.__scene, self.__contexts, self[:], self.root(), self.getFilter() )
+
+	def inspectionContext( self, canceller = None ) :
+
+		return self.__contexts[0]
 
 	def cancellationSubject( self ) :
 
@@ -2064,11 +2070,18 @@ class __AttributesSection( LocationSection ) :
 				Gaffer.DictPath( {}, "/" ),
 				columns = [
 					GafferUI.StandardPathColumn( "Name", "name" ),
-					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.A ),
-					_InspectorDiffColumn( _InspectorDiffColumn.DiffContext.B ),
+					_InspectorDiffColumn(
+						_InspectorDiffColumn.DiffContext.A,
+						headerData = GafferUI.PathColumn.CellData( value = "A" )
+					),
+					_InspectorDiffColumn(
+						_InspectorDiffColumn.DiffContext.B,
+						headerData = GafferUI.PathColumn.CellData( value = "B" )
+					)
 				],
+				selectionMode = GafferUI.PathListingWidget.SelectionMode.Cells,
+				displayMode = GafferUI.PathListingWidget.DisplayMode.Tree,
 			)
-			self.__pathListing.setHeaderVisible( False )
 
 	def update( self, targets ) :
 
