@@ -62,8 +62,7 @@ class GAFFERSCENEUI_API InspectorColumn : public GafferUI::PathColumn
 		InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const std::string &label, const std::string &toolTip = "", PathColumn::SizeMode sizeMode = Default );
 		InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode = Default );
 
-		/// Returns the inspector used by this column.
-		GafferSceneUI::Private::Inspector *inspector() const;
+		GafferSceneUI::Private::Inspector::ResultPtr inspect( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
 
 		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
 		CellData headerData( const IECore::Canceller *canceller ) const override;
