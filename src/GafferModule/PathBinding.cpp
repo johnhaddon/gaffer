@@ -190,7 +190,7 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 			WrappedType::propertyNames( names, canceller  );
 		}
 
-		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+		IECore::ConstRefCountedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
 		{
 			if( this->isSubclassed() )
 			{
@@ -200,7 +200,7 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 					boost::python::object f = this->methodOverride( "property" );
 					if( f )
 					{
-						return extract<IECore::ConstRunTimeTypedPtr>( f( name.c_str(), boost::python::ptr( canceller ) ) );
+						return extract<IECore::ConstRefCountedPtr>( f( name.c_str(), boost::python::ptr( canceller ) ) );
 					}
 					// fall back to emulating properties using the deprecated python info() method.
 					f = this->methodOverride( "info" );
@@ -210,7 +210,7 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 						boost::python::object a = info.get( name.c_str() );
 						if( a )
 						{
-							return extract<IECore::ConstRunTimeTypedPtr>( a );
+							return extract<IECore::ConstRefCountedPtr>( a );
 						}
 						return nullptr;
 					}

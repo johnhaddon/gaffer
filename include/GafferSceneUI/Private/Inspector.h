@@ -232,7 +232,7 @@ class GAFFERSCENEUI_API Inspector : public IECore::RefCounted, public Gaffer::Si
 				~HistoryPath() override;
 
 				void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr) const override;
-				IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
+				IECore::ConstRefCountedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
 
 				bool isValid( const IECore::Canceller *canceller = nullptr ) const override;
 				bool isLeaf( const IECore::Canceller *canceller = nullptr ) const override;

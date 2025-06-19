@@ -306,7 +306,7 @@ class RenderPassPath : public Gaffer::Path
 			names.push_back( g_renderPassEnabledPropertyName );
 		}
 
-		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+		IECore::ConstRefCountedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
 		{
 			if( name == g_renderPassNamePropertyName )
 			{
@@ -342,7 +342,8 @@ class RenderPassPath : public Gaffer::Path
 
 		Gaffer::ContextPtr inspectionContext( const IECore::Canceller *canceller ) const override
 		{
-			const auto renderPassName = runTimeCast<const IECore::StringData>( property( g_renderPassNamePropertyName, canceller ) );
+			IECore::ConstRefCountedPtr renderPassNameProperty = property( g_renderPassNamePropertyName, canceller );
+			const auto renderPassName = dynamic_cast<const IECore::StringData *>( renderPassNameProperty.get() );
 			if( !renderPassName )
 			{
 				return nullptr;
@@ -477,7 +478,8 @@ class RenderPassNameColumn : public StandardPathColumn
 		{
 			CellData result = StandardPathColumn::cellData( path, canceller );
 
-			if( !runTimeCast<const IECore::StringData>( path.property( g_renderPassNamePropertyName, canceller ) ) )
+			IECore::ConstRefCountedPtr property = path.property( g_renderPassNamePropertyName, canceller );
+			if( !dynamic_cast<const IECore::StringData *>( property.get() ) )
 			{
 				result.icon = g_renderPassFolderIcon;
 				return result;
@@ -494,7 +496,8 @@ class RenderPassNameColumn : public StandardPathColumn
 			pathCopy->setContext( adaptorEnabledContext );
 
 			bool enabled = true;
-			if( !runTimeCast<const IECore::StringData>( pathCopy->property( g_renderPassNamePropertyName, canceller ) ) )
+			property = pathCopy->property( g_renderPassNamePropertyName, canceller );
+			if( !runTimeCast<const IECore::StringData>( property.get() ) )
 			{
 				// The render pass has been deleted by a render adaptor, so present it to the user as disabled.
 				enabled = false;

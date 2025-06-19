@@ -273,7 +273,7 @@ class SetPath : public Gaffer::Path
 			names.push_back( g_setPropertyName );
 		}
 
-		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+		IECore::ConstRefCountedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
 		{
 			if( name == g_setNamePropertyName )
 			{

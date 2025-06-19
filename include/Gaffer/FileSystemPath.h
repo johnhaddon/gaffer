@@ -79,7 +79,7 @@ class GAFFER_API FileSystemPath : public Path
 		/// "fileSystem:modificationTime" -> DateTimeData, in UTC time
 		/// "fileSystem:size" -> UInt64Data, in bytes
 		/// "fileSystem:frameRange" -> StringData
-		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
+		IECore::ConstRefCountedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
 		PathPtr copy() const override;
 
 		// Returns true if this FileSystemPath includes FileSequences
