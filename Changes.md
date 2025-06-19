@@ -70,6 +70,7 @@ Breaking Changes
 - Catalogue, CatalogueSelect, Display : Moved from GafferImage module to GafferScene.
 - StandardAttributes : Changed the default value of the `linkedLights` plug to "defaultLights". Scripts loaded from earlier Gaffer versions containing `linkedLights` plugs set to the previous default of "" will need to be updated as those plugs will now default to "defaultLights".
 - ImageView : Changed image comparison hotkey from <kbd>Q</kbd> to <kbd>K</kbd> ( <kbd>Q</kbd> now selects the selection tool in the image view, same as in the scene view ).
+- Path : Removed `inspectionContext()` method. Use `property( "inspector:context" )` instead.
 
 Build
 -----
