@@ -59,7 +59,7 @@ const boost::container::flat_map<int, ConstColor4fDataPtr> g_sourceTypeColors = 
 { (int)Inspector::Result::SourceType::Fallback, nullptr },
 };
 const Color4fDataPtr g_fallbackValueForegroundColor = new Color4fData( Imath::Color4f( 163, 163, 163, 255 ) / 255.0f );
-const IECore::InternedString g_inspectorContextPropertyName( "inspector:context" );
+const IECore::InternedString g_inspectorPropertyName( "inspector:inspector" );
 
 }  // namespace
 
@@ -73,13 +73,13 @@ InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector
 }
 
 InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_inspector( inspector ), m_headerData( headerData )
+	:	PathColumn( sizeMode ), m_inspector( inspector ), m_headerData( headerData ), m_contextProperty( "inspector:context" )
 {
 	inspector->dirtiedSignal().connect( boost::bind( &InspectorColumn::inspectorDirtied, this ) );
 }
 
-InspectorColumn::InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_inspector( inspectorProperty ), m_headerData( headerData )
+InspectorColumn::InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, IECore::InternedString contextProperty, PathColumn::SizeMode sizeMode )
+	:	PathColumn( sizeMode ), m_inspector( inspectorProperty ), m_headerData( headerData ), m_contextProperty( contextProperty )
 {
 }
 
@@ -101,7 +101,7 @@ GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaf
 		return nullptr;
 	}
 
-	ConstContextPtr inspectionContext = IECore::runTimeCast<const Context>( path.property( g_inspectorContextPropertyName, canceller ) );
+	ConstContextPtr inspectionContext = IECore::runTimeCast<const Context>( path.property( m_contextProperty, canceller ) );
 	if( !inspectionContext )
 	{
 		return nullptr;
