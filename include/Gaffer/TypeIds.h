@@ -155,6 +155,7 @@ enum TypeId
 	Box2fVectorDataPlugTypeId = 118109,
 	PatternMatchTypeId = 118110,
 	Int64VectorDataPlugTypeId = 118111,
+	ContextTypeId = 118112,
 
 	LastTypeId = 118799
 
