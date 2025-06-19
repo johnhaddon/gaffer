@@ -107,7 +107,7 @@ void Path::propertyNames( std::vector<IECore::InternedString> &names, const IECo
 	names.push_back( g_fullNamePropertyName );
 }
 
-IECore::ConstRefCountedPtr Path::property( const IECore::InternedString &name, const IECore::Canceller *canceller ) const
+IECore::ConstRunTimeTypedPtr Path::property( const IECore::InternedString &name, const IECore::Canceller *canceller ) const
 {
 	if( name == g_namePropertyName )
 	{

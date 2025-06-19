@@ -78,12 +78,12 @@ boost::python::list propertyNames( const T &p, const IECore::Canceller *cancelle
 	return result;
 }
 
-GAFFERBINDINGS_API boost::python::object propertyToPython( const IECore::ConstRefCountedPtr &a );
+GAFFERBINDINGS_API boost::python::object propertyToPython( IECore::ConstRunTimeTypedPtr a );
 
 template<typename T>
 boost::python::object property( const T &p, const IECore::InternedString &name, const IECore::Canceller *canceller )
 {
-	IECore::ConstRefCountedPtr property;
+	IECore::ConstRunTimeTypedPtr property;
 	{
 		IECorePython::ScopedGILRelease gilRelease;
 		property = p.T::property( name, canceller );
@@ -142,7 +142,7 @@ boost::python::object info( boost::python::object o )
 	boost::python::dict result;
 	for( std::vector<IECore::InternedString>::const_iterator it = propertyNames.begin(), eIt = propertyNames.end(); it != eIt; ++it )
 	{
-		IECore::ConstRefCountedPtr a;
+		IECore::ConstRunTimeTypedPtr a;
 		if( infoImplementedInPython )
 		{
 			a = p.T::property( *it );

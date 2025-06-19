@@ -131,7 +131,7 @@ bool MatchPatternPathFilter::remove( PathPtr path ) const
 			return false;
 		}
 
-		IECore::ConstRefCountedPtr property;
+		IECore::ConstStringDataPtr propertyData;
 		const std::string *propertyValue = nullptr;
 		if( m_propertyName == g_namePropertyName )
 		{
@@ -144,15 +144,12 @@ bool MatchPatternPathFilter::remove( PathPtr path ) const
 		}
 		else
 		{
-			property = path->property( m_propertyName );
-			if( auto stringData = dynamic_cast<const IECore::StringData *>( property.get() ) )
-			{
-				propertyValue = &stringData->readable();
-			}
-			else
+			propertyData = IECore::runTimeCast<const IECore::StringData>( path->property( m_propertyName ) );
+			if( !propertyData )
 			{
 				throw IECore::Exception( "Expected StringData" );
 			}
+			propertyValue = &propertyData->readable();
 		}
 
 		for( std::vector<IECore::StringAlgo::MatchPattern>::const_iterator it = m_patterns.begin(), eIt = m_patterns.end(); it != eIt; ++it )
