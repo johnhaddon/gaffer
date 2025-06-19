@@ -261,7 +261,7 @@ def __selectAffected( pathListing ) :
 		# Evaluate set expressions within their path's inspection context
 		# as set membership could vary based on the context.
 		path.setFromString( pathString )
-		with path.inspectionContext() :
+		with path.inspectionContext() : # TODO : NEEDS UPDATING
 			for setExpression in setExpressions :
 				result.addPaths( GafferScene.SetAlgo.evaluateSetExpression( setExpression, editor.settings()["in"] ) )
 
