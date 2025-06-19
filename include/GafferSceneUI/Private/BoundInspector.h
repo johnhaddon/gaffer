@@ -63,7 +63,7 @@ class GAFFERSCENEUI_API BoundInspector : public Inspector
 			Space space
 		);
 
-		IE_CORE_DECLAREMEMBERPTR( BoundInspector );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::BoundInspector, BoundInspectorTypeId, Inspector );
 
 	protected :
 

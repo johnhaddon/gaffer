@@ -125,6 +125,8 @@ HistoryCache g_historyCache(
 // BoundInspector
 //////////////////////////////////////////////////////////////////////////
 
+IE_CORE_DEFINERUNTIMETYPED( BoundInspector )
+
 BoundInspector::BoundInspector( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope, Space space )
 	:	Inspector( "Bound", "Bound", editScope ), m_scene( scene ), m_space( space )
 {
