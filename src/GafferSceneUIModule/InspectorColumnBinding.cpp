@@ -90,10 +90,11 @@ void GafferSceneUIModule::bindInspectorColumn()
 				arg_( "sizeMode" ) = PathColumn::Default
 			)
 		) )
-		.def( init<IECore::InternedString, const PathColumn::CellData &, PathColumn::SizeMode>(
+		.def( init<IECore::InternedString, const PathColumn::CellData &, IECore::InternedString, PathColumn::SizeMode>(
 			(
 				arg_( "inspectorProperty" ),
 				arg_( "headerData" ),
+				arg_( "contextProperty") = "inspector:context",
 				arg_( "sizeMode" ) = PathColumn::Default
 			)
 		) )

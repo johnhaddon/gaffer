@@ -90,6 +90,7 @@ Breaking Changes
 - OSLObject, OSLImage, Expression : Removed support for file-based pointclouds.
 - ContextAlgo : Removed deprecated API. Use ScriptNodeAlgo instead, which has been available from Gaffer 1.4.13.0 onwards.
 - ScriptNodeAlgo : Reimplemented using Metadata rather than Context variables for storage. Use the ScriptNodeAlgo API instead of attempting direct access to `ui:*` context variables.
+- Path : Removed `inspectionContext()` method. Use `property( "inspector:context" )` instead.
 
 Build
 -----

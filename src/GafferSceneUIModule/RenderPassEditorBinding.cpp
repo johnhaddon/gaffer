@@ -196,6 +196,7 @@ PathMatcherCache g_pathMatcherCache( pathMatcherCacheGetter, 50 );
 
 const InternedString g_renderPassContextName( "renderPass" );
 const InternedString g_enableAdaptorsContextName( "renderPassEditor:enableAdaptors" );
+const InternedString g_inspectorContextPropertyName( "inspector:context" );
 const InternedString g_renderPassNamePropertyName( "renderPassPath:name" );
 const InternedString g_renderPassEnabledPropertyName( "renderPassPath:enabled" );
 const InternedString g_renderPassNamesOption( "option:renderPass:names" );
@@ -304,6 +305,7 @@ class RenderPassPath : public Gaffer::Path
 			Path::propertyNames( names, canceller );
 			names.push_back( g_renderPassNamePropertyName );
 			names.push_back( g_renderPassEnabledPropertyName );
+			names.push_back( g_inspectorContextPropertyName );
 		}
 
 		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
@@ -331,6 +333,18 @@ class RenderPassPath : public Gaffer::Path
 					return new BoolData( enabledData ? enabledData->readable() : true );
 				}
 			}
+			else if( name == g_inspectorContextPropertyName )
+			{
+				const auto renderPassName = runTimeCast<const IECore::StringData>( property( g_renderPassNamePropertyName, canceller ) );
+				if( !renderPassName )
+				{
+					return nullptr;
+				}
+
+				ContextPtr result = new Context( *getContext() );
+				result->set( g_renderPassContextName, renderPassName.get() );
+				return result;
+			}
 
 			return Path::property( name, canceller );
 		}
@@ -338,24 +352,6 @@ class RenderPassPath : public Gaffer::Path
 		const Gaffer::Plug *cancellationSubject() const override
 		{
 			return m_scene.get();
-		}
-
-		Gaffer::ContextPtr inspectionContext( const IECore::Canceller *canceller ) const override
-		{
-			const auto renderPassName = runTimeCast<const IECore::StringData>( property( g_renderPassNamePropertyName, canceller ) );
-			if( !renderPassName )
-			{
-				return nullptr;
-			}
-
-			Context::EditableScope scope( getContext() );
-			scope.set( g_renderPassContextName, &( renderPassName->readable() ) );
-			if( canceller )
-			{
-				scope.setCanceller( canceller );
-			}
-
-			return new Context( *scope.context() );
 		}
 
 	protected :
