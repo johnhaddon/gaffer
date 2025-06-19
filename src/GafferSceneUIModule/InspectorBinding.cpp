@@ -175,18 +175,18 @@ void GafferSceneUIModule::bindInspector()
 		);
 	}
 
-	RunTimeTypedClass<ParameterInspector>( "ParameterInspector" )
-		.def(
-			init<const ScenePlugPtr &, const PlugPtr &, IECore::InternedString, const ShaderNetwork::Parameter &>(
-				( arg( "scene" ), arg( "attribute" ), arg( "parameter" ) )
-			)
-		)
-	;
-
 	RunTimeTypedClass<AttributeInspector>( "AttributeInspector" )
 		.def(
 			init<const ScenePlugPtr &, const PlugPtr &, IECore::InternedString, const std::string &>(
 				( arg( "scene" ), arg( "editScope" ), arg( "attribute" ), arg( "name" ) = "" )
+			)
+		)
+	;
+
+	RunTimeTypedClass<ParameterInspector>( "ParameterInspector" )
+		.def(
+			init<const ScenePlugPtr &, const PlugPtr &, IECore::InternedString, const ShaderNetwork::Parameter &>(
+				( arg( "scene" ), arg( "attribute" ), arg( "parameter" ) )
 			)
 		)
 	;
