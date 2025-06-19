@@ -59,7 +59,7 @@ const boost::container::flat_map<int, ConstColor4fDataPtr> g_sourceTypeColors = 
 { (int)Inspector::Result::SourceType::Fallback, nullptr },
 };
 const Color4fDataPtr g_fallbackValueForegroundColor = new Color4fData( Imath::Color4f( 163, 163, 163, 255 ) / 255.0f );
-const IECore::InternedString g_inspectorContextPropertyName( "inspector:context" );
+const IECore::InternedString g_inspectorPropertyName( "inspector:inspector" );
 
 }  // namespace
 
@@ -68,13 +68,12 @@ const IECore::InternedString g_inspectorContextPropertyName( "inspector:context"
 //////////////////////////////////////////////////////////////////////////
 
 InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const std::string &columnName, const std::string &columnToolTip, PathColumn::SizeMode sizeMode )
-	// TODO : DO NOT LIKE. CAN WE JUST HAVE THE VERSION BELOW????
-	:	InspectorColumn( inspector, PathColumn::CellData( headerValue( columnName != "" ? columnName : ( inspector ? inspector->name() : "" ) ), nullptr, nullptr, new IECore::StringData( columnToolTip ) ), sizeMode )
+	:	InspectorColumn( inspector, PathColumn::CellData( headerValue( columnName != "" ? columnName : inspector->name() ), nullptr, nullptr, new IECore::StringData( columnToolTip ) ), "inspector:context", sizeMode )
 {
 }
 
-InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_inspector( inspector ), m_headerData( headerData )
+InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, const IECore::InternedString contextProperty, PathColumn::SizeMode sizeMode )
+	:	PathColumn( sizeMode ), m_inspector( inspector ), m_headerData( headerData ), m_contextProperty( contextProperty )
 {
 	if( m_inspector )
 	{
@@ -84,7 +83,7 @@ InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector
 
 GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
 {
-	ConstContextPtr inspectionContext = IECore::runTimeCast<const Context>( path.property( g_inspectorContextPropertyName, canceller ) );
+	ConstContextPtr inspectionContext = IECore::runTimeCast<const Context>( path.property( m_contextProperty, canceller ) );
 	if( !inspectionContext )
 	{
 		return nullptr;
@@ -97,8 +96,21 @@ GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaf
 		cancellableContext->setCanceller( canceller );
 	}
 
+	const Inspector *inspector = m_inspector.get();
+	ConstRunTimeTypedPtr inspectorProperty;
+	if( !inspector )
+	{
+		inspectorProperty = path.property( g_inspectorPropertyName );
+		inspector = runTimeCast<const Inspector>( inspectorProperty.get() );
+	}
+
+	if( !inspector )
+	{
+		return nullptr;
+	}
+
 	Context::Scope scope( inspectionContext.get() );
-	return m_inspector->inspect();
+	return inspector->inspect();
 }
 
 PathColumn::CellData InspectorColumn::cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
