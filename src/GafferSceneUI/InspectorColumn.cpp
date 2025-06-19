@@ -59,6 +59,7 @@ const boost::container::flat_map<int, ConstColor4fDataPtr> g_sourceTypeColors = 
 { (int)Inspector::Result::SourceType::Fallback, nullptr },
 };
 const Color4fDataPtr g_fallbackValueForegroundColor = new Color4fData( Imath::Color4f( 163, 163, 163, 255 ) / 255.0f );
+const IECore::InternedString g_inspectorContextPropertyName( "inspector:context" );
 
 }  // namespace
 
@@ -100,10 +101,17 @@ GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaf
 		return nullptr;
 	}
 
-	const ContextPtr inspectionContext = path.inspectionContext( canceller );
+	ConstContextPtr inspectionContext = IECore::runTimeCast<const Context>( path.property( g_inspectorContextPropertyName, canceller ) );
 	if( !inspectionContext )
 	{
 		return nullptr;
+	}
+
+	std::optional<Context::EditableScope> cancellableContext;
+	if( canceller )
+	{
+		cancellableContext.emplace( inspectionContext.get() );
+		cancellableContext->setCanceller( canceller );
 	}
 
 	Context::Scope scope( inspectionContext.get() );
