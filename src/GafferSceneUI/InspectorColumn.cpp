@@ -78,8 +78,8 @@ InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector
 	inspector->dirtiedSignal().connect( boost::bind( &InspectorColumn::inspectorDirtied, this ) );
 }
 
-InspectorColumn::InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_inspector( inspectorProperty ), m_headerData( headerData )
+InspectorColumn::InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, IECore::InternedString contextProperty, PathColumn::SizeMode sizeMode )
+	:	PathColumn( sizeMode ), m_inspector( inspectorProperty ), m_headerData( headerData ), m_contextProperty( contextProperty )
 {
 }
 
