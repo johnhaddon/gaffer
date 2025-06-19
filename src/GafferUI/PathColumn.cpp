@@ -172,30 +172,31 @@ IECore::InternedString StandardPathColumn::property() const
 
 PathColumn::CellData StandardPathColumn::cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
 {
-	IECore::ConstDataPtr data = runTimeCast<const IECore::Data>( path.property( m_property, canceller ) );
+	IECore::ConstRefCountedPtr property = path.property( m_property, canceller );
+	const IECore::Data *data = dynamic_cast<const IECore::Data *>( property.get() );
 	CellData cellData = CellData( data );
 
-	if( auto color = runTimeCast<const Color3fData>( data.get() ) )
+	if( auto color = runTimeCast<const Color3fData>( data ) )
 	{
 		cellData.icon = color;
 	}
-	else if( auto color = runTimeCast<const Color4fData>( data.get() ) )
+	else if( auto color = runTimeCast<const Color4fData>( data ) )
 	{
 		cellData.icon = color;
 	}
-	else if( auto spline = runTimeCast<const SplineffData>( data.get() ) )
+	else if( auto spline = runTimeCast<const SplineffData>( data ) )
 	{
 		cellData.value = new StringData( basisName( spline->readable().basis.standardBasis() ) );
 	}
-	else if( auto spline = runTimeCast<const SplineddData>( data.get() ) )
+	else if( auto spline = runTimeCast<const SplineddData>( data ) )
 	{
 		cellData.value = new StringData( basisName( spline->readable().basis.standardBasis() ) );
 	}
-	else if( auto spline = runTimeCast<const SplinefColor3fData>( data.get() ) )
+	else if( auto spline = runTimeCast<const SplinefColor3fData>( data ) )
 	{
 		cellData.value = new StringData( basisName( spline->readable().basis.standardBasis() ) );
 	}
-	else if( auto spline = runTimeCast<const SplinefColor4fData>( data.get() ) )
+	else if( auto spline = runTimeCast<const SplinefColor4fData>( data ) )
 	{
 		cellData.value = new StringData( basisName( spline->readable().basis.standardBasis() ) );
 	}
@@ -236,7 +237,8 @@ PathColumn::CellData IconPathColumn::cellData( const Gaffer::Path &path, const I
 {
 	CellData result;
 
-	ConstRunTimeTypedPtr property = path.property( m_property, canceller );
+	ConstRefCountedPtr refCountedProperty = path.property( m_property, canceller );
+	const RunTimeTyped *property = dynamic_cast<const RunTimeTyped *>( refCountedProperty.get() );
 	if( !property )
 	{
 		return result;
@@ -246,16 +248,16 @@ PathColumn::CellData IconPathColumn::cellData( const Gaffer::Path &path, const I
 	switch( property->typeId() )
 	{
 		case IECore::StringDataTypeId :
-			fileName += static_cast<const IECore::StringData *>( property.get() )->readable();
+			fileName += static_cast<const IECore::StringData *>( property )->readable();
 			break;
 		case IECore::IntDataTypeId :
-			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::IntData *>( property.get() )->readable() );
+			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::IntData *>( property )->readable() );
 			break;
 		case IECore::UInt64DataTypeId :
-			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::UInt64Data *>( property.get() )->readable() );
+			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::UInt64Data *>( property )->readable() );
 			break;
 		case IECore::BoolDataTypeId :
-			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::BoolData *>( property.get() )->readable() );
+			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::BoolData *>( property )->readable() );
 			break;
 		default :
 			IECore::msg( IECore::Msg::Warning, "IconPathColumn", fmt::format( "Unsupported property type \"{}\"", property->typeName() ) );
