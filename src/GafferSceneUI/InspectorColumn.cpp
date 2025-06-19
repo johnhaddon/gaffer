@@ -77,23 +77,22 @@ InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector
 	m_inspector->dirtiedSignal().connect( boost::bind( &InspectorColumn::inspectorDirtied, this ) );
 }
 
-GafferSceneUI::Private::Inspector *InspectorColumn::inspector() const
+GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
 {
-	return m_inspector.get();
+	const ContextPtr inspectionContext = path.inspectionContext( canceller );
+	if( !inspectionContext )
+	{
+		return nullptr;
+	}
+
+	Context::Scope scope( inspectionContext.get() );
+	return m_inspector->inspect();
 }
 
 PathColumn::CellData InspectorColumn::cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
 {
 	CellData result;
-
-	const ContextPtr inspectionContext = path.inspectionContext( canceller );
-	if( !inspectionContext )
-	{
-		return result;
-	}
-
-	Context::Scope scope( inspectionContext.get() );
-	Inspector::ConstResultPtr inspectorResult = m_inspector->inspect();
+	Inspector::ConstResultPtr inspectorResult = inspect( path, canceller );
 	if( !inspectorResult )
 	{
 		return result;

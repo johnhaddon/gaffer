@@ -50,6 +50,17 @@ using namespace IECorePython;
 using namespace GafferUI;
 using namespace GafferSceneUI::Private;
 
+namespace
+{
+
+Inspector::ResultPtr inspectorColumnInspectBinding( const InspectorColumn &column, const Gaffer::Path &path, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return column.inspect( path, canceller );
+}
+
+} // namespace
+
 void GafferSceneUIModule::bindInspectorColumn()
 {
 
@@ -73,7 +84,7 @@ void GafferSceneUIModule::bindInspectorColumn()
 				arg_( "sizeMode" ) = PathColumn::Default
 			)
 		) )
-		.def( "inspector", &InspectorColumn::inspector, return_value_policy<CastToIntrusivePtr>() )
+		.def( "inspect", &inspectorColumnInspectBinding, ( arg( "path" ), arg( "canceller" ) = object() ) )
 	;
 
 }
