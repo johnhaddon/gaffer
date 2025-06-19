@@ -191,10 +191,6 @@ class GAFFER_API Path : public IECore::RunTimeTyped
 		/// made.
 		virtual const Plug *cancellationSubject() const;
 
-		/// May be implemented by Paths to provide a Context useful for inspecting
-		/// data represented by the Path.
-		virtual ContextPtr inspectionContext( const IECore::Canceller *canceller = nullptr ) const;
-
 	protected :
 
 		/// The subclass specific part of children(). This must be implemented

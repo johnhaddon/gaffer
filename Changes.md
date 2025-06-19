@@ -6,6 +6,11 @@ API
 
 - Context : Changed base class from RefCounted to RunTimeTyped.
 
+Breaking Changes
+----------------
+
+- Path : Removed `inspectionContext()` method. Use `property( "inspector:context" )` instead.
+
 1.6.0.0a1 (relative to 1.5.16.1)
 =========
 
