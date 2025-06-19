@@ -44,7 +44,7 @@
 #include "Gaffer/Context.h"
 
 #include "IECorePython/ExceptionAlgo.h"
-#include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace GafferBindings;
@@ -153,7 +153,7 @@ ContextPtr current()
 
 void GafferModule::bindContext()
 {
-	IECorePython::RefCountedClass<Context, IECore::RefCounted> contextClass( "Context" );
+	IECorePython::RunTimeTypedClass<Context> contextClass( "Context" );
 	scope s = contextClass;
 
 	contextClass

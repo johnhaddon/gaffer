@@ -62,6 +62,7 @@ API
 - MetadataAlgo : Added `createPlugFromMetadata()` function.
 - RenderController : Added `renderManifest()` method.
 - ImageGadget : Added support for showing selected and highlighted ids. Controlled using `setIDChannel`, `setSelectedIDs`, and `setHighlightID`.
+- Context : Changed base class from RefCounted to RunTimeTyped.
 - ShadingEngine : Added support for passing custom pointclouds to the `shade()` call.
 - SceneAlgo :
   - `applyCameraGlobals()` now always applies the `render:overscan[Top/Bottom/Left/Right]` options to the camera if they exist in the scene globals.
