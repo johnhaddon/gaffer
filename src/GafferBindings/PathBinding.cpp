@@ -48,19 +48,19 @@ namespace GafferBindings
 namespace Detail
 {
 
-boost::python::object propertyToPython( const IECore::ConstRefCountedPtr &a )
+boost::python::object propertyToPython( IECore::ConstRunTimeTypedPtr a )
 {
 	if( !a )
 	{
 		return boost::python::object();
 	}
 
-	if( const IECore::Data *d = dynamic_cast<const IECore::Data *>( a.get() ) )
+	if( const IECore::Data *d = IECore::runTimeCast<const IECore::Data>( a.get() ) )
 	{
 		return dataToPython( d, /* copy = */ true );
 	}
 
-	return boost::python::object( boost::const_pointer_cast<IECore::RefCounted>( a ) );
+	return boost::python::object( boost::const_pointer_cast<IECore::RunTimeTyped>( a ) );
 }
 
 } // namespace Detail

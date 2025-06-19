@@ -643,7 +643,7 @@ void Inspector::HistoryPath::propertyNames( std::vector<InternedString> &names, 
 	}
 }
 
-ConstRefCountedPtr Inspector::HistoryPath::property( const InternedString &name, const Canceller *canceller) const
+ConstRunTimeTypedPtr Inspector::HistoryPath::property( const InternedString &name, const Canceller *canceller) const
 {
 	if( m_plugMap.size() == 0 )
 	{

@@ -106,7 +106,7 @@ class GAFFER_API Path : public IECore::RunTimeTyped
 		/// Queries a property, whose name must have first been retrieved via propertyNames().
 		/// Derived class implementations should fall back to the base class implementation for
 		/// any unrecognised names. Returns null for unknown properties. May return null for invalid paths.
-		virtual IECore::ConstRefCountedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
+		virtual IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
 
 		/// Returns the parent of this path, or None if the path
 		/// has no parent (is the root).

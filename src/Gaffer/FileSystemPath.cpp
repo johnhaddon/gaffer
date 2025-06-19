@@ -343,7 +343,7 @@ void FileSystemPath::propertyNames( std::vector<IECore::InternedString> &names, 
 	}
 }
 
-IECore::ConstRefCountedPtr FileSystemPath::property( const IECore::InternedString &name, const IECore::Canceller *canceller ) const
+IECore::ConstRunTimeTypedPtr FileSystemPath::property( const IECore::InternedString &name, const IECore::Canceller *canceller ) const
 {
 	if( name == g_ownerPropertyName )
 	{
