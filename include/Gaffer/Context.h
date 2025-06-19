@@ -71,7 +71,7 @@ namespace Gaffer
 /// avoid unnecessary recomputation. In the future we may explore having the UI use a separate
 /// container for such variables, or a more general mechanism for variables guaranteed to be
 /// unrelated to computation.
-class GAFFER_API Context : public IECore::RefCounted
+class GAFFER_API Context : public IECore::RunTimeTyped
 {
 
 	public :
@@ -89,7 +89,7 @@ class GAFFER_API Context : public IECore::RefCounted
 		Context( const Context &other, bool omitCanceller );
 		~Context() override;
 
-		IE_CORE_DECLAREMEMBERPTR( Context )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Context, ContextTypeId, IECore::RunTimeTyped );
 
 		using ChangedSignal = Signals::Signal<void ( const Context *context, const IECore::InternedString & ), Signals::CatchingCombiner<void>>;
 

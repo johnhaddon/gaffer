@@ -51,6 +51,7 @@ API
 - MetadataAlgo : Added `createPlugFromMetadata()` function.
 - RenderController : Added `renderManifest()` method.
 - ImageGadget : Added support for showing selected and highlighted ids. Controlled using `setIDChannel`, `setSelectedIDs`, and `setHighlightID`.
+- Context : Changed base class from RefCounted to RunTimeTyped.
 
 API
 ---
