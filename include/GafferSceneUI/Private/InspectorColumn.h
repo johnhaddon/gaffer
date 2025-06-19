@@ -60,7 +60,8 @@ class GAFFERSCENEUI_API InspectorColumn : public GafferUI::PathColumn
 		IE_CORE_DECLAREMEMBERPTR( InspectorColumn )
 
 		InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const std::string &label, const std::string &toolTip = "", PathColumn::SizeMode sizeMode = Default );
-		InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode = Default );
+		/// TODO : DOCS, RECONSIDER HOW THIS IS PRESENTED? SEPARATE CONSTRUCTOR WITHOUT INSPECTOR ARGUMENT MAYBE?
+		InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, const IECore::InternedString contextProperty = "inspector:context", PathColumn::SizeMode sizeMode = Default );
 
 		GafferSceneUI::Private::Inspector::ResultPtr inspect( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
 
@@ -75,6 +76,7 @@ class GAFFERSCENEUI_API InspectorColumn : public GafferUI::PathColumn
 
 		const Private::InspectorPtr m_inspector;
 		const CellData m_headerData;
+		const IECore::InternedString m_contextProperty;
 
 };
 
