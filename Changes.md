@@ -1,7 +1,10 @@
 1.6.x.x (relative to 1.6.0.0a1)
 =======
 
+API
+---
 
+- Context : Changed base class from RefCounted to RunTimeTyped.
 
 1.6.0.0a1 (relative to 1.5.16.1)
 =========

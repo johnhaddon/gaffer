@@ -228,6 +228,8 @@ Context::TypeDescription<Color4fVectorData> g_color4fVectorTypeDescription;
 static InternedString g_frame( "frame" );
 static InternedString g_framesPerSecond( "framesPerSecond" );
 
+IE_CORE_DEFINERUNTIMETYPED( Context )
+
 Context::Context()
 	:	m_changedSignal( nullptr ), m_hashValid( false ), m_canceller( nullptr )
 {

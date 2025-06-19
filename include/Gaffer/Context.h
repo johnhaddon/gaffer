@@ -64,7 +64,7 @@ namespace Gaffer
 /// It is common for Nodes to need to evaluate their upstream inputs in a modified context.
 /// The EditableScope class should be used for this purpose since it is more efficient than
 /// copy constructing a new Context.
-class GAFFER_API Context : public IECore::RefCounted
+class GAFFER_API Context : public IECore::RunTimeTyped
 {
 
 	public :
@@ -82,7 +82,7 @@ class GAFFER_API Context : public IECore::RefCounted
 		Context( const Context &other, bool omitCanceller );
 		~Context() override;
 
-		IE_CORE_DECLAREMEMBERPTR( Context )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Context, ContextTypeId, IECore::RunTimeTyped );
 
 		using ChangedSignal = Signals::Signal<void ( const Context *context, const IECore::InternedString & ), Signals::CatchingCombiner<void>>;
 
