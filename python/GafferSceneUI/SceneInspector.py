@@ -352,13 +352,9 @@ GafferUI.Editor.registerType( "SceneInspector", SceneInspector )
 # # Attributes section
 # ##########################################################################
 
-## \todo
-# - CAN WE MAKE ALL THE SAME EDITING AND HISTORY MENU ITEMS "JUST WORK"?
-# - ADD PRESENTATION FOR SHADERNETWORKS
-#    - COLOR CAN GO IN ICON
 class _InspectorDiffColumn( GafferSceneUI.Private.InspectorColumn ) :
 
-	DiffContext = enum.Enum( "Context", [ "A", "B" ] )
+	DiffContext = enum.Enum( "DiffContext", [ "A", "B" ] )
 
 	__backgroundColors = {
 		DiffContext.A : imath.Color4f( 0.7, 0.12, 0, 0.3 ),
@@ -373,6 +369,12 @@ class _InspectorDiffColumn( GafferSceneUI.Private.InspectorColumn ) :
 			self, inspector = None, headerData = headerData,
 			contextProperty = "inspector:context{}".format( diffContext.name ),
 			sizeMode = sizeMode
+		)
+
+		otherDiffContext = self.DiffContext.A if diffContext == self.DiffContext.B else self.DiffContext.B
+		self.__otherColumn = GafferSceneUI.Private.InspectorColumn.__init__(
+			self, inspector = None, headerData = self.CellData(),
+			contextProperty = "inspector:context{}".format( otherDiffContext.name ),
 		)
 
 class _AttributesPath( Gaffer.Path ) :
