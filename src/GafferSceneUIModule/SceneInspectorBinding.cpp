@@ -39,6 +39,7 @@
 #include "SceneInspectorBinding.h"
 
 #include "GafferSceneUI/Private/AttributeInspector.h"
+#include "GafferSceneUI/Private/BoundInspector.h"
 #include "GafferSceneUI/TypeIds.h"
 
 // #include "GafferScene/ScenePlug.h"
@@ -80,14 +81,7 @@ using namespace GafferSceneUI;
 namespace
 {
 
-struct Inspection
-{
-	std::vector<InternedString> path;
-	GafferSceneUI::Private::ConstInspectorPtr inspector;
-};
-
-using Inspections = std::vector<Inspection>;
-
+using Inspections = map<vector<InternedString>, GafferSceneUI::Private::ConstInspectorPtr>;
 using InspectionProvider = std::function<Inspections ( ScenePlug * )>;
 
 Inspections attributeInspectionProvider( ScenePlug *scene )
@@ -97,12 +91,21 @@ Inspections attributeInspectionProvider( ScenePlug *scene )
 	for( const auto &[name, value] : attributes->members() )
 	{
 		/// \todo EditScope
-		result.push_back( { std::vector<InternedString>( { name } ), new GafferSceneUI::Private::AttributeInspector( scene, nullptr, name ) } );
+		result.insert( { std::vector<InternedString>( { name } ), new GafferSceneUI::Private::AttributeInspector( scene, nullptr, name ) } );
 	}
 	return result;
 }
 
+Inspections boundInspectionProvider( ScenePlug *scene )
+{
+	return {
+		{ { "Local" }, new GafferSceneUI::Private::BoundInspector( scene, nullptr, GafferSceneUI::Private::BoundInspector::Space::Local ) },
+		{ { "World" }, new GafferSceneUI::Private::BoundInspector( scene, nullptr, GafferSceneUI::Private::BoundInspector::Space::World ) }
+	};
+}
+
 multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
+	{ { "Bound" }, boundInspectionProvider },
 	{ { "Attributes" }, attributeInspectionProvider }
 };
 
@@ -274,30 +277,6 @@ class InspectorPath : public Gaffer::Path
 				);
 				lastChildName = childName;
 			}
-
-
-			// const PathMatcher p = pathMatcher( canceller );
-
-			// auto it = p.find( names() );
-			// if( it == p.end() )
-			// {
-			// 	return;
-			// }
-
-			// ++it;
-			// while( it != p.end() && it->size() == names().size() + 1 )
-			// {
-			// 	children.push_back( new RenderPassPath( m_scene, m_context, *it, root(), const_cast<PathFilter *>( getFilter() ), m_grouped ) );
-			// 	it.prune();
-			// 	++it;
-			// }
-
-			// std::sort(
-			// 	children.begin(), children.end(),
-			// 	[]( const PathPtr &a, const PathPtr &b ) {
-			// 		return a->names().back().string() < b->names().back().string();
-			// 	}
-			// );
 		}
 
 	private :
@@ -322,14 +301,14 @@ class InspectorPath : public Gaffer::Path
 				for( const auto &[root, thing] : g_inspectionProviders )
 				{
 					auto x = thing( m_scene.get() );
-					for( const auto &xx : x )
+					for( const auto &[subPath, inspector] : x )
 					{
 						auto p = root;
-						for( auto n : xx.path )
+						for( auto n : subPath )
 						{
 							p.push_back( n ); // TODO : INSERT RANGE
 						}
-						result[p] = xx.inspector;
+						result[p] = inspector;
 					}
 
 				}
