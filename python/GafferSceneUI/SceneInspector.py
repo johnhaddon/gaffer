@@ -46,6 +46,8 @@ import GafferScene
 import GafferUI
 import GafferSceneUI
 
+from . import _GafferSceneUI
+
 class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 	class Settings( GafferSceneUI.SceneEditor.Settings ) :
@@ -167,7 +169,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			contexts.append( context )
 
 		self.__selectionPathListing.setPath(
-			_AttributesPath(
+			_GafferSceneUI._SceneInspector.InspectorPath(
 				self.settings()["__switchedIn"],
 				contexts
 			)
