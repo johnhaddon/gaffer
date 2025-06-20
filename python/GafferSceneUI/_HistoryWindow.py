@@ -98,6 +98,9 @@ class _NodeNameColumn( GafferUI.PathColumn ) :
 # \todo This duplicates logic from (in this case) `_GafferSceneUI._LightEditorInspectorColumn`.
 # Refactor to allow calling `_GafferSceneUI.InspectorColumn.cellData()` from `_HistoryWindow` to
 # remove this duplication for columns that customize their value presentation.
+# DO WE WANT TO USE THE EXACT SAME COLUMN AS WE GOT THE HISTORY FROM? WOULD IT BE ODD TO GET THE
+# DIFF BACKGROUND IN THE TRACEBACK? MAYBE IT WOULD BE USEFUL, TO SEE WHERE THE THING HAD DIVERGED?
+# HOW DO WE GET THE DIFF CONTEXT INTO THE HISTORY PATH ANYHOW?
 class _ValueColumn( GafferUI.PathColumn ) :
 
 	def __init__( self, title, property, fallbackProperty ) :
@@ -176,6 +179,10 @@ class _HistoryWindow( GafferUI.Window ) :
 
 	def __updatePath( self ) :
 
+		## TODO : ASSUMES PATH HAS SETCONTEXT METHOD, WHICH WE DON'T REALLY WANT. ALSO ASSUMES IT IS THREADSAFE,
+		# WHICH IT IS NOT. IF WE ACCEPT WE NEED SETCONTEXT, WE COULD COPY PATH TO DEAL WITH THREAD-SAFETY?
+		# AND SCENEINSPECTORPATH CAN SPLIT THE CONTEXT IN TWO AND ADD THE INPUT INDEX TO EACH.
+		# COULD USE CANCELLATIONSUBJECT INSTEAD OF GETSCENE, SO THIS ISN'T SCENE-SPECIFIC?
 		self.__inspectionPath.setContext( self.__contextTracker.context( self.__inspectionPath.getScene() ) )
 		with self.__inspectionPath.inspectionContext() :
 			self.__path = self.__inspector.historyPath()
