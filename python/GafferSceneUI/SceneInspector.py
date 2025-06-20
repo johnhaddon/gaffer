@@ -36,18 +36,10 @@
 ##########################################################################
 
 import enum
-import math
-import difflib
-import html
-import itertools
-import collections
-import functools
 
 import imath
 
 import IECore
-import IECoreScene
-import IECoreVDB
 
 import Gaffer
 import GafferScene
