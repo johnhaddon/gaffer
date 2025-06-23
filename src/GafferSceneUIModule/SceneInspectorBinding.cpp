@@ -50,9 +50,12 @@
 
 #include "Gaffer/Context.h"
 // #include "Gaffer/Node.h"
+#include "Gaffer/ParallelAlgo.h"
 #include "Gaffer/Path.h"
 #include "Gaffer/PathFilter.h"
-// #include "Gaffer/Private/IECorePreview/LRUCache.h"
+#include "Gaffer/Private/IECorePreview/LRUCache.h"
+
+#include "IECoreScene/Primitive.h"
 
 // #include "IECorePython/RefCountedBinding.h"
 
@@ -61,18 +64,152 @@
 #include "boost/algorithm/string/predicate.hpp"
 // #include "boost/bind/bind.hpp"
 
+#include "Imath/ImathMatrixAlgo.h"
+
 #include <map>
 
 using namespace std;
+using namespace Imath;
 // using namespace boost::placeholders;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECoreScene;
 // using namespace IECorePython;
 using namespace Gaffer;
 using namespace GafferBindings;
 // using namespace GafferUI;
 using namespace GafferScene;
 using namespace GafferSceneUI;
+
+//////////////////////////////////////////////////////////////////////////
+// History cache for BasicInspector
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+// This uses the same strategy that ValuePlug uses for the hash cache,
+// using `plug->dirtyCount()` to invalidate previous cache entries when
+// a plug is dirtied.
+/// \todo SHOULD THIS BE SHARED SOMEWHERE? AT LEAST WITH BOUNDINSPECTOR? OR IS BOUNDINSPECTOR A BASICINSPECTOR? DO WE PUT IT ALL IN SCENEINSPECTORBINDING FOR NOW?
+struct HistoryCacheKey
+{
+	HistoryCacheKey() {};
+	HistoryCacheKey( const ValuePlug *plug )
+		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+	{
+	}
+
+	bool operator==( const HistoryCacheKey &rhs ) const
+	{
+		return
+			plug == rhs.plug &&
+			contextHash == rhs.contextHash &&
+			dirtyCount == rhs.dirtyCount
+		;
+	}
+
+	const ValuePlug *plug;
+	IECore::MurmurHash contextHash;
+	uint64_t dirtyCount;
+};
+
+size_t hash_value( const HistoryCacheKey &key )
+{
+	size_t result = 0;
+	boost::hash_combine( result, key.plug );
+	boost::hash_combine( result, key.contextHash );
+	boost::hash_combine( result, key.dirtyCount );
+	return result;
+}
+
+using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History::ConstPtr>;
+
+HistoryCache g_historyCache(
+	// Getter
+	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+		assert( canceller == Context::current()->canceller() );
+		cost = 1;
+		return SceneAlgo::history(
+			key.plug, Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
+		);
+	},
+	// Max cost
+	1000,
+	// Removal callback
+	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+		// Histories contain PlugPtrs, which could potentially be the sole
+		// owners. Destroying plugs can trigger dirty propagation, so as a
+		// precaution we destroy the history on the UI thread, where this would
+		// be OK.
+		ParallelAlgo::callOnUIThread(
+			[history] () {}
+		);
+	}
+
+);
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// BasicInspector
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+class BasicInspector : public GafferSceneUI::Private::Inspector
+{
+
+	public :
+
+		using ValueFunction = std::function<IECore::ConstObjectPtr( const GafferScene::SceneAlgo::History *history )>;
+
+		BasicInspector(
+			const Gaffer::ValuePlugPtr &plug,
+			const Gaffer::PlugPtr &editScope,
+			const ValueFunction &valueFunction
+		)
+			:	Inspector( "", "", editScope ), m_plug( plug ), m_valueFunction( valueFunction )
+		{
+		}
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BasicInspector, BoundInspectorTypeId, GafferSceneUI::Private::Inspector );
+
+	protected :
+
+		GafferScene::SceneAlgo::History::ConstPtr history() const override
+		{
+			const auto scenePlug = m_plug->parent<ScenePlug>();
+			if( m_plug != scenePlug->globalsPlug() &&m_plug != scenePlug->setNamesPlug() && m_plug != scenePlug->setPlug() )
+			{
+				if( !scenePlug->existsPlug()->getValue() )
+				{
+					return nullptr;
+				}
+			}
+
+			return g_historyCache.get( HistoryCacheKey( m_plug.get() ), Context::current()->canceller() );
+		}
+
+		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override
+		{
+			Context::Scope scope( history->context.get() ); // TODO : CANCELLER PLEASE??? OR IS IT IN THERE ALREADY?
+			return m_valueFunction( history );
+		}
+
+	private :
+
+		void plugDirtied( Gaffer::Plug *plug );
+
+		const Gaffer::ValuePlugPtr m_plug;
+		ValueFunction m_valueFunction;
+
+};
+
+IE_CORE_DECLAREPTR( BasicInspector )
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Registry Shenanigans TODO : BETTER NAME PLEASE!
@@ -83,6 +220,74 @@ namespace
 
 using Inspections = map<vector<InternedString>, GafferSceneUI::Private::ConstInspectorPtr>;
 using InspectionProvider = std::function<Inspections ( ScenePlug * )>;
+
+Inspections transformInspectionProvider( ScenePlug *scene )
+{
+	Inspections result;
+	for( auto full : { false, true } )
+	{
+		vector<InternedString> path = { full ? "World" : "Local", "" };
+		for( auto component : { 'm', 't', 'r', 's', 'h' } )
+		{
+			switch( component )
+			{
+				case 'm' : path[1] = "Matrix"; break;
+				case 't' : path[1] = "Translate"; break;
+				case 'r' : path[1] = "Rotate"; break;
+				case 's' : path[1] = "Scale"; break;
+				case 'h' : path[1] = "Shear"; break;
+			}
+			result[path] = new BasicInspector(
+				scene->transformPlug(), nullptr,
+				[full, component] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+					const M44f matrix =
+						full ?
+							history->scene->fullTransform( history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
+						:
+							history->scene->transformPlug()->getValue()
+					;
+					if( component == 'm' )
+					{
+						return new M44fData( matrix );
+					}
+
+					V3f s, h, r, t;
+					extractSHRT( matrix, s, h, r, t );
+					switch( component )
+					{
+						case 't' : return new V3fData( t );
+						case 'r' : return new V3fData( r );
+						case 's' : return new V3fData( s );
+						default : return new V3fData( h );
+					}
+				}
+			);
+		}
+	}
+	return result;
+}
+
+Inspections boundInspectionProvider( ScenePlug *scene )
+{
+	Inspections result;
+	result[{"Local"}] = new BasicInspector(
+		scene->boundPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			return new Box3fData( history->scene->boundPlug()->getValue() );
+		}
+	);
+	result[{"World"}] = new BasicInspector(
+		scene->boundPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			const Imath::Box3f bound = Imath::transform(
+				history->scene->boundPlug()->getValue(),
+				history->scene->fullTransform( history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
+			);
+			return new Box3fData( bound );
+		}
+	);
+	return result;
+}
 
 Inspections attributeInspectionProvider( ScenePlug *scene )
 {
@@ -96,17 +301,147 @@ Inspections attributeInspectionProvider( ScenePlug *scene )
 	return result;
 }
 
-Inspections boundInspectionProvider( ScenePlug *scene )
+Inspections objectTypeInspectionProvider( ScenePlug *scene )
 {
-	return {
-		{ { "Local" }, new GafferSceneUI::Private::BoundInspector( scene, nullptr, GafferSceneUI::Private::BoundInspector::Space::Local ) },
-		{ { "World" }, new GafferSceneUI::Private::BoundInspector( scene, nullptr, GafferSceneUI::Private::BoundInspector::Space::World ) }
-	};
+	Inspections result;
+	ConstObjectPtr object = scene->objectPlug()->getValue();
+	if( object->typeId() != NullObjectTypeId )
+	{
+		result[{"Type"}] = new BasicInspector(
+			scene->objectPlug(), nullptr,
+			[] ( const SceneAlgo::History *history ) -> ConstStringDataPtr {
+				ConstObjectPtr object = history->scene->objectPlug()->getValue();
+				if( object->typeId() == NullObjectTypeId )
+				{
+					return nullptr;
+				}
+				return new StringData( object->typeName() );
+			}
+		);
+	}
+
+	return result;
+}
+
+ConstStringDataPtr g_invalidStringData = new StringData( "Invalid" );
+ConstStringDataPtr g_constantStringData = new StringData( "Constant" );
+ConstStringDataPtr g_uniformStringData = new StringData( "Uniform" );
+ConstStringDataPtr g_vertexStringData = new StringData( "Vertex" );
+ConstStringDataPtr g_varyingStringData = new StringData( "Varying" );
+ConstStringDataPtr g_faceVaryingStringData = new StringData( "FaceVarying" );
+
+const PrimitiveVariable *primitiveVariable( const Object *object, const std::string &name )
+{
+	auto primitive = runTimeCast<const Primitive>( object );
+	if( !primitive )
+	{
+		return nullptr;
+	}
+
+	auto it = primitive->variables.find( name );
+	return it != primitive->variables.end() ? &it->second : nullptr;
+}
+
+ConstStringDataPtr primitiveVariableInterpolation( const std::string &name, const SceneAlgo::History *history )
+{
+	ConstObjectPtr object = history->scene->objectPlug()->getValue();
+	auto variable = primitiveVariable( object.get(), name );
+	if( !variable )
+	{
+		return nullptr;
+	}
+
+	switch( variable->interpolation )
+	{
+		case PrimitiveVariable::Invalid : return g_invalidStringData;
+		case PrimitiveVariable::Constant : return g_constantStringData;
+		case PrimitiveVariable::Uniform : return g_uniformStringData;
+		case PrimitiveVariable::Vertex : return g_vertexStringData;
+		case PrimitiveVariable::Varying : return g_varyingStringData;
+		case PrimitiveVariable::FaceVarying : return g_faceVaryingStringData;
+		default : return nullptr;
+	}
+}
+
+ConstStringDataPtr primitiveVariableType( const std::string &name, const SceneAlgo::History *history )
+{
+	ConstObjectPtr object = history->scene->objectPlug()->getValue();
+	auto variable = primitiveVariable( object.get(), name );
+	if( !variable || !variable->data )
+	{
+		return nullptr;
+	}
+
+	return new StringData( variable->data->typeName() );
+}
+
+ConstDataPtr primitiveVariableData( const std::string &name, const SceneAlgo::History *history )
+{
+	ConstObjectPtr object = history->scene->objectPlug()->getValue();
+	auto variable = primitiveVariable( object.get(), name );
+	if( !variable )
+	{
+		return nullptr;
+	}
+
+	return variable->data;
+}
+
+ConstDataPtr primitiveVariableIndices( const std::string &name, const SceneAlgo::History *history )
+{
+	ConstObjectPtr object = history->scene->objectPlug()->getValue();
+	auto variable = primitiveVariable( object.get(), name );
+	if( !variable )
+	{
+		return nullptr;
+	}
+
+	return variable->indices;
+}
+
+Inspections primitiveVariablesInspectionProvider( ScenePlug *scene )
+{
+	ConstObjectPtr object = scene->objectPlug()->getValue();
+	Inspections result;
+	if( auto primitive = runTimeCast<const Primitive>( object.get() ) )
+	{
+		for( const auto &[name, variable] : primitive->variables )
+		{
+			result[{ name, "Interpolation" }] = new BasicInspector(
+				scene->objectPlug(), nullptr,
+				[name] ( const SceneAlgo::History *history ) {
+					return primitiveVariableInterpolation( name, history );
+				}
+			);
+			result[{ name, "Type" }] = new BasicInspector(
+				scene->objectPlug(), nullptr,
+				[name] ( const SceneAlgo::History *history ) {
+					return primitiveVariableType( name, history );
+				}
+			);
+			result[{ name, "Data" }] = new BasicInspector(
+				scene->objectPlug(), nullptr,
+				[name] ( const SceneAlgo::History *history ) {
+					return primitiveVariableData( name, history );
+				}
+			);
+			result[{ name, "Indices" }] = new BasicInspector(
+				scene->objectPlug(), nullptr,
+				[name] ( const SceneAlgo::History *history ) {
+					return primitiveVariableIndices( name, history );
+				}
+			);
+		}
+	}
+	return result;
 }
 
 multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 	{ { "Bound" }, boundInspectionProvider },
-	{ { "Attributes" }, attributeInspectionProvider }
+	{ { "Transform" }, transformInspectionProvider },
+	{ { "Attributes" }, attributeInspectionProvider },
+	{ { "Object" }, objectTypeInspectionProvider },
+	{ { "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider },
 };
 
 // void registerInspectionProvider(
@@ -169,6 +504,7 @@ class InspectorPath : public Gaffer::Path
 		InspectorPath( const ScenePlugPtr &scene, const Contexts &contexts, const Names &names, const IECore::InternedString &root = "/", Gaffer::PathFilterPtr filter = nullptr )
 			:	Path( names, root, filter ), m_scene( scene ), m_contexts( contexts )
 		{
+			m_plugDirtiedConnection = m_scene->node()->plugDirtiedSignal().connect( boost::bind( &InspectorPath::emitPathChanged, this ) );
 		}
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( InspectorPath, GafferSceneUI::InspectorPathTypeId, Gaffer::Path );
@@ -329,7 +665,7 @@ class InspectorPath : public Gaffer::Path
 		// Gaffer::NodePtr m_node;
 		ScenePlugPtr m_scene;
 		Contexts m_contexts;
-		// Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
+		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
 		// Gaffer::Signals::ScopedConnection m_contextChangedConnection;
 		// bool m_grouped;
 

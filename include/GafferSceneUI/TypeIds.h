@@ -68,6 +68,7 @@ enum TypeId
 	SetMembershipInspectorTypeId = 121024,
 	BoundInspectorTypeId = 121025,
 	InspectorPathTypeId = 121026,
+	BasicInspectorTypeId = 121027,
 
 	LastTypeId = 121199
 };
