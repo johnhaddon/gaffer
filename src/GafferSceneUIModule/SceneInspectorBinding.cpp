@@ -55,6 +55,8 @@
 #include "Gaffer/PathFilter.h"
 #include "Gaffer/Private/IECorePreview/LRUCache.h"
 
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/ExternalProcedural.h"
 #include "IECoreScene/Primitive.h"
 
 // #include "IECorePython/RefCountedBinding.h"
@@ -301,6 +303,44 @@ Inspections attributeInspectionProvider( ScenePlug *scene )
 	return result;
 }
 
+const CompoundData *objectParameters( const Object *object )
+{
+	if( auto camera = runTimeCast<const Camera>( object ) )
+	{
+		return camera->parametersData();
+	}
+	else if( auto externalProcedural = runTimeCast<const ExternalProcedural>( object ) )
+	{
+		return externalProcedural->parameters();
+	}
+	return nullptr;
+}
+
+Inspections objectParametersInspectionProvider( ScenePlug *scene )
+{
+	Inspections result;
+
+	ConstObjectPtr object = scene->objectPlug()->getValue();
+	if( auto parameters = objectParameters( object.get() ) )
+	{
+		for( const auto &[name, value] : parameters->readable() )
+		{
+			result[{ name }] = new BasicInspector(
+				scene->objectPlug(), nullptr,
+				[name] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+					ConstObjectPtr object = history->scene->objectPlug()->getValue();
+					if( auto parameters = objectParameters( object.get() ) )
+					{
+						return parameters->member( name );
+					}
+					return nullptr;
+				}
+			);
+		}
+	}
+	return result;
+}
+
 Inspections objectTypeInspectionProvider( ScenePlug *scene )
 {
 	Inspections result;
@@ -441,6 +481,7 @@ multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 	{ { "Transform" }, transformInspectionProvider },
 	{ { "Attributes" }, attributeInspectionProvider },
 	{ { "Object" }, objectTypeInspectionProvider },
+	{ { "Object", "Parameters" }, objectParametersInspectionProvider },
 	{ { "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider },
 };
 
@@ -654,20 +695,9 @@ class InspectorPath : public Gaffer::Path
 			return result;
 		}
 
-		// void plugDirtied( Gaffer::Plug *plug )
-		// {
-		// 	if( plug == m_scene->globalsPlug() )
-		// 	{
-		// 		emitPathChanged();
-		// 	}
-		// }
-
-		// Gaffer::NodePtr m_node;
 		ScenePlugPtr m_scene;
 		Contexts m_contexts;
 		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
-		// Gaffer::Signals::ScopedConnection m_contextChangedConnection;
-		// bool m_grouped;
 
 };
 
@@ -685,16 +715,6 @@ InspectorPath::Ptr inspectorPathConstructor( ScenePlug &scene, object pythonCont
 }
 
 } // namespace
-
-// RenderPassPath::Ptr constructor1( ScenePlug &scene, Context &context, PathFilterPtr filter, const bool grouped )
-// {
-// 	return new RenderPassPath( &scene, &context, filter, grouped );
-// }
-
-// RenderPassPath::Ptr constructor2( ScenePlug &scene, Context &context, const std::vector<IECore::InternedString> &names, const IECore::InternedString &root, PathFilterPtr filter, const bool grouped )
-// {
-// 	return new RenderPassPath( &scene, &context, names, root, filter, grouped );
-// }
 
 //////////////////////////////////////////////////////////////////////////
 // InspectorDiffColumn
@@ -785,19 +805,6 @@ void GafferSceneUIModule::bindSceneInspector()
 
 	PathClass<InspectorPath>()
 
-		// .def(
-		// 	"__init__",
-		// 	make_constructor(
-		// 		constructor1,
-		// 		default_call_policies(),
-		// 		(
-		// 			boost::python::arg( "scene" ),
-		// 			boost::python::arg( "context" ),
-		// 			boost::python::arg( "filter" ) = object(),
-		// 			boost::python::arg( "grouped" ) = false
-		// 		)
-		// 	)
-		// )
 		.def(
 			"__init__",
 			make_constructor(
@@ -812,33 +819,6 @@ void GafferSceneUIModule::bindSceneInspector()
 				)
 			)
 		)
-			// init<const ScenePlugPtr &, const InspectorPath::Contexts &, const Path::Names &, const InternedString, Gaffer::PathFilterPtr>( (
-			// 	boost::python::arg( "scene" ),
-			// 	boost::python::arg( "contexts" ),
-			// 	boost::python::arg( "names" ) = boost::python::list(),
-			// 	boost::python::arg( "root" ) = "/",
-			// 	boost::python::arg( "filter" ) = object()
-			// ) )
-			// make_constructor(
-			// 	constructor2,
-			// 	default_call_policies(),
-			// 	(
-			// 		boost::python::arg( "scene" ),
-			// 		boost::python::arg( "context" ),
-			// 		boost::python::arg( "names" ) = list(),
-			// 		boost::python::arg( "root" ) = "/",
-			// 		boost::python::arg( "filter" ) = object(),
-			// 		boost::python::arg( "grouped" ) = false
-			// 	)
-			// )
-		// .def( "setScene", &RenderPassPath::setScene )
-		// .def( "getScene", (ScenePlug *(RenderPassPath::*)())&RenderPassPath::getScene, return_value_policy<CastToIntrusivePtr>() )
-		// .def( "setContext", &RenderPassPath::setContext )
-		// .def( "getContext", (Context *(RenderPassPath::*)())&RenderPassPath::getContext, return_value_policy<CastToIntrusivePtr>() )
-		// .def( "registerPathGroupingFunction", &registerPathGroupingFunctionWrapper )
-		// .staticmethod( "registerPathGroupingFunction" )
-		// .def( "pathGroupingFunction", &pathGroupingFunctionWrapper )
-		// .staticmethod( "pathGroupingFunction" )
 	;
 
 	// RefCountedClass<RenderPassNameColumn, GafferUI::PathColumn>( "RenderPassNameColumn" )
@@ -847,12 +827,6 @@ void GafferSceneUIModule::bindSceneInspector()
 
 	// RefCountedClass<RenderPassActiveColumn, GafferUI::PathColumn>( "RenderPassActiveColumn" )
 	// 	.def( init<>() )
-	// ;
-
-	// RefCountedClass<RenderPassEditorSearchFilter, PathFilter>( "SearchFilter" )
-	// 	.def( init<IECore::CompoundDataPtr>( ( boost::python::arg( "userData" ) = object() ) ) )
-	// 	.def( "setMatchPattern", &RenderPassEditorSearchFilter::setMatchPattern )
-	// 	.def( "getMatchPattern", &RenderPassEditorSearchFilter::getMatchPattern, return_value_policy<copy_const_reference>() )
 	// ;
 
 	// RefCountedClass<DisabledRenderPassFilter, PathFilter>( "DisabledRenderPassFilter" )
