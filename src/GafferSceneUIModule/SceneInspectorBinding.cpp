@@ -57,6 +57,7 @@
 
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/ExternalProcedural.h"
+#include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/Primitive.h"
 
 // #include "IECorePython/RefCountedBinding.h"
@@ -476,6 +477,107 @@ Inspections primitiveVariablesInspectionProvider( ScenePlug *scene )
 	return result;
 }
 
+Inspections subdivisionInspectionProvider( ScenePlug *scene )
+{
+	Inspections result;
+
+	ConstObjectPtr object = scene->objectPlug()->getValue();
+	auto mesh = runTimeCast<const MeshPrimitive>( object.get() );
+	if( !mesh )
+	{
+		return result;
+	}
+
+	result[{"Interpolation"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? new StringData( mesh->interpolation() ) : nullptr;
+		}
+	);
+
+	result[{"Corners"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? new UInt64Data( mesh->cornerIds()->readable().size() ) : nullptr;
+		}
+	);
+
+	result[{"Corners","Indices"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? mesh->cornerIds() : nullptr;
+		}
+	);
+
+	result[{"Corners","Sharpnesses"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? mesh->cornerSharpnesses() : nullptr;
+		}
+	);
+
+	result[{"Creases"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? new UInt64Data( mesh->creaseLengths()->readable().size() ) : nullptr;
+		}
+	);
+
+	result[{"Creases","Lengths"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? mesh->creaseLengths() : nullptr;
+		}
+	);
+
+	result[{"Creases","Ids"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? mesh->creaseIds() : nullptr;
+		}
+	);
+
+	result[{"Creases","Sharpnesses"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? mesh->creaseSharpnesses() : nullptr;
+		}
+	);
+
+	result[{"Interpolate Boundary"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? new StringData( mesh->getInterpolateBoundary() ) : nullptr;
+		}
+	);
+
+	result[{"FaceVarying Linear Interpolation"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? new StringData( mesh->getFaceVaryingLinearInterpolation() ) : nullptr;
+		}
+	);
+
+	result[{"Triangle Subdivision Rule"}] = new BasicInspector(
+		scene->objectPlug(), nullptr,
+		[] ( const SceneAlgo::History *history ) {
+			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
+			return mesh ? new StringData( mesh->getTriangleSubdivisionRule() ) : nullptr;
+		}
+	);
+	return result;
+}
+
 multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 	{ { "Bound" }, boundInspectionProvider },
 	{ { "Transform" }, transformInspectionProvider },
@@ -483,6 +585,7 @@ multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 	{ { "Object" }, objectTypeInspectionProvider },
 	{ { "Object", "Parameters" }, objectParametersInspectionProvider },
 	{ { "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider },
+	{ { "Object", "Subdivision" }, subdivisionInspectionProvider },
 };
 
 // void registerInspectionProvider(
