@@ -68,7 +68,7 @@ class GAFFERSCENEUI_API BoundInspector : public Inspector
 	protected :
 
 		GafferScene::SceneAlgo::History::ConstPtr history() const override;
-		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
+		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
 
 	private :
 
