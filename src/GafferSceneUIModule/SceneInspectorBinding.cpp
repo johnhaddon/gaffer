@@ -40,16 +40,12 @@
 
 #include "GafferSceneUI/Private/AttributeInspector.h"
 #include "GafferSceneUI/Private/BoundInspector.h"
+#include "GafferSceneUI/Private/InspectorColumn.h"
 #include "GafferSceneUI/TypeIds.h"
-
-// #include "GafferScene/ScenePlug.h"
-
-// #include "GafferUI/PathColumn.h"
 
 #include "GafferBindings/PathBinding.h"
 
 #include "Gaffer/Context.h"
-// #include "Gaffer/Node.h"
 #include "Gaffer/ParallelAlgo.h"
 #include "Gaffer/Path.h"
 #include "Gaffer/PathFilter.h"
@@ -60,27 +56,18 @@
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/Primitive.h"
 
-// #include "IECorePython/RefCountedBinding.h"
-
-// #include "IECore/StringAlgo.h"
-
-#include "boost/algorithm/string/predicate.hpp"
-// #include "boost/bind/bind.hpp"
-
 #include "Imath/ImathMatrixAlgo.h"
 
 #include <map>
 
 using namespace std;
 using namespace Imath;
-// using namespace boost::placeholders;
 using namespace boost::python;
 using namespace IECore;
 using namespace IECoreScene;
-// using namespace IECorePython;
+using namespace IECorePython;
 using namespace Gaffer;
 using namespace GafferBindings;
-// using namespace GafferUI;
 using namespace GafferScene;
 using namespace GafferSceneUI;
 
@@ -825,77 +812,77 @@ InspectorPath::Ptr inspectorPathConstructor( ScenePlug &scene, object pythonCont
 // InspectorDiffColumn
 //////////////////////////////////////////////////////////////////////////
 
-// ConstStringDataPtr g_adaptorDisabledRenderPassIcon = new StringData( "adaptorDisabledRenderPass.png" );
-// ConstStringDataPtr g_disabledRenderPassIcon = new StringData( "disabledRenderPass.png" );
-// ConstStringDataPtr g_renderPassIcon = new StringData( "renderPass.png" );
-// ConstStringDataPtr g_renderPassFolderIcon = new StringData( "renderPassFolder.png" );
-// ConstStringDataPtr g_disabledToolTip = new StringData( "Disabled." );
-// ConstStringDataPtr g_adaptorDisabledToolTip = new StringData( "Automatically disabled by a render adaptor.");
-// const Color4fDataPtr g_dimmedForegroundColor = new Color4fData( Imath::Color4f( 152, 152, 152, 255 ) / 255.0f );
+namespace
+{
 
-// class InspectorDiffColumn : public InspectorColumn
-// {
+const std::array<ConstStringDataPtr, 2> g_diffColumnHeaders = {
+	new StringData( "A" ),
+	new StringData( "B" )
+};
 
-// 	public :
+const std::array<ConstColor4fDataPtr, 2> g_diffColumnBackgroundColors = {
+	new Color4fData( Color4f( 0.7, 0.12, 0, 0.3 ) ),
+	new Color4fData( Color4f( 0.13, 0.62, 0, 0.3 ) )
+};
 
-// 		IE_CORE_DECLAREMEMBERPTR( InspectorDiffColumn )
+const std::array<InternedString, 2> g_diffColumnContextProperties = { "inspector:contextA", "inspector:contextB" };
 
-// 		// InspectorDiffColumn()
-// 		// 	:	StandardPathColumn( "Name", "name" )
-// 		// {
-// 		// }
+class InspectorDiffColumn : public GafferSceneUI::Private::InspectorColumn
+{
 
-// 		// CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-// 		// {
-// 		// 	CellData result = StandardPathColumn::cellData( path, canceller );
+	public :
 
-// 		// 	if( !runTimeCast<const IECore::StringData>( path.property( g_renderPassNamePropertyName, canceller ) ) )
-// 		// 	{
-// 		// 		result.icon = g_renderPassFolderIcon;
-// 		// 		return result;
-// 		// 	}
+		IE_CORE_DECLAREMEMBERPTR( InspectorDiffColumn )
 
-// 		// 	// Enable render adaptors as they may have disabled or deleted render passes.
-// 		// 	auto pathCopy = runTimeCast<RenderPassPath>( path.copy() );
-// 		// 	if( !pathCopy )
-// 		// 	{
-// 		// 		return result;
-// 		// 	}
-// 		// 	ContextPtr adaptorEnabledContext = new Context( *pathCopy->getContext() );
-// 		// 	adaptorEnabledContext->set<bool>( g_enableAdaptorsContextName, true );
-// 		// 	pathCopy->setContext( adaptorEnabledContext );
+		enum class DiffContext { A, B };
 
-// 		// 	bool enabled = true;
-// 		// 	if( !runTimeCast<const IECore::StringData>( pathCopy->property( g_renderPassNamePropertyName, canceller ) ) )
-// 		// 	{
-// 		// 		// The render pass has been deleted by a render adaptor, so present it to the user as disabled.
-// 		// 		enabled = false;
-// 		// 	}
-// 		// 	else if( const auto enabledData = runTimeCast<const IECore::BoolData>( pathCopy->property( g_renderPassEnabledPropertyName, canceller ) ) )
-// 		// 	{
-// 		// 		enabled = enabledData->readable();
-// 		// 	}
+		InspectorDiffColumn( DiffContext diffContext )
+			:	InspectorColumn(
+					/* inspector = */ nullptr,
+					CellData( g_diffColumnHeaders[(int)diffContext] ),
+					g_diffColumnContextProperties[(int)diffContext]
+				),
+				m_backgroundColor( g_diffColumnBackgroundColors[(int)diffContext] )
+		{
+			const DiffContext otherContext = diffContext == DiffContext::A ? DiffContext::B : DiffContext::A;
+			m_otherColumn = new InspectorColumn( nullptr, CellData( g_diffColumnHeaders[(int)diffContext] ), g_diffColumnContextProperties[(int)otherContext] );
+		}
 
-// 		// 	if( enabled )
-// 		// 	{
-// 		// 		result.icon = g_renderPassIcon;
-// 		// 		return result;
-// 		// 	}
+		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+		{
+			CellData result = InspectorColumn::cellData( path, canceller );
 
-// 		// 	// Check `renderPass:enabled` without render adaptors enabled
-// 		// 	// to determine whether the render pass was disabled upstream
-// 		// 	// or by a render adaptor.
-// 		// 	const auto enabledData = runTimeCast<const IECore::BoolData>( path.property( g_renderPassEnabledPropertyName, canceller ) );
-// 		// 	enabled = !enabledData || enabledData->readable();
+			GafferSceneUI::Private::Inspector::ResultPtr inspectionA = inspect( path, canceller );
+			GafferSceneUI::Private::Inspector::ResultPtr inspectionB = m_otherColumn->inspect( path, canceller );
+			const Object *valueA = inspectionA ? inspectionA->value() : nullptr;
+			const Object *valueB = inspectionB ? inspectionB->value() : nullptr;
 
-// 		// 	result.icon = enabled ? g_adaptorDisabledRenderPassIcon : g_disabledRenderPassIcon;
-// 		// 	result.toolTip = enabled ? g_adaptorDisabledToolTip : g_disabledToolTip;
-// 		// 	result.foreground = g_dimmedForegroundColor;
+			bool different = false;
+			if( (bool)valueA != (bool)valueB )
+			{
+				different = true;
+			}
+			else if( valueA )
+			{
+				different = valueA->isNotEqualTo( valueB );
+			}
 
-// 		// 	return result;
-// 		// }
+			if( different )
+			{
+				result.background = m_backgroundColor;
+			}
 
-// };
+			return result;
+		}
+
+	private :
+
+		GafferSceneUI::Private::ConstInspectorColumnPtr m_otherColumn;
+		ConstColor4fDataPtr m_backgroundColor;
+
+};
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Bindings
@@ -926,16 +913,15 @@ void GafferSceneUIModule::bindSceneInspector()
 		)
 	;
 
-	// RefCountedClass<RenderPassNameColumn, GafferUI::PathColumn>( "RenderPassNameColumn" )
-	// 	.def( init<>() )
-	// ;
+	{
+		scope s = RefCountedClass<InspectorDiffColumn, GafferSceneUI::Private::InspectorColumn>( "InspectorDiffColumn" )
+			.def( init<InspectorDiffColumn::DiffContext>() )
+		;
 
-	// RefCountedClass<RenderPassActiveColumn, GafferUI::PathColumn>( "RenderPassActiveColumn" )
-	// 	.def( init<>() )
-	// ;
-
-	// RefCountedClass<DisabledRenderPassFilter, PathFilter>( "DisabledRenderPassFilter" )
-	// 	.def( init<IECore::CompoundDataPtr>( ( boost::python::arg( "userData" ) = object() ) ) )
-	// ;
+		enum_<InspectorDiffColumn::DiffContext>( "DiffContext" )
+			.value( "A", InspectorDiffColumn::DiffContext::A )
+			.value( "B", InspectorDiffColumn::DiffContext::B )
+		;
+	}
 
 }
