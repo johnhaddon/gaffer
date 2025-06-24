@@ -78,6 +78,23 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 		GafferSceneUI.SceneEditor.__init__( self, mainColumn, scriptNode, **kw )
 
+		self.__standardColumns = [
+			GafferUI.StandardPathColumn( "Name", "name" ),
+			GafferSceneUI.Private.InspectorColumn( inspector = None, headerData = GafferUI.PathColumn.CellData( value = "Value" ) ),
+		]
+
+		self.__diffColumns = [
+			GafferUI.StandardPathColumn( "Name", "name" ),
+			_InspectorDiffColumn(
+				_InspectorDiffColumn.DiffContext.A,
+				headerData = GafferUI.PathColumn.CellData( value = "A" )
+			),
+			_InspectorDiffColumn(
+				_InspectorDiffColumn.DiffContext.B,
+				headerData = GafferUI.PathColumn.CellData( value = "B" )
+			)
+		]
+
 		with mainColumn :
 
 			with GafferUI.TabbedContainer() :
@@ -86,17 +103,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 					self.__selectionPathListing = GafferUI.PathListingWidget(
 						Gaffer.DictPath( {}, "/" ),
-						columns = [
-							GafferUI.StandardPathColumn( "Name", "name" ),
-							_InspectorDiffColumn(
-								_InspectorDiffColumn.DiffContext.A,
-								headerData = GafferUI.PathColumn.CellData( value = "A" )
-							),
-							_InspectorDiffColumn(
-								_InspectorDiffColumn.DiffContext.B,
-								headerData = GafferUI.PathColumn.CellData( value = "B" )
-							)
-						],
+						columns = self.__standardColumns,
 						selectionMode = GafferUI.PathListingWidget.SelectionMode.Cells,
 						displayMode = GafferUI.PathListingWidget.DisplayMode.Tree,
 					)
@@ -105,17 +112,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 					self.__globalsPathListing = GafferUI.PathListingWidget(
 						Gaffer.DictPath( {}, "/" ),
-						columns = [
-							GafferUI.StandardPathColumn( "Name", "name" ),
-							_InspectorDiffColumn(
-								_InspectorDiffColumn.DiffContext.A,
-								headerData = GafferUI.PathColumn.CellData( value = "A" )
-							),
-							_InspectorDiffColumn(
-								_InspectorDiffColumn.DiffContext.B,
-								headerData = GafferUI.PathColumn.CellData( value = "B" )
-							)
-						],
+						columns = self.__standardColumns,
 						selectionMode = GafferUI.PathListingWidget.SelectionMode.Cells,
 						displayMode = GafferUI.PathListingWidget.DisplayMode.Tree,
 					)
@@ -180,9 +177,14 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 				)
 			)
 
+			self.__selectionPathListing.setColumns(
+				self.__standardColumns if selectionContexts[0] == selectionContexts[1] else self.__diffColumns
+			)
+
 		else :
 
 			self.__selectionPathListing.setPath( Gaffer.DictPath( {}, "/" ) )
+			self.__selectionPathListing.setColumns( self.__standardColumns )
 
 	def __settingsInputChanged( self, plug ) :
 

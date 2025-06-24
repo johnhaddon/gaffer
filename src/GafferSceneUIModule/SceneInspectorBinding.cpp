@@ -632,6 +632,7 @@ multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 namespace
 {
 
+const IECore::InternedString g_contextPropertyName( "inspector:context" );
 const IECore::InternedString g_contextAPropertyName( "inspector:contextA" );
 const IECore::InternedString g_contextBPropertyName( "inspector:contextB" );
 const IECore::InternedString g_inspectorPropertyName( "inspector:inspector" );
@@ -687,13 +688,14 @@ class InspectorPath : public Gaffer::Path
 		{
 			Path::propertyNames( names, canceller );
 			names.push_back( g_inspectorPropertyName );
+			names.push_back( g_contextPropertyName );
 			names.push_back( g_contextAPropertyName );
 			names.push_back( g_contextBPropertyName );
 		}
 
 		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
 		{
-			if( name == g_contextAPropertyName )
+			if( name == g_contextPropertyName || name == g_contextAPropertyName )
 			{
 				return m_contexts[0];
 			}
