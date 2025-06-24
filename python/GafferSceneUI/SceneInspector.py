@@ -190,54 +190,6 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 GafferUI.Editor.registerType( "SceneInspector", SceneInspector )
 
 ##########################################################################
-# Inspector
-##########################################################################
-
-## Abstract class for a callable which inspects a Target and returns
-# a value. Inspectors are key to allowing the UI to perform the same
-# query over multiple targets to generate history and inheritance
-# queries.
-# class Inspector( object ) :
-
-# 	## Must be implemented to return a descriptive name
-# 	# for what is being inspected.
-# 	def name( self ) :
-
-# 		raise NotImplementedError
-
-# 	## Should return True if the Inspector's results
-# 	# can meaningfully be tracked back up through the
-# 	# node graph.
-# 	def supportsHistory( self ) :
-
-# 		return True
-
-# 	## Should return True if the Inspector's results
-# 	# may be inherited from parent locations - this will
-# 	# enable inheritance queries for the inspector.
-# 	def supportsInheritance( self ) :
-
-# 		return False
-
-# 	## Must be implemented to inspect the target and return
-# 	# a value to be displayed. When supportsInheritance()==True,
-# 	# this method must accept an ignoreInheritance keyword
-# 	# argument (defaulting to False).
-# 	def __call__( self, target, **kw ) :
-
-# 		raise NotImplementedError
-
-# 	## May be implemented to return a list of "child" inspectors -
-# 	# this is used by the DiffColumn to obtain an inspector per row.
-# 	def children( self, target ) :
-
-# 		return []
-
-# 	def _useBackgroundThread( self ) :
-
-# 		return False
-
-##########################################################################
 # Node section
 ##########################################################################
 
