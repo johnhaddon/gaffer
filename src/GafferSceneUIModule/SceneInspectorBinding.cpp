@@ -184,6 +184,10 @@ class BasicInspector : public GafferSceneUI::Private::Inspector
 		GafferScene::SceneAlgo::History::ConstPtr history() const override
 		{
 			const auto scenePlug = m_plug->parent<ScenePlug>();
+
+			std::cerr << "SOURCE " << scenePlug->source()->fullName() << std::endl;
+			std::cerr << "CONTEXT " << Gaffer::Context::current()->get<int>( "__sceneInspector:inputIndex", -10 ) << std::endl;
+
 			if( m_plug != scenePlug->globalsPlug() &&m_plug != scenePlug->setNamesPlug() && m_plug != scenePlug->setPlug() )
 			{
 				if( !scenePlug->existsPlug()->getValue() )
@@ -192,7 +196,9 @@ class BasicInspector : public GafferSceneUI::Private::Inspector
 				}
 			}
 
-			return g_historyCache.get( HistoryCacheKey( m_plug.get() ), Context::current()->canceller() );
+			auto g = g_historyCache.get( HistoryCacheKey( m_plug.get() ), Context::current()->canceller() );
+			std::cerr << "HISTORY " << g << std::endl;
+			return g;
 		}
 
 		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override

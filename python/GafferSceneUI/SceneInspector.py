@@ -123,15 +123,15 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			Gaffer.WeakMethod( self.__selectedPathsChanged )
 		)
 
+		self.settings().plugInputChangedSignal().connect(
+			Gaffer.WeakMethod( self.__settingsInputChanged )
+		)
+
 		self._updateFromSet()
 
 	def __repr__( self ) :
 
 		return "GafferSceneUI.SceneInspector( scriptNode )"
-
-	# def _updateFromSettings( self, plug ) :
-
-		# TODO : ADD FILTERS ETC
 
 	def _updateFromContext( self, modifiedItems ) :
 
@@ -157,61 +157,38 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			context["__sceneInspector:inputIndex"] = inputIndex if self.settings()["in"][inputIndex].getInput() is not None else 0
 			inputContexts.append( context )
 
-		selectionContexts = [ Gaffer.Context( c ) for c in inputContexts ]
+		selectionContexts = None
 		lastSelectedPath = GafferSceneUI.ScriptNodeAlgo.getLastSelectedPath( self.scriptNode() )
 		if lastSelectedPath :
 
+			selectionContexts = [ Gaffer.Context( c ) for c in inputContexts ]
 			selectionContexts[0]["scene:path"] = GafferScene.ScenePlug.stringToPath( lastSelectedPath )
-			selectionContexts[1]["scene:path"] = GafferScene.ScenePlug.stringToPath( lastSelectedPath )
 
 			selectedPaths = GafferSceneUI.ScriptNodeAlgo.getSelectedPaths( self.scriptNode() ).paths()
 			if len( selectedPaths ) > 1 and inputContexts[0] == inputContexts[1] :
 				selectionContexts[1]["scene:path"] = GafferScene.ScenePlug.stringToPath( next( p for p in selectedPaths if p != lastSelectedPath ) )
+			else :
+				selectionContexts[1]["scene:path"] = GafferScene.ScenePlug.stringToPath( lastSelectedPath )
 
-		print( [ ( c.get( "scene:path"), c.get( "__sceneInspector:inputIndex" ) ) for c in selectionContexts ] )
-		# 	paths.append( lastSelectedPath )
-		# 	selectedPaths = GafferSceneUI.ScriptNodeAlgo.getSelectedPaths( self.scriptNode() ).paths()
-		# 	if len( selectedPaths ) > 1 and len( inputIndices ) < 2 :
-		# 		paths.insert( 0, next( p for p in selectedPaths if p != lastSelectedPath ) )
+		if selectionContexts :
 
-		# print( paths, inputIndices )
-
-		# contexts = []
-		# for inputIndex in inputIndices :
-		# 	for path in paths :
-		# 		context = Gaffer.Context( self.context() )
-		# 		context["scene:path"] = GafferScene.ScenePlug.stringToPath( path )
-		# 		contexts.append( context )
-
-		self.__selectionPathListing.setPath(
-			_GafferSceneUI._SceneInspector.InspectorPath(
-				self.settings()["__switchedIn"],
-				selectionContexts
+			self.__selectionPathListing.setPath(
+				_GafferSceneUI._SceneInspector.InspectorPath(
+					self.settings()["__switchedIn"],
+					selectionContexts
+				)
 			)
-		)
 
-		# with self.context():
+		else :
 
+			self.__selectionPathListing.setPath( Gaffer.DictPath( {}, "/" ) )
 
+	def __settingsInputChanged( self, plug ) :
 
-		# 	if len( scenes ) > 1 :
-		# 		paths = [ paths[-1] ]
-
-		# 	targets = []
-		# 	for sceneIndex, scene in enumerate( scenes ) :
-		# 		for path in paths :
-		# 			if path is not None and not scene.exists( path ) : ## TODO : DOES THIS BELONG HERE? IT'S IN THE FOREGROUND WHICH IS NOT GREAT. MOVE TO PATH?
-		# 				# selection may not be valid for both scenes,
-		# 				# and we can't inspect invalid paths.
-		# 				path = None
-		# 			targetContext = Gaffer.Context( self.context() )
-		# 			if path is not None :
-		# 				targetContext["scene:path"] = GafferScene.ScenePlug.stringToPath( path )
-		# 			targetContext["__sceneInspector:inputIndex"] = sceneIndex
-		# 			targets.append( self.Target( scene, path, targetContext ) )
-
-		# 	for section in self.__sections :
-		# 		section.update( targets )
+		if plug == self.settings()["in"][1] :
+			# When the comparison scene is connected or disconnected, the
+			# contexts we give to our InspectorPath need to be updated.
+			self.__updateLazily()
 
 GafferUI.Editor.registerType( "SceneInspector", SceneInspector )
 
