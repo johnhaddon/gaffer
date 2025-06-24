@@ -279,14 +279,40 @@ Inspections boundInspectionProvider( ScenePlug *scene )
 	return result;
 }
 
+const boost::container::flat_map<string, InternedString> g_attributeCategories = {
+	{ "ai:*", "Arnold" },
+	{ "dl:*", "3Delight" },
+	{ "cycles:*", "Cycles" },
+	{ "ri:*", "RenderMan" },
+	{ "gl:*", "OpenGL" },
+	{ "usd:*", "USD" },
+	{ "user:*", "User" },
+	{
+		"scene:visible doubleSided render:* gaffer:* " \
+		"linkedLights shadowedLights filteredLights",
+		"Standard"
+	}
+};
+
+const InternedString g_other( "Other" );
+
 Inspections attributeInspectionProvider( ScenePlug *scene )
 {
 	ConstCompoundObjectPtr attributes = scene->attributesPlug()->getValue();
 	Inspections result;
 	for( const auto &[name, value] : attributes->members() )
 	{
+		InternedString category = g_other;
+		for( const auto &[pattern, matchingCategory] : g_attributeCategories )
+		{
+			if( StringAlgo::matchMultiple( name, pattern ) )
+			{
+				category = matchingCategory;
+				break;
+			}
+		}
 		/// \todo EditScope
-		result.insert( { std::vector<InternedString>( { name } ), new GafferSceneUI::Private::AttributeInspector( scene, nullptr, name ) } );
+		result.insert( { { category, name }, new GafferSceneUI::Private::AttributeInspector( scene, nullptr, name ) } );
 	}
 	return result;
 }
