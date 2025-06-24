@@ -449,6 +449,9 @@ size_t Switch::inputIndex( const Context *context ) const
 	}
 
 	const size_t index = indexPlug->getValue();
+
+	std::cerr << "SWITCH " << fullName() << " " << index << std::endl;
+
 	if( inPlugs->resizeWhenInputsChange() )
 	{
 		// Last input is always unconnected, so should be ignored.
