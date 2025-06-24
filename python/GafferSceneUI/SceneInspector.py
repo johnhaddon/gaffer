@@ -64,7 +64,8 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 			self["__switch"] = Gaffer.Switch()
 			self["__switch"].setup( self["in"][0] )
-			self["__switch"]["in"].setInput( self["in"] )
+			self["__switch"]["in"][0].setInput( self["in"][0] )
+			self["__switch"]["in"][1].setInput( self["in"][1] )
 			self["__switch"]["index"].setInput( self["__switchIndexQuery"]["out"][0]["value"] )
 			self["__switch"]["deleteContextVariables"].setValue( "__sceneInspector:inputIndex" )
 			self["__switchedIn"].setInput( self["__switch"]["out"] )
@@ -356,8 +357,6 @@ class _InspectorDiffColumn( GafferSceneUI.Private.InspectorColumn ) :
 	}
 
 	def __init__( self, diffContext, headerData, sizeMode = GafferUI.PathColumn.SizeMode.Default ) :
-
-		print( diffContext.name )
 
 		GafferSceneUI.Private.InspectorColumn.__init__(
 			self, inspector = None, headerData = headerData,
