@@ -91,6 +91,8 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 		with mainColumn :
 
+			GafferUI.EditScopeUI.EditScopePlugValueWidget( self.settings()["editScope"] )
+
 			with GafferUI.TabbedContainer() :
 
 				with GafferUI.ListContainer( spacing = 4, borderWidth = 4, parenting = { "label" : "Selection" } ) :
