@@ -120,6 +120,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 		)
 
 		self._updateFromSet()
+		self.__updateLazily()
 
 	def __repr__( self ) :
 
@@ -149,6 +150,18 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			context["__sceneInspector:inputIndex"] = inputIndex if self.settings()["in"][inputIndex].getInput() is not None else 0
 			inputContexts.append( context )
 
+		self.__globalsPathListing.setPath(
+			_GafferSceneUI._SceneInspector.InspectorPath(
+				self.settings()["__switchedIn"],
+				inputContexts,
+				"/Globals"
+			)
+		)
+
+		self.__globalsPathListing.setColumns(
+			self.__standardColumns if inputContexts[0] == inputContexts[1] else self.__diffColumns
+		)
+
 		selectionContexts = None
 		lastSelectedPath = GafferSceneUI.ScriptNodeAlgo.getLastSelectedPath( self.scriptNode() )
 		if lastSelectedPath :
@@ -167,7 +180,8 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			self.__selectionPathListing.setPath(
 				_GafferSceneUI._SceneInspector.InspectorPath(
 					self.settings()["__switchedIn"],
-					selectionContexts
+					selectionContexts,
+					"/Selection"
 				)
 			)
 
