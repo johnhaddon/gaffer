@@ -39,8 +39,8 @@
 #include "SceneInspectorBinding.h"
 
 #include "GafferSceneUI/Private/AttributeInspector.h"
-#include "GafferSceneUI/Private/BoundInspector.h"
 #include "GafferSceneUI/Private/InspectorColumn.h"
+#include "GafferSceneUI/Private/OptionInspector.h"
 #include "GafferSceneUI/TypeIds.h"
 
 #include "GafferBindings/PathBinding.h"
@@ -57,6 +57,8 @@
 #include "IECoreScene/Primitive.h"
 
 #include "Imath/ImathMatrixAlgo.h"
+
+#include "boost/algorithm/string/predicate.hpp"
 
 #include <map>
 
@@ -120,9 +122,8 @@ HistoryCache g_historyCache(
 	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
-		return SceneAlgo::history(
-			key.plug, Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
-		);
+		const ScenePlug::ScenePath *path = Context::current()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
+		return path ? SceneAlgo::history( key.plug, *path ) : SceneAlgo::history( key.plug );
 	},
 	// Max cost
 	1000,
@@ -164,14 +165,14 @@ class BasicInspector : public GafferSceneUI::Private::Inspector
 		{
 		}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BasicInspector, BoundInspectorTypeId, GafferSceneUI::Private::Inspector );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BasicInspector, BasicInspectorTypeId, GafferSceneUI::Private::Inspector );
 
 	protected :
 
 		GafferScene::SceneAlgo::History::ConstPtr history() const override
 		{
 			const auto scenePlug = m_plug->parent<ScenePlug>();
-			if( m_plug != scenePlug->globalsPlug() &&m_plug != scenePlug->setNamesPlug() && m_plug != scenePlug->setPlug() )
+			if( m_plug != scenePlug->globalsPlug() && m_plug != scenePlug->setNamesPlug() && m_plug != scenePlug->setPlug() )
 			{
 				if( !scenePlug->existsPlug()->getValue() )
 				{
@@ -184,7 +185,7 @@ class BasicInspector : public GafferSceneUI::Private::Inspector
 
 		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override
 		{
-			Context::Scope scope( history->context.get() ); // TODO : CANCELLER PLEASE??? OR IS IT IN THERE ALREADY?
+			Context::Scope scope( history->context.get() ); // TODO : CANCELLER PLEASE - NEEDS BASE CLASS HELP
 			return m_valueFunction( history );
 		}
 
@@ -591,14 +592,93 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene )
 	return result;
 }
 
+const boost::container::flat_map<string, InternedString> g_optionCategories = {
+	{ "ai:*", "Arnold" },
+	{ "dl:*", "3Delight" },
+	{ "cycles:*", "Cycles" },
+	{ "ri:*", "RenderMan" },
+	{ "gl:*", "OpenGL" },
+	{ "usd:*", "USD" },
+	{ "user:*", "User" },
+	{ "render:* sampleMotion", "Standard" },
+};
+
+const std::string g_optionPrefix( "option:" );
+const std::string g_attributePrefix( "attribute:" );
+
+Inspections optionInspectionProvider( ScenePlug *scene )
+{
+	ConstCompoundObjectPtr globals = scene->globalsPlug()->getValue();
+	Inspections result;
+	for( const auto &[name, value] : globals->members() )
+	{
+		if( !boost::starts_with( name.string(), g_optionPrefix ) )
+		{
+			continue;
+		}
+
+		string optionName = name.string().substr( g_optionPrefix.size() );
+		InternedString category = g_other;
+		for( const auto &[pattern, matchingCategory] : g_optionCategories )
+		{
+			if( StringAlgo::matchMultiple( optionName, pattern ) )
+			{
+				category = matchingCategory;
+				break;
+			}
+		}
+		/// \todo EditScope
+		result.insert( { { category, optionName }, new GafferSceneUI::Private::OptionInspector( scene, nullptr, optionName ) } );
+	}
+	return result;
+}
+
+Inspections globalAttributesInspectionProvider( ScenePlug *scene )
+{
+	ConstCompoundObjectPtr globals = scene->globalsPlug()->getValue();
+	Inspections result;
+	for( const auto &[name, value] : globals->members() )
+	{
+		if( !boost::starts_with( name.string(), g_attributePrefix ) )
+		{
+			continue;
+		}
+
+		string optionName = name.string().substr( g_attributePrefix.size() );
+		InternedString category = g_other;
+		for( const auto &[pattern, matchingCategory] : g_attributeCategories )
+		{
+			if( StringAlgo::matchMultiple( optionName, pattern ) )
+			{
+				category = matchingCategory;
+				break;
+			}
+		}
+		/// \todo EditScope
+		result.insert( {
+			{ category, optionName },
+			new BasicInspector(
+				scene->globalsPlug(), nullptr,
+				[name] ( const SceneAlgo::History *history ) {
+					ConstCompoundObjectPtr globals = history->scene->globalsPlug()->getValue();
+					return globals->member( name );
+				}
+			)
+		} );
+	}
+	return result;
+}
+
 multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
-	{ { "Bound" }, boundInspectionProvider },
-	{ { "Transform" }, transformInspectionProvider },
-	{ { "Attributes" }, attributeInspectionProvider },
-	{ { "Object" }, objectTypeInspectionProvider },
-	{ { "Object", "Parameters" }, objectParametersInspectionProvider },
-	{ { "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider },
-	{ { "Object", "Subdivision" }, subdivisionInspectionProvider },
+	{ { "Selection", "Bound" }, boundInspectionProvider },
+	{ { "Selection", "Transform" }, transformInspectionProvider },
+	{ { "Selection", "Attributes" }, attributeInspectionProvider },
+	{ { "Selection", "Object" }, objectTypeInspectionProvider },
+	{ { "Selection", "Object", "Parameters" }, objectParametersInspectionProvider },
+	{ { "Selection", "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider },
+	{ { "Selection", "Object", "Subdivision" }, subdivisionInspectionProvider },
+	{ { "Globals", "Attributes" }, globalAttributesInspectionProvider },
+	{ { "Globals", "Options" }, optionInspectionProvider },
 };
 
 // void registerInspectionProvider(
@@ -795,6 +875,14 @@ class InspectorPath : public Gaffer::Path
 
 				for( const auto &[root, thing] : g_inspectionProviders )
 				{
+					if( names().size() && root[0] != names()[0] )
+					{
+						// Skip stuff not matching the first part of the name. We can do better than this I think,
+						// but this is the minimum needed to avoid evaluating per-location stuff with the context
+						// for `/Globals`.
+						continue;
+					}
+
 					auto x = thing( m_scene.get() );
 					for( const auto &[subPath, inspector] : x )
 					{
