@@ -80,7 +80,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 		self.__standardColumns = [
 			GafferUI.StandardPathColumn( "Name", "name" ),
-			GafferSceneUI.Private.InspectorColumn( inspector = None, headerData = GafferUI.PathColumn.CellData( value = "Value" ) ),
+			GafferSceneUI.Private.InspectorColumn( "inspector:inspector", headerData = GafferUI.PathColumn.CellData( value = "Value" ) ),
 		]
 
 		self.__diffColumns = [

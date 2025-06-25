@@ -1029,14 +1029,14 @@ class InspectorDiffColumn : public GafferSceneUI::Private::InspectorColumn
 
 		InspectorDiffColumn( DiffContext diffContext )
 			:	InspectorColumn(
-					/* inspector = */ nullptr,
+					"inspector:inspector",
 					CellData( g_diffColumnHeaders[(int)diffContext] ),
 					g_diffColumnContextProperties[(int)diffContext]
 				),
 				m_backgroundColor( g_diffColumnBackgroundColors[(int)diffContext] )
 		{
 			const DiffContext otherContext = diffContext == DiffContext::A ? DiffContext::B : DiffContext::A;
-			m_otherColumn = new InspectorColumn( nullptr, CellData( g_diffColumnHeaders[(int)diffContext] ), g_diffColumnContextProperties[(int)otherContext] );
+			m_otherColumn = new InspectorColumn( "inspector:inspector", CellData( g_diffColumnHeaders[(int)diffContext] ), g_diffColumnContextProperties[(int)otherContext] );
 		}
 
 		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
