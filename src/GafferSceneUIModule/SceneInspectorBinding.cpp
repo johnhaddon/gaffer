@@ -54,6 +54,7 @@
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/ExternalProcedural.h"
 #include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/Output.h"
 #include "IECoreScene/Primitive.h"
 
 #include "Imath/ImathMatrixAlgo.h"
@@ -669,6 +670,81 @@ Inspections globalAttributesInspectionProvider( ScenePlug *scene )
 	return result;
 }
 
+const std::string g_outputPrefix( "output:" );
+
+Inspections outputsInspectionProvider( ScenePlug *scene )
+{
+	ConstCompoundObjectPtr globals = scene->globalsPlug()->getValue();
+	Inspections result;
+	for( const auto &[name, value] : globals->members() )
+	{
+		if( !boost::starts_with( name.string(), g_outputPrefix ) )
+		{
+			continue;
+		}
+
+		auto output = runTimeCast<const Output>( value.get() );
+		if( !output )
+		{
+			continue;
+		}
+
+		vector<InternedString> path = ScenePlug::stringToPath( name.string().substr( g_outputPrefix.size( ) ) );
+		path.push_back( "File Name" );
+		result.insert( {
+			path,
+			new BasicInspector(
+				scene->globalsPlug(), nullptr,
+				[ name ] ( const SceneAlgo::History *history ) {
+					ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
+					return output ? new StringData( output->getName() ) : nullptr;
+				}
+			)
+		} );
+
+		path.back() = "Type";
+		result.insert( {
+			path,
+			new BasicInspector(
+				scene->globalsPlug(), nullptr,
+				[ name ] ( const SceneAlgo::History *history ) {
+					ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
+					return output ? new StringData( output->getType() ) : nullptr;
+				}
+			)
+		} );
+
+		path.back() = "Data";
+		result.insert( {
+			path,
+			new BasicInspector(
+				scene->globalsPlug(), nullptr,
+				[ name ] ( const SceneAlgo::History *history ) {
+					ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
+					return output ? new StringData( output->getData() ) : nullptr;
+				}
+			)
+		} );
+
+		path.back() = "Parameters"; path.resize( path.size() + 1 );
+		for( const auto &[parameterName, parameterValue] : output->parameters() )
+		{
+			path.back() = parameterName;
+			result.insert( {
+				path,
+				new BasicInspector(
+					scene->globalsPlug(), nullptr,
+					[ name, parameterName ] ( const SceneAlgo::History *history ) {
+						ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
+						return output ? output->parametersData()->member( parameterName ) : nullptr;
+					}
+				)
+			} );
+		}
+	}
+	return result;
+}
+
 multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 	{ { "Selection", "Bound" }, boundInspectionProvider },
 	{ { "Selection", "Transform" }, transformInspectionProvider },
@@ -679,6 +755,7 @@ multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 	{ { "Selection", "Object", "Subdivision" }, subdivisionInspectionProvider },
 	{ { "Globals", "Attributes" }, globalAttributesInspectionProvider },
 	{ { "Globals", "Options" }, optionInspectionProvider },
+	{ { "Globals", "Outputs" }, outputsInspectionProvider },
 };
 
 // void registerInspectionProvider(
