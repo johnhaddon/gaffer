@@ -39,6 +39,7 @@
 #include "SceneInspectorBinding.h"
 
 #include "GafferSceneUI/Private/AttributeInspector.h"
+#include "GafferSceneUI/Private/BasicInspector.h"
 #include "GafferSceneUI/Private/InspectorColumn.h"
 #include "GafferSceneUI/Private/OptionInspector.h"
 #include "GafferSceneUI/TypeIds.h"
@@ -75,135 +76,6 @@ using namespace GafferScene;
 using namespace GafferSceneUI;
 
 //////////////////////////////////////////////////////////////////////////
-// History cache for BasicInspector
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-// This uses the same strategy that ValuePlug uses for the hash cache,
-// using `plug->dirtyCount()` to invalidate previous cache entries when
-// a plug is dirtied.
-/// \todo SHOULD THIS BE SHARED SOMEWHERE? AT LEAST WITH BOUNDINSPECTOR? OR IS BOUNDINSPECTOR A BASICINSPECTOR? DO WE PUT IT ALL IN SCENEINSPECTORBINDING FOR NOW?
-struct HistoryCacheKey
-{
-	HistoryCacheKey() {};
-	HistoryCacheKey( const ValuePlug *plug )
-		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
-	{
-	}
-
-	bool operator==( const HistoryCacheKey &rhs ) const
-	{
-		return
-			plug == rhs.plug &&
-			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount
-		;
-	}
-
-	const ValuePlug *plug;
-	IECore::MurmurHash contextHash;
-	uint64_t dirtyCount;
-};
-
-size_t hash_value( const HistoryCacheKey &key )
-{
-	size_t result = 0;
-	boost::hash_combine( result, key.plug );
-	boost::hash_combine( result, key.contextHash );
-	boost::hash_combine( result, key.dirtyCount );
-	return result;
-}
-
-using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History::ConstPtr>;
-
-HistoryCache g_historyCache(
-	// Getter
-	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
-		assert( canceller == Context::current()->canceller() );
-		cost = 1;
-		const ScenePlug::ScenePath *path = Context::current()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
-		return path ? SceneAlgo::history( key.plug, *path ) : SceneAlgo::history( key.plug );
-	},
-	// Max cost
-	1000,
-	// Removal callback
-	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
-		// Histories contain PlugPtrs, which could potentially be the sole
-		// owners. Destroying plugs can trigger dirty propagation, so as a
-		// precaution we destroy the history on the UI thread, where this would
-		// be OK.
-		ParallelAlgo::callOnUIThread(
-			[history] () {}
-		);
-	}
-
-);
-
-} // namespace
-
-//////////////////////////////////////////////////////////////////////////
-// BasicInspector
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-class BasicInspector : public GafferSceneUI::Private::Inspector
-{
-
-	public :
-
-		using ValueFunction = std::function<IECore::ConstObjectPtr( const GafferScene::SceneAlgo::History *history )>;
-
-		BasicInspector(
-			const Gaffer::ValuePlugPtr &plug,
-			const Gaffer::PlugPtr &editScope,
-			const ValueFunction &valueFunction
-		)
-			:	Inspector( "", "", editScope ), m_plug( plug ), m_valueFunction( valueFunction )
-		{
-		}
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BasicInspector, BasicInspectorTypeId, GafferSceneUI::Private::Inspector );
-
-	protected :
-
-		GafferScene::SceneAlgo::History::ConstPtr history() const override
-		{
-			const auto scenePlug = m_plug->parent<ScenePlug>();
-			if( m_plug != scenePlug->globalsPlug() && m_plug != scenePlug->setNamesPlug() && m_plug != scenePlug->setPlug() )
-			{
-				if( !scenePlug->existsPlug()->getValue() )
-				{
-					return nullptr;
-				}
-			}
-
-			return g_historyCache.get( HistoryCacheKey( m_plug.get() ), Context::current()->canceller() );
-		}
-
-		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override
-		{
-			Context::Scope scope( history->context.get() ); // TODO : CANCELLER PLEASE - NEEDS BASE CLASS HELP
-			return m_valueFunction( history );
-		}
-
-	private :
-
-		void plugDirtied( Gaffer::Plug *plug );
-
-		const Gaffer::ValuePlugPtr m_plug;
-		ValueFunction m_valueFunction;
-
-};
-
-IE_CORE_DECLAREPTR( BasicInspector )
-
-} // namespace
-
-//////////////////////////////////////////////////////////////////////////
 // Registry Shenanigans TODO : BETTER NAME PLEASE!
 //////////////////////////////////////////////////////////////////////////
 
@@ -229,7 +101,7 @@ Inspections transformInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr
 				case 's' : path[1] = "Scale"; break;
 				case 'h' : path[1] = "Shear"; break;
 			}
-			result[path] = new BasicInspector(
+			result[path] = new GafferSceneUI::Private::BasicInspector(
 				scene->transformPlug(), editScope,
 				[full, component] ( const SceneAlgo::History *history ) -> ConstDataPtr {
 					const M44f matrix =
@@ -262,13 +134,13 @@ Inspections transformInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr
 Inspections boundInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
 	Inspections result;
-	result[{"Local"}] = new BasicInspector(
+	result[{"Local"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->boundPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			return new Box3fData( history->scene->boundPlug()->getValue() );
 		}
 	);
-	result[{"World"}] = new BasicInspector(
+	result[{"World"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->boundPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			const Imath::Box3f bound = Imath::transform(
@@ -340,7 +212,7 @@ Inspections objectParametersInspectionProvider( ScenePlug *scene, const Gaffer::
 	{
 		for( const auto &[name, value] : parameters->readable() )
 		{
-			result[{ name }] = new BasicInspector(
+			result[{ name }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
 				[name] ( const SceneAlgo::History *history ) -> ConstDataPtr {
 					ConstObjectPtr object = history->scene->objectPlug()->getValue();
@@ -362,7 +234,7 @@ Inspections objectTypeInspectionProvider( ScenePlug *scene, const Gaffer::PlugPt
 	ConstObjectPtr object = scene->objectPlug()->getValue();
 	if( object->typeId() != NullObjectTypeId )
 	{
-		result[{"Type"}] = new BasicInspector(
+		result[{"Type"}] = new GafferSceneUI::Private::BasicInspector(
 			scene->objectPlug(), editScope,
 			[] ( const SceneAlgo::History *history ) -> ConstStringDataPtr {
 				ConstObjectPtr object = history->scene->objectPlug()->getValue();
@@ -462,25 +334,25 @@ Inspections primitiveVariablesInspectionProvider( ScenePlug *scene, const Gaffer
 	{
 		for( const auto &[name, variable] : primitive->variables )
 		{
-			result[{ name, "Interpolation" }] = new BasicInspector(
+			result[{ name, "Interpolation" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
 				[name] ( const SceneAlgo::History *history ) {
 					return primitiveVariableInterpolation( name, history );
 				}
 			);
-			result[{ name, "Type" }] = new BasicInspector(
+			result[{ name, "Type" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
 				[name] ( const SceneAlgo::History *history ) {
 					return primitiveVariableType( name, history );
 				}
 			);
-			result[{ name, "Data" }] = new BasicInspector(
+			result[{ name, "Data" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
 				[name] ( const SceneAlgo::History *history ) {
 					return primitiveVariableData( name, history );
 				}
 			);
-			result[{ name, "Indices" }] = new BasicInspector(
+			result[{ name, "Indices" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
 				[name] ( const SceneAlgo::History *history ) {
 					return primitiveVariableIndices( name, history );
@@ -502,7 +374,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		return result;
 	}
 
-	result[{"Interpolation"}] = new BasicInspector(
+	result[{"Interpolation"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -510,7 +382,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Corners"}] = new BasicInspector(
+	result[{"Corners"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -518,7 +390,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Corners","Indices"}] = new BasicInspector(
+	result[{"Corners","Indices"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -526,7 +398,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Corners","Sharpnesses"}] = new BasicInspector(
+	result[{"Corners","Sharpnesses"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -534,7 +406,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Creases"}] = new BasicInspector(
+	result[{"Creases"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -542,7 +414,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Creases","Lengths"}] = new BasicInspector(
+	result[{"Creases","Lengths"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -550,7 +422,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Creases","Ids"}] = new BasicInspector(
+	result[{"Creases","Ids"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -558,7 +430,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Creases","Sharpnesses"}] = new BasicInspector(
+	result[{"Creases","Sharpnesses"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -566,7 +438,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Interpolate Boundary"}] = new BasicInspector(
+	result[{"Interpolate Boundary"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -574,7 +446,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"FaceVarying Linear Interpolation"}] = new BasicInspector(
+	result[{"FaceVarying Linear Interpolation"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -582,7 +454,7 @@ Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugP
 		}
 	);
 
-	result[{"Triangle Subdivision Rule"}] = new BasicInspector(
+	result[{"Triangle Subdivision Rule"}] = new GafferSceneUI::Private::BasicInspector(
 		scene->objectPlug(), editScope,
 		[] ( const SceneAlgo::History *history ) {
 			ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() );
@@ -655,7 +527,7 @@ Inspections globalAttributesInspectionProvider( ScenePlug *scene, const Gaffer::
 		}
 		result.insert( {
 			{ category, optionName },
-			new BasicInspector(
+			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
 				[name] ( const SceneAlgo::History *history ) {
 					ConstCompoundObjectPtr globals = history->scene->globalsPlug()->getValue();
@@ -690,7 +562,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 		path.push_back( "File Name" );
 		result.insert( {
 			path,
-			new BasicInspector(
+			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
 				[ name ] ( const SceneAlgo::History *history ) {
 					ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
@@ -702,7 +574,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 		path.back() = "Type";
 		result.insert( {
 			path,
-			new BasicInspector(
+			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
 				[ name ] ( const SceneAlgo::History *history ) {
 					ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
@@ -714,7 +586,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 		path.back() = "Data";
 		result.insert( {
 			path,
-			new BasicInspector(
+			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
 				[ name ] ( const SceneAlgo::History *history ) {
 					ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
@@ -729,7 +601,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 			path.back() = parameterName;
 			result.insert( {
 				path,
-				new BasicInspector(
+				new GafferSceneUI::Private::BasicInspector(
 					scene->globalsPlug(), editScope,
 					[ name, parameterName ] ( const SceneAlgo::History *history ) {
 						ConstOutputPtr output = history->scene->globalsPlug()->getValue()->member<Output>( name );
