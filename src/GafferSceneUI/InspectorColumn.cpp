@@ -40,8 +40,6 @@
 
 #include "Gaffer/ScriptNode.h"
 
-#include "IECoreScene/ShaderNetwork.h"
-
 #include "IECore/CamelCase.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -61,9 +59,6 @@ const boost::container::flat_map<int, ConstColor4fDataPtr> g_sourceTypeColors = 
 { (int)Inspector::Result::SourceType::Fallback, nullptr },
 };
 const Color4fDataPtr g_fallbackValueForegroundColor = new Color4fData( Imath::Color4f( 163, 163, 163, 255 ) / 255.0f );
-const ConstStringDataPtr g_missingOutputShader = new StringData( "Missing output shader" );
-const IECore::InternedString g_nodeColor( "gaffer:nodeColor" );
-const IECore::InternedString g_nodeName( "gaffer:nodeName" );
 const IECore::InternedString g_inspectorPropertyName( "inspector:inspector" );
 
 }  // namespace
@@ -132,37 +127,14 @@ PathColumn::CellData InspectorColumn::cellData( const Gaffer::Path &path, const 
 		return result;
 	}
 
-	if( const auto shaderNetwork = runTimeCast<const IECoreScene::ShaderNetwork>( inspectorResult->value() ) )
+	result.value = runTimeCast<const IECore::Data>( inspectorResult->value() );
+	/// \todo Should PathModel create a decoration automatically when we
+	/// return a colour for `Role::Value`?
+	result.icon = runTimeCast<const Color3fData>( inspectorResult->value() );
+	if( !result.icon )
 	{
-		/// \todo We don't really want InspectorColumn to know about scene types.
-		/// If this comes up again, consider adding a registry of converters instead
-		/// of hardcoding here.
-		const IECoreScene::Shader *shader = shaderNetwork->outputShader();
-		if( shader )
-		{
-			if( auto nodeColor = shader->blindData()->member<Color3fData>( g_nodeColor ) )
-			{
-				result.icon = nodeColor;
-			}
-			result.value = new StringData( shader->getName() );
-		}
-		else
-		{
-			result.value = g_missingOutputShader;
-		}
+		result.icon = runTimeCast<const Color4fData>( inspectorResult->value() );
 	}
-	else
-	{
-		result.value = runTimeCast<const IECore::Data>( inspectorResult->value() );
-		/// \todo Should PathModel create a decoration automatically when we
-		/// return a colour for `Role::Value`?
-		result.icon = runTimeCast<const Color3fData>( inspectorResult->value() );
-		if( !result.icon )
-		{
-			result.icon = runTimeCast<const Color4fData>( inspectorResult->value() );
-		}
-	}
-
 	result.background = g_sourceTypeColors.at( (int)inspectorResult->sourceType() );
 	std::string toolTip;
 	if( inspectorResult->sourceType() == Inspector::Result::SourceType::Fallback )

@@ -114,8 +114,7 @@ class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signal
 			/// value. Supported types :
 			///
 			/// - StringData (providing icon name)
-			/// - Color3fData, Color4fData (drawn as colour swatch with DisplayTransform applied)
-			/// - V3fData (drawn as colour swatch without DisplayTransform applied)
+			/// - Color3fData, Color4fData (drawn as swatch)
 			/// - CompoundData (containing `state:normal` and/or `state:highlighted`
 			//    keys mapping to StringData providing an icon name for each state)
 			IECore::ConstDataPtr icon;
