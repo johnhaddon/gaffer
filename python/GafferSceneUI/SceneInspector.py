@@ -74,7 +74,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 	def __init__( self, scriptNode, **kw ) :
 
-		mainColumn = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Vertical, borderWidth = 4 )
+		mainColumn = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Vertical, borderWidth = 4, spacing = 4 )
 
 		GafferSceneUI.SceneEditor.__init__( self, mainColumn, scriptNode, **kw )
 
@@ -91,7 +91,11 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 		with mainColumn :
 
-			GafferUI.EditScopeUI.EditScopePlugValueWidget( self.settings()["editScope"] )
+			GafferUI.PlugLayout(
+				self.settings(),
+				orientation = GafferUI.ListContainer.Orientation.Horizontal,
+				rootSection = "Settings",
+			)
 
 			with GafferUI.TabbedContainer() :
 
@@ -102,6 +106,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 						columns = self.__standardColumns,
 						selectionMode = GafferUI.PathListingWidget.SelectionMode.Cells,
 						displayMode = GafferUI.PathListingWidget.DisplayMode.Tree,
+						sortable = False,
 					)
 
 				with GafferUI.ListContainer( spacing = 4, borderWidth = 4, parenting = { "label" : "Globals" } ) :
@@ -111,6 +116,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 						columns = self.__standardColumns,
 						selectionMode = GafferUI.PathListingWidget.SelectionMode.Cells,
 						displayMode = GafferUI.PathListingWidget.DisplayMode.Tree,
+						sortable = False,
 					)
 
 		GafferSceneUI.ScriptNodeAlgo.selectedPathsChangedSignal( scriptNode ).connect(
@@ -206,6 +212,42 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 			self.__updateLazily()
 
 GafferUI.Editor.registerType( "SceneInspector", SceneInspector )
+
+##########################################################################
+# Settings metadata
+##########################################################################
+
+Gaffer.Metadata.registerNode(
+
+	SceneInspector.Settings,
+
+	## \todo Doing spacers with custom widgets is tedious, and we're doing it
+	# in all the View UIs. Maybe we could just attach metadata to the plugs we
+	# want to add space around, in the same way we use `divider` to add a divider?
+	# "layout:customWidget:spacer:widgetType", "GafferSceneUI.RenderPassEditor._Spacer",
+	# "layout:customWidget:spacer:section", "Settings",
+	# "layout:customWidget:spacer:index", 3,
+
+	plugs = {
+
+		"*" : [
+
+			"label", "",
+
+		],
+
+		"in" : [ "plugValueWidget:type", "" ],
+
+		"editScope" : [
+
+			"plugValueWidget:type", "GafferUI.EditScopeUI.EditScopePlugValueWidget",
+			"layout:width", 130,
+
+		],
+
+	}
+
+)
 
 ##########################################################################
 # Node section
