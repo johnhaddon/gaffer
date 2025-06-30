@@ -602,10 +602,7 @@ class V2iGadget : public GafferUI::Gadget
 				{
 					glEnable( GL_LINE_SMOOTH );
 					Color4f black( 0.0f, 0.0f, 0.0f, 1.0f );
-					renderLine2D( style, point - V2f( threshold.x, 0 ), point - V2f( 2.5 * screenScale.x, 0 ), screenScale.y * 2.0f, black );
-					renderLine2D( style, point + V2f( threshold.x, 0 ), point + V2f( 2.5 * screenScale.x, 0 ), screenScale.y * 2.0f, black );
-					renderLine2D( style, point - V2f( 0, threshold.y ), point - V2f( 0, 2.5 * screenScale.y ), screenScale.x * 2.0f, black );
-					renderLine2D( style, point + V2f( 0, threshold.y ), point + V2f( 0, 2.5 * screenScale.y ), screenScale.x * 2.0f, black );
+					renderCircle2D( style, point, 3.5f * screenScale, screenScale.x * 2.0f, black );
 					renderCircle2D( style, point, 2.5f * screenScale, screenScale.x * 2.0f, Color4f( 0.8, 0.8, 0.8, 1.0 ) );
 
 					if( m_hover )
