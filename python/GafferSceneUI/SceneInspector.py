@@ -215,6 +215,8 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 GafferUI.Editor.registerType( "SceneInspector", SceneInspector )
 
+SceneInspector.registerInspectors = _GafferSceneUI._SceneInspector.registerInspectors
+
 ##########################################################################
 # Settings metadata
 ##########################################################################

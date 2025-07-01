@@ -614,7 +614,8 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 	return result;
 }
 
-multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
+using InspectionProviders = multimap<vector<InternedString>, InspectionProvider>;
+InspectionProviders *g_inspectionProviders = new InspectionProviders( {
 	{ { "Selection", "Bound" }, boundInspectionProvider },
 	{ { "Selection", "Transform" }, transformInspectionProvider },
 	{ { "Selection", "Attributes" }, attributeInspectionProvider },
@@ -625,7 +626,33 @@ multimap<vector<InternedString>, InspectionProvider> g_inspectionProviders = {
 	{ { "Globals", "Attributes" }, globalAttributesInspectionProvider },
 	{ { "Globals", "Options" }, optionInspectionProvider },
 	{ { "Globals", "Outputs" }, outputsInspectionProvider },
-};
+} );
+
+void registerInspectors( const vector<InternedString> &path, object pythonInspectionProvider )
+{
+	InspectionProvider inspectionProvider = [pythonInspectionProvider] ( ScenePlug *scene, const Gaffer::PlugPtr &editScope ) {
+		Inspections result;
+		IECorePython::ScopedGILLock gilLock;
+		try
+		{
+			object pythonInspections = pythonInspectionProvider( ScenePlugPtr( scene ), editScope );
+			dict inspectionsDict = extract<dict>( pythonInspections );
+			boost::python::list items = inspectionsDict.items();
+			for( size_t i = 0, e = len( items ); i < e; ++i )
+			{
+				vector<InternedString> path = extract<vector<InternedString>>( items[i][0] );
+				Private::InspectorPtr inspector = extract<Private::InspectorPtr>( items[i][1] );
+				result[path] = inspector;
+			}
+		}
+		catch( const error_already_set & )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
+		}
+		return result;
+	};
+	g_inspectionProviders->insert( { path, inspectionProvider } );
+}
 
 // void registerInspectionProvider(
 // 	std::vector<InternedString> rootPath,
@@ -819,7 +846,7 @@ class InspectorPath : public Gaffer::Path
 					scope.setCanceller( canceller );
 				}
 
-				for( const auto &[root, thing] : g_inspectionProviders )
+				for( const auto &[root, thing] : *g_inspectionProviders )
 				{
 					if( names().size() && root[0] != names()[0] )
 					{
@@ -827,6 +854,14 @@ class InspectorPath : public Gaffer::Path
 						// but this is the minimum needed to avoid evaluating per-location stuff with the context
 						// for `/Globals`.
 						continue;
+					}
+
+					if( names().size() && names()[0] == "Selection" )
+					{
+						if( !m_scene->existsPlug()->getValue() )
+						{
+							continue;
+						}
 					}
 
 					auto x = thing( m_scene.get(), m_editScope );
@@ -981,5 +1016,7 @@ void GafferSceneUIModule::bindSceneInspector()
 			.value( "B", InspectorDiffColumn::DiffContext::B )
 		;
 	}
+
+	def( "registerInspectors", &registerInspectors );
 
 }
