@@ -91,11 +91,13 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 		with mainColumn :
 
-			GafferUI.PlugLayout(
-				self.settings(),
-				orientation = GafferUI.ListContainer.Orientation.Horizontal,
-				rootSection = "Settings",
-			)
+			with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
+
+				GafferUI.PlugLayout(
+					self.settings(),
+					orientation = GafferUI.ListContainer.Orientation.Horizontal,
+					rootSection = "Settings",
+				)
 
 			with GafferUI.TabbedContainer() :
 
@@ -236,7 +238,7 @@ Gaffer.Metadata.registerNode(
 
 		],
 
-		"in" : [ "plugValueWidget:type", "" ],
+		"in" : [ "plugValueWidget:type", "GafferSceneUI.SceneInspector._InputWidget" ],
 
 		"editScope" : [
 
@@ -248,6 +250,30 @@ Gaffer.Metadata.registerNode(
 	}
 
 )
+
+class _InputWidget( GafferUI.PlugValueWidget ) :
+
+	def __init__( self, plug, **kw ) :
+
+		self.__column = GafferUI.ListContainer()
+		GafferUI.PlugValueWidget.__init__( self, self.__column, plug, **kw )
+
+		with self.__column :
+			for i in range( 0, 2 ) :
+				with GafferUI.Frame(
+					borderWidth = 4,
+					borderStyle = GafferUI.Frame.BorderStyle.None_
+				) :
+					GafferUI.NameLabel( None )
+
+	def _updateFromValues( self, values, exception ) :
+
+		for i in range( 0, 2 ) :
+			input = self.getPlug()[i].getInput()
+			node = input.node() if input is not None else None
+			self.__column[i].getChild().setGraphComponent( node )
+
+SceneInspector._InputWidget = _InputWidget
 
 ##########################################################################
 # Node section
