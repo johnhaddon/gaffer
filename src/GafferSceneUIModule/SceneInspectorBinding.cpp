@@ -53,6 +53,7 @@
 #include "Gaffer/Private/IECorePreview/LRUCache.h"
 
 #include "IECoreScene/Camera.h"
+#include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/ExternalProcedural.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/Output.h"
@@ -201,6 +202,161 @@ const CompoundData *objectParameters( const Object *object )
 		return externalProcedural->parameters();
 	}
 	return nullptr;
+}
+
+const vector<pair<PrimitiveVariable::Interpolation, const char *>> g_primitiveVariableInterpolations = {
+	{ PrimitiveVariable::Constant, "Constant" },
+	{ PrimitiveVariable::Uniform, "Uniform" },
+	{ PrimitiveVariable::Vertex, "Vertex" },
+	{ PrimitiveVariable::Varying, "Varying" },
+	{ PrimitiveVariable::FaceVarying, "FaceVarying" }
+};
+
+Inspections primitiveTopologyInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
+{
+	Inspections result;
+
+	ConstObjectPtr object = scene->objectPlug()->getValue();
+	if( runTimeCast<const Primitive>( object.get() ) )
+	{
+		for( const auto &[interpolation, interpolationName] : g_primitiveVariableInterpolations )
+		{
+			result[{ interpolationName }] = new GafferSceneUI::Private::BasicInspector(
+				scene->objectPlug(), editScope,
+				[interpolation] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+					ConstObjectPtr object = history->scene->objectPlug()->getValue();
+					if( auto primitive = runTimeCast<const Primitive>( object.get() ) )
+					{
+						return new IntData( primitive->variableSize( interpolation ) );
+					}
+					return nullptr;
+				}
+			);
+		}
+	}
+	return result;
+}
+
+
+Inspections meshTopologyInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
+{
+	Inspections result;
+
+	ConstObjectPtr object = scene->objectPlug()->getValue();
+	if( runTimeCast<const MeshPrimitive>( object.get() ) )
+	{
+		result[{ "Vertices" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return new IntData( mesh->variableSize( PrimitiveVariable::Vertex ) );
+				}
+				return nullptr;
+			}
+		);
+		result[{ "Faces" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return new IntData( mesh->numFaces() );
+				}
+				return nullptr;
+			}
+		);
+		result[{ "Vertices Per Face" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return mesh->verticesPerFace();
+				}
+				return nullptr;
+			}
+		);
+		result[{ "Vertex Ids" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto mesh = runTimeCast<const MeshPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return mesh->vertexIds();
+				}
+				return nullptr;
+			}
+		);
+	}
+	return result;
+}
+
+Inspections curvesTopologyInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
+{
+	Inspections result;
+
+	ConstObjectPtr object = scene->objectPlug()->getValue();
+	if( runTimeCast<const CurvesPrimitive>( object.get() ) )
+	{
+		result[{ "Vertices" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto curves = runTimeCast<const CurvesPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return new IntData( curves->variableSize( PrimitiveVariable::Vertex ) );
+				}
+				return nullptr;
+			}
+		);
+		result[{ "Curves" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto curves = runTimeCast<const CurvesPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return new IntData( curves->numCurves() );
+				}
+				return nullptr;
+			}
+		);
+		result[{ "Vertices Per Curve" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto curves = runTimeCast<const CurvesPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return curves->verticesPerCurve();
+				}
+				return nullptr;
+			}
+		);
+		result[{ "Periodic" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto curves = runTimeCast<const CurvesPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					return new BoolData( curves->periodic() );
+				}
+				return nullptr;
+			}
+		);
+		result[{ "Basis" }] = new GafferSceneUI::Private::BasicInspector(
+			scene->objectPlug(), editScope,
+			[] ( const SceneAlgo::History *history ) -> ConstDataPtr {
+				if( auto curves = runTimeCast<const CurvesPrimitive>( history->scene->objectPlug()->getValue() ) )
+				{
+					switch( curves->basis().standardBasis() )
+					{
+						case StandardCubicBasis::Linear : return new StringData( "Linear" );
+						case StandardCubicBasis::Bezier : return new StringData( "Bezier" );
+						case StandardCubicBasis::BSpline : return new StringData( "BSpline" );
+						case StandardCubicBasis::CatmullRom : return new StringData( "CatmullRom" );
+						case StandardCubicBasis::Constant : return new StringData( "Constant" );
+						default : return nullptr;
+					}
+				}
+				return nullptr;
+			}
+		);
+	}
+
+	return result;
 }
 
 Inspections objectParametersInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
@@ -620,6 +776,9 @@ InspectionProviders *g_inspectionProviders = new InspectionProviders( {
 	{ { "Selection", "Transform" }, transformInspectionProvider },
 	{ { "Selection", "Attributes" }, attributeInspectionProvider },
 	{ { "Selection", "Object" }, objectTypeInspectionProvider },
+	{ { "Selection", "Object", "Topology" }, primitiveTopologyInspectionProvider },
+	{ { "Selection", "Object", "Mesh Topology" }, meshTopologyInspectionProvider },
+	{ { "Selection", "Object", "Curves Topology" }, curvesTopologyInspectionProvider },
 	{ { "Selection", "Object", "Parameters" }, objectParametersInspectionProvider },
 	{ { "Selection", "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider },
 	{ { "Selection", "Object", "Subdivision" }, subdivisionInspectionProvider },
