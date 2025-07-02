@@ -46,14 +46,14 @@ import functools
 ## \todo Cache results of properties such as min/max which
 # we are currently computing from the grid each time.
 
-def __grid( scene, gridName ) :
+def __grid( objectPlug, gridName ) :
 
-	o = scene["object"].getValue()
+	o = objectPlug.getValue()
 	return o.findGrid( gridName ) if isinstance( o, IECoreVDB.VDBObject ) else None
 
-def __valueType( scene, gridName ) :
+def __valueType( objectPlug, gridName ) :
 
-	grid = __grid( scene, gridName )
+	grid = __grid( objectPlug, gridName )
 	return grid.valueTypeName if grid is not None else None
 
 def __convertValue( value ) :
@@ -72,38 +72,38 @@ def __convertValue( value ) :
 
 	return value
 
-def __minValue( scene, gridName ) :
+def __minValue( objectPlug, gridName ) :
 
-	grid = __grid( scene, gridName )
+	grid = __grid( objectPlug, gridName )
 	return __convertValue( grid.evalMinMax()[0] ) if grid is not None else None
 
-def __maxValue( scene, gridName ) :
+def __maxValue( objectPlug, gridName ) :
 
-	grid = __grid( scene, gridName )
+	grid = __grid( objectPlug, gridName )
 	return __convertValue( grid.evalMinMax()[1] ) if grid is not None else None
 
-def __activeVoxels( scene, gridName ) :
+def __activeVoxels( objectPlug, gridName ) :
 
-	grid = __grid( scene, gridName )
+	grid = __grid( objectPlug, gridName )
 	return grid.activeVoxelCount() if grid is not None else None
 
-def __voxelBound( scene, gridName ) :
+def __voxelBound( objectPlug, gridName ) :
 
-	grid = __grid( scene, gridName )
+	grid = __grid( objectPlug, gridName )
 	if grid is None :
 		return None
 
 	bound = grid.evalActiveVoxelBoundingBox()
 	return imath.Box3i( __convertValue( bound[0] ), __convertValue( bound[1] ) )
 
-def __memoryUsage( scene, gridName ) :
+def __memoryUsage( objectPlug, gridName ) :
 
-	grid = __grid( scene, gridName )
+	grid = __grid( objectPlug, gridName )
 	return grid.memUsage() if grid is not None else None
 
-def __metadata( scene, gridName, metadataName ) :
+def __metadata( objectPlug, gridName, metadataName ) :
 
-	grid = __grid( scene, gridName )
+	grid = __grid( objectPlug, gridName )
 	metadata = grid.metadata.get( metadataName ) if grid is not None else None
 	return __convertValue( metadata ) if metadata is not None else None
 
