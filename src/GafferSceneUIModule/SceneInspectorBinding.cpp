@@ -146,6 +146,10 @@ Inspections boundInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &ed
 		[] ( const AtomicBox3fPlug *boundPlug ) {
 			const Imath::Box3f bound = Imath::transform(
 				boundPlug->getValue(),
+				// Calling `fullTransform()` is a bit naughty, because we're only
+				// meant to be inspecting the `bound` plug. But we get away with
+				// it because InspectorPath emits `changedSignal()` when any child
+				// of the ScenePlug is dirtied.
 				boundPlug->parent<ScenePlug>()->fullTransform( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
 			);
 			return new Box3fData( bound );
