@@ -603,7 +603,7 @@ class V2iGadget : public GafferUI::Gadget
 					glEnable( GL_LINE_SMOOTH );
 					Color4f black( 0.0f, 0.0f, 0.0f, 1.0f );
 					renderCircle2D( style, point, 3.5f * screenScale, screenScale.x * 2.0f, black );
-					renderCircle2D( style, point, 2.5f * screenScale, screenScale.x * 2.0f, Color4f( 0.8, 0.8, 0.8, 1.0 ) );
+					renderCircle2D( style, point, 2.5f * screenScale, screenScale.x * 2.0f, Color4f( 1.0, 1.0, 1.0, 1.0 ) );
 
 					if( m_hover )
 					{
@@ -895,8 +895,8 @@ ColorInspectorTool::ColorInspectorTool( View *view, const std::string &name )
 	// We want to inspect the same image we are displaying in the ImageGadget ( this includes some preprocessing
 	// by ImageView such as selecting the correct view ), so we take the plug from the ImageGadget as our input.
 
-	// TODO - is this const_cast safe? I guess technically not ... but when would we ever have the ImageGadget
-	// connected to something that it wasn't safe to pass to setInput?
+	// \todo - this const_cast is technically not safe ... but when would we ever have the ImageGadget
+	// connected to something that it wasn't safe to pass to setInput? John says he isn't concerned.
 	ImagePlug *image = const_cast< ImagePlug* >( imageGadget->getImage() );
 	m_deleteContextVariables->inPlug()->setInput( image );
 	m_sampler->imagePlug()->setInput( m_deleteContextVariables->outPlug() );
