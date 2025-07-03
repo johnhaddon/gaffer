@@ -177,7 +177,8 @@ class _HistoryWindow( GafferUI.Window ) :
 	def __updatePath( self ) :
 
 		self.__inspectionPath.setContext( self.__contextTracker.context( self.__inspectionPath.getScene() ) )
-		with self.__inspectionPath.inspectionContext() :
+		with self.__inspectionPath.property( "inspector:context" ) : # NOT RIGHT FOR DIFF COLUMNS
+			# TODO : ADD INSPECTIONCONTEXT METHOD TO COLUMN? OR HISTORYPATH METHOD?
 			self.__path = self.__inspector.historyPath()
 
 		self.__pathListingWidget.setPath( self.__path )
