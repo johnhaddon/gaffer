@@ -128,7 +128,134 @@ def _hsvString( color ) :
 		hsv = color.rgb2hsv()
 		return "%s %s %s" % ( _inspectFormat( hsv.r ), _inspectFormat( hsv.g ), _inspectFormat( hsv.b ) )
 
+def _v2iFloor( v ):
+	return imath.V2i( math.floor( v.x ), math.floor( v.y ) )
+
+def _eventPosition( viewportGadget, event, floor = True ):
+	imageGadget = viewportGadget.getPrimaryChild()
+	try :
+		pixel = imageGadget.pixelAt( viewportGadget.rasterToGadgetSpace( imath.V2f( event.line.p0.x, event.line.p0.y ), imageGadget ) )
+	except :
+		# `pixelAt()` can throw if there is an error
+		# computing the image being viewed. We leave
+		# the error reporting to other UI components.
+		pixel = imath.V2f( 0 )
+
+	if floor:
+		return _v2iFloor( pixel )
+	else:
+		return imath.V2f( pixel.x, pixel.y )
+
+def _addInspector( inspectorsPlug ):
+	suffix = 1
+	while "inspector" + str( suffix ) in inspectorsPlug:
+		suffix += 1
+
+	inspectorsPlug.addChild( GafferImageUI.ColorInspectorTool.ColorInspectorPlug( "inspector" + str( suffix ) ) )
+
+# Duplicating weird hackery from pixelAspectFromImageGadget in src/GafferImageUI/ImageView.cpp
+def _pixelAspectFromImageGadget( imageGadget ) :
+	# We want to grab the cached version of imageGadget->format(), but it's not exposed publicly, so we
+	# get it from pixelAt.
+	# In the future, it would be better if format() was public and we didn't have to worry about it
+	# throwing.
+	try:
+		return 1.0 / imageGadget.pixelAt( IECore.LineSegment3f( imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 1 ) ) ).x
+	except:
+		# Not worried about rendering correctly for images which can't be evaluated properly
+		return 1.0
+
+def _transformV2i( v, m, floor = True ) :
+	vt = m.multVecMatrix( imath.V3f( v.x + 0.5, v.y + 0.5, 0 ) )
+
+	if floor:
+		return imath.V2i( math.floor( vt.x ), math.floor( vt.y ) )
+	else:
+		return imath.V2f( vt.x, vt.y )
+
+# Returns the source coordinates for both the main image and the compare image, based
+# on an input in the coordinate system of the main image.
+# The input coordinates can be a Box2i, a V2i, or a V2f ( The cursor may have a fractional
+# position in the main image coordinates, allowing the selection of specific comparison pixels
+# if the comparison image is scaled differently ).
+# The return values is a list of two V2i's or Box2i's ( depending on whether we
+# are sampling a single pixel or a region ).
+def _toSourceCoordinates( viewportGadget, coordinates ):
+
+	primaryGadget = viewportGadget.getPrimaryChild()
+	compareGadget = [
+		i for i in viewportGadget.children()
+		if isinstance( i, GafferImageUI.ImageGadget )
+		and i != primaryGadget
+	][0]
+
+	primaryAspect = _pixelAspectFromImageGadget( primaryGadget )
+	compareAspect = _pixelAspectFromImageGadget( compareGadget )
+	toCompareSpace = imath.M44f()
+	toCompareSpace.scale( imath.V3f( primaryAspect, 1.0, 1.0 ) )
+	toCompareSpace *= compareGadget.getTransform().inverse()
+	toCompareSpace.scale( imath.V3f( 1.0 / compareAspect, 1.0, 1.0 ) )
+	toCompareSpace[3][0] /= compareAspect
+
+	if type( coordinates ) == imath.V2f:
+		sources = [ _v2iFloor( coordinates ) ] * 2
+		if toCompareSpace != imath.M44f():
+			sources[1] = _v2iFloor( toCompareSpace.multVecMatrix( imath.V3f( coordinates.x, coordinates.y, 0.0 ) ) )
+	elif type( coordinates ) == imath.V2i:
+		sources = [ coordinates ] * 2
+		if toCompareSpace != imath.M44f():
+			sources[1] = _transformV2i( sources[0], toCompareSpace )
+	elif type( coordinates ) == imath.Box2i:
+		sources = [ coordinates ] * 2
+		if toCompareSpace != imath.M44f():
+			bMin = _transformV2i( sources[0].min(), toCompareSpace, floor = False )
+			bMax = _transformV2i( sources[0].max(), toCompareSpace, floor = False )
+			ibMin = imath.V2i( round( bMin.x ), round( bMin.y ) )
+			ibMax = imath.V2i( round( bMax.x ), round( bMax.y ) )
+			if ibMin.x == ibMax.x:
+				ibMin.x = math.floor( bMin.x )
+				ibMax.x = math.ceil( bMax.x )
+			if ibMin.y == ibMax.y:
+				ibMin.y = math.floor( bMin.y )
+				ibMax.y = math.ceil( bMax.y )
+			sources[1] = imath.Box2i( ibMin, ibMax )
+	else:
+		raise Exception( "Unsupported data type {}".format( type( coordinates ) ) )
+
+	return sources
+
+def _evaluateColors( colorInspectorTool, sources ):
+	colors = [ imath.Color4f( 0, 0, 0, 1 ) ] * 2
+	for i in range( 2 ):
+		if i == 0:
+			c = Gaffer.Context( Gaffer.Context.current() )
+		else:
+			if colorInspectorTool.view()["compare"]["mode"].getValue() == "":
+				# Don't bother computing a color sample for the comparison image if we aren't
+				# showing the comparison
+				continue
+
+			# We don't want to have to make a separate evaluator plug to evaluate the comparison
+			# image, but we do want to use the context created by the __comparisonSelect node.
+			# Just grab the context so we can do our own evaluation with it
+			c = Gaffer.Context( colorInspectorTool.view()["__comparisonSelect"].inPlugContext() )
+
+		with c :
+			if type( sources[i] ) == imath.V2i:
+				c["colorInspector:source"] = imath.V2f( sources[i] ) + imath.V2f( 0.5 ) # Center of pixel
+				colors[i] = colorInspectorTool["evaluator"]["pixelColor"].getValue()
+			elif type( sources[i] ) == imath.Box2i:
+				areaEval = colorInspectorTool["evaluator"]["areaColor"]
+				c["colorInspector:source"] = GafferImage.BufferAlgo.intersection( sources[i], areaEval.getInput().node()["in"].format().getDisplayWindow() )
+				colors[i] = areaEval.getValue()
+			else:
+				raise Exception( "ColorInspector source must be V2i or Box2i, not " + str( type( sources[i] ) ) )
+	return colors
+
+
 class _ColorInspectorsPlugValueWidget( GafferUI.PlugValueWidget ) :
+
+	__nullObjectForViewportEvents = IECore.NullObject()
 
 	def __init__( self, plug, **kw ) :
 
@@ -142,6 +269,118 @@ class _ColorInspectorsPlugValueWidget( GafferUI.PlugValueWidget ) :
 		with frame :
 
 			GafferUI.LayoutPlugValueWidget( plug )
+
+		self.__createInspectorStartPosition = None
+
+		self.__mouseConnections = []
+		viewportGadget = plug.node().view().viewportGadget()
+
+		self.__mouseConnections.append( viewportGadget.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ) ) )
+		self.__mouseConnections.append( viewportGadget.buttonReleaseSignal().connect( Gaffer.WeakMethod( self.__buttonRelease ) ) )
+		self.__mouseConnections.append( viewportGadget.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ) ) )
+		self.__mouseConnections.append( viewportGadget.dragEnterSignal().connect( Gaffer.WeakMethod( self.__dragEnter ) ) )
+		self.__mouseConnections.append( viewportGadget.dragMoveSignal().connect( Gaffer.WeakMethod( self.__dragMove ) ) )
+		self.__mouseConnections.append( viewportGadget.dragEndSignal().connect( Gaffer.WeakMethod( self.__dragEnd ) ) )
+
+		plug.node().plugSetSignal().connect( Gaffer.WeakMethod( self.__plugSet ) )
+
+	def __plugSet( self, plug ) :
+		if plug == self.getPlug().node()["active"]:
+			active = plug.getValue()
+			for s in self.__mouseConnections:
+				s.setBlocked( not active )
+
+	def __buttonPress( self, viewportGadget, event ) :
+
+		if event.buttons == event.Buttons.Left and not event.modifiers :
+			self.__createInspectorStartPosition = None
+			return True # accept press so we get dragBegin() for dragging color
+		elif event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
+			self.__createInspectorStartPosition = _eventPosition( viewportGadget, event )
+			_addInspector( self.getPlug() )
+			ci = self.getPlug().children()[-1]
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", True, persistent = False )
+			ci["pixel"].setValue( self.__createInspectorStartPosition )
+
+			return True # creating inspector
+		else:
+			return False
+
+	def __buttonRelease( self, viewportGadget, event ) :
+		if self.__createInspectorStartPosition:
+			ci = self.getPlug().children()[-1]
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["area"], "__hovered", False, persistent = False )
+
+	def __dragBegin( self, viewportGadget, event ) :
+		if self.__createInspectorStartPosition:
+			# This drag is starting to create a rectangle inspector - just return a special null object
+			# to mark this drag.
+			return self.__nullObjectForViewportEvents
+
+		# Otherwise, we're going to drag a color value, so we need to compute the color under the current cursor
+
+		cursorPosition = _eventPosition( viewportGadget, event, floor = False )
+		sources = _toSourceCoordinates( self.getPlug().node().view().viewportGadget(), cursorPosition )
+
+		inputImagePlug = self.getPlug().node().view()["in"].getInput()
+		with inputImagePlug.node().scriptNode().context() :
+			colors = _evaluateColors( self.getPlug().node(), sources )
+
+		ig = viewportGadget.getPrimaryChild()
+		wipeAngle = ig.getWipeAngle() * math.pi / 180.0
+		compareMode = self.getPlug().node().view()["compare"]["mode"].getValue()
+		if compareMode == "":
+			compositedColor = colors[0]
+		elif ig.getWipeEnabled() and ( cursorPosition - ig.getWipePosition() ).dot( imath.V2f( math.cos( wipeAngle ), math.sin( wipeAngle ) ) ) >= 0:
+			compositedColor = colors[1]
+		else:
+			if compareMode == "replace":
+				compositedColor = colors[0]
+			elif compareMode == "over":
+				compositedColor = colors[0] + colors[1] * ( 1.0 - colors[0].a )
+			elif compareMode == "under":
+				compositedColor = colors[1] + colors[0] * ( 1.0 - colors[1].a )
+			elif compareMode == "difference":
+				diff = colors[1] - colors[0]
+				compositedColor = imath.Color4f( abs( diff.r ), abs( diff.g ), abs( diff.b ), abs( diff.a ) )
+
+		GafferUI.Pointer.setCurrent( "rgba" )
+		return compositedColor
+
+	def __dragEnter( self, viewportGadget, event ) :
+
+		if not event.data.isSame( self.__nullObjectForViewportEvents ):
+			return False
+
+		return True
+
+	def __dragMove( self, viewportGadget, event ) :
+		if self.__createInspectorStartPosition:
+			ci = self.getPlug().children()[-1]
+			c = imath.Box2i()
+			c.extendBy( self.__createInspectorStartPosition )
+			c.extendBy( _eventPosition( viewportGadget, event ) )
+
+			# _eventPosition is rounded down, the rectangle should also include the upper end of the
+			# pixel containing the cursor
+			c.setMax( c.max() + imath.V2i( 1 ) )
+
+			ci["mode"].setValue( GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Area )
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["area"], "__hovered", True, persistent = False )
+			ci["area"].setValue( c )
+
+		return True
+
+	def __dragEnd( self, viewportGadget, event ) :
+		if self.__createInspectorStartPosition:
+			ci = self.getPlug().children()[-1]
+			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
+			Gaffer.Metadata.registerValue( ci["area"], "__hovered", False, persistent = False )
+
+		GafferUI.Pointer.setCurrent( "" )
+		return True
 
 class _ColorValueWidget( GafferUI.Widget ) :
 
@@ -232,8 +471,6 @@ class _ColorValueWidget( GafferUI.Widget ) :
 
 class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
-	__nullObjectForViewportEvents = IECore.NullObject()
-
 	def __init__( self, plug, **kw ) :
 
 		l = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 )
@@ -278,22 +515,9 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 
 		self.__pixel = imath.V2f( 0 )
-		self.__createInspectorStartPosition = None
 
-		if plug.getName() == "defaultInspector":
-			# \todo - it's kind of weird having these global functions implemented on whichever child plug
-			# has a default name. I think it would probably make a lot more sense to put these callbacks on
-			# _ColorInspectorsPlugValueWidget, but I don't want to do that refactor while I'm in the middle
-			# of changing other stuff.
-			viewportGadget = plug.node().view().viewportGadget()
-
-			viewportGadget.mouseMoveSignal().connect( Gaffer.WeakMethod( self.__mouseMove ) )
-			viewportGadget.buttonPressSignal().connect( Gaffer.WeakMethod( self.__buttonPress ) )
-			viewportGadget.buttonReleaseSignal().connect( Gaffer.WeakMethod( self.__buttonRelease ) )
-			viewportGadget.dragBeginSignal().connect( Gaffer.WeakMethod( self.__dragBegin ) )
-			viewportGadget.dragEnterSignal().connect( Gaffer.WeakMethod( self.__dragEnter ) )
-			viewportGadget.dragMoveSignal().connect( Gaffer.WeakMethod( self.__dragMove ) )
-			viewportGadget.dragEndSignal().connect( Gaffer.WeakMethod( self.__dragEnd ) )
+		viewportGadget = plug.node().view().viewportGadget()
+		viewportGadget.mouseMoveSignal().connect( Gaffer.WeakMethod( self.__mouseMove ) )
 
 		plug.node()["evaluator"]["pixelColor"].getInput().node().plugDirtiedSignal().connect( Gaffer.WeakMethod( self.__updateFromImageNode ) )
 
@@ -310,16 +534,8 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__plugDirtied( plug["mode"] )
 		self.__plugDirtied( self.getPlug().node().view()["compare"]["mode"] )
 
-	def __addInspector( self ):
-		parent = self.getPlug().parent()
-		suffix = 1
-		while "inspector" + str( suffix ) in parent:
-			suffix += 1
-
-		parent.addChild( GafferImageUI.ColorInspectorTool.ColorInspectorPlug( "inspector" + str( suffix ) ) )
-
 	def __addClick( self, mode ):
-		self.__addInspector()
+		_addInspector( self.getPlug().parent() )
 		ci = self.getPlug().parent().children()[-1]
 		ci["mode"].setValue( mode )
 		if mode == GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Area:
@@ -368,74 +584,22 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		self.__updateLazily()
 
-	@staticmethod
-	# Duplicating weird hackery from pixelAspectFromImageGadget in src/GafferImageUI/ImageView.cpp
-	def __pixelAspectFromImageGadget( imageGadget ) :
-		# We want to grab the cached version of imageGadget->format(), but it's not exposed publicly, so we
-		# get it from pixelAt.
-		# In the future, it would be better if format() was public and we didn't have to worry about it
-		# throwing.
-		try:
-			return 1.0 / imageGadget.pixelAt( IECore.LineSegment3f( imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 1 ) ) ).x
-		except:
-			# Not worried about rendering correctly for images which can't be evaluated properly
-			return 1.0
-
-	@staticmethod
-	def __transformV2i( v, m, floor = True ) :
-		vt = m.multVecMatrix( imath.V3f( v.x + 0.5, v.y + 0.5, 0 ) )
-
-		if floor:
-			return imath.V2i( math.floor( vt.x ), math.floor( vt.y ) )
-		else:
-			return imath.V2f( vt.x, vt.y )
-
 	# Returns the source coordinates to sample for this inspector, for both the main image
 	# and the compare image, as a list of two V2i's or Box2i's ( depending on whether we
 	# are sampling a single pixel or a region )
 	def __getSampleSources( self, mode ):
 
-		primaryGadget = self.getPlug().node().view().viewportGadget().getPrimaryChild()
-		compareGadget = [
-			i for i in self.getPlug().node().view().viewportGadget().children()
-			if isinstance( i, GafferImageUI.ImageGadget )
-			and i != primaryGadget
-		][0]
-
-		primaryAspect = self.__pixelAspectFromImageGadget( primaryGadget )
-		compareAspect = self.__pixelAspectFromImageGadget( compareGadget )
-		toCompareSpace = imath.M44f()
-		toCompareSpace.scale( imath.V3f( primaryAspect, 1.0, 1.0 ) )
-		toCompareSpace *= compareGadget.getTransform().inverse()
-		toCompareSpace.scale( imath.V3f( 1.0 / compareAspect, 1.0, 1.0 ) )
-		toCompareSpace[3][0] /= compareAspect
-
 		if mode == GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Cursor:
-			sources = [ self.__V2iFloor( self.__pixel ) ] * 2
-			if toCompareSpace != imath.M44f():
-				sources[1] = self.__V2iFloor( toCompareSpace.multVecMatrix( imath.V3f( self.__pixel.x, self.__pixel.y, 0.0 ) ) )
+			mainCoordinate = self.__pixel
 		elif mode == GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Pixel:
-			sources = [ self.getPlug()["pixel"].getValue() ] * 2
-			if toCompareSpace != imath.M44f():
-				sources[1] = self.__transformV2i( sources[0], toCompareSpace )
+			mainCoordinate = self.getPlug()["pixel"].getValue()
 		elif mode == GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Area:
-			sources = [ self.getPlug()["area"].getValue() ] * 2
-			if toCompareSpace != imath.M44f():
-				bMin = self.__transformV2i( sources[0].min(), toCompareSpace, floor = False )
-				bMax = self.__transformV2i( sources[0].max(), toCompareSpace, floor = False )
-				ibMin = imath.V2i( round( bMin.x ), round( bMin.y ) )
-				ibMax = imath.V2i( round( bMax.x ), round( bMax.y ) )
-				if ibMin.x == ibMax.x:
-					ibMin.x = math.floor( bMin.x )
-					ibMax.x = math.ceil( bMax.x )
-				if ibMin.y == ibMax.y:
-					ibMin.y = math.floor( bMin.y )
-					ibMax.y = math.ceil( bMax.y )
-				sources[1] = imath.Box2i( ibMin, ibMax )
+			mainCoordinate = self.getPlug()["area"].getValue()
 		else:
 			raise Exception( "ColorInspector mode not recognized <" + mode + ">" )
 
-		return sources
+		return _toSourceCoordinates( self.getPlug().node().view().viewportGadget(), mainCoordinate )
+
 
 	@GafferUI.LazyMethod()
 	def __updateLazily( self ) :
@@ -452,38 +616,10 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 		with self.getPlug().node().view().context() :
 			self.__updateInBackground( sources )
 
-	def __evaluateColors( self, sources ):
-		colors = [ imath.Color4f( 0, 0, 0, 1 ) ] * 2
-		for i in range( 2 ):
-			if i == 0:
-				c = Gaffer.Context( Gaffer.Context.current() )
-			else:
-				if self.getPlug().node().view()["compare"]["mode"].getValue() == "":
-					# Don't bother computing a color sample for the comparison image if we aren't
-					# showing the comparison
-					continue
-
-				# We don't want to have to make a separate evaluator plug to evaluate the comparison
-				# image, but we do want to use the context created by the __comparisonSelect node.
-				# Just grab the context so we can do our own evaluation with it
-				c = Gaffer.Context( self.getPlug().node().view()["__comparisonSelect"].inPlugContext() )
-
-			with c :
-				if type( sources[i] ) == imath.V2i:
-					c["colorInspector:source"] = imath.V2f( sources[i] ) + imath.V2f( 0.5 ) # Center of pixel
-					colors[i] = self.getPlug().node()["evaluator"]["pixelColor"].getValue()
-				elif type( sources[i] ) == imath.Box2i:
-					areaEval = self.getPlug().node()["evaluator"]["areaColor"]
-					c["colorInspector:source"] = GafferImage.BufferAlgo.intersection( sources[i], areaEval.getInput().node()["in"].format().getDisplayWindow() )
-					colors[i] = areaEval.getValue()
-				else:
-					raise Exception( "ColorInspector source must be V2i or Box2i, not " + str( type( sources[i] ) ) )
-		return colors
-
 	@GafferUI.BackgroundMethod()
 	def __updateInBackground( self, sources ) :
 
-		colors = self.__evaluateColors( sources )
+		colors = _evaluateColors( self.getPlug().node(), sources )
 
 		# TODO : This is a pretty ugly way to find the input node connected to the colorInspector?
 		samplerChannels = self.getPlug().node()["evaluator"]["pixelColor"].getInput().node()["channels"].getValue()
@@ -565,31 +701,12 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 			else:
 				self.__positionLabels[i].setText( prefix + "<b>XY : %i %i</b>" % ( sources[i].x, sources[i].y ) + postfix )
 
-	@staticmethod
-	def __V2iFloor( v ):
-		return imath.V2i( math.floor( v.x ), math.floor( v.y ) )
-
-	def __eventPosition( self, viewportGadget, event, floor = True ):
-		imageGadget = viewportGadget.getPrimaryChild()
-		try :
-			pixel = imageGadget.pixelAt( viewportGadget.rasterToGadgetSpace( imath.V2f( event.line.p0.x, event.line.p0.y ), imageGadget ) )
-		except :
-			# `pixelAt()` can throw if there is an error
-			# computing the image being viewed. We leave
-			# the error reporting to other UI components.
-			pixel = imath.V2f( 0 )
-
-		if floor:
-			return self.__V2iFloor( pixel )
-		else:
-			return imath.V2f( pixel.x, pixel.y )
-
 	def __mouseMove( self, viewportGadget, event ) :
 
-		if not self.getPlug().node()["active"].getValue():
+		if not self.getPlug()["mode"].getValue() == GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Cursor:
 			return False
 
-		pixel = self.__eventPosition( viewportGadget, event, floor = False )
+		pixel = _eventPosition( viewportGadget, event, floor = False )
 
 		if pixel == self.__pixel :
 			return False
@@ -598,96 +715,4 @@ class _ColorInspectorPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		self.__updateLazily()
 
-		return True
-
-	def __buttonPress( self, viewportGadget, event ) :
-		if not self.getPlug().node()["active"].getValue():
-			return False
-
-		if event.buttons == event.Buttons.Left and not event.modifiers :
-			self.__createInspectorStartPosition = None
-			return True # accept press so we get dragBegin() for dragging color
-		elif event.buttons == event.Buttons.Left and event.modifiers == GafferUI.ModifiableEvent.Modifiers.Control :
-			self.__createInspectorStartPosition = self.__eventPosition( viewportGadget, event )
-			self.__addInspector()
-			ci = self.getPlug().parent().children()[-1]
-			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", True, persistent = False )
-			ci["pixel"].setValue( self.__createInspectorStartPosition )
-
-			return True # creating inspector
-		else:
-			return False
-
-	def __buttonRelease( self, viewportGadget, event ) :
-		if self.__createInspectorStartPosition:
-			ci = self.getPlug().parent().children()[-1]
-			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
-			Gaffer.Metadata.registerValue( ci["area"], "__hovered", False, persistent = False )
-
-	def __dragBegin( self, viewportGadget, event ) :
-		if self.__createInspectorStartPosition:
-			return self.__nullObjectForViewportEvents
-
-
-		sources = self.__getSampleSources( GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Cursor )
-
-		inputImagePlug = self.getPlug().node().view()["in"].getInput()
-		with inputImagePlug.node().scriptNode().context() :
-			colors = self.__evaluateColors( sources )
-
-		ig = viewportGadget.getPrimaryChild()
-		wipeAngle = ig.getWipeAngle() * math.pi / 180.0
-		compareMode = self.getPlug().node().view()["compare"]["mode"].getValue()
-		if compareMode == "":
-			compositedColor = colors[0]
-		elif ig.getWipeEnabled() and ( self.__pixel - ig.getWipePosition() ).dot( imath.V2f( math.cos( wipeAngle ), math.sin( wipeAngle ) ) ) >= 0:
-			compositedColor = colors[1]
-		else:
-			if compareMode == "replace":
-				compositedColor = colors[0]
-			elif compareMode == "over":
-				compositedColor = colors[0] + colors[1] * ( 1.0 - colors[0].a )
-			elif compareMode == "under":
-				compositedColor = colors[1] + colors[0] * ( 1.0 - colors[1].a )
-			elif compareMode == "difference":
-				diff = colors[1] - colors[0]
-				compositedColor = imath.Color4f( abs( diff.r ), abs( diff.g ), abs( diff.b ), abs( diff.a ) )
-
-		GafferUI.Pointer.setCurrent( "rgba" )
-		return compositedColor
-
-	def __dragEnter( self, viewportGadget, event ) :
-		if not self.getPlug().node()["active"].getValue():
-			return False
-
-		if not event.data.isSame( self.__nullObjectForViewportEvents ):
-			return False
-
-		return True
-
-	def __dragMove( self, viewportGadget, event ) :
-		if self.__createInspectorStartPosition:
-			ci = self.getPlug().parent().children()[-1]
-			c = imath.Box2i()
-			c.extendBy( self.__createInspectorStartPosition )
-			c.extendBy( self.__eventPosition( viewportGadget, event ) )
-
-			# __eventPosition is rounded down, the rectangle should also include the upper end of the
-			# pixel containing the cursor
-			c.setMax( c.max() + imath.V2i( 1 ) )
-
-			ci["mode"].setValue( GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Area )
-			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
-			Gaffer.Metadata.registerValue( ci["area"], "__hovered", True, persistent = False )
-			ci["area"].setValue( c )
-
-		return True
-
-	def __dragEnd( self, viewportGadget, event ) :
-		if self.__createInspectorStartPosition:
-			ci = self.getPlug().parent().children()[-1]
-			Gaffer.Metadata.registerValue( ci["pixel"], "__hovered", False, persistent = False )
-			Gaffer.Metadata.registerValue( ci["area"], "__hovered", False, persistent = False )
-
-		GafferUI.Pointer.setCurrent( "" )
 		return True
