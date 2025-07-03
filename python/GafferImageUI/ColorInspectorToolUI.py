@@ -89,10 +89,10 @@ Gaffer.Metadata.registerNode(
 			"description", lambda plug :
 			{
 				GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Cursor : "Displays the color values of the pixel under the cursor.",
-				GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Pixel : "Displays the color values of pixel inspector %s." % plug.getName()[9:],
-				GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Area : "Displays the average color values of region inspector %s." % plug.getName()[9:],
+				GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Pixel : "Displays the color values of pixel inspector {}.".format( plug.getName()[9:] ),
+				GafferImageUI.ColorInspectorTool.ColorInspectorPlug.Mode.Area : "Displays the average color values of region inspector {}.".format( plug.getName()[9:] ),
 			}[ plug["mode"].getValue() ] + """
-			Display shows value of each channel, hue/saturation/value, and Exposure Value which is measured in stops relative to 18% grey.
+			Shows value of each channel, hue/saturation/value, and Exposure Value which is measured in stops relative to 18% grey.
 			""",
 			"label", "",
 			"plugValueWidget:type", "GafferImageUI.ColorInspectorToolUI._ColorInspectorPlugValueWidget",
