@@ -201,6 +201,8 @@ class _HistoryWindow( GafferUI.Window ) :
 
 	def __pathChanged( self, path ) :
 
+		## \todo This invokes computes on the UI thread, but the point of using
+		# a Path and PathListingWidget was to never block the UI.
 		if len( path.children() ) == 0 :
 			self.close()
 
@@ -294,24 +296,28 @@ class _HistoryWindow( GafferUI.Window ) :
 
 	def __updateFinished( self, pathListing ) :
 
-		self.__nodeNameChangedSignals = []
+		self.__nodeNameChangedSignals = {}
 
+		## \todo calling `children()` here can cause computations/inspections
+		# to occur _now_ on the UI thread. But the point of using
+		# HistoryPath/PathListingWidget is to make sure all that happens in the
+		# background. Can we do better?
 		for path in self.__path.children() :
-			node = path.property( "history:node" )
 
 			# The node and all of its parents up to the script node
 			# contribute to the path name.
 
+			node = path.property( "history:node" )
 			while node is not None and not isinstance( node, Gaffer.ScriptNode ) :
-				self.__nodeNameChangedSignals.append(
-					node.nameChangedSignal().connect(
+				if node not in self.__nodeNameChangedSignals :
+					self.__nodeNameChangedSignals[node] = node.nameChangedSignal().connect(
 						Gaffer.WeakMethod( self.__nodeNameChanged ),
 						scoped = True
 					)
-				)
 
 				node = node.parent()
 
 	def __nodeNameChanged( self, node, oldName ) :
 
-		self.__path._emitPathChanged()
+		nameColumn = self.__pathListingWidget.getColumns()[0]
+		nameColumn.changedSignal()( nameColumn )
