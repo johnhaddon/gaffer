@@ -192,7 +192,8 @@ class _HistoryWindow( GafferUI.Window ) :
 		# AND SCENEINSPECTORPATH CAN SPLIT THE CONTEXT IN TWO AND ADD THE INPUT INDEX TO EACH.
 		# COULD USE CANCELLATIONSUBJECT INSTEAD OF GETSCENE, SO THIS ISN'T SCENE-SPECIFIC?
 		self.__inspectionPath.setContext( self.__contextTracker.context( self.__inspectionPath.getScene() ) )
-		with self.__inspectionPath.inspectionContext() :
+		with self.__inspectionPath.property( "inspector:context" ) : # NOT RIGHT FOR DIFF COLUMNS
+			# TODO : ADD INSPECTIONCONTEXT METHOD TO COLUMN? OR HISTORYPATH METHOD?
 			self.__path = self.__inspector.historyPath()
 
 		self.__pathChangedConnection = self.__path.pathChangedSignal().connect( Gaffer.WeakMethod( self.__pathChanged ), scoped = True )

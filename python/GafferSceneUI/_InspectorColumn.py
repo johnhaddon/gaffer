@@ -303,8 +303,8 @@ def __showHistory( pathListing ) :
 		for pathString in selection[i].paths() :
 			path = pathListing.getPath().copy()
 			path.setFromString( pathString )
-			if path.inspectionContext() is None :
-				continue
+			#if path.inspectionContext() is None : TODO
+			#	continue
 			inspector = column.inspector( path )
 			if inspector is None :
 				continue
