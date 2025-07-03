@@ -66,7 +66,7 @@ Gaffer.Metadata.registerNode(
 	"nodeToolbar:bottom:type", "GafferUI.StandardNodeToolbar.bottom",
 
 	# So our widget doesn't center, add a stretchy spacer to the right
-	"toolbarLayout:customWidget:RightSpacer:widgetType", "GafferSceneUI.ImageSelectionToolUI._RightSpacer",
+	"toolbarLayout:customWidget:RightSpacer:widgetType", "GafferImageUI.ColorInspectorToolUI._RightSpacer",
 	"toolbarLayout:customWidget:RightSpacer:section", "Bottom",
 	"toolbarLayout:customWidget:RightSpacer:index", -1,
 
