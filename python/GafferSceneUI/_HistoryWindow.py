@@ -288,7 +288,7 @@ class _HistoryWindow( GafferUI.Window ) :
 
 	def __inspectorDirtied( self, inspector ) :
 
-		self.__path._emitPathChanged()
+		self.__updatePath()
 
 	def __contextChanged( self, contextTracker ) :
 
