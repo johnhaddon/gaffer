@@ -111,7 +111,7 @@ GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaf
 	if( canceller )
 	{
 		cancellableContext.emplace( inspectionContext.get() );
-		cancellableContext->setCanceller( canceller );
+		cancellableContext->setCanceller( canceller ); // SOMETHING NOT RIGHT HERE! WE'RE GETTING OVERRIDDEN WITH THE SCOPE BELOW!!!
 	}
 
 	Context::Scope scope( inspectionContext.get() );
