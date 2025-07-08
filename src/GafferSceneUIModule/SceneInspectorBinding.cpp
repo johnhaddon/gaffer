@@ -42,6 +42,7 @@
 #include "GafferSceneUI/Private/BasicInspector.h"
 #include "GafferSceneUI/Private/InspectorColumn.h"
 #include "GafferSceneUI/Private/OptionInspector.h"
+#include "GafferSceneUI/Private/ParameterInspector.h"
 #include "GafferSceneUI/TypeIds.h"
 
 #include "GafferBindings/PathBinding.h"
@@ -58,6 +59,8 @@
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/Output.h"
 #include "IECoreScene/Primitive.h"
+#include "IECoreScene/ShaderNetwork.h"
+#include "IECoreScene/ShaderNetworkAlgo.h"
 
 #include "Imath/ImathMatrixAlgo.h"
 
@@ -175,6 +178,49 @@ const boost::container::flat_map<string, InternedString> g_attributeCategories =
 
 const InternedString g_other( "Other" );
 
+void addShaderInspections( Inspections &inspections, const vector<InternedString> &path, ScenePlug *scene, const Gaffer::PlugPtr &editScope, InternedString attributeName, const IECoreScene::ShaderNetwork *shaderNetwork )
+{
+	vector<InternedString> shaderPath = path;
+	shaderPath.push_back( InternedString() );
+
+	IECoreScene::ShaderNetworkAlgo::depthFirstTraverse(
+
+		shaderNetwork,
+
+		[&] ( const ShaderNetwork *network, InternedString shaderHandle ) {
+
+			const Shader *shader = network->getShader( shaderHandle );
+			shaderPath.back() = shaderHandle;
+
+			inspections[shaderPath] = new GafferSceneUI::Private::BasicInspector(
+				scene->attributesPlug(), editScope,
+				[attributeName, shaderHandle] ( const CompoundObjectPlug *attributesPlug ) -> ConstShaderPtr {
+					ConstCompoundObjectPtr attributes = attributesPlug->parent<ScenePlug>()->fullAttributes(
+						Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
+					);
+					auto shaderNetwork = attributes->member<ShaderNetwork>( attributeName );
+					if( !shaderNetwork )
+					{
+						return nullptr;
+					}
+					return shaderNetwork->getShader( shaderHandle );
+				}
+			);
+
+			vector<InternedString> parameterPath = shaderPath;
+			parameterPath.push_back( InternedString() );
+			for( const auto &[parameterName, value] : shader->parameters() )
+			{
+				parameterPath.back() = parameterName;
+				inspections[parameterPath] = new GafferSceneUI::Private::ParameterInspector(
+					scene, editScope, attributeName, { shaderHandle, parameterName }
+				);
+			}
+		}
+
+	);
+}
+
 Inspections attributeInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
 	ConstCompoundObjectPtr attributes = scene->fullAttributes( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) );
@@ -191,6 +237,10 @@ Inspections attributeInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr
 			}
 		}
 		result.insert( { { category, name }, new GafferSceneUI::Private::AttributeInspector( scene, editScope, name ) } );
+		if( auto shaderNetwork = runTimeCast<const ShaderNetwork>( value.get() ) )
+		{
+			addShaderInspections( result, { category, name }, scene, editScope, name, shaderNetwork );
+		}
 	}
 	return result;
 }
