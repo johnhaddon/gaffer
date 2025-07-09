@@ -103,12 +103,12 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 				with GafferUI.ListContainer( spacing = 4, borderWidth = 4, parenting = { "label" : "Selection" } ) :
 
-					with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
-						label = GafferUI.Label( "Location", horizontalAlignment = GafferUI.HorizontalAlignment.Right )
-						label._qtWidget().setFixedWidth( GafferUI.PlugWidget.labelWidth() )
-						for i in range( 0, 2 ) :
-							with GafferUI.Frame() :
-								GafferUI.Label( "Something here" )
+					# with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
+					# 	label = GafferUI.Label( "Location", horizontalAlignment = GafferUI.HorizontalAlignment.Right )
+					# 	label._qtWidget().setFixedWidth( GafferUI.PlugWidget.labelWidth() )
+					# 	for i in range( 0, 2 ) :
+					# 		with GafferUI.Frame() :
+					# 			GafferUI.Label( "Something here" )
 
 					self.__selectionPathListing = GafferUI.PathListingWidget(
 						Gaffer.DictPath( {}, "/" ),
@@ -244,7 +244,7 @@ Gaffer.Metadata.registerNode(
 
 		],
 
-		"in" : [ "plugValueWidget:type", "GafferSceneUI.SceneInspector._InputWidget" ],
+		"in" : [ "plugValueWidget:type", "" ], #"GafferSceneUI.SceneInspector._InputWidget" ],
 
 		"editScope" : [
 
