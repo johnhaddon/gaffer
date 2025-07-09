@@ -209,7 +209,7 @@ void addShaderInspections( Inspections &inspections, const vector<InternedString
 
 			vector<InternedString> parameterPath = shaderPath;
 			parameterPath.push_back( InternedString() );
-			for( const auto &[parameterName, value] : shader->parameters() )
+			for( const auto &[parameterName, value] : shader->parameters() ) // TODO : SORT NAMES
 			{
 				parameterPath.back() = parameterName;
 				inspections[parameterPath] = new GafferSceneUI::Private::ParameterInspector(
