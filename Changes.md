@@ -29,6 +29,7 @@ Improvements
 - PathListingWidget :
   - Improved formatting of Box and Matrix values.
   - Improved performance when showing colour values.
+  - Added support for showing spline values.
 
 Fixes
 -----
