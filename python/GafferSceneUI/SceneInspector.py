@@ -103,6 +103,13 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 				with GafferUI.ListContainer( spacing = 4, borderWidth = 4, parenting = { "label" : "Selection" } ) :
 
+					with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
+						label = GafferUI.Label( "Location", horizontalAlignment = GafferUI.HorizontalAlignment.Right )
+						label._qtWidget().setFixedWidth( GafferUI.PlugWidget.labelWidth() )
+						for i in range( 0, 2 ) :
+							with GafferUI.Frame() :
+								GafferUI.Label( "Something here" )
+
 					self.__selectionPathListing = GafferUI.PathListingWidget(
 						Gaffer.DictPath( {}, "/" ),
 						columns = self.__standardColumns,
@@ -225,9 +232,9 @@ Gaffer.Metadata.registerNode(
 	## \todo Doing spacers with custom widgets is tedious, and we're doing it
 	# in all the View UIs. Maybe we could just attach metadata to the plugs we
 	# want to add space around, in the same way we use `divider` to add a divider?
-	# "layout:customWidget:spacer:widgetType", "GafferSceneUI.RenderPassEditor._Spacer",
-	# "layout:customWidget:spacer:section", "Settings",
-	# "layout:customWidget:spacer:index", 3,
+	"layout:customWidget:spacer:widgetType", "GafferSceneUI.RenderPassEditor._Spacer",
+	"layout:customWidget:spacer:section", "Settings",
+	"layout:customWidget:spacer:index", 1,
 
 	plugs = {
 
@@ -254,23 +261,29 @@ class _InputWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plug, **kw ) :
 
-		self.__column = GafferUI.ListContainer()
-		GafferUI.PlugValueWidget.__init__( self, self.__column, plug, **kw )
+		row = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 )
+		GafferUI.PlugValueWidget.__init__( self, row, plug, **kw )
 
-		with self.__column :
-			for i in range( 0, 2 ) :
-				with GafferUI.Frame(
-					borderWidth = 4,
-					borderStyle = GafferUI.Frame.BorderStyle.None_
-				) :
-					GafferUI.NameLabel( None )
+		self.__frames = []
+
+		with row  :
+			label = GafferUI.Label( "Node", horizontalAlignment = GafferUI.HorizontalAlignment.Right )
+			label._qtWidget().setFixedWidth( GafferUI.PlugWidget.labelWidth() )
+			with GafferUI.ListContainer() :
+				for i in range( 0, 2 ) :
+					with GafferUI.Frame(
+						borderWidth = 4,
+						borderStyle = GafferUI.Frame.BorderStyle.None_
+					) as frame :
+						GafferUI.NameLabel( None )
+					self.__frames.append( frame )
 
 	def _updateFromValues( self, values, exception ) :
 
 		for i in range( 0, 2 ) :
 			input = self.getPlug()[i].getInput()
 			node = input.node() if input is not None else None
-			self.__column[i].getChild().setGraphComponent( node )
+			self.__frames[i].getChild().setGraphComponent( node )
 
 SceneInspector._InputWidget = _InputWidget
 
