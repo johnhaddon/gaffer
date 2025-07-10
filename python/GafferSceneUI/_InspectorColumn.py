@@ -303,13 +303,14 @@ def __showHistory( pathListing ) :
 		for pathString in selection[i].paths() :
 			path = pathListing.getPath().copy()
 			path.setFromString( pathString )
-			#if path.inspectionContext() is None : TODO
-			#	continue
-			inspector = column.inspector( path )
-			if inspector is None :
-				continue
+			# #if path.inspectionContext() is None : TODO
+			# #	continue
+			# inspector = column.inspector( path )
+			# if inspector is None :
+			# 	continue
+			## TODO : STILL NEED TO SKIP THINGS THAT AREN'T INSPECTABLE
 			window = _HistoryWindow(
-				inspector,
+				column,
 				path,
 				"History : {} : {}".format( pathString, column.headerData().value )
 			)

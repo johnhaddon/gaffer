@@ -132,14 +132,14 @@ class _ValueColumn( GafferUI.PathColumn ) :
 
 class _HistoryWindow( GafferUI.Window ) :
 
-	def __init__( self, inspector, inspectionPath, title=None, **kw ) :
+	def __init__( self, inspectorColumn, inspectionPath, title=None, **kw ) :
 
 		if title is None :
 			title = "History"
 
 		GafferUI.Window.__init__( self, title, **kw )
 
-		self.__inspector = inspector
+		self.__inspectorColumn = inspectorColumn
 		self.__inspectionPath = inspectionPath
 
 		with self :
@@ -166,7 +166,7 @@ class _HistoryWindow( GafferUI.Window ) :
 		self.__pathListingWidget.dragBeginSignal().connectFront( Gaffer.WeakMethod( self.__dragBegin ) )
 		self.__pathListingWidget.updateFinishedSignal().connectFront( Gaffer.WeakMethod( self.__updateFinished ) )
 
-		inspector.dirtiedSignal().connect( Gaffer.WeakMethod( self.__inspectorDirtied ) )
+		self.__inspectorColumn.changedSignal().connect( Gaffer.WeakMethod( self.__inspectorColumnChanged ) )
 
 		## \todo We want to make the inspection framework scene-agnostic. We could add an `Inspector::plug()` method
 		# to provide a scene-agnostic way of querying what is being inspected, and use it here.
@@ -177,9 +177,7 @@ class _HistoryWindow( GafferUI.Window ) :
 	def __updatePath( self ) :
 
 		self.__inspectionPath.setContext( self.__contextTracker.context( self.__inspectionPath.getScene() ) )
-		with self.__inspectionPath.property( "inspector:context" ) : # NOT RIGHT FOR DIFF COLUMNS
-			# TODO : ADD INSPECTIONCONTEXT METHOD TO COLUMN? OR HISTORYPATH METHOD?
-			self.__path = self.__inspector.historyPath()
+		self.__path = self.__inspectorColumn.historyPath( self.__inspectionPath )
 
 		self.__pathListingWidget.setPath( self.__path )
 
@@ -264,7 +262,7 @@ class _HistoryWindow( GafferUI.Window ) :
 
 		return None
 
-	def __inspectorDirtied( self, inspector ) :
+	def __inspectorColumnChanged( self, inspectorColumn ) :
 
 		self.__updatePath()
 
