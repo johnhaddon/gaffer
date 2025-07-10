@@ -301,8 +301,6 @@ def __showHistory( pathListing ) :
 
 	for i, column in enumerate( columns ) :
 		for pathString in selection[i].paths() :
-			path = pathListing.getPath().copy()
-			path.setFromString( pathString )
 			# #if path.inspectionContext() is None : TODO
 			# #	continue
 			# inspector = column.inspector( path )
@@ -311,7 +309,8 @@ def __showHistory( pathListing ) :
 			## TODO : STILL NEED TO SKIP THINGS THAT AREN'T INSPECTABLE
 			window = _HistoryWindow(
 				column,
-				path,
+				pathListing.getPath(),
+				pathString,
 				"History : {} : {}".format( pathString, column.headerData().value )
 			)
 			pathListing.ancestor( GafferUI.Window ).addChildWindow( window, removeOnClose = True )

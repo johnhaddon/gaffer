@@ -132,7 +132,7 @@ class _ValueColumn( GafferUI.PathColumn ) :
 
 class _HistoryWindow( GafferUI.Window ) :
 
-	def __init__( self, inspectorColumn, inspectionPath, title=None, **kw ) :
+	def __init__( self, inspectorColumn, inspectionRootPath, inspectionPathString, title=None, **kw ) :
 
 		if title is None :
 			title = "History"
@@ -140,7 +140,8 @@ class _HistoryWindow( GafferUI.Window ) :
 		GafferUI.Window.__init__( self, title, **kw )
 
 		self.__inspectorColumn = inspectorColumn
-		self.__inspectionPath = inspectionPath
+		self.__inspectionRootPath = inspectionRootPath
+		self.__inspectionPathString = inspectionPathString
 
 		with self :
 			self.__pathListingWidget = GafferUI.PathListingWidget(
@@ -167,18 +168,15 @@ class _HistoryWindow( GafferUI.Window ) :
 		self.__pathListingWidget.updateFinishedSignal().connectFront( Gaffer.WeakMethod( self.__updateFinished ) )
 
 		self.__inspectorColumn.changedSignal().connect( Gaffer.WeakMethod( self.__inspectorColumnChanged ) )
+		self.__inspectionRootPath.pathChangedSignal().connect( Gaffer.WeakMethod( self.__inspectionRootPathChanged ) )
 
-		## \todo We want to make the inspection framework scene-agnostic. We could add an `Inspector::plug()` method
-		# to provide a scene-agnostic way of querying what is being inspected, and use it here.
-		self.__contextTracker = GafferUI.ContextTracker.acquireForFocus( self.__inspectionPath.getScene() )
-		self.__contextTracker.changedSignal().connect( Gaffer.WeakMethod( self.__contextChanged ) )
 		self.__updatePath()
 
 	def __updatePath( self ) :
 
-		self.__inspectionPath.setContext( self.__contextTracker.context( self.__inspectionPath.getScene() ) )
-		self.__path = self.__inspectorColumn.historyPath( self.__inspectionPath )
-
+		inspectionPath = self.__inspectionRootPath.copy()
+		inspectionPath.setFromString( self.__inspectionPathString )
+		self.__path = self.__inspectorColumn.historyPath( inspectionPath )
 		self.__pathListingWidget.setPath( self.__path )
 
 	def __buttonDoubleClick( self, pathListing, event ) :
@@ -266,7 +264,7 @@ class _HistoryWindow( GafferUI.Window ) :
 
 		self.__updatePath()
 
-	def __contextChanged( self, contextTracker ) :
+	def __inspectionRootPathChanged( self, contextTracker ) :
 
 		self.__updatePath()
 
@@ -300,7 +298,8 @@ class _HistoryWindow( GafferUI.Window ) :
 		if len( self.__path.children() ) == 0 :
 			# History is empty, for example because the scene location no
 			# longer exists.
-			self.close()
+			print( "NOT CLOSING" )
+			#self.close()
 
 	def __nodeNameChanged( self, node, oldName ) :
 
