@@ -122,6 +122,33 @@ GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaf
 	return i->inspect();
 }
 
+Gaffer::PathPtr InspectorColumn::historyPath( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
+{
+	ConstInspectorPtr i = inspector( path, canceller );
+	if( !i )
+	{
+		return nullptr;
+	}
+
+	ConstContextPtr inspectionContext = IECore::runTimeCast<const Context>( path.property( m_contextProperty, canceller ) );
+	if( !inspectionContext )
+	{
+		return nullptr;
+	}
+
+	std::variant<std::monostate, Context::Scope, Context::EditableScope> scopedContext;
+	if( canceller )
+	{
+		scopedContext.emplace<Context::EditableScope>( inspectionContext.get() ).setCanceller( canceller );
+	}
+	else
+	{
+		scopedContext.emplace<Context::Scope>( inspectionContext.get() );
+	}
+
+	return i->historyPath();
+}
+
 PathColumn::CellData InspectorColumn::cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
 {
 	CellData result;
