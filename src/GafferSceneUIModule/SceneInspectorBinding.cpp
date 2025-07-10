@@ -959,7 +959,6 @@ class InspectorPath : public Gaffer::Path
 
 		PathPtr copy() const override
 		{
-			//return nullptr;
 			return new InspectorPath( m_scene, m_contexts, m_editScope, names(), root(), const_cast<PathFilter *>( getFilter() ) );
 		}
 
