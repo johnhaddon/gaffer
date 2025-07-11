@@ -1084,11 +1084,12 @@ class _RenderPassPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 		self.__settings = self.Settings()
 		self.__settings.setName( "RenderPassPlugValueWidgetSettings" )
-		self.__settings["__scriptNode"].setInput( plug.node().scriptNode()["fileName"] )
 
 		self.__listContainer = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 )
 
 		GafferUI.PlugValueWidget.__init__( self, self.__listContainer, plug, **kw )
+
+		self.__settings["__scriptNode"].setInput( self.scriptNode()["fileName"] )
 
 		with self.__listContainer :
 			if showLabel :
@@ -1109,7 +1110,7 @@ class _RenderPassPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__displayGrouped = Gaffer.Metadata.value( plug, "renderPassPlugValueWidget:displayGrouped" ) or False
 		self.__hideDisabled = Gaffer.Metadata.value( plug, "renderPassPlugValueWidget:hideDisabled" ) or False
 
-		self.__focusChangedConnection = plug.node().scriptNode().focusChangedSignal().connect(
+		self.__focusChangedConnection = self.scriptNode().focusChangedSignal().connect(
 			Gaffer.WeakMethod( self.__focusChanged ), scoped = True
 		)
 
@@ -1310,11 +1311,13 @@ class _RenderPassPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __updateSettingsInput( self ) :
 
+		# TODO : SHOULD TAKE FROM EDITOR INPUT IF THERE IS AN EDITOR
+
 		self.__settings["in"].setInput( self.__scenePlugFromFocus() )
 
 	def __scenePlugFromFocus( self ) :
 
-		focusNode = self.getPlug().node().scriptNode().getFocus()
+		focusNode = self.scriptNode().getFocus()
 
 		if focusNode is not None :
 			outputScene = next(

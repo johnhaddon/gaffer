@@ -64,12 +64,15 @@ class ScenePathPlugValueWidget( GafferUI.PathPlugValueWidget ) :
 
 			path = GafferScene.ScenePath(
 				None,
-				plug.node().scriptNode().context(),
+				Gaffer.Context(),
 				"/",
 				filter = filter
 			)
 
 		GafferUI.PathPlugValueWidget.__init__( self, plug, path, **kw )
+
+		## TODO SHOULD ALSO UPDATE CONTEXT WHEN IT CHANGES
+		self.path().setContext( self.context() )
 
 	def _auxiliaryPlugs( self, plug ) :
 
@@ -121,7 +124,7 @@ class ScenePathPlugValueWidget( GafferUI.PathPlugValueWidget ) :
 			# final paths as seen by the renderer. So instead we use the focus node, as
 			# it is more likely to be pointed at the final render node.
 			self.path().setScene( self.__scenePlugFromFocus() )
-			self.__focusChangedConnection = self.getPlug().ancestor( Gaffer.ScriptNode ).focusChangedSignal().connect(
+			self.__focusChangedConnection = self.scriptNode().focusChangedSignal().connect(
 				Gaffer.WeakMethod( self.__focusChanged ), scoped = True
 			)
 
@@ -149,7 +152,7 @@ class ScenePathPlugValueWidget( GafferUI.PathPlugValueWidget ) :
 
 	def __scenePlugFromFocus( self ) :
 
-		focusNode = self.getPlug().ancestor( Gaffer.ScriptNode ).getFocus()
+		focusNode = self.scriptNode().getFocus()
 		if focusNode is not None :
 			outputScene = next( GafferScene.ScenePlug.RecursiveOutputRange( focusNode ), None )
 			if outputScene is not None :
