@@ -47,17 +47,16 @@ class IECORE_EXPORT EnumPlug : public IntPlug
 
 	public :
 
-		GAFFER_PLUG_DECLARE_TYPE( EnumPlug, IntPlug );
+		GAFFER_PLUG_DECLARE_TYPE( EnumPlug, EnumPlugTypeId, IntPlug );
 
 		template<typename EnumType>
 		explicit EnumPlug(
-			const std::string &name = defaultName<NumericPlug>(),
-			EnumType defaultValue,
-			unsigned flags = Default
+			const std::string &name = defaultName<EnumPlug>(), Direction direction = Gaffer::Plug::In,
+			EnumType defaultValue = 0, unsigned flags = Default
 		);
 		~EnumPlug() override;
 
-		bool acceptsInput( const Plug *input ) const override;
+		//bool acceptsInput( const Plug *input ) const override;
 		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
 		template<typename EnumType>
@@ -68,20 +67,17 @@ class IECORE_EXPORT EnumPlug : public IntPlug
 
 	private :
 
-		// using DataType = IECore::TypedData<T>;
-		// using DataTypePtr = typename DataType::Ptr;
+		EnumPlug(
+			const std::string &name, Direction direction, int defaultValue, int minValue, int maxValue,
+			unsigned flags, const std::type_info &enumType
+		);
 
-		// T m_minValue;
-		// T m_maxValue;
+		const std::type_info &m_enumType;
 
 };
 
-using FloatPlug = NumericPlug<float>;
-using IntPlug = NumericPlug<int>;
-
-IE_CORE_DECLAREPTR( FloatPlug );
-IE_CORE_DECLAREPTR( IntPlug );
+IE_CORE_DECLAREPTR( EnumPlug );
 
 } // namespace Gaffer
 
-#include "Gaffer/NumericPlug.inl"
+#include "Gaffer/EnumPlug.inl"

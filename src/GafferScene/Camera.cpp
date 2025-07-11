@@ -60,7 +60,7 @@ Camera::Camera( const std::string &name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "projection", Plug::In, "perspective" ) );
-	addChild( new IntPlug( "perspectiveMode", Plug::In, FieldOfView ) );
+	addChild( new EnumPlug( "perspectiveMode", Plug::In, FieldOfView ) );
 	addChild( new FloatPlug( "fieldOfView", Plug::In, 50.0f, 0.0f, 180.0f ) );
 	addChild( new FloatPlug( "apertureAspectRatio", Plug::In, 1.0f, 0.0f ) );
 	addChild( new V2fPlug( "aperture", Plug::In, V2f( 36.0f, 24.0f ), V2f( 0.0f ) ) );
@@ -105,14 +105,14 @@ const Gaffer::StringPlug *Camera::projectionPlug() const
 	return getChild<StringPlug>( g_firstPlugIndex );
 }
 
-Gaffer::IntPlug *Camera::perspectiveModePlug()
+Gaffer::EnumPlug *Camera::perspectiveModePlug()
 {
-	return getChild<IntPlug>( g_firstPlugIndex + 1 );
+	return getChild<EnumPlug>( g_firstPlugIndex + 1 );
 }
 
-const Gaffer::IntPlug *Camera::perspectiveModePlug() const
+const Gaffer::EnumPlug *Camera::perspectiveModePlug() const
 {
-	return getChild<IntPlug>( g_firstPlugIndex + 1 );
+	return getChild<EnumPlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::FloatPlug *Camera::fieldOfViewPlug()
@@ -289,7 +289,7 @@ IECore::ConstObjectPtr Camera::computeSource( const Context *context ) const
 	V2f aperture;
 	if( projection == "perspective" )
 	{
-		if( perspectiveModePlug()->getValue() == FieldOfView )
+		if( perspectiveModePlug()->getValue<PerspectiveMode>() == PerspectiveMove::FieldOfView )
 		{
 			result->setAperture( V2f( 1.0f, 1.0f / apertureAspectRatioPlug()->getValue() ) );
 			result->setFocalLengthFromFieldOfView( fieldOfViewPlug()->getValue() );

@@ -37,8 +37,10 @@
 
 #pragma once
 
-#include "Gaffer/CompoundDataPlug.h"
 #include "GafferScene/ObjectSource.h"
+
+#include "Gaffer/CompoundDataPlug.h"
+#include "Gaffer/EnumPlug.h"
 
 namespace GafferScene
 {
@@ -56,14 +58,14 @@ class GAFFERSCENE_API Camera : public ObjectSource
 		Gaffer::StringPlug *projectionPlug();
 		const Gaffer::StringPlug *projectionPlug() const;
 
-		enum PerspectiveMode
+		enum class PerspectiveMode
 		{
 			FieldOfView,
 			ApertureFocalLength
 		};
 
-		Gaffer::IntPlug *perspectiveModePlug();
-		const Gaffer::IntPlug *perspectiveModePlug() const;
+		Gaffer::EnumPlug *perspectiveModePlug();
+		const Gaffer::EnumPlug *perspectiveModePlug() const;
 
 		Gaffer::FloatPlug *fieldOfViewPlug();
 		const Gaffer::FloatPlug *fieldOfViewPlug() const;
