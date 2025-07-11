@@ -94,6 +94,9 @@ using namespace Gaffer;
 // General utilities
 //////////////////////////////////////////////////////////////////////////
 
+// Allows us to store ConstDataPtr in a QVariant.
+Q_DECLARE_METATYPE( IECore::ConstDataPtr )
+
 namespace
 {
 
