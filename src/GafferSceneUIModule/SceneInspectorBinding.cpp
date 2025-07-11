@@ -277,7 +277,7 @@ Inspections primitiveTopologyInspectionProvider( ScenePlug *scene, const Gaffer:
 		{
 			result[{ interpolationName }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
-				[interpolation] ( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+				[ interpolation = interpolation ] ( const ObjectPlug *objectPlug ) -> ConstDataPtr {
 					ConstObjectPtr object = objectPlug->getValue();
 					if( auto primitive = runTimeCast<const Primitive>( object.get() ) )
 					{
@@ -424,7 +424,7 @@ Inspections objectParametersInspectionProvider( ScenePlug *scene, const Gaffer::
 		{
 			result[{ name }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
-				[name] ( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+				[ name = name ] ( const ObjectPlug *objectPlug ) -> ConstDataPtr {
 					ConstObjectPtr object = objectPlug->getValue();
 					if( auto parameters = objectParameters( object.get() ) )
 					{
@@ -546,25 +546,25 @@ Inspections primitiveVariablesInspectionProvider( ScenePlug *scene, const Gaffer
 		{
 			result[{ name, "Interpolation" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
-				[name] ( const ObjectPlug *objectPlug ) {
+				[ name = name ] ( const ObjectPlug *objectPlug ) {
 					return primitiveVariableInterpolation( name, objectPlug );
 				}
 			);
 			result[{ name, "Type" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
-				[name] ( const ObjectPlug *objectPlug ) {
+				[ name = name ] ( const ObjectPlug *objectPlug ) {
 					return primitiveVariableType( name, objectPlug );
 				}
 			);
 			result[{ name, "Data" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
-				[name] ( const ObjectPlug *objectPlug ) {
+				[ name = name ] ( const ObjectPlug *objectPlug ) {
 					return primitiveVariableData( name, objectPlug );
 				}
 			);
 			result[{ name, "Indices" }] = new GafferSceneUI::Private::BasicInspector(
 				scene->objectPlug(), editScope,
-				[name] ( const ObjectPlug *objectPlug ) {
+				[ name = name ] ( const ObjectPlug *objectPlug ) {
 					return primitiveVariableIndices( name, objectPlug );
 				}
 			);
@@ -739,7 +739,7 @@ Inspections globalAttributesInspectionProvider( ScenePlug *scene, const Gaffer::
 			{ category, optionName },
 			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
-				[name] ( const CompoundObjectPlug *globalsPlug ) {
+				[ name = name ] ( const CompoundObjectPlug *globalsPlug ) {
 					ConstCompoundObjectPtr globals = globalsPlug->getValue();
 					return globals->member( name );
 				}
@@ -774,7 +774,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 			path,
 			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
-				[ name ] ( const CompoundObjectPlug *globalsPlug ) {
+				[ name = name ] ( const CompoundObjectPlug *globalsPlug ) {
 					ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
 					return output ? new StringData( output->getName() ) : nullptr;
 				}
@@ -786,7 +786,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 			path,
 			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
-				[ name ] ( const CompoundObjectPlug *globalsPlug ) {
+				[ name = name ] ( const CompoundObjectPlug *globalsPlug ) {
 					ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
 					return output ? new StringData( output->getType() ) : nullptr;
 				}
@@ -798,7 +798,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 			path,
 			new GafferSceneUI::Private::BasicInspector(
 				scene->globalsPlug(), editScope,
-				[ name ] ( const CompoundObjectPlug *globalsPlug ) {
+				[ name = name ] ( const CompoundObjectPlug *globalsPlug ) {
 					ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
 					return output ? new StringData( output->getData() ) : nullptr;
 				}
@@ -813,7 +813,7 @@ Inspections outputsInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &
 				path,
 				new GafferSceneUI::Private::BasicInspector(
 					scene->globalsPlug(), editScope,
-					[ name, parameterName ] ( const CompoundObjectPlug *globalsPlug ) {
+					[ name = name, parameterName = parameterName ] ( const CompoundObjectPlug *globalsPlug ) {
 						ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
 						return output ? output->parametersData()->member( parameterName ) : nullptr;
 					}
