@@ -54,18 +54,25 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 
 		def __init__( self ) :
 
-			GafferSceneUI.SceneEditor.Settings.__init__( self, numInputs = 2 )
+			GafferSceneUI.SceneEditor.Settings.__init__( self )
 
 			self["editScope"] = Gaffer.Plug()
+
+			self["compare"] = Gaffer.Plug()
+			self["compare"]["enabled"] = Gaffer.BoolPlug()
+			self["compare"]["location"] = Gaffer.StringPlug()
+			self["compare"]["scene"] = GafferScene.ScenePlug()
+			self["compare"]["renderPass"] = Gaffer.StringPlug()
+
 			self["__switchedIn"] = GafferScene.ScenePlug()
 
 			self["__switchIndexQuery"] = Gaffer.ContextQuery()
 			self["__switchIndexQuery"].addQuery( Gaffer.IntPlug(), "__sceneInspector:inputIndex" )
 
 			self["__switch"] = Gaffer.Switch()
-			self["__switch"].setup( self["in"][0] )
-			self["__switch"]["in"][0].setInput( self["in"][0] )
-			self["__switch"]["in"][1].setInput( self["in"][1] )
+			self["__switch"].setup( self["in"] )
+			self["__switch"]["in"][0].setInput( self["in"] )
+			self["__switch"]["in"][1].setInput( self["compare"]["scene"] )
 			self["__switch"]["index"].setInput( self["__switchIndexQuery"]["out"][0]["value"] )
 			self["__switch"]["deleteContextVariables"].setValue( "__sceneInspector:inputIndex" )
 			self["__switchedIn"].setInput( self["__switch"]["out"] )
@@ -246,10 +253,46 @@ Gaffer.Metadata.registerNode(
 
 		"in" : [ "plugValueWidget:type", "" ], #"GafferSceneUI.SceneInspector._InputWidget" ],
 
+		"compare" : [
+
+			"plugValueWidget:type", "GafferUI.LayoutPlugValueWidget",
+
+			"layout:activator:compareIsEnabled", lambda plug : plug["enabled"].getValue(),
+
+		],
+
+		"compare.enabled" : [
+
+			"label", "Enable Comparison",
+
+		],
+
+		"compare.scene" : [
+
+			"plugValueWidget:type", "GafferUI.ConnectionPlugValueWidget",
+			"layout:activator", "compareIsEnabled",
+
+		],
+
+		"compare.location" : [
+
+			"plugValueWidget:type", "GafferSceneUI.ScenePathPlugValueWidget",
+			"layout:activator", "compareIsEnabled",
+
+		],
+
+		"compare.renderPass" : [
+
+			"plugValueWidget:type", "GafferSceneUI.RenderPassEditor._RenderPassPlugValueWidget",
+			"layout:activator", "compareIsEnabled",
+
+		],
+
 		"editScope" : [
 
 			"plugValueWidget:type", "GafferUI.EditScopeUI.EditScopePlugValueWidget",
 			"layout:width", 130,
+			"layout:index", -1,
 
 		],
 
