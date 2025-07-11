@@ -937,6 +937,14 @@ class InspectorPath : public Gaffer::Path
 		{
 		}
 
+		void setContexts( const Contexts &contexts )
+		{
+			// We don't bother connecting to `Context::changedSignal()`, because we
+			// are always used with immutable contexts sourced from a ContextTracker.
+			m_contexts = contexts;
+			emitPathChanged();
+		}
+
 		bool isValid( const IECore::Canceller *canceller = nullptr ) const override
 		{
 			if( !Path::isValid() )
@@ -1103,14 +1111,25 @@ class InspectorPath : public Gaffer::Path
 
 IE_CORE_DEFINERUNTIMETYPED( InspectorPath );
 
+InspectorPath::Contexts contextsFromPython( object pythonContexts )
+{
+	InspectorPath::Contexts result;
+	for( size_t i = 0; i < result.size(); ++i )
+	{
+		result[i] = extract<ContextPtr>( pythonContexts[i] )();
+	}
+	return result;
+}
+
 InspectorPath::Ptr inspectorPathConstructor( ScenePlug &scene, object pythonContexts, const Gaffer::PlugPtr &editScope, const Path::Names &names, const IECore::InternedString &root, Gaffer::PathFilterPtr filter )
 {
-	InspectorPath::Contexts contexts;
-	for( size_t i = 0; i < contexts.size(); ++i )
-	{
-		contexts[i] = extract<ContextPtr>( pythonContexts[i] )();
-	}
-	return new InspectorPath( &scene, contexts, editScope, names, root, filter );
+	return new InspectorPath( &scene, contextsFromPython( pythonContexts ), editScope, names, root, filter );
+}
+
+void inspectorPathSetContextsWrapper( InspectorPath &path, object pythonContexts )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	path.setContexts( contextsFromPython( pythonContexts ) );
 }
 
 } // namespace
@@ -1216,6 +1235,7 @@ void GafferSceneUIModule::bindSceneInspector()
 				)
 			)
 		)
+		.def( "setContexts", &inspectorPathSetContextsWrapper )
 	;
 
 	{
