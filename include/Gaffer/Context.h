@@ -82,7 +82,7 @@ class GAFFER_API Context
 		Context( const Context &other, bool omitCanceller );
 		~Context();
 
-		mutable std::atomic<size_t> m_numRefs;
+		mutable size_t m_numRefs = 0;
 
 inline void addRef() const { m_numRefs++; };
 
