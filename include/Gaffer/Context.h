@@ -64,7 +64,7 @@ namespace Gaffer
 /// It is common for Nodes to need to evaluate their upstream inputs in a modified context.
 /// The EditableScope class should be used for this purpose since it is more efficient than
 /// copy constructing a new Context.
-class GAFFER_API Context : public IECore::RefCounted
+class GAFFER_API Context
 {
 
 	public :
@@ -80,7 +80,21 @@ class GAFFER_API Context : public IECore::RefCounted
 		/// Copy constructor which can optionally omit an existing canceller
 		/// if `omitCanceller = true` is passed.
 		Context( const Context &other, bool omitCanceller );
-		~Context() override;
+		~Context();
+
+		mutable std::atomic<size_t> m_numRefs;
+
+inline void addRef() const { m_numRefs++; };
+
+		/// Remove a reference from the current object
+		inline void removeRef() const
+		{
+			assert( m_numRefs > 0 );
+			if( --m_numRefs==0 )
+			{
+				delete this;
+			}
+		};
 
 		IE_CORE_DECLAREMEMBERPTR( Context )
 
@@ -377,6 +391,16 @@ class GAFFER_API Context : public IECore::RefCounted
 		AllocMap m_allocMap;
 
 };
+
+inline void intrusive_ptr_add_ref( const Context *r )
+{
+	r->addRef();
+}
+
+inline void intrusive_ptr_release(const Context *r)
+{
+	r->removeRef();
+}
 
 IE_CORE_DECLAREPTR( Context );
 

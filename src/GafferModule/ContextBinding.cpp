@@ -153,7 +153,9 @@ ContextPtr current()
 
 void GafferModule::bindContext()
 {
-	IECorePython::RefCountedClass<Context, IECore::RefCounted> contextClass( "Context" );
+	class_<Context, boost::noncopyable, IECorePython::Detail::GILReleasePtr<Context>> contextClass( "Context" );
+
+	//IECorePython::RefCountedClass<Context, IECore::RefCounted> contextClass( "Context" );
 	scope s = contextClass;
 
 	contextClass
