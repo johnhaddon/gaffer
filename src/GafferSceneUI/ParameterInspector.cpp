@@ -102,6 +102,24 @@ ParameterInspector::ParameterInspector(
 
 }
 
+ShaderNetwork::Parameter ParameterInspector::connectionSource( const Object *object )
+{
+	if( auto data = runTimeCast<const CompoundData>( object ) )
+	{
+		if( data->readable().size() == 2 )
+		{
+			const auto shaderName = data->member<InternedStringData>( "shaderConnection:shader" );
+			const auto parameterName = data->member<InternedStringData>( "shaderConnection:parameter" );
+
+			if( shaderName && parameterName )
+			{
+				return ShaderNetwork::Parameter( shaderName->readable(), parameterName->readable() );
+			}
+		}
+	}
+	return ShaderNetwork::Parameter();
+}
+
 GafferScene::SceneAlgo::History::ConstPtr ParameterInspector::history() const
 {
 	// Computing histories is expensive, and there's no point doing it

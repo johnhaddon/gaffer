@@ -1469,6 +1469,32 @@ class ParameterInspectorTest( GafferUITest.TestCase ) :
 			edit = edit
 		)
 
+	def testParameter( self ) :
+
+		s = Gaffer.ScriptNode()
+
+		s["add"] = GafferScene.Shader()
+		s["add"]["out"] = Gaffer.Color3fPlug( direction = Gaffer.Plug.Direction.Out )
+
+		s["srf"] = GafferScene.Shader()
+		s["srf"]["type"].setValue( "test:surface" )
+		s["srf"]["parameters"]["a"] = Gaffer.Color3fPlug()
+		s["srf"]["parameters"]["a"].setInput( s["add"]["out"] )
+		s["srf"]["parameters"]["b"] = Gaffer.Color3fPlug()
+		s["srf"]["out"] = Gaffer.Color3fPlug( direction = Gaffer.Plug.Direction.Out )
+
+		s["cube"] = GafferScene.Cube()
+
+		s["assign"] = GafferScene.ShaderAssignment()
+		s["assign"]["in"].setInput( s["cube"]["out"] )
+		s["assign"]["shader"].setInput( s["srf"]["out"] )
+
+		inspection = self.__inspect( s["assign"]["out"], "/cube", ( "srf", "a" ), attribute = "test:surface" )
+		self.assertEqual( GafferSceneUI.Private.ParameterInspector.connectionSource( inspection.value() ), ( "add", "out" ) )
+
+		inspection = self.__inspect( s["assign"]["out"], "/cube", ( "srf", "b" ), attribute = "test:surface" )
+		self.assertEqual( GafferSceneUI.Private.ParameterInspector.connectionSource( inspection.value() ), ( "", "" ) )
+
 
 if __name__ == "__main__":
 	unittest.main()
