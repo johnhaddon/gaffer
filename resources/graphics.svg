@@ -101,7 +101,7 @@
     </linearGradient>
     <linearGradient
        id="boundsTemplate"
-       gradientTransform="matrix(1.4488738,0,0,1.25,1285.8825,5285.1293)"
+       gradientTransform="matrix(1.4488738,0,0,1.25,1385.8825,5232.7671)"
        inkscape:swatch="solid">
       <stop
          style="stop-color:#ff0101;stop-opacity:0.0787037;"
@@ -358,7 +358,18 @@
      inkscape:bbox-nodes="true"
      inkscape:showpageshadow="2"
      inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#4c4c4c">
+     inkscape:deskcolor="#4c4c4c"
+     showgrid="false"
+     inkscape:snap-bbox="true"
+     inkscape:zoom="32"
+     inkscape:cx="127.17188"
+     inkscape:cy="3008.0313"
+     inkscape:window-width="5120"
+     inkscape:window-height="1387"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
     <inkscape:grid
        type="xygrid"
        id="grid3598"
@@ -10910,6 +10921,16 @@
        width="11.273009"
        id="rect4131"
        style="display:inline;fill:none;fill-opacity:0.992157;stroke:#f1c816;stroke-width:1.00001;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.992157" />
+    <path
+       style="fill:none;stroke:#3d3d3d;stroke-width:3;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 122.5,3066.8622 H 119 c -5.5,0 3.5,-9 -2,-9 h -3.5"
+       id="path36714"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:none;stroke:#acacac;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
+       d="M 122.5,3066.8622 H 119 c -5.5,0 3.5,-9 -2,-9 h -3.5"
+       id="path2700"
+       sodipodi:nodetypes="cccc" />
     <g
        id="g3916"
        inkscape:label="SceneInspector">
@@ -11045,17 +11066,18 @@
            id="path96431"
            style="fill:#e0e0e0;fill-opacity:1" />
       </g>
-      <path
-         id="rect4470"
-         style="fill:#e0e0e0;fill-opacity:1;stroke:#3d3d3d;stroke-width:2;stroke-dasharray:none;stroke-dashoffset:1.10173;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
-         d="m 122,3058.3622 h -8 v 7 h -4 v 2 h 6 v -7 h 6 z"
-         sodipodi:nodetypes="ccccccccc" />
       <circle
-         style="display:inline;fill:#e0e0e0;fill-opacity:1;stroke:#3d3d3d;stroke-width:2;stroke-dasharray:none;stroke-dashoffset:1.10173;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+         style="display:inline;fill:#acacac;fill-opacity:1;stroke:#3d3d3d;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1.10173;stroke-opacity:1;paint-order:normal;stop-color:#000000"
          id="path4970"
-         cx="122"
-         cy="3059.3623"
-         r="2.5" />
+         cx="122.50006"
+         cy="3066.8621"
+         r="1.9999392" />
+      <circle
+         style="display:inline;fill:#acacac;fill-opacity:1;stroke:#3d3d3d;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1.10173;stroke-opacity:1;paint-order:normal;stop-color:#000000"
+         id="circle2664"
+         cx="113.50006"
+         cy="3057.8623"
+         r="1.9999392" />
     </g>
   </g>
 </svg>
