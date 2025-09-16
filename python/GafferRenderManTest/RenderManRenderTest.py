@@ -146,5 +146,9 @@ class RenderManRenderTest( GafferSceneTest.RenderTest ) :
 
 		pass
 
+class RenderManXPURenderTest( RenderManRenderTest ) :
+
+	renderer = "RenderMan XPU"
+
 if __name__ == "__main__":
 	unittest.main()
