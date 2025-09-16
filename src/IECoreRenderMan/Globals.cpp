@@ -566,6 +566,11 @@ void Globals::updateRenderView()
 		extent.y = resolution[1];
 	}
 
+	// TODO : CAN WE CALL THIS MULTIPLE TIMES REALLY? ANYWAY, SEEMS LIKE WE NEED TO CALL IT TO AVOID THIS WARNING
+	//
+	// W00002 {WARNING} Unable to find a valid displacement camera. Using the first available camera.
+	m_session->riley->SetDefaultDicingCamera( camera.id );
+
 	// Update Filters if necessary.
 
 	updateDisplayFilter();
