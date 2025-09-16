@@ -39,6 +39,7 @@ import unittest
 
 import imath
 
+import IECore
 import IECoreRenderMan
 import GafferTest
 import GafferSceneTest
@@ -104,6 +105,17 @@ class InteractiveRenderManRenderTest( GafferSceneTest.InteractiveRenderTest ) :
 	def _createGobo( self ) :
 
 		self.skipTest( "Light filters not supported" )
+
+@unittest.skipIf( IECoreRenderMan.renderManMajorVersion() < 27, "XPU only supported for RenderMan 27+" )
+class InteractiveRenderManXPURenderTest( InteractiveRenderManRenderTest ) :
+
+	renderer = "RenderMan XPU"
+
+	def setUp( self ) :
+
+		InteractiveRenderManRenderTest.setUp( self )
+
+		self.ignoreMessage( IECore.Msg.Level.Warning, "RenderMan", "W00034 Camera deletion is not supported yet." )
 
 if __name__ == "__main__":
 	unittest.main()

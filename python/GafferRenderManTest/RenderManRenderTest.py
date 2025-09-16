@@ -40,6 +40,7 @@ import imath
 
 import IECore
 import IECoreScene
+import IECoreRenderMan
 
 import Gaffer
 import GafferTest
@@ -145,6 +146,11 @@ class RenderManRenderTest( GafferSceneTest.RenderTest ) :
 	def testInstanceIDOutput( self ) :
 
 		pass
+
+@unittest.skipIf( IECoreRenderMan.renderManMajorVersion() < 27, "XPU only supported for RenderMan 27+" )
+class RenderManXPURenderTest( RenderManRenderTest ) :
+
+	renderer = "RenderMan XPU"
 
 if __name__ == "__main__":
 	unittest.main()
