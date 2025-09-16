@@ -80,7 +80,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 	public :
 
-		RenderManRenderer( RenderType renderType, const std::string &fileName, const MessageHandlerPtr &messageHandler )
+		RenderManRenderer( RtUString rileyVariant, RenderType renderType, const std::string &fileName, const MessageHandlerPtr &messageHandler )
 			:	m_messageHandler( messageHandler ), m_session( nullptr )
 		{
 			if( renderType == SceneDescription )
@@ -94,7 +94,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				throw IECore::Exception( "RenderMan doesn't allow multiple active sessions" );
 			}
 
-			m_globals = std::make_unique<Globals>( renderType, messageHandler );
+			m_globals = std::make_unique<Globals>( rileyVariant, renderType, messageHandler );
 		}
 
 		~RenderManRenderer() override
@@ -273,12 +273,31 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		std::unique_ptr<GeometryPrototypeCache> m_geometryPrototypeCache;
 		std::unique_ptr<LightLinker> m_lightLinker;
 
-		static Renderer::TypeDescription<RenderManRenderer> g_typeDescription;
 		static std::atomic_bool g_haveInstance;
 
 };
 
-IECoreScenePreview::Renderer::TypeDescription<RenderManRenderer> RenderManRenderer::g_typeDescription( "RenderMan" );
 std::atomic_bool RenderManRenderer::g_haveInstance = false;
+
+struct VariantTypeDescriptions
+{
+	VariantTypeDescriptions()
+	{
+		IECoreScenePreview::Renderer::registerType(
+			"RenderMan",
+			[] ( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler ) {
+				return new RenderManRenderer( RtUString(), renderType, fileName, messageHandler );
+			}
+		);
+		IECoreScenePreview::Renderer::registerType(
+			"RenderMan XPU",
+			[] ( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler ) {
+				return new RenderManRenderer( RtUString( "xpu" ), renderType, fileName, messageHandler );
+			}
+		);
+	}
+};
+
+VariantTypeDescriptions g_typeDescription;
 
 } // namespace
