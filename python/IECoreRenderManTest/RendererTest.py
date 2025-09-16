@@ -188,9 +188,15 @@ class RendererTest( GafferTest.TestCase ) :
 		light = renderer.light( "/light", None, lightAttributes )
 		light.transform( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
 
-		self.assertEqual( len( messageHandler.messages ), 1 )
-		self.assertEqual( messageHandler.messages[0].level, IECore.MessageHandler.Level.Warning )
-		self.assertEqual( messageHandler.messages[0].message, "Unable to find shader \"BadShader\"." )
+		self.assertGreater( len( messageHandler.messages ), 0 )
+		self.assertTrue(
+			{ m.message for m in messageHandler.messages }.issubset( {
+				# Message we output ourselves.
+				"Unable to find shader \"BadShader\".",
+				# Message that XPU emits but RIS doesn't.
+				"W00045 A light shader could not be created because there were no light nodes.",
+			} )
+		)
 
 		del lightAttributes
 		del light
@@ -1006,9 +1012,15 @@ class RendererTest( GafferTest.TestCase ) :
 
 		renderer.render()
 
-		self.assertEqual( len( messageHandler.messages ), 1 )
-		self.assertEqual( messageHandler.messages[0].level, IECore.MessageHandler.Level.Warning )
-		self.assertEqual( messageHandler.messages[0].message, "Unable to find shader \"MissingShader\"." )
+		self.assertGreater( len( messageHandler.messages ), 0 )
+		self.assertTrue(
+			{ m.message for m in messageHandler.messages }.issubset( {
+				# Message we output ourselves.
+				"Unable to find shader \"MissingShader\".",
+				# Message that XPU emits but RIS doesn't.
+				"W00053 A material : <unknown> cannot be created because there were no bxdf nodes.",
+			} )
+		)
 
 		del renderer
 
