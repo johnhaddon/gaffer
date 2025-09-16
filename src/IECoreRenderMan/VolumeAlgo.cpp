@@ -36,10 +36,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "GeometryAlgo.h"
+#include "Strings.h"
 
 #include "IECoreVDB/VDBObject.h"
-
-#include "RixPredefinedStrings.hpp"
 
 #include "fmt/format.h"
 
@@ -65,13 +64,13 @@ RtUString convertVDBObject( const IECoreVDB::VDBObject *vdbObject, RtPrimVarList
 		return RtUString();
 	}
 
-	primVars.SetString( Rix::k_Ri_type, g_implOpenVDB );
+	primVars.SetString( strings().k_Ri_type, g_implOpenVDB );
 	// Dimensions is a required parameter so we have to set it.
 	// I think it is only useful if you want to provide the volume
 	// data as a dense grid via primvars. We're providing the data via
 	// VDB so can set it all to zeroes.
 	const int dimensions[] = { 0, 0, 0 };
-	primVars.SetIntegerArray( Rix::k_Ri_dimensions, dimensions, 3 );
+	primVars.SetIntegerArray( strings().k_Ri_dimensions, dimensions, 3 );
 	// Because dimensions is 0, all primvar details are size 0 too,
 	// except for constant.
 	primVars.SetDetail( 1, 0, 0, 0 );
@@ -134,9 +133,9 @@ RtUString convertVDBObject( const IECoreVDB::VDBObject *vdbObject, RtPrimVarList
 		/// Where would we get those from? Attributes perhaps?
 		RtUString( "{}" )
 	};
-	primVars.SetStringArray( Rix::k_blobbydso_stringargs, stringArgs.data(), stringArgs.size() );
+	primVars.SetStringArray( strings().k_blobbydso_stringargs, stringArgs.data(), stringArgs.size() );
 
-	return Rix::k_Ri_Volume;
+	return strings().k_Ri_Volume;
 }
 
 GeometryAlgo::ConverterDescription<VDBObject> g_meshConverterDescription( convertVDBObject );

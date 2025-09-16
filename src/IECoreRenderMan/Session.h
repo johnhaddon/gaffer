@@ -39,6 +39,7 @@
 #include "GafferScene/Private/IECoreScenePreview/Renderer.h"
 
 #include "Riley.h"
+#include "RixRiCtl.h"
 
 #include "boost/multi_index/member.hpp"
 #include "boost/multi_index/ordered_index.hpp"
@@ -122,6 +123,9 @@ struct Session
 	void updatePortals();
 
 	private :
+
+		RixContext *m_context;
+		RixRiCtl *m_riCtl;
 
 		struct ExceptionHandler;
 		std::unique_ptr<ExceptionHandler> m_exceptionHandler;
