@@ -242,7 +242,7 @@ class RendererTest( GafferTest.TestCase ) :
 					"integrator" : IECoreScene.Shader(
 						"PxrVisualizer", "ri:integrator",
 						{
-							"style" : "objectnormals",
+							"style" : "normals",
 							"wireframe" : False,
 						}
 					),
