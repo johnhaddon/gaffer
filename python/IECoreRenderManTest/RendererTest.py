@@ -2274,5 +2274,25 @@ class XPURendererTest( RendererTest ) :
 
 		pass
 
+	@unittest.skip( "Light shader edits not functioning yet" )
+	def testLightFilter( self ) :
+
+		pass
+
+	@unittest.skip( "Light shader edits not functioning yet" )
+	def testLightFilterCombineModes( self ) :
+
+		pass
+
+	@unittest.skip( "Light shader edits not functioning yet" )
+	def testLightFilterTransforms( self ) :
+
+		pass
+
+	@unittest.skip( "Light shader edits not functioning yet" )
+	def testPortalLight( self ) :
+
+		pass
+
 if __name__ == "__main__":
 	unittest.main()
