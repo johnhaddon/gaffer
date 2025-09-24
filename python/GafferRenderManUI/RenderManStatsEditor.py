@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2018, John Haddon. All rights reserved.
+#  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,31 +34,36 @@
 #
 ##########################################################################
 
-import ctypes
-import platform
+import GafferUI
 
-# There is no `GafferRenderManUI` Python module, so we load the root module
-# manually in order to register the light filter visualisers.
+#import importlib
 
-prefix, suffix = {
-	"Darwin" : ( "lib", ".dylib" ),
-	"Windows" : ( "", ".dll" ),
-}.get( platform.system(), ( "lib", ".so" ) )
+import os
+import pathlib
+import sys
 
-ctypes.CDLL( f"{prefix}GafferRenderManUI{suffix}" )
+# TODO : TIDY. CAN't DO THIS IN WRAPPER BECAUSE THE PATH WOULD COME BEFORE OUR OWN SITE-PACKAGES, AND PIXARS IS LITTERED WITH CONFLICTING STUFF
+sys.path.append( str( pathlib.Path( os.environ["RMANTREE"] ) / "lib" / "python{}.{}".format( *sys.version_info[:2] ) / "site-packages" ) )
 
-del ctypes, platform
+#from Qt import QtWidgets
 
-__import__( "GafferSceneUI" )
+class RenderManStatsEditor( GafferUI.Editor ) :
 
-from . import RenderManAttributesUI
-from . import RenderManOptionsUI
-from . import RenderManShaderUI
-from . import RenderManMeshLightUI
-from . import RenderManIntegratorUI
-from . import RenderManOutputFilterUI
-from . import RenderManDisplayFilterUI
-from . import RenderManSampleFilterUI
-from .RenderManStatsEditor import RenderManStatsEditor
+	def __init__( self, scriptNode, **kw ) :
 
-__import__( "IECore" ).loadConfig( "GAFFER_STARTUP_PATHS", subdirectory = "GafferRenderManUI" )
+		mainColumn = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Vertical, borderWidth = 4, spacing = 4 )
+
+		GafferUI.Editor.__init__( self, mainColumn, scriptNode, **kw )
+
+		from stportal.ui.live.mainwin import LiveStatsMainUI
+		from stportal.core.datamanager import DataManager
+
+		self.__manager = DataManager()
+
+		mainColumn.append( GafferUI.Widget( LiveStatsMainUI( parent = None, manager = self.__manager ) ) )
+
+	def __repr__( self ) :
+
+		return "GafferRenderManUI.RenderManStatsEditor( scriptNode )"
+
+GafferUI.Editor.registerType( "RenderManStats", RenderManStatsEditor )
