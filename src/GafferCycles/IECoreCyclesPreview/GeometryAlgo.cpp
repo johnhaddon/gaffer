@@ -228,7 +228,7 @@ ccl::Geometry *convert( const IECore::Object *object, const std::string &nodeNam
 	return it->second.converter( object, nodeName, scene );
 }
 
-ccl::Geometry *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
+ccl::Geometry *convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
 {
 	if( samples.empty() )
 	{

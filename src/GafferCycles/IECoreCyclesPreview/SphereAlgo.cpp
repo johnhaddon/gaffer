@@ -108,7 +108,7 @@ ccl::Geometry *convert( const IECoreScene::SpherePrimitive *sphere, const std::s
 	return result;
 }
 
-ccl::Geometry *convert( const vector<const IECoreScene::SpherePrimitive *> &samples, const std::vector<float> &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
+ccl::Geometry *convert( const vector<const IECoreScene::SpherePrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
 {
 	ccl::Geometry *result = convertCommon( samples.front(), scene );
 	result->name = ccl::ustring( nodeName.c_str() );

@@ -144,7 +144,7 @@ ccl::Geometry *convert( const IECoreScene::PointsPrimitive *points, const std::s
 	return pointCloud;
 }
 
-ccl::Geometry *convert( const vector<const IECoreScene::PointsPrimitive *> &points, const std::vector<float> &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
+ccl::Geometry *convert( const vector<const IECoreScene::PointsPrimitive *> &points, const IECoreScenePreview::Renderer::SampleTimes &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
 {
 	const int numSamples = points.size();
 
