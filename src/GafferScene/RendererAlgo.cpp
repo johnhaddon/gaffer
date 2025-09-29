@@ -1506,14 +1506,9 @@ struct CameraOutput : public LocationOutput
 				}
 				else
 				{
-					vector<const Camera *> rawCameraSamples; rawCameraSamples.reserve( cameraSamples.size() );
-					for( auto &c : cameraSamples )
-					{
-						rawCameraSamples.push_back( c.get() );
-					}
 					objectInterface = renderer()->camera(
 						name( path ),
-						rawCameraSamples,
+						cameraSamples,
 						sampleTimes,
 						attributesInterface().get()
 					);
@@ -1680,13 +1675,7 @@ struct ObjectOutput : public LocationOutput
 		else
 		{
 			assert( sampleTimes.size() == samples.size() );
-			/// \todo Can we rejig things so this conversion isn't necessary?
-			vector<const Object *> objectsVector; objectsVector.reserve( samples.size() );
-			for( const auto &sample : samples )
-			{
-				objectsVector.push_back( sample.get() );
-			}
-			objectInterface = renderer()->object( name( path ), objectsVector, sampleTimes, attributesInterface.get() );
+			objectInterface = renderer()->object( name( path ), samples, sampleTimes, attributesInterface.get() );
 		}
 
 		if( objectInterface )

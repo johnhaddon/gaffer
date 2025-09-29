@@ -235,11 +235,11 @@ ccl::Geometry *convert( const IECoreScenePreview::Renderer::ObjectSamples &sampl
 		return nullptr;
 	}
 
-	const IECore::Object *firstSample = samples.front();
+	const IECore::Object *firstSample = samples.front().get();
 	const IECore::TypeId firstSampleTypeId = firstSample->typeId();
-	for( std::vector<const IECore::Object *>::const_iterator it = samples.begin()+1, eIt = samples.end(); it != eIt; ++it )
+	for( const auto &sample : samples )
 	{
-		if( (*it)->typeId() != firstSampleTypeId )
+		if( sample->typeId() != firstSampleTypeId )
 		{
 			throw IECore::Exception( "Inconsistent object types." );
 		}
@@ -257,7 +257,7 @@ ccl::Geometry *convert( const IECoreScenePreview::Renderer::ObjectSamples &sampl
 	}
 	else
 	{
-		return it->second.converter( samples.front(), nodeName, scene );
+		return it->second.converter( samples.front().get(), nodeName, scene );
 	}
 }
 
