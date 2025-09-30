@@ -1100,5 +1100,42 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 		self.assertEqual( acquiredEdit["mode"].getValue(), Gaffer.TweakPlug.Mode.Create )
 		self.assertEqual( acquiredEdit["value"].getValue(), "/existingCamera" )
 
+	def testMergeScenes( self ) :
+
+		plane = GafferScene.Plane()
+
+		editScope = Gaffer.EditScope()
+		editScope.setup( plane["out"] )
+		editScope["in"].setInput( plane["out"] )
+
+		outputs1 = GafferScene.Outputs()
+		outputs1["in"].setInput( editScope["out"] )
+		outputs2 = GafferScene.Outputs()
+		outputs2["in"].setInput( editScope["out"] )
+
+		mergeScenes = GafferScene.MergeScenes()
+		mergeScenes["in"][0].setInput( outputs1["out"] )
+		mergeScenes["in"][1].setInput( outputs2["out"] )
+		mergeScenes["globalsMode"].setValue( mergeScenes.Mode.Merge )
+
+		inspection = self.__inspect( mergeScenes["out"], "render:camera", editScope )
+		self.__assertExpectedResult(
+			inspection,
+			source = None,
+			sourceType = inspection.SourceType.Fallback,
+			editable = True,
+		)
+
+		edit = inspection.acquireEdit()
+		edit["enabled"].setValue( True )
+		edit["value"].setValue( "/myCamera" )
+
+		self.__assertExpectedResult(
+			self.__inspect( mergeScenes["out"], "render:camera", editScope ),
+			source = edit,
+			sourceType = inspection.SourceType.EditScope,
+			editable = True,
+		)
+
 if __name__ == "__main__" :
 	unittest.main()
