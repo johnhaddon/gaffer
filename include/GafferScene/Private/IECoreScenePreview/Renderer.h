@@ -44,6 +44,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/MessageHandler.h"
 
+#include "boost/container/small_vector.hpp"
 #include "boost/unordered_set.hpp"
 
 namespace IECoreScenePreview
@@ -157,10 +158,10 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 		using ObjectSet = boost::unordered_set<ObjectInterfacePtr>;
 		using ObjectSetPtr = std::shared_ptr<ObjectSet>;
 		using ConstObjectSetPtr = std::shared_ptr<const ObjectSet>;
-		using TransformSamples = std::vector<Imath::M44f>;
-		using CameraSamples = std::vector<IECoreScene::ConstCameraPtr>;
-		using ObjectSamples = std::vector<IECore::ConstObjectPtr>;
-		using SampleTimes = std::vector<float>;
+		using TransformSamples = boost::container::small_vector<Imath::M44f, 2>;
+		using CameraSamples = boost::container::small_vector<IECoreScene::ConstCameraPtr, 2>;
+		using ObjectSamples = boost::container::small_vector<IECore::ConstObjectPtr, 2>;
+		using SampleTimes = boost::container::small_vector<float, 2>;
 
 		/// A handle to an object in the renderer. The reference counting semantics of an
 		/// ObjectInterfacePtr are as follows :
