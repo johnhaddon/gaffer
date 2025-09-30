@@ -83,13 +83,13 @@ class ConverterDescription
 
 		/// Type-specific conversion functions.
 		using Converter = bool (*)( const T *, NSIContext_t, const char * );
-		using MotionConverter = bool (*)( const std::vector<const T *> &, const std::vector<float> &, NSIContext_t, const char * );
+		using MotionConverter = bool (*)( const std::vector<const T *> &, const std::vector<float> &, NSIContext_t, const char * ); // EEK!!! NOT GONNA WORK! MAYBE NEED TO PASS SPANS??
 
 		ConverterDescription( Converter converter, MotionConverter motionConverter = nullptr )
 		{
 			registerConverter(
 				T::staticTypeId(),
-				reinterpret_cast<NodeAlgo::Converter>( converter ),
+				reinterpret_cast<NodeAlgo::Converter>( converter ), // EEK!!!
 				reinterpret_cast<NodeAlgo::MotionConverter>( motionConverter )
 			);
 		}
