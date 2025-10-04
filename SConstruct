@@ -1487,6 +1487,10 @@ libraries = {
 
 	"GafferTractorUITest" : {},
 
+	"GafferFlamenco" : {},
+
+	"GafferFlamencoUI" : {},
+
 	"GafferUSD" : {
 		"envAppends" : {
 			"LIBS" :
