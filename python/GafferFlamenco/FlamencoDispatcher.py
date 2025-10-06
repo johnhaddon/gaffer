@@ -60,9 +60,9 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 		# build a simple list of tasks, which our Gaffer job type
 		# translates to a Flamenco job during submission.
 
-		tasks = {}
+		batchesToTasks = {}
 		for batch in rootBatch.preTasks() :
-			self.__buildTasksWalk( batch, tasks )
+			self.__buildTasksWalk( batch, batchesToTasks )
 
 		# Submit a job to run the tasks. There is a Flamenco Python
 		# API we could use for this part, but the protocol is simple
@@ -76,7 +76,7 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 			"priority" : self["priority"].getValue(),
 			"submitter_platform" : sys.platform, ## \todo Check
 			"settings" : {
-				"tasks" : list( tasks.values() ),
+				"tasks" : list( batchesToTasks.values() ),
 			},
 			"status" : "paused",
 		}
@@ -92,25 +92,25 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 		except urllib.error.URLError as e :
 			raise Exception( f"Failed to connect to manager. Is the manager running at {managerURL}?" ) from None
 
-	def __buildTasksWalk( self, batch, tasks ) :
+	def __buildTasksWalk( self, batch, batchesToTasks ) :
 
-		# Get unique task name.
+		# If we've already visited this batch, then return
+		# the name of the task we made already.
+
+		task = batchesToTasks.get( batch )
+		if task is not None :
+			return task["name"]
+
+		# Otherwise make a new task. Start by getting a unique
+		# task name.
 
 		nodeName = batch.node().relativeName( batch.node().scriptNode() )
 		frames = str( IECore.frameListFromList( [ int( x ) for x in batch.frames() ] ) )
 
 		taskName = "{nodeName}-{hash}{frames}".format(
-			nodeName = nodeName, hash = str( batch.context().hash() )[:7],
+			nodeName = nodeName, hash = hash( batch ),
 			frames = f"-{frames}" if frames else ""
 		)
-
-		# If we've already visited this batch, then return
-		# the task we made already.
-
-		if taskName in tasks :
-			return taskName
-
-		# Otherwise make a new task.
 
 		task = { "name" : taskName }
 		if frames :
@@ -138,9 +138,9 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 		# Recurse to upstream batches, adding them as dependencies of this task.
 
 		for upstreamBatch in batch.preTasks() :
-			task.setdefault( "dependencies", [] ).append( self.__buildTasksWalk( upstreamBatch, tasks ) )
+			task.setdefault( "dependencies", [] ).append( self.__buildTasksWalk( upstreamBatch, batchesToTasks ) )
 
-		tasks[taskName] = task
+		batchesToTasks[batch] = task
 		return taskName
 
 	@staticmethod
