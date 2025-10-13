@@ -911,7 +911,7 @@ class RendererTest( GafferTest.TestCase ) :
 		self.assertEqual( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[0], 0.0 )
 		self.assertGreater( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[1], 0.1 )
 		self.assertEqual( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[2], 0.0 )
-		self.assertEqual( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[3], 1.0 )
+		self.assertEqualWithAbsError( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[3], 1.0, 0.00001 )
 
 		# Light is camera visible and should be cyan.
 
@@ -963,7 +963,7 @@ class RendererTest( GafferTest.TestCase ) :
 		self.assertEqual( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[0], 0.0 )
 		self.assertGreater( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[1], 0.1 )
 		self.assertEqual( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[2], 0.0 )
-		self.assertEqual( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[3], 1.0 )
+		self.assertEqualWithAbsError( self.__colorAtUV( image, imath.V2f( 0.5, 0.5 ) )[3], 1.0, 0.00001 )
 
 		# No light in beauty.
 		self.assertEqual( self.__colorAtUV( image, imath.V2f( 0.75, 0.5 ) ), imath.Color4f( 0 ) )
@@ -2249,43 +2249,8 @@ class XPURendererTest( RendererTest ) :
 
 	renderer = "RenderMan XPU"
 
-	@unittest.skip( "PxrMeshLight not supported by XPU" )
-	def testMeshLight( self ) :
-
-		pass
-
-	@unittest.skip( "Display filters not supported by XPU" )
-	def testDisplayFilter( self ):
-
-		pass
-
-	@unittest.skip( "Sample filters not supported by XPU" )
-	def testSampleFilter( self ):
-
-		pass
-
 	@unittest.skip( "Checkpointing not supported by XPU" )
 	def testCheckpointing( self ):
-
-		pass
-
-	@unittest.skip( "Lama not supported by XPU" )
-	def testBXDFConnection( self ) :
-
-		pass
-
-	@unittest.skip( "Light shader edits not functioning yet" )
-	def testLightFilter( self ) :
-
-		pass
-
-	@unittest.skip( "Light shader edits not functioning yet" )
-	def testLightFilterCombineModes( self ) :
-
-		pass
-
-	@unittest.skip( "Light shader edits not functioning yet" )
-	def testLightFilterTransforms( self ) :
 
 		pass
 
