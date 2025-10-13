@@ -150,5 +150,7 @@ class RenderManXPURenderTest( RenderManRenderTest ) :
 
 	renderer = "RenderMan XPU"
 
+	unsupportedOutputMetadataTypes = [ IECore.M44fData ]
+
 if __name__ == "__main__":
 	unittest.main()
