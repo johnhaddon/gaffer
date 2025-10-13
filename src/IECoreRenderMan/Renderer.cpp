@@ -81,7 +81,9 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 	public :
 
 		RenderManRenderer( RtUString rileyVariant, RenderType renderType, const std::string &fileName, const MessageHandlerPtr &messageHandler )
-			:	m_messageHandler( messageHandler ), m_session( nullptr )
+			:	m_messageHandler( messageHandler ),
+				m_name( rileyVariant == RtUString() ? "RenderMan" : "RenderMan XPU" ),
+				m_session( nullptr )
 		{
 			if( renderType == SceneDescription )
 			{
@@ -108,7 +110,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		IECore::InternedString name() const override
 		{
-			return "RenderMan";
+			return m_name;
 		}
 
 		void option( const IECore::InternedString &name, const IECore::Object *value ) override
@@ -235,6 +237,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		IECore::MessageHandlerPtr m_messageHandler;
 		std::unique_ptr<Globals> m_globals;
+		const InternedString m_name;
 
 		// Used to acquire the Session via `m_globals` at the first point we need it.
 		// Also initialises other members that depend on the session.
