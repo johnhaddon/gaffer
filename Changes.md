@@ -20,6 +20,7 @@ Fixes
 - Viewer : Fixed diagnostic shading modes for Arnold's diffuse and specular visibility attributes.
 - Scene Editors : Fixed undo after creating a new edit in an EditScope.
 - RenderPasses : Fixed drawing of custom widgets registered by `registerRenderPassNameWidget()`.
+- Environment : Gaffer's `LD_PRELOAD` overrides are no longer inherited by subprocesses launched from Gaffer.
 
 Build
 -----

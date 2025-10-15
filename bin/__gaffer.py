@@ -50,6 +50,15 @@ signal.signal( signal.SIGINT, signal.SIG_DFL )
 # to catch all the naughty deprecated things we do.
 warnings.simplefilter( "default", DeprecationWarning )
 
+# Revert environment modifications that the `_gaffer.py` wrapper made, where they're not suitable
+# for passing to child processes.
+
+restorePrefix = "__GAFFER_RESTORE_"
+for name, value in list( os.environ.items() ) :
+	if name.startswith( restorePrefix ) :
+		os.environ[name[len(restorePrefix):]] = value
+		del os.environ[name]
+
 import Gaffer
 Gaffer._Gaffer._nameProcess()
 
