@@ -83,7 +83,7 @@ bool validName( const std::string &name )
 			!(c >= 'A' && c <= 'Z') &&
 			!(c >= 'a' && c <= 'z' ) &&
 			!(c >= '0' && c <= '9' ) &&
-			c != '_' && c != ':'
+			c != '_' && c != ':' && c != ' '
 		)
 		{
 			return false;
