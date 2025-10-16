@@ -279,7 +279,7 @@ if os.environ.get( "GAFFERRENDERMAN_HIDE_UI", "" ) != "1" :
 		] )
 
 	GafferSceneUI.SceneView.registerRenderer(
-		"RenderMan",
+		"RenderMan XPU",
 		functools.partial( __loadRendererSettings, os.path.join( os.path.dirname( __file__ ), "renderManViewerSettings.gfr" ) )
 	)
 
