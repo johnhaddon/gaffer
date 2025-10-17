@@ -150,6 +150,7 @@ class RenderManXPURenderTest( RenderManRenderTest ) :
 
 	renderer = "RenderMan XPU"
 
+	## \todo Remove - this will be fixed on the RenderMan side.
 	unsupportedOutputMetadataTypes = [ IECore.M44fData ]
 
 if __name__ == "__main__":
