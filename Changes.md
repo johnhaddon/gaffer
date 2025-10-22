@@ -8,6 +8,7 @@ Improvements
 - OSLShader :
  - Improved loading of spline parameters with additional duplicate endpoints.
  - Added support for loading splines from RenderMan shaders.
+- RenderManOptions : Added XPU device configuration options.
 
 Fixes
 -----
