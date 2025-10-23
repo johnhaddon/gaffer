@@ -84,7 +84,7 @@ gafferRoot = pathlib.Path( __file__ ).resolve().parents[1]
 # clean copies that can be restored by `__gaffer.py`.
 
 if sys.platform == "linux" :
-	os.environ["__GAFFER_RESTORE_LD_PRELOAD"] = os.environ.get( "LD_PRELOAD", "" )
+	os.environ["__GAFFER_RESTORE_LD_PRELOAD"] = os.environ.get( "LD_PRELOAD", "__NONE__" )
 
 # Cortex Setup
 # ============

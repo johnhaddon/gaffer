@@ -143,7 +143,7 @@ class ApplicationTest( GafferTest.TestCase ) :
 					[]
 				)
 
-		# But any `LD_PRELOADS` from the environment Gaffer is called
+		# But any `LD_PRELOAD` from the environment Gaffer is called
 		# in should be passed through as normal.
 
 		env = Gaffer.environment()
@@ -158,6 +158,29 @@ class ApplicationTest( GafferTest.TestCase ) :
 
 			env["LD_PRELOAD"],
 
+		)
+
+		# Even if it's just an empty string.
+
+		env["LD_PRELOAD"] = ""
+		self.assertEqual(
+
+			subprocess.check_output(
+				[ str( Gaffer.executablePath() ), "env", "python", "-c", "import os; print( os.environ['LD_PRELOAD'], end = '' )" ],
+				universal_newlines = True, env = env
+			),
+
+			env["LD_PRELOAD"],
+
+		)
+
+		# If `LD_PRELOAD` wasn't set in the launch environment, then it
+		# shouldn't be set for subprocesses either.
+
+		del env["LD_PRELOAD"]
+		subprocess.check_call(
+			[ str( Gaffer.executablePath() ), "env", "python", "-c", "import os; assert( 'LD_PRELOAD' not in os.environ )" ],
+			universal_newlines = True, env = env
 		)
 
 if __name__ == "__main__":

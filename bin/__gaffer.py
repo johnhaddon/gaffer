@@ -56,7 +56,10 @@ warnings.simplefilter( "default", DeprecationWarning )
 restorePrefix = "__GAFFER_RESTORE_"
 for name, value in list( os.environ.items() ) :
 	if name.startswith( restorePrefix ) :
-		os.environ[name[len(restorePrefix):]] = value
+		if value != "__NONE__" :
+			os.environ[name[len(restorePrefix):]] = value
+		else :
+			del os.environ[name[len(restorePrefix):]]
 		del os.environ[name]
 
 import Gaffer
