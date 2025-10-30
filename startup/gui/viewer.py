@@ -265,6 +265,7 @@ if os.environ.get( "GAFFERRENDERMAN_HIDE_UI", "" ) != "1" :
 
 	with IECore.IgnoredExceptions( ImportError ) :
 
+		import IECoreRenderMan
 		import GafferRenderMan
 
 		__registerShadingModes( [
@@ -278,10 +279,16 @@ if os.environ.get( "GAFFERRENDERMAN_HIDE_UI", "" ) != "1" :
 
 		] )
 
-	GafferSceneUI.SceneView.registerRenderer(
-		"RenderMan",
-		functools.partial( __loadRendererSettings, os.path.join( os.path.dirname( __file__ ), "renderManViewerSettings.gfr" ) )
-	)
+		GafferSceneUI.SceneView.registerRenderer(
+				"RenderMan",
+				functools.partial( __loadRendererSettings, os.path.join( os.path.dirname( __file__ ), "renderManViewerSettings.gfr" ) )
+			)
+
+		if IECoreRenderMan.renderManMajorVersion() >= 27 :
+			GafferSceneUI.SceneView.registerRenderer(
+				"RenderManXPU",
+				functools.partial( __loadRendererSettings, os.path.join( os.path.dirname( __file__ ), "renderManViewerSettings.gfr" ) )
+			)
 
 # Add catalogue hotkeys to viewers, eg: up/down navigation
 GafferUI.Editor.instanceCreatedSignal().connect( GafferSceneUI.CatalogueUI.addCatalogueHotkeys )
