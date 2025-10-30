@@ -2251,7 +2251,12 @@ class XPURendererTest( RendererTest ) :
 
 	renderer = "RenderMan XPU"
 
-	@unittest.skip( "Checkpointing not supported by XPU" )
+	## \todo Figure out why this test fails with XPU. It does seem
+	# that XPU will write a checkpoint sometimes, but possibly only if we make
+	# the render take longer. It's hard to tell if its actually recovering from
+	# checkpoints, but I've been unable to convince myself it is - it certainly
+	# doesn't emit the R56049 message we hope for.
+	@unittest.skip( "XPU checkpointing status unclear" )
 	def testCheckpointing( self ):
 
 		pass
