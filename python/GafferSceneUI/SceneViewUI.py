@@ -134,7 +134,7 @@ Gaffer.Metadata.registerNode(
 			"layoutPlugValueWidget:orientation" : "horizontal",
 			"toolbarLayout:index" : 1,
 			"toolbarLayout:label" : "",
-			"toolbarLayout:width" : 100,
+			"toolbarLayout:width" : 130,
 
 		},
 
@@ -1368,7 +1368,7 @@ class _EditScopeBalancingSpacer( GafferUI.Spacer ) :
 
 		editScopeWidth = Gaffer.Metadata.value( sceneView["editScope"], "toolbarLayout:width" ) or 130
 		# EditScope width + spacer - pause button - spacer - spinner - renderer
-		width = max( editScopeWidth + 4 - 25 - 4 - 20 - 100, 0 )
+		width = max( editScopeWidth + 4 - 25 - 4 - 20 - 130, 0 )
 		GafferUI.Spacer.__init__(
 			self,
 			imath.V2i( 0 ), # Minimum
@@ -1384,7 +1384,7 @@ class _RightEditScopeBalancingSpacer( GafferUI.Spacer ) :
 
 		editScopeWidth = Gaffer.Metadata.value( sceneView["editScope"], "toolbarLayout:width" ) or 130
 		# pause button + spacer + spinner + renderer - spacer - EditScope width
-		width = max( 25 + 4 + 20 + 100 - 4 - editScopeWidth, 0 )
+		width = max( 25 + 4 + 20 + 130 - 4 - editScopeWidth, 0 )
 		GafferUI.Spacer.__init__(
 			self,
 			imath.V2i( 0 ), # Minimum
