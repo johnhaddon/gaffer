@@ -35,6 +35,7 @@
 ##########################################################################
 
 import json
+import socket
 import sys
 import urllib.error
 import urllib.request
@@ -50,9 +51,44 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 
 		GafferDispatch.Dispatcher.__init__( self, name )
 
-		self["startPaused"] = Gaffer.BoolPlug()
+		self["managerURL"] = Gaffer.StringPlug( defaultValue = "" )
 		self["priority"] = Gaffer.IntPlug( defaultValue = 50, minValue = 0 )
-		self["managerURL"] = Gaffer.StringPlug( defaultValue = "http://localhost:8080" )
+		self["workerTag"] = Gaffer.StringPlug()
+		self["startPaused"] = Gaffer.BoolPlug()
+
+	## Searches for a Flamenco manager on the local network, returning
+	# a URL if one is found, or None otherwise.
+	@staticmethod
+	def discoverManagerURL() :
+
+		import socket
+
+		broadcastAddress = "239.255.255.250"
+		broadcastPort = 1900
+
+		import inspect
+
+		request = (
+			"M-SEARCH * HTTP/1.1\r\n" +
+			f"HOST: {broadcastAddress}:{broadcastPort}\r\n" +
+			'MAN: "ssdp:discover"\r\n' +
+			"MX: 1\r\n" +
+			"ST: urn:flamenco:manager:0\r\n"
+		)
+
+		request = request.replace( "\n", "\r\n" )
+		request = request.lstrip()
+
+		print( repr( request ) )
+
+		#LOCATION_REGEX = re.compile("LOCATION: {}_{}://[ ]*(.+)\r\n".format(self.protocol, self.networkid), re.IGNORECASE)
+		sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+
+		sock.sendto( request.encode( "ASCII" ), ( broadcastAddress, broadcastPort ) )
+		sock.settimeout( 3 )
+
+		data, _ = sock.recvfrom( 1024 )
+		print( data.decode( "ASCII" ), addr )
 
 	def _doDispatch( self, rootBatch ) :
 
@@ -80,9 +116,12 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 				"tasks" : list( batchesToTasks.values() ),
 			},
 
+			"worker_tag" : self["workerTag"].getValue(), ## NEEDS TO BE A UUID!!
 			"initial_status" : "paused" if self["startPaused"].getValue() else "active",
 
 		}
+
+		print( job )
 
 		managerURL = self["managerURL"].getValue().rstrip( "/" )
 		request = urllib.request.Request( f"{managerURL}/api/v3/jobs" )
@@ -149,6 +188,7 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 	@staticmethod
 	def _setupPlugs( parentPlug ) :
 
+		## \todo Allow task type to be specified
 		return
 
 IECore.registerRunTimeTyped( FlamencoDispatcher, typeName = "GafferFlamenco::FlamencoDispatcher" )

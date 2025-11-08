@@ -34,8 +34,16 @@
 #
 ##########################################################################
 
+import urllib.error
+import urllib.request
+
+import imath
+
 import Gaffer
+import GafferUI
 import GafferFlamenco
+
+from GafferUI.PlugValueWidget import sole
 
 Gaffer.Metadata.registerNode(
 
@@ -49,15 +57,6 @@ Gaffer.Metadata.registerNode(
 
 	plugs = {
 
-		"priority" : [
-
-			"description",
-			"""
-			The priority of the job relative to other jobs.
-			""",
-
-		],
-
 		"managerURL" : [
 
 			"description",
@@ -68,8 +67,79 @@ Gaffer.Metadata.registerNode(
 			> Tip : The Flamenco manager displays its own URL when it is first started.
 			""",
 
+			"plugValueWidget:type", "GafferFlamencoUI.FlamencoDispatcherUI._ManagerURLPlugValueWidget",
+
+		],
+
+		"priority" : [
+
+			"description",
+			"""
+			The priority of the job relative to other jobs.
+			""",
+
+		],
+
+		## TODO : DESCRIPTIONS FOR EVERYTHING
+
+		"workerTag" : [
+
+			## TODO : PRESETS FOR TAGS
+			#"plugValueWidget:type",
+
 		],
 
 	}
 
 )
+
+class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
+
+	def __init__( self, plugs, **kw ) :
+
+		print( "CONSTRUCTING" )
+
+		column = GafferUI.ListContainer( spacing = 4 )
+		GafferUI.PlugValueWidget.__init__( self, column, plugs )
+
+		with column :
+
+			GafferUI.StringPlugValueWidget( plugs )
+
+			with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) as self.__statusRow :
+
+				self.__statusIcon = GafferUI.Image( "warningSmall.png" )
+				self.__statusLabel = GafferUI.Label( "I am a status" )
+
+				GafferUI.Spacer( imath.V2i( 1 ) )
+
+				refreshButton = GafferUI.Button( hasFrame = False, image = "refresh.png" )
+				refreshButton.clickedSignal().connect( Gaffer.WeakMethod( self._requestUpdateFromValues ) )
+
+	def _updateFromValues( self, values, exception ) :
+
+		print( "UPDATING" )
+
+		# Possible code for auto-discovery of manager
+		# https://github.com/tw7613781/ssdp_upnp/blob/master/ssdp_upnp/ssdp.py#L121-L138"
+
+
+		managerURL = sole( values )
+
+		with urllib.request.urlopen( f"{managerURL}/api/v3/jobs/type/gaffer" ) as response :
+			print( response.read() )
+
+		# If there was an error getting the plug values, that will be
+		# shown by our StringPlugValueWidget. We can't show a status
+		# if we don't have a plug value, so just hide the status bar.
+		self.__statusRow.setVisible( exception is None )
+
+
+
+	# 	request.add_header( 'Content-Type', 'application/json; charset=utf-8' )
+
+	# 	try :
+	# 		urllib.request.urlopen( request, json.dumps( job ).encode( "utf-8" ) )
+
+		pass
+
