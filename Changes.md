@@ -1,6 +1,11 @@
 1.6.x.x (relative to 1.6.6.1)
 =======
 
+Improvements
+------------
+
+- NodeEditor : Added BoxPlug items to the plug creation menus.
+
 Fixes
 -----
 
