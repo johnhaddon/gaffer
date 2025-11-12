@@ -29,6 +29,7 @@ API
 ---
 
 - PlugCreationWidget : Added standard metadata-driven widget to allow users to add plugs to nodes.
+- UserPlugs : Deprecated. Use PlugCreationWidget instead.
 
 1.6.6.0 (relative to 1.6.5.1)
 =======
