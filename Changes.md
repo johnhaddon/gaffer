@@ -25,7 +25,15 @@ Fixes
 - Dispatcher : Fixed omission that prevented values from CompoundObjectPlugs, ObjectPlugs and ObjectVectorPlugs with inputs from being saved in a dispatch with `isolated` enabled.
 - Reference : Fixed "Duplicate as Box" order of operations, so the new Box is fully initialised before being parented and selected.
 
+API
+---
+
+- PlugCreationWidget : Added standard metadata-driven widget to allow users to add plugs to nodes.
+
 1.6.6.0 (relative to 1.6.5.1)
+=======
+
+1.6.x.x (relative to 1.6.5.1)
 =======
 
 Features
