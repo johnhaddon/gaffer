@@ -38,61 +38,8 @@
 import Gaffer
 import GafferUI
 
-## Supported plug metadata :
-#
-# "compoundDataPlugValueWidget:editable"
-#
-## \todo We could deprecate this and use LayoutPlugValueWidget/PlugCreationWidget
-# directly.
-class CompoundDataPlugValueWidget( GafferUI.PlugValueWidget ) :
-
-	def __init__( self, plug, **kw ) :
-
-		self.__column = GafferUI.ListContainer( spacing = 6 )
-
-		GafferUI.PlugValueWidget.__init__( self, self.__column, plug, **kw )
-
-		with self.__column :
-
-			self.__layout = GafferUI.PlugLayout( plug )
-			self.__plugCreationWidget = GafferUI.PlugCreationWidget( plug )
-
-	def hasLabel( self ) :
-
-		return True
-
-	def setPlug( self, plug ) :
-
-		GafferUI.PlugValueWidget.setPlug( self, plug )
-
-		self.__layout = GafferUI.PlugLayout( plug )
-		self.__plugCreationWidget = GafferUI.PlugCreationWidget( plug )
-		self.__column[:] = [ self.__layout, self.__plugCreationWidget ]
-
-	def childPlugValueWidget( self, childPlug ) :
-
-		return self.__layout.plugValueWidget( childPlug )
-
-	def _updateFromMetadata( self ) :
-
-		editable = Gaffer.Metadata.value( self.getPlug(), "compoundDataPlugValueWidget:editable" )
-		editable = editable if editable is not None else True
-		self.__plugCreationWidget.setVisible( editable )
-
-	def _updateFromEditable( self ) :
-
-		# Not using `_editable()` as it considers the whole plug to be non-editable if
-		# any child has an input connection, but that shouldn't prevent us adding a new
-		# child.
-		self.__plugCreationWidget.setEnabled(
-			self.getPlug().getInput() is None and not Gaffer.MetadataAlgo.readOnly( self.getPlug() )
-		)
-
-GafferUI.PlugValueWidget.registerType( Gaffer.CompoundDataPlug, CompoundDataPlugValueWidget )
-
-##########################################################################
-# Plug metadata
-##########################################################################
-
 Gaffer.Metadata.registerValue( Gaffer.CompoundDataPlug, "*", "deletable", lambda plug : plug.getFlags( Gaffer.Plug.Flags.Dynamic ) )
+Gaffer.Metadata.registerValue( Gaffer.CompoundDataPlug, "plugValueWidget:type", "GafferUI.LayoutPlugValueWidget" )
+Gaffer.Metadata.registerValue( Gaffer.CompoundDataPlug, "layout:customWidget:addButton:widgetType", "GafferUI.PlugCreationWidget" )
+Gaffer.Metadata.registerValue( Gaffer.CompoundDataPlug, "layout:customWidget:addButton:index", -1 ), # Last
 Gaffer.Metadata.registerValue( Gaffer.CompoundDataPlug, "plugCreationWidget:useGeometricInterpretation", True )
