@@ -1,6 +1,11 @@
 1.6.x.x (relative to 1.6.7.0)
 =======
 
+Features
+--------
+
+- FileList : Added node for listing matching files.
+
 Improvements
 ------------
 
