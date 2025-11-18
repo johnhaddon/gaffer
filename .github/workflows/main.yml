@@ -268,14 +268,14 @@ jobs:
         echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
         ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }} IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
         echo "::remove-matcher owner=unittest::"
-        # Free up space for the next installation.
-        rm -r $RMANTREE
       env:
         PYTHONUTF8: 1
       if: ${{ env.RMANTREE != '' }}
 
     - name: Install RenderMan 27.0
-      run: ./.github/workflows/main/installRenderMan.py --version 27.0 --outputFormat "RMANTREE={rmanTree}" >> $GITHUB_ENV
+      run: |
+        rm -r $RMANTREE # Free up precious disk space from the previous installation
+        ./.github/workflows/main/installRenderMan.py --version 27.0 --outputFormat "RMANTREE={rmanTree}" >> $GITHUB_ENV
       shell: bash
       env:
         RENDERMAN_DOWNLOAD_USER: ${{ secrets.RENDERMAN_DOWNLOAD_USER }}
