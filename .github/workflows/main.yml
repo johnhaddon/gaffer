@@ -303,7 +303,7 @@ jobs:
         df -H
       env:
         RENDERMAN_DOWNLOAD_USER: ${{ secrets.RENDERMAN_DOWNLOAD_USER }}
-      if: ${{ env.RENDERMAN_DOWNLOAD_USER != '' && runner.os != 'Windows' }}
+      if: ${{ env.RENDERMAN_DOWNLOAD_USER != '' && runner.os != 'Windows' && ${{ matrix.name }} != 'linux-gcc11-platform23' }}
 
     - name: Build Docs and Package
       # Docs builds should be relatively quick. If there is a problem, this
