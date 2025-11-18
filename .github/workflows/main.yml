@@ -270,6 +270,7 @@ jobs:
         echo "::remove-matcher owner=unittest::"
         # Free up space for the next installation.
         rm -rf $RMANTREE
+      shell: bash
       env:
         PYTHONUTF8: 1
       if: ${{ env.RMANTREE != '' }}
