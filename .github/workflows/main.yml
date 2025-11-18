@@ -274,7 +274,7 @@ jobs:
 
     - name: Install RenderMan 27.0
       run: |
-        rm -r $RMANTREE # Free up precious disk space from the previous installation
+        rm -r "$RMANTREE" # Free up precious disk space from the previous installation
         ./.github/workflows/main/installRenderMan.py --version 27.0 --outputFormat "RMANTREE={rmanTree}" >> $GITHUB_ENV
       shell: bash
       env:
