@@ -291,7 +291,7 @@ jobs:
       if: ${{ env.RMANTREE != '' }}
 
     - name: Test against RenderMan 27.0
-      # RenderMan 27 claims to compatible with VFXPlatform 2024, but requires a
+      # RenderMan 27 claims to be compatible with VFXPlatform 2024, but requires a
       # glibc version higher than the allowed maximum of 2.28. This means we
       # can't run RenderMan in our Rocky 8 build container, which was carefully
       # chosen to provide a conforming glibc version. So, to test RenderMan 27,
