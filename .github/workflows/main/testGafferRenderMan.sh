@@ -6,12 +6,10 @@ set -e
 # space on the GitHub runners. Install the bare minimum of packages required by
 # Gaffer/RenderMan.
 
-microdnf install -y lcms2 mesa-libGL mesa-libGLU fontconfig libgomp
+microdnf install -y lcms2 mesa-libGL mesa-libGLU fontconfig libgomp libxcb libxkbcommon-x11 xcb-util-image xcb-util-cursor xcb-util-wm xcb-util-keysyms
 
 # Run the tests.
-## \todo Add GafferRenderManUITest. This will require additional packages
-# to be installed.
 
 echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
-$GAFFER_BUILD_DIR/bin/gaffer test IECoreRenderManTest GafferRenderManTest
+$GAFFER_BUILD_DIR/bin/gaffer test IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
 echo "::remove-matcher owner=unittest::"
