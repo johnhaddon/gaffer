@@ -269,8 +269,7 @@ jobs:
         ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }} IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
         echo "::remove-matcher owner=unittest::"
         # Free up space for the next installation.
-        rm -rf $RMANTREE
-      shell: bash
+        rm -r $RMANTREE
       env:
         PYTHONUTF8: 1
       if: ${{ env.RMANTREE != '' }}
