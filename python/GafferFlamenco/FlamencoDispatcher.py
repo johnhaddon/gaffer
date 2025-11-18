@@ -34,7 +34,9 @@
 #
 ##########################################################################
 
+import enum
 import json
+import re
 import socket
 import sys
 import urllib.error
@@ -56,39 +58,36 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 		self["workerTag"] = Gaffer.StringPlug()
 		self["startPaused"] = Gaffer.BoolPlug()
 
-	## Searches for a Flamenco manager on the local network, returning
-	# a URL if one is found, or None otherwise.
+	ManagerStatus = enum.Enum(
+		"ManagerStatus", [
+			"NotFound",
+			"JobTypeMissing",
+			"OK",
+		]
+	)
+
 	@staticmethod
-	def discoverManagerURL() :
+	def managerStatus( managerURL ) :
 
-		import socket
+		if not managerURL :
+			managerURL = FlamencoDispatcher.__discoverManagerURL()
+			if managerURL is None :
+				result = FlamencoDispatcher.ManagerStatus.NotFound
+				result.url = ""
+				return result
 
-		broadcastAddress = "239.255.255.250"
-		broadcastPort = 1900
+		try :
+			request = urllib.request.Request( f"{managerURL}/api/v3/type/gaffer" )
+			request.add_header( 'Content-Type', 'application/json; charset=utf-8' )
+			urllib.request.urlopen( f"{managerURL}/api/v3/jobs/type/gaffer" )
+			result = FlamencoDispatcher.ManagerStatus.OK
+		except urllib.error.HTTPError as e :
+			result = FlamencoDispatcher.ManagerStatus.JobTypeMissing
+		except :
+			result = FlamencoDispatcher.ManagerStatus.NotFound
 
-		import inspect
-
-		request = (
-			"M-SEARCH * HTTP/1.1\r\n" +
-			f"HOST: {broadcastAddress}:{broadcastPort}\r\n" +
-			'MAN: "ssdp:discover"\r\n' +
-			"MX: 1\r\n" +
-			"ST: urn:flamenco:manager:0\r\n"
-		)
-
-		request = request.replace( "\n", "\r\n" )
-		request = request.lstrip()
-
-		print( repr( request ) )
-
-		#LOCATION_REGEX = re.compile("LOCATION: {}_{}://[ ]*(.+)\r\n".format(self.protocol, self.networkid), re.IGNORECASE)
-		sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-
-		sock.sendto( request.encode( "ASCII" ), ( broadcastAddress, broadcastPort ) )
-		sock.settimeout( 3 )
-
-		data, _ = sock.recvfrom( 1024 )
-		print( data.decode( "ASCII" ), addr )
+		result.url = managerURL
+		return result
 
 	def _doDispatch( self, rootBatch ) :
 
@@ -121,9 +120,14 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 
 		}
 
-		print( job )
+		## TODO : USE STATUS METHOD
 
 		managerURL = self["managerURL"].getValue().rstrip( "/" )
+		if not managerURL :
+			managerURL = self.__discoverManagerURL()
+			if not managerURL :
+				raise Exception( "Failed to discover manager" )
+
 		request = urllib.request.Request( f"{managerURL}/api/v3/jobs" )
 		request.add_header( 'Content-Type', 'application/json; charset=utf-8' )
 
@@ -190,6 +194,36 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 
 		## \todo Allow task type to be specified
 		return
+
+	@staticmethod
+	def __discoverManagerURL() :
+
+		broadcastAddress = "239.255.255.250"
+		broadcastPort = 1900
+
+		request = (
+			"M-SEARCH * HTTP/1.1\r\n"
+			f"HOST: {broadcastAddress}:{broadcastPort}\r\n"
+			"MAN: \"ssdp:discover\"\r\n"
+			"MX: 1\r\n"
+			"ST: urn:flamenco:manager:0\r\n"
+			"\r\n"
+		)
+
+		sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+		sock.settimeout( 3 )
+		sock.sendto( request.encode( "ASCII" ), ( broadcastAddress, broadcastPort ) )
+
+		try :
+			data, _ = sock.recvfrom( 1024 )
+		except TimeoutError :
+			return None
+
+		match = re.search( r"LOCATION:\s*(.*)/upnp/description\.xml",  data.decode( "ASCII" ) )
+		if match is not None :
+			return match.group( 1 )
+		else :
+			return None
 
 IECore.registerRunTimeTyped( FlamencoDispatcher, typeName = "GafferFlamenco::FlamencoDispatcher" )
 

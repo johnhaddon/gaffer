@@ -58,6 +58,13 @@ class Image( GafferUI.Widget ) :
 		# the same size.
 		self._qtWidget().setSizePolicy( QtWidgets.QSizePolicy( QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed ) )
 
+		self.setImage( imagePrimitiveOrFileName )
+
+		self.__pixmapHighlighted = None
+		self.__pixmapDisabled = None
+
+	def setImage( self, imagePrimitiveOrFileName ) :
+
 		if isinstance( imagePrimitiveOrFileName, str ) :
 			pixmap = self._qtPixmapFromFile( str( imagePrimitiveOrFileName ) )
 		elif isinstance( imagePrimitiveOrFileName, IECoreImage.ImagePrimitive ) :
@@ -67,9 +74,6 @@ class Image( GafferUI.Widget ) :
 
 		if pixmap is not None :
 			self._qtWidget().setPixmap( pixmap )
-
-		self.__pixmapHighlighted = None
-		self.__pixmapDisabled = None
 
 	## Creates an Image containing a color swatch useful for
 	# button and menu icons. An `image` can be overlaid on

@@ -154,6 +154,8 @@ class BackgroundMethod( object ) :
 			plug = method.__plug( widget )
 			superceded = _ValueWrapper( False )
 
+			print( "USING PLUG", plug  )
+
 			backgroundTask = Gaffer.ParallelAlgo.callOnBackgroundThread(
 				plug,
 				functools.partial( backgroundFunction, widget, superceded, *args, **kw )
