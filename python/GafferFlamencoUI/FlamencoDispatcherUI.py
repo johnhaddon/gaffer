@@ -43,7 +43,10 @@ import Gaffer
 import GafferUI
 import GafferFlamenco
 
+from GafferUI._StyleSheet import _styleColors
 from GafferUI.PlugValueWidget import sole
+
+from Qt import QtGui
 
 Gaffer.Metadata.registerNode(
 
@@ -57,47 +60,47 @@ Gaffer.Metadata.registerNode(
 
 	plugs = {
 
-		"managerURL" : [
+		"managerURL" : {
 
-			"description",
+			"description" :
 			"""
-			The URL used to connect to the Flamenco manager. Defaults to a manager running
-			on the same machine as Gaffer, using the default port.
+			The URL used to connect to the Flamenco manager. If not specified, the
+			manager will be discovered automatically.
 
 			> Tip : The Flamenco manager displays its own URL when it is first started.
 			""",
 
-			"plugValueWidget:type", "GafferFlamencoUI.FlamencoDispatcherUI._ManagerURLPlugValueWidget",
+			"plugValueWidget:type" : "GafferFlamencoUI.FlamencoDispatcherUI._ManagerURLPlugValueWidget",
+			"stringPlugValueWidget:placeholderText" : "Auto",
 
-		],
+		},
 
-		"priority" : [
+		"priority" : {
 
-			"description",
+			"description" :
 			"""
 			The priority of the job relative to other jobs.
 			""",
 
-		],
+		},
 
 		## TODO : DESCRIPTIONS FOR EVERYTHING
 
-		"workerTag" : [
+		"workerTag" : {
 
 			## TODO : PRESETS FOR TAGS
 			#"plugValueWidget:type",
 
-		],
+		},
 
 	}
 
 )
 
+## TODO : MOVE TO TOP??
 class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plugs, **kw ) :
-
-		print( "CONSTRUCTING" )
 
 		column = GafferUI.ListContainer( spacing = 4 )
 		GafferUI.PlugValueWidget.__init__( self, column, plugs )
@@ -106,40 +109,80 @@ class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 			GafferUI.StringPlugValueWidget( plugs )
 
-			with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) as self.__statusRow :
+			with GafferUI.Frame( borderWidth = 4, borderStyle = GafferUI.Frame.BorderStyle.None_, ) as frame :
 
-				self.__statusIcon = GafferUI.Image( "warningSmall.png" )
-				self.__statusLabel = GafferUI.Label( "I am a status" )
+				## \todo Add public "role" property to Frame widget and use that to determine styling.
+				frame._qtWidget().setProperty( "gafferDiff", "Other" )
 
-				GafferUI.Spacer( imath.V2i( 1 ) )
+				with GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Horizontal, spacing = 4 ) :
 
-				refreshButton = GafferUI.Button( hasFrame = False, image = "refresh.png" )
-				refreshButton.clickedSignal().connect( Gaffer.WeakMethod( self._requestUpdateFromValues ) )
+					self.__statusIcon = GafferUI.Image( "infoSmall.png" )
+					self.__statusLabel = GafferUI.Label( "Checking..." )
+					self.__statusLabel.linkActivatedSignal().connect( Gaffer.WeakMethod( self.__installJobType ) )
+
+					GafferUI.Spacer( imath.V2i( 1 ) )
+
+					refreshButton = GafferUI.Button( hasFrame = False, image = "refresh.png" )
+					refreshButton.clickedSignal().connect( Gaffer.WeakMethod( self.__refreshClicked ) )
+
+		self.__currentURL = None
 
 	def _updateFromValues( self, values, exception ) :
 
-		print( "UPDATING" )
+		if not values or values[0] == self.__currentURL :
+			return
 
-		# Possible code for auto-discovery of manager
-		# https://github.com/tw7613781/ssdp_upnp/blob/master/ssdp_upnp/ssdp.py#L121-L138"
+		self.__currentURL = values[0]
+		self.__updateStatusInBackground( self.__currentURL )
+
+	def __refreshClicked( self, button ) :
+
+		self.__currentURL = None
+		self._requestUpdateFromValues()
+
+	@GafferUI.BackgroundMethod()
+	def __updateStatusInBackground( self, managerURL ) :
+
+		return GafferFlamenco.FlamencoDispatcher.managerStatus( managerURL )
+
+	@__updateStatusInBackground.plug
+	def __updateStatusInBackgroundPplug( self ) :
+
+		# We don't depend on any graph state, so don't need
+		# to be cancelled before the graph is edited.
+		return None
+
+	@__updateStatusInBackground.preCall
+	def __updateStatusInBackgroundPreCall( self ) :
+
+		self.__updateIconAndLabel( "infoSmall.png", "Checking..." )
+
+	@__updateStatusInBackground.postCall
+	def __updateStatusInBackgroundPostCall( self, status ) :
+
+		## TODO : DEAL WITH CANCELLATION
 
 
-		managerURL = sole( values )
+		match status :
+			case GafferFlamenco.FlamencoDispatcher.ManagerStatus.NotFound :
+				self.__updateIconAndLabel( "warningSmall.png", "Manager not found" )
+			case GafferFlamenco.FlamencoDispatcher.ManagerStatus.JobTypeMissing :
+				self.__updateIconAndLabel(
+					"warningSmall.png",
+					"Gaffer job type missing. <a href=install>Install now</a>"
+				)
+			case GafferFlamenco.FlamencoDispatcher.ManagerStatus.OK :
+				self.__updateIconAndLabel( "infoSmall.png", status.url )
 
-		with urllib.request.urlopen( f"{managerURL}/api/v3/jobs/type/gaffer" ) as response :
-			print( response.read() )
+	def __updateIconAndLabel( self, icon, label ) :
 
-		# If there was an error getting the plug values, that will be
-		# shown by our StringPlugValueWidget. We can't show a status
-		# if we don't have a plug value, so just hide the status bar.
-		self.__statusRow.setVisible( exception is None )
+		textColor = QtGui.QColor( *_styleColors["foregroundFaded"] ).name()
+		linkColor = QtGui.QColor( *_styleColors["foregroundInfo"] ).name()
+		label = f"<html><header><style type=text/css> * {{ color:{textColor} }} a {{ color:{linkColor}}}></style></head><body>{label}</body></html>"
 
+		self.__statusIcon.setImage( icon )
+		self.__statusLabel.setText( label )
 
+	def __installJobType( self, *unused ) :
 
-	# 	request.add_header( 'Content-Type', 'application/json; charset=utf-8' )
-
-	# 	try :
-	# 		urllib.request.urlopen( request, json.dumps( job ).encode( "utf-8" ) )
-
-		pass
-
+		print( "INSTALLING" )
