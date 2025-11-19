@@ -2190,7 +2190,7 @@ class RendererTest( GafferTest.TestCase ) :
 		with IECoreRenderManTest.RileyCapture() as capture :
 
 			renderer = GafferScene.Private.IECoreScenePreview.Renderer.create(
-				"RenderMan",
+				self.renderer,
 				GafferScene.Private.IECoreScenePreview.Renderer.RenderType.Batch
 			)
 
