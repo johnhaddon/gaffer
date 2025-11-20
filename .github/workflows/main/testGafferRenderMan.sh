@@ -6,7 +6,7 @@ set -e
 # space on the GitHub runners. Install the bare minimum of packages required by
 # Gaffer/RenderMan.
 
-microdnf install -y lcms2 mesa-libGL mesa-libGLU libglvnd-opengl fontconfig libgomp
+microdnf install -y lcms2 mesa-libGL mesa-libGLU libglvnd-opengl fontconfig libgomp numactl-libs
 
 # Run the tests.
 ## \todo Run GafferRenderManUITest as well. To do this we need to install some
