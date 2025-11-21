@@ -95,7 +95,7 @@ jobs:
         LD_PRELOAD: libSegFault.so
       # The MAC address is required by our RenderMan license. The `--privileged`
       # option is needed to run docker containers inside the main docker container.
-      options: --mac-address a4:bb:6d:cf:40:7a
+      options: --mac-address a4:bb:6d:cf:40:7a --privileged
 
     env:
       ARNOLD_LICENSE_ORDER: none # Don't waste time looking for a license that doesn't exist
