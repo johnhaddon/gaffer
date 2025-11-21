@@ -297,7 +297,7 @@ jobs:
       # we must run in a Rocky 9 container.
       run: |
         dnf install -y podman
-        podman run -e RMANTREE -e GITHUB_WORKSPACE -e GAFFER_BUILD_DIR -v /opt/pixar:/opt/pixar -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE --network host --ipc host --entrypoint=sh -w $GITHUB_WORKSPACE rockylinux:9.4-minimal -c .github/workflows/main/testGafferRenderMan.sh
+        podman run -e RMANTREE -e GITHUB_WORKSPACE -e GAFFER_BUILD_DIR -v /opt/pixar:/opt/pixar -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE --network host --ipc host --privileged --entrypoint=sh -w $GITHUB_WORKSPACE rockylinux:9.4-minimal -c .github/workflows/main/testGafferRenderMan.sh
         df -H
       if: ${{ env.RMANTREE != '' && runner.os != 'Windows' && matrix.name != 'linux-gcc11-platform23' }}
 
