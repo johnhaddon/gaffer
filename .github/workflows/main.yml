@@ -267,6 +267,7 @@ jobs:
       run: |
         scons -j ${{ matrix.jobs }} build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
         echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
+        export LD_DEBUG=files
         ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }} IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
         echo "::remove-matcher owner=unittest::"
       env:
