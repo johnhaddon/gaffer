@@ -46,7 +46,6 @@ import OpenImageIO
 import IECore
 import IECoreImage
 import IECoreScene
-import IECoreRenderMan
 import IECoreRenderManTest
 
 import GafferTest
