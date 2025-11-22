@@ -51,6 +51,8 @@ import IECoreRenderManTest
 import GafferTest
 import GafferScene
 
+import IECoreRenderMan
+
 @unittest.skipIf( GafferTest.inCI() and os.name == "nt", "RenderMan cannot get license on Windows.")
 class RendererTest( GafferTest.TestCase ) :
 
