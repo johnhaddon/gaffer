@@ -147,17 +147,5 @@ class RenderManRenderTest( GafferSceneTest.RenderTest ) :
 
 		pass
 
-@unittest.skipIf( IECoreRenderMan.renderManMajorVersion() < 27, "XPU only supported for RenderMan 27+" )
-class RenderManXPURenderTest( RenderManRenderTest ) :
-
-	renderer = "RenderManXPU"
-
-	## \todo Either find a way of getting float outputs in the style of RIS,
-	# or update OpenImageIOReader to load integer IDs via `reinterpret_cast`.
-	@unittest.skip( "XPU only renders integer ID outputs, but we want floats" )
-	def testIDOutput( self ) :
-
-		pass
-
 if __name__ == "__main__":
 	unittest.main()
