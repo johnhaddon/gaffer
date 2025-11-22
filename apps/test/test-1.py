@@ -151,8 +151,13 @@ class test( Gaffer.Application ) :
 
 		for i in range( 0, args["repeat"].value ) :
 
+			print( "test 1", flush = True )
+
 			testSuite = unittest.TestSuite()
+
+			print( "test 2", flush = True )
 			for name in args["testCases"] :
+				print( "test 1", name, flush = True )
 				testCase = unittest.defaultTestLoader.loadTestsFromName( name )
 				testSuite.addTest( testCase )
 
@@ -160,18 +165,28 @@ class test( Gaffer.Application ) :
 				print( " ".join( sorted( GafferTest.TestRunner.categories( testSuite ) ) ) )
 				return 0
 
+			print( "test 3", flush = True )
+
 			GafferTest.TestRunner.filterCategories( testSuite, args["category"].value, args["excludedCategories"].value )
+
+			print( "test 4", flush = True )
 
 			testRunner = GafferTest.TestRunner( previousResultsFile = args["previousOutputFile"].value )
 			if args["stopOnFailure"].value :
 				testRunner.failfast = True
 
+			print( "test 5", flush = True )
+
 			with warnings.catch_warnings() :
 				warnings.simplefilter( "error", DeprecationWarning )
 				testResult = testRunner.run( testSuite )
 
+			print( "test 6", flush = True )
+
 			if args["outputFile"].value :
 				testResult.save( args["outputFile"].value )
+
+			print( "test 7", flush = True )
 
 			if not testResult.wasSuccessful() :
 				return 1

@@ -68,6 +68,8 @@ print( "importing Gaffer bits", flush = True )
 import GafferTest
 import GafferScene
 
+print( "imported Gaffer bits", flush = True )
+
 @unittest.skipIf( GafferTest.inCI() and os.name == "nt", "RenderMan cannot get license on Windows.")
 class RendererTest( GafferTest.TestCase ) :
 
