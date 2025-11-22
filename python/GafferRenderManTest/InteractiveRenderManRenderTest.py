@@ -39,7 +39,6 @@ import unittest
 
 import imath
 
-import IECore
 import IECoreRenderMan
 import GafferTest
 import GafferSceneTest
