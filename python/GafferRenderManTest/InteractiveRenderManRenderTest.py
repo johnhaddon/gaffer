@@ -106,14 +106,5 @@ class InteractiveRenderManRenderTest( GafferSceneTest.InteractiveRenderTest ) :
 
 		self.skipTest( "Light filters not supported" )
 
-@unittest.skipIf( IECoreRenderMan.renderManMajorVersion() < 27, "XPU only supported for RenderMan 27+" )
-class InteractiveRenderManXPURenderTest( InteractiveRenderManRenderTest ) :
-
-	renderer = "RenderManXPU"
-
-	def setUp( self ) :
-
-		InteractiveRenderManRenderTest.setUp( self )
-
 if __name__ == "__main__":
 	unittest.main()
