@@ -34,36 +34,36 @@
 #
 ##########################################################################
 
-print( "importing native modules" )
+print( "importing native modules", flush = True )
 
 import math
 import os
 import time
 import unittest
 
-print( "importing imath" )
+print( "importing imath", flush = True )
 
 import imath
 
-print( "importing openimageio" )
+print( "importing openimageio", flush = True )
 
 import OpenImageIO
 
-print( "importing cortex" )
+print( "importing cortex", flush = True )
 
 import IECore
 import IECoreImage
 import IECoreScene
 
-print( "importing IECoreRenderMan" )
+print( "importing IECoreRenderMan", flush = True )
 
 import IECoreRenderMan
 
-print( "importing IECoreRenderManTest" )
+print( "importing IECoreRenderManTest", flush = True )
 
 import IECoreRenderManTest
 
-print( "importing Gaffer bits" )
+print( "importing Gaffer bits", flush = True )
 
 import GafferTest
 import GafferScene
