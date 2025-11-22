@@ -2322,20 +2322,5 @@ class RendererTest( GafferTest.TestCase ) :
 		c = self.__colorAtUV( image, uv )
 		return imath.Color3f( c.r, c.g, c.b )
 
-@unittest.skipIf( IECoreRenderMan.renderManMajorVersion() < 27, "XPU only supported for RenderMan 27+" )
-class XPURendererTest( RendererTest ) :
-
-	renderer = "RenderManXPU"
-
-	## \todo Figure out why this test fails with XPU. It does seem
-	# that XPU will write a checkpoint sometimes, but possibly only if we make
-	# the render take longer. It's hard to tell if its actually recovering from
-	# checkpoints, but I've been unable to convince myself it is - it certainly
-	# doesn't emit the R56049 message we hope for.
-	@unittest.skip( "XPU checkpointing status unclear" )
-	def testCheckpointing( self ):
-
-		pass
-
 if __name__ == "__main__":
 	unittest.main()
