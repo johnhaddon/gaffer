@@ -34,19 +34,36 @@
 #
 ##########################################################################
 
+print( "importing native modules" )
+
 import math
 import os
 import time
 import unittest
 
+print( "importing imath" )
+
 import imath
 
+print( "importing openimageio" )
+
 import OpenImageIO
+
+print( "importing cortex" )
 
 import IECore
 import IECoreImage
 import IECoreScene
+
+print( "importing IECoreRenderMan" )
+
+import IECoreRenderMan
+
+print( "importing IECoreRenderManTest" )
+
 import IECoreRenderManTest
+
+print( "importing Gaffer bits" )
 
 import GafferTest
 import GafferScene

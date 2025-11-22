@@ -257,6 +257,7 @@ jobs:
       run: ./.github/workflows/main/installRenderMan.py --version 26.3 --outputFormat "RMANTREE={rmanTree}" >> $GITHUB_ENV
       shell: bash
       env:
+        LD_DEBUG: files
         RENDERMAN_DOWNLOAD_USER: ${{ secrets.RENDERMAN_DOWNLOAD_USER }}
         RENDERMAN_DOWNLOAD_PASSWORD: ${{ secrets.RENDERMAN_DOWNLOAD_PASSWORD }}
         RENDERMAN_LICENSE_PASSPHRASE: ${{ secrets.RENDERMAN_LICENSE_PASSPHRASE }}
