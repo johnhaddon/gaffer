@@ -8,6 +8,8 @@ set -e
 
 microdnf install -y lcms2 mesa-libGL mesa-libGLU libglvnd-opengl fontconfig libgomp numactl-libs
 
+export LD_PRELOAD=libSegFault.so
+
 # Run the tests.
 ## \todo Run GafferRenderManUITest as well. To do this we need to install some
 # additional packages above, and modify the `podman run` call in `main.yml` so
