@@ -34,13 +34,23 @@
 #
 ##########################################################################
 
+print( "usd.py 1", flush = True )
+
 import os
 
+print( "usd.py 2", flush = True )
+
 import IECore
+
+print( "usd.py 3", flush = True )
 
 moduleSearchPath = IECore.SearchPath( os.environ["PYTHONPATH"] )
 if moduleSearchPath.find( "IECoreUSD" ) and moduleSearchPath.find( "pxr/Usd" ) :
 
+	print( "usd.py 4", flush = True )
+
 	# Import IECoreUSD so that we get the USD SceneInterface registered,
 	# providing USD functionality to both the SceneReader and SceneWriter.
 	import IECoreUSD
+
+	print( "usd.py 5", flush = True )
