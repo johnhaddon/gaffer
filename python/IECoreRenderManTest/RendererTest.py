@@ -63,9 +63,10 @@ print( "importing IECoreRenderManTest", flush = True )
 
 import IECoreRenderManTest
 
-print( "importing Gaffer bits", flush = True )
+print( "importing Gaffer Test", flush = True )
 
 import GafferTest
+print( "importing Gaffer Scene", flush = True )
 import GafferScene
 
 print( "imported Gaffer bits", flush = True )

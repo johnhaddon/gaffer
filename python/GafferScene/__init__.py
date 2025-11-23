@@ -35,16 +35,33 @@
 #
 ##########################################################################
 
+print( "GafferScene importing IECoreScene", flush = True )
+
 __import__( "IECoreScene" )
+
+print( "GafferScene importing Gaffer", flush = True )
+
 __import__( "Gaffer" )
+
+print( "GafferScene importing GafferDispatch", flush = True )
+
 __import__( "GafferDispatch" )
+
+print( "GafferScene importing GafferImage", flush = True )
+
 __import__( "GafferImage" )
 
+print( "GafferScene importing _GafferScene", flush = True )
+
 from ._GafferScene import *
+
+print( "GafferScene importing NODES", flush = True )
 
 from .CatalogueSelect import CatalogueSelect
 from .ShaderBall import ShaderBall
 from .RenderPassWedge import RenderPassWedge
 from .RenderPassTypeAdaptor import RenderPassTypeAdaptor
+
+print( "GafferScene running startup", flush = True )
 
 __import__( "IECore" ).loadConfig( "GAFFER_STARTUP_PATHS", subdirectory = "GafferScene" )
