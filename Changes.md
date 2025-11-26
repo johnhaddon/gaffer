@@ -4,7 +4,9 @@
 Improvements
 ------------
 
-- NodeEditor : Added BoxPlug items to the plug creation menus.
+- NodeEditor :
+  - Added BoxPlug items to the plug creation menus.
+  - Added more Array items to the plug creation menus.
 
 Fixes
 -----
