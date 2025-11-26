@@ -83,6 +83,39 @@ class PlugCreationWidget( GafferUI.Widget ) :
 
 		self.__updateReadOnly()
 
+	## Returns the GraphComponent on which this widget creates plugs.
+	def plugParent( self ) :
+
+		return self.__plugParent
+
+	__plugCreationMenuSignal = Gaffer.Signals.Signal2(
+		Gaffer.Signals.CatchingCombiner( "PlugCreationWidget.plugCreationMenuSignal" )
+	)
+	## Signal is emitted to allow customisation of the menu used
+	# to create plugs. The signature for slots is `( menuDefinition, plugCreationWidget )`,
+	# and slots should just modify the menu definition in place.
+	@staticmethod
+	def plugCreationMenuSignal() :
+
+		return PlugCreationWidget.__plugCreationMenuSignal
+
+	## Creates a plug on `plugParent()`. Expected to be called from menu items
+	# created by `plugCreationMenuSignal()`. The optional `name` argument is
+	# used only when wrapping the created plug in a NameValuePlug or TweakPlug.
+	def createPlug( self, plug, name = "" ) :
+
+		with Gaffer.UndoScope( self.__plugParent.ancestor( Gaffer.ScriptNode ) ) :
+			if isinstance( self.__plugParent, Gaffer.CompoundDataPlug ) :
+				plug = Gaffer.NameValuePlug( "", plug, True, "member0", flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+				plug["name"].setValue( name )
+			elif isinstance( self.__plugParent, Gaffer.TweaksPlug ) :
+				plug = Gaffer.TweakPlug( "tweak0", valuePlug = plug, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+				plug["name"].setValue( name )
+			if isinstance( self.__plugParent, Gaffer.Box ) :
+				## \todo Could this be made the default via a metadata registration in SubGraphUI.py?
+				Gaffer.Metadata.registerValue( plug, "nodule:type", "" )
+			self.__plugParent.addChild( plug )
+
 	def __menuDefinition( self ) :
 
 		result = IECore.MenuDefinition()
@@ -168,6 +201,8 @@ class PlugCreationWidget( GafferUI.Widget ) :
 		appendItem( "/Array/Color3f", Gaffer.Color3fVectorDataPlug )
 		appendItem( "/Array/Color4f", Gaffer.Color4fVectorDataPlug )
 
+		self.plugCreationMenuSignal()( result, self )
+
 		if not result.size() :
 			result.append( "/All Types Excluded", { "active" : False } )
 
@@ -175,14 +210,8 @@ class PlugCreationWidget( GafferUI.Widget ) :
 
 	def __addPlug( self, plugType, plugKW = {} ) :
 
-		with Gaffer.UndoScope( self.__plugParent.ancestor( Gaffer.ScriptNode ) ) :
-			plug = plugType( **plugKW, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-			if isinstance( self.__plugParent, Gaffer.CompoundDataPlug ) :
-				plug = Gaffer.NameValuePlug( "", plug, True, "member0", flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-			if isinstance( self.__plugParent, Gaffer.Box ) :
-				## \todo Could this be made the default via a metadata registration in SubGraphUI.py?
-				Gaffer.Metadata.registerValue( plug, "nodule:type", "" )
-			self.__plugParent.addChild( plug )
+		plug = plugType( **plugKW, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		self.createPlug( plug )
 
 	def __updateReadOnly( self ) :
 
