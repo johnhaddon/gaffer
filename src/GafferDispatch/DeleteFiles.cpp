@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,24 +34,78 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#include "GafferDispatch/DeleteFiles.h"
 
-namespace GafferDispatch
+#include <filesystem>
+
+using namespace std;
+using namespace IECore;
+using namespace Gaffer;
+using namespace GafferDispatch;
+
+GAFFER_NODE_DEFINE_TYPE( DeleteFiles );
+
+size_t DeleteFiles::g_firstPlugIndex = 0;
+
+DeleteFiles::DeleteFiles( const std::string &name )
+	:	TaskNode( name )
 {
+	storeIndexOfNextChild( g_firstPlugIndex );
+	addChild( new StringVectorDataPlug( "files" ) );
+	addChild( new BoolPlug( "deleteDirectories" ) );
+}
 
-enum TypeId
+DeleteFiles::~DeleteFiles()
 {
+}
 
-	TaskNodeTypeId = 118800,
-	TaskNodeTaskPlugTypeId = 118801,
-	DispatcherTypeId = 118802,
-	TaskListTypeId = 118803,
-	FrameMaskTypeId = 118804,
-	FileListTypeId = 118805,
-	DeleteFilesTypeId = 118806,
+Gaffer::StringVectorDataPlug *DeleteFiles::filesPlug()
+{
+	return getChild<StringVectorDataPlug>( g_firstPlugIndex );
+}
 
-	LastTypeId = 118999
+const Gaffer::StringVectorDataPlug *DeleteFiles::filesPlug() const
+{
+	return getChild<StringVectorDataPlug>( g_firstPlugIndex );
+}
 
-};
+Gaffer::BoolPlug *DeleteFiles::deleteDirectoriesPlug()
+{
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
+}
 
-} // namespace GafferDispatch
+const Gaffer::BoolPlug *DeleteFiles::deleteDirectoriesPlug() const
+{
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
+}
+
+IECore::MurmurHash DeleteFiles::hash( const Gaffer::Context *context ) const
+{
+	ConstStringVectorDataPtr filesData = filesPlug()->getValue();
+	if( filesData->readable().empty() )
+	{
+		return IECore::MurmurHash();
+	}
+
+	IECore::MurmurHash h = TaskNode::hash( context );
+	filesData->hash( h );
+	deleteDirectoriesPlug()->hash( h );
+	return h;
+}
+
+void DeleteFiles::execute() const
+{
+	const bool deleteDirectories = deleteDirectoriesPlug()->getValue();
+	ConstStringVectorDataPtr filesData = filesPlug()->getValue();
+	for( const auto &file : filesData->readable() )
+	{
+		if( deleteDirectories )
+		{
+			filesystem::remove_all( filesystem::path( file ) );
+		}
+		else
+		{
+			filesystem::remove( filesystem::path( file ) );
+		}
+	}
+}
