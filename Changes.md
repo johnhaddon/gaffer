@@ -23,6 +23,11 @@ API
 - MenuButton : Added `set/getImmediate()` methods. These allow the button to execute a menu item immediately instead of showing the menu, if the menu has only a single item.
 - Signals : Added CatchingCombiner Python class, equivalent to the C++ template class.
 
+Breaking Changes
+----------------
+
+- CompoundDataPlugValueWidget : Removed. Instead, LayoutPlugValueWidget and PlugCreationWidget replace all previous functionality.
+
 1.6.6.1 (relative to 1.6.6.0)
 =======
 

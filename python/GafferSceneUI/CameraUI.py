@@ -333,7 +333,7 @@ plugsMetadata = {
 		corresponding global render options.
 		""",
 		"layout:section", "Render Overrides",
-		"compoundDataPlugValueWidget:editable", False,
+		"layout:customWidget:addButton:visibilityActivator", False,
 
 	],
 
@@ -351,7 +351,7 @@ plugsMetadata = {
 			""",
 
 			"layout:section", "Visualisation",
-			"compoundDataPlugValueWidget:editable", False,
+			"layout:customWidget:addButton:visibilityActivator", False,
 
 	],
 

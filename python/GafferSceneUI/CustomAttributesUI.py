@@ -62,7 +62,7 @@ Gaffer.Metadata.registerNode(
 
 		"attributes" : {
 
-			"compoundDataPlugValueWidget:editable" : True,
+			"layout:customWidget:addButton:visibilityActivator" : True,
 			"ui:scene:acceptsAttributes" : True,
 
 		},
