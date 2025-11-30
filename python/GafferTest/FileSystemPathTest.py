@@ -544,6 +544,7 @@ class FileSystemPathTest( GafferTest.TestCase ) :
 	def testPath( self ) :
 
 		self.assertEqual( Gaffer.FileSystemPath( pathlib.Path( __file__ ) ).standardPath(), pathlib.Path( __file__ ) )
+		self.assertEqual( pathlib.Path( Gaffer.FileSystemPath( __file__) ), pathlib.Path( __file__ ) )
 
 	def setUp( self ) :
 
@@ -574,7 +575,6 @@ class FileSystemPathTest( GafferTest.TestCase ) :
 			securityDescriptor = GafferTest._WindowsUtils.getFileSecurity( filePath )
 			group, domain = securityDescriptor.group()
 			return group
-
 
 if __name__ == "__main__":
 	unittest.main()
