@@ -544,6 +544,7 @@ class FileSystemPathTest( GafferTest.TestCase ) :
 	def testPath( self ) :
 
 		self.assertEqual( Gaffer.FileSystemPath( pathlib.Path( __file__ ) ).standardPath(), pathlib.Path( __file__ ) )
+		self.assertEqual( pathlib.Path( Gaffer.FileSystemPath( __file__) ), pathlib.Path( __file__ ) )
 
 	def testPathLike( self ) :
 
