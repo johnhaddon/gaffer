@@ -34,8 +34,8 @@
 #
 ##########################################################################
 
-import urllib.error
-import urllib.request
+import pathlib
+import shutil
 
 import imath
 
@@ -185,4 +185,26 @@ class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __installJobType( self, *unused ) :
 
-		print( "INSTALLING" )
+		filter = Gaffer.MatchPatternPathFilter(
+			patterns = [ "flamenco-manager" ],
+		)
+		filter.userData()["UI"] = { "visible" : False }
+
+		dialogue = GafferUI.PathChooserDialogue(
+			Gaffer.FileSystemPath( pathlib.Path.cwd(), filter ),
+			title = "Locate Flamenco Manager",
+			cancelLabel = "Cancel", confirmLabel = "Install",
+			allowMultipleSelection = False, valid = True, leaf = True
+		)
+		flamencoManager = dialogue.waitForPath()
+		if not flamencoManager :
+			return
+
+		scriptsDir = pathlib.Path( flamencoManager ).parent / "scripts"
+		# TODO : WHEN THIS IS NEEDED, THE MANAGER NEEDS A RESTART. ADD A WARNING POPUP
+		scriptsDir.mkdir( exist_ok = True )
+		shutil.copy( Gaffer.rootPath() / "python" / "GafferFlamenco" / "gaffer.js", scriptsDir )
+
+		print( "REQUESTING UPDATE" )
+		self.__currentURL = None
+		self._requestUpdateFromValues()

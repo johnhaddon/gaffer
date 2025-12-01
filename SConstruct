@@ -1513,7 +1513,9 @@ libraries = {
 
 	"GafferTractorUITest" : {},
 
-	"GafferFlamenco" : {},
+	"GafferFlamenco" : {
+		"additionalFiles" : [ "python/GafferFlamenco/gaffer.js" ],
+	},
 
 	"GafferFlamencoTest" : {},
 
