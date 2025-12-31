@@ -34,39 +34,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#pragma once
 
-#include "FileNodeBinding.h"
+#include "GafferDispatch/TaskNode.h"
 
-#include "GafferDispatch/Archive.h"
-#include "GafferDispatch/CopyFiles.h"
-#include "GafferDispatch/DeleteFiles.h"
-#include "GafferDispatch/FileList.h"
-#include "GafferDispatch/RenameFiles.h"
+#include "Gaffer/StringPlug.h"
+#include "Gaffer/TypedObjectPlug.h"
 
-#include "GafferDispatchBindings/TaskNodeBinding.h"
-
-#include "GafferBindings/DependencyNodeBinding.h"
-
-using namespace Gaffer;
-using namespace GafferBindings;
-using namespace GafferDispatch;
-using namespace GafferDispatchBindings;
-
-void GafferDispatchModule::bindFileNodes()
+namespace GafferDispatch
 {
-	{
-		boost::python::scope s = DependencyNodeClass<FileList>();
 
-		boost::python::enum_<FileList::SequenceMode>( "SequenceMode" )
-			.value( "Files", FileList::SequenceMode::Files )
-			.value( "Sequences", FileList::SequenceMode::Sequences )
-			.value( "FilesAndSequences", FileList::SequenceMode::FilesAndSequences )
-		;
-	}
+class GAFFER_API Archive : public TaskNode
+{
 
-	TaskNodeClass<DeleteFiles>();
-	TaskNodeClass<CopyFiles>();
-	TaskNodeClass<RenameFiles>();
-	TaskNodeClass<Archive>();
-}
+	public :
+
+		explicit Archive( const std::string &name=defaultName<Archive>() );
+		~Archive() override;
+
+		GAFFER_NODE_DECLARE_TYPE( GafferDispatch::Archive, ArchiveTypeId, TaskNode );
+
+		Gaffer::StringVectorDataPlug *filesPlug();
+		const Gaffer::StringVectorDataPlug *filesPlug() const;
+
+		Gaffer::StringPlug *archivePlug();
+		const Gaffer::StringPlug *archivePlug() const;
+
+	protected :
+
+		IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
+		void execute() const override;
+
+	private :
+
+		static size_t g_firstPlugIndex;
+
+		// Friendship for the bindings
+		friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
+
+};
+
+} // namespace GafferDispatch

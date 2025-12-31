@@ -581,6 +581,7 @@ nodeMenu.append( "/Dispatch/Local Dispatcher", GafferDispatch.LocalDispatcher, s
 nodeMenu.append( "/Dispatch/Delete Files", GafferDispatch.DeleteFiles, searchText = "DeleteFiles" )
 nodeMenu.append( "/Dispatch/Copy Files", GafferDispatch.CopyFiles, searchText = "CopyFiles" )
 nodeMenu.append( "/Dispatch/Rename Files", GafferDispatch.RenameFiles, searchText = "RenameFiles" )
+nodeMenu.append( "/Dispatch/Archive", GafferDispatch.Archive )
 
 # ML nodes
 

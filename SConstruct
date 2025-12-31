@@ -1093,7 +1093,7 @@ libraries = {
 
 	"GafferDispatch" : {
 		"envAppends" : {
-			"LIBS" : [ "Gaffer" ],
+			"LIBS" : [ "Gaffer", "archive" ],
 		},
 		"pythonEnvAppends" : {
 			"LIBS" : [ "GafferBindings", "GafferDispatch" ],
