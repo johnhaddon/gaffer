@@ -132,7 +132,7 @@ jobs:
       run: |
         # Clear space on runner by deleting stuff we don't need from the host VM.
         df -h
-        rm -r /usr/lib/jvm /usr/local/lib/android
+        rm -r /hostUsr/lib/jvm /hostUsr/local/lib/android
         df -h
         Xvfb :99 -screen 0 1280x1024x24 &
         metacity --display :99.0 &
