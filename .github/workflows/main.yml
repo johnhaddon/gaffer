@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - '*'
@@ -95,6 +96,8 @@ jobs:
       # The MAC address is required by our RenderMan license. The `--privileged`
       # option is needed to run docker containers inside the main docker container.
       options: --mac-address a4:bb:6d:cf:40:7a --privileged
+      volumes:
+        - /usr:/hostUsr
 
     env:
       ARNOLD_LICENSE_ORDER: none # Don't waste time looking for a license that doesn't exist
@@ -127,6 +130,10 @@ jobs:
 
     - name: Install toolchain (Linux)
       run: |
+        # Clear space on runner by deleting stuff we don't need from the host VM.
+        df -h
+        rm -r /usr/lib/jvm /usr/local/lib/android
+        df -h
         Xvfb :99 -screen 0 1280x1024x24 &
         metacity --display :99.0 &
         useradd -m testUser
