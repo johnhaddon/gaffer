@@ -43,7 +43,6 @@
 #include "IECore/MessageHandler.h"
 
 #include "boost/algorithm/string/predicate.hpp"
-#include "boost/fusion/include/adapt_struct.hpp"
 #include "boost/phoenix/operator.hpp"
 #include "boost/spirit/include/classic_core.hpp"
 #include "boost/spirit/include/qi.hpp"
