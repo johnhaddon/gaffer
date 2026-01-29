@@ -4,6 +4,7 @@
 Improvements
 ------------
 
+- RenderMan : Added support for RenderMan 26.4.
 - RenderManAttributes : Added trace set support via `grouping:membership` and `trace:*subset` attributes.
 
 Fixes
