@@ -89,7 +89,7 @@ if args.dailyBuildDate :
 	# Download the web page that lists the daily builds for the chosen
 	# date.
 
-	dailyBuildsText = requests.get(
+	dailyBuilds = requests.get(
 		"https://renderman.pixar.com/forum/daily_builds",
 		{
 			"action" : "showbuilds",
@@ -98,16 +98,14 @@ if args.dailyBuildDate :
 		cookies = cookies,
 	)
 
-	soup = bs4.BeautifulSoup( dailyBuildsText.text, "html.parser" )
+	soup = bs4.BeautifulSoup( dailyBuilds.text, "html.parser" )
 
 	# The page contains a series of forms, each for downloading a particular
 	# version and platform. Search for one containing the version and platform
 	# we care about. We identify this by an input within the form that specifies
 	# the filename.
 
-	expectedFileName = f"RenderManProServer-{args.version}-linuxRHEL9_gcc11icx232.x86_64.rpm"
-
-	platformSuffix = "-linuxRHEL9_gcc11icx232.x86_64.rpm"
+	platformSuffix = "-linuxRHEL7_gcc93icx232.x86_64.rpm" if os.name != "nt" else "-windows11_vc143icx232.x86_64.msi"
 	fileNameRegex = re.compile( f"RenderManProServer-{args.version}_[0-9]+{platformSuffix}" )
 
 	input = soup.find( "input", attrs = { "name" : "filename", "value" : fileNameRegex } )
