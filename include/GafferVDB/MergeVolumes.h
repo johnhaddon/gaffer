@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, John Haddon. All rights reserved.
+//  Copyright (c) 2026, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,20 +36,34 @@
 
 #pragma once
 
+#include "GafferVDB/Export.h"
+#include "GafferVDB/TypeIds.h"
+
+#include "GafferScene/MergeObjects.h"
+
 namespace GafferVDB
 {
 
-enum TypeId
+class GAFFERVDB_API MergeVolumes : public GafferScene::MergeObjects
 {
-	MeshToLevelSetTypeId = 123200,
-	LevelSetToMeshTypeId = 123201,
-	LevelSetOffsetTypeId = 123202,
-	PointsGridToPointsTypeId = 123203,
-	SphereLevelSetTypeId = 123204,
-	PointsToLevelSetTypeId = 123205,
-	VolumeScatterTypeId = 123206,
-	MergeVolumesTypeId = 123207,
-	LastTypeId = 123399
+
+	public :
+
+		GAFFER_NODE_DECLARE_TYPE( GafferVDB::MergeVolumes, MergeVolumesTypeId, GafferScene::MergeObjects );
+
+		explicit MergeVolumes( const std::string &name=defaultName<MergeVolumes>() );
+		~MergeVolumes() override;
+
+	protected :
+
+		IECore::ConstObjectPtr computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f >> &sources, const Gaffer::Context *context ) const override;
+
+	private :
+
+		static size_t g_firstPlugIndex;
+
 };
+
+IE_CORE_DECLAREPTR( MergeVolumes )
 
 } // namespace GafferVDB

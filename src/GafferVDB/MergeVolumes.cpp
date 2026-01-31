@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, John Haddon. All rights reserved.
+//  Copyright (c) 2026, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,22 +34,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#include "GafferVDB/MergeVolumes.h"
 
-namespace GafferVDB
+#include "tbb/task_arena.h"
+
+#include "IECoreVDB/VDBObject.h"
+#include "IECore/NullObject.h"
+
+using namespace std;
+using namespace Imath;
+using namespace IECore;
+using namespace IECoreScene;
+using namespace Gaffer;
+using namespace GafferScene;
+using namespace GafferVDB;
+
+GAFFER_NODE_DEFINE_TYPE( MergeVolumes );
+
+size_t MergeVolumes::g_firstPlugIndex = 0;
+
+MergeVolumes::MergeVolumes( const std::string &name )
+	:	MergeObjects( name, "/mergedVolume" )
 {
+	storeIndexOfNextChild( g_firstPlugIndex );
+}
 
-enum TypeId
+MergeVolumes::~MergeVolumes()
 {
-	MeshToLevelSetTypeId = 123200,
-	LevelSetToMeshTypeId = 123201,
-	LevelSetOffsetTypeId = 123202,
-	PointsGridToPointsTypeId = 123203,
-	SphereLevelSetTypeId = 123204,
-	PointsToLevelSetTypeId = 123205,
-	VolumeScatterTypeId = 123206,
-	MergeVolumesTypeId = 123207,
-	LastTypeId = 123399
-};
+}
 
-} // namespace GafferVDB
+IECore::ConstObjectPtr MergeVolumes::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
+{
+	//std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> meshes;
+
+	// for( const auto &[object, transform] : sources )
+	// {
+	// 	const IECoreScene::MeshPrimitive * m = IECore::runTimeCast< const IECoreScene::MeshPrimitive >( object.get() );
+	// 	if( !m )
+	// 	{
+	// 		// Just skip anything that's not a mesh
+	// 		continue;
+	// 	}
+
+	// 	meshes.push_back( std::make_pair( m, transform ) );
+	// }
+
+	// if( !meshes.size() )
+	// {
+	// 	return IECore::NullObject::defaultNullObject();
+	// }
+
+	// return IECoreScenePreview::PrimitiveAlgo::mergePrimitives( meshes, context->canceller() );
+
+	return IECore::NullObject::defaultNullObject();
+}
