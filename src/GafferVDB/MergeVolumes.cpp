@@ -36,18 +36,48 @@
 
 #include "GafferVDB/MergeVolumes.h"
 
-#include "tbb/task_arena.h"
-
 #include "IECoreVDB/VDBObject.h"
 #include "IECore/NullObject.h"
+
+#include "openvdb/tools/Merge.h"
 
 using namespace std;
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
+using namespace IECoreVDB;
 using namespace Gaffer;
 using namespace GafferScene;
 using namespace GafferVDB;
+
+// template<typename GridOrTreeT>
+// void
+// csgUnion(GridOrTreeT& a, GridOrTreeT& b, bool prune, bool pruneCancelledTiles)
+// {
+//     using Adapter = TreeAdapter<GridOrTreeT>;
+//     using TreeT = typename Adapter::TreeType;
+//     TreeT &aTree = Adapter::tree(a), &bTree = Adapter::tree(b);
+//     composite::validateLevelSet(aTree, "A");
+//     composite::validateLevelSet(bTree, "B");
+//     CsgUnionOp<TreeT> op(bTree, Steal());
+//     op.setPruneCancelledTiles(prune && pruneCancelledTiles);
+//     tree::DynamicNodeManager<TreeT> nodeManager(aTree);
+//     nodeManager.foreachTopDown(op);
+//     if (prune) tools::pruneLevelSet(aTree);
+// }
+
+namespace
+{
+
+VDBObjectPtr mergeVolumes( const vector<const VDBObject *> &volumes )
+{
+	// HOUDINI CODE USES DEQUE, BUT IT'S NOT NECESSARY
+	//std::deque<tools::TreeToMerge<TreeT>> trees;
+
+	return nullptr;
+}
+
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( MergeVolumes );
 
@@ -65,26 +95,25 @@ MergeVolumes::~MergeVolumes()
 
 IECore::ConstObjectPtr MergeVolumes::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
 {
-	//std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> meshes;
+	vector<const VDBObject *> vdbObjects;
+	for( const auto &[object, transform] : sources )
+	{
+		const auto vdbObject = IECore::runTimeCast<const VDBObject>( object.get() );
+		if( !vdbObject )
+		{
+			continue;
+		}
+		vdbObjects.push_back( vdbObject );
+	}
 
-	// for( const auto &[object, transform] : sources )
-	// {
-	// 	const IECoreScene::MeshPrimitive * m = IECore::runTimeCast< const IECoreScene::MeshPrimitive >( object.get() );
-	// 	if( !m )
-	// 	{
-	// 		// Just skip anything that's not a mesh
-	// 		continue;
-	// 	}
+	if( vdbObjects.empty() )
+	{
+		return IECore::NullObject::defaultNullObject();
+	}
+	else if( vdbObjects.size() == 1 )
+	{
+		return vdbObjects.front();
+	}
 
-	// 	meshes.push_back( std::make_pair( m, transform ) );
-	// }
-
-	// if( !meshes.size() )
-	// {
-	// 	return IECore::NullObject::defaultNullObject();
-	// }
-
-	// return IECoreScenePreview::PrimitiveAlgo::mergePrimitives( meshes, context->canceller() );
-
-	return IECore::NullObject::defaultNullObject();
+	return mergeVolumes( vdbObjects );
 }

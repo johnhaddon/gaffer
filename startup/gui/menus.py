@@ -515,6 +515,7 @@ nodeMenu.append( "/VDB/Level Set Offset", GafferVDB.LevelSetOffset, searchText =
 nodeMenu.append( "/VDB/Points Grid To Points", GafferVDB.PointsGridToPoints, searchText = "PointsGridToPoints" )
 nodeMenu.append( "/VDB/Sphere Level Set", GafferVDB.SphereLevelSet, searchText="SphereLevelSet")
 nodeMenu.append( "/VDB/Volume Scatter", GafferVDB.VolumeScatter, searchText = "VolumeScatter" )
+nodeMenu.append( "/VDB/Merge Volumes", GafferVDB.MergeVolumes, searchText = "MergeVolumes" )
 
 # USD nodes
 

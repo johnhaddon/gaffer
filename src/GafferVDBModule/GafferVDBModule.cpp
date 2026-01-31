@@ -38,6 +38,7 @@
 
 #include "GafferVDB/LevelSetOffset.h"
 #include "GafferVDB/LevelSetToMesh.h"
+#include "GafferVDB/MergeVolumes.h"
 #include "GafferVDB/MeshToLevelSet.h"
 #include "GafferVDB/PointsGridToPoints.h"
 #include "GafferVDB/PointsToLevelSet.h"
@@ -58,5 +59,6 @@ BOOST_PYTHON_MODULE( _GafferVDB )
 	GafferBindings::DependencyNodeClass<SphereLevelSet>();
 	GafferBindings::DependencyNodeClass<PointsToLevelSet>();
 	GafferBindings::DependencyNodeClass<VolumeScatter>();
+	GafferBindings::DependencyNodeClass<MergeVolumes>();
 
 }
