@@ -195,6 +195,7 @@ enum TypeId
 	GafferDisplayDriverTypeId = 120150,
 	CameraQueryTypeId = 120151,
 	ClosurePlugTypeId = 120152,
+	PrimitiveVariablePaintTypeId = 120153,
 
 	LastTypeId = 120999
 };

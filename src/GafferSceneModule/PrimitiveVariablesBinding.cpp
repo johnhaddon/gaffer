@@ -47,6 +47,7 @@
 #include "GafferScene/PrimitiveVariableExists.h"
 #include "GafferScene/ShufflePrimitiveVariables.h"
 #include "GafferScene/PrimitiveVariableTweaks.h"
+#include "GafferScene/PrimitiveVariablePaint.h"
 
 #include "GafferBindings/DependencyNodeBinding.h"
 
@@ -64,6 +65,7 @@ void GafferSceneModule::bindPrimitiveVariables()
 	GafferBindings::DependencyNodeClass<CollectPrimitiveVariables>();
 	GafferBindings::DependencyNodeClass<PrimitiveVariableExists>();
 	GafferBindings::DependencyNodeClass<ShufflePrimitiveVariables>();
+	GafferBindings::DependencyNodeClass<PrimitiveVariablePaint>();
 
 	{
 		boost::python::scope tweaksScope = GafferBindings::DependencyNodeClass<PrimitiveVariableTweaks>();
