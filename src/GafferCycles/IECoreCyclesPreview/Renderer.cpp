@@ -493,7 +493,7 @@ class CyclesShader : public IECore::RefCounted
 		{
 			std::unique_ptr<ccl::ShaderGraph> graph = ShaderNetworkAlgo::convertGraph(
 				surfaceShader, displacementShader, volumeShader,
-				scene->shader_manager.get(),
+				scene,
 				name
 			);
 			if( surfaceShader && singleSided )
@@ -505,7 +505,7 @@ class CyclesShader : public IECore::RefCounted
 			{
 				ShaderNetworkAlgo::convertAOV(
 					aovShader, graph.get(),
-					scene->shader_manager.get(),
+					scene,
 					name
 				);
 			}
