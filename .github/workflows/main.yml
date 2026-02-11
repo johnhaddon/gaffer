@@ -41,11 +41,6 @@ jobs:
             buildType: RELEASE
             publish: true
             containerImage: ghcr.io/gafferhq/build/build:3.4.0
-            # GitHub container builds run as root. This causes failures for tests that
-            # assert that filesystem permissions are respected, because root doesn't
-            # respect permissions. So we run the final test suite as a dedicated
-            # test user rather than as root.
-            testRunner: sudo -E -u testUser
             sconsCacheMegabytes: 400
             jobs: 4
 
@@ -54,7 +49,6 @@ jobs:
             buildType: DEBUG
             publish: false
             containerImage: ghcr.io/gafferhq/build/build:3.4.0
-            testRunner: sudo -E -u testUser
             testArguments: -excludedCategories performance
             # Debug builds are ludicrously big, so we must use a larger cache
             # limit. In practice this compresses down to 4-500Mb.
@@ -66,11 +60,6 @@ jobs:
             buildType: RELEASE
             publish: false
             containerImage: ghcr.io/gafferhq/build/build:3.4.0
-            # GitHub container builds run as root. This causes failures for tests that
-            # assert that filesystem permissions are respected, because root doesn't
-            # respect permissions. So we run the final test suite as a dedicated
-            # test user rather than as root.
-            testRunner: sudo -E -u testUser
             sconsCacheMegabytes: 400
             jobs: 4
             dependenciesURL: https://github.com/ImageEngine/cortex/releases/download/10.5.16.0/cortex-10.5.16.0-linux-gcc11.tar.gz
@@ -136,8 +125,6 @@ jobs:
         # Set up an X server and window manager.
         Xvfb :99 -screen 0 1280x1024x24 &
         metacity --display :99.0 &
-        # Create user used for running tests.
-        useradd -m testUser
         # The Docker container configures bash shells such that they enable the
         # software collections we want. If we could set GitHub's
         # `defaults.run.shell` to `bash` then all our build steps would pick up
@@ -211,7 +198,7 @@ jobs:
       timeout-minutes: 60
       run: |
         echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
-        ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }}
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }}
         echo "::remove-matcher owner=unittest::"
 
     - name: Build and test Arnold extension
@@ -240,7 +227,7 @@ jobs:
           testCommand = os.path.join( os.environ["GAFFER_BUILD_DIR"], "bin", "gaffer" if os.name != "nt" else "gaffer.cmd" )
           if os.name == "nt" :
             testCommand = testCommand.lstrip( "./\\" )
-          subprocess.check_call( "${{ matrix.testRunner }} " + testCommand + " test IECoreArnoldTest GafferArnoldTest GafferArnoldUITest", shell = True )
+          subprocess.check_call( testCommand + " test IECoreArnoldTest GafferArnoldTest GafferArnoldUITest", shell = True )
           print( "::remove-matcher owner=unittest::" )
 
           # Publish ARNOLD_ROOT to the environment for subsequent steps,
@@ -273,7 +260,7 @@ jobs:
       run: |
         scons -j ${{ matrix.jobs }} build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
         echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
-        ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }} IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }} IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
         echo "::remove-matcher owner=unittest::"
       env:
         PYTHONUTF8: 1
@@ -294,7 +281,7 @@ jobs:
       run: |
         scons -j ${{ matrix.jobs }} build BUILD_TYPE=${{ matrix.buildType }} OPTIONS=.github/workflows/main/sconsOptions
         echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
-        ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }} IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
+        ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }} IECoreRenderManTest GafferRenderManTest GafferRenderManUITest
         echo "::remove-matcher owner=unittest::"
       env:
         PYTHONUTF8: 1
