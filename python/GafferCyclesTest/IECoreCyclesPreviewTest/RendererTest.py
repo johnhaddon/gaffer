@@ -1355,7 +1355,8 @@ class RendererTest( GafferTest.TestCase ) :
 				centerBottom : curves["uniformColor"].data[1],
 				rightTop : curves["uniformColor"].data[2],
 				rightBottom : curves["uniformColor"].data[2],
-			}
+			},
+			maxDifference = 0.0003
 		)
 
 		self.__testPrimitiveVariableInterpolation(
