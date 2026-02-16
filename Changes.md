@@ -48,6 +48,7 @@ Breaking Changes
 - Widget : The `toolTip`, `parenting` and `displayTransform` constructor arguments are no longer positional.
 - ValuePlug : Removed deprecated cache policies. Use `TaskCollaboration` instead of `TaskIsolation`. Use `Default` instead of `Legacy`. Instead of `Standard`, use `TaskCollaboration` for `computeCachePolicy()` and `Default` for `hashCachePolicy()`.
 - Box : Removed deprecated plug promotion methods. Use `PlugAlgo` instead.
+- CyclesAttributes : Removed `cycles:shader:heterogeneous_volume` attribute as it is no longer used by Cycles.
 
 Build
 -----
