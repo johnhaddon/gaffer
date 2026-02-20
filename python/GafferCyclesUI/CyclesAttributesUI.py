@@ -143,6 +143,8 @@ Gaffer.Metadata.registerNode(
 			"layout:customWidget:attributeFilter:index" : 1,
 			"layout:customWidget:attributeFilter:accessory" : True,
 
+			"layout:autoRevealThreshold" : 10,
+
 		},
 
 	}

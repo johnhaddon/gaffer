@@ -279,6 +279,13 @@ class PlugLayout( GafferUI.Widget ) :
 
 		self.__layout.update( self.__rootSection )
 
+		# \todo Should this apply to nodes as well?
+		autoRevealThreshold = self.__itemMetadataValue( self.__parent, "autoRevealThreshold" ) or 0 if not isinstance( self.__parent, Gaffer.Node ) else 0
+		if autoRevealThreshold > 0 :
+			visibleItems = [ item for item, widget in self.__widgets.items() if widget is not None and widget.getVisible() ]
+			if len( visibleItems ) <= autoRevealThreshold :
+				self.__layout.revealAll()
+
 	def __updateLayout( self ) :
 
 		# get the items to lay out - these are a combination
@@ -754,6 +761,10 @@ class _Layout( GafferUI.Widget ) :
 
 		raise NotImplementedError
 
+	def revealAll( self ) :
+
+		raise NotImplementedError
+
 class _TabLayout( _Layout ) :
 
 	def __init__( self, orientation, embedded = False, **kw ) :
@@ -830,6 +841,10 @@ class _TabLayout( _Layout ) :
 
 		return haveVisibleWidgets or haveVisibleTabs
 
+	def revealAll( self ) :
+		# \todo If len( sections ) == 1 reveal it, otherwise... pick the first or last? Don't do anything?
+		pass
+
 	def __currentTabChanged( self, tabbedContainer, currentTab ) :
 
 		self.__section.saveState( "currentTab", tabbedContainer.index( currentTab ) )
@@ -843,6 +858,7 @@ class _CollapsibleLayout( _Layout ) :
 		_Layout.__init__( self, self.__column, orientation, **kw )
 
 		self.__collapsibles = {} # Indexed by section name
+		self.__collapsibleStateChangedSignals = {}
 
 	def update( self, section ) :
 
@@ -867,14 +883,15 @@ class _CollapsibleLayout( _Layout ) :
 				# way of controlling size behaviours for all widgets in the public API.
 				collapsible.getCornerWidget()._qtWidget().setSizePolicy( QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed )
 
-				if subsection.restoreState( "collapsed" ) is False :
-					collapsible.setCollapsed( False )
-
-				collapsible.stateChangedSignal().connect(
-					functools.partial( Gaffer.WeakMethod( self.__collapsibleStateChanged ), subsection = subsection )
+				self.__collapsibleStateChangedSignals[name] = collapsible.stateChangedSignal().connect(
+					functools.partial( Gaffer.WeakMethod( self.__collapsibleStateChanged ), subsection = subsection ),
+					scoped = True
 				)
 
 				self.__collapsibles[name] = collapsible
+
+			with Gaffer.Signals.BlockedConnection( self.__collapsibleStateChangedSignals[name] ) :
+				collapsible.setCollapsed( False if subsection.restoreState( "collapsed" ) is False else True )
 
 			collapsible.setVisible(
 				collapsible.getChild().update( subsection )
@@ -895,9 +912,20 @@ class _CollapsibleLayout( _Layout ) :
 
 		return any( w.getVisible() for w in self.__column )
 
+	def revealAll( self ) :
+
+		for section in self.__collapsibles.keys() :
+			self.__revealWalk( section )
+
 	def __collapsibleStateChanged( self, collapsible, subsection ) :
 
 		subsection.saveState( "collapsed", collapsible.getCollapsed() )
+
+	def __revealWalk( self, section ) :
+
+		with Gaffer.Signals.BlockedConnection( self.__collapsibleStateChangedSignals[section] ) :
+			self.__collapsibles[section].getChild().revealAll()
+			self.__collapsibles[section].setCollapsed( False )
 
 class _MissingCustomWidget( GafferUI.Widget ) :
 

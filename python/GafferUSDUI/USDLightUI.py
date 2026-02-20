@@ -60,6 +60,8 @@ Gaffer.Metadata.registerNode(
 			"layout:customWidget:standardFilter:index" : 1,
 			"layout:customWidget:standardFilter:accessory" : True,
 
+			"layout:autoRevealThreshold" : 10,
+
 		},
 
 		"parameters.colorTemperature" : { "layout:activator" : lambda plug : plug.parent()["enableColorTemperature"].getValue() },
