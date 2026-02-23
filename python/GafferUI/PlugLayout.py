@@ -626,6 +626,12 @@ class StandardFilterWidget( GafferUI.Widget ) :
 
 	def __parentChanged( self, widget ) :
 
+		if self.__plugLayout() is None :
+			p = widget.parent()
+			while p.parent() is not None :
+				p = p.parent()
+			p.parentChangedSignal().connect( Gaffer.WeakMethod( self.__parentChanged ) )
+
 		self.__updateWidgets()
 		self.__updateFilter()
 
