@@ -277,14 +277,14 @@ class PlugLayout( GafferUI.Widget ) :
 		# delegate to our layout class to create a concrete
 		# layout from the section definitions.
 
-		self.__layout.update( self.__rootSection )
+		autoReveal = False
+		autoRevealThreshold = self.__metadataValue( self.__parent, f"{self.__layoutName}:autoRevealThreshold" )
+		if autoRevealThreshold :
+			visibleWidgets = [ widget for widget in self.__widgets.values() if widget is not None and widget.getVisible() ]
+			if len( visibleWidgets ) <= autoRevealThreshold :
+				autoReveal = True
 
-		# \todo Should this apply to nodes as well?
-		autoRevealThreshold = self.__itemMetadataValue( self.__parent, "autoRevealThreshold" ) or 0 if not isinstance( self.__parent, Gaffer.Node ) else 0
-		if autoRevealThreshold > 0 :
-			visibleItems = [ item for item, widget in self.__widgets.items() if widget is not None and widget.getVisible() ]
-			if len( visibleItems ) <= autoRevealThreshold :
-				self.__layout.revealAll()
+		self.__layout.update( self.__rootSection, autoReveal )
 
 	def __updateLayout( self ) :
 
@@ -763,7 +763,7 @@ class _Layout( GafferUI.Widget ) :
 
 	# Returns `True` if the layout contains any visible widgets,
 	# `False` otherwise.
-	def update( self, section ) :
+	def update( self, section, reveal ) :
 
 		raise NotImplementedError
 
@@ -795,7 +795,11 @@ class _TabLayout( _Layout ) :
 			Gaffer.WeakMethod( self.__currentTabChanged )
 		)
 
-	def update( self, section ) :
+	# Note : We don't need to do anything for `revealChildren` because we can't
+	# show more than one tab, and we hide empty tabs anyway. When searching, the
+	# user wants to search the current tab first and only switch tabs if it becomes
+	# empty, which is what will happen naturally.
+	def update( self, section, revealChildren ) :
 
 		self.__section = section
 		self.__widgetsColumn[:] = section.widgets
@@ -820,7 +824,7 @@ class _TabLayout( _Layout ) :
 						tab.setVerticalMode( GafferUI.ScrollMode.Never )
 
 				tab.setChild( _CollapsibleLayout( self.orientation() ) )
-			updatedTabVisibilities.append( tab.getChild().update( subsection ) )
+			updatedTabVisibilities.append( tab.getChild().update( subsection, revealChildren ) )
 			updatedTabs[name] = tab
 
 		if existingTabs.keys() != updatedTabs.keys() :
@@ -847,10 +851,6 @@ class _TabLayout( _Layout ) :
 
 		return haveVisibleWidgets or haveVisibleTabs
 
-	def revealAll( self ) :
-		# \todo If len( sections ) == 1 reveal it, otherwise... pick the first or last? Don't do anything?
-		pass
-
 	def __currentTabChanged( self, tabbedContainer, currentTab ) :
 
 		self.__section.saveState( "currentTab", tabbedContainer.index( currentTab ) )
@@ -866,7 +866,7 @@ class _CollapsibleLayout( _Layout ) :
 		self.__collapsibles = {} # Indexed by section name
 		self.__collapsibleStateChangedSignals = {}
 
-	def update( self, section ) :
+	def update( self, section, revealChildren ) :
 
 		widgets = list( section.widgets )
 
@@ -897,10 +897,10 @@ class _CollapsibleLayout( _Layout ) :
 				self.__collapsibles[name] = collapsible
 
 			with Gaffer.Signals.BlockedConnection( self.__collapsibleStateChangedSignals[name] ) :
-				collapsible.setCollapsed( False if subsection.restoreState( "collapsed" ) is False else True )
+				collapsible.setCollapsed( not revealChildren and not subsection.restoreState( "collapsed" ) is False )
 
 			collapsible.setVisible(
-				collapsible.getChild().update( subsection )
+				collapsible.getChild().update( subsection, revealChildren )
 			)
 
 			collapsible.getCornerWidget().setText(
@@ -918,20 +918,9 @@ class _CollapsibleLayout( _Layout ) :
 
 		return any( w.getVisible() for w in self.__column )
 
-	def revealAll( self ) :
-
-		for section in self.__collapsibles.keys() :
-			self.__revealWalk( section )
-
 	def __collapsibleStateChanged( self, collapsible, subsection ) :
 
 		subsection.saveState( "collapsed", collapsible.getCollapsed() )
-
-	def __revealWalk( self, section ) :
-
-		with Gaffer.Signals.BlockedConnection( self.__collapsibleStateChangedSignals[section] ) :
-			self.__collapsibles[section].getChild().revealAll()
-			self.__collapsibles[section].setCollapsed( False )
 
 class _MissingCustomWidget( GafferUI.Widget ) :
 
