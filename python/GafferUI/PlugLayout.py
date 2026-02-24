@@ -277,14 +277,12 @@ class PlugLayout( GafferUI.Widget ) :
 		# delegate to our layout class to create a concrete
 		# layout from the section definitions.
 
-		autoReveal = False
-		autoRevealThreshold = self.__metadataValue( self.__parent, f"{self.__layoutName}:autoRevealThreshold" )
-		if autoRevealThreshold :
-			visibleWidgets = [ widget for widget in self.__widgets.values() if widget is not None and widget.getVisible() ]
-			if len( visibleWidgets ) <= autoRevealThreshold :
-				autoReveal = True
-
-		self.__layout.update( self.__rootSection, autoReveal )
+		self.__layout.update(
+			self.__rootSection,
+			# When filters are active, automatically reveal all visible widgets
+			# if we've whittled it down to less than 10.
+			revealChildren = len( self.__filterFunctions ) and len( [ widget for widget in self.__widgets.values() if widget is not None and widget.getVisible() ] ) < 10,
+		)
 
 	def __updateLayout( self ) :
 
