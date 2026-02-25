@@ -2980,7 +2980,7 @@ class RendererTest( GafferTest.TestCase ) :
 		volume2.transform( imath.M44f().translate( imath.V3f( 50, 0, 0 ) ) )
 
 		renderer.render()
-		time.sleep( 1 )
+		time.sleep( 4 )
 
 		image = IECoreImage.ImageDisplayDriver.storedImage( "testVDB" )
 		self.assertIsInstance( image, IECoreImage.ImagePrimitive )
@@ -3006,7 +3006,7 @@ class RendererTest( GafferTest.TestCase ) :
 		)
 
 		renderer.render()
-		time.sleep( 1 )
+		time.sleep( 4 )
 
 		image = IECoreImage.ImageDisplayDriver.storedImage( "testVDB" )
 		self.assertIsInstance( image, IECoreImage.ImagePrimitive )
