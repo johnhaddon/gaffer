@@ -94,42 +94,6 @@ Gaffer.Metadata.registerNode(
 
 		},
 
-		"parameters.use_camera" : {
-
-			"nodule:type" : ""
-
-		},
-
-		"parameters.use_diffuse" : {
-
-			"nodule:type" : ""
-
-		},
-
-		"parameters.use_glossy" : {
-
-			"nodule:type" : ""
-
-		},
-
-		"parameters.use_transmission" : {
-
-			"nodule:type" : ""
-
-		},
-
-		"parameters.use_scatter" : {
-
-			"nodule:type" : ""
-
-		},
-
-		"parameters.lightgroup" : {
-
-			"nodule:type" : ""
-
-		},
-
 	}
 
 )

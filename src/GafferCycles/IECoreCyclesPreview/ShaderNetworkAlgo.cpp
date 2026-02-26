@@ -374,20 +374,6 @@ Imath::Color3f constantLightStrength( const IECoreScene::ShaderNetwork *light )
 	return strength;
 }
 
-int updateVisibility( const IECore::Data *data, const IECore::InternedString &name, const int rayType, int visibility )
-{
-	if( parameterValue<bool>( data, name, true ) )
-	{
-		visibility |= rayType;
-	}
-	else
-	{
-		visibility = visibility & ~rayType;
-	}
-
-	return visibility;
-}
-
 const InternedString g_empty( "" );
 const InternedString g_out( "out" );
 
@@ -543,15 +529,8 @@ bool hasOSL( const ccl::Shader *cshader )
 	return false;
 }
 
-void convertLight( const IECoreScene::ShaderNetwork *light, ccl::Object *object )
+void convertLight( const IECoreScene::ShaderNetwork *light, ccl::Light *cyclesLight )
 {
-	if( !object->get_geometry()->is_light() )
-	{
-		msg( Msg::Warning, "IECoreCycles::ShaderNetworkAlgo::convertLight", "Cycles object is not a light" );
-		return;
-	}
-
-	auto cyclesLight = static_cast<ccl::Light *>( object->get_geometry() );
 	const IECoreScene::Shader *lightShader = light->outputShader();
 	if( !lightShader )
 	{
@@ -599,8 +578,6 @@ void convertLight( const IECoreScene::ShaderNetwork *light, ccl::Object *object 
 		cyclesLight->set_light_type( ccl::LIGHT_POINT );
 	}
 
-	int visibility = (int)(ccl::PATH_RAY_ALL_VISIBILITY & ~ccl::PATH_RAY_CAMERA);
-
 	// Convert parameters
 
 	for( const auto &[name, value] : lightShader->parameters() )
@@ -610,31 +587,6 @@ void convertLight( const IECoreScene::ShaderNetwork *light, ccl::Object *object 
 			continue;
 		}
 
-		// Accumulate the visibility flags and set at the end.
-		if( name == "use_camera" )
-		{
-			visibility = updateVisibility( value.get(), name, (int)ccl::PATH_RAY_CAMERA, visibility );
-		}
-		else if( name == "use_diffuse" )
-		{
-			visibility = updateVisibility( value.get(), name, (int)ccl::PATH_RAY_DIFFUSE, visibility );
-		}
-		else if( name == "use_glossy" )
-		{
-			visibility = updateVisibility( value.get(), name, (int)ccl::PATH_RAY_GLOSSY, visibility );
-		}
-		else if( name == "use_transmission" )
-		{
-			visibility = updateVisibility( value.get(), name, (int)ccl::PATH_RAY_TRANSMIT, visibility );
-		}
-		else if( name == "use_scatter" )
-		{
-			visibility = updateVisibility( value.get(), name, (int)ccl::PATH_RAY_VOLUME_SCATTER, visibility );
-		}
-		else if( name == "lightgroup" )
-		{
-			object->set_lightgroup( ccl::ustring( parameterValue<string>( value.get(), name, std::string() ).c_str() ) );
-		}
 		// Convert angle-based parameters, where we use degrees and Cycles uses radians.
 		else if( name == "angle" )
 		{
@@ -667,8 +619,6 @@ void convertLight( const IECoreScene::ShaderNetwork *light, ccl::Object *object 
 			SocketAlgo::setSocket( cyclesLight, name, value.get() );
 		}
 	}
-
-	object->set_visibility( visibility );
 
 	// Convert "virtual" parameters to strength. We can't do this for background
 	// lights because Cycles will ignore it - we deal with that in

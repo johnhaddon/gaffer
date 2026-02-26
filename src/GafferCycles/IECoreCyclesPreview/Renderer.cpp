@@ -1061,6 +1061,7 @@ class CyclesAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 			object->set_asset_name( ccl::ustring( m_assetName.c_str() ) );
 			object->set_is_caustics_caster( m_isCausticsCaster );
 			object->set_is_caustics_receiver( m_isCausticsReceiver );
+			object->set_lightgroup( ccl::ustring( m_lightGroup.c_str() ) );
 
 			if( object->get_geometry()->is_mesh() )
 			{
@@ -1077,7 +1078,7 @@ class CyclesAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 				auto light = static_cast<ccl::Light *>( object->get_geometry() );
 				if( m_lightAttribute )
 				{
-					ShaderNetworkAlgo::convertLight( m_lightAttribute.get(), object );
+					ShaderNetworkAlgo::convertLight( m_lightAttribute.get(), light );
 					ccl::array<ccl::Node *> shaders;
 					shaders.push_back_slow( m_lightShader->shader() );
 					{
@@ -1149,8 +1150,6 @@ class CyclesAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 			}
 
 			m_volume.apply( object );
-
-			object->set_lightgroup( ccl::ustring( m_lightGroup.c_str() ) );
 
 			// Custom attributes.
 			object->attributes = m_custom;
