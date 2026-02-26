@@ -249,7 +249,6 @@ struct NodeDeleter
 
 	};
 
-	using LightDeleter = Deleter<ccl::Light>;
 	using GeometryDeleter = Deleter<ccl::Geometry>;
 	using ObjectDeleter = Deleter<ccl::Object>;
 
@@ -258,14 +257,6 @@ struct NodeDeleter
 		std::lock_guard lock( m_mutex );
 		std::lock_guard sceneLock( m_scene->mutex );
 
-		if( m_pendingLightDeletions.size() )
-		{
-			for( auto light : m_pendingLightDeletions )
-			{
-				m_scene->delete_node( light );
-			}
-			m_pendingLightDeletions.clear();
-		}
 		if( m_pendingObjectDeletions.size() )
 		{
 			m_scene->delete_nodes( m_pendingObjectDeletions );
@@ -279,12 +270,6 @@ struct NodeDeleter
 	}
 
 	private :
-
-		void scheduleDeletion( ccl::Light *light )
-		{
-			std::lock_guard lock( m_mutex );
-			m_pendingLightDeletions.insert( light );
-		}
 
 		void scheduleDeletion( ccl::Object *object )
 		{
@@ -301,7 +286,6 @@ struct NodeDeleter
 		ccl::Scene *m_scene;
 
 		std::mutex m_mutex;
-		std::set<ccl::Light *> m_pendingLightDeletions;
 		std::set<ccl::Object *> m_pendingObjectDeletions;
 		std::set<ccl::Geometry *> m_pendingGeometryDeletions;
 
@@ -1946,7 +1930,7 @@ class CyclesLight : public IECoreScenePreview::Renderer::ObjectInterface
 	public :
 
 		CyclesLight( ccl::Scene *scene, const std::string &name, NodeDeleter *nodeDeleter )
-			:	m_scene( scene ), m_light( SceneAlgo::createNodeWithLock<ccl::Light>( scene ), NodeDeleter::LightDeleter( nodeDeleter ) ), m_object( SceneAlgo::createNodeWithLock<ccl::Object>( scene ), NodeDeleter::ObjectDeleter( nodeDeleter ) )
+			:	m_scene( scene ), m_light( SceneAlgo::createNodeWithLock<ccl::Light>( scene ), NodeDeleter::GeometryDeleter( nodeDeleter ) ), m_object( SceneAlgo::createNodeWithLock<ccl::Object>( scene ), NodeDeleter::ObjectDeleter( nodeDeleter ) )
 		{
 			m_object->set_geometry( m_light.get() );
 			m_object->set_random_id( std::hash<string>()( name ) );
@@ -2051,7 +2035,7 @@ class CyclesLight : public IECoreScenePreview::Renderer::ObjectInterface
 	private :
 
 		ccl::Scene *m_scene;
-		using UniqueLightPtr = std::unique_ptr<ccl::Light, NodeDeleter::LightDeleter>;
+		using UniqueLightPtr = std::unique_ptr<ccl::Light, NodeDeleter::GeometryDeleter>;
 		UniqueLightPtr m_light;
 		using UniqueObjectPtr = std::unique_ptr<ccl::Object, NodeDeleter::ObjectDeleter>;
 		UniqueObjectPtr m_object;
