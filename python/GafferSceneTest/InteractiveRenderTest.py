@@ -2979,7 +2979,7 @@ class InteractiveRenderTest( GafferSceneTest.SceneTestCase ) :
 
 		script["render"]["state"].setValue( script["render"].State.Running )
 		self.uiThreadCallHandler.waitFor( 1 )
-		self.assertEqualWithAbsError( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ), 0.002 )
+		self.assertEqual( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ) )
 
 		# Remove shadow link, and check plane isn't shadowed.
 
@@ -2993,7 +2993,7 @@ class InteractiveRenderTest( GafferSceneTest.SceneTestCase ) :
 
 		script["attributes"]["attributes"][-1]["value"].setValue( "/pointLight" )
 		self.uiThreadCallHandler.waitFor( 1 )
-		self.assertEqualWithAbsError( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ), 0.002 )
+		self.assertEqual( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ) )
 
 		# Link to non-existent light, and check plane isn't shadowed.
 
@@ -3005,13 +3005,13 @@ class InteractiveRenderTest( GafferSceneTest.SceneTestCase ) :
 
 		script["attributes"]["attributes"][-1]["value"].setValue( "defaultLights" )
 		self.uiThreadCallHandler.waitFor( 1 )
-		self.assertEqualWithAbsError( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ), 0.002 )
+		self.assertEqual( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ) )
 
 		# Remove light from set, and check plane isn't shadowed.
 
 		script["light"]["defaultLight"].setValue( False )
 		self.uiThreadCallHandler.waitFor( 1 )
-		self.assertEqualWithAbsError( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ), 0.002 )
+		self.assertEqual( script["sampler"]["color"].getValue(), imath.Color4f( 0, 0, 0, 1 ) )
 
 	def testManifest( self ) :
 
