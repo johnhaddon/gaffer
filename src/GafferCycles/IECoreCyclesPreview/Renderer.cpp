@@ -1994,6 +1994,7 @@ class CyclesLight : public IECoreScenePreview::Renderer::ObjectInterface
 			if( cyclesAttributes->applyObject( m_object.get(), m_attributes.get(), m_scene ) )
 			{
 				m_attributes = cyclesAttributes;
+				SceneAlgo::tagUpdateWithLock( m_light.get(), m_scene );
 				SceneAlgo::tagUpdateWithLock( m_object.get(), m_scene );
 				return true;
 			}
