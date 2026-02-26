@@ -772,6 +772,7 @@ IECore::InternedString g_glossyVisibilityAttributeName( "cycles:visibility:gloss
 IECore::InternedString g_transmissionVisibilityAttributeName( "cycles:visibility:transmission" );
 IECore::InternedString g_shadowVisibilityAttributeName( "cycles:visibility:shadow" );
 IECore::InternedString g_scatterVisibilityAttributeName( "cycles:visibility:scatter" );
+IECore::InternedString g_USDRayVisibilityBlindDataKey( "__USDRayVisibility" );
 // Caustics
 IECore::InternedString g_isCausticsCasterAttributeName( "cycles:is_caustics_caster" );
 IECore::InternedString g_isCausticsReceiverAttributeName( "cycles:is_caustics_receiver" );
@@ -868,13 +869,6 @@ class CyclesAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 				m_isCausticsCaster( false ),
 				m_isCausticsReceiver( false )
 		{
-			updateVisibility( g_cameraVisibilityAttributeName,       (int)ccl::PATH_RAY_CAMERA,         attributes );
-			updateVisibility( g_diffuseVisibilityAttributeName,      (int)ccl::PATH_RAY_DIFFUSE,        attributes );
-			updateVisibility( g_glossyVisibilityAttributeName,       (int)ccl::PATH_RAY_GLOSSY,         attributes );
-			updateVisibility( g_transmissionVisibilityAttributeName, (int)ccl::PATH_RAY_TRANSMIT,       attributes );
-			updateVisibility( g_shadowVisibilityAttributeName,       (int)ccl::PATH_RAY_SHADOW,         attributes );
-			updateVisibility( g_scatterVisibilityAttributeName,      (int)ccl::PATH_RAY_VOLUME_SCATTER, attributes );
-
 			m_useHoldout = attributeValue<bool>( g_useHoldoutAttributeName, attributes, m_useHoldout );
 			m_isShadowCatcher = attributeValue<bool>( g_isShadowCatcherAttributeName, attributes, m_isShadowCatcher );
 			m_shadowTerminatorShadingOffset = attributeValue<float>( g_shadowTerminatorShadingOffsetAttributeName, attributes, m_shadowTerminatorShadingOffset );
@@ -926,7 +920,21 @@ class CyclesAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 				// Cycles requires lights to be set as shadow catchers in order to contribute shadows to the
 				// shadow pass, so we disregard the attribute and override lights to always be shadow catchers.
 				m_isShadowCatcher = true;
+
+				if( auto rayVisibility = m_lightAttribute->outputShader()->blindData()->member<IECore::IntData>( g_USDRayVisibilityBlindDataKey ) )
+				{
+					m_visibility = rayVisibility->readable();
+				}
 			}
+
+			// Visibility
+
+			updateVisibility( g_cameraVisibilityAttributeName,       (int)ccl::PATH_RAY_CAMERA,         attributes );
+			updateVisibility( g_diffuseVisibilityAttributeName,      (int)ccl::PATH_RAY_DIFFUSE,        attributes );
+			updateVisibility( g_glossyVisibilityAttributeName,       (int)ccl::PATH_RAY_GLOSSY,         attributes );
+			updateVisibility( g_transmissionVisibilityAttributeName, (int)ccl::PATH_RAY_TRANSMIT,       attributes );
+			updateVisibility( g_shadowVisibilityAttributeName,       (int)ccl::PATH_RAY_SHADOW,         attributes );
+			updateVisibility( g_scatterVisibilityAttributeName,      (int)ccl::PATH_RAY_VOLUME_SCATTER, attributes );
 
 			// Custom attributes
 

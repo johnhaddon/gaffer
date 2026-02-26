@@ -894,8 +894,6 @@ const InternedString g_texMappingYMappingParameter( "tex_mapping__y_mapping" );
 const InternedString g_texMappingZMappingParameter( "tex_mapping__z_mapping" );
 const InternedString g_translationParameter( "translation" );
 const InternedString g_treatAsPointParameter( "treatAsPoint" );
-const InternedString g_useDiffuseParameter( "use_diffuse" );
-const InternedString g_useGlossyParameter( "use_glossy" );
 const InternedString g_useMISParameter( "use_mis" );
 const InternedString g_useSpecularWorkflowParameter( "useSpecularWorkflow" );
 const InternedString g_UVParameter( "UV" );
@@ -914,6 +912,7 @@ const InternedString g_vector3Parameter( "vector3" );
 const InternedString g_widthParameter( "width" );
 const InternedString g_wrapSParameter( "wrapS" );
 const InternedString g_wrapTParameter( "wrapT" );
+const InternedString g_USDRayVisibilityBlindDataKey( "__USDRayVisibility" );
 
 const string g_cyclesNamespace( "cycles:" );
 
@@ -931,11 +930,19 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	transferUSDParameter( network, shaderHandle, usdShader, g_normalizeParameter, shader, g_normalizeParameter, false );
 	transferUSDParameter( network, shaderHandle, usdShader, g_shadowEnableParameter, shader, g_castShadowParameter, true );
 
-	const float diffuse = parameterValue( usdShader, g_diffuseParameter, 1.0f );
-	shader->parameters()[g_useDiffuseParameter] = new BoolData( diffuse > 0.0f );
-
-	const float specular = parameterValue( usdShader, g_specularParameter, 1.0f );
-	shader->parameters()[g_useGlossyParameter] = new BoolData( specular > 0.0f );
+	int visibility = (int)ccl::PATH_RAY_ALL_VISIBILITY;
+	if( parameterValue( usdShader, g_diffuseParameter, 1.0f ) == 0.0f )
+	{
+		visibility &= ~(int)ccl::PATH_RAY_DIFFUSE;
+	}
+	if( parameterValue( usdShader, g_specularParameter, 1.0f ) == 0.0f )
+	{
+		visibility &= ~(int)ccl::PATH_RAY_GLOSSY;
+	}
+	if( visibility != (int)ccl::PATH_RAY_ALL_VISIBILITY )
+	{
+		shader->blindData()->writable()[g_USDRayVisibilityBlindDataKey] = new IntData( visibility );
+	}
 
 	shader->parameters()[g_useMISParameter] = new BoolData( true );
 
