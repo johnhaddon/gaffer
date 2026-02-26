@@ -439,9 +439,12 @@ Gaffer.Metadata.registerValues( {
 		"defaultValue" : False,
 		"description" :
 		"""
-		Render volumes using ray marching. When ray marching is enabled the
-		`volume_step_rate` and `volume_max_steps` options control the step
-		size and max steps.
+		Render volumes using the biased volume ray marching approach from
+		Cycles 4.5 and earlier. Cycles 5.0 defaults to unbiased volume sampling,
+		which produces fewer artifacts but could result in more noise.
+
+		> Tip : When ray marching is enabled the `volume_step_rate` and
+		> `volume_max_steps` options control the step size and max steps.
 		""",
 		"label" : "Volume Ray Marching",
 		"layout:section" : "Volumes",
@@ -453,9 +456,10 @@ Gaffer.Metadata.registerValues( {
 		"defaultValue" : 1024,
 		"description" :
 		"""
-		The maximum number of steps taken through a volume when rendered
-		with volume ray marching. Reduce this to avoid long render times
-		with large volumes or small step sizes.
+		The maximum number of steps taken through a volume. Reduce this to
+		avoid long render times with large volumes or small step sizes.
+
+		> Info : Only used when the legacy `volume_ray_marching` option is enabled.
 		""",
 		"label" : "Volume Max Steps",
 		"layout:section" : "Volumes",
@@ -467,8 +471,10 @@ Gaffer.Metadata.registerValues( {
 		"defaultValue" : 0.1,
 		"description" :
 		"""
-		Globally adjust detail for volumes rendered with volume ray marching.
-		Higher values reduce render time, lower values render with more detail.
+		Globally adjust detail for volumes. Higher values reduce render time,
+		lower values render with more detail.
+
+		> Info : Only used when the legacy `volume_ray_marching` option is enabled.
 		""",
 		"label" : "Volume Step Rate",
 		"layout:section" : "Volumes",
