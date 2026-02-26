@@ -36,6 +36,7 @@
 
 import unittest
 import imath
+import os
 import pathlib
 
 import IECore
@@ -498,9 +499,9 @@ class MeshAlgoTessellateTest( GafferTest.TestCase ) :
 		nonManifold = nonManifoldFile.child( "object" ).readObject( 0.0 )
 
 		# On CI we test builds using OpenSubdiv 3.6.0 and 3.6.1. Each version provides
-		# different results from our non-manifold mesh, so we skip this comparison as
-		# one of the two would fail.
-		if not GafferTest.inCI() :
+		# different results from our non-manifold mesh, so we skip this comparison on
+		# the legacy platform as it would fail.
+		if not GafferTest.inCI() or not "platform24" in os.environ["GAFFER_BUILD_VARIANT"] :
 			referenceFile = IECoreScene.SceneInterface.create(
 				str( self.usdFileDir / "nonManifoldTessellated.usd" ), IECore.IndexedIO.OpenMode.Read
 			)
