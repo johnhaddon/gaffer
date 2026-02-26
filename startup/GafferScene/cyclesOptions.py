@@ -272,8 +272,8 @@ Gaffer.Metadata.registerValues( {
 		"description" :
 		"""
 		Round Ribbons - Render curves as flat ribbon with rounded normals, for fast rendering.
-		3D Curves - Render curves as circular 3D geometry, for accurate results when viewing hair close up.
-		Linear 3D Curves - Render curves as circular 3D geometry with linear interpolation.
+		3D Curves - Render curves as cylindrical 3D geometry, for accurate results when viewing hair close up.
+		Linear 3D Curves - Render curves as cylindrical 3D geometry with linear interpolation.
 		""",
 		"label" : "Hair Shape",
 		"layout:section" : "Scene",
