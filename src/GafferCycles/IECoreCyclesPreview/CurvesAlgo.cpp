@@ -61,6 +61,7 @@ ccl::Hair *convertCommon( const IECoreScene::CurvesPrimitive *curve, ccl::Scene 
 {
 	assert( curve->typeId() == IECoreScene::CurvesPrimitive::staticTypeId() );
 	ccl::Hair *hair = SceneAlgo::createNodeWithLock<ccl::Hair>( scene );
+	/// \todo Support per-object `curve_shape` configured via an attribute.
 	hair->curve_shape = scene->params.hair_shape;
 
 	size_t numCurves = curve->numCurves();
