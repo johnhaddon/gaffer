@@ -461,11 +461,64 @@ class ViewportGadget::CameraController : public boost::noncopyable
 					lerpfactor( cameraPosition.x, normalizedScreenWindow.min.x, normalizedScreenWindow.max.x ),
 					lerpfactor( cameraPosition.y, normalizedScreenWindow.max.y, normalizedScreenWindow.min.y )
 				);
-				return V2f(
+
+
+				V2f result(
 					ndcPosition.x * resolution.x,
 					ndcPosition.y * resolution.y
 				);
+
+				/*V3f testResult;
+				projectionMatrix().multVecMatrix( worldPosition, testResult );
+				std::cerr << " RESULT " << result << " : " << testResult << "\n";
+				*/
+
+				return result;
 			}
+		}
+
+		M44f projectionMatrix() const
+		{
+			const V2f clippingPlanes = m_camera->getClippingPlanes();
+			float n = clippingPlanes[0];
+			float f = clippingPlanes[1];
+
+			const Box2f &normalizedScreenWindow = m_camera->frustum();
+			float l = n * normalizedScreenWindow.min.x;
+			float r = n * normalizedScreenWindow.max.x;
+			float b = n * normalizedScreenWindow.min.y;
+			float t = n * normalizedScreenWindow.max.y;
+
+			const V2i resolution = getViewportResolution();
+
+			M44f proj;
+			if( m_camera->getProjection() == "perspective" )
+			{
+				proj = M44f(
+					2.0f * n / ( r - l ), 0.0f, 0.0f, 0.0f,
+					0.0f, 2.0f * n / ( b - t ), 0.0f, 0.0f,
+					( r + l ) / ( r - l ), ( b + t ) / ( b - t ), - ( f + n ) / ( f - n ), -1.0f,
+					0.0f, 0.0f, - 2.0f * f * n / ( f - n ), 0.0f
+				);
+			}
+			else
+			{
+				proj = M44f(
+					2.0f / ( r - l ), 0.0f, 0.0f, 0.0f,
+					0.0f, 2.0f / ( b - t ), 0.f, 0.0f,
+					0.0f, 0.0f, -2.0f / ( f - n ), 0.0,
+					( r + l ) / ( r - l ), ( b + t ) / ( b - t ), -1.0f - 2.0f * n / ( f - n ), 1.0f
+				);
+			}
+
+			M44f toRaster(
+				0.5f * resolution.x, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.5f * resolution.y, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				0.5f * resolution.x, 0.5f * resolution.y, 0.0f, 1.0f
+			);
+
+			return m_transform.inverse() * proj * toRaster;
 		}
 
 		/// Motion
@@ -1169,6 +1222,11 @@ IECore::LineSegment3f ViewportGadget::rasterToWorldSpace( const Imath::V2f &rast
 Imath::V2f ViewportGadget::worldToRasterSpace( const Imath::V3f &worldPosition ) const
 {
 	return m_cameraController->project( worldPosition );
+}
+
+M44f ViewportGadget::projectionMatrix() const
+{
+	return m_cameraController->projectionMatrix();
 }
 
 void ViewportGadget::render() const
