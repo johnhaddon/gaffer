@@ -347,6 +347,7 @@ class GAFFERUI_API ViewportGadget : public Gadget
 		void childDirtied( DirtyType dirtyType );
 
 		friend class Gadget;
+		friend class DepthRender;
 
 		struct RenderItem
 		{
