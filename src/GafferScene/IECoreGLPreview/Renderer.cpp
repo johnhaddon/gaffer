@@ -887,6 +887,10 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			{
 				m_selection = ::option<IECore::PathMatcher>( value, name, IECore::PathMatcher() );
 			}
+			else if( name == "gl:hideSelected" )
+			{
+				m_hideSelected = ::option<bool>( value, name, false );
+			}
 			else if(
 				boost::starts_with( name.string(), "gl:primitive:" ) ||
 				boost::starts_with( name.string(), "gl:pointsPrimitive:" ) ||
@@ -1233,6 +1237,16 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 				{
 					selector->loadName( i++ );
 				}
+
+				if( m_hideSelected )
+				{
+					// TODO - duplicate match against m_selection
+					if( m_selection.match( o->name() ) & ( PathMatcher::AncestorMatch | PathMatcher::ExactMatch ) )
+					{
+						continue;
+					}
+				}
+
 				o->render( currentState, m_selection, colorSpace );
 			}
 		}
@@ -1379,6 +1393,7 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		RenderType m_renderType;
 		string m_camera;
 		IECore::PathMatcher m_selection;
+		bool m_hideSelected;
 		IECore::CompoundObjectPtr m_baseStateOptions;
 		IECoreGL::StatePtr m_baseState;
 		bool m_renderObjects;
