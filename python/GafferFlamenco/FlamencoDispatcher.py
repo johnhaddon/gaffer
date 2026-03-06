@@ -145,29 +145,21 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 
 		task = batchesToTasks.get( batch )
 		if task is not None :
-			return task["name"]
+			return task["id"]
 
 		# Otherwise make a new task. Start by getting a unique
 		# task name.
 
-		nodeName = batch.node().relativeName( batch.node().scriptNode() )
-		frames = str( IECore.frameListFromList( [ int( x ) for x in batch.frames() ] ) )
-
-		taskName = "{nodeName}-{hash}{frames}".format(
-			nodeName = nodeName, hash = hash( batch ),
-			frames = f"-{frames}" if frames else ""
-		)
-
-		task = { "name" : taskName }
-		if frames :
+		task = { "name" : batch.name(), "id" : str( batch.__hash__() ) }
+		if batch.frames() :
 
 			# Add a `gaffer execute` command to the task.
 
 			args = [
 				"execute",
 				"-script", batch.context()["dispatcher:scriptFileName"],
-				"-nodes", nodeName,
-				"-frames", frames,
+				"-nodes", batch.node().relativeName( batch.node().scriptNode() ),
+				"-frames", str( IECore.frameListFromList( [ int( x ) for x in batch.frames() ] ) ),
 			]
 
 			scriptContext = batch.node().scriptNode().context()
@@ -187,7 +179,7 @@ class FlamencoDispatcher( GafferDispatch.Dispatcher ) :
 			task.setdefault( "dependencies", [] ).append( self.__buildTasksWalk( upstreamBatch, batchesToTasks ) )
 
 		batchesToTasks[batch] = task
-		return taskName
+		return task["id"]
 
 	@staticmethod
 	def _setupPlugs( parentPlug ) :

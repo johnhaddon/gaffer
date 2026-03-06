@@ -59,7 +59,7 @@ function compileJob( job ) {
 	for( const taskDefinition of job.settings.tasks ) {
 
 		const task = author.Task( taskDefinition["name"], "misc" );
-		tasks[taskDefinition["name"]] = task;
+		tasks[taskDefinition["id"]] = task;
 
 		if( "commandArgs" in taskDefinition )
 		{
@@ -75,9 +75,9 @@ function compileJob( job ) {
 
 		if( "dependencies" in taskDefinition )
 		{
-			for( const dependencyName of taskDefinition["dependencies"] )
+			for( const taskID of taskDefinition["dependencies"] )
 			{
-				task.addDependency( tasks[dependencyName] );
+				task.addDependency( tasks[taskID] );
 			}
 		}
 
