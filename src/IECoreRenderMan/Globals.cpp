@@ -208,43 +208,20 @@ struct Globals::InteractiveRenderThread
 
 	private :
 
-		// COMMENT FROM HDPRMAN :
-		//
-		// Note: if we were rendering, when the flag goes low we'll be back in
-		// render thread idle until another StartRender comes in, so we don't need
-		// to manually call renderThread->StopRender. Theoretically
-		// riley->Stop() is blocking, but we need the loop here because:
-		// 1. It's possible that IsRendering() is true because we're in the preamble
-		//    of the render loop, before calling into riley. In that case, Stop()
-		//    is a no-op and we need to call it again after we call into Riley.
-		// 2. We've occassionally seen cases where Stop() returns successfully,
-		//    but the riley threadpools don't shut down right away.
-
-		// possible issues :
-		//
-		// 1 :
-		//
-		// - `render()` has transitioned to `Rendering` state but not started render yet
-		// - we call `pause()`, but it's too late
-		// - render starts
-		// - render carries on until done
-		//
-		// Maybe render thread can hold lock while rendering? Since `Stop()` will make it
-		// release the lock?
-		//
-		//
-
 		void threadFunction()
 		{
 			while( true )
 			{
-				unique_lock lock( m_stateMutex );
-				m_stateCondition.wait(
-					lock, [this] {
-						return m_requestedState != m_state;
-					}
-				);
-				m_state = m_requestedState;
+				{
+					unique_lock lock( m_stateMutex );
+					m_stateCondition.wait(
+						lock, [this] {
+							return m_requestedState != m_state;
+						}
+					);
+					m_state = m_requestedState;
+				}
+
 				if( m_state == State::Stopped )
 				{
 					return;
@@ -252,10 +229,10 @@ struct Globals::InteractiveRenderThread
 				else if( m_state == State::Rendering )
 				{
 					m_globals->m_session->riley->Render( { 1, &m_globals->m_renderView }, m_globals->m_renderParameters );
-					static int g_numRenders = 0;
-					fmt::print( "{}\n", g_numRenders++ );
-					m_state = m_requestedState = State::Waiting;
-					lock.unlock();
+					{
+						unique_lock lock( m_stateMutex );
+						m_state = m_requestedState = State::Waiting;
+					}
 					m_stateCondition.notify_one();
 				}
 			}
