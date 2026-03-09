@@ -176,7 +176,7 @@ struct Globals::InteractiveRenderThread
 {
 
 	InteractiveRenderThread( Globals *globals )
-		:	m_globals( globals ), m_state( State::Stopped ), m_requestedState( State::Waiting ),
+		:	m_globals( globals ), m_state( State::Stopped ),
 			m_thread( &InteractiveRenderThread::threadFunction, this )
 	{
 	}
@@ -201,9 +201,14 @@ struct Globals::InteractiveRenderThread
 
 	void pause()
 	{
-		m_globals->m_session->riley->Stop();
 		std::unique_lock lock( m_stateMutex );
-		m_stateCondition.wait( lock, [this] { return m_state == State::Waiting; } );
+		m_requestedState = State::Waiting;
+		m_stateCondition.wait(
+			lock, [this] {
+				m_globals->m_session->riley->Stop();
+				return m_state == State::Waiting;
+			}
+		);
 	}
 
 	private :
@@ -243,16 +248,22 @@ struct Globals::InteractiveRenderThread
 
 		void threadFunction()
 		{
+			{
+				unique_lock lock( m_stateMutex );
+				m_state = State::Waiting;
+			}
+
 			while( true )
 			{
 				{
 					unique_lock lock( m_stateMutex );
 					m_stateCondition.wait(
 						lock, [this] {
-							return m_requestedState != m_state;
+							return m_requestedState.has_value();
 						}
 					);
-					m_state = m_requestedState;
+					m_state = m_requestedState.value();
+					m_requestedState.reset();
 				}
 
 				if( m_state == State::Stopped )
@@ -262,9 +273,11 @@ struct Globals::InteractiveRenderThread
 				else if( m_state == State::Rendering )
 				{
 					m_globals->m_session->riley->Render( { 1, &m_globals->m_renderView }, m_globals->m_renderParameters );
+					static int g_numRenders;
+					fmt::print( "{}\n", g_numRenders++ );
 					{
 						unique_lock lock( m_stateMutex );
-						m_state = m_requestedState = State::Waiting; // COULD BREAK A REQUEST TO STOP??
+						m_state = State::Waiting;
 					}
 					m_stateCondition.notify_one();
 				}
@@ -272,11 +285,16 @@ struct Globals::InteractiveRenderThread
 		}
 
 		Globals *m_globals;
+		// Protects `m_requestedState` and `m_state`.
 		std::mutex m_stateMutex;
+		// Signals changes to `m_requestedState` and `m_state`.
 		std::condition_variable m_stateCondition;
 		enum class State { Stopped, Waiting, Rendering };
+		// Set by main thread to request change of state
+		// on render thread.
+		std::optional<State> m_requestedState;
+		// Set by render thread to reflect change of state.
 		State m_state;
-		State m_requestedState;
 		std::thread m_thread;
 
 };
