@@ -245,13 +245,16 @@ struct Globals::InteractiveRenderThread
 		{
 			while( true )
 			{
-				unique_lock lock( m_stateMutex );
-				m_stateCondition.wait(
-					lock, [this] {
-						return m_requestedState != m_state;
-					}
-				);
-				m_state = m_requestedState;
+				{
+					unique_lock lock( m_stateMutex );
+					m_stateCondition.wait(
+						lock, [this] {
+							return m_requestedState != m_state;
+						}
+					);
+					m_state = m_requestedState;
+				}
+
 				if( m_state == State::Stopped )
 				{
 					return;
@@ -259,10 +262,10 @@ struct Globals::InteractiveRenderThread
 				else if( m_state == State::Rendering )
 				{
 					m_globals->m_session->riley->Render( { 1, &m_globals->m_renderView }, m_globals->m_renderParameters );
-					static int g_numRenders = 0;
-					fmt::print( "{}\n", g_numRenders++ );
-					m_state = m_requestedState = State::Waiting;
-					lock.unlock();
+					{
+						unique_lock lock( m_stateMutex );
+						m_state = m_requestedState = State::Waiting; // COULD BREAK A REQUEST TO STOP??
+					}
 					m_stateCondition.notify_one();
 				}
 			}
