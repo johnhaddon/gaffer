@@ -176,8 +176,8 @@ struct Globals::InteractiveRenderThread
 {
 
 	InteractiveRenderThread( Globals *globals )
-		:	m_globals( globals ), m_thread( &InteractiveRenderThread::threadFunction, this ),
-			m_state( State::Stopped ), m_requestedState( State::Waiting )
+		:	m_globals( globals ), m_state( State::Stopped ), m_requestedState( State::Waiting ),
+			m_thread( &InteractiveRenderThread::threadFunction, this )
 	{
 	}
 
@@ -231,7 +231,7 @@ struct Globals::InteractiveRenderThread
 					m_globals->m_session->riley->Render( { 1, &m_globals->m_renderView }, m_globals->m_renderParameters );
 					{
 						unique_lock lock( m_stateMutex );
-						m_state = m_requestedState = State::Waiting;
+						m_state = m_requestedState = State::Waiting; // COULD BREAK A REQUEST TO STOP??
 					}
 					m_stateCondition.notify_one();
 				}
@@ -239,12 +239,12 @@ struct Globals::InteractiveRenderThread
 		}
 
 		Globals *m_globals;
-		std::thread m_thread;
 		std::mutex m_stateMutex;
 		std::condition_variable m_stateCondition;
 		enum class State { Stopped, Waiting, Rendering };
 		State m_state;
 		State m_requestedState;
+		std::thread m_thread;
 
 };
 
