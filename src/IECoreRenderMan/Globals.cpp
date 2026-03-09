@@ -216,7 +216,7 @@ struct Globals::InteractiveRenderThread
 		// riley->Stop() is blocking, but we need the loop here because:
 		// 1. It's possible that IsRendering() is true because we're in the preamble
 		//    of the render loop, before calling into riley. In that case, Stop()
-		//    is a no-op and we need to call it again after we call into Riley.
+		//    is a no-op and we need to call it again after we call into Riley.              !!!!!!!!! NEED TO LISTEN TO THIS
 		// 2. We've occassionally seen cases where Stop() returns successfully,
 		//    but the riley threadpools don't shut down right away.
 
@@ -228,6 +228,13 @@ struct Globals::InteractiveRenderThread
 		// - we call `pause()`, but it's too late
 		// - render starts
 		// - render carries on until done
+		//
+		// 2 :
+		//
+		// - render finishes and clobbers m_requestedState, so we ignore a stop request
+		// - could be solved by holding the lock, or checking for new request, or not
+		//   clobbering
+		//
 		//
 		// Maybe render thread can hold lock while rendering? Since `Stop()` will make it
 		// release the lock?
