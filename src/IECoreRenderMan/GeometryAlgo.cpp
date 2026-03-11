@@ -365,33 +365,30 @@ void IECoreRenderMan::GeometryAlgo::convertPrimitiveVariables( const std::vector
 {
 	const PrimitiveVariableConverter converter( messageContext );
 
-	bool haveSetTimes = false;
 	for( const auto &[name, primitiveVariable] : samples[0]->variables )
 	{
 		bool animated = false;
-		for( size_t i = 1; i < samples.size(); ++i )
+		if( name == "P" )
 		{
-			auto it = samples[i]->variables.find( name );
-			if( it == samples[i]->variables.end() )
+			for( size_t i = 1; i < samples.size(); ++i )
 			{
-				animated = false;
-				break;
-			}
-			else if( it->second != primitiveVariable )
-			{
-				animated = true;
+				auto it = samples[i]->variables.find( name );
+				if( it == samples[i]->variables.end() )
+				{
+					animated = false;
+					break;
+				}
+				else if( it->second != primitiveVariable )
+				{
+					animated = true;
+				}
 			}
 		}
 
 		const RtUString convertedName( name == "uv" ? "st" : name.c_str() );
 		if( animated )
 		{
-			if( !haveSetTimes )
-			{
-				primVarList.SetTimes( sampleTimes.size(), sampleTimes.data() );
-				haveSetTimes = true;
-			}
-
+			primVarList.SetTimes( sampleTimes.size(), sampleTimes.data() );
 			for( size_t i = 0; i < samples.size(); ++i )
 			{
 				auto it = samples[i]->variables.find( name );
