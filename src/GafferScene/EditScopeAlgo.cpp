@@ -40,6 +40,7 @@
 #include "GafferScene/OptionTweaks.h"
 #include "GafferScene/Prune.h"
 #include "GafferScene/PathFilter.h"
+#include "GafferScene/PrimitiveVariablePaint.h"
 #include "GafferScene/SceneAlgo.h"
 #include "GafferScene/SceneProcessor.h"
 #include "GafferScene/Set.h"
@@ -47,6 +48,7 @@
 #include "GafferScene/Transform.h"
 #include "GafferScene/RenderPasses.h"
 
+#include "Gaffer/CachedDataNode.h"
 #include "Gaffer/EditScope.h"
 #include "Gaffer/Metadata.h"
 #include "Gaffer/MetadataAlgo.h"
@@ -56,6 +58,8 @@
 
 #include "IECore/AngleConversion.h"
 #include "IECore/CamelCase.h"
+
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "Imath/ImathMatrixAlgo.h"
 
@@ -1584,4 +1588,118 @@ std::optional<std::string> GafferScene::EditScopeAlgo::renameRenderPassNonEditab
 	}
 
 	return std::nullopt;
+}
+
+
+// Paint
+// ==========
+
+namespace {
+
+const std::string g_paintProcessorName = "Paint";
+const IECore::InternedString g_liveDataName = "liveData";
+
+SceneProcessorPtr paintProcessor( const std::string &name )
+{
+	SceneProcessorPtr result = new SceneProcessor( name );
+
+	CachedDataNodePtr paintCache = new CachedDataNode( "paintCache" );
+	result->addChild( paintCache );
+	paintCache->selectorPlug()->setValue( "${scene:path}" );
+	paintCache->targetDirectoryPlug()->setValue( "${project:rootDirectory}/paint/${fileName}/" );
+
+	PathFilterPtr pathFilter = new PathFilter;
+	result->addChild( pathFilter );
+	// TODO - expose this properly
+	pathFilter->pathsPlug()->setInput( paintCache->keysPlug() );
+
+	//pathFilter->pathsPlug()->setValue( new IECore::StringVectorData( { "..." } ) );
+
+	PrimitiveVariablePaintPtr primVarPaint = new PrimitiveVariablePaint;
+	result->addChild( primVarPaint );
+	primVarPaint->inPlug()->setInput( result->inPlug() );
+	primVarPaint->filterPlug()->setInput( pathFilter->outPlug() );
+	primVarPaint->enabledPlug()->setInput( result->enabledPlug() );
+	primVarPaint->paintPlug()->setInput( paintCache->dataPlug() );
+
+	result->outPlug()->setInput( primVarPaint->outPlug() );
+
+	return result;
+}
+
+SceneProcessor *acquirePaintProcessor( EditScope *editScope, bool createIfNecessary )
+{
+	static bool isRegistered = false;
+	if( !isRegistered )
+	{
+		EditScope::registerProcessor(
+			g_paintProcessorName,
+			[]() {
+				return paintProcessor( g_paintProcessorName );
+			}
+		);
+
+		isRegistered = true;
+	}
+
+	return editScope->acquireProcessor<SceneProcessor>( g_paintProcessorName, createIfNecessary );
+}
+
+} // namespace
+
+bool GafferScene::EditScopeAlgo::hasPaintEdit( const Gaffer::EditScope *scope )
+{
+	return acquirePaintEdit( const_cast<EditScope *>( scope ), /* createIfNecessary = */ false );
+}
+
+CachedDataNode *GafferScene::EditScopeAlgo::acquirePaintEdit( Gaffer::EditScope *scope, bool createIfNecessary )
+{
+	/*string pathString;
+	ScenePlug::pathToString( path, pathString );*/
+
+	// TODO - some sort of channel/primVar selection?
+	auto *processor = acquirePaintProcessor( scope, createIfNecessary );
+	if( !processor )
+	{
+		return nullptr;
+	}
+
+	CachedDataNode *paintCache = processor->getChild<CachedDataNode>( "paintCache" );
+	if( !paintCache )
+	{
+		throw IECore::Exception( "Corrupt Paint Node" );
+	}
+
+	return paintCache;
+}
+
+void GafferScene::EditScopeAlgo::removePaintEdit( Gaffer::EditScope *scope )
+{
+	// TODO
+	//auto p = acquirePaintEdit( scope, path, /* createIfNecessary = */ false );
+	//if( !p )
+	//{
+	//	return;
+	//}
+	//auto row = p->ancestor<Spreadsheet::RowPlug>();
+	//row->parent()->removeChild( row );
+}
+
+
+const GraphComponent *GafferScene::EditScopeAlgo::paintEditReadOnlyReason( const Gaffer::EditScope *scope )
+{
+	// TODO - const_cast?
+
+	CachedDataNode *paintEdit = acquirePaintEdit( const_cast<EditScope *>( scope ), /* createIfNecessary = */ false );
+	if( !paintEdit )
+	{
+		return MetadataAlgo::readOnlyReason( scope );
+	}
+
+	if( MetadataAlgo::getReadOnly( paintEdit ) )
+	{
+		return paintEdit;
+	}
+
+	return nullptr;
 }
