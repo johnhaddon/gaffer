@@ -40,6 +40,7 @@
 #include "GafferSceneUI/CropWindowTool.h"
 #include "GafferSceneUI/LightPositionTool.h"
 #include "GafferSceneUI/LightTool.h"
+#include "GafferSceneUI/PaintTool.h"
 #include "GafferSceneUI/RotateTool.h"
 #include "GafferSceneUI/ScaleTool.h"
 #include "GafferSceneUI/SceneView.h"
@@ -128,6 +129,40 @@ boost::python::list selection( const TransformTool &tool )
 }
 
 bool selectionEditable( const TransformTool &tool )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return tool.selectionEditable();
+}
+
+ScenePlugPtr paintScene( const PaintTool::Selection &s )
+{
+	return const_cast<ScenePlug *>( s.scene() );
+}
+
+std::string paintPath( const PaintTool::Selection &s )
+{
+	std::string result;
+	ScenePlug::pathToString( s.path(), result );
+	return result;
+}
+
+boost::python::list paintSelection( const PaintTool &tool )
+{
+	vector<PaintTool::Selection> selection;
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		selection = tool.selection();
+	}
+
+	boost::python::list result;
+	for( const auto &s : selection )
+	{
+		result.append( s );
+	}
+	return result;
+}
+
+bool paintSelectionEditable( const PaintTool &tool )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return tool.selectionEditable();
@@ -364,5 +399,38 @@ void GafferSceneUIModule::bindTools()
 		;
 
 		GafferBindings::SignalClass<ImageSelectionTool::StatusChangedSignal, GafferBindings::DefaultSignalCaller<ImageSelectionTool::StatusChangedSignal>, ImageSelectionToolStatusChangedSlotCaller>( "StatusChangedSignal" );
+	}
+
+	{
+		GafferBindings::NodeClass<PaintTool>( nullptr, no_init )
+			.def( init<SceneView *>() )
+			.def( "targetVariableTypes", &PaintTool::targetVariableTypes )
+			.def( "selection", &paintSelection )
+			.def( "selectionEditable", &paintSelectionEditable )
+			.def( "selectionChangedSignal", &PaintTool::selectionChangedSignal, return_internal_reference<1>() )
+		;
+
+		class_<PaintTool::Selection>( "Selection", no_init )
+
+			.def( init<const ConstScenePlugPtr &, const ScenePlug::ScenePath &, const ConstContextPtr &, const EditScopePtr &>() )
+
+			.def( "scene", &paintScene )
+			.def( "path", &paintPath )
+			//.def( "context", &context )
+
+			//.def( "upstreamScene", &upstreamScene )
+			//.def( "upstreamPath", &upstreamPath )
+			//.def( "upstreamContext", &upstreamContext )
+
+			.def( "editable", &PaintTool::Selection::editable )
+			.def( "warning", &PaintTool::Selection::warning, return_value_policy<copy_const_reference>() )
+			//.def( "editScope", &editScope )
+			//.def( "acquireTransformEdit", &acquireTransformEdit, ( boost::python::arg( "createIfNecessary" ) = true ) )
+			.def( "editTarget", &PaintTool::Selection::editTarget, return_value_policy<CastToIntrusivePtr>() )
+			//.def( "transformSpace", &TransformTool::Selection::transformSpace, return_value_policy<copy_const_reference>() )
+
+		;
+
+		GafferBindings::SignalClass<PaintTool::SelectionChangedSignal, GafferBindings::DefaultSignalCaller<PaintTool::SelectionChangedSignal>, SelectionChangedSlotCaller<PaintTool> >( "SelectionChangedSignal" );
 	}
 }

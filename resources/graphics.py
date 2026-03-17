@@ -207,6 +207,7 @@
 				'gafferSceneUILightTool',
 				'gafferSceneUILightPositionTool',
 				'gafferSceneUIVisualiserTool',
+				'gafferSceneUIPaintTool',
 				'gafferImageUIColorInspectorTool',
 			]
 
