@@ -36,6 +36,7 @@
 				"pointerPivot",
 				"pointerCut",
 				"pointerNotEditable",
+				"pointerInvisible",
 			]
 		},
 
@@ -532,13 +533,13 @@
 			],
 
 		},
-		
+
 		"nodeEditor" : {
-			
+
 			"options" : {
 				"validatePixelAlignment" : True,
 			},
-			
+
 			"ids" : [
 				"rendererArnoldOnIcon",
 				"rendererArnoldOffIcon",
