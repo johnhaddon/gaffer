@@ -1237,8 +1237,7 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 				{
 					selector->loadName( i++ );
 				}
-
-				if( m_hideSelected )
+				else if( m_hideSelected )
 				{
 					// TODO - duplicate match against m_selection
 					if( m_selection.match( o->name() ) & ( PathMatcher::AncestorMatch | PathMatcher::ExactMatch ) )
