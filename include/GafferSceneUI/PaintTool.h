@@ -182,7 +182,9 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 			// declare a custom Data class with value, opacity and indices
 
 			mutable IECore::ConstCompoundDataPtr m_initialEditValue;
+			mutable IECore::ConstCompoundDataPtr m_initialMeshValue;
 			mutable IECore::CompoundDataPtr m_composedInputValue;
+			mutable IECore::CompoundDataPtr m_composedEditValue;
 			mutable IECore::CompoundDataPtr m_composedValue;
 			mutable Gaffer::CachedDataNode* m_paintEdit;
 			//mutable IECore::ConstColor3fVectorDataPtr m_baseInputValue;

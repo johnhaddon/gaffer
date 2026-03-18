@@ -134,6 +134,11 @@ CompoundDataPtr newPrimVarComposite( IECore::TypeId variableType, size_t numVert
 void applyPrimVarComposite( const CompoundData *a, const CompoundData *b, int mode, float opacity, CompoundData *result )
 {
 	const FloatVectorData *bOpacityData = b->member< FloatVectorData >( "opacity" );
+	if( !bOpacityData )
+	{
+		throw IECore::Exception( "Expected B to always have opacity" ); // TODO;
+	}
+
 	const vector<float> &bOpacity = bOpacityData->readable();
 	FloatVectorData *resultOpacityData = result->member< FloatVectorData >( "opacity" );
 
@@ -618,8 +623,18 @@ class PaintGadget : public Gadget
 					size_t numVerts = mesh->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Vertex );
 					size_t numVertsExpanded = location.m_triangulatedTemp->variableSize( IECoreScene::PrimitiveVariable::Interpolation::FaceVarying );
 
-					// TODO - erase mode doesn't work like this
-					applyPrimVarComposite( location.m_composedInputValue.get(), location.m_currentStroke.get(), toolMode, toolOpacity, location.m_composedValue.get() );
+					if( toolMode == 1 )
+					{
+						applyPrimVarComposite( location.m_composedInputValue.get(), location.m_currentStroke.get(), 1, toolOpacity, location.m_composedValue.get() );
+					}
+					else
+					{
+						applyPrimVarComposite( location.m_initialEditValue.get(), location.m_currentStroke.get(), 0, toolOpacity, location.m_composedEditValue.get() );
+
+						applyPrimVarComposite( location.m_initialMeshValue.get(), location.m_composedEditValue.get(), 1, toolOpacity, location.m_composedValue.get() );
+
+					}
+
 					if( isColor )
 					{
 						components = 3;
@@ -992,7 +1007,7 @@ bool applyPaint( std::vector< T > &outValue, std::vector<float> &outOpacity, con
 		if( curOpac > 0 )
 		{
 			modified = true;
-			if( mode == 0 )
+			/*if( mode == 0 )
 			{
 				outValue[i] = ( 1.0f - curOpac ) * outValue[i];
 
@@ -1001,13 +1016,13 @@ bool applyPaint( std::vector< T > &outValue, std::vector<float> &outOpacity, con
 				outOpacity[i] = ( 1.0f - curOpac ) * outOpacity[i];
 			}
 			else
-			{
-				outValue[i] = ( 1.0f - curOpac ) * outValue[i] + curOpac * value;
+			{*/
+			outValue[i] = ( 1.0f - curOpac ) * outValue[i] + curOpac * value;
 
-				// TODO - this would be simpler if we stored ( 1 - opacity ), but maybe that's a harder
-				// thing to name?
-				outOpacity[i] = 1.0f - ( 1.0f - curOpac ) * ( 1.0f - outOpacity[i] );
-			}
+			// TODO - this would be simpler if we stored ( 1 - opacity ), but maybe that's a harder
+			// thing to name?
+			outOpacity[i] = 1.0f - ( 1.0f - curOpac ) * ( 1.0f - outOpacity[i] );
+			//}
 		}
 	}
 	return modified;
@@ -2745,6 +2760,7 @@ bool PaintTool::buttonPress( const GafferUI::ButtonEvent &event )
 
 	IECore::InternedString variableName = variableNamePlug()->getValue();
 	IECore::TypeId variableType = (IECore::TypeId)variableTypePlug()->getValue();
+	int mode = modePlug()->getValue();
 
 	for( const auto &s : selection() )
 	{
@@ -2779,22 +2795,30 @@ bool PaintTool::buttonPress( const GafferUI::ButtonEvent &event )
 		s.m_currentStroke = newPrimVarComposite( variableType, numVerts );
 		s.m_currentStrokeDirty = true;
 
-		s.m_composedInputValue = new CompoundData();
 		const Data *inputData = mesh->variableData<Data>( variableName );
+
+		CompoundDataPtr initialMeshValue = new CompoundData();
 		if( inputData )
 		{
 			// TODO expand
-			// TODO think about COW
-			s.m_composedInputValue->writable()["value"] = mesh->variableData<Data>( variableName )->copy();
+			// const_cast is safe because s.m_initialMeshValue is const, we only need non-const versions
+			// to put the data inside the container.
+			initialMeshValue->writable()["value"] = const_cast<Data*>( mesh->variableData<Data>( variableName ) );
+		}
+		s.m_initialMeshValue = initialMeshValue;
+
+		if( mode == 1 )
+		{
+			s.m_composedInputValue = newPrimVarComposite( variableType, numVerts, false );
+
+			if( s.m_initialEditValue && s.m_composedInputValue )
+			{
+				applyPrimVarComposite( s.m_initialMeshValue.get(), s.m_initialEditValue.get(), 1, 1.0f, s.m_composedInputValue.get() );
+			}
 		}
 		else
 		{
-			s.m_composedInputValue = newPrimVarComposite( variableType, numVerts, false );
-		}
-
-		if( s.m_initialEditValue )
-		{
-			applyPrimVarComposite( s.m_composedInputValue.get(), s.m_initialEditValue.get(), 1, 1.0f, s.m_composedInputValue.get() );
+			s.m_composedEditValue = newPrimVarComposite( variableType, numVerts, true );
 		}
 
 		// TODO - writable shouldn't be needed
@@ -2830,7 +2854,6 @@ bool PaintTool::buttonPress( const GafferUI::ButtonEvent &event )
 
 	float opacity = opacityPlug()->getValue();
 	float hardness = hardnessPlug()->getValue();
-	int mode = modePlug()->getValue();
 	float toolSize = sizePlug()->getValue();
 
 	V2f rasterPos( event.line.p0.x, event.line.p0.y );
@@ -2877,6 +2900,7 @@ void PaintTool::applyCurrentStroke()
 {
 	IECore::InternedString variableName = variableNamePlug()->getValue();
 	IECore::TypeId variableType = (IECore::TypeId)variableTypePlug()->getValue();
+	int mode = modePlug()->getValue();
 	float opacity = opacityPlug()->getValue();
 	// TODO share code
 	for( const auto &s : selection() )
@@ -2895,7 +2919,7 @@ void PaintTool::applyCurrentStroke()
 		if( s.m_initialEditValue )
 		{
 			newVal = newPrimVarComposite( variableType, IECore::size( s.m_currentStroke->writable()["opacity"].get() ), true );
-			applyPrimVarComposite( s.m_initialEditValue.get(), s.m_currentStroke.get(), 1, opacity, newVal.get() );
+			applyPrimVarComposite( s.m_initialEditValue.get(), s.m_currentStroke.get(), mode, opacity, newVal.get() );
 		}
 		else
 		{
