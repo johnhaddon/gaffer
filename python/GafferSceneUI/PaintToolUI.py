@@ -64,8 +64,9 @@ Gaffer.Metadata.registerNode(
 	#"toolbarLayout:customWidget:VariableSelectWidget:section", "Bottom",
 	#"toolbarLayout:customWidget:VariableSelectWidget:index", 0,
 
+	"nodeToolbar:top:type", "GafferUI.StandardNodeToolbar.top",
 	"toolbarLayout:customWidget:StatusWidget:widgetType", "GafferSceneUI.PaintToolUI._StatusWidget",
-	"toolbarLayout:customWidget:StatusWidget:section", "Bottom",
+	"toolbarLayout:customWidget:StatusWidget:section", "Top",
 
 	"toolbarLayout:activator:colorValue", lambda node : node["variableType"].getValue() == IECore.Color3fVectorData.staticTypeId(),
 	"toolbarLayout:activator:floatValue", lambda node : node["variableType"].getValue() == IECore.FloatVectorData.staticTypeId(),
