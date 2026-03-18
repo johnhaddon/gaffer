@@ -41,6 +41,9 @@
 #include "GafferSceneUI/SceneView.h"
 #include "GafferSceneUI/ScriptNodeAlgo.h"
 
+#include "GafferUI/Pointer.h"
+#include "GafferUI/Style.h"
+
 #include "GafferScene/AimConstraint.h"
 #include "GafferScene/EditScopeAlgo.h"
 //#include "GafferScene/Group.h"
@@ -67,6 +70,7 @@
 #include "IECoreGL/Buffer.h"
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/MeshPrimitive.h"
+#include "IECoreGL/CurvesPrimitive.h"
 #include "IECoreGL/ShaderLoader.h"
 
 #include "Imath/ImathMatrixAlgo.h"
@@ -339,8 +343,8 @@ class PaintGadget : public Gadget
 		void renderLayer( Gadget::Layer layer, const Style *style, Gadget::RenderReason reason ) const override
 		{
 			if(
-				( layer != Gadget::Layer::MidFront ) ||
-				Gadget::isSelectionRender( reason )
+				( layer != Gadget::Layer::MidFront )
+				|| Gadget::isSelectionRender( reason ) // TODO TODO TODO - remove this early exit, actually support selection
 			)
 			{
 				return;
@@ -357,7 +361,7 @@ class PaintGadget : public Gadget
 
 			if( layer == Gadget::Layer::MidFront )
 			{
-				renderColorVisualiser( viewportGadget );
+				renderColorVisualiser( viewportGadget, reason );
 			}
 		}
 
@@ -402,7 +406,7 @@ class PaintGadget : public Gadget
 		/// is reponsible for determining if it should be drawn for the given `mode`. Objects may
 		/// have different data types for the same variable name, so a visualiser's suitability may
 		/// vary per-object.
-		void renderColorVisualiser( const ViewportGadget *viewportGadget ) const
+		void renderColorVisualiser( const ViewportGadget *viewportGadget, Gadget::RenderReason reason ) const
 		{
 			// Get the name of the primitive variable to visualise
 			const std::string name = m_tool->variableNamePlug()->getValue();
@@ -410,6 +414,9 @@ class PaintGadget : public Gadget
 			{
 				return;
 			}
+
+			// TODO TODO TODO : Support selection
+			//if( Gadget::isSelectionRender( reason ) )
 
 			IECore::TypeId variableType = (IECore::TypeId)m_tool->variableTypePlug()->getValue();
 			int toolMode = m_tool->modePlug()->getValue();
@@ -1009,6 +1016,298 @@ bool applyPaint( std::vector< T > &outValue, std::vector<float> &outOpacity, con
 
 } // namespace
 
+class PaintTool::BrushOutline : public GafferUI::Gadget
+{
+
+    public :
+
+        /*enum BrushOutlineChangedReason
+        {
+            Invalid,
+            SetBound,
+            DragBegin,
+            DragMove,
+            DragEnd
+        };*/
+
+        BrushOutline()
+            :   Gadget(), m_pos( 0.0f ), m_radius( 100.0f ), m_hardness( 0.5f )
+        {
+            /*mouseMoveSignal().connect( boost::bind( &BrushOutline::mouseMove, this, ::_2 ) );
+            buttonPressSignal().connect( boost::bind( &BrushOutline::buttonPress, this, ::_2 ) );
+            dragBeginSignal().connect( boost::bind( &BrushOutline::dragBegin, this, ::_1, ::_2 ) );
+            dragEnterSignal().connect( boost::bind( &BrushOutline::dragEnter, this, ::_1, ::_2 ) );
+            dragMoveSignal().connect( boost::bind( &BrushOutline::dragMove, this, ::_2 ) );
+            dragEndSignal().connect( boost::bind( &BrushOutline::dragEnd, this, ::_2 ) );
+            leaveSignal().connect( boost::bind( &BrushOutline::leave, this ) );*/
+
+
+			/*const int numDivisions = 100;
+			IntVectorDataPtr vertsPerCurveData = new IntVectorData( { numDivisions } );
+			V3fVectorDataPtr pData = new V3fVectorData;
+			std::vector<V3f> &p = pData->writable();
+			for( int i = 0; i < numDivisions; ++i )
+			{
+				const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
+				p.push_back( 100.0f * V3f( cos( angle ), sin( angle ), 0 ) );
+			}
+
+			m_curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), false, vertsPerCurveData );
+			m_curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );*/
+        }
+
+        Imath::Box3f bound() const override
+        {
+			// We draw in raster space so don't have a sensible bound
+			return Box3f();
+        }
+
+        void setPos( const Imath::V2f &pos )
+        {
+			m_pos = pos;
+            dirty( DirtyType::Render );
+        }
+
+        void setBrush( float radius, float hardness )
+        {
+			m_radius = radius;
+			m_hardness = hardness;
+            dirty( DirtyType::Render );
+        }
+
+        /*const Imath::Box2f &getBrushOutline() const
+        {
+            return m_rectangle;
+        }*/
+
+        /*using UnarySignal = Signals::Signal<void ( BrushOutline *, BrushOutlineChangedReason )>;
+        UnarySignal &rectangleChangedSignal()
+        {
+            return m_rectangleChangedSignal;
+        }*/
+
+    protected :
+
+        void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+        {
+            if( layer != Layer::Front )
+            {
+                return;
+            }
+
+            /// \todo Would it make sense for the ViewportGadget to have a way
+            /// of adding a child as an overlay, so we didn't have to do the
+            /// raster scope bit manually? Maybe that would let us write more reusable
+            /// gadgets, which could be used in any space, and we wouldn't need
+            /// eventPosition().
+            std::optional<ViewportGadget::RasterScope> rasterScope;
+			rasterScope.emplace( ancestor<ViewportGadget>() );
+
+            glPushAttrib( GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT );
+
+                if( !isSelectionRender( reason ) )
+                {
+                    glEnable( GL_LINE_SMOOTH );
+                    glLineWidth( 1.5f );
+
+					glTranslatef( m_pos.x, m_pos.y, 0.0f );
+
+					for( int j = 0; j < 2; j++ )
+					{
+						if( j == 1 )
+						{
+							if( m_hardness == 1.0f )
+							{
+								continue;
+							}
+							glColor4f( 0.0f, 0.0f, 0.0, 1.0f );
+							float h = std::max( 0.01f, m_hardness );
+							glScalef( h, h, h );
+						}
+						else
+						{
+							glColor4f( 0.8f, 0.8f, 0.8, 1.0f );
+							glScalef( m_radius, m_radius, m_radius );
+						}
+
+
+						glBegin( GL_LINE_LOOP );
+
+							const int numDivisions = 100;
+							for( int i = 0; i < numDivisions; ++i )
+							{
+								const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
+								glVertex2f( cos( angle ), sin( angle ) );
+							}
+
+						glEnd();
+					}
+                }
+
+            glPopAttrib();
+
+        }
+
+        unsigned layerMask() const override
+        {
+            return (unsigned)Layer::Front;
+        }
+
+        Imath::Box3f renderBound() const override
+        {
+			// We don't have a sensible bound when we're drawing
+			// in raster space
+			Box3f b;
+			b.makeInfinite();
+			return b;
+        }
+
+    private :
+
+        /*bool mouseMove( const ButtonEvent &event )
+        {
+            int x, y;
+            bool inside;
+
+            if( !inside || event.modifiers == ButtonEvent::Modifiers::Shift )
+            {
+                Pointer::setCurrent( "crossHair" );
+            }
+            else if( x && y )
+            {
+                const bool isDown = x * y > 0;
+                Pointer::setCurrent( isDown ? "moveDiagonallyDown" : "moveDiagonallyUp" );
+            }
+            else if( x )
+            {
+                Pointer::setCurrent( "moveHorizontally" );
+            }
+            else if( y )
+            {
+                Pointer::setCurrent( "moveVertically" );
+            }
+            else
+            {
+                Pointer::setCurrent( "move" );
+            }
+
+            return false;
+        }
+
+        bool buttonPress( const GafferUI::ButtonEvent &event )
+        {
+            if( event.buttons != ButtonEvent::Left )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+        {
+            m_dragStart = eventPosition( event );
+            m_dragStartBrushOutline = m_rectangle;
+            return IECore::NullObject::defaultNullObject();
+        }
+
+
+       bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+        {
+            if( event.sourceGadget != this )
+            {
+                return false;
+            }
+
+            updateDragBrushOutline( event, DragBegin );
+            return true;
+        }
+
+        bool dragMove( const GafferUI::DragDropEvent &event )
+        {
+            updateDragBrushOutline( event, DragMove );
+            return true;
+        }
+
+        bool dragEnd( const GafferUI::DragDropEvent &event )
+        {
+            updateDragBrushOutline( event, DragEnd );
+            return true;
+        }
+
+        void updateDragBrushOutline( const GafferUI::DragDropEvent &event, BrushOutlineChangedReason reason )
+        {
+            const V2f p = eventPosition( event );
+            Box2f b = m_dragStartBrushOutline;
+
+            if( !m_dragInside || event.modifiers == ButtonEvent::Modifiers::Shift )
+            {
+                b.min = m_dragStart;
+                b.max = p;
+            }
+            else if( m_xDragEdge || m_yDragEdge )
+            {
+                if( m_xDragEdge == -1 )
+                {
+                    b.min.x = p.x;
+                }
+                else if( m_xDragEdge == 1 )
+                {
+                    b.max.x = p.x;
+                }
+
+                if( m_yDragEdge == -1 )
+                {
+                    b.min.y = p.y;
+                }
+                else if( m_yDragEdge == 1 )
+                {
+                    b.max.y = p.y;
+                }
+            }
+            else
+            {
+                const V2f offset = p - m_dragStart;
+                b.min += offset;
+                b.max += offset;
+            }
+
+            // fix max < min issues
+            Box2f c;
+            c.extendBy( b.min );
+            c.extendBy( b.max );
+
+            setBrushOutlineInternal( c, reason );
+        }
+
+        void leave()
+        {
+            Pointer::setCurrent( "" );
+        }
+
+        V2f eventPosition( const ButtonEvent &event ) const
+        {
+            const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+			return viewportGadget->gadgetToRasterSpace( event.line.p1, this );
+        }*/
+
+        /*Imath::Box2f m_rectangle;
+        UnarySignal m_rectangleChangedSignal;
+
+        Imath::Box2f m_dragStartBrushOutline;
+        Imath::V2f m_dragStart;
+        bool m_dragInside;
+        int m_xDragEdge;
+        int m_yDragEdge;*/
+
+		V2f m_pos;
+		float m_radius;
+		float m_hardness;
+		IECoreGL::CurvesPrimitivePtr m_curves;
+
+};
+
+
 //////////////////////////////////////////////////////////////////////////
 // PaintTool::Selection
 //////////////////////////////////////////////////////////////////////////
@@ -1392,7 +1691,8 @@ PaintTool::PaintTool( SceneView *view, const std::string &name )
 		m_priorityPathsDirty( true ),
 		m_dragging( false ),
 		m_mergeGroupId( 0 ),
-		m_depthRender( Imath::V2i( 32, 32 ) )
+		m_depthRender( Imath::V2i( 32, 32 ) ),
+		m_mouseIn( false )
 {
 	view->viewportGadget()->addChild( m_gadget );
 	m_gadget->setVisible( false );
@@ -1416,6 +1716,9 @@ PaintTool::PaintTool( SceneView *view, const std::string &name )
 	scenePlug()->setInput( view->inPlug<ScenePlug>() );
 
 	view->viewportGadget()->keyPressSignal().connect( boost::bind( &PaintTool::keyPress, this, ::_2 ) );
+	view->viewportGadget()->enterSignal().connectFront( boost::bind( &PaintTool::enter, this, ::_2 ) );
+	view->viewportGadget()->leaveSignal().connectFront( boost::bind( &PaintTool::leave, this, ::_2 ) );
+	view->viewportGadget()->mouseMoveSignal().connect( boost::bind( &PaintTool::mouseMove, this, ::_2 ) );
 	view->viewportGadget()->buttonPressSignal().connectFront( boost::bind( &PaintTool::buttonPress, this, ::_2 ) );
 	view->viewportGadget()->buttonReleaseSignal().connectFront( boost::bind( &PaintTool::buttonRelease, this, ::_2 ) );
 
@@ -1433,6 +1736,13 @@ PaintTool::PaintTool( SceneView *view, const std::string &name )
 
 	Metadata::plugValueChangedSignal().connect( boost::bind( &PaintTool::metadataChanged, this, ::_3 ) );
 	Metadata::nodeValueChangedSignal().connect( boost::bind( &PaintTool::metadataChanged, this, ::_2 ) );
+
+	m_brushOutline = new BrushOutline();
+	m_brushOutline->setVisible( false );
+	view->viewportGadget()->setChild( "__paintBrushOutline", m_brushOutline );
+
+	// Init the brush gadget
+	plugDirtied( sizePlug() );
 }
 
 PaintTool::~PaintTool()
@@ -1598,6 +1908,7 @@ void PaintTool::selectedPathsChanged()
 	selectionChangedSignal()( *this );
 	m_gadgetDirty = true;
 	m_priorityPathsDirty = true;
+	updateCursor();
 }
 
 void PaintTool::plugDirtied( const Gaffer::Plug *plug )
@@ -1638,6 +1949,10 @@ void PaintTool::plugDirtied( const Gaffer::Plug *plug )
 			view()->viewportGadget()
 		);
 	}
+	else if( plug == sizePlug() || plug == hardnessPlug() )
+	{
+		m_brushOutline->setBrush( sizePlug()->getValue(), hardnessPlug()->getValue() );
+	}
 
 	/*if( affectsHandles( plug ) )
 	{
@@ -1657,6 +1972,7 @@ void PaintTool::plugDirtied( const Gaffer::Plug *plug )
 		{
 			m_preRenderConnection.disconnect();
 			m_gadget->setVisible( false );
+			m_brushOutline->setVisible( false );
 			SceneGadget *sceneGadget = static_cast<SceneGadget *>( view()->viewportGadget()->getPrimaryChild() );
 			sceneGadget->setPriorityPaths( IECore::PathMatcher() );
 		}
@@ -1940,6 +2256,8 @@ bool PaintTool::dragMove( const GafferUI::DragDropEvent &event )
 		return false;
 	}
 
+	m_brushOutline->setPos( V2f( event.line.p1.x, event.line.p1.y ) );
+
 	// TODO
 	DirtyPropagationScope dirtyPropagationScope;
 
@@ -2009,8 +2327,8 @@ bool PaintTool::dragMove( const GafferUI::DragDropEvent &event )
 
 bool PaintTool::dragEnd( const GafferUI::DragDropEvent &event )
 {
-	m_dragging = false;
 	applyCurrentStroke();
+	m_dragging = false;
 	return true;
 }
 
@@ -2380,6 +2698,30 @@ CompoundDataPtr PaintTool::targetVariableTypes()
 	return resultData;
 }
 
+bool PaintTool::enter( const ButtonEvent &event )
+{
+	m_mouseIn = true;
+	updateCursor();
+	return false;
+}
+
+bool PaintTool::leave( const ButtonEvent &event )
+{
+	m_mouseIn = false;
+	updateCursor();
+	return false;
+}
+
+bool PaintTool::mouseMove( const ButtonEvent &event )
+{
+	// TODO - shouldn't be necessary to update cursor this often if we can accurately track when it should be changed
+	// ( Currently I've been noticing this going wrong after middle mouse panning )
+	updateCursor();
+
+	m_brushOutline->setPos( V2f( event.line.p1.x, event.line.p1.y ) );
+	return false;
+}
+
 bool PaintTool::buttonPress( const GafferUI::ButtonEvent &event )
 {
 	if( event.buttons != ButtonEvent::Left || event.modifiers )
@@ -2390,6 +2732,12 @@ bool PaintTool::buttonPress( const GafferUI::ButtonEvent &event )
 	if( !activePlug()->getValue() )
 	{
 		return false;
+	}
+
+	if( !selectionEditable() )
+	{
+		// We're not editable, but we should still consume the event
+		return true;
 	}
 
 	// TODO - now about button being down rather than dragging?
@@ -2538,13 +2886,22 @@ void PaintTool::applyCurrentStroke()
 			continue;
 		}
 		// TODO TODO TODO
-		if( !s.m_initialEditValue )
+		/*if( !s.m_initialEditValue )
 		{
 			s.m_initialEditValue = new IECore::CompoundData();
-		}
+		}*/
 
-		CompoundDataPtr newVal = newPrimVarComposite( variableType, IECore::size( s.m_currentStroke->writable()["opacity"].get() ), true );
-		applyPrimVarComposite( s.m_initialEditValue.get(), s.m_currentStroke.get(), 1, opacity, newVal.get() );
+		CompoundDataPtr newVal;
+		if( s.m_initialEditValue )
+		{
+			newVal = newPrimVarComposite( variableType, IECore::size( s.m_currentStroke->writable()["opacity"].get() ), true );
+			applyPrimVarComposite( s.m_initialEditValue.get(), s.m_currentStroke.get(), 1, opacity, newVal.get() );
+		}
+		else
+		{
+			newVal = s.m_currentStroke->copy();
+			s.m_initialEditValue = newVal;
+		}
 
 		// TODO - lift out of loop
 		CachedDataNode* paintEdit = s.acquirePaintEdit( true );
@@ -2574,11 +2931,37 @@ void PaintTool::applyCurrentStroke()
 	}
 }
 
+void PaintTool::updateCursor()
+{
+	bool useBrush = m_mouseIn && activePlug()->getValue();
+	if( useBrush && !selectionEditable() )
+	{
+		useBrush = false;
+	}
+
+	if( useBrush )
+	{
+		m_brushOutline->setVisible( true );
+		Pointer::setCurrent( "invisible" );
+	}
+	else
+	{
+		m_brushOutline->setVisible( false );
+		Pointer::setCurrent( "" );
+	}
+
+	/*view()->viewportGadget()->renderRequestSignal()(
+		view()->viewportGadget()
+	);*/
+}
+
 bool PaintTool::buttonRelease( const GafferUI::ButtonEvent &event )
 {
 	m_dragging = false;
 	//m_ourButtonPress = false;
 	applyCurrentStroke();
+
+	updateCursor();
 	return false; // TODO
 }
 

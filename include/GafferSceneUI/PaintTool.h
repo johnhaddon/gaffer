@@ -278,12 +278,17 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 
 	private :
 
+		IE_CORE_FORWARDDECLARE( BrushOutline );
+
 		void contextChanged();
 		void selectedPathsChanged();
 		void plugDirtied( const Gaffer::Plug *plug );
 		void metadataChanged( IECore::InternedString key );
 		void updateSelection() const;
 		void preRender();
+		bool enter( const GafferUI::ButtonEvent &event );
+		bool leave( const GafferUI::ButtonEvent &event );
+		bool mouseMove( const GafferUI::ButtonEvent &event );
 		bool buttonPress( const GafferUI::ButtonEvent &event );
 		bool buttonRelease( const GafferUI::ButtonEvent &event );
 		bool keyPress( const GafferUI::KeyEvent &event );
@@ -293,6 +298,8 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 		bool dragEnd( const GafferUI::DragDropEvent &event );
 
 		void applyCurrentStroke();
+
+		void updateCursor();
 
 		Gaffer::Signals::ScopedConnection m_preRenderConnection;
 
@@ -309,6 +316,10 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 		int m_mergeGroupId;
 
 		GafferUI::DepthRender m_depthRender;
+
+		BrushOutlinePtr m_brushOutline;
+
+		bool m_mouseIn;
 
 		static ToolDescription<PaintTool, SceneView> g_toolDescription;
 		static size_t g_firstPlugIndex;

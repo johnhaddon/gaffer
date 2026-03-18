@@ -396,3 +396,5 @@ class _StatusWidget( GafferUI.Frame ) :
 			self.__warningRow.setVisible( False )
 			self.__infoLabel.setText( "Select something to paint" )
 			self.__nameLabel.setGraphComponent( None )
+
+GafferUI.Pointer.registerPointer( "invisible", GafferUI.Pointer( "pointerInvisible.png", imath.V2i( 0, 0 ) ) )
