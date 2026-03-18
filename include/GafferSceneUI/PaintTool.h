@@ -164,7 +164,7 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 			/// Throws if `status() != Editable`.
 			Gaffer::GraphComponent *editTarget() const;
 
-			mutable std::vector<float> m_floatValue;
+			mutable std::vector<float> m_floatValueExpanded;
 			//mutable std::vector<Imath::Color3f> m_colorValue;
 			mutable std::vector<Imath::Color3f> m_colorValueExpanded;
 			mutable IECoreGL::BufferPtr m_valueBuffer;

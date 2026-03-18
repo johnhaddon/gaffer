@@ -620,7 +620,7 @@ class PaintGadget : public Gadget
 						location.m_triangulatedTemp = IECoreScene::MeshAlgo::triangulate( mesh.get() );
 					}
 
-					size_t numVerts = mesh->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Vertex );
+					//size_t numVerts = mesh->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Vertex );
 					size_t numVertsExpanded = location.m_triangulatedTemp->variableSize( IECoreScene::PrimitiveVariable::Interpolation::FaceVarying );
 
 					if( toolMode == 1 )
@@ -660,14 +660,34 @@ class PaintGadget : public Gadget
 					else
 					{
 						components = 1;
-						location.m_floatValue.resize( numVerts, 1.0f );
+
+						const std::vector<float> &strokeValue = location.m_composedValue->member<FloatVectorData>( "value" )->readable();
+
+						location.m_floatValueExpanded.resize( numVertsExpanded, 0.0f );
+
+						const std::vector<int> &vertexIds = location.m_triangulatedTemp->vertexIds()->readable();
+						for( unsigned int i = 0; i < numVertsExpanded; i++ )
+						{
+							location.m_floatValueExpanded[i] = strokeValue[ vertexIds[i] ];
+						}
+
 						if( !location.m_valueBuffer )
+						{
+							location.m_valueBuffer = new IECoreGL::Buffer( &location.m_floatValueExpanded[0], sizeof( float ) * numVertsExpanded );
+						}
+						glBindBuffer( GL_ARRAY_BUFFER, location.m_valueBuffer->buffer() );
+						//glBufferData( GL_ARRAY_BUFFER, location.m_valueBuffer->size(), &location.m_colorValueExpanded[0], GL_DYNAMIC_DRAW );
+						glBufferSubData( GL_ARRAY_BUFFER, 0, location.m_valueBuffer->size(), &location.m_floatValueExpanded[0] );
+
+
+						/*if( !location.m_valueBuffer )
 						{
 							location.m_valueBuffer = new IECoreGL::Buffer( &location.m_floatValue[0], sizeof( float ) * numVerts );
 						}
 						glBindBuffer( GL_ARRAY_BUFFER, location.m_valueBuffer->buffer() );
 						//glBufferData( GL_ARRAY_BUFFER, location.m_valueBuffer->size(), &location.m_floatValue[0], GL_DYNAMIC_DRAW );
 						glBufferSubData( GL_ARRAY_BUFFER, 0, location.m_valueBuffer->size(), &location.m_floatValue[0] );
+						*/
 					}
 					location.m_currentStrokeDirty = false;
 				}
