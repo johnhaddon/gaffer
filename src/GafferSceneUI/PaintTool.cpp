@@ -321,8 +321,237 @@ const std::string g_colorShaderFragSource
     "}\n"
 );
 
+
+// Cache for mesh evaluators
+struct EvaluationData
+{
+	IECoreScene::ConstMeshPrimitivePtr triMesh;
+	IECoreScene::ConstMeshPrimitiveEvaluatorPtr evaluator;
+};
+
+IECore::LRUCache<IECoreScene::ConstMeshPrimitivePtr, EvaluationData> g_evaluatorCache(
+	[] ( IECoreScene::ConstMeshPrimitivePtr mesh, size_t &cost ) -> EvaluationData
+	{
+		cost = 1;
+		EvaluationData data;
+		data.triMesh = mesh->copy();
+		data.triMesh = IECoreScene::MeshAlgo::triangulate( data.triMesh.get() );
+		data.evaluator = new IECoreScene::MeshPrimitiveEvaluator( data.triMesh );
+		return data;
+	},
+	1000
+);
+
+/*M44f signOnlyScaling( const M44f &m )
+{
+	V3f scale( 1 );
+	V3f shear( 0 );
+	V3f rotate( 0 );
+	V3f translate( 0 );
+
+	extractSHRT( m, scale, shear, rotate, translate );
+
+	M44f result;
+
+	result.translate( translate );
+	result.rotate( rotate );
+	result.shear( shear );
+	result.scale( V3f( Imath::sign( scale.x ), Imath::sign( scale.y ), Imath::sign( scale.z ) ) );
+
+	return result;
+}*/
+
+// Similar to `plug->source()`, but able to traverse through
+// Spreadsheet outputs to find the appropriate input row.
+/*V3fPlug *spreadsheetAwareSource( V3fPlug *plug, std::string &failureReason )
+{
+	plug = plug->source<V3fPlug>();
+	if( !plug )
+	{
+		// Source is not a V3fPlug. Not much we can do about that.
+		failureReason = "Plug input is not a V3fPlug";
+		return nullptr;
+	}
+
+	auto *spreadsheet = runTimeCast<Spreadsheet>( plug->node() );
+	if( !spreadsheet )
+	{
+		return plug;
+	}
+
+	if( !spreadsheet->outPlug()->isAncestorOf( plug ) )
+	{
+		return plug;
+	}
+
+	plug = static_cast<V3fPlug *>( spreadsheet->activeInPlug( plug ) );
+	if( plug->ancestor<Spreadsheet::RowPlug>() == spreadsheet->rowsPlug()->defaultRow() )
+	{
+		// Default spreadsheet row. Editing this could affect any number
+		// of unrelated objects, so don't allow that.
+		failureReason = "Cannot edit default spreadsheet row";
+		return nullptr;
+	}
+
+	return plug->source<V3fPlug>();
+}*/
+
+/*GraphComponent *editTargetOrNull( const PaintTool::Selection &selection )
+{
+	return selection.editable() ? selection.editTarget() : nullptr;
+}*/
+
+class HandlesGadget : public Gadget
+{
+
+	public :
+
+		HandlesGadget( const std::string &name="HandlesGadget" )
+			:	Gadget( name )
+		{
+		}
+
+	protected :
+
+		Imath::Box3f renderBound() const override
+		{
+			// We need `renderLayer()` to be called any time it will
+			// be called for one of our children. Our children claim
+			// infinite bounds to account for their raster scale, so
+			// we must too.
+			Box3f b;
+			b.makeInfinite();
+			return b;
+		}
+
+		void renderLayer( Layer layer, const Style *style, Gadget::RenderReason reason ) const override
+		{
+			if( layer != Layer::MidFront )
+			{
+				return;
+			}
+
+			// Clear the depth buffer so that the handles render
+			// over the top of the SceneGadget. Otherwise they are
+			// unusable when the object is larger than the handles.
+			/// \todo Can we really justify this approach? Does it
+			/// play well with new Gadgets we'll add over time? If
+			/// so, then we should probably move the depth clearing
+			/// to `Gadget::render()`, in between each layer. If
+			/// not we'll need to come up with something else, perhaps
+			/// going back to punching a hole in the depth buffer using
+			/// `glDepthFunc( GL_GREATER )`. Or maybe an option to
+			/// render gadgets in an offscreen buffer before compositing
+			/// them over the current framebuffer?
+			glClearDepth( 1.0f );
+			glClear( GL_DEPTH_BUFFER_BIT );
+			glEnable( GL_DEPTH_TEST );
+
+		}
+
+		unsigned layerMask() const override
+		{
+			return (unsigned)Layer::MidFront;
+		}
+
+};
+
+template< class T >
+bool applyPaint( std::vector< T > &outValue, std::vector<float> &outOpacity, const T &value, float opacity, int mode, float hardness, const IECoreScene::PrimitiveVariable::IndexedView<V3f> &pVar, const M44f& localPaintMatrix, int resolution, const float *depthMap, const UglyArray &iterators, const V2f *baseKDPoint )
+{
+	outValue.resize( pVar.size(), T( 0.0f ) );
+	outOpacity.resize( pVar.size(), 0.0f );
+
+	//M44f localPaintMatrixInverse = localPaintMatrix.inverse();
+
+	//auto &paintIndices = paintIndicesData->writable();
+	bool modified = false;
+
+	//for( size_t i = 0; i < pVar.size(); i++ )
+	for( auto it : iterators )
+	{
+		int i = &(*it) - baseKDPoint;
+		//V3f offset = (*pVar)[i] - localOrigin;
+		//float curOpac = opacity * ( toolSize - ( offset - localDir * offset.dot( dir ) ).length() ) / toolSize;
+		V3f brushPos;
+		localPaintMatrix.multVecMatrix( pVar[i], brushPos );
+
+		float l2 = brushPos.x * brushPos.x + brushPos.y * brushPos.y;
+		if( l2 > 1.0f )
+		{
+			continue;
+		}
+
+		float brushShape;
+		if( hardness == 1.0f )
+		{
+			brushShape = l2 <= 1.0f ? 1.0f : 0.0f;
+		}
+		else
+		{
+			brushShape = std::min( ( 1 - sqrtf( l2 ) ) / ( 1.0f - hardness ), 1.0f );
+		}
+
+		float rasterX = ( brushPos.x * 0.5f + 0.5f ) * ( resolution - 1 );
+		float rasterY = ( brushPos.y * 0.5f + 0.5f ) * ( resolution - 1 );
+
+		float iX = std::min( floorf( rasterX ), resolution - 2.0f );
+		float iY = std::min( floorf( rasterY ), resolution - 2.0f );
+
+		float lerpX = rasterX - iX;
+		float lerpY = rasterY - iY;
+
+		int iiX = iX;
+		int iiY = iY;
+
+		//std::cerr << "HIT : " << rasterX << ", " << rasterY << "\n";
+		float depth =
+			( depthMap[ iiY * resolution + iiX ] * ( 1.0f - lerpX ) + ( depthMap[ iiY * resolution + iiX + 1 ] * lerpX ) ) * ( 1.0f - lerpY ) +
+			( depthMap[ ( iiY + 1 ) * resolution + iiX ] * ( 1.0f - lerpX ) + ( depthMap[ ( iiY + 1 ) * resolution + iiX + 1 ] * lerpX ) ) * lerpY;
+
+
+		//V3f localNearPlanePoint;
+
+		//localPaintMatrixInverse.multVecMatrix( V3f( brushPos.x, brushPos.y, -1.0f ), localNearPlanePoint );
+
+		const float lookupDepth = brushPos.z;
+
+		const float depthTolerance = brushPos.z * 0.00001;
+
+
+		//std::cerr << "COMPARE " << ( pVar[i] - localNearPlanePoint ).length() << " <= " << depth << "\n";
+		float depthMask = std::max( 0.0f, std::min( 1.0f, ( 2.0f * depth - 1.0f + depthTolerance - lookupDepth ) / depthTolerance ) );
+
+		float curOpac = opacity * brushShape * depthMask;
+		if( curOpac > 0 )
+		{
+			modified = true;
+			/*if( mode == 0 )
+			{
+				outValue[i] = ( 1.0f - curOpac ) * outValue[i];
+
+				// TODO - this would be simpler if we stored ( 1 - opacity ), but maybe that's a harder
+				// thing to name?
+				outOpacity[i] = ( 1.0f - curOpac ) * outOpacity[i];
+			}
+			else
+			{*/
+			outValue[i] = ( 1.0f - curOpac ) * outValue[i] + curOpac * value;
+
+			// TODO - this would be simpler if we stored ( 1 - opacity ), but maybe that's a harder
+			// thing to name?
+			outOpacity[i] = 1.0f - ( 1.0f - curOpac ) * ( 1.0f - outOpacity[i] );
+			//}
+		}
+	}
+	return modified;
+}
+
+
+} // namespace
+
 // The gadget that does the actual opengl drawing of the shaded primitive
-class PaintGadget : public Gadget
+class PaintTool::PaintGadget : public Gadget
 {
 
 	public :
@@ -343,7 +572,6 @@ class PaintGadget : public Gadget
 			m_visualiseMode = visualiseMode;
 		}
 
-	protected:
 
 		void renderLayer( Gadget::Layer layer, const Style *style, Gadget::RenderReason reason ) const override
 		{
@@ -369,6 +597,8 @@ class PaintGadget : public Gadget
 				renderColorVisualiser( viewportGadget, reason );
 			}
 		}
+
+	protected:
 
 		Box3f renderBound() const override
 		{
@@ -822,234 +1052,6 @@ class PaintGadget : public Gadget
 		mutable IECoreGL::ConstBufferPtr m_colorUniformBuffer;
 		int m_visualiseMode;
 };
-
-// Cache for mesh evaluators
-struct EvaluationData
-{
-	IECoreScene::ConstMeshPrimitivePtr triMesh;
-	IECoreScene::ConstMeshPrimitiveEvaluatorPtr evaluator;
-};
-
-IECore::LRUCache<IECoreScene::ConstMeshPrimitivePtr, EvaluationData> g_evaluatorCache(
-	[] ( IECoreScene::ConstMeshPrimitivePtr mesh, size_t &cost ) -> EvaluationData
-	{
-		cost = 1;
-		EvaluationData data;
-		data.triMesh = mesh->copy();
-		data.triMesh = IECoreScene::MeshAlgo::triangulate( data.triMesh.get() );
-		data.evaluator = new IECoreScene::MeshPrimitiveEvaluator( data.triMesh );
-		return data;
-	},
-	1000
-);
-
-/*M44f signOnlyScaling( const M44f &m )
-{
-	V3f scale( 1 );
-	V3f shear( 0 );
-	V3f rotate( 0 );
-	V3f translate( 0 );
-
-	extractSHRT( m, scale, shear, rotate, translate );
-
-	M44f result;
-
-	result.translate( translate );
-	result.rotate( rotate );
-	result.shear( shear );
-	result.scale( V3f( Imath::sign( scale.x ), Imath::sign( scale.y ), Imath::sign( scale.z ) ) );
-
-	return result;
-}*/
-
-// Similar to `plug->source()`, but able to traverse through
-// Spreadsheet outputs to find the appropriate input row.
-/*V3fPlug *spreadsheetAwareSource( V3fPlug *plug, std::string &failureReason )
-{
-	plug = plug->source<V3fPlug>();
-	if( !plug )
-	{
-		// Source is not a V3fPlug. Not much we can do about that.
-		failureReason = "Plug input is not a V3fPlug";
-		return nullptr;
-	}
-
-	auto *spreadsheet = runTimeCast<Spreadsheet>( plug->node() );
-	if( !spreadsheet )
-	{
-		return plug;
-	}
-
-	if( !spreadsheet->outPlug()->isAncestorOf( plug ) )
-	{
-		return plug;
-	}
-
-	plug = static_cast<V3fPlug *>( spreadsheet->activeInPlug( plug ) );
-	if( plug->ancestor<Spreadsheet::RowPlug>() == spreadsheet->rowsPlug()->defaultRow() )
-	{
-		// Default spreadsheet row. Editing this could affect any number
-		// of unrelated objects, so don't allow that.
-		failureReason = "Cannot edit default spreadsheet row";
-		return nullptr;
-	}
-
-	return plug->source<V3fPlug>();
-}*/
-
-/*GraphComponent *editTargetOrNull( const PaintTool::Selection &selection )
-{
-	return selection.editable() ? selection.editTarget() : nullptr;
-}*/
-
-class HandlesGadget : public Gadget
-{
-
-	public :
-
-		HandlesGadget( const std::string &name="HandlesGadget" )
-			:	Gadget( name )
-		{
-		}
-
-	protected :
-
-		Imath::Box3f renderBound() const override
-		{
-			// We need `renderLayer()` to be called any time it will
-			// be called for one of our children. Our children claim
-			// infinite bounds to account for their raster scale, so
-			// we must too.
-			Box3f b;
-			b.makeInfinite();
-			return b;
-		}
-
-		void renderLayer( Layer layer, const Style *style, Gadget::RenderReason reason ) const override
-		{
-			if( layer != Layer::MidFront )
-			{
-				return;
-			}
-
-			// Clear the depth buffer so that the handles render
-			// over the top of the SceneGadget. Otherwise they are
-			// unusable when the object is larger than the handles.
-			/// \todo Can we really justify this approach? Does it
-			/// play well with new Gadgets we'll add over time? If
-			/// so, then we should probably move the depth clearing
-			/// to `Gadget::render()`, in between each layer. If
-			/// not we'll need to come up with something else, perhaps
-			/// going back to punching a hole in the depth buffer using
-			/// `glDepthFunc( GL_GREATER )`. Or maybe an option to
-			/// render gadgets in an offscreen buffer before compositing
-			/// them over the current framebuffer?
-			glClearDepth( 1.0f );
-			glClear( GL_DEPTH_BUFFER_BIT );
-			glEnable( GL_DEPTH_TEST );
-
-		}
-
-		unsigned layerMask() const override
-		{
-			return (unsigned)Layer::MidFront;
-		}
-
-};
-
-template< class T >
-bool applyPaint( std::vector< T > &outValue, std::vector<float> &outOpacity, const T &value, float opacity, int mode, float hardness, const IECoreScene::PrimitiveVariable::IndexedView<V3f> &pVar, const M44f& localPaintMatrix, int resolution, const float *depthMap, const UglyArray &iterators, const V2f *baseKDPoint )
-{
-	outValue.resize( pVar.size(), T( 0.0f ) );
-	outOpacity.resize( pVar.size(), 0.0f );
-
-	//M44f localPaintMatrixInverse = localPaintMatrix.inverse();
-
-	//auto &paintIndices = paintIndicesData->writable();
-	bool modified = false;
-
-	//for( size_t i = 0; i < pVar.size(); i++ )
-	for( auto it : iterators )
-	{
-		int i = &(*it) - baseKDPoint;
-		//V3f offset = (*pVar)[i] - localOrigin;
-		//float curOpac = opacity * ( toolSize - ( offset - localDir * offset.dot( dir ) ).length() ) / toolSize;
-		V3f brushPos;
-		localPaintMatrix.multVecMatrix( pVar[i], brushPos );
-
-		float l2 = brushPos.x * brushPos.x + brushPos.y * brushPos.y;
-		if( l2 > 1.0f )
-		{
-			continue;
-		}
-
-		float brushShape;
-		if( hardness == 1.0f )
-		{
-			brushShape = l2 <= 1.0f ? 1.0f : 0.0f;
-		}
-		else
-		{
-			brushShape = std::min( ( 1 - sqrtf( l2 ) ) / ( 1.0f - hardness ), 1.0f );
-		}
-
-		float rasterX = ( brushPos.x * 0.5f + 0.5f ) * ( resolution - 1 );
-		float rasterY = ( brushPos.y * 0.5f + 0.5f ) * ( resolution - 1 );
-
-		float iX = std::min( floorf( rasterX ), resolution - 2.0f );
-		float iY = std::min( floorf( rasterY ), resolution - 2.0f );
-
-		float lerpX = rasterX - iX;
-		float lerpY = rasterY - iY;
-
-		int iiX = iX;
-		int iiY = iY;
-
-		//std::cerr << "HIT : " << rasterX << ", " << rasterY << "\n";
-		float depth =
-			( depthMap[ iiY * resolution + iiX ] * ( 1.0f - lerpX ) + ( depthMap[ iiY * resolution + iiX + 1 ] * lerpX ) ) * ( 1.0f - lerpY ) +
-			( depthMap[ ( iiY + 1 ) * resolution + iiX ] * ( 1.0f - lerpX ) + ( depthMap[ ( iiY + 1 ) * resolution + iiX + 1 ] * lerpX ) ) * lerpY;
-
-
-		//V3f localNearPlanePoint;
-
-		//localPaintMatrixInverse.multVecMatrix( V3f( brushPos.x, brushPos.y, -1.0f ), localNearPlanePoint );
-
-		const float lookupDepth = brushPos.z;
-
-		const float depthTolerance = brushPos.z * 0.00001;
-
-
-		//std::cerr << "COMPARE " << ( pVar[i] - localNearPlanePoint ).length() << " <= " << depth << "\n";
-		float depthMask = std::max( 0.0f, std::min( 1.0f, ( 2.0f * depth - 1.0f + depthTolerance - lookupDepth ) / depthTolerance ) );
-
-		float curOpac = opacity * brushShape * depthMask;
-		if( curOpac > 0 )
-		{
-			modified = true;
-			/*if( mode == 0 )
-			{
-				outValue[i] = ( 1.0f - curOpac ) * outValue[i];
-
-				// TODO - this would be simpler if we stored ( 1 - opacity ), but maybe that's a harder
-				// thing to name?
-				outOpacity[i] = ( 1.0f - curOpac ) * outOpacity[i];
-			}
-			else
-			{*/
-			outValue[i] = ( 1.0f - curOpac ) * outValue[i] + curOpac * value;
-
-			// TODO - this would be simpler if we stored ( 1 - opacity ), but maybe that's a harder
-			// thing to name?
-			outOpacity[i] = 1.0f - ( 1.0f - curOpac ) * ( 1.0f - outOpacity[i] );
-			//}
-		}
-	}
-	return modified;
-}
-
-
-} // namespace
 
 class PaintTool::BrushOutline : public GafferUI::Gadget
 {
@@ -2482,7 +2484,12 @@ void PaintTool::paint( const IECore::InternedString &variableName, const M44f &p
 	//const float* depthMap = m_depthRender.render( projectionMatrixPadded, view()->viewportGadget(), Gadget::Layer::Main );
 
 	//std::cerr << "DEPTH RENDER\n";
-	const float* depthMap = m_depthRender.render( projectionMatrixPadded, view()->viewportGadget(), Gadget::Layer( 0 ) );
+	//const float* depthMap = m_depthRender.render( projectionMatrixPadded, view()->viewportGadget(), Gadget::Layer( 0 ) );
+	m_depthRender.startRendering( projectionMatrixPadded );
+
+	m_gadget->renderLayer( Gadget::Layer::MidFront, nullptr, Gadget::RenderReason::Draw );
+
+	const float* depthMap = m_depthRender.finishRendering();
 	//std::cerr << "DEPTH RENDER DONE\n";
 	//std::cerr << "depthMap : " << depthMap[0] << "\n";
 

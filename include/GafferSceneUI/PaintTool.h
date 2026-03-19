@@ -280,6 +280,7 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 
 	private :
 
+		IE_CORE_FORWARDDECLARE( PaintGadget );
 		IE_CORE_FORWARDDECLARE( BrushOutline );
 
 		void contextChanged();
@@ -305,7 +306,7 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 
 		Gaffer::Signals::ScopedConnection m_preRenderConnection;
 
-		GafferUI::GadgetPtr m_gadget;
+		PaintGadgetPtr m_gadget;
 		bool m_gadgetDirty;
 
 		mutable std::vector<Selection> m_selection;
