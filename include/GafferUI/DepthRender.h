@@ -72,10 +72,10 @@ class GAFFERUI_API DepthRender
 
 		mutable GLuint m_framebuffer;
 		mutable Imath::V2i m_framebufferSize;
-		mutable GLuint m_colorBuffer;
+		//mutable GLuint m_colorBuffer;
 		mutable GLuint m_depthBuffer;
-		mutable GLuint m_downsampledFramebuffer;
-		mutable GLuint m_downsampledFramebufferTexture;
+		//mutable GLuint m_downsampledFramebuffer;
+		//mutable GLuint m_downsampledFramebufferTexture;
 
 };
 

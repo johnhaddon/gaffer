@@ -72,29 +72,6 @@ using namespace Gaffer;
 using namespace GafferUI;
 
 //////////////////////////////////////////////////////////////////////////
-// Utilities
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-bool checkGLArbTextureFloat()
-{
-	bool supported = std::regex_match( std::string( (const char*)glGetString( GL_EXTENSIONS ) ), std::regex( R"(.*GL_ARB_texture_float( |\n).*)" ) );
-	if( !supported )
-	{
-		IECore::msg(
-			IECore::Msg::Warning, "DepthRender",
-			"Could not find supported floating point texture format in OpenGL. Viewport "
-			"display is likely to show banding - please resolve graphics driver issue."
-		);
-	}
-	return supported;
-}
-
-} // namespace
-
-//////////////////////////////////////////////////////////////////////////
 // DepthRender
 //////////////////////////////////////////////////////////////////////////
 
@@ -111,10 +88,7 @@ DepthRender::~DepthRender()
 	if( m_framebuffer )
 	{
 		glDeleteFramebuffers( 1, &m_framebuffer );
-		glDeleteRenderbuffers( 1, &m_colorBuffer );
 		glDeleteRenderbuffers( 1, &m_depthBuffer );
-		glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
-		glDeleteTextures( 1, &m_downsampledFramebufferTexture );
 	}
 }
 
@@ -148,7 +122,7 @@ const float* DepthRender::render( const M44f &projectionMatrix, const ViewportGa
 	glClearColor( 0.26f, 0.26f, 0.26f, 0.0f );
 	glClearDepth( 1.0f );
 	//glClearDepth( 0.5f );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glClear( GL_DEPTH_BUFFER_BIT );
 
 	// Set up the camera to world matrix in gl_TextureMatrix[0] so that we can
 	// reference world space positions in shaders
@@ -184,7 +158,6 @@ const float* DepthRender::render( const M44f &projectionMatrix, const ViewportGa
 	glEnable( GL_BLEND );
 	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, acquireFramebuffer() );
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-	glClear( GL_COLOR_BUFFER_BIT );
 	glEnable( GL_MULTISAMPLE );
 	glClearDepth( 1.0f );
 	glClear( GL_DEPTH_BUFFER_BIT );
@@ -250,17 +223,17 @@ GLuint DepthRender::acquireFramebuffer() const
 		return m_framebuffer;
 	}
 
-	if( !m_colorBuffer )
+	if( !m_depthBuffer )
 	{
-		glGenRenderbuffers( 1, &m_colorBuffer );
+		//glGenRenderbuffers( 1, &m_colorBuffer );
 		glGenRenderbuffers( 1, &m_depthBuffer );
 
-		glGenTextures( 1, &m_downsampledFramebufferTexture );
+		/*glGenTextures( 1, &m_downsampledFramebufferTexture );
 		glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );*/
 	}
 
 	if( m_framebuffer )
@@ -270,7 +243,7 @@ GLuint DepthRender::acquireFramebuffer() const
 		// resized - sounds like it depends on the driver. Safer to just
 		// recreate it.
 		glDeleteFramebuffers( 1, &m_framebuffer );
-		glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
+		//glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
 	}
 
 	// Create framebuffer
@@ -278,11 +251,11 @@ GLuint DepthRender::acquireFramebuffer() const
 	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer );
 
 	// Resize color buffer and attach to framebuffer
-	static const GLint colorFormat = checkGLArbTextureFloat() ? GL_RGBA16F : GL_RGBA8;
+	/*static const GLint colorFormat = checkGLArbTextureFloat() ? GL_RGBA16F : GL_RGBA8;
 
 	glBindRenderbuffer( GL_RENDERBUFFER, m_colorBuffer );
 	glRenderbufferStorage( GL_RENDERBUFFER, colorFormat, m_resolution.x, m_resolution.y );
-	glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_colorBuffer );
+	glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_colorBuffer );*/
 
 	// Resize depth buffer and attach to framebuffer
 	glBindRenderbuffer( GL_RENDERBUFFER, m_depthBuffer );
