@@ -59,7 +59,9 @@ class GAFFERUI_API DepthRender
 
 		void setResolution( const Imath::V2i &resolution );
 		const Imath::V2i &getResolution() const;
-		const float* render( const Imath::M44f &projectionMatrix, const ViewportGadget* itemSource, GafferUI::Gadget::Layer filterLayer );
+		//const float* render( const Imath::M44f &projectionMatrix, const ViewportGadget* itemSource, GafferUI::Gadget::Layer filterLayer );
+		void startRendering( const Imath::M44f &projectionMatrix );
+		const float* finishRendering();
 
 	private :
 

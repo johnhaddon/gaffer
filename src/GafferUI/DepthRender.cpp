@@ -102,18 +102,12 @@ const V2i &DepthRender::getResolution() const
 	return m_resolution;
 }
 
-const float* DepthRender::render( const M44f &projectionMatrix, const ViewportGadget* itemSource, Gadget::Layer filterLayer )
+void DepthRender::startRendering( const M44f &projectionMatrix ) //, const ViewportGadget* itemSource, Gadget::Layer filterLayer )
 {
 	glViewport(	0, 0, m_resolution.x, m_resolution.y );
 
     glMatrixMode( GL_PROJECTION );
     glLoadMatrixf( projectionMatrix.getValue() );
-    /*glLoadIdentity();
-	glFrustum( -1, 1,
-		-1, 1,
-		1, 10000
-	);*/
-
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
@@ -121,36 +115,21 @@ const float* DepthRender::render( const M44f &projectionMatrix, const ViewportGa
 
 	glClearColor( 0.26f, 0.26f, 0.26f, 0.0f );
 	glClearDepth( 1.0f );
-	//glClearDepth( 0.5f );
 	glClear( GL_DEPTH_BUFFER_BIT );
 
-	// Set up the camera to world matrix in gl_TextureMatrix[0] so that we can
-	// reference world space positions in shaders
-	// This should be more appropriately named in a uniform buffer, but the
-	// easiest time to get this right is probably when we switch everything
-	// away from using fixed function stuff
-	// TODO - is there any reason to need this during a depth render
-	/*glActiveTexture( GL_TEXTURE0 );
-	glMatrixMode( GL_TEXTURE );
-	glLoadIdentity();
-	glMultMatrixf( camera->getTransform().getValue() );
-	glMatrixMode( GL_MODELVIEW );*/
-
-	// TODO
-	//bound(); // Updates layout if necessary
-
-	if( !itemSource->m_renderItems.size() )
+	/*if( !itemSource->m_renderItems.size() )
 	{
 		itemSource->getRenderItems( itemSource, M44f(), itemSource->style(), itemSource->m_renderItems );
-	}
+	}*/
 
-	M44f viewTransform;
+	/*M44f viewTransform;
 	glGetFloatv( GL_MODELVIEW_MATRIX, viewTransform.getValue() );
 	M44f projectionTransform;
 	glGetFloatv( GL_PROJECTION_MATRIX, projectionTransform.getValue() );
 
 	M44f combinedInverse = projectionTransform.inverse() * viewTransform.inverse();
 	Box3f bound = transform( Box3f( V3f( -1 ), V3f( 1 ) ), combinedInverse );
+	*/
 
 	GLint outputFramebuffer = -1;
 	glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &outputFramebuffer );
@@ -161,17 +140,23 @@ const float* DepthRender::render( const M44f &projectionMatrix, const ViewportGa
 	glEnable( GL_MULTISAMPLE );
 	glClearDepth( 1.0f );
 	glClear( GL_DEPTH_BUFFER_BIT );
+}
 
+/*
 	for( int layerIndex = std::log2( (int)Gadget::Layer::Back ); layerIndex <= std::log2( (int)Gadget::Layer::Front ); ++layerIndex )
 	{
 		Gadget::Layer layer = Gadget::Layer( (int)Gadget::Layer::Back << layerIndex );
-		/*if( filterLayer != Gadget::Layer::None && layer != filterLayer )
-		{
-			continue;
-		}*/
+		//if( filterLayer != Gadget::Layer::None && layer != filterLayer )
+		//{
+		//	continue;
+		//}
 
 		itemSource->renderLayerInternal( Gadget::RenderReason::Draw, layer, viewTransform, bound, nullptr );
 	}
+*/
+
+const float* DepthRender::finishRendering()
+{
 
 	glBindFramebuffer( GL_READ_FRAMEBUFFER, m_framebuffer );
 	//glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_downsampledFramebuffer );
@@ -180,40 +165,6 @@ const float* DepthRender::render( const M44f &projectionMatrix, const ViewportGa
 
 	return &m_depthMap[0];
 }
-
-/*void ViewportGadget::renderLayerInternal( RenderReason reason, Gadget::Layer layer, const M44f &viewTransform, const Box3f &bound, IECoreGL::Selector *selector ) const
-{
-	const Style *currentStyle = nullptr;
-	for( unsigned int i = 0; i < m_renderItems.size(); i++ )
-	{
-		const RenderItem &renderItem = m_renderItems[i];
-		if( !( renderItem.layerMask & ( (unsigned int)layer ) ) )
-		{
-			continue;
-		}
-
-		if( !renderItem.bound.intersects( bound ) )
-		{
-			continue;
-		}
-
-		glLoadMatrixf( viewTransform.getValue() );
-		glMultMatrixf( renderItem.transform.getValue() );
-		if( selector )
-		{
-			// 0 is a reserved name for when nothing is selected, so start at 1
-			selector->loadName( i + 1 );
-		}
-
-		if( renderItem.style != currentStyle )
-		{
-			renderItem.style->bind( currentStyle );
-			currentStyle = renderItem.style;
-		}
-
-		renderItem.gadget->renderLayer( layer, currentStyle, reason );
-	}
-}*/
 
 GLuint DepthRender::acquireFramebuffer() const
 {
@@ -225,15 +176,7 @@ GLuint DepthRender::acquireFramebuffer() const
 
 	if( !m_depthBuffer )
 	{
-		//glGenRenderbuffers( 1, &m_colorBuffer );
 		glGenRenderbuffers( 1, &m_depthBuffer );
-
-		/*glGenTextures( 1, &m_downsampledFramebufferTexture );
-		glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );*/
 	}
 
 	if( m_framebuffer )
@@ -243,19 +186,11 @@ GLuint DepthRender::acquireFramebuffer() const
 		// resized - sounds like it depends on the driver. Safer to just
 		// recreate it.
 		glDeleteFramebuffers( 1, &m_framebuffer );
-		//glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
 	}
 
 	// Create framebuffer
 	glGenFramebuffers( 1, &m_framebuffer );
 	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer );
-
-	// Resize color buffer and attach to framebuffer
-	/*static const GLint colorFormat = checkGLArbTextureFloat() ? GL_RGBA16F : GL_RGBA8;
-
-	glBindRenderbuffer( GL_RENDERBUFFER, m_colorBuffer );
-	glRenderbufferStorage( GL_RENDERBUFFER, colorFormat, m_resolution.x, m_resolution.y );
-	glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_colorBuffer );*/
 
 	// Resize depth buffer and attach to framebuffer
 	glBindRenderbuffer( GL_RENDERBUFFER, m_depthBuffer );
@@ -268,22 +203,6 @@ GLuint DepthRender::acquireFramebuffer() const
 	{
 		IECore::msg( IECore::Msg::Warning, "GafferUI::DepthRender", "Multisampled framebuffer error : " + std::to_string( framebufferStatus ) );
 	}
-
-	// Create downsampled framebuffer
-	/*glGenFramebuffers( 1, &m_downsampledFramebuffer );
-	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_downsampledFramebuffer );
-
-	// Resize color texture and attach to downsampled framebuffer
-	glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
-	glTexImage2D( GL_TEXTURE_2D, 0, colorFormat, size.x, size.y, 0, GL_RGBA, GL_FLOAT, nullptr );
-	glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_downsampledFramebufferTexture, 0 );
-
-	// Validate downsampled framebuffer
-	framebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
-	if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
-	{
-		IECore::msg( IECore::Msg::Warning, "GafferUI::ViewportGadget", "Downsampled framebuffer error : " + std::to_string( framebufferStatus ) );
-	}*/
 
 	m_framebufferSize = m_resolution;
 	return m_framebuffer;
