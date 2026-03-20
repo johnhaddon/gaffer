@@ -5,6 +5,7 @@ Features
 --------
 
 - Cycles : Updated to version 5.0.0.
+- FlamencoDispatcher : Added a new node for sending tasks to Blender's [Flamenco]((https://flamenco.blender.org) render farm manager.
 
 Improvements
 ------------
