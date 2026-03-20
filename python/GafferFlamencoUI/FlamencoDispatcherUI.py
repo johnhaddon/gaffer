@@ -44,7 +44,6 @@ import GafferUI
 import GafferFlamenco
 
 from GafferUI._StyleSheet import _styleColors
-from GafferUI.PlugValueWidget import sole
 
 from Qt import QtGui
 
@@ -146,7 +145,7 @@ class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 		return GafferFlamenco.FlamencoDispatcher.managerStatus( managerURL )
 
 	@__updateStatusInBackground.plug
-	def __updateStatusInBackgroundPplug( self ) :
+	def __updateStatusInBackgroundPlug( self ) :
 
 		# We don't depend on any graph state, so don't need
 		# to be cancelled before the graph is edited.
@@ -167,10 +166,21 @@ class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 			case GafferFlamenco.FlamencoDispatcher.ManagerStatus.NotFound :
 				self.__updateIconAndLabel( "warningSmall.png", "Manager not found" )
 			case GafferFlamenco.FlamencoDispatcher.ManagerStatus.JobTypeMissing :
-				self.__updateIconAndLabel(
-					"warningSmall.png",
-					"Gaffer job type missing. <a href=install>Install now</a>"
-				)
+				if not self.__haveInstalledJobType :
+					self.__updateIconAndLabel(
+						"warningSmall.png",
+						"Gaffer job type missing. <a href=install>Install now</a>"
+					)
+				else :
+					# Flamenco doesn't notice a newly-installed job type if the
+					# `scripts` directory didn't exist when it was first
+					# started.
+					## \todo Get Flamenco to recheck the scripts directory so we
+					# can remove this friction.
+					self.__updateIconAndLabel(
+						"warningSmall.png",
+						"Manager restart required</a>"
+					)
 			case GafferFlamenco.FlamencoDispatcher.ManagerStatus.OK :
 				self.__updateIconAndLabel( "infoSmall.png", status.url )
 
@@ -183,6 +193,7 @@ class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 		self.__statusIcon.setImage( icon )
 		self.__statusLabel.setText( label )
 
+	__haveInstalledJobType = False
 	def __installJobType( self, *unused ) :
 
 		filter = Gaffer.MatchPatternPathFilter(
@@ -196,15 +207,14 @@ class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 			cancelLabel = "Cancel", confirmLabel = "Install",
 			allowMultipleSelection = False, valid = True, leaf = True
 		)
-		flamencoManager = dialogue.waitForPath()
+		flamencoManager = dialogue.waitForPath( parentWindow = self.ancestor( GafferUI.Window ) )
 		if not flamencoManager :
 			return
 
 		scriptsDir = pathlib.Path( flamencoManager ).parent / "scripts"
-		# TODO : WHEN THIS IS NEEDED, THE MANAGER NEEDS A RESTART. ADD A WARNING POPUP
 		scriptsDir.mkdir( exist_ok = True )
 		shutil.copy( Gaffer.rootPath() / "python" / "GafferFlamenco" / "gaffer.js", scriptsDir )
 
-		print( "REQUESTING UPDATE" )
+		_ManagerURLPlugValueWidget.__haveInstalledJobType = True
 		self.__currentURL = None
 		self._requestUpdateFromValues()
