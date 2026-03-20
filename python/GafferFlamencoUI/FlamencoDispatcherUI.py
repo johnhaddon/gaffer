@@ -92,11 +92,21 @@ Gaffer.Metadata.registerNode(
 
 		},
 
+		"startPaused" : {
+
+			"description" :
+			"""
+			Submits the job in a paused state, so that it doesn't
+			pick up workers until it is unpaused via the
+			Flamenco dashboard.
+			""",
+
+		},
+
 	}
 
 )
 
-## TODO : MOVE TO TOP??
 class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	def __init__( self, plugs, **kw ) :
@@ -158,9 +168,6 @@ class _ManagerURLPlugValueWidget( GafferUI.PlugValueWidget ) :
 
 	@__updateStatusInBackground.postCall
 	def __updateStatusInBackgroundPostCall( self, status ) :
-
-		## TODO : DEAL WITH CANCELLATION
-
 
 		match status :
 			case GafferFlamenco.FlamencoDispatcher.ManagerStatus.NotFound :
