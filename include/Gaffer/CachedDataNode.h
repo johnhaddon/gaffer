@@ -138,6 +138,11 @@ class GAFFER_API CachedDataNode : public ComputeNode
 
 	private :
 
+		class SetEntryAction;
+
+		void setEntryInternal( const IECore::InternedString &key, IECore::ConstObjectPtr value );
+		IECore::ConstObjectPtr getEntryIfLive( const IECore::InternedString &key ) const;
+
 		IntPlug *refreshCountPlug();
 		const IntPlug *refreshCountPlug() const;
 

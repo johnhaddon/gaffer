@@ -52,6 +52,66 @@ static const IECore::InternedString g_cacheEvaluationKeyName( "__cacheEvaluation
 
 } // namespace
 
+class CachedDataNode::SetEntryAction : public Gaffer::Action
+{
+
+    public :
+
+        IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::CachedDataNode::SetEntryAction, SetEntryActionTypeId, Gaffer::Action );
+
+        SetEntryAction( CachedDataNodePtr node, const IECore::InternedString &key, IECore::ConstObjectPtr value )
+			// TODO - once we're using serialization, we shouldn't treat live and from disk entries the same
+            :   m_node( node ), m_key( key ), m_doValue( value ), m_undoValue( node->getEntryIfLive( key ) )
+        {
+        }
+
+    protected :
+
+        GraphComponent *subject() const override
+        {
+            return m_node.get();
+        }
+
+        void doAction() override
+        {
+            Action::doAction();
+			m_node->setEntryInternal( m_key, m_doValue );
+        }
+
+        void undoAction() override
+        {
+            Action::undoAction();
+			m_node->setEntryInternal( m_key, m_undoValue );
+        }
+
+        bool canMerge( const Action *other ) const override
+        {
+            if( !Action::canMerge( other ) )
+            {
+                return false;
+            }
+            const SetEntryAction *setEntryAction = IECore::runTimeCast<const SetEntryAction>( other );
+            return setEntryAction && setEntryAction->m_node == m_node && setEntryAction->m_key == m_key;
+        }
+
+        void merge( const Action *other ) override
+        {
+            const SetEntryAction *setEntryAction = static_cast<const SetEntryAction *>( other );
+            m_doValue = setEntryAction->m_doValue;
+        }
+
+    private :
+
+        CachedDataNodePtr m_node;
+		IECore::InternedString m_key;
+        IECore::ConstObjectPtr m_doValue;
+        IECore::ConstObjectPtr m_undoValue;
+
+};
+
+IE_CORE_DEFINERUNTIMETYPED( CachedDataNode::SetEntryAction );
+
+
 GAFFER_NODE_DEFINE_TYPE( CachedDataNode );
 
 size_t CachedDataNode::g_firstPlugIndex = 0;
@@ -306,7 +366,27 @@ void CachedDataNode::setEntry( const IECore::InternedString &key, IECore::ConstO
 			}
 		}
 	}
-	m_liveData[key] = value;
+	else
+	{
+		if( m_liveData[key]->hash() == value->hash() )
+		{
+			return;
+		}
+	}
+
+	Action::enact( new SetEntryAction( this, key, value ) );
+}
+
+void CachedDataNode::setEntryInternal( const IECore::InternedString &key, IECore::ConstObjectPtr value )
+{
+	if( !value )
+	{
+		m_liveData.erase( key );
+	}
+	else
+	{
+		m_liveData[key] = value;
+	}
 	refreshCountPlug()->setValue( refreshCountPlug()->getValue() + 1 );
 }
 
@@ -332,6 +412,19 @@ IECore::ConstObjectPtr CachedDataNode::getEntry( const IECore::InternedString &k
 			return nullptr;
 		}
 	}
+}
+
+IECore::ConstObjectPtr CachedDataNode::getEntryIfLive( const IECore::InternedString &key ) const
+{
+	IECore::ConstObjectPtr result;
+	// TODO - don't take a mutex here because currently this is called within setEntry
+	//tbb::spin_rw_mutex::scoped_lock lock( m_mutex, /* write = */ false );
+	auto liveIt = m_liveData.find( key );
+	if( liveIt != m_liveData.end() )
+	{
+		result = liveIt->second;
+	}
+	return result;
 }
 
 void CachedDataNode::hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const

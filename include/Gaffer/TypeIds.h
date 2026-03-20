@@ -157,6 +157,7 @@ enum TypeId
 	Int64VectorDataPlugTypeId = 118111,
 	CachedDataNodeTypeId = 118112,
 	SingleCacheNodeTypeId = 118113,
+	SetEntryActionTypeId = 118114,
 
 	LastTypeId = 118799
 
