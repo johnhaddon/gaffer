@@ -1166,38 +1166,11 @@ class PaintTool::BrushOutline : public GafferUI::Gadget
                     glEnable( GL_LINE_SMOOTH );
                     glLineWidth( 1.5f );
 
-					glTranslatef( m_pos.x, m_pos.y, 0.0f );
+					glColor4f( 0.0f, 0.0f, 0.0, 1.0f );
+					style->renderCircle( m_pos, std::max( 0.01f, m_hardness ) * m_radius );
 
-					for( int j = 0; j < 2; j++ )
-					{
-						if( j == 1 )
-						{
-							if( m_hardness == 1.0f )
-							{
-								continue;
-							}
-							glColor4f( 0.0f, 0.0f, 0.0, 1.0f );
-							float h = std::max( 0.01f, m_hardness );
-							glScalef( h, h, h );
-						}
-						else
-						{
-							glColor4f( 0.8f, 0.8f, 0.8, 1.0f );
-							glScalef( m_radius, m_radius, m_radius );
-						}
-
-
-						glBegin( GL_LINE_LOOP );
-
-							const int numDivisions = 100;
-							for( int i = 0; i < numDivisions; ++i )
-							{
-								const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
-								glVertex2f( cos( angle ), sin( angle ) );
-							}
-
-						glEnd();
-					}
+					glColor4f( 0.8f, 0.8f, 0.8, 1.0f );
+					style->renderCircle( m_pos, m_radius );
                 }
 
             glPopAttrib();
