@@ -2366,13 +2366,13 @@ bool PaintTool::dragEnd( const GafferUI::DragDropEvent &event )
 {
 	applyCurrentStroke();
 	m_dragging = false;
+	m_mergeGroupId++;
 	return true;
 }
 
 /*void PaintTool::dragEnd()
 {
 	m_dragging = false;
-	m_mergeGroupId++;
 	selectionChangedSignal()( *this );
 }*/
 
@@ -2929,6 +2929,8 @@ void PaintTool::applyCurrentStroke()
 	IECore::TypeId variableType = (IECore::TypeId)variableTypePlug()->getValue();
 	int mode = modePlug()->getValue();
 	float opacity = opacityPlug()->getValue();
+
+	UndoScope undoScope( view()->scriptNode(), UndoScope::Enabled, undoMergeGroup() );
 	// TODO share code
 	for( const auto &s : selection() )
 	{
@@ -3011,6 +3013,7 @@ bool PaintTool::buttonRelease( const GafferUI::ButtonEvent &event )
 	m_dragging = false;
 	//m_ourButtonPress = false;
 	applyCurrentStroke();
+	m_mergeGroupId++;
 
 	updateCursor();
 	return false; // TODO
