@@ -103,6 +103,7 @@ class GAFFERUI_API Style : public IECore::RunTimeTyped
 		virtual void renderLine( const IECore::LineSegment3f &line, float width=0.5, const Imath::Color4f *userColor = nullptr ) const = 0;
 		virtual void renderSolidRectangle( const Imath::Box2f &box ) const = 0;
 		virtual void renderRectangle( const Imath::Box2f &box ) const = 0;
+		virtual void renderCircle( const Imath::V2f &pos, float radius ) const = 0;
 		//@}
 
 		/// @name Text drawing

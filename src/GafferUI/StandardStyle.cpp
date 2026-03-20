@@ -917,6 +917,25 @@ void StandardStyle::renderRectangle( const Imath::Box2f &box ) const
 	glEnd();
 }
 
+void StandardStyle::renderCircle( const Imath::V2f &pos, float radius ) const
+{
+	glUniform1i( g_isCurveParameter, 0 );
+	glUniform1i( g_borderParameter, 0 );
+	glUniform1i( g_edgeAntiAliasingParameter, 0 );
+	glUniform1i( g_textureTypeParameter, 0 );
+
+	glBegin( GL_LINE_LOOP );
+
+	const int numDivisions = 100;
+	for( int i = 0; i < numDivisions; ++i )
+	{
+		const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
+		glVertex2f( radius * cos( angle ) + pos.x, radius * sin( angle ) + pos.y );
+	}
+
+	glEnd();
+}
+
 void StandardStyle::renderAnimationCurve( const std::vector< Imath::V2f > &vertices, const bool inKeyRange, const State state, const Imath::Color3f *const userColor ) const
 {
 

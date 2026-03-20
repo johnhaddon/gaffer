@@ -75,6 +75,7 @@ class GAFFERUI_API StandardStyle : public Style
 		void renderLine( const IECore::LineSegment3f &line, float width=0.5, const Imath::Color4f *userColor = nullptr ) const override;
 		void renderSolidRectangle( const Imath::Box2f &box ) const override;
 		void renderRectangle( const Imath::Box2f &box ) const override;
+		void renderCircle( const Imath::V2f &pos, float radius ) const override;
 
 		Imath::Box3f characterBound( TextType textType ) const override;
 		Imath::Box3f textBound( TextType type, const std::string &text ) const override;
