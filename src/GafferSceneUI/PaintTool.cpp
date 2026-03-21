@@ -252,7 +252,7 @@ void applyPrimVarComposite( const CompoundData *a, const CompoundData *b, int mo
 struct UniformBlockColorShader
 {
     alignas( 16 ) M44f o2c;
-    alignas( 16 ) bool selection;
+    alignas( 16 ) bool selection = false;
 };
 
 
