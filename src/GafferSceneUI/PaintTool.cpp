@@ -252,7 +252,6 @@ void applyPrimVarComposite( const CompoundData *a, const CompoundData *b, int mo
 struct UniformBlockColorShader
 {
     alignas( 16 ) M44f o2c;
-    alignas( 16 ) bool selection = false;
 };
 
 
@@ -265,7 +264,6 @@ const GLuint g_uniformBlockBindingIndex = 0;
     "layout( std140, row_major ) uniform UniformBlock\n" \
     "{\n" \
     "   mat4 o2c;\n" \
-	"	bool selection;\n" \
     "} uniforms;\n"
 
 #define ATTRIB_GLSL_LOCATION_PS 0
@@ -319,7 +317,7 @@ const std::string g_colorShaderFragSource
 
     "void main()\n"
     "{\n"
-    "   cs = uniforms.selection ? vec4( 0.4, 0.7, 1.0, 1.0 ) : vec4( inputs.value, 1.0 );\n"
+    "   cs = vec4( inputs.value, 1.0 );\n"
     "}\n"
 );
 
@@ -958,7 +956,6 @@ class PaintTool::PaintGadget : public Gadget
 
 				// Compute object to clip matrix
 				uniforms.o2c = o2w * w2c;
-				uniforms.selection = 0;
 
 				// Upload opengl uniform block data
 
@@ -1028,22 +1025,6 @@ class PaintTool::PaintGadget : public Gadget
 				}
 
 				meshGL->renderInstances( 1 );
-
-				if( reason != (RenderReason)7 )
-				{
-					// TODO - horrible mess, think about perf
-					uniforms.selection = 1;
-					glBufferData( GL_UNIFORM_BUFFER, sizeof( UniformBlockColorShader ), &uniforms, GL_DYNAMIC_DRAW );
-
-					glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-					glEnable( GL_POLYGON_OFFSET_LINE );
-					float width = 6;
-					glPolygonOffset( width * 2, 1 );
-					glLineWidth( width );
-
-					meshGL->renderInstances( 1 );
-					glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-				}
 			}
 
 			// Restore opengl state
@@ -1059,10 +1040,10 @@ class PaintTool::PaintGadget : public Gadget
 			{
 				glDisable( GL_DEPTH_TEST );
 			}
-			//if( depthWriteEnabled )
-			//{
-			//	glDepthMask( GL_TRUE );
-			//}
+			/*if( depthWriteEnabled )
+			{
+				glDepthMask( GL_TRUE );
+			}*/
 			glUseProgram( shaderProgram );
 		}
 
@@ -2479,9 +2460,7 @@ void PaintTool::paint( const IECore::InternedString &variableName, const M44f &p
 	//const float* depthMap = m_depthRender.render( projectionMatrixPadded, view()->viewportGadget(), Gadget::Layer( 0 ) );
 	m_depthRender.startRendering( projectionMatrixPadded );
 
-	//m_gadget->renderLayer( Gadget::Layer::MidFront, nullptr, Gadget::RenderReason::Draw );
-	// TODO - the out of bounds enum is probably UB. Find an actual API for this
-	m_gadget->renderLayer( Gadget::Layer::MidFront, nullptr, Gadget::RenderReason( 7 ) );
+	m_gadget->renderLayer( Gadget::Layer::MidFront, nullptr, Gadget::RenderReason::Draw );
 
 	const float* depthMap = m_depthRender.finishRendering();
 	//std::cerr << "DEPTH RENDER DONE\n";
