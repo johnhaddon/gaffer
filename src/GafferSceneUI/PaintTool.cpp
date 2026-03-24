@@ -990,7 +990,7 @@ class PaintTool::PaintGadget : public Gadget
 
 				if( components != 0 )
 				{
-					glEnableVertexAttribArray( ATTRIB_GLSL_LOCATION_VSX );
+					glEnableVertexAttribArray( ATTRIB_GLSL_LOCATION_VSY );
 					glVertexAttribPointer(
 						ATTRIB_GLSL_LOCATION_VSY,
 						1,
