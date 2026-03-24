@@ -295,6 +295,7 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 		bool buttonPress( const GafferUI::ButtonEvent &event );
 		bool buttonRelease( const GafferUI::ButtonEvent &event );
 		bool keyPress( const GafferUI::KeyEvent &event );
+		bool keyRelease( const GafferUI::KeyEvent &event );
 		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
 		bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
 		bool dragMove( const GafferUI::DragDropEvent &event );
@@ -323,6 +324,8 @@ class GAFFERSCENEUI_API PaintTool : public GafferSceneUI::SelectionTool
 		BrushOutlinePtr m_brushOutline;
 
 		bool m_mouseIn;
+		GafferUI::ModifiableEvent::Modifiers m_eventModifiers;
+		GafferUI::ButtonEvent::Buttons m_eventButtons;
 
 		static ToolDescription<PaintTool, SceneView> g_toolDescription;
 		static size_t g_firstPlugIndex;

@@ -1726,6 +1726,7 @@ PaintTool::PaintTool( SceneView *view, const std::string &name )
 	scenePlug()->setInput( view->inPlug<ScenePlug>() );
 
 	view->viewportGadget()->keyPressSignal().connect( boost::bind( &PaintTool::keyPress, this, ::_2 ) );
+	view->viewportGadget()->keyReleaseSignal().connect( boost::bind( &PaintTool::keyRelease, this, ::_2 ) );
 	view->viewportGadget()->enterSignal().connectFront( boost::bind( &PaintTool::enter, this, ::_2 ) );
 	view->viewportGadget()->leaveSignal().connectFront( boost::bind( &PaintTool::leave, this, ::_2 ) );
 	view->viewportGadget()->mouseMoveSignal().connect( boost::bind( &PaintTool::mouseMove, this, ::_2 ) );
@@ -2340,6 +2341,22 @@ bool PaintTool::dragEnd( const GafferUI::DragDropEvent &event )
 	applyCurrentStroke();
 	m_dragging = false;
 	m_mergeGroupId++;
+
+	// We don't receive keyPress/keyRelease/mouseMove events during a drag, so we could
+	// need to update several things now.
+	m_eventModifiers = event.modifiers;
+	m_brushOutline->setPos( V2f( event.line.p1.x, event.line.p1.y ) );
+
+	// Buttons in a dragEnd is a special case - the event doesn't tell us the current state
+	// of which mouse buttons are held down, the event holds the mouse button state from the start
+	// of the drag. All we know is that whichever button started the drag is now released.
+	// A reasonable guess is that no buttons are now held down - this works in simple cases at least,
+	// where the user doesn't try to trick us with sequences like "Hold middle mouse button, start
+	// dragging, begin holding left mouse button, release middle button".
+
+	m_eventButtons = ButtonEvent::Buttons( 0 );
+	updateCursor();
+
 	return true;
 }
 
@@ -2729,8 +2746,10 @@ bool PaintTool::leave( const ButtonEvent &event )
 
 bool PaintTool::mouseMove( const ButtonEvent &event )
 {
-	// TODO - shouldn't be necessary to update cursor this often if we can accurately track when it should be changed
-	// ( Currently I've been noticing this going wrong after middle mouse panning )
+	// TODO - it shouldn't be necessary to update cursor here - we should be tracking
+	// any state change that should trigger a cursor update. But this does help get
+	// things back in sync if something changes the cursor underneath us without us
+	// realizing ( ie. the mouseWheel handler in ViewportGadget )
 	updateCursor();
 
 	m_brushOutline->setPos( V2f( event.line.p1.x, event.line.p1.y ) );
@@ -2739,6 +2758,9 @@ bool PaintTool::mouseMove( const ButtonEvent &event )
 
 bool PaintTool::buttonPress( const GafferUI::ButtonEvent &event )
 {
+	m_eventButtons = event.buttons;
+	updateCursor();
+
 	if( event.buttons != ButtonEvent::Left || event.modifiers )
 	{
 		return false;
@@ -2959,16 +2981,18 @@ void PaintTool::applyCurrentStroke()
 
 void PaintTool::updateCursor()
 {
-	bool useBrush = m_mouseIn && activePlug()->getValue();
-	if( useBrush && !selectionEditable() )
+	if( m_mouseIn && activePlug()->getValue() && !m_eventModifiers && !( m_eventButtons & ButtonEvent::Middle || m_eventButtons & ButtonEvent::Right ) )
 	{
-		useBrush = false;
-	}
-
-	if( useBrush )
-	{
-		m_brushOutline->setVisible( true );
-		Pointer::setCurrent( "invisible" );
+		if( !selectionEditable() )
+		{
+			m_brushOutline->setVisible( false );
+			Pointer::setCurrent( "notEditable" );
+		}
+		else
+		{
+			m_brushOutline->setVisible( true );
+			Pointer::setCurrent( "invisible" );
+		}
 	}
 	else
 	{
@@ -2988,12 +3012,15 @@ bool PaintTool::buttonRelease( const GafferUI::ButtonEvent &event )
 	applyCurrentStroke();
 	m_mergeGroupId++;
 
+	m_eventButtons = event.buttons;
 	updateCursor();
 	return false; // TODO
 }
 
 bool PaintTool::keyPress( const GafferUI::KeyEvent &event )
 {
+	m_eventModifiers = event.modifiers;
+	updateCursor();
 	/*if( !activePlug()->getValue() )
 	{
 		return false;
@@ -3036,6 +3063,13 @@ bool PaintTool::keyPress( const GafferUI::KeyEvent &event )
 	}
 	*/
 
+	return false;
+}
+
+bool PaintTool::keyRelease( const GafferUI::KeyEvent &event )
+{
+	m_eventModifiers = event.modifiers;
+	updateCursor();
 	return false;
 }
 
