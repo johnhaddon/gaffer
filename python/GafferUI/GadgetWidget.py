@@ -59,6 +59,9 @@ class GadgetWidget( GafferUI.GLWidget ) :
 
 		GafferUI.GLWidget.__init__( self, **kw )
 
+		# See comment in mouseMove
+		self.__overOverlay = False
+
 		self._qtWidget().setFocusPolicy( QtCore.Qt.ClickFocus )
 
 		self.enterSignal().connect( Gaffer.WeakMethod( self.__enter ) )
@@ -209,6 +212,24 @@ class GadgetWidget( GafferUI.GLWidget ) :
 	def __mouseMove( self, widget, event ) :
 
 		if not self._makeCurrent() :
+			return False
+
+		# When the cursor is over the overlay, it is within this Gadget, but for the
+		# contained ViewportGadget, we want to present things as if the cursor is outside
+		# it when it is over an overlay ( ie. it gets a leaveSignal when the cursor enters
+		# an overlay, an enterSignal when the cursor leave an overlay, and no mouseMove
+		# signals while the cursor is over an overlay )
+
+		overOverlay = self._qtWidget().itemAt( event.line.p0.x, event.line.p0.y ) is not None
+
+		if self.__overOverlay != overOverlay:
+			if overOverlay:
+				self.__viewportGadget.leaveSignal()( self.__viewportGadget, event )
+			else:
+				self.__viewportGadget.enterSignal()( self.__viewportGadget, event )
+			self.__overOverlay = overOverlay
+
+		if overOverlay:
 			return False
 
 		self.__viewportGadget.mouseMoveSignal()( self.__viewportGadget, event )
