@@ -334,7 +334,7 @@ void convertP( const IECoreScene::Primitive *primitive, RtPrimVarList &primVarLi
 	}
 }
 
-void convertP( const std::vector<const IECoreScene::Primitive *> &samples, const std::vector<float> &sampleTimes, RtPrimVarList &primVarList, const std::string &messageContext )
+void convertP( const std::vector<const IECoreScene::Primitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVarList, const std::string &messageContext )
 {
 	const auto firstSampleIt = samples[0]->variables.find( g_p );
 	if( firstSampleIt == samples[0]->variables.end() )
