@@ -404,7 +404,7 @@ AtNode *convert( const IECoreScene::MeshPrimitive *mesh, AtUniverse *universe, c
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECoreScene::MeshPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert( const boost::container::small_vector<const IECoreScene::MeshPrimitive *, 2> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
 {
 	AtNode *result = convertCommon( samples.front(), universe, nodeName, parentNode, messageContext );
 
@@ -420,9 +420,9 @@ AtNode *convert( const std::vector<const IECoreScene::MeshPrimitive *> &samples,
 	vector<const Data *> nSamples;
 	nSamples.reserve( samples.size() );
 	PrimitiveVariable::Interpolation nInterpolation = PrimitiveVariable::Invalid;
-	for( vector<const MeshPrimitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	for( auto sample : samples )
 	{
-		if( const V3fVectorData *n = normal( *it, nInterpolation, messageContext ) )
+		if( const V3fVectorData *n = normal( sample, nInterpolation, messageContext ) )
 		{
 			nSamples.push_back( n );
 		}

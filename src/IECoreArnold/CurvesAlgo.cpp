@@ -219,7 +219,7 @@ AtNode *convert( const IECoreScene::CurvesPrimitive *curves, AtUniverse *univers
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert( const boost::container::small_vector<const IECoreScene::CurvesPrimitive *, 2> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
 {
 	// Arnold (and IECoreArnold::ShapeAlgo) does not support Vertex PrimitiveVariables for
 	// cubic CurvesPrimitives, so we resample the variables to Varying first.

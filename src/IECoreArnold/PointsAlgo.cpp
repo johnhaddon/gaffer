@@ -113,7 +113,7 @@ AtNode *convert( const IECoreScene::PointsPrimitive *points, AtUniverse *univers
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert( const boost::container::small_vector<const IECoreScene::PointsPrimitive *, 2> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
 {
 	AtNode *result = convertCommon( samples.front(), universe, nodeName, parentNode, messageContext );
 

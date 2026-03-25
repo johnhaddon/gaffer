@@ -38,6 +38,8 @@
 
 #include "IECoreScene/Camera.h"
 
+#include "boost/container/small_vector.hpp"
+
 #include "ai_nodes.h"
 
 namespace IECoreArnold
@@ -46,8 +48,10 @@ namespace IECoreArnold
 namespace CameraAlgo
 {
 
+using CameraSamples = boost::container::small_vector<const IECoreScene::Camera *, 2>;
+
 IECOREARNOLD_API AtNode *convert( const IECoreScene::Camera *camera, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr, const std::string &messageContext = "CameraAlgo::convert" );
-IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::Camera *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr, const std::string &messageContext = "CameraAlgo::convert" );
+IECOREARNOLD_API AtNode *convert( const CameraSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr, const std::string &messageContext = "CameraAlgo::convert" );
 
 } // namespace CameraAlgo
 
