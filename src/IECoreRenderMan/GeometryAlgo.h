@@ -99,14 +99,14 @@ class ConverterDescription
 				};
 			}
 
-			registerConverter(
-				T::staticTypeId(),
-				[converter] ( const IECore::Object *object, RtPrimVarList &primVars, const std::string &messageContext )
-				{
-					return converter( static_cast<const T *>( object ), primVars, messageContext );
-				},
-				motionConverterWrapper
-			);
+			// registerConverter(
+			// 	T::staticTypeId(),
+			// 	[converter] ( const IECore::Object *object, RtPrimVarList &primVars, const std::string &messageContext )
+			// 	{
+			// 		return converter( static_cast<const T *>( object ), primVars, messageContext );
+			// 	},
+			// 	motionConverterWrapper
+			// );
 		}
 
 };

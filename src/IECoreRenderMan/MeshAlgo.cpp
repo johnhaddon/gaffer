@@ -204,7 +204,7 @@ RtUString convertStaticMesh( const IECoreScene::MeshPrimitive *mesh, RtPrimVarLi
 	return convertMeshTopology( mesh, primVars, messageContext );
 }
 
-RtUString convertAnimatedMesh( const std::vector<const IECoreScene::MeshPrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertAnimatedMesh( const boost::container::small_vector<const IECoreScene::MeshPrimitive *, 2> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	GeometryAlgo::convertPrimitive( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars, messageContext );
 	return convertMeshTopology( samples[0], primVars, messageContext );;
