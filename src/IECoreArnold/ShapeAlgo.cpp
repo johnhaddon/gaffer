@@ -161,7 +161,7 @@ bool convertP( const IECoreScene::Primitive *primitive, AtNode *shape, const AtS
 	return false;
 }
 
-bool convertP( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape, const AtString name, const std::string &messageContext )
+bool convertP( const PrimitiveSamples &samples, AtNode *shape, const AtString name, const std::string &messageContext )
 {
 	vector<const Data *> dataSamples;
 	dataSamples.reserve( samples.size() );
@@ -192,16 +192,16 @@ void convertRadius( const IECoreScene::Primitive *primitive, AtNode *shape, cons
 	);
 }
 
-void convertRadius( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape, const std::string &messageContext )
+void convertRadius( const PrimitiveSamples &samples, AtNode *shape, const std::string &messageContext )
 {
 	vector<ConstFloatVectorDataPtr> radiusSamples; // for ownership
 	vector<const Data *> dataSamples; // for passing to dataToArray()
 	radiusSamples.reserve( samples.size() );
 	dataSamples.reserve( samples.size() );
 
-	for( vector<const Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	for( auto primitive : samples )
 	{
-		ConstFloatVectorDataPtr r = radius( *it );
+		ConstFloatVectorDataPtr r = radius( primitive );
 		radiusSamples.push_back( r );
 		dataSamples.push_back( r.get() );
 	}

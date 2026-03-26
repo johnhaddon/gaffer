@@ -80,7 +80,7 @@ class ConverterDescription
 
 		/// Type-specific conversion functions.
 		using TypedConverter = AtNode *(*)( const T *, AtUniverse *, const std::string &, const AtNode *, const std::string & );
-		using TypedObjectSamples = boost::container::small_vector<const T *, 2>;
+		using TypedObjectSamples = IECoreScenePreview::Renderer::Samples<const T *>;
 		using TypedMotionConverter = AtNode *(*)( const TypedObjectSamples &, float, float, AtUniverse *, const std::string &, const AtNode *, const std::string & );
 
 		ConverterDescription( TypedConverter converter, TypedMotionConverter motionConverter = nullptr )

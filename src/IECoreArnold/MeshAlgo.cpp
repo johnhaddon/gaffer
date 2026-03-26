@@ -404,11 +404,11 @@ AtNode *convert( const IECoreScene::MeshPrimitive *mesh, AtUniverse *universe, c
 	return result;
 }
 
-AtNode *convert( const boost::container::small_vector<const IECoreScene::MeshPrimitive *, 2> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
 {
 	AtNode *result = convertCommon( samples.front(), universe, nodeName, parentNode, messageContext );
 
-	std::vector<const IECoreScene::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	const auto primitiveSamples = IECoreScenePreview::staticSamplesCast<Primitive>( samples );
 	if( !ShapeAlgo::convertP( primitiveSamples, result, g_vlistArnoldString, messageContext ) )
 	{
 		AiNodeDestroy( result );

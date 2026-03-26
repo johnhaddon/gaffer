@@ -34,11 +34,11 @@
 
 #pragma once
 
+#include "GafferScene/Private/IECoreScenePreview/Renderer.h"
+
 #include "IECoreArnold/Export.h"
 
 #include "IECoreScene/Camera.h"
-
-#include "boost/container/small_vector.hpp"
 
 #include "ai_nodes.h"
 
@@ -48,7 +48,7 @@ namespace IECoreArnold
 namespace CameraAlgo
 {
 
-using CameraSamples = boost::container::small_vector<const IECoreScene::Camera *, 2>;
+using CameraSamples = IECoreScenePreview::Renderer::Samples<const IECoreScene::Camera *>;
 
 IECOREARNOLD_API AtNode *convert( const IECoreScene::Camera *camera, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr, const std::string &messageContext = "CameraAlgo::convert" );
 IECOREARNOLD_API AtNode *convert( const CameraSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr, const std::string &messageContext = "CameraAlgo::convert" );
