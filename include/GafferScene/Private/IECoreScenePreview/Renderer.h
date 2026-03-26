@@ -50,6 +50,18 @@
 namespace IECoreScenePreview
 {
 
+template<typename T, typename S>
+boost::container::small_vector<const T *, 2> staticSamplesCast( const boost::container::small_vector<S, 2> &samples )
+{
+	boost::container::small_vector<const T *, 2> result;
+	result.reserve( samples.size() );
+	for( const auto &s : samples )
+	{
+		result.push_back( static_cast<const T *>( s.get() ) );
+	}
+	return result;
+}
+
 /// \todo Improve the API, particularly in terms of ownership
 /// semantics and the python bindings :
 ///
