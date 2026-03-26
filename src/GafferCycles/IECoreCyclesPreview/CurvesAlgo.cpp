@@ -150,7 +150,7 @@ ccl::Geometry *convert( const IECoreScene::CurvesPrimitive *curve, const std::st
 	return hair;
 }
 
-ccl::Geometry *convert( const vector<const IECoreScene::CurvesPrimitive *> &curves, const IECoreScenePreview::Renderer::SampleTimes &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
+ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &curves, const IECoreScenePreview::Renderer::SampleTimes &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
 {
 	const int numSamples = curves.size();
 

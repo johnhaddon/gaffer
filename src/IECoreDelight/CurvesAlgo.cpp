@@ -102,7 +102,7 @@ bool convertStatic( const IECoreScene::CurvesPrimitive *object, NSIContext_t con
 	return true;
 }
 
-bool convertAnimated( const vector<const IECoreScene::CurvesPrimitive *> &objects, const vector<float> &times, NSIContext_t context, const char *handle )
+bool convertAnimated( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &objects, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle )
 {
 	NSICreate( context, handle, "cubiccurves", 0, nullptr );
 

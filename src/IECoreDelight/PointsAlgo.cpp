@@ -79,7 +79,7 @@ bool convertStatic( const IECoreScene::PointsPrimitive *object, NSIContext_t con
 	return true;
 }
 
-bool convertAnimated( const vector<const IECoreScene::PointsPrimitive *> &objects, const vector<float> &times, NSIContext_t context, const char *handle )
+bool convertAnimated( const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &objects, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle )
 {
 	NSICreate( context, handle, "particles", 0, nullptr );
 

@@ -67,7 +67,7 @@ ccl::Geometry *convert( const IECoreVDB::VDBObject *vdbObject, const std::string
 	return volume;
 }
 
-ccl::Geometry *convert( const std::vector<const IECoreVDB::VDBObject *> &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
+ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const int frameIdx, const std::string &nodeName, ccl::Scene *scene )
 {
 	return convert( samples.front(), nodeName, scene );
 }

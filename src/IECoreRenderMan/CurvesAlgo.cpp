@@ -88,10 +88,9 @@ RtUString convertStaticCurves( const IECoreScene::CurvesPrimitive *curves, RtPri
 	return Loader::strings().k_Ri_Curves;
 }
 
-RtUString convertAnimatedCurves( const boost::container::small_vector<const IECoreScene::CurvesPrimitive *, 2> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertAnimatedCurves( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
 {
-	// TODO : NEED TO CONVERT THE SAMPLES
-	GeometryAlgo::convertPrimitive( reinterpret_cast<const std::vector<const IECoreScene::Primitive *> &>( samples ), sampleTimes, primVars, messageContext );
+	GeometryAlgo::convertPrimitive( IECoreScenePreview::staticSamplesCast<const IECoreScene::Primitive>( samples ), sampleTimes, primVars, messageContext );
 	convertCurvesTopology( samples[0], primVars, messageContext );
 	return Loader::strings().k_Ri_Curves;
 }

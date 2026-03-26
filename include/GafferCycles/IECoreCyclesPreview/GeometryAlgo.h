@@ -75,10 +75,10 @@ IECORECYCLES_API void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, 
 /// \todo There's really no need to pass the node name here, because it's not a unique handle that
 /// needs to be provided when creating the Geometry (like it is in Arnold). The caller can just set the name
 /// afterwards if they want to.
-using Converter = ccl::Geometry *(*)( const IECore::Object *, const std::string &, ccl::Scene * );
+using Converter = std::function<ccl::Geometry *( const IECore::Object *, const std::string &, ccl::Scene * )>;
 /// Signature of a function which can convert a series of IECore::Object
 /// samples into a moving `ccl:Geometry` object.
-using MotionConverter = ccl::Geometry *(*)( const IECoreScenePreview::Renderer::ObjectSamples &, const IECoreScenePreview::Renderer::SampleTimes &, const int, const std::string &, ccl::Scene * );
+using MotionConverter = std::function<ccl::Geometry *( const IECoreScenePreview::Renderer::ObjectSamples &, const IECoreScenePreview::Renderer::SampleTimes &, const int, const std::string &, ccl::Scene * )>;
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -94,15 +94,28 @@ class ConverterDescription
 	public :
 
 		/// Type-specific conversion functions.
-		using Converter = ccl::Geometry *(*)( const T *, const std::string &, ccl::Scene * );
-		using MotionConverter = ccl::Geometry *(*)( const std::vector<const T *> &, const IECoreScenePreview::Renderer::SampleTimes &, const int, const std::string &, ccl::Scene * );
+		using TypedConverter = ccl::Geometry *(*)( const T *, const std::string &, ccl::Scene * );
+		using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
+		using TypedMotionConverter = ccl::Geometry *(*)( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, const int, const std::string &, ccl::Scene * );
 
-		ConverterDescription( Converter converter, MotionConverter motionConverter = nullptr )
+		ConverterDescription( TypedConverter converter, TypedMotionConverter motionConverter = nullptr )
 		{
+			MotionConverter motionConverterWrapper;
+			if( motionConverter )
+			{
+				motionConverterWrapper = [motionConverter] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const int frame, const std::string &nodeName, ccl::Scene *scene )
+				{
+					return motionConverter( IECoreScenePreview::staticSamplesCast<T>( samples ), times, frame, nodeName, scene );
+				};
+			}
+
 			registerConverter(
 				T::staticTypeId(),
-				reinterpret_cast<GeometryAlgo::Converter>( converter ),
-				reinterpret_cast<GeometryAlgo::MotionConverter>( motionConverter )
+				[converter] ( const IECore::Object *object, const std::string &nodeName, ccl::Scene *scene )
+				{
+					return converter( static_cast<const T *>( object ), nodeName, scene );
+				},
+				motionConverterWrapper
 			);
 		}
 

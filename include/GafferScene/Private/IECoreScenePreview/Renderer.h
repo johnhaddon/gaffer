@@ -51,6 +51,7 @@ namespace IECoreScenePreview
 {
 
 /// TODO : MOVE, AND USE `SAMPLES` TYPE
+/// TODO : SHOULD THE `*` REALLY BE IMPLICIT?
 template<typename T, typename S>
 boost::container::small_vector<const T *, 2> staticSamplesCast( const boost::container::small_vector<S, 2> &samples )
 {

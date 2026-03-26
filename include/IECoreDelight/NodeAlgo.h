@@ -65,8 +65,8 @@ IECOREDELIGHT_API bool convert( const IECoreScenePreview::Renderer::ObjectSample
 
 /// Signature of a function which can convert an IECore::Object
 /// into an NSI node.
-using Converter = bool (*)( const IECore::Object *, NSIContext_t, const char * );
-using MotionConverter = bool (*)( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t constant, const char * );
+using Converter = std::function<bool ( const IECore::Object *, NSIContext_t, const char * )>;
+using MotionConverter = std::function<bool ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle )>;
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -82,15 +82,28 @@ class ConverterDescription
 	public :
 
 		/// Type-specific conversion functions.
-		using Converter = bool (*)( const T *, NSIContext_t, const char * );
-		using MotionConverter = bool (*)( const std::vector<const T *> &, const std::vector<float> &, NSIContext_t, const char * ); // EEK!!! NOT GONNA WORK! MAYBE NEED TO PASS SPANS??
+		using TypedConverter = bool (*)( const T *, NSIContext_t, const char * );
+		using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
+		using TypedMotionConverter = bool (*)( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, NSIContext_t, const char * );
 
-		ConverterDescription( Converter converter, MotionConverter motionConverter = nullptr )
+		ConverterDescription( TypedConverter converter, TypedMotionConverter motionConverter = nullptr )
 		{
+			MotionConverter motionConverterWrapper;
+			if( motionConverter )
+			{
+				motionConverterWrapper = [motionConverter] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle )
+				{
+					return motionConverter( IECoreScenePreview::staticSamplesCast<T>( samples ), times, context, handle );
+				};
+			}
+
 			registerConverter(
 				T::staticTypeId(),
-				reinterpret_cast<NodeAlgo::Converter>( converter ), // EEK!!!
-				reinterpret_cast<NodeAlgo::MotionConverter>( motionConverter )
+				[converter] ( const IECore::Object *object, NSIContext_t context, const char *handle )
+				{
+					return converter( static_cast<const T *>( object ), context, handle );
+				},
+				motionConverterWrapper
 			);
 		}
 
