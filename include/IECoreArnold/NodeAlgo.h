@@ -90,13 +90,7 @@ class ConverterDescription
 			{
 				motionConverterWrapper = [motionConverter] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parent, const std::string &messageContext )
 				{
-					TypedObjectSamples typedSamples;
-					typedSamples.reserve( samples.size() );
-					for( const auto &sample : samples )
-					{
-						typedSamples.push_back( static_cast<const T *>( sample.get() ) );
-					}
-					return motionConverter( typedSamples, motionStart, motionEnd, universe, nodeName, parent, messageContext );
+					return motionConverter( IECoreScenePreview::staticSamplesCast<T>( samples ), motionStart, motionEnd, universe, nodeName, parent, messageContext );
 				};
 			}
 
