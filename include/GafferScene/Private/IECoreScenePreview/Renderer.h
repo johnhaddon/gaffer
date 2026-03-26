@@ -50,6 +50,7 @@
 namespace IECoreScenePreview
 {
 
+/// TODO : MOVE, AND USE `SAMPLES` TYPE
 template<typename T, typename S>
 boost::container::small_vector<const T *, 2> staticSamplesCast( const boost::container::small_vector<S, 2> &samples )
 {
@@ -57,7 +58,19 @@ boost::container::small_vector<const T *, 2> staticSamplesCast( const boost::con
 	result.reserve( samples.size() );
 	for( const auto &s : samples )
 	{
-		result.push_back( static_cast<const T *>( s.get() ) );
+		result.push_back( static_cast<const T *>( s ) );
+	}
+	return result;
+}
+
+template<typename T, typename S>
+boost::container::small_vector<const T *, 2> staticSamplesCast( const boost::container::small_vector<boost::intrusive_ptr<S>, 2> &samples )
+{
+	boost::container::small_vector<const T *, 2> result;
+	result.reserve( samples.size() );
+	for( const auto &s : samples )
+	{
+		result.push_back( static_cast<const T *>( s.get() ) ); // TODO : CAN WE DO THIS WITHOUT AN OVERLOAD?
 	}
 	return result;
 }
@@ -170,10 +183,12 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 		using ObjectSet = boost::unordered_set<ObjectInterfacePtr>;
 		using ObjectSetPtr = std::shared_ptr<ObjectSet>;
 		using ConstObjectSetPtr = std::shared_ptr<const ObjectSet>;
-		using TransformSamples = boost::container::small_vector<Imath::M44f, 2>;
-		using CameraSamples = boost::container::small_vector<IECoreScene::ConstCameraPtr, 2>;
-		using ObjectSamples = boost::container::small_vector<IECore::ConstObjectPtr, 2>;
-		using SampleTimes = boost::container::small_vector<float, 2>;
+		template<typename T>
+		using Samples = boost::container::small_vector<T, 2>;
+		using TransformSamples = Samples<Imath::M44f>;
+		using CameraSamples = Samples<IECoreScene::ConstCameraPtr>;
+		using ObjectSamples = Samples<IECore::ConstObjectPtr>;
+		using SampleTimes = Samples<float>;
 
 		/// A handle to an object in the renderer. The reference counting semantics of an
 		/// ObjectInterfacePtr are as follows :
