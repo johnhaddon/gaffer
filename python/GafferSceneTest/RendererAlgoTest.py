@@ -121,7 +121,7 @@ class RendererAlgoTest( GafferSceneTest.SceneTestCase ) :
 		capturedCamera = renderer.capturedObject( "/camera" )
 
 		self.assertEqual( capturedCamera.capturedSamples(), [ expectedCamera( 1 ) ] )
-		self.assertEqual( capturedCamera.capturedSampleTimes(), [] )
+		self.assertEqual( capturedCamera.capturedSampleTimes(), [ 0.0 ] )
 
 		# Animated case
 
@@ -842,7 +842,7 @@ class RendererAlgoTest( GafferSceneTest.SceneTestCase ) :
 				objectTimes = [ Gaffer.Context.current().getFrame() ]
 
 			self.assertEqual( len( sphere.capturedSamples() ), len( objectTimes ) )
-			self.assertEqual( sphere.capturedSampleTimes(), objectTimes if len( objectTimes ) > 1 else [] )
+			self.assertEqual( sphere.capturedSampleTimes(), objectTimes if len( objectTimes ) > 1 else [ 0.0 ] )
 			for index, time in enumerate( objectTimes ) :
 				with Gaffer.Context() as context :
 					context.setFrame( time )
