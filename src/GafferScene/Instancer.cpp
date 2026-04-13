@@ -3115,7 +3115,7 @@ struct Prototype : public IECore::RefCounted
 {
 	Prototype(
 		const ScenePlug *prototypesPlug, const ScenePlug::ScenePath *prototypeRoot,
-		const std::vector<float> &sampleTimes, const IECore::MurmurHash &hash,
+		const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const IECore::MurmurHash &hash,
 		const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
 		const Context *prototypeContext,
 		IECoreScenePreview::Renderer *renderer,
@@ -3162,12 +3162,6 @@ struct Prototype : public IECore::RefCounted
 
 			GafferScene::Private::RendererAlgo::deformationMotionTimes( renderOptions, m_attributes.get(), m_objectSampleTimes );
 			GafferScene::Private::RendererAlgo::objectSamples( prototypesPlug->objectPlug(), m_objectSampleTimes, m_object );
-
-			m_objectPointers.reserve( m_object.size() );
-			for( ConstObjectPtr &i : m_object )
-			{
-				m_objectPointers.push_back( i.get() );
-			}
 		}
 		else
 		{
@@ -3188,15 +3182,11 @@ struct Prototype : public IECore::RefCounted
 		}
 	}
 
-	std::vector<ConstObjectPtr> m_object;
-
-	// Rather awkwardly, we need to store the objects as raw pointers as well, because Renderer::object
-	// requires a vector of pointers for the animated case.
-	std::vector<const Object *> m_objectPointers;
-	std::vector<float> m_objectSampleTimes;
+	IECoreScenePreview::Renderer::ObjectSamples m_object;
+	IECoreScenePreview::Renderer::SampleTimes m_objectSampleTimes;
 	ConstCompoundObjectPtr m_attributes;
 	IECoreScenePreview::Renderer::AttributesInterfacePtr m_rendererAttributes;
-	std::vector<M44f> m_transforms;
+	IECoreScenePreview::Renderer::TransformSamples m_transforms;
 };
 
 using ConstPrototypePtr = boost::intrusive_ptr<const Prototype>;
@@ -3246,9 +3236,9 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 	// This is a bit of a weird convention for using a const variable with an initialization that doesn't
 	// fit in one line ... not sure how I feel about it. In this case, it's crucial that sampleTimes is
 	// const, because it is used from multiple threads simultaneously.
-	const vector<float> sampleTimes = [this, &enginePath, &renderOpts]()
+	const IECoreScenePreview::Renderer::SampleTimes sampleTimes = [this, &enginePath, &renderOpts]()
 	{
-		vector<float> result;
+		IECoreScenePreview::Renderer::SampleTimes result;
 		const ConstCompoundObjectPtr sceneAttributes = m_instancer->inPlug()->fullAttributes( enginePath );
 		GafferScene::Private::RendererAlgo::transformMotionTimes( renderOpts, sceneAttributes.get(), result );
 
@@ -3358,7 +3348,7 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 		{
 			Context::EditableScope prototypeScope( threadState );
 
-			vector<M44f> pointTransforms( sampleTimes.size() );
+			IECoreScenePreview::Renderer::TransformSamples pointTransforms( sampleTimes.size() );
 			IECoreScenePreview::Renderer::AttributesInterfacePtr attribsStorage;
 
 			// Storage for names, indexed by prototype id ( each instance of the same prototype
@@ -3456,7 +3446,7 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 				if( proto->m_objectSampleTimes.size() )
 				{
 					objectInterface = renderer->object(
-						name, proto->m_objectPointers, proto->m_objectSampleTimes, attribs
+						name, proto->m_object, proto->m_objectSampleTimes, attribs
 					);
 				}
 				else
