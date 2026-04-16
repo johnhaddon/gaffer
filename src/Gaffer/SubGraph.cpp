@@ -49,6 +49,7 @@
 
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/bind.hpp"
+#include "boost/regex.hpp"
 
 using namespace IECore;
 using namespace Gaffer;
@@ -516,6 +517,45 @@ SubGraph::SubGraph( const std::string &name )
 
 SubGraph::~SubGraph()
 {
+}
+
+void SubGraph::exportReference( const std::filesystem::path &fileName ) const
+{
+	const ScriptNode *script = scriptNode();
+	if( !script )
+	{
+		throw IECore::Exception( "SubGraph::exportForReference called without ScriptNode" );
+	}
+
+	// we only want to save out our child nodes and plugs that are visible in the UI, so we build a filter
+	// to specify just the things to export.
+
+	boost::regex invisiblePlug( "^__.*$" );
+	StandardSetPtr toExport = new StandardSet;
+	for( ChildIterator it = children().begin(), eIt = children().end(); it != eIt; ++it )
+	{
+		if( (*it)->isInstanceOf( Node::staticTypeId() ) )
+		{
+			toExport->add( *it );
+		}
+		else if( const Plug *plug = IECore::runTimeCast<Plug>( it->get() ) )
+		{
+			if(
+				!boost::regex_match( plug->getName().c_str(), invisiblePlug )
+				&& plug != userPlug()
+			)
+			{
+				toExport->add( *it );
+			}
+		}
+	}
+
+	ContextPtr context = new Context;
+	context->set( "valuePlugSerialiser:omitParentNodePlugValues", true );
+	context->set( "serialiser:includeParentMetadata", true );
+	Context::Scope scopedContext( context.get() );
+
+	script->serialiseToFile( fileName, this, toExport.get() );
 }
 
 void SubGraph::loadReference( const std::filesystem::path &fileName )
