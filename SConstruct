@@ -2020,6 +2020,7 @@ env.Alias( "build", "buildCore" )
 exeEnv = env.Clone()
 
 # Piggy-back on some of `baseLibEnv` variables.
+exeEnv["PYTHON_VERSION"] = baseLibEnv["PYTHON_VERSION"]
 exeEnv["PYTHON_ABI_VERSION"] = baseLibEnv["PYTHON_ABI_VERSION"]
 
 exeEnv.Append(
@@ -2037,7 +2038,7 @@ if exeEnv["PLATFORM"] != "win32" :
 	exeEnv["LINKFLAGS"].remove( "-Wl,--as-needed" )
 	exeEnv.Append(
 
-		LINKFLAGS = [ "-pthread", "-Wl,-export-dynamic", "-Wl,--no-as-needed" ],
+		LINKFLAGS = [ "-pthread" ],
 		LIBS = [
 			"dl",
 			"pthread",
