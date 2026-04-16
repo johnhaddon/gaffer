@@ -42,7 +42,7 @@
 //   - Control over what libraries the main executable links to, for example
 //     libstdc++ and custom allocators.
 
-#include "Python.h"
+#include "boost/python.hpp"
 
 #include <filesystem>
 #include <functional>
