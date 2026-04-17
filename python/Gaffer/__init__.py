@@ -61,6 +61,8 @@ from . import NodeAlgo
 from . import ExtensionAlgo
 
 # Class-level non-UI metadata registration
+## TODO : DO WE KEEP THIS SO THAT THE CHILDREN ARE READ-ONLY EVEN
+# BEFORE A REFERENCE IS LOADED? OR DO WE JUST NOT WORRY?
 Metadata.registerValue( Reference, "childNodesAreReadOnly", True )
 
 def rootPath() :

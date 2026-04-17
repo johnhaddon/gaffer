@@ -582,6 +582,11 @@ void SubGraph::loadReference( const std::filesystem::path &fileName )
 	);
 }
 
+bool SubGraph::isReference() const
+{
+	return m_referenceState && !m_referenceState->fileName.empty();
+}
+
 const std::filesystem::path &SubGraph::referenceFileName() const
 {
 	return m_referenceState ? m_referenceState->fileName : g_emptyPath;
@@ -903,3 +908,25 @@ bool SubGraph::isReferencePlug( const Plug *plug ) const
 	// everything else must be from a reference then.
 	return true;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// Metadata
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+ConstBoolDataPtr g_true = new BoolData( true );
+ConstBoolDataPtr g_false = new BoolData( false );
+
+const bool g_childNodesAreReadOnlyRegistration = [] {
+	Metadata::registerValue(
+		SubGraph::staticTypeId(), g_childNodesAreReadOnlyName,
+		[] ( const GraphComponent *graphComponent ) {
+			return static_cast<const SubGraph *>( graphComponent )->isReference() ? g_true : g_false;
+		}
+	);
+	return true;
+} ();
+
+} // namespace
