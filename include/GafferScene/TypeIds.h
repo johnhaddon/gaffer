@@ -197,6 +197,7 @@ enum TypeId
 	ClosurePlugTypeId = 120152,
 	ReflectionConstraintTypeId = 120153,
 	CurvesInterpolationTypeId = 120154,
+	CurvesTangentsTypeId = 120155,
 
 	LastTypeId = 120999
 };
