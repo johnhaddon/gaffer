@@ -36,10 +36,17 @@
 
 #include "GafferScene/CurvesTangents.h"
 
+#include "Gaffer/ThreadState.h"
+
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/CurvesPrimitiveEvaluator.h"
 
+#include "IECore/Canceller.h"
 #include "IECore/VectorTypedData.h"
+
+#include "tbb/blocked_range.h"
+#include "tbb/enumerable_thread_specific.h"
+#include "tbb/parallel_for.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -80,6 +87,11 @@ Gaffer::StringPlug *CurvesTangents::tangentPlug()
 const Gaffer::StringPlug *CurvesTangents::tangentPlug() const
 {
 	return getChild<StringPlug>( g_firstPlugIndex + 1 );
+}
+
+Gaffer::ValuePlug::CachePolicy CurvesTangents::processedObjectComputeCachePolicy() const
+{
+	return ValuePlug::CachePolicy::TaskCollaboration;
 }
 
 bool CurvesTangents::affectsProcessedObject( const Gaffer::Plug *input ) const
@@ -123,34 +135,61 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 	}
 
 	CurvesPrimitiveEvaluator evaluator( evalCurves );
-	PrimitiveEvaluator::ResultPtr result = evaluator.createResult();
 
 	const bool periodic = curves->wrap() == CurvesPrimitive::Wrap::Periodic;
 	const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
+	const size_t numCurves = verticesPerCurve.size();
+
+	// Pre-compute per-curve offsets into the flat output array.
+	std::vector<int> curveOffsets( numCurves );
+	int totalVerts = 0;
+	for( size_t i = 0; i < numCurves; ++i )
+	{
+		curveOffsets[i] = totalVerts;
+		totalVerts += verticesPerCurve[i];
+	}
 
 	V3fVectorDataPtr tangentData = new V3fVectorData();
 	tangentData->setInterpretation( GeometricData::Interpretation::Vector );
 	auto &tangents = tangentData->writable();
-	tangents.reserve( curves->variableSize( PrimitiveVariable::Interpolation::Vertex ) );
+	tangents.resize( totalVerts );
 
-	for( size_t curveIndex = 0; curveIndex < verticesPerCurve.size(); ++curveIndex )
-	{
-		const int numVerts = verticesPerCurve[curveIndex];
-		for( int vertIndex = 0; vertIndex < numVerts; ++vertIndex )
+	const IECore::Canceller *canceller = context->canceller();
+	const ThreadState &threadState = ThreadState::current();
+
+	tbb::enumerable_thread_specific<PrimitiveEvaluator::ResultPtr> threadLocalResult(
+		[&evaluator](){ return evaluator.createResult(); }
+	);
+
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, numCurves ),
+		[&]( const tbb::blocked_range<size_t> &range )
 		{
-			float v;
-			if( periodic )
+			ThreadState::Scope threadStateScope( threadState );
+			PrimitiveEvaluator::ResultPtr &result = threadLocalResult.local();
+
+			for( size_t curveIndex = range.begin(); curveIndex != range.end(); ++curveIndex )
 			{
-				v = float(vertIndex) / float(numVerts);
+				IECore::Canceller::check( canceller );
+				const int numVerts = verticesPerCurve[curveIndex];
+				const int startOffset = curveOffsets[curveIndex];
+				for( int vertIndex = 0; vertIndex < numVerts; ++vertIndex )
+				{
+					float v;
+					if( periodic )
+					{
+						v = float(vertIndex) / float(numVerts);
+					}
+					else
+					{
+						v = numVerts > 1 ? float(vertIndex) / float(numVerts - 1) : 0.0f;
+					}
+					evaluator.pointAtV( curveIndex, v, result.get() );
+					tangents[startOffset + vertIndex] = result->vTangent();
+				}
 			}
-			else
-			{
-				v = numVerts > 1 ? float(vertIndex) / float(numVerts - 1) : 0.0f;
-			}
-			evaluator.pointAtV( curveIndex, v, result.get() );
-			tangents.push_back( result->vTangent() );
 		}
-	}
+	);
 
 	CurvesPrimitivePtr output = runTimeCast<CurvesPrimitive>( curves->copy() );
 	output->variables[tangentName] = PrimitiveVariable(

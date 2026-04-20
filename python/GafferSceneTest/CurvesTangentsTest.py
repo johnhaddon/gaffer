@@ -43,6 +43,7 @@ import IECoreScene
 import Gaffer
 import GafferScene
 import GafferSceneTest
+import GafferTest
 
 
 class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
@@ -204,6 +205,40 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 		node["position"].setValue( "Pref" )
 		h3 = node["out"].objectHash( "/object" )
 		self.assertNotEqual( h1, h3 )
+
+
+	@GafferTest.TestRunner.PerformanceTestMethod()
+	def testPerformance( self ) :
+
+		# 10,000 curves of 100 vertices each = 1M vertices total.
+		numCurves = 10000
+		numVertsPerCurve = 100
+
+		vertsPerCurve = IECore.IntVectorData( [numVertsPerCurve] * numCurves )
+		p = IECore.V3fVectorData(
+			[
+				imath.V3f( c, float(v) / float(numVertsPerCurve - 1), 0 )
+				for c in range( numCurves )
+				for v in range( numVertsPerCurve )
+			]
+		)
+		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.linear(), False, p )
+
+		objectToScene = GafferScene.ObjectToScene()
+		objectToScene["object"].setValue( curves )
+
+		self._pathFilter = GafferScene.PathFilter()
+		self._pathFilter["paths"].setValue( IECore.StringVectorData( ["/object"] ) )
+
+		node = GafferScene.CurvesTangents()
+		node["in"].setInput( objectToScene["out"] )
+		node["filter"].setInput( self._pathFilter["out"] )
+
+		# Precache input so it is not included in the measurement.
+		node["in"].object( "/object" )
+
+		with GafferTest.TestRunner.PerformanceScope() :
+			node["out"].object( "/object" )
 
 
 if __name__ == "__main__" :

@@ -61,6 +61,7 @@ class GAFFERSCENE_API CurvesTangents : public ObjectProcessor
 
 	protected :
 
+		Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
 		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
