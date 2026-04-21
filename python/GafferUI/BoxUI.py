@@ -152,8 +152,20 @@ def appendNodeEditorToolMenuDefinitions( nodeEditor, node, menuDefinition ) :
 		}
 	)
 	menuDefinition.append( "/BoxDivider", { "divider" : True } )
-	menuDefinition.append( "/Export Reference...", { "command" : functools.partial( __exportForReferencing, node = node ) } )
-	menuDefinition.append( "/Import Reference...", { "command" : functools.partial( __importReference, node = node ) } )
+	menuDefinition.append( "/Export Reference...", { "command" : functools.partial( __exportReference, node = node ) } )
+	menuDefinition.append( "/Load Reference...", { "command" : functools.partial( __loadReference, node = node ) } )
+	menuDefinition.append(
+		"/Convert To Reference...", {
+			"command" : functools.partial( __convertToReference, node = node ),
+			"active" : not node.isReference(),
+		}
+	)
+	menuDefinition.append(
+		"/Localise", {
+			"command" : functools.partial( __localise, node = node ),
+			"active" : node.isReference(),
+		}
+	)
 
 	if Gaffer.BoxIO.canInsert( node ) :
 		menuDefinition.append( "/UpgradeDivider", { "divider" : True } )
@@ -230,12 +242,12 @@ def __waitForReferenceFileName( menu, node, **dialogueKeywords ) :
 
 	return pathlib.Path( path ).with_suffix( ".grf" )
 
-def __exportForReferencing( menu, node ) :
+def __confirmExportWithNonDefaultValues( node, operation = "Export" ) :
 
 	nonDefaultPlugs = __nonDefaultPlugs( node )
 	if len( nonDefaultPlugs ) :
 		dialogue = GafferUI.ConfirmationDialogue(
-			title = "Export without current values?",
+			title = f"{operation} without current values?",
 			message = inspect.cleandoc(
 				"""
 				Not all plugs are at their default values, and non-default
@@ -250,31 +262,53 @@ def __exportForReferencing( menu, node ) :
 				using "Reset Default Value" in the plug context menu.
 				"""
 			).replace( "\n", " " ),
-			confirmLabel = "Export"
+			confirmLabel = operation
 		)
-		if not dialogue.waitForConfirmation() :
-			return
+		return dialogue.waitForConfirmation()
+
+	return True
+
+def __exportReference( menu, node ) :
+
+	if not __confirmExportWithNonDefaultValues( node ) :
+		return
 
 	path = __waitForReferenceFileName( menu, node, title="Export reference", confirmLabel="Export" )
 	if not path :
 		return
 
-	node.exportForReference( path )
+	node.exportReference( path )
 
-def __importReference( menu, node ) :
+def __loadReference( menu, node ) :
 
 	path = __waitForReferenceFileName( menu, node, title="Import reference", confirmLabel="Import", valid=True )
 	if not path :
 		return
 
-	scriptNode = node.ancestor( Gaffer.ScriptNode )
 	with GafferUI.ErrorDialogue.ErrorHandler(
-		title = "Error Importing Reference",
+		title = "Error Loading Reference",
 		closeLabel = "Oy vey",
 		parentWindow = menu.ancestor( GafferUI.Window )
 	) :
-		with Gaffer.UndoScope( scriptNode ) :
-			scriptNode.executeFile( str( path ), parent = node, continueOnError = True )
+		with Gaffer.UndoScope( node.ancestor( Gaffer.ScriptNode ) ) :
+			node.loadReference( path )
+
+def __convertToReference( menu, node ) :
+
+	if not __confirmExportWithNonDefaultValues( node ) :
+		return
+
+	path = __waitForReferenceFileName( menu, node, title="Convert to reference", confirmLabel="Convert" )
+	if not path :
+		return
+
+	with Gaffer.UndoScope( node.scriptNode() ) :
+		node.convertToReference( path )
+
+def __localise( node ) :
+
+	with Gaffer.UndoScope( node.scriptNode() ) :
+		node.localise()
 
 def __upgradeToUseBoxIO( node ) :
 
