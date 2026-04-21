@@ -2043,7 +2043,6 @@ class SubGraphTest( GafferTest.TestCase ) :
 	def testLoadReferenceOnBoxWithLocalNodes( self ) :
 
 		# Make an empty `.grf` file.
-
 		script = Gaffer.ScriptNode()
 		script["box"] = Gaffer.Box()
 
@@ -2062,6 +2061,197 @@ class SubGraphTest( GafferTest.TestCase ) :
 		script["box"].loadReference( fileName )
 		self.assertEqual( script["box"].referenceFileName(), fileName )
 		self.assertEqual( script["box"].keys(), [ "user"] )
+
+	def __assertGraphsMatch( self, root1, root2 ) :
+
+		def walk( graphComponent1, graphComponent2 ) :
+
+			if graphComponent1.getName() == "unsavedChanges" and isinstance( graphComponent1.parent(), Gaffer.ScriptNode ) :
+				# Ignore `ScriptNode.unsavedChanges`
+				return
+
+			message = "(At root)" if graphComponent1 is root1 else '(At descendant "{}")'.format( graphComponent1.relativeName( root1 ) )
+
+			self.assertIs( type( graphComponent1 ), type( graphComponent2 ), message )
+
+			if isinstance( graphComponent1, Gaffer.Plug ) :
+
+				self.assertEqual( graphComponent1.getFlags(), graphComponent2.getFlags(), message )
+				input1 = graphComponent1.getInput()
+				input2 = graphComponent2.getInput()
+				if input1 is not None :
+					self.assertIsNotNone( input2, message )
+					self.assertEqual( input1.relativeName( root1 ), input2.relativeName( root2 ), message )
+				else :
+					self.assertIsNone( input2, message )
+
+				if hasattr( graphComponent1, "getValue" ) :
+					self.assertEqual( graphComponent1.getValue(), graphComponent2.getValue(), message )
+				if hasattr( graphComponent1, "minValue" ) :
+					self.assertEqual( graphComponent1.minValue(), graphComponent2.minValue(), message )
+				if hasattr( graphComponent1, "maxValue" ) :
+					self.assertEqual( graphComponent1.maxValue(), graphComponent2.maxValue(), message )
+				if hasattr( graphComponent1, "defaultValue" ) :
+					self.assertEqual( graphComponent1.defaultValue(), graphComponent2.defaultValue(), message )
+
+			self.assertEqual( graphComponent1.keys(), graphComponent2.keys(), message )
+			for key in graphComponent1.keys() :
+				walk( graphComponent1[key], graphComponent2[key] )
+
+		walk( root1, root2 )
+
+	def testConvertToReferenceThrowsIfReferenceAlready( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["box"] = Gaffer.Box()
+
+		fileName = self.temporaryDirectory() / "test.grf"
+		script["box"].exportForReference( fileName )
+
+		script["reference"] = Gaffer.Box()
+		script["reference"].loadReference( fileName )
+
+		with self.assertRaisesRegex( RuntimeError, "Already a reference" ) :
+			script["reference"].convertToReference( self.temporaryDirectory() / "test2.grf" )
+
+	def testConvertToReference( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		script["box"] = Gaffer.Box()
+		add = GafferTest.AddNode()
+		script["box"]["add"] = add
+		promotedOp1 = Gaffer.PlugAlgo.promote( script["box"]["add"]["op1"] )
+		promotedOp1.setValue( 1001 )
+		promotedSum = Gaffer.PlugAlgo.promote( script["box"]["add"]["sum"] )
+
+		scriptCopy = Gaffer.ScriptNode() # Copy so we have something to compare to
+		scriptCopy.execute( script.serialise() )
+
+		def assertLocal() :
+
+			self.assertFalse( script["box"].isReference() )
+			self.assertEqual( script["box"].referenceFileName(), None )
+			self.__assertGraphsMatch( script, scriptCopy )
+			self.assertEqual( Gaffer.Metadata.value( script["box"], "childNodesAreReadOnly" ), None )
+
+			# Nodes and plugs should have been reused rather than recreated.
+
+			self.assertTrue( script["box"]["add"].isSame( add ) )
+			self.assertTrue( script["box"]["op1"].isSame( promotedOp1 ) )
+			self.assertTrue( script["box"]["sum"].isSame( promotedSum ) )
+
+		assertLocal()
+
+		fileName = self.temporaryDirectory() / "test.grf"
+		referenceChangedSlot = GafferTest.CapturingSlot( script["box"].referenceChangedSignal() )
+		with Gaffer.UndoScope( script ) :
+			script["box"].convertToReference( fileName )
+
+		def assertReferenced() :
+
+			self.assertTrue( script["box"].isReference() )
+			self.assertEqual( script["box"].referenceFileName(), fileName )
+			self.__assertGraphsMatch( script, scriptCopy )
+			self.assertEqual( Gaffer.Metadata.value( script["box"], "childNodesAreReadOnly" ), True )
+
+			# Nodes and plugs should have been reused rather than recreated.
+
+			self.assertTrue( script["box"]["add"].isSame( add ) )
+			self.assertTrue( script["box"]["op1"].isSame( promotedOp1 ) )
+			self.assertTrue( script["box"]["sum"].isSame( promotedSum ) )
+
+		assertReferenced()
+		self.assertEqual( len( referenceChangedSlot ), 1 )
+
+		script.undo()
+		assertLocal()
+		self.assertEqual( len( referenceChangedSlot ), 2 )
+
+		script.redo()
+		assertReferenced()
+		self.assertEqual( len( referenceChangedSlot ), 3 )
+
+		script.undo()
+		assertLocal()
+		self.assertEqual( len( referenceChangedSlot ), 4 )
+
+	def testLocaliseThrowsIfLocalAlready( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["box"] = Gaffer.Box()
+
+		with self.assertRaisesRegex( RuntimeError, "Not a reference" ) :
+			script["box"].localise()
+
+	def testLocalise( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		script["box"] = Gaffer.Box()
+		add = GafferTest.AddNode()
+		script["box"]["add"] = add
+		Gaffer.PlugAlgo.promote( script["box"]["add"]["op1"] )
+		Gaffer.PlugAlgo.promote( script["box"]["add"]["sum"] )
+
+		fileName = self.temporaryDirectory() / "test.grf"
+		script["box"].exportReference( fileName )
+
+		script["reference1"] = Gaffer.Box()
+		script["reference1"].loadReference( fileName )
+
+		script["reference2"] = Gaffer.Box()
+		script["reference2"].loadReference( fileName )
+
+		add = script["reference2"]["add"]
+		op1 = script["reference2"]["op1"]
+		sum = script["reference2"]["sum"]
+
+		def assertReferenced() :
+
+			self.assertTrue( script["reference2"].isReference() )
+			self.assertEqual( script["reference2"].referenceFileName(), fileName )
+			self.__assertGraphsMatch( script["reference1"], script["reference2"] )
+			self.assertEqual( Gaffer.Metadata.value( script["reference2"], "childNodesAreReadOnly" ), True )
+
+			# Nodes and plugs should have been reused rather than recreated.
+
+			self.assertTrue( script["reference2"]["add"].isSame( add ) )
+			self.assertTrue( script["reference2"]["op1"].isSame( op1 ) )
+			self.assertTrue( script["reference2"]["sum"].isSame( sum ) )
+
+		assertReferenced()
+
+		referenceChangedSlot = GafferTest.CapturingSlot( script["reference2"].referenceChangedSignal() )
+		with Gaffer.UndoScope( script ) :
+			script["reference2"].localise()
+
+		self.assertEqual( len( referenceChangedSlot ), 1 )
+
+		def assertLocal() :
+
+			self.assertFalse( script["reference2"].isReference() )
+			self.assertEqual( script["reference2"].referenceFileName(), None )
+			self.__assertGraphsMatch( script["reference1"], script["reference2"] )
+			self.assertEqual( Gaffer.Metadata.value( script["reference2"], "childNodesAreReadOnly" ), None )
+
+			# Nodes and plugs should have been reused rather than recreated.
+
+			self.assertTrue( script["reference2"]["add"].isSame( add ) )
+			self.assertTrue( script["reference2"]["op1"].isSame( op1 ) )
+			self.assertTrue( script["reference2"]["sum"].isSame( sum ) )
+
+		script.undo()
+		assertReferenced()
+		self.assertEqual( len( referenceChangedSlot ), 2 )
+
+		script.redo()
+		assertLocal()
+		self.assertEqual( len( referenceChangedSlot ), 3 )
+
+		script.undo()
+		assertReferenced()
+		self.assertEqual( len( referenceChangedSlot ), 4 )
 
 if __name__ == "__main__":
 	unittest.main()
