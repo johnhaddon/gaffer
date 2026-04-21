@@ -34,7 +34,6 @@
 #
 ##########################################################################
 
-import os
 import inspect
 import functools
 import pathlib

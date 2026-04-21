@@ -75,11 +75,21 @@ class GAFFER_API SubGraph : public DependencyNode
 		/// in a separate `.grf` file. This allows self-contained node graphs
 		/// to be published and then referenced into multiple `.gfr` files. When
 		/// referencing, the child nodes are not user-editable.
+		///
+		/// SubGraphs can be switched freely between referencing and local states,
+		/// allowing a user to localise a reference for editing before exporting
+		/// it again for referencing.
 
 		/// Exports the internal node graph as a `.grf` file, ready for referencing.
 		void exportReference( const std::filesystem::path &fileName ) const;
 		/// Loads a previously exported `.grf` file, replacing the internal node graph.
 		void loadReference( const std::filesystem::path &fileName );
+		/// Exports to `fileName`, and converts the SubGraph to reference it.
+		void convertToReference( const std::filesystem::path &fileName );
+		/// Localises the SubGraph's contents so that they may be edited by the
+		/// user. The contents will be saved with the local `.gfr` file unless
+		/// converted back to a reference.
+		void localise();
 
 		/// Returns true if this node is referencing a `.grf` file, and false if
 		/// the child nodes are local.

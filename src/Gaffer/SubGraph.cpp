@@ -569,6 +569,53 @@ void SubGraph::loadReference( const std::filesystem::path &fileName )
 	);
 }
 
+void SubGraph::convertToReference( const std::filesystem::path &fileName )
+{
+	if( isReference() )
+	{
+		throw IECore::Exception( "Already a reference" );
+	}
+
+	exportReference( fileName );
+	Action::enact(
+		this,
+		[this, fileName] {
+			if( !m_referenceState )
+			{
+				m_referenceState = std::make_unique<ReferenceState>( this );
+			}
+			m_referenceState->fileName = fileName;
+			Metadata::registerValue( this, g_childNodesAreReadOnlyName, new BoolData( true ) );
+			referenceChangedSignal()( this );
+		},
+		[this, fileName] {
+			m_referenceState->fileName.clear();
+			referenceChangedSignal()( this );
+		}
+	);
+}
+
+void SubGraph::localise()
+{
+	if( !isReference() )
+	{
+		throw IECore::Exception( "Not a reference" );
+	}
+
+	Action::enact(
+		this,
+		[this] {
+			m_referenceState->fileName.clear();
+			Metadata::deregisterValue( this, g_childNodesAreReadOnlyName );
+			referenceChangedSignal()( this );
+		},
+		[this, fileName = referenceFileName()] {
+			m_referenceState->fileName = fileName;
+			referenceChangedSignal()( this );
+		}
+	);
+}
+
 bool SubGraph::isReference() const
 {
 	return m_referenceState && !m_referenceState->fileName.empty();
