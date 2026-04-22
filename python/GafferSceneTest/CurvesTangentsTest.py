@@ -40,26 +40,11 @@ import imath
 import IECore
 import IECoreScene
 
-import Gaffer
 import GafferScene
 import GafferSceneTest
 import GafferTest
 
-
 class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
-
-	def makeStraightCurveScene( self, axis=imath.V3f( 1, 0, 0 ), numCurves=1, numVerts=3 ) :
-
-		vertsPerCurve = IECore.IntVectorData( [numVerts] * numCurves )
-		p = IECore.V3fVectorData(
-			[ axis * ( float(i) / float(numVerts - 1) ) for _ in range( numCurves ) for i in range( numVerts ) ]
-		)
-		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.linear(), False, p )
-
-		objectToScene = GafferScene.ObjectToScene()
-		objectToScene["object"].setValue( curves )
-
-		return objectToScene
 
 	def makeFilteredNode( self, upstream ) :
 
@@ -74,66 +59,90 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 
 		return node
 
-	def testTangentsAlongX( self ) :
+	def testLinearNonPeriodic( self ) :
 
-		scene = self.makeStraightCurveScene( axis=imath.V3f( 1, 0, 0 ), numVerts=3 )
-		node = self.makeFilteredNode( scene )
-
-		obj = node["out"].object( "/object" )
-
-		self.assertIn( "tangent", obj.keys() )
-		tangentVar = obj["tangent"]
-		self.assertEqual( tangentVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( len( tangentVar.data ), 3 )
-
-		for t in tangentVar.data :
-			self.assertEqualWithAbsError( t.normalized(), imath.V3f( 1, 0, 0 ), 0.000001 )
-
-	def testTangentsAlongY( self ) :
-
-		scene = self.makeStraightCurveScene( axis=imath.V3f( 0, 1, 0 ), numVerts=4 )
-		node = self.makeFilteredNode( scene )
-
-		obj = node["out"].object( "/object" )
-		tangentVar = obj["tangent"]
-		self.assertEqual( len( tangentVar.data ), 4 )
-
-		for t in tangentVar.data :
-			self.assertEqualWithAbsError( t.normalized(), imath.V3f( 0, 1, 0 ), 0.000001 )
-
-	def testMultipleCurves( self ) :
-
-		vertsPerCurve = IECore.IntVectorData( [2, 2] )
-		p = IECore.V3fVectorData( [
-			imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ),  # curve 0 along X
-			imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ),  # curve 1 along Y
-		] )
-		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.linear(), False, p )
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 2, 2 ] ), IECore.CubicBasisf.linear(), False,
+			IECore.V3fVectorData( [
+				imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ),  # curve 0 along X
+				imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ),  # curve 1 along Y
+			] )
+		)
 
 		objectToScene = GafferScene.ObjectToScene()
 		objectToScene["object"].setValue( curves )
-		node = self.makeFilteredNode( objectToScene )
 
-		obj = node["out"].object( "/object" )
-		tangentVar = obj["tangent"]
-		self.assertEqual( len( tangentVar.data ), 4 )
+		pathFilter = GafferScene.PathFilter()
+		pathFilter["paths"].setValue( IECore.StringVectorData( [ "/object" ] ) )
 
-		for t in tangentVar.data[:2] :
-			self.assertEqualWithAbsError( t.normalized(), imath.V3f( 1, 0, 0 ), 0.000001 )
+		curveTangents = GafferScene.CurvesTangents()
+		curveTangents["in"].setInput( objectToScene["out"] )
+		curveTangents["filter"].setInput( pathFilter["out"] )
 
-		for t in tangentVar.data[2:] :
-			self.assertEqualWithAbsError( t.normalized(), imath.V3f( 0, 1, 0 ), 0.000001 )
+		curves = curveTangents["out"].object( "/object" )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+		self.assertTrue( "tangent" in curves )
+		self.assertEqual( curves["tangent"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
-	def testRename( self ) :
+		self.assertEqual(
+			curves["tangent"].data,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, 1, 0 ), imath.V3f( 0, 1, 0 ),
+				],
+				IECore.GeometricData.Interpretation.Vector
+			)
+		)
+
+	def testCatmullRomPeriodic( self ) :
+
+		# Circle in XY plane
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom(), True,
+			IECore.V3fVectorData( [
+				imath.V3f( -1, 0, 0 ), imath.V3f( 0, 1, 0 ),
+				imath.V3f( 1, 0, 0 ), imath.V3f( 0, -1, 0 ),
+			] )
+		)
+
+		objectToScene = GafferScene.ObjectToScene()
+		objectToScene["object"].setValue( curves )
+
+		pathFilter = GafferScene.PathFilter()
+		pathFilter["paths"].setValue( IECore.StringVectorData( [ "/object" ] ) )
+
+		curveTangents = GafferScene.CurvesTangents()
+		curveTangents["in"].setInput( objectToScene["out"] )
+		curveTangents["filter"].setInput( pathFilter["out"] )
+
+		curves = curveTangents["out"].object( "/object" )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+		self.assertTrue( "tangent" in curves )
+		self.assertEqual( curves["tangent"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( curves["tangent"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+
+		print( curves["tangent"].data )
+		self.assertEqual(
+			curves["tangent"].data,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 0, 1, 0 ), imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, -1, 0 ), imath.V3f( -1, 0, 0 ),
+				],
+				IECore.GeometricData.Interpretation.Vector
+			)
+		)
+
+	def testTangentName( self ) :
 
 		scene = self.makeStraightCurveScene()
 		node = self.makeFilteredNode( scene )
 		node["tangent"].setValue( "myTangent" )
 
-		obj = node["out"].object( "/object" )
-		self.assertIn( "myTangent", obj.keys() )
-		self.assertNotIn( "tangent", obj.keys() )
-		self.assertEqual( len( obj["myTangent"].data ), 3 )
+		curves = node["out"].object( "/object" )
+		self.assertIn( "myTangent", curves )
+		self.assertNotIn( "tangent", curves )
 
 	def testAlternativePosition( self ) :
 
@@ -160,25 +169,30 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 
 	def testNonCurvesPassThrough( self ) :
 
-		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
-		objectToScene = GafferScene.ObjectToScene()
-		objectToScene["object"].setValue( mesh )
+		cube = GafferScene.Cube()
 
-		node = self.makeFilteredNode( objectToScene )
+		cubeFilter = GafferScene.PathFilter()
+		cubeFilter["paths"].setValue( IECore.StringVectorData( [ "cube" ] ) )
 
-		obj = node["out"].object( "/object" )
-		self.assertIsInstance( obj, IECoreScene.MeshPrimitive )
-		self.assertNotIn( "tangent", obj.keys() )
+		node = GafferScene.CurvesTangents()
+		node["in"].setInput( cube["out"] )
+		node["filter"].setInput( cubeFilter["out"] )
+
+		self.assertScenesEqual( node["out"], node["in"] )
 
 	def testMissingPositionPassThrough( self ) :
 
-		scene = self.makeStraightCurveScene()
-		node = self.makeFilteredNode( scene )
-		node["position"].setValue( "nonexistent" )
+		grid = GafferScene.Grid()
 
-		# Should pass through unchanged when the named position variable is absent
-		obj = node["out"].object( "/object" )
-		self.assertNotIn( "tangent", obj.keys() )
+		allFilter = GafferScene.PathFilter()
+		allFilter["paths"].setValue( IECore.StringVectorData( [ "..." ] ) )
+
+		node = GafferScene.CurvesTangents()
+		node["in"].setInput( grid["out"] )
+		node["filter"].setInput( allFilter["out"] )
+		node["position"].setValue( "nonexistentP" )
+
+		self.assertScenesEqual( node["out"], node["in"] )
 
 	def testPreservesExistingVariables( self ) :
 
@@ -205,7 +219,6 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 		node["position"].setValue( "Pref" )
 		h3 = node["out"].objectHash( "/object" )
 		self.assertNotEqual( h1, h3 )
-
 
 	@GafferTest.TestRunner.PerformanceTestMethod()
 	def testPerformance( self ) :
@@ -239,7 +252,6 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 
 		with GafferTest.TestRunner.PerformanceScope() :
 			node["out"].object( "/object" )
-
 
 if __name__ == "__main__" :
 	unittest.main()
