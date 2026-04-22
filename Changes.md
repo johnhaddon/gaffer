@@ -86,6 +86,7 @@ Breaking Changes
 - MeshSegments : Changed behaviour when setting `connectivity` to "". Previously, this used vertex topology, now it passes through the input unchanged. This aligns better with other geometry processing nodes.
 - EditScopeAlgo : Removed `acquireSetEdits()` function.
 - RampPlug : Moved point plugs to a `points` child container. Old `.gfr` files are converted automatically on load.
+- Reference : Removed support for loading `.grf` files from versions prior to 0.18.0.0.
 
 Build
 -----
@@ -624,6 +625,7 @@ Breaking Changes
 - Light : Removed public constructor. Lights may now only be constructed via derived classes, which are now responsible for providing a Shader node to the base class.
 - OSLCode : Removed `shaderCompiledSignal()`.
 - PathColumn : Changed `headerData()` signature.
+- Reference : Removed support for loading `.grf` files from versions prior to 0.18.0.0.
 
 Documentation
 -------------
