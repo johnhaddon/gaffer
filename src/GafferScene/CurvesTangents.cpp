@@ -63,7 +63,6 @@ CurvesTangents::CurvesTangents( const std::string &name )
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "position", Plug::In, "P" ) );
 	addChild( new StringPlug( "tangent", Plug::In, "tangent" ) );
-	addChild( new BoolPlug( "normalize" ) );
 }
 
 CurvesTangents::~CurvesTangents()
@@ -90,16 +89,6 @@ const Gaffer::StringPlug *CurvesTangents::tangentPlug() const
 	return getChild<StringPlug>( g_firstPlugIndex + 1 );
 }
 
-Gaffer::BoolPlug *CurvesTangents::normalizePlug()
-{
-	return getChild<BoolPlug>( g_firstPlugIndex + 2 );
-}
-
-const Gaffer::BoolPlug *CurvesTangents::normalizePlug() const
-{
-	return getChild<BoolPlug>( g_firstPlugIndex + 2 );
-}
-
 Gaffer::ValuePlug::CachePolicy CurvesTangents::processedObjectComputeCachePolicy() const
 {
 	return ValuePlug::CachePolicy::TaskCollaboration;
@@ -110,8 +99,7 @@ bool CurvesTangents::affectsProcessedObject( const Gaffer::Plug *input ) const
 	return
 		ObjectProcessor::affectsProcessedObject( input ) ||
 		input == positionPlug() ||
-		input == tangentPlug() ||
-		input == normalizePlug()
+		input == tangentPlug()
 	;
 }
 
@@ -120,7 +108,6 @@ void CurvesTangents::hashProcessedObject( const ScenePath &path, const Gaffer::C
 	ObjectProcessor::hashProcessedObject( path, context, h );
 	positionPlug()->hash( h );
 	tangentPlug()->hash( h );
-	normalizePlug()->hash( h );
 }
 
 IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
@@ -133,13 +120,10 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 
 	const std::string position = positionPlug()->getValue();
 	const std::string tangentName = tangentPlug()->getValue();
-	const bool normalize = normalizePlug()->getValue();
 
-	ConstCurvesPrimitivePtr curvesWithPosition = curves;
+	ConstCurvesPrimitivePtr evalCurves = curves;
 	if( position != "P" )
 	{
-		// The CurvesPrimitiveEvaluator always uses "P" for its
-		// `pointAtV()` query, so swap in the position we want.
 		auto it = curves->variables.find( position );
 		if( it == curves->variables.end() )
 		{
@@ -147,16 +131,15 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 		}
 		CurvesPrimitivePtr copy = runTimeCast<CurvesPrimitive>( curves->copy() );
 		copy->variables["P"] = it->second;
-		curvesWithPosition = copy;
+		evalCurves = copy;
 	}
 
-	CurvesPrimitiveEvaluator evaluator( curvesWithPosition );
+	CurvesPrimitiveEvaluator evaluator( evalCurves );
 
 	const bool periodic = curves->wrap() == CurvesPrimitive::Wrap::Periodic;
 	const size_t numCurves = curves->numCurves();
 
-	// Compute per-curve offsets into the output data, so we can process curves
-	// in parallel.
+	// Pre-compute per-curve offsets into the flat output array.
 	std::vector<int> curveOffsets( numCurves );
 	size_t offset = 0;
 	for( size_t curveIndex = 0; curveIndex < numCurves; ++curveIndex )
@@ -189,7 +172,7 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 			for( size_t curveIndex = range.begin(); curveIndex != range.end(); ++curveIndex )
 			{
 				IECore::Canceller::check( canceller );
-				const int numVarying = curves->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Varying, curveIndex );
+				const int numVarying = curves->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Varying, curveIndex ); // TODO : COULD GET FROM OFFSETS TABLE
 				const int startOffset = curveOffsets[curveIndex];
 				for( int varyingIndex = 0; varyingIndex < numVarying; ++varyingIndex )
 				{
@@ -203,13 +186,7 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 						v = numVarying > 1 ? float(varyingIndex) / float(numVarying - 1) : 0.0f;
 					}
 					evaluator.pointAtV( curveIndex, v, result.get() );
-					//fmt::print( "{} {} : ({} {} {})\n", varyingIndex, v, result->point()[0], result->point()[1], result->point()[2] );
-					Imath::V3f tangent = result->vTangent();
-					if( normalize )
-					{
-						tangent.normalize();
-					}
-					tangents[startOffset + varyingIndex] = tangent;
+					tangents[startOffset + varyingIndex] = result->vTangent();
 				}
 			}
 		},

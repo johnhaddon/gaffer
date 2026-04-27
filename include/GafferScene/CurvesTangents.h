@@ -57,9 +57,6 @@ class GAFFERSCENE_API CurvesTangents : public ObjectProcessor
 		Gaffer::StringPlug *tangentPlug();
 		const Gaffer::StringPlug *tangentPlug() const;
 
-		Gaffer::BoolPlug *normalizePlug();
-		const Gaffer::BoolPlug *normalizePlug() const;
-
 		GAFFER_NODE_DECLARE_TYPE( GafferScene::CurvesTangents, CurvesTangentsTypeId, ObjectProcessor );
 
 	protected :
