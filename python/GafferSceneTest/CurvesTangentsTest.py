@@ -46,19 +46,6 @@ import GafferTest
 
 class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 
-	def makeFilteredNode( self, upstream ) :
-
-		# Stored on self to prevent the PathFilter being garbage collected,
-		# which would disconnect the filter plug.
-		self._pathFilter = GafferScene.PathFilter()
-		self._pathFilter["paths"].setValue( IECore.StringVectorData( ["/object"] ) )
-
-		node = GafferScene.CurvesTangents()
-		node["in"].setInput( upstream["out"] )
-		node["filter"].setInput( self._pathFilter["out"] )
-
-		return node
-
 	def testLinearNonPeriodic( self ) :
 
 		curves = IECoreScene.CurvesPrimitive(
@@ -106,6 +93,8 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 			] )
 		)
 
+		print( curves.numSegments( 0 ) )
+
 		objectToScene = GafferScene.ObjectToScene()
 		objectToScene["object"].setValue( curves )
 
@@ -151,8 +140,6 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 		self.assertNotIn( "tangent", curves )
 
 	def testAlternativePosition( self ) :
-
-		pref = IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 2, 0, 0 )] )
 
 		curves = IECoreScene.CurvesPrimitive(
 			IECore.IntVectorData( [ 2 ] ), IECore.CubicBasisf.linear(), False,
