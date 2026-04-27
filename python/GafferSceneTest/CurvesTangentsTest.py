@@ -136,49 +136,36 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 
 	def testTangentName( self ) :
 
-		grid = GafferScene.Grid()
-
-		allFilter = GafferScene.PathFilter()
-		allFilter["paths"].setValue( IECore.StringVectorData( [ "..." ] ) )
-
-		node = GafferScene.CurvesTangents()
-		node["in"].setInput( grid["out"] )
-		node["filter"].setInput( allFilter["out"] )
+		scene = self.makeStraightCurveScene()
+		node = self.makeFilteredNode( scene )
 		node["tangent"].setValue( "myTangent" )
 
-		curves = node["out"].object( "/grid/centerLines" )
+		curves = node["out"].object( "/object" )
 		self.assertIn( "myTangent", curves )
 		self.assertNotIn( "tangent", curves )
 
 	def testAlternativePosition( self ) :
 
+		vertsPerCurve = IECore.IntVectorData( [3] )
+		p = IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 2, 0 )] )
 		pref = IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 2, 0, 0 )] )
 
-		curves = IECoreScene.CurvesPrimitive(
-			IECore.IntVectorData( [ 2 ] ), IECore.CubicBasisf.linear(), False,
-			IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ) ] )
-		)
+		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.linear(), False, p )
 		curves["Pref"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ) ] )
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex, pref
 		)
 
 		objectToScene = GafferScene.ObjectToScene()
 		objectToScene["object"].setValue( curves )
-
-		objectFilter = GafferScene.PathFilter()
-		objectFilter["paths"].setValue( IECore.StringVectorData( [ "/object" ] ) )
-
-		node = GafferScene.CurvesTangents()
-		node["in"].setInput( objectToScene["out"] )
-		node["filter"].setInput( objectFilter["out"] )
+		node = self.makeFilteredNode( objectToScene )
 		node["position"].setValue( "Pref" )
 
-		curves = node["out"].object( "/object" )
-		self.assertEqual(
-			curves["tangent"].data,
-			IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ), imath.V3f( 0, 1, 0 ) ], IECore.GeometricData.Interpretation.Vector )
-		)
+		obj = node["out"].object( "/object" )
+		tangentVar = obj["tangent"]
+		self.assertEqual( len( tangentVar.data ), 3 )
+
+		for t in tangentVar.data :
+			self.assertEqualWithAbsError( t.normalized(), imath.V3f( 1, 0, 0 ), 0.000001 )
 
 	def testNonCurvesPassThrough( self ) :
 
@@ -207,6 +194,32 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 
 		self.assertScenesEqual( node["out"], node["in"] )
 
+	def testPreservesExistingVariables( self ) :
+
+		scene = self.makeStraightCurveScene()
+		node = self.makeFilteredNode( scene )
+
+		obj = node["out"].object( "/object" )
+		self.assertIn( "P", obj.keys() )
+
+	def testHashChangesWithPlugs( self ) :
+
+		scene = self.makeStraightCurveScene()
+		node = self.makeFilteredNode( scene )
+
+		h1 = node["out"].objectHash( "/object" )
+
+		node["tangent"].setValue( "renamed" )
+		h2 = node["out"].objectHash( "/object" )
+		self.assertNotEqual( h1, h2 )
+
+		node["tangent"].setValue( "tangent" )
+		self.assertEqual( node["out"].objectHash( "/object" ), h1 )
+
+		node["position"].setValue( "Pref" )
+		h3 = node["out"].objectHash( "/object" )
+		self.assertNotEqual( h1, h3 )
+
 	@GafferTest.TestRunner.PerformanceTestMethod()
 	def testPerformance( self ) :
 
@@ -214,7 +227,7 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 		numCurves = 10000
 		numVertsPerCurve = 100
 
-		vertsPerCurve = IECore.IntVectorData( [ numVertsPerCurve ] * numCurves )
+		vertsPerCurve = IECore.IntVectorData( [numVertsPerCurve] * numCurves )
 		p = IECore.V3fVectorData(
 			[
 				imath.V3f( c, float(v) / float(numVertsPerCurve - 1), 0 )
@@ -227,12 +240,12 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 		objectToScene = GafferScene.ObjectToScene()
 		objectToScene["object"].setValue( curves )
 
-		objectFilter = GafferScene.PathFilter()
-		objectFilter["paths"].setValue( IECore.StringVectorData( ["/object"] ) )
+		self._pathFilter = GafferScene.PathFilter()
+		self._pathFilter["paths"].setValue( IECore.StringVectorData( ["/object"] ) )
 
 		node = GafferScene.CurvesTangents()
 		node["in"].setInput( objectToScene["out"] )
-		node["filter"].setInput( objectFilter["out"] )
+		node["filter"].setInput( self._pathFilter["out"] )
 
 		# Precache input so it is not included in the measurement.
 		node["in"].object( "/object" )

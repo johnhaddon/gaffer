@@ -137,21 +137,22 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 	CurvesPrimitiveEvaluator evaluator( evalCurves );
 
 	const bool periodic = curves->wrap() == CurvesPrimitive::Wrap::Periodic;
-	const size_t numCurves = curves->numCurves();
+	const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
+	const size_t numCurves = verticesPerCurve.size();
 
 	// Pre-compute per-curve offsets into the flat output array.
 	std::vector<int> curveOffsets( numCurves );
-	size_t offset = 0;
-	for( size_t curveIndex = 0; curveIndex < numCurves; ++curveIndex )
+	int totalVerts = 0;
+	for( size_t i = 0; i < numCurves; ++i )
 	{
-		curveOffsets[curveIndex] = offset;
-		offset += curves->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Varying, curveIndex );
+		curveOffsets[i] = totalVerts;
+		totalVerts += verticesPerCurve[i];
 	}
 
 	V3fVectorDataPtr tangentData = new V3fVectorData();
 	tangentData->setInterpretation( GeometricData::Interpretation::Vector );
 	auto &tangents = tangentData->writable();
-	tangents.resize( curves->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Varying ) );
+	tangents.resize( totalVerts );
 
 	const IECore::Canceller *canceller = context->canceller();
 	const ThreadState &threadState = ThreadState::current();
@@ -159,8 +160,6 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 	tbb::enumerable_thread_specific<PrimitiveEvaluator::ResultPtr> threadLocalResult(
 		[&evaluator](){ return evaluator.createResult(); }
 	);
-
-	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
 	tbb::parallel_for(
 		tbb::blocked_range<size_t>( 0, numCurves ),
@@ -172,35 +171,31 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 			for( size_t curveIndex = range.begin(); curveIndex != range.end(); ++curveIndex )
 			{
 				IECore::Canceller::check( canceller );
-				const int numVarying = curves->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Varying, curveIndex ); // TODO : COULD GET FROM OFFSETS TABLE
+				const int numVerts = verticesPerCurve[curveIndex];
 				const int startOffset = curveOffsets[curveIndex];
-				for( int varyingIndex = 0; varyingIndex < numVarying; ++varyingIndex )
+				for( int vertIndex = 0; vertIndex < numVerts; ++vertIndex )
 				{
 					float v;
 					if( periodic )
 					{
-						v = float(varyingIndex) / float(numVarying);
+						v = float(vertIndex) / float(numVerts);
 					}
 					else
 					{
-						v = numVarying > 1 ? float(varyingIndex) / float(numVarying - 1) : 0.0f;
+						v = numVerts > 1 ? float(vertIndex) / float(numVerts - 1) : 0.0f;
 					}
 					evaluator.pointAtV( curveIndex, v, result.get() );
-					tangents[startOffset + varyingIndex] = result->vTangent();
+					tangents[startOffset + vertIndex] = result->vTangent();
 				}
 			}
-		},
-		taskGroupContext
+		}
 	);
 
-	auto interpolation = IECoreScene::PrimitiveVariable::Interpolation::Varying;
-	if( curves->variableSize( interpolation ) == curves->variableSize( IECoreScene::PrimitiveVariable::Interpolation::Vertex ) )
-	{
-		interpolation = IECoreScene::PrimitiveVariable::Interpolation::Vertex;
-	}
-
 	CurvesPrimitivePtr output = runTimeCast<CurvesPrimitive>( curves->copy() );
-	output->variables[tangentName] = PrimitiveVariable( interpolation, tangentData );
+	output->variables[tangentName] = PrimitiveVariable(
+		PrimitiveVariable::Interpolation::Vertex,
+		tangentData
+	);
 
 	return output;
 }
