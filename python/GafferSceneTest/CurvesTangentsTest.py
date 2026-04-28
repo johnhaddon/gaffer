@@ -207,6 +207,72 @@ class CurvesTangentsTest( GafferSceneTest.SceneTestCase ) :
 		self.assertNotEqual( h1, h3 )
 
 
+	def testOpenCubicPhantomCVs( self ) :
+
+		# 6-point open CatmullRom S-curve. CVs 0 and 5 are phantom hull points
+		# not on the curve; their tangents should be copied from the nearest
+		# varying position (the curve start and end respectively).
+		vertsPerCurve = IECore.IntVectorData( [6] )
+		p = IECore.V3fVectorData( [
+			imath.V3f( 0, -1, 0 ),
+			imath.V3f( 1, -1, 0 ),
+			imath.V3f( 2,  0, 0 ),
+			imath.V3f( 3,  0, 0 ),
+			imath.V3f( 4,  1, 0 ),
+			imath.V3f( 5,  1, 0 ),
+		] )
+		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.catmullRom(), False, p )
+
+		objectToScene = GafferScene.ObjectToScene()
+		objectToScene["object"].setValue( curves )
+		node = self.makeFilteredNode( objectToScene )
+
+		obj = node["out"].object( "/object" )
+		tangentVar = obj["tangent"]
+		self.assertEqual( tangentVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len( tangentVar.data ), 6 )
+
+		tangents = tangentVar.data
+		# Phantom CVs should receive the tangent from the nearest curve endpoint.
+		self.assertEqual( tangents[0], tangents[1] )
+		self.assertEqual( tangents[5], tangents[4] )
+		# The S-curve travels in the +X direction throughout, so all tangents
+		# should have a positive X component.
+		for t in tangents :
+			self.assertGreater( t.x, 0 )
+
+	def testPeriodicCubic( self ) :
+
+		# 4-point periodic CatmullRom approximating a circle in the XY plane,
+		# going counterclockwise. For periodic curves varying count equals vertex
+		# count, so no phantom CV handling is needed.
+		vertsPerCurve = IECore.IntVectorData( [4] )
+		p = IECore.V3fVectorData( [
+			imath.V3f(  1,  0, 0 ),
+			imath.V3f(  0,  1, 0 ),
+			imath.V3f( -1,  0, 0 ),
+			imath.V3f(  0, -1, 0 ),
+		] )
+		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.catmullRom(), True, p )
+
+		objectToScene = GafferScene.ObjectToScene()
+		objectToScene["object"].setValue( curves )
+		node = self.makeFilteredNode( objectToScene )
+
+		obj = node["out"].object( "/object" )
+		tangentVar = obj["tangent"]
+		self.assertEqual( tangentVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len( tangentVar.data ), 4 )
+
+		# For CatmullRom the tangent at each CV is proportional to
+		# (next - prev), giving the exact circle tangent at each of the
+		# 4 symmetric points.
+		tangents = tangentVar.data
+		self.assertEqualWithAbsError( tangents[0].normalized(), imath.V3f(  0,  1, 0 ), 0.000001 )
+		self.assertEqualWithAbsError( tangents[1].normalized(), imath.V3f( -1,  0, 0 ), 0.000001 )
+		self.assertEqualWithAbsError( tangents[2].normalized(), imath.V3f(  0, -1, 0 ), 0.000001 )
+		self.assertEqualWithAbsError( tangents[3].normalized(), imath.V3f(  1,  0, 0 ), 0.000001 )
+
 	@GafferTest.TestRunner.PerformanceTestMethod()
 	def testPerformance( self ) :
 

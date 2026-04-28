@@ -137,16 +137,16 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 	CurvesPrimitiveEvaluator evaluator( evalCurves );
 
 	const bool periodic = curves->wrap() == CurvesPrimitive::Wrap::Periodic;
-	const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
-	const size_t numCurves = verticesPerCurve.size();
+	const bool isLinear = curves->basis() == CubicBasisf::linear();
+	const size_t numCurves = curves->verticesPerCurve()->readable().size();
 
 	// Pre-compute per-curve offsets into the flat output array.
-	std::vector<int> curveOffsets( numCurves );
+	std::vector<int> vertexOffsets( numCurves );
 	int totalVerts = 0;
 	for( size_t i = 0; i < numCurves; ++i )
 	{
-		curveOffsets[i] = totalVerts;
-		totalVerts += verticesPerCurve[i];
+		vertexOffsets[i] = totalVerts;
+		totalVerts += curves->variableSize( PrimitiveVariable::Interpolation::Vertex, i );
 	}
 
 	V3fVectorDataPtr tangentData = new V3fVectorData();
@@ -171,21 +171,38 @@ IECore::ConstObjectPtr CurvesTangents::computeProcessedObject( const ScenePath &
 			for( size_t curveIndex = range.begin(); curveIndex != range.end(); ++curveIndex )
 			{
 				IECore::Canceller::check( canceller );
-				const int numVerts = verticesPerCurve[curveIndex];
-				const int startOffset = curveOffsets[curveIndex];
-				for( int vertIndex = 0; vertIndex < numVerts; ++vertIndex )
+				const int numVertex = curves->variableSize( PrimitiveVariable::Interpolation::Vertex, curveIndex );
+				const int numVarying = curves->variableSize( PrimitiveVariable::Interpolation::Varying, curveIndex );
+				const int vertexOffset = vertexOffsets[curveIndex];
+				// For open cubic curves, numVertex == numVarying + 2, with the first
+				// and last CVs being phantom hull points not on the curve.
+				const bool hasPhantoms = numVertex != numVarying;
+
+				for( int j = 0; j < numVarying; ++j )
 				{
+					// For periodic cubic curves, the evaluator's v=0 sits at CV 1
+					// rather than CV 0 (Cortex's segment-k starts at CV k+1). Apply
+					// a -1 shift so that vertex j receives the tangent at its own
+					// curve position. Linear curves have no such offset.
 					float v;
 					if( periodic )
 					{
-						v = float(vertIndex) / float(numVerts);
+						const int jShifted = isLinear ? j : ( j - 1 + numVarying ) % numVarying;
+						v = float(jShifted) / float(numVarying);
 					}
 					else
 					{
-						v = numVerts > 1 ? float(vertIndex) / float(numVerts - 1) : 0.0f;
+						v = float(j) / float(numVarying - 1);
 					}
 					evaluator.pointAtV( curveIndex, v, result.get() );
-					tangents[startOffset + vertIndex] = result->vTangent();
+					const Imath::V3f t = result->vTangent();
+
+					tangents[vertexOffset + j + hasPhantoms] = t;
+					if( hasPhantoms )
+					{
+						if( j == 0 ) tangents[vertexOffset] = t;
+						if( j == numVarying - 1 ) tangents[vertexOffset + numVertex - 1] = t;
+					}
 				}
 			}
 		}
