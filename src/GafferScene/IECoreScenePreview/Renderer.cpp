@@ -111,6 +111,12 @@ Renderer::ObjectInterfacePtr Renderer::object( const std::string &name, const IE
 	return this->object( name, { object }, { 0.0f }, attributes );
 }
 
+Renderer::ObjectInterfacePtr Renderer::pointInstancer( const std::string &name, const IECoreScene::PointsPrimitive *pointInstancer, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes )
+{
+	// TODO : DEFAULT IMPLEMENTATION. NOT SURE HOW WE'D DO ATTRIBUTE INHERITANCE THOUGH.
+	throw IECore::NotImplementedException( "Renderer::pointInstancer" );
+}
+
 IECore::DataPtr Renderer::command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters )
 {
 	throw IECore::NotImplementedException( "Renderer::command" );
