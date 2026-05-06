@@ -53,6 +53,7 @@
 #include "IECoreScene/CoordinateSystem.h"
 #include "IECoreScene/Output.h"
 #include "IECoreScene/Primitive.h"
+#include "IECoreScene/PointInstancer.h"
 #include "IECoreScene/Shader.h"
 #include "IECoreScene/VisibleRenderable.h"
 
@@ -710,6 +711,11 @@ IECoreScenePreview::Renderer::ObjectInterfacePtr outputObject( const std::string
 			capsuleCopy->setRenderOptions( renderOptions );
 			return renderer->object( name, { capsuleCopy }, sampledObject.sampleTimes, attributes );
 		}
+	}
+
+	if( auto pointInstancer = runTimeCast<const IECoreScene::PointInstancer>( sampledObject.samples[0].get() ) )
+	{
+
 	}
 
 	return renderer->object( name, sampledObject.samples, sampledObject.sampleTimes, attributes );
