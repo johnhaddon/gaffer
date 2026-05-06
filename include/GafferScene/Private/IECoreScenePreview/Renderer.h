@@ -40,6 +40,7 @@
 
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/Output.h"
+#include "IECoreScene/PointInstancer.h"
 #include "IECoreScene/PointsPrimitive.h"
 
 #include "IECore/CompoundObject.h"
@@ -169,6 +170,7 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 		using TransformSamples = Samples<Imath::M44f>;
 		using CameraSamples = Samples<IECoreScene::ConstCameraPtr>;
 		using ObjectSamples = Samples<IECore::ConstObjectPtr>;
+		using PointInstancerSamples = Samples<IECoreScene::ConstPointInstancerPtr>;
 		using SampleTimes = Samples<float>;
 
 		/// Convenience function for casting between sample types. Typically
@@ -319,10 +321,7 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 			SampleTimes times;
 			AttributesInterfacePtr attributes;
 		};
-
-		/// TODO : USE A POINTINSTANCER CLASS.
-		/// THINK WE NEED SAMPLES<POINTINSTANCER> SO THAT WE CAN DO TRANSFORM MOTION?
-		virtual ObjectInterfacePtr pointInstancer( const std::string &name, const IECoreScene::PointsPrimitive *pointInstancer, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes );
+		virtual ObjectInterfacePtr pointInstancer( const std::string &name, const PointInstancerSamples &samples, const SampleTimes &times, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes );
 
 		/// Performs the render - should be called after the
 		/// entire scene has been specified using the methods

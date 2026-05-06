@@ -420,6 +420,7 @@ class ArnoldRendererBase : public IECoreScenePreview::Renderer
 		ObjectInterfacePtr light( const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times, const AttributesInterface *attributes ) override;
 		ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times, const AttributesInterface *attributes ) override;
 		ObjectInterfacePtr object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+		ObjectInterfacePtr pointInstancer( const std::string &name, const PointInstancerSamples &samples, const SampleTimes &times, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes ) override;
 
 	protected :
 
@@ -4622,6 +4623,12 @@ ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::object( const std::st
 	ObjectInterfacePtr result = new ArnoldObject( instance );
 	result->attributes( attributes );
 	return result;
+}
+
+ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::pointInstancer( const std::string &name, const PointInstancerSamples &samples, const SampleTimes &times, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes )
+{
+	fmt::print( "ArnoldRendererBase::pointInstancer() - {} prototypes\n", prototypes.size() );
+	return nullptr;
 }
 
 } // namespace
