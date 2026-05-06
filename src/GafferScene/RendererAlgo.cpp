@@ -715,6 +715,7 @@ IECoreScenePreview::Renderer::ObjectInterfacePtr outputObject( const std::string
 
 	if( runTimeCast<const IECoreScene::PointInstancer>( sampledObject.samples[0].get() ) )
 	{
+		auto prototypes = pointInstancerPrototypes( sampledObject.samples[0].get() );
 		return renderer->pointInstancer(
 			name, IECoreScenePreview::Renderer::staticSamplesCast<IECoreScene::ConstPointInstancerPtr>( sampledObject.samples ),
 			sampledObject.sampleTimes, {}, attributes
