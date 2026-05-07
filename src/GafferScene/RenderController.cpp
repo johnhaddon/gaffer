@@ -938,7 +938,7 @@ class RenderController::SceneGraph
 			else
 			{
 				m_objectInterface.assign(
-					Private::RendererAlgo::outputObject( name, *sampledObject, attributesInterface( renderer ), renderOptions, renderer ),
+					Private::RendererAlgo::outputObject( name, *sampledObject, attributesInterface( renderer ), renderOptions, scene, renderer ),
 					ObjectInterfaceHandle::RemovalCallback(),
 					/* isCapsule = */ sampledObject->samples[0]->isInstanceOf( Capsule::staticTypeId() )
 				);

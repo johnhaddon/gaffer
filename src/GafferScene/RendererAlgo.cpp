@@ -701,7 +701,70 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 	return result;
 }
 
-IECoreScenePreview::Renderer::ObjectInterfacePtr outputObject( const std::string &name, const SampledObject &sampledObject, const IECoreScenePreview::Renderer::AttributesInterface *attributes, const RenderOptions &renderOptions, IECoreScenePreview::Renderer *renderer )
+std::vector<IECoreScenePreview::Renderer::Prototype> pointInstancerPrototypes( const IECoreScene::PointInstancer *instancer, const RenderOptions &renderOptions, const ScenePlug *scene, IECoreScenePreview::Renderer *renderer )
+{
+	const StringVectorData *prototypeRootsData = instancer->variableData<StringVectorData>(  "prototypeRoots", PrimitiveVariable::Constant ); // TODO : OFFICIAL ACCESSOR
+	auto &prototypeRoots = prototypeRootsData->readable();
+
+	std::vector<IECoreScenePreview::Renderer::Prototype> result;
+	result.resize( prototypeRoots.size() );
+
+	const ThreadState &threadState = ThreadState::current();
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+
+	tbb::parallel_for(
+
+		tbb::blocked_range<size_t>( 0, prototypeRoots.size() ),
+
+		[&]( const tbb::blocked_range<size_t> &r )
+		{
+			ScenePlug::PathScope prototypeScope( threadState );
+			ScenePlug::ScenePath rootPath;
+			IECoreScenePreview::Renderer::SampleTimes sampleTimes;
+
+			for( size_t prototypeIndex = r.begin(); prototypeIndex != r.end(); ++prototypeIndex )
+			{
+				const string &rootString = prototypeRoots[prototypeIndex];
+				if( rootString[0] == '/' )
+				{
+					ScenePlug::stringToPath( rootString, rootPath );
+				}
+				else
+				{
+					if( rootString[0] == '.' && rootString.size() >= 2 && rootString[1] == '/' ) // TODO : STOP LOADING LIKE THIS, AND DROP THE CODE
+					{
+						// \todo - stringToPath should probably take a string_view to avoid this allocation
+						ScenePlug::stringToPath( rootString.substr( 2 ), rootPath );
+					}
+					else
+					{
+						ScenePlug::stringToPath( rootString, rootPath );
+					}
+					const auto &basePath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
+					rootPath.insert( rootPath.begin(), basePath.begin(), basePath.end() );
+				}
+
+				prototypeScope.setPath( &rootPath );
+
+				IECoreScenePreview::Renderer::Prototype &prototype = result[prototypeIndex];
+				ConstCompoundObjectPtr attributes = scene->fullAttributes( rootPath );
+				deformationMotionTimes( renderOptions, attributes.get(), prototype.times );
+				auto sampledObject = GafferScene::Private::RendererAlgo::objectSamples( scene->objectPlug(), prototype.times );
+				prototype.samples = sampledObject->samples;
+				prototype.times = sampledObject->sampleTimes;
+				prototype.attributes = renderer->attributes( attributes.get() );
+			}
+
+		},
+
+		taskGroupContext
+	);
+
+
+	return result;
+}
+
+IECoreScenePreview::Renderer::ObjectInterfacePtr outputObject( const std::string &name, const SampledObject &sampledObject, const IECoreScenePreview::Renderer::AttributesInterface *attributes, const RenderOptions &renderOptions, const ScenePlug *scene, IECoreScenePreview::Renderer *renderer )
 {
 	if( sampledObject.samples.size() == 1 )
 	{
@@ -713,12 +776,12 @@ IECoreScenePreview::Renderer::ObjectInterfacePtr outputObject( const std::string
 		}
 	}
 
-	if( runTimeCast<const IECoreScene::PointInstancer>( sampledObject.samples[0].get() ) )
+	if( auto pointInstancer = runTimeCast<const IECoreScene::PointInstancer>( sampledObject.samples[0].get() ) )
 	{
-		auto prototypes = pointInstancerPrototypes( sampledObject.samples[0].get() );
+		auto prototypes = pointInstancerPrototypes( pointInstancer, renderOptions, scene, renderer );
 		return renderer->pointInstancer(
 			name, IECoreScenePreview::Renderer::staticSamplesCast<IECoreScene::ConstPointInstancerPtr>( sampledObject.samples ),
-			sampledObject.sampleTimes, {}, attributes
+			sampledObject.sampleTimes, prototypes, attributes
 		);
 	}
 
@@ -1683,7 +1746,7 @@ struct ObjectOutput : public LocationOutput
 		}
 
 		IECoreScenePreview::Renderer::AttributesInterfacePtr attributesInterface = this->attributesInterface();
-		IECoreScenePreview::Renderer::ObjectInterfacePtr objectInterface = outputObject( name( path ), *sampledObject, attributesInterface.get(), renderOptions(), renderer() );
+		IECoreScenePreview::Renderer::ObjectInterfacePtr objectInterface = outputObject( name( path ), *sampledObject, attributesInterface.get(), renderOptions(), scene, renderer() );
 
 		if( objectInterface )
 		{
