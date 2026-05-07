@@ -315,7 +315,7 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 		/// Convenience overload for when there is only a single object sample.
 		ObjectInterfacePtr object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes );
 
-		struct Prototype
+		struct Prototype // TODO : RENAME TO POINTINSTANCERPROTOTYPE?
 		{
 			ObjectSamples samples;
 			SampleTimes times;
