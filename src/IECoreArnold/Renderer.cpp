@@ -2370,7 +2370,7 @@ class Instance
 			}
 		}
 
-	private :
+	// private : TODO : RESTORE
 
 		// Constructors are private as they are only intended for use in
 		// `InstanceCache::get()`. See comment in `nodesCreated()`.
@@ -2415,26 +2415,16 @@ class InstanceCache : public IECore::RefCounted
 		{
 		}
 
-		Instance get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const IECoreScenePreview::Renderer::AttributesInterface *attributes, const std::string &nodeName )
+		SharedAtNodePtr getShareable( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const IECoreScenePreview::Renderer::AttributesInterface *attributes )
 		{
-			if( samples.empty() )
-			{
-				return Instance( SharedAtNodePtr() );
-			}
-
-			const ArnoldAttributes *arnoldAttributes = static_cast<const ArnoldAttributes *>( attributes );
-
-			if( !arnoldAttributes->canInstanceGeometry( samples.front().get() ) )
-			{
-				return Instance( convert( samples, times, arnoldAttributes, nodeName, /* messageContext = */ nodeName ) );
-			}
-
 			IECore::MurmurHash h;
 			for( const auto &sample : samples )
 			{
 				sample->hash( h );
 			}
 			h.append( times.data(), times.size() );
+
+			const ArnoldAttributes *arnoldAttributes = static_cast<const ArnoldAttributes *>( attributes );
 			arnoldAttributes->hashGeometry( samples.front().get(), h );
 
 			SharedAtNodePtr node;
@@ -2451,7 +2441,7 @@ class InstanceCache : public IECore::RefCounted
 				{
 					try
 					{
-						writeAccessor->second = convert( samples, times, arnoldAttributes, "instance:" + h.toString(), /* messageContext = */ nodeName );
+						writeAccessor->second = convert( samples, times, arnoldAttributes, "instance:" + h.toString(), /* messageContext = */ "MESSAGE CONTEXT HERE PLEASE" ); // TODO
 					}
 					catch( const IECore::Cancelled & )
 					{
@@ -2466,7 +2456,23 @@ class InstanceCache : public IECore::RefCounted
 				writeAccessor.release();
 			}
 
-			return Instance( node, m_nodeDeleter, m_universe, nodeName, m_parentNode );
+			return node;
+		}
+
+		Instance get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const IECoreScenePreview::Renderer::AttributesInterface *attributes, const std::string &nodeName )
+		{
+			if( samples.empty() )
+			{
+				return Instance( SharedAtNodePtr() );
+			}
+
+			const ArnoldAttributes *arnoldAttributes = static_cast<const ArnoldAttributes *>( attributes );
+			if( !arnoldAttributes->canInstanceGeometry( samples.front().get() ) )
+			{
+				return Instance( convert( samples, times, arnoldAttributes, nodeName, /* messageContext = */ nodeName ) );
+			}
+
+			return Instance( getShareable( samples, times, attributes ), m_nodeDeleter, m_universe, nodeName, m_parentNode );
 		}
 
 		// Must not be called concurrently with anything.
@@ -3106,6 +3112,27 @@ class ArnoldObject : public ArnoldObjectBase
 IE_CORE_DECLAREPTR( ArnoldLight )
 
 } // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// ArnoldInstancerObject
+//////////////////////////////////////////////////////////////////////////
+
+// namespace
+// {
+
+// class ArnoldInstancerObject : public ArnoldObject
+// {
+
+// 	public :
+
+// 		ArnoldInstancerObject( const Instance &instance, const vector<SharedAtNodePtr> &prototypes )
+// 			:	ArnoldObject( instance ), m_prototypes( prototypes )
+// 		{
+// 		}
+
+// };
+
+// } // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Procedurals
@@ -4627,8 +4654,45 @@ ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::object( const std::st
 
 ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::pointInstancer( const std::string &name, const PointInstancerSamples &samples, const SampleTimes &times, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes )
 {
-	fmt::print( "ArnoldRendererBase::pointInstancer() - {} prototypes\n", prototypes.size() );
-	return nullptr;
+	const IECore::MessageHandler::Scope s( m_messageHandler.get() );
+
+	// TODO : STATIC STRINGS
+
+	auto instancerNode = SharedAtNodePtr( AiNode( m_universe, AtString( "instancer" ), AtString( name.c_str() ), m_parentNode ), m_nodeDeleter );
+
+	vector<SharedAtNodePtr> arnoldPrototypes;
+	arnoldPrototypes.reserve( prototypes.size() );
+	AtArray *prototypesArray = AiArrayAllocate( prototypes.size(), 1, AI_TYPE_NODE );
+	for( size_t prototypeIndex = 0; prototypeIndex < prototypes.size(); prototypeIndex++ ) // TODO : parallel_for
+	{
+		const Prototype &prototype = prototypes[prototypeIndex];
+		fmt::print( "Prototype samples {}\n", prototype.samples.size() ); // TODO : WHAT IF EMPTY?
+		arnoldPrototypes.push_back( m_instanceCache->getShareable( prototype.samples, prototype.times, prototype.attributes.get() ) );
+		AiArraySetPtr( prototypesArray, prototypeIndex, arnoldPrototypes[prototypeIndex].get() );
+	}
+
+	AiNodeSetArray( instancerNode.get(), AtString( "nodes" ), prototypesArray );
+
+
+	IECoreScene::PointInstancer::Query query( samples[0] );
+	auto matrixArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_MATRIX ); // TODO : MOTION BLUR
+	auto indexArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_UINT );
+	for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
+	{
+		Imath::M44f m = query.transform( instanceIndex );
+		AiArraySetMtx( matrixArray, instanceIndex, reinterpret_cast<const AtMatrix&>( m.x ) );
+		AiArraySetInt( indexArray, instanceIndex, 0 ); // TODO : THE REAL THING
+	}
+
+	AiNodeSetArray( instancerNode.get(), AtString( "instance_matrix" ), matrixArray );
+	AiNodeSetArray( instancerNode.get(), AtString( "node_idxs" ), indexArray );
+
+	fmt::print( "ArnoldRendererBase::pointInstancer() - {} prototypes, {} matrices\n", prototypes.size(), query.numInstances() );
+
+	ObjectInterfacePtr result = new ArnoldObject( Instance( instancerNode ) );
+	result->attributes( attributes );
+
+	return result;
 }
 
 } // namespace
