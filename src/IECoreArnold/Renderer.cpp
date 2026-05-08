@@ -4660,7 +4660,7 @@ ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::pointInstancer( const
 
 	auto instancerNode = SharedAtNodePtr( AiNode( m_universe, AtString( "instancer" ), AtString( name.c_str() ), m_parentNode ), m_nodeDeleter );
 
-	vector<SharedAtNodePtr> arnoldPrototypes;
+	vector<SharedAtNodePtr> arnoldPrototypes; // TODO : STORE ON OBJECTINTERFACE, ALONG WITH ATTRIBUTES OBJECTS
 	arnoldPrototypes.reserve( prototypes.size() );
 	AtArray *prototypesArray = AiArrayAllocate( prototypes.size(), 1, AI_TYPE_NODE );
 	for( size_t prototypeIndex = 0; prototypeIndex < prototypes.size(); prototypeIndex++ ) // TODO : parallel_for
@@ -4673,6 +4673,8 @@ ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::pointInstancer( const
 
 	AiNodeSetArray( instancerNode.get(), AtString( "nodes" ), prototypesArray );
 
+	// TODO : ACCESSOR? SOMETHING IN QUERY OBJECT?
+	auto prototypeIndex = samples[0]->variableIndexedView<IECore::IntVectorData>( "prototypeIndex", IECoreScene::PrimitiveVariable::Vertex, false );
 
 	IECoreScene::PointInstancer::Query query( samples[0] );
 	auto matrixArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_MATRIX ); // TODO : MOTION BLUR
@@ -4681,7 +4683,7 @@ ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::pointInstancer( const
 	{
 		Imath::M44f m = query.transform( instanceIndex );
 		AiArraySetMtx( matrixArray, instanceIndex, reinterpret_cast<const AtMatrix&>( m.x ) );
-		AiArraySetInt( indexArray, instanceIndex, 0 ); // TODO : THE REAL THING
+		AiArraySetInt( indexArray, instanceIndex, prototypeIndex ? (*prototypeIndex)[instanceIndex] : 0 ); // TODO : THE REAL THING
 	}
 
 	AiNodeSetArray( instancerNode.get(), AtString( "instance_matrix" ), matrixArray );
