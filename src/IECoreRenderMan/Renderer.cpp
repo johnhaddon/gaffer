@@ -42,6 +42,7 @@
 #include "Light.h"
 #include "LightFilter.h"
 #include "LightLinker.h"
+#include "Loader.h"
 #include "MaterialCache.h"
 #include "Globals.h"
 #include "Object.h"
@@ -195,6 +196,59 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 			{
 				return new IECoreRenderMan::Object( name, geometryPrototype, typedAttributes, m_lightLinker.get(), m_session );
 			}
+		}
+
+		ObjectInterfacePtr pointInstancer( const std::string &name, const PointInstancerSamples &samples, const SampleTimes &times, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes ) override
+		{
+			const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
+			acquireSession();
+
+			auto typedAttributes = static_cast<const Attributes *>( attributes );
+			riley::DisplacementId displacement;
+			if( auto d = typedAttributes->displacement() )
+			{
+				displacement = d->id();
+			}
+
+			vector<ConstGeometryPrototypePtr> geometryPrototypes;
+			geometryPrototypes.resize( prototypes.size() );
+			for( size_t prototypeIndex = 0; prototypeIndex < prototypes.size(); ++prototypeIndex ) // TODO : parallel_for
+			{
+				const Prototype &prototype = prototypes[prototypeIndex];
+				geometryPrototypes[prototypeIndex] = m_geometryPrototypeCache->get( prototype.samples, prototype.times, static_cast<const Attributes *>( prototype.attributes.get() ), "TODO" );
+				fmt::print( "Prototype {} -> {}\n", prototypes[prototypeIndex].samples[0]->typeName(), (void *)geometryPrototypes[prototypeIndex].get() );
+			}
+
+			ConstGeometryPrototypePtr group = new GeometryPrototype(
+				m_session->riley->CreateGeometryPrototype( riley::UserId(), Loader::strings().k_Ri_Group, displacement, RtPrimVarList() ),
+				m_session
+			);
+
+			IECoreScene::PointInstancer::Query query( samples[0] );
+			auto prototypeIndices = samples[0]->variableIndexedView<IECore::IntVectorData>( "prototypeIndex", IECoreScene::PrimitiveVariable::Vertex, false );
+
+			for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
+			{
+				Imath::M44f m = query.transform( instanceIndex );
+				const size_t prototypeIndex = prototypeIndices ? (*prototypeIndices)[instanceIndex] : 0;
+				if( !geometryPrototypes[prototypeIndex] )
+				{
+					//fmt::print( "Empty proto\n" );
+					continue;
+				}
+				const Attributes *prototypeAttributes = static_cast<const Attributes *>( prototypes[prototypeIndex].attributes.get() );
+				m_session->riley->CreateGeometryInstance(
+					riley::UserId(), group->id(), geometryPrototypes[prototypeIndex]->id(),
+					prototypeAttributes->surfaceMaterial()->id(), riley::CoordinateSystemList(),
+					StaticTransform( m ),
+					prototypeAttributes->instanceAttributes()
+				);
+			}
+
+
+			/// TODO : REFERENCE PROTOTYPE GEOMETRY, CACHE INSTANCER ITSELF
+
+			return new IECoreRenderMan::Object( name, group, typedAttributes, m_lightLinker.get(), m_session );
 		}
 
 		void render() override

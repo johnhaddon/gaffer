@@ -750,23 +750,31 @@ std::vector<IECoreScenePreview::Renderer::Prototype> pointInstancerPrototypes( c
 
 				fmt::print( "Getting prototype from {}\n", ScenePlug::pathToString( rootPath ) );
 
-				IECoreScenePreview::Renderer::Prototype &prototype = result[prototypeIndex];
-				CapsulePtr capsule = new Capsule(
-					scene, rootPath, *Context::current(),
-					SceneAlgo::hierarchyHash( scene, rootPath ),
-					Box3f( V3f( -1 ), V3f( 1 ) ) // TODO
-				);
-				capsule->setRenderOptions( renderOptions );
-
-				prototype.samples = { capsule };
-				prototype.times = { 0.0f }; // TODO
-				//ConstCompoundObjectPtr attributes =
-
-				// deformationMotionTimes( renderOptions, attributes.get(), prototype.times );
-				// auto sampledObject = GafferScene::Private::RendererAlgo::objectSamples( scene->objectPlug(), prototype.times );
-				// prototype.samples = sampledObject->samples;
-				// prototype.times = sampledObject->sampleTimes;
 				ConstCompoundObjectPtr rootAttributes = scene->fullAttributes( rootPath );
+
+				IECoreScenePreview::Renderer::Prototype &prototype = result[prototypeIndex];
+
+				if( scene->childNamesPlug()->getValue()->readable().empty() ) // TODD : GET ON THIS PATH WHEN THERE IS A SINGLE VISIBLE OBJECT (INC PURPOSE) IN THE HIERARCHY
+				{
+					deformationMotionTimes( renderOptions, rootAttributes.get(), prototype.times );
+					auto sampledObject = GafferScene::Private::RendererAlgo::objectSamples( scene->objectPlug(), prototype.times );
+					prototype.samples = sampledObject->samples;
+					prototype.times = sampledObject->sampleTimes;
+
+				}
+				else
+				{
+					CapsulePtr capsule = new Capsule(
+						scene, rootPath, *Context::current(),
+						SceneAlgo::hierarchyHash( scene, rootPath ),
+						Box3f( V3f( -1 ), V3f( 1 ) ) // TODO
+					);
+					capsule->setRenderOptions( renderOptions );
+
+					prototype.samples = { capsule };
+					prototype.times = { 0.0f }; // TODO
+				}
+
 				prototype.attributes = renderer->attributes( rootAttributes.get() );
 			}
 
