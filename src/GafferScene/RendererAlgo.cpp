@@ -746,13 +746,28 @@ std::vector<IECoreScenePreview::Renderer::Prototype> pointInstancerPrototypes( c
 
 				prototypeScope.setPath( &rootPath );
 
+				// TODO : RENDER PURPOSE
+
+				fmt::print( "Getting prototype from {}\n", ScenePlug::pathToString( rootPath ) );
+
 				IECoreScenePreview::Renderer::Prototype &prototype = result[prototypeIndex];
-				ConstCompoundObjectPtr attributes = scene->fullAttributes( rootPath );
-				deformationMotionTimes( renderOptions, attributes.get(), prototype.times );
-				auto sampledObject = GafferScene::Private::RendererAlgo::objectSamples( scene->objectPlug(), prototype.times );
-				prototype.samples = sampledObject->samples;
-				prototype.times = sampledObject->sampleTimes;
-				prototype.attributes = renderer->attributes( attributes.get() );
+				CapsulePtr capsule = new Capsule(
+					scene, rootPath, *Context::current(),
+					SceneAlgo::hierarchyHash( scene, rootPath ),
+					Box3f( V3f( -1 ), V3f( 1 ) ) // TODO
+				);
+				capsule->setRenderOptions( renderOptions );
+
+				prototype.samples = { capsule };
+				prototype.times = { 0.0f }; // TODO
+				//ConstCompoundObjectPtr attributes =
+
+				// deformationMotionTimes( renderOptions, attributes.get(), prototype.times );
+				// auto sampledObject = GafferScene::Private::RendererAlgo::objectSamples( scene->objectPlug(), prototype.times );
+				// prototype.samples = sampledObject->samples;
+				// prototype.times = sampledObject->sampleTimes;
+				ConstCompoundObjectPtr rootAttributes = scene->fullAttributes( rootPath );
+				prototype.attributes = renderer->attributes( rootAttributes.get() );
 			}
 
 		},
