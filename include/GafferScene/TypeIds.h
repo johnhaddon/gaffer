@@ -198,6 +198,7 @@ enum TypeId
 	ReflectionConstraintTypeId = 120153,
 	CurvesInterpolationTypeId = 120154,
 	MeshLightTypeId = 120155,
+	PrimitiveQueryTypeId = 120156,
 
 	LastTypeId = 120999
 };
