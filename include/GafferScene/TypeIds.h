@@ -199,6 +199,7 @@ enum TypeId
 	CurvesInterpolationTypeId = 120154,
 	MeshLightTypeId = 120155,
 	PrimitiveQueryTypeId = 120156,
+	SceneStatsTypeId = 120157,
 
 	LastTypeId = 120999
 };
