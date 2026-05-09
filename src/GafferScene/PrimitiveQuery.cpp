@@ -38,8 +38,8 @@
 
 #include "IECoreScene/Primitive.h"
 
-namespace GafferScene
-{
+using namespace Gaffer;
+using namespace GafferScene;
 
 size_t PrimitiveQuery::g_firstPlugIndex = 0;
 
@@ -49,6 +49,7 @@ PrimitiveQuery::PrimitiveQuery( const std::string &name )
 :	Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
+	addChild( new BoolPlug( "enabled", Plug::In, true ) );
 	addChild( new ScenePlug( "scene" ) );
 	addChild( new Gaffer::StringPlug( "location" ) );
 	addChild( new Gaffer::StringPlug( "type", Gaffer::Plug::Out ) );
@@ -62,81 +63,96 @@ PrimitiveQuery::~PrimitiveQuery()
 {
 }
 
+Gaffer::BoolPlug *PrimitiveQuery::enabledPlug()
+{
+	return getChild<BoolPlug>( g_firstPlugIndex );
+}
+
+const Gaffer::BoolPlug *PrimitiveQuery::enabledPlug() const
+{
+	return getChild<BoolPlug>( g_firstPlugIndex );
+}
+
 ScenePlug *PrimitiveQuery::scenePlug()
 {
-	return getChild<ScenePlug>( g_firstPlugIndex );
+	return getChild<ScenePlug>( g_firstPlugIndex + 1 );
 }
 
 const ScenePlug *PrimitiveQuery::scenePlug() const
 {
-	return getChild<ScenePlug>( g_firstPlugIndex );
+	return getChild<ScenePlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::StringPlug *PrimitiveQuery::locationPlug()
 {
-	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 1 );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 2 );
 }
 
 const Gaffer::StringPlug *PrimitiveQuery::locationPlug() const
 {
-	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 1 );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 2 );
 }
 
 Gaffer::StringPlug *PrimitiveQuery::typePlug()
 {
-	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 2 );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 3 );
 }
 
 const Gaffer::StringPlug *PrimitiveQuery::typePlug() const
 {
-	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 2 );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 3 );
 }
 
 Gaffer::IntPlug *PrimitiveQuery::uniformPlug()
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 3 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 4 );
 }
 
 const Gaffer::IntPlug *PrimitiveQuery::uniformPlug() const
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 3 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 4 );
 }
 
 Gaffer::IntPlug *PrimitiveQuery::vertexPlug()
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 4 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 5 );
 }
 
 const Gaffer::IntPlug *PrimitiveQuery::vertexPlug() const
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 4 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 5 );
 }
 
 Gaffer::IntPlug *PrimitiveQuery::varyingPlug()
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 5 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 6 );
 }
 
 const Gaffer::IntPlug *PrimitiveQuery::varyingPlug() const
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 5 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 6 );
 }
 
 Gaffer::IntPlug *PrimitiveQuery::faceVaryingPlug()
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 6 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 7 );
 }
 
 const Gaffer::IntPlug *PrimitiveQuery::faceVaryingPlug() const
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 6 );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 7 );
 }
 
 void PrimitiveQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 
-	if( input == locationPlug() || input == scenePlug()->existsPlug() || input == scenePlug()->objectPlug() )
+	if(
+		input == enabledPlug() ||
+		input == locationPlug() ||
+		input == scenePlug()->existsPlug() ||
+		input == scenePlug()->objectPlug()
+	)
 	{
 		outputs.push_back( typePlug() );
 		outputs.push_back( uniformPlug() );
@@ -157,14 +173,17 @@ void PrimitiveQuery::hash( const Gaffer::ValuePlug *output, const Gaffer::Contex
 	)
 	{
 		ComputeNode::hash( output, context, h );
-		const std::string location = locationPlug()->getValue();
-		if( !location.empty() )
+		if( enabledPlug()->getValue() )
 		{
-			const ScenePlug::ScenePath path = ScenePlug::stringToPath( location );
-			const ScenePlug::PathScope scope( context, &path );
-			if( scenePlug()->existsPlug()->getValue() )
+			const std::string location = locationPlug()->getValue();
+			if( !location.empty() )
 			{
-				scenePlug()->objectPlug()->hash( h );
+				const ScenePlug::ScenePath path = ScenePlug::stringToPath( location );
+				const ScenePlug::PathScope scope( context, &path );
+				if( scenePlug()->existsPlug()->getValue() )
+				{
+					scenePlug()->objectPlug()->hash( h );
+				}
 			}
 		}
 	}
@@ -185,15 +204,17 @@ void PrimitiveQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *
 	)
 	{
 		IECoreScene::ConstPrimitivePtr primitive;
-
-		const std::string location = locationPlug()->getValue();
-		if( !location.empty() )
+		if( enabledPlug()->getValue() )
 		{
-			const ScenePlug::ScenePath path = ScenePlug::stringToPath( location );
-			const ScenePlug::PathScope scope( context, &path );
-			if( scenePlug()->existsPlug()->getValue() )
+			const std::string location = locationPlug()->getValue();
+			if( !location.empty() )
 			{
-				primitive = IECore::runTimeCast<const IECoreScene::Primitive>( scenePlug()->objectPlug()->getValue() );
+				const ScenePlug::ScenePath path = ScenePlug::stringToPath( location );
+				const ScenePlug::PathScope scope( context, &path );
+				if( scenePlug()->existsPlug()->getValue() )
+				{
+					primitive = IECore::runTimeCast<const IECoreScene::Primitive>( scenePlug()->objectPlug()->getValue() );
+				}
 			}
 		}
 
@@ -223,5 +244,3 @@ void PrimitiveQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *
 		ComputeNode::compute( output, context );
 	}
 }
-
-} // GafferScene

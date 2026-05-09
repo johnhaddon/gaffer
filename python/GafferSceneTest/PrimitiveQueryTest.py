@@ -43,7 +43,7 @@ import GafferSceneTest
 
 class PrimitiveQueryTest( GafferSceneTest.SceneTestCase ) :
 
-	def testCube( self ) :
+	def test( self ) :
 
 		cube = GafferScene.Cube()
 		mesh = cube["out"].object( "/cube" )
@@ -57,6 +57,13 @@ class PrimitiveQueryTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( query["vertex"].getValue(), mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 		self.assertEqual( query["varying"].getValue(), mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying ) )
 		self.assertEqual( query["faceVarying"].getValue(), mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+		query["enabled"].setValue( False )
+		self.assertEqual( query["type"].getValue(), "" )
+		self.assertEqual( query["uniform"].getValue(), 0 )
+		self.assertEqual( query["vertex"].getValue(), 0 )
+		self.assertEqual( query["varying"].getValue(), 0 )
+		self.assertEqual( query["faceVarying"].getValue(), 0 )
 
 	def testDefaultOutputs( self ) :
 

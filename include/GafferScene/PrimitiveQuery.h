@@ -57,6 +57,9 @@ class GAFFERSCENE_API PrimitiveQuery : public Gaffer::ComputeNode
 
 		GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveQuery, PrimitiveQueryTypeId, Gaffer::ComputeNode );
 
+		Gaffer::BoolPlug *enabledPlug() override;
+		const Gaffer::BoolPlug *enabledPlug() const override;
+
 		ScenePlug *scenePlug();
 		const ScenePlug *scenePlug() const;
 
