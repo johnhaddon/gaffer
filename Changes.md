@@ -62,6 +62,7 @@ API
 - MeshLight : Added based class to simplify the implementation of renderer-specific mesh light nodes.
 - PathColumn : `headerData()` is now passed the root Path.
 - SetExpressionAlgo : Added new namespace with functions for evaluating and editing set expressions.
+- DictPath : Added support for subclassing, without the need to override `copy()` or `_children()`.
 
 Breaking Changes
 ----------------
