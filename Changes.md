@@ -6,6 +6,7 @@ Features
 
 - Cycles : Updated to version 5.1.0.
 - CurvesInterpolation : Added node for modifying CurvesPrimitive `basis` and `wrap`. This includes the ability to convert curves with `Pinned` wrap to `NonPeriodic`, adding the appropriate "phantom" points to maintain curve shape.
+- SceneInspector : Added Statistics tab with aggregated geometry statistics for the entire scene.
 
 Improvements
 ------------
