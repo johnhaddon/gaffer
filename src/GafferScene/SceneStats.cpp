@@ -41,6 +41,7 @@
 #include "Gaffer/CompoundNumericPlug.h"
 #include "Gaffer/NumericPlug.h"
 #include "Gaffer/PlugAlgo.h"
+#include "Gaffer/PlugType.h"
 #include "Gaffer/TypedObjectPlug.h"
 #include "Gaffer/TypedPlug.h"
 
@@ -53,6 +54,7 @@
 #include <vector>
 
 using namespace std;
+using namespace Imath;
 using namespace IECore;
 using namespace Gaffer;
 using namespace GafferScene;
@@ -64,61 +66,74 @@ using namespace GafferScene;
 namespace
 {
 
-IECore::DataPtr makeZeroData( const Gaffer::ValuePlug *plug )
+// If `plug` is a supported type, downcasts it to its true type and
+// calls `functor( plug, args )`. Otherwise, does nothing.
+/// \todo This is copied from Collect.cpp (but with only a subset of
+/// the supported types). Should we consolidate them somewhere?
+template<typename F>
+void dispatchPlugFunction( const ValuePlug *plug, F &&functor )
 {
-	if( runTimeCast<const BoolPlug>( plug ) ) return new IntData( 0 );
-	if( runTimeCast<const IntPlug>( plug ) ) return new IntData( 0 );
-	if( runTimeCast<const FloatPlug>( plug ) ) return new FloatData( 0.0f );
-	if( runTimeCast<const V2fPlug>( plug ) ) return new V2fData( Imath::V2f( 0 ) );
-	if( runTimeCast<const V3fPlug>( plug ) ) return new V3fData( Imath::V3f( 0 ) );
-	if( runTimeCast<const Color3fPlug>( plug ) ) return new Color3fData( Imath::Color3f( 0 ) );
-	if( runTimeCast<const Color4fPlug>( plug ) ) return new Color4fData( Imath::Color4f( 0, 0, 0, 0 ) );
-	if( runTimeCast<const V2iPlug>( plug ) ) return new V2iData( Imath::V2i( 0 ) );
-	if( runTimeCast<const V3iPlug>( plug ) ) return new V3iData( Imath::V3i( 0 ) );
-	throw IECore::Exception( fmt::format( "SceneStats : Unsupported plug type {}.", plug->typeName() ) );
+	switch( (int)plug->typeId() )
+	{
+		case BoolPlugTypeId :
+			functor( static_cast<const BoolPlug *>( plug ) );
+			break;
+		case IntPlugTypeId :
+			functor( static_cast<const IntPlug *>( plug ) );
+			break;
+		case FloatPlugTypeId :
+			functor( static_cast<const FloatPlug *>( plug ) );
+			break;
+		case V2iPlugTypeId :
+			functor( static_cast<const V2iPlug *>( plug ) );
+			break;
+		case V3iPlugTypeId :
+			functor( static_cast<const V3iPlug *>( plug ) );
+			break;
+		case V2fPlugTypeId :
+			functor( static_cast<const V2fPlug *>( plug ) );
+			break;
+		case V3fPlugTypeId :
+			functor( static_cast<const V3fPlug *>( plug ) );
+			break;
+		// case Color3fPlugTypeId :
+		// 	functor( static_cast<const Color3fPlug *>( plug ) );
+		// 	break;
+		// case Color4fPlugTypeId :
+		// 	functor( static_cast<const Color4fPlug *>( plug ) );
+		// 	break;
+		default :
+			break;
+	}
 }
 
-void addToData( IECore::Data *dest, const Gaffer::ValuePlug *sourcePlug )
+template<typename T>
+struct StatsTraits
 {
-	if( auto *boolPlug = runTimeCast<const BoolPlug>( sourcePlug ) )
-		static_cast<IntData *>( dest )->writable() += boolPlug->getValue() ? 1 : 0;
-	else if( auto *d = runTimeCast<IntData>( dest ) )
-		d->writable() += static_cast<const IntPlug *>( sourcePlug )->getValue();
-	else if( auto *d = runTimeCast<FloatData>( dest ) )
-		d->writable() += static_cast<const FloatPlug *>( sourcePlug )->getValue();
-	else if( auto *d = runTimeCast<V2fData>( dest ) )
-		d->writable() += static_cast<const V2fPlug *>( sourcePlug )->getValue();
-	else if( auto *d = runTimeCast<V3fData>( dest ) )
-		d->writable() += static_cast<const V3fPlug *>( sourcePlug )->getValue();
-	else if( auto *d = runTimeCast<Color3fData>( dest ) )
-		d->writable() += static_cast<const Color3fPlug *>( sourcePlug )->getValue();
-	else if( auto *d = runTimeCast<Color4fData>( dest ) )
-		d->writable() += static_cast<const Color4fPlug *>( sourcePlug )->getValue();
-	else if( auto *d = runTimeCast<V2iData>( dest ) )
-		d->writable() += static_cast<const V2iPlug *>( sourcePlug )->getValue();
-	else if( auto *d = runTimeCast<V3iData>( dest ) )
-		d->writable() += static_cast<const V3iPlug *>( sourcePlug )->getValue();
-}
+	using SumDataType = TypedData<T>;
+	//using AverageType = float;
+};
 
-void mergeData( IECore::Data *dest, const IECore::Data *src )
+template<>
+struct StatsTraits<bool>
 {
-	if( auto *d = runTimeCast<IntData>( dest ) )
-		d->writable() += static_cast<const IntData *>( src )->readable();
-	else if( auto *d = runTimeCast<FloatData>( dest ) )
-		d->writable() += static_cast<const FloatData *>( src )->readable();
-	else if( auto *d = runTimeCast<V2fData>( dest ) )
-		d->writable() += static_cast<const V2fData *>( src )->readable();
-	else if( auto *d = runTimeCast<V3fData>( dest ) )
-		d->writable() += static_cast<const V3fData *>( src )->readable();
-	else if( auto *d = runTimeCast<Color3fData>( dest ) )
-		d->writable() += static_cast<const Color3fData *>( src )->readable();
-	else if( auto *d = runTimeCast<Color4fData>( dest ) )
-		d->writable() += static_cast<const Color4fData *>( src )->readable();
-	else if( auto *d = runTimeCast<V2iData>( dest ) )
-		d->writable() += static_cast<const V2iData *>( src )->readable();
-	else if( auto *d = runTimeCast<V3iData>( dest ) )
-		d->writable() += static_cast<const V3iData *>( src )->readable();
-}
+	using SumDataType = IntData;
+	//using AverageType = float;
+};
+
+template<typename T>
+struct StatsTraits<Vec2<T>>
+{
+	using SumDataType = GeometricTypedData<Vec2<T>>;
+	//using AverageType = Imath::V2f;
+};
+
+template<typename T>
+struct StatsTraits<Vec3<T>>
+{
+	using SumDataType = GeometricTypedData<Vec3<T>>;
+	//using AverageType = Imath::V3f;
+};
 
 /// TODO : USE RECURSIVE RANGE
 void addLeafPlugs( const Gaffer::Plug *plug, Gaffer::DependencyNode::AffectedPlugsContainer &outputs )
@@ -217,10 +232,15 @@ Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const st
 	PlugPtr queryChild = plug->createCounterpart( actualName, Plug::In );
 	queryChild->setFlags( Plug::Dynamic, true );
 
-	PlugPtr outChild = runTimeCast<const BoolPlug>( plug )
-		? PlugPtr( new IntPlug( actualName, Plug::Out ) )
-		: plug->createCounterpart( actualName, Plug::Out );
-	outChild->setFlags( Plug::Dynamic, true );
+	PlugPtr outChild;
+	dispatchPlugFunction(
+		plug, [&] ( auto *plug ) {
+			using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
+			using SumType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType::ValueType;
+			using SumPlugType = typename PlugType<SumType>::Type;
+			outChild = new SumPlugType( actualName, Plug::Out );
+		}
+	);
 
 	queriesPlug()->addChild( queryChild );
 	outPlug()->addChild( outChild );
@@ -325,9 +345,15 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 			[this]()
 			{
 				Accumulators acc;
-				for( const ValuePlugPtr &child : ValuePlug::Range( *queriesPlug() ) )
+				for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
 				{
-					acc.push_back( makeZeroData( child.get() ) );
+					dispatchPlugFunction(
+						queryPlug.get(), [&] ( auto *plug ) {
+							using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
+							using SumDataType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType;
+							acc.push_back( new SumDataType( typename SumDataType::ValueType( 0 ) ) );
+						}
+					);
 				}
 				return acc;
 			}
@@ -337,26 +363,37 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 		{
 			Accumulators &acc = threadAccumulators.local();
 			size_t i = 0;
-			for( const ValuePlugPtr &child : ValuePlug::Range( *queriesPlug() ) )
+			for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
 			{
-				addToData( acc[i++].get(), child.get() );
+				dispatchPlugFunction(
+					queryPlug.get(), [&] ( auto *plug ) {
+						using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
+						using SumDataType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType;
+						static_cast<SumDataType *>( acc[i++].get() )->writable() += plug->getValue();
+					}
+				);
 			}
 			return true;
 		};
 		SceneAlgo::filteredParallelTraverse( scenePlug(), filterPlug(), functor );
 
 		CompoundDataPtr result = new CompoundData;
-		for( const ValuePlugPtr &child : ValuePlug::Range( *queriesPlug() ) )
+
+		size_t i = 0;
+		for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
 		{
-			result->writable()[ child->getName() ] = makeZeroData( child.get() );
-		}
-		for( const Accumulators &acc : threadAccumulators )
-		{
-			size_t i = 0;
-			for( const ValuePlugPtr &child : ValuePlug::Range( *queriesPlug() ) )
-			{
-				mergeData( result->writable()[ child->getName() ].get(), acc[i++].get() );
-			}
+			dispatchPlugFunction(
+				queryPlug.get(), [&] ( auto *plug ) {
+					using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
+					using SumDataType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType;
+					typename SumDataType::Ptr data = new SumDataType( typename SumDataType::ValueType( 0 ) );
+					threadAccumulators.combine_each( [&] ( const Accumulators &acc ) {
+						data->writable() += static_cast<SumDataType *>( acc[i].get() )->readable();
+					} );
+					result->writable()[ plug->getName() ] = data;
+				}
+			);
+			++i;
 		}
 
 		static_cast<AtomicCompoundDataPlug *>( output )->setValue( result );
@@ -372,15 +409,8 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 
 		ConstCompoundDataPtr data = internalDataPlug()->getValue();
 		const auto it = data->readable().find( topOutput->getName() );
-		if( it != data->readable().end() )
-		{
-			if( PlugAlgo::setValueFromData( topOutput, output, it->second.get() ) )
-			{
-				return;
-			}
-		}
-
-		output->setToDefault();
+		assert( it != data->readable().end() );
+		PlugAlgo::setValueFromData( topOutput, output, it->second.get() );
 		return;
 	}
 
