@@ -76,6 +76,8 @@ class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 		/// Adds a query whose input is a counterpart of `plug`. Returns the
 		/// newly created input plug, parented to `queriesPlug()`.
 		/// TODO : IS THIS A QUERY OR A STATISTIC? SHOULD NAME BE PASSED LIKE THIS? SHOULD WE SUPPORT ON-THE-FLY RENAMING OF THE PLUG?
+		/// TODO : SHOULD THERE BE AN ENABLED PLUG PER QUERY? SO, FOR EXAMPLE, I COULD CALCULATE THE AVERAGE
+		/// FACE COUNT FOR MESHES, SKIPPING OVER LOCATIONS THAT AREN'T MESHES. THIS WOULD HAVE A TOTAL OUTPUT PLUG TO GO WITH IT.
 		Gaffer::ValuePlug *addQuery( const Gaffer::ValuePlug *plug, const std::string &name );
 		/// Removes a query and its corresponding output. Throws if `plug` is
 		/// not a child of `queriesPlug()`.
