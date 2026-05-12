@@ -91,10 +91,8 @@ Gaffer.Metadata.registerNode(
 
 			"plugCreationWidget:action" : "addQuery",
 			"plugCreationWidget:includedTypes" : (
-				"Gaffer::BoolPlug "
-				"Gaffer::IntPlug Gaffer::FloatPlug "
-				"Gaffer::V2iPlug Gaffer::V3iPlug "
-				"Gaffer::V2fPlug Gaffer::V3fPlug "
+				"Gaffer::BoolPlug Gaffer::IntPlug Gaffer::FloatPlug "
+				"Gaffer::V2iPlug Gaffer::V3iPlug Gaffer::V2fPlug Gaffer::V3fPlug "
 				"Gaffer::Color3fPlug Gaffer::Color4fPlug"
 			),
 
@@ -107,6 +105,8 @@ Gaffer.Metadata.registerNode(
 			"deletable" : True,
 
 		},
+
+		# TODO : MATCH CAMERA UI, WITH EVERYTHING ON ONE LINE
 
 		"out" : {
 

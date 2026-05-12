@@ -96,40 +96,40 @@ void dispatchPlugFunction( const ValuePlug *plug, F &&functor )
 		case V3fPlugTypeId :
 			functor( static_cast<const V3fPlug *>( plug ) );
 			break;
-		// case Color3fPlugTypeId :
-		// 	functor( static_cast<const Color3fPlug *>( plug ) );
-		// 	break;
-		// case Color4fPlugTypeId :
-		// 	functor( static_cast<const Color4fPlug *>( plug ) );
-		// 	break;
+		case Color3fPlugTypeId :
+			functor( static_cast<const Color3fPlug *>( plug ) );
+			break;
+		case Color4fPlugTypeId :
+			functor( static_cast<const Color4fPlug *>( plug ) );
+			break;
 		default :
 			break;
 	}
 }
 
-template<typename T>
+template<typename InputPlugType>
 struct StatsTraits
 {
-	using SumDataType = TypedData<T>;
+	using SumDataType = TypedData<typename InputPlugType::ValueType>;
 	//using AverageType = float;
 };
 
 template<>
-struct StatsTraits<bool>
+struct StatsTraits<BoolPlug>
 {
 	using SumDataType = IntData;
 	//using AverageType = float;
 };
 
 template<typename T>
-struct StatsTraits<Vec2<T>>
+struct StatsTraits<CompoundNumericPlug<Vec2<T>>>
 {
 	using SumDataType = GeometricTypedData<Vec2<T>>;
 	//using AverageType = Imath::V2f;
 };
 
 template<typename T>
-struct StatsTraits<Vec3<T>>
+struct StatsTraits<CompoundNumericPlug<Vec3<T>>>
 {
 	using SumDataType = GeometricTypedData<Vec3<T>>;
 	//using AverageType = Imath::V3f;
@@ -236,7 +236,7 @@ Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const st
 	dispatchPlugFunction(
 		plug, [&] ( auto *plug ) {
 			using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-			using SumType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType::ValueType;
+			using SumType = typename StatsTraits<InputPlugType>::SumDataType::ValueType;
 			using SumPlugType = typename PlugType<SumType>::Type;
 			outChild = new SumPlugType( actualName, Plug::Out );
 		}
@@ -350,7 +350,7 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 					dispatchPlugFunction(
 						queryPlug.get(), [&] ( auto *plug ) {
 							using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-							using SumDataType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType;
+							using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
 							acc.push_back( new SumDataType( typename SumDataType::ValueType( 0 ) ) );
 						}
 					);
@@ -368,7 +368,7 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 				dispatchPlugFunction(
 					queryPlug.get(), [&] ( auto *plug ) {
 						using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-						using SumDataType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType;
+						using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
 						static_cast<SumDataType *>( acc[i++].get() )->writable() += plug->getValue();
 					}
 				);
@@ -385,7 +385,7 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 			dispatchPlugFunction(
 				queryPlug.get(), [&] ( auto *plug ) {
 					using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-					using SumDataType = typename StatsTraits<typename InputPlugType::ValueType>::SumDataType;
+					using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
 					typename SumDataType::Ptr data = new SumDataType( typename SumDataType::ValueType( 0 ) );
 					threadAccumulators.combine_each( [&] ( const Accumulators &acc ) {
 						data->writable() += static_cast<SumDataType *>( acc[i].get() )->readable();

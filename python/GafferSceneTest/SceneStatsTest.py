@@ -103,34 +103,32 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 
 		self.assertEqual( stats["out"]["count"].getValue(), 3 )
 
-	def testMultipleQueryTypes( self ) :
+	def testAllQueryTypes( self ) :
 
 		sphere = GafferScene.Sphere()
-		cube = GafferScene.Cube()
-
 		group = GafferScene.Group()
 		group["in"][0].setInput( sphere["out"] )
-		group["in"][1].setInput( cube["out"] )
 
-		pathFilter = GafferScene.PathFilter()
-		pathFilter["paths"].setValue( IECore.StringVectorData( [ "/group/sphere", "/group/cube" ] ) )
+		allFilter = GafferScene.PathFilter()
+		allFilter["paths"].setValue( IECore.StringVectorData( [ "/*/..." ] ) )
 
 		stats = GafferScene.SceneStats()
 		stats["scene"].setInput( group["out"] )
-		stats["filter"].setInput( pathFilter["out"] )
+		stats["filter"].setInput( allFilter["out"] )
 
-		stats.addQuery( Gaffer.IntPlug(), "intStat" )
-		stats["queries"]["intStat"].setValue( 3 )
+		for plugType in [
+			Gaffer.BoolPlug,
+			Gaffer.IntPlug, Gaffer.FloatPlug,
+			Gaffer.V2iPlug, Gaffer.V3iPlug,
+			Gaffer.V2fPlug, Gaffer.V3fPlug,
+			Gaffer.Color3fPlug, Gaffer.Color4fPlug,
+		] :
 
-		stats.addQuery( Gaffer.FloatPlug(), "floatStat" )
-		stats["queries"]["floatStat"].setValue( 1.5 )
+			query = stats.addQuery( plugType() )
+			query.setValue( plugType.ValueType( 1 ) )
 
-		stats.addQuery( Gaffer.V3fPlug(), "v3fStat" )
-		stats["queries"]["v3fStat"].setValue( imath.V3f( 1, 2, 3 ) )
-
-		self.assertEqual( stats["out"]["intStat"].getValue(), 6 )
-		self.assertAlmostEqual( stats["out"]["floatStat"].getValue(), 3.0 )
-		self.assertEqual( stats["out"]["v3fStat"].getValue(), imath.V3f( 2, 4, 6 ) )
+			output = stats.outPlugFromQuery( query )
+			self.assertEqual( output.getValue(), query.getValue() * 2 )
 
 	def testFilterLimitsContributions( self ) :
 

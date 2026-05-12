@@ -83,6 +83,7 @@ class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 		/// not a child of `queriesPlug()`.
 		void removeQuery( Gaffer::ValuePlug *plug );
 
+		/// TODO : WHY THE MISMATCH?
 		const Gaffer::ValuePlug *outPlugFromQuery( const Gaffer::ValuePlug *queryPlug ) const;
 		const Gaffer::ValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
