@@ -46,6 +46,7 @@
 #include "Gaffer/TypedPlug.h"
 
 #include "IECore/CompoundData.h"
+#include "IECore/NullObject.h"
 #include "IECore/SimpleTypedData.h"
 
 #include "tbb/enumerable_thread_specific.h"
@@ -151,6 +152,29 @@ void addLeafPlugs( const Gaffer::Plug *plug, Gaffer::DependencyNode::AffectedPlu
 	}
 }
 
+struct StatsData : public IECore::Data
+{
+
+	IE_CORE_DECLAREMEMBERPTR( StatsData )
+
+	struct Stats
+	{
+		template<typename InputPlugType>
+		void init( const InputPlugType *plug )
+		{
+			using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
+			sum = new SumDataType( typename SumDataType::ValueType( 0 ) );
+		}
+
+		IECore::DataPtr sum;
+	};
+
+	// Maps from plug name to stats values.
+	using Map = std::unordered_map<InternedString, Stats>;
+	Map map;
+
+};
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -169,7 +193,7 @@ SceneStats::SceneStats( const std::string &name )
 	addChild( new FilterPlug( "filter" ) );
 	addChild( new ValuePlug( "queries", Plug::In ) );
 	addChild( new ValuePlug( "out", Plug::Out ) );
-	addChild( new AtomicCompoundDataPlug( "__internalData", Plug::Out, new CompoundData ) );
+	addChild( new ObjectPlug( "__internalData", Plug::Out, NullObject::defaultNullObject() ) );
 }
 
 SceneStats::~SceneStats()
@@ -216,14 +240,14 @@ const Gaffer::ValuePlug *SceneStats::outPlug() const
 	return getChild<ValuePlug>( g_firstPlugIndex + 3 );
 }
 
-Gaffer::AtomicCompoundDataPlug *SceneStats::internalDataPlug()
+Gaffer::ObjectPlug *SceneStats::internalDataPlug()
 {
-	return getChild<AtomicCompoundDataPlug>( g_firstPlugIndex + 4 );
+	return getChild<ObjectPlug>( g_firstPlugIndex + 4 );
 }
 
-const Gaffer::AtomicCompoundDataPlug *SceneStats::internalDataPlug() const
+const Gaffer::ObjectPlug *SceneStats::internalDataPlug() const
 {
-	return getChild<AtomicCompoundDataPlug>( g_firstPlugIndex + 4 );
+	return getChild<ObjectPlug>( g_firstPlugIndex + 4 );
 }
 
 Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const std::string &name )
@@ -232,13 +256,13 @@ Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const st
 	PlugPtr queryChild = plug->createCounterpart( actualName, Plug::In );
 	queryChild->setFlags( Plug::Dynamic, true );
 
-	PlugPtr outChild;
+	PlugPtr outChild = new ValuePlug( actualName, Plug::Out );
 	dispatchPlugFunction(
 		plug, [&] ( auto *plug ) {
 			using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
 			using SumType = typename StatsTraits<InputPlugType>::SumDataType::ValueType;
 			using SumPlugType = typename PlugType<SumType>::Type;
-			outChild = new SumPlugType( actualName, Plug::Out );
+			outChild->addChild( new SumPlugType( "sum", Plug::Out ) );
 		}
 	);
 
@@ -320,19 +344,23 @@ void SceneStats::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *c
 	else if( outPlug()->isAncestorOf( output ) )
 	{
 		ComputeNode::hash( output, context, h );
-
-		const ValuePlug *topOutput = output;
-		while( topOutput->parent<Plug>() != outPlug() )
-		{
-			topOutput = topOutput->parent<ValuePlug>();
-		}
-
 		internalDataPlug()->hash( h );
-		h.append( topOutput->getName() );
-		if( output != topOutput )
-		{
-			h.append( output->getName() );
-		}
+
+		// const ValuePlug *topOutput = output;
+		// while( topOutput->parent<Plug>() != outPlug() )
+		// {
+		// 	topOutput = topOutput->parent<ValuePlug>();
+		// }
+
+		// h.append( topOutput->getName() ); // TODO : DON'T THINK THIS IS NECESSARY - THE BASE CLASS INCLUDES THE NAME
+		// if( output != topOutput )
+		// {
+		// 	h.append( output->getName() );
+		// }
+	}
+	else
+	{
+		ComputeNode::hash( output, context, h );
 	}
 }
 
@@ -340,36 +368,34 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 {
 	if( output == internalDataPlug() )
 	{
-		using Accumulators = vector<DataPtr>;
-		tbb::enumerable_thread_specific<Accumulators> threadAccumulators(
+		tbb::enumerable_thread_specific<StatsData::Ptr> threadStats(
 			[this]()
 			{
-				Accumulators acc;
+				StatsData::Ptr result = new StatsData;
 				for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
 				{
 					dispatchPlugFunction(
 						queryPlug.get(), [&] ( auto *plug ) {
-							using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-							using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
-							acc.push_back( new SumDataType( typename SumDataType::ValueType( 0 ) ) );
+							// using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
+							// using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
+							result->map[queryPlug->getName()].init( plug ); // = new SumDataType( typename SumDataType::ValueType( 0 ) );
 						}
 					);
 				}
-				return acc;
+				return result;
 			}
 		);
 
 		auto functor = [&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> bool
 		{
-			Accumulators &acc = threadAccumulators.local();
-			size_t i = 0;
+			auto &statsData = threadStats.local();
 			for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
 			{
 				dispatchPlugFunction(
 					queryPlug.get(), [&] ( auto *plug ) {
 						using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
 						using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
-						static_cast<SumDataType *>( acc[i++].get() )->writable() += plug->getValue();
+						static_cast<SumDataType *>( statsData->map[queryPlug->getName()].sum.get() )->writable() += plug->getValue();
 					}
 				);
 			}
@@ -377,9 +403,7 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 		};
 		SceneAlgo::filteredParallelTraverse( scenePlug(), filterPlug(), functor );
 
-		CompoundDataPtr result = new CompoundData;
-
-		size_t i = 0;
+		StatsData::Ptr result = new StatsData;
 		for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
 		{
 			dispatchPlugFunction(
@@ -387,32 +411,39 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 					using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
 					using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
 					typename SumDataType::Ptr data = new SumDataType( typename SumDataType::ValueType( 0 ) );
-					threadAccumulators.combine_each( [&] ( const Accumulators &acc ) {
-						data->writable() += static_cast<SumDataType *>( acc[i].get() )->readable();
+					threadStats.combine_each( [&] ( const StatsData::Ptr &statsData ) {
+						data->writable() += static_cast<SumDataType *>( statsData->map[queryPlug->getName()].sum.get() )->readable();
 					} );
-					result->writable()[ plug->getName() ] = data;
+					result->map[plug->getName()].sum = data;
 				}
 			);
-			++i;
 		}
 
-		static_cast<AtomicCompoundDataPlug *>( output )->setValue( result );
-		return;
+		static_cast<ObjectPlug *>( output )->setValue( result );
 	}
 	else if( outPlug()->isAncestorOf( output ) )
 	{
-		const ValuePlug *topOutput = output;
-		while( topOutput->parent<Plug>() != outPlug() )
-		{
-			topOutput = topOutput->parent<ValuePlug>();
-		}
+		auto [topOutput, statOutput] = outPlugAncestors( output );
 
-		ConstCompoundDataPtr data = internalDataPlug()->getValue();
-		const auto it = data->readable().find( topOutput->getName() );
-		assert( it != data->readable().end() );
-		PlugAlgo::setValueFromData( topOutput, output, it->second.get() );
-		return;
+		StatsData::ConstPtr data = boost::static_pointer_cast<const StatsData>( internalDataPlug()->getValue() );
+		const auto it = data->map.find( topOutput->getName() );
+		assert( it != data->map.end() );
+		PlugAlgo::setValueFromData( statOutput, output, it->second.sum.get() );
+	}
+	else
+	{
+		ComputeNode::compute( output, context );
+	}
+}
+
+std::tuple<const ValuePlug *, const ValuePlug *> SceneStats::outPlugAncestors( const Gaffer::ValuePlug *output ) const
+{
+	const ValuePlug *parentPlug = output->parent<ValuePlug>();
+	while( parentPlug->parent() != outPlug() )
+	{
+		output = parentPlug;
+		parentPlug = output->parent<ValuePlug>();
 	}
 
-	ComputeNode::compute( output, context );
+	return { parentPlug, output };
 }

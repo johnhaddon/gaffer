@@ -96,8 +96,10 @@ class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 
 	private :
 
-		Gaffer::AtomicCompoundDataPlug *internalDataPlug();
-		const Gaffer::AtomicCompoundDataPlug *internalDataPlug() const;
+		std::tuple<const Gaffer::ValuePlug *, const Gaffer::ValuePlug *> outPlugAncestors( const Gaffer::ValuePlug *output ) const;
+
+		Gaffer::ObjectPlug *internalDataPlug(); // TODO : RENAME
+		const Gaffer::ObjectPlug *internalDataPlug() const;
 
 		static size_t g_firstPlugIndex;
 

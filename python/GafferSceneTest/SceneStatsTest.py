@@ -50,23 +50,23 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 
 		stats = GafferScene.SceneStats()
 
-		self.assertEqual( len( stats["queries"].children() ), 0 )
-		self.assertEqual( len( stats["out"].children() ), 0 )
+		self.assertEqual( len( stats["queries"] ), 0 )
+		self.assertEqual( len( stats["out"] ), 0 )
 
-		stats.addQuery( Gaffer.IntPlug(), "count" )
+		stats.addQuery( Gaffer.IntPlug(), "count" ) # TODO : THIS IS A SHIT NAME, BECAUSE WE'RE GOING TO HAVE A COUNT CHILD PLUG
 
-		self.assertEqual( len( stats["queries"].children() ), 1 )
-		self.assertEqual( len( stats["out"].children() ), 1 )
+		self.assertEqual( len( stats["queries"] ), 1 )
+		self.assertEqual( len( stats["out"] ), 1 )
 		self.assertIsInstance( stats["queries"]["count"], Gaffer.IntPlug )
-		self.assertIsInstance( stats["out"]["count"], Gaffer.IntPlug )
+		self.assertIsInstance( stats["out"]["count"]["sum"], Gaffer.IntPlug )
 
 		self.assertTrue( stats.outPlugFromQuery( stats["queries"]["count"] ).isSame( stats["out"]["count"] ) )
 		self.assertTrue( stats.queryPlug( stats["out"]["count"] ).isSame( stats["queries"]["count"] ) )
 
 		stats.removeQuery( stats["queries"]["count"] )
 
-		self.assertEqual( len( stats["queries"].children() ), 0 )
-		self.assertEqual( len( stats["out"].children() ), 0 )
+		self.assertEqual( len( stats["queries"] ), 0 )
+		self.assertEqual( len( stats["out"] ), 0 )
 
 	def testQueryPlugFromDescendant( self ) :
 
@@ -75,10 +75,12 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 
 		# queryPlug() should work when called with a component of a compound output
 		self.assertTrue(
-			stats.queryPlug( stats["out"]["position"]["x"] ).isSame( stats["queries"]["position"] )
+			stats.queryPlug( stats["out"]["position"]["sum"]["x"] ).isSame( stats["queries"]["position"] )
 		)
 
 	def testSum( self ) :
+
+		# TODO : MERGE WITH TESTCONNECTEDQUERY
 
 		sphere = GafferScene.Sphere()
 		cube = GafferScene.Cube()
@@ -91,7 +93,7 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 
 		pathFilter = GafferScene.PathFilter()
 		pathFilter["paths"].setValue( IECore.StringVectorData( [
-			"/group/sphere", "/group/cube", "/group/plane"
+			"/group/sphere", "/group/cube", "/group/plane" # TODO : *
 		] ) )
 
 		stats = GafferScene.SceneStats()
@@ -101,7 +103,7 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		stats.addQuery( Gaffer.IntPlug(), "count" )
 		stats["queries"]["count"].setValue( 1 )
 
-		self.assertEqual( stats["out"]["count"].getValue(), 3 )
+		self.assertEqual( stats["out"]["count"]["sum"].getValue(), 3 )
 
 	def testAllQueryTypes( self ) :
 
@@ -128,7 +130,7 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 			query.setValue( plugType.ValueType( 1 ) )
 
 			output = stats.outPlugFromQuery( query )
-			self.assertEqual( output.getValue(), query.getValue() * 2 )
+			self.assertEqual( output["sum"].getValue(), query.getValue() * 2 )
 
 	def testFilterLimitsContributions( self ) :
 
@@ -149,7 +151,9 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		stats.addQuery( Gaffer.IntPlug(), "count" )
 		stats["queries"]["count"].setValue( 7 )
 
-		self.assertEqual( stats["out"]["count"].getValue(), 7 )
+		self.assertEqual( stats["out"]["count"]["sum"].getValue(), 7 )
+
+		# TODO : CHANGE FILTER AND RETEST
 
 	def testNoMatches( self ) :
 
@@ -164,7 +168,7 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		stats.addQuery( Gaffer.IntPlug(), "count" )
 		stats["queries"]["count"].setValue( 99 )
 
-		self.assertEqual( stats["out"]["count"].getValue(), 0 )
+		self.assertEqual( stats["out"]["count"]["sum"].getValue(), 0 )
 
 	def testConnectedQuery( self ) :
 
@@ -173,6 +177,8 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		# location returns the same value regardless of the traversal path, so
 		# the sum equals that value multiplied by the number of matched locations.
 		cube = GafferScene.Cube()
+
+		# TODO : USE TWO DIFFERENT PRIMITIVES WITH DIFFERENT COUNTS
 
 		group = GafferScene.Group()
 		group["in"][0].setInput( cube["out"] )
@@ -193,7 +199,7 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		stats["queries"]["vertexCount"].setInput( primitiveQuery["vertex"] )
 
 		self.assertEqual(
-			stats["out"]["vertexCount"].getValue(),
+			stats["out"]["vertexCount"]["sum"].getValue(),
 			primitiveQuery["vertex"].getValue() * 2
 		)
 
