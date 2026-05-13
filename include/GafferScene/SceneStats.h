@@ -48,6 +48,11 @@
 namespace GafferScene
 {
 
+/// TODO
+///
+/// - Enabled plug per stat
+/// - Min, max, count, average
+/// - Nice UI
 class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 {
 
@@ -96,6 +101,7 @@ class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 
 	private :
 
+		/// TODO : MOVE TO COMPUTE
 		std::tuple<const Gaffer::ValuePlug *, const Gaffer::ValuePlug *> outPlugAncestors( const Gaffer::ValuePlug *output ) const;
 
 		Gaffer::ObjectPlug *internalDataPlug(); // TODO : RENAME

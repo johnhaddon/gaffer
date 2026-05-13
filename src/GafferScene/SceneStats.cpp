@@ -157,13 +157,29 @@ struct StatsData : public IECore::Data
 
 	IE_CORE_DECLAREMEMBERPTR( StatsData )
 
+	// StatsData( const ValuePlug *queriesPlug )
+	// {
+	// 	for( const auto &queryPlug : ValuePlug::Range( *queriesPlug ) )
+	// 	{
+	// 		dispatchPlugFunction(
+	// 			queryPlug.get(), [&] ( auto *plug ) {
+	// 				map[queryPlug->getName()].init( plug );
+	// 			}
+	// 		);
+	// 	}
+	// }
+
 	struct Stats
 	{
 		template<typename InputPlugType>
-		void init( const InputPlugType *plug )
+		void update( const InputPlugType *inputPlug )
 		{
 			using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
-			sum = new SumDataType( typename SumDataType::ValueType( 0 ) );
+			if( !sum )
+			{
+				sum = new SumDataType( typename SumDataType::ValueType( 0 ) );
+			}
+			static_cast<SumDataType *>( sum.get() )->writable() += inputPlug->getValue();
 		}
 
 		IECore::DataPtr sum;
@@ -345,18 +361,8 @@ void SceneStats::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *c
 	{
 		ComputeNode::hash( output, context, h );
 		internalDataPlug()->hash( h );
-
-		// const ValuePlug *topOutput = output;
-		// while( topOutput->parent<Plug>() != outPlug() )
-		// {
-		// 	topOutput = topOutput->parent<ValuePlug>();
-		// }
-
-		// h.append( topOutput->getName() ); // TODO : DON'T THINK THIS IS NECESSARY - THE BASE CLASS INCLUDES THE NAME
-		// if( output != topOutput )
-		// {
-		// 	h.append( output->getName() );
-		// }
+		// We also use the plug's name in the compute, but ComputeNode
+		// includes that in the hash for us anyway.
 	}
 	else
 	{
@@ -368,23 +374,7 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 {
 	if( output == internalDataPlug() )
 	{
-		tbb::enumerable_thread_specific<StatsData::Ptr> threadStats(
-			[this]()
-			{
-				StatsData::Ptr result = new StatsData;
-				for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
-				{
-					dispatchPlugFunction(
-						queryPlug.get(), [&] ( auto *plug ) {
-							// using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-							// using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
-							result->map[queryPlug->getName()].init( plug ); // = new SumDataType( typename SumDataType::ValueType( 0 ) );
-						}
-					);
-				}
-				return result;
-			}
-		);
+		tbb::enumerable_thread_specific<StatsData> threadStats;
 
 		auto functor = [&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> bool
 		{
@@ -392,11 +382,7 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 			for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
 			{
 				dispatchPlugFunction(
-					queryPlug.get(), [&] ( auto *plug ) {
-						using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-						using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
-						static_cast<SumDataType *>( statsData->map[queryPlug->getName()].sum.get() )->writable() += plug->getValue();
-					}
+					queryPlug.get(), [&] ( auto *plug ) { statsData.map[queryPlug->getName()].update( plug ); }
 				);
 			}
 			return true;
@@ -408,11 +394,12 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 		{
 			dispatchPlugFunction(
 				queryPlug.get(), [&] ( auto *plug ) {
+					/// TODO : MOVE TO STATS CLASS
 					using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
 					using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
 					typename SumDataType::Ptr data = new SumDataType( typename SumDataType::ValueType( 0 ) );
-					threadStats.combine_each( [&] ( const StatsData::Ptr &statsData ) {
-						data->writable() += static_cast<SumDataType *>( statsData->map[queryPlug->getName()].sum.get() )->readable();
+					threadStats.combine_each( [&] ( StatsData &statsData ) {
+						data->writable() += static_cast<SumDataType *>( statsData.map[queryPlug->getName()].sum.get() )->readable();
 					} );
 					result->map[plug->getName()].sum = data;
 				}
