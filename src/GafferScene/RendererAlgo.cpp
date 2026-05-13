@@ -703,10 +703,17 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 
 std::vector<IECoreScenePreview::Renderer::Prototype> pointInstancerPrototypes( const IECoreScene::PointInstancer *instancer, const RenderOptions &renderOptions, const ScenePlug *scene, IECoreScenePreview::Renderer *renderer )
 {
-	const StringVectorData *prototypeRootsData = instancer->variableData<StringVectorData>(  "prototypeRoots", PrimitiveVariable::Constant ); // TODO : OFFICIAL ACCESSOR
-	auto &prototypeRoots = prototypeRootsData->readable();
+	const auto &basePath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 
 	std::vector<IECoreScenePreview::Renderer::Prototype> result;
+	const StringVectorData *prototypeRootsData = instancer->variableData<StringVectorData>( "prototypeRoots", PrimitiveVariable::Constant ); // TODO : OFFICIAL ACCESSOR
+	if( !prototypeRootsData )
+	{
+		IECore::msg( IECore::Msg::Warning, "PointInstancer", "No `prototypeRoots` defined for `{}`", ScenePlug::pathToString( basePath ) );
+		return result;
+	}
+
+	auto &prototypeRoots = prototypeRootsData->readable();
 	result.resize( prototypeRoots.size() );
 
 	const ThreadState &threadState = ThreadState::current();
@@ -740,11 +747,18 @@ std::vector<IECoreScenePreview::Renderer::Prototype> pointInstancerPrototypes( c
 					{
 						ScenePlug::stringToPath( rootString, rootPath );
 					}
-					const auto &basePath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 					rootPath.insert( rootPath.begin(), basePath.begin(), basePath.end() );
 				}
 
 				prototypeScope.setPath( &rootPath );
+				if( !scene->existsPlug()->getValue() )
+				{
+					IECore::msg(
+						IECore::Msg::Warning, "PointInstancer", "Prototype `{}` does not exist for instancer `{}`.",
+						ScenePlug::pathToString( rootPath ), ScenePlug::pathToString( basePath )
+					);
+					continue;
+				}
 
 				// TODO : RENDER PURPOSE
 
@@ -802,6 +816,11 @@ IECoreScenePreview::Renderer::ObjectInterfacePtr outputObject( const std::string
 	if( auto pointInstancer = runTimeCast<const IECoreScene::PointInstancer>( sampledObject.samples[0].get() ) )
 	{
 		auto prototypes = pointInstancerPrototypes( pointInstancer, renderOptions, scene, renderer );
+		if( prototypes.empty() )
+		{
+			// Warning already emitted by `pointInstancerPrototypes()`.
+			return nullptr;
+		}
 		return renderer->pointInstancer(
 			name, IECoreScenePreview::Renderer::staticSamplesCast<IECoreScene::ConstPointInstancerPtr>( sampledObject.samples ),
 			sampledObject.sampleTimes, prototypes, attributes
