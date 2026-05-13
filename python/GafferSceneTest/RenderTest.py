@@ -841,7 +841,7 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script["filter"]["paths"].setValue( IECore.StringVectorData( [ "/instancer" ] ) )
 
 		script["sphere"] = GafferScene.Sphere()
-		script["sphere"]["divisions"].setValue( imath.V2i( 5, 10 ) )
+		script["sphere"]["radius"].setValue( 0.5 )
 
 		script["prototypeParent"] = GafferScene.Parent()
 		script["prototypeParent"]["in"].setInput( script["pointInstancer"]["out"] )
@@ -856,7 +856,7 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script["parent"]["children"][0].setInput( script["camera"]["out"] )
 		script["parent"]["parent"].setValue( "/" )
 
-		imagePath = pathlib.Path( "/tmp/test.exr" ) #self.temporaryDirectory() / "test.exr"
+		imagePath = self.temporaryDirectory() / "test.exr"
 
 		script["outputs"] = GafferScene.Outputs()
 		script["outputs"].addOutput(
@@ -882,37 +882,36 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
 		script["render"]["renderer"].setValue( self.renderer )
 
-		#script["render"]["mode"].setValue( 2 )
-		script["render"]["fileName"].setValue( "/tmp/test.ass" ) # TODO : REMOVE
-
-
 		script["render"]["task"].execute()
 
 		reader = GafferImage.ImageReader()
 		reader["fileName"].setValue( imagePath )
 
-		# TODO : ASSERT STUFF
+		sampler = GafferImage.ImageSampler()
+		sampler["image"].setInput( reader["out"] )
 
-		# sampler = GafferImage.ImageSampler()
-		# sampler["image"].setInput( reader["out"] )
-		# sampler["channels"].setValue( IECore.StringVectorData( [ "instanceID" ] * 4 ) )
-		# sampler["interpolate"].setValue( False )
+		for centre in [
+			imath.V2f( 180, 102 ),
+			imath.V2f( 456, 102 ),
+			imath.V2f( 179, 379 ),
+			imath.V2f( 456, 379 ),
+		] :
 
-		# for pixel, expectedID in {
-		# 	imath.V2f( 260, 360 ) : 2,
-		# 	imath.V2f( 400, 360 ) : 3,
-		# 	imath.V2f( 260, 160 ) : 0,
-		# 	imath.V2f( 400, 160 ) : 1,
-		# }.items() :
+			with self.subTest( centre = centre ) :
 
-		# 	sampler["pixel"].setValue( pixel )
-		# 	id = sampler["color"]["r"].getValue()
+				# Assert there's an instance where we expect it.
+				sampler["pixel"].setValue( centre )
+				self.assertEqual( sampler["color"]["a"].getValue(), 1 )
+				# And that it's not a fluke by asserting there is empty
+				# space around it.
+				for offset in [
+					imath.V2f( 80, 0 ), imath.V2f( -80, 0 ),
+					imath.V2f( 0, 80 ), imath.V2f( 0, -80 ),
+				] :
+					sampler["pixel"].setValue( centre + offset )
+					self.assertAlmostEqual( sampler["color"]["a"].getValue(), 0, delta = 0.01 )
 
-		# 	# Reinterpret float as int.
-		# 	id = struct.pack( "f", id )
-		# 	id = struct.unpack( "I", id )[0]
-
-		# 	self.assertEqual( id, expectedID + 1 )
+		# TODO : ASSERT THAT THE CENTRAL PROTOTYPE ISN'T RENDERED (ONCE YOU'VE STOPPED THAT HAPPENING)
 
 	## Should be implemented by derived classes to return
 	# an appropriate Shader node with a diffuse surface shader loaded, along
