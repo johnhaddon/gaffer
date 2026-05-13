@@ -812,6 +812,108 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 			)
 		)
 
+	def testPointInstancer( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		pointInstancer = IECoreScene.PointInstancer( 4 )
+		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [
+				imath.V3f( -1, -1, 0 ), imath.V3f( 1, -1, 0 ),
+				imath.V3f( 1, 1, 0 ), imath.V3f( -1, 1, 0 ),
+			] )
+		)
+		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.IntVectorData( [ 0, 0, 0, 0 ] ),
+		)
+		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.StringVectorData( [ "./sphere" ] ),
+		)
+
+		script["pointInstancer"] = GafferScene.ObjectToScene()
+		script["pointInstancer"]["name"].setValue( "instancer" )
+		script["pointInstancer"]["object"].setValue( pointInstancer )
+
+		script["filter"] = GafferScene.PathFilter()
+		script["filter"]["paths"].setValue( IECore.StringVectorData( [ "/instancer" ] ) )
+
+		script["sphere"] = GafferScene.Sphere()
+		script["sphere"]["divisions"].setValue( imath.V2i( 5, 10 ) )
+
+		script["prototypeParent"] = GafferScene.Parent()
+		script["prototypeParent"]["in"].setInput( script["pointInstancer"]["out"] )
+		script["prototypeParent"]["children"][0].setInput( script["sphere"]["out"] )
+		script["prototypeParent"]["filter"].setInput( script["filter"]["out"] )
+
+		script["camera"] = GafferScene.Camera()
+		script["camera"]["transform"]["translate"]["z"].setValue( 5 )
+
+		script["parent"] = GafferScene.Parent()
+		script["parent"]["in"].setInput( script["prototypeParent"]["out"] )
+		script["parent"]["children"][0].setInput( script["camera"]["out"] )
+		script["parent"]["parent"].setValue( "/" )
+
+		imagePath = pathlib.Path( "/tmp/test.exr" ) #self.temporaryDirectory() / "test.exr"
+
+		script["outputs"] = GafferScene.Outputs()
+		script["outputs"].addOutput(
+			"beauty",
+			IECoreScene.Output(
+				imagePath.as_posix(),
+				"exr",
+				"rgba"
+			)
+		)
+
+		script["outputs"]["in"].setInput( script["parent"]["out"] )
+
+		script["options"] = GafferScene.StandardOptions()
+		script["options"]["in"].setInput( script["outputs"]["out"] )
+		script["options"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["options"]["options"]["render:camera"]["value"].setValue( "/camera" )
+
+		script["rendererOptions"] = self._createOptions()
+		script["rendererOptions"]["in"].setInput( script["options"]["out"] )
+
+		script["render"] = GafferScene.Render()
+		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
+		script["render"]["renderer"].setValue( self.renderer )
+
+		#script["render"]["mode"].setValue( 2 )
+		script["render"]["fileName"].setValue( "/tmp/test.ass" ) # TODO : REMOVE
+
+
+		script["render"]["task"].execute()
+
+		reader = GafferImage.ImageReader()
+		reader["fileName"].setValue( imagePath )
+
+		# TODO : ASSERT STUFF
+
+		# sampler = GafferImage.ImageSampler()
+		# sampler["image"].setInput( reader["out"] )
+		# sampler["channels"].setValue( IECore.StringVectorData( [ "instanceID" ] * 4 ) )
+		# sampler["interpolate"].setValue( False )
+
+		# for pixel, expectedID in {
+		# 	imath.V2f( 260, 360 ) : 2,
+		# 	imath.V2f( 400, 360 ) : 3,
+		# 	imath.V2f( 260, 160 ) : 0,
+		# 	imath.V2f( 400, 160 ) : 1,
+		# }.items() :
+
+		# 	sampler["pixel"].setValue( pixel )
+		# 	id = sampler["color"]["r"].getValue()
+
+		# 	# Reinterpret float as int.
+		# 	id = struct.pack( "f", id )
+		# 	id = struct.unpack( "I", id )[0]
+
+		# 	self.assertEqual( id, expectedID + 1 )
+
 	## Should be implemented by derived classes to return
 	# an appropriate Shader node with a diffuse surface shader loaded, along
 	# with the plug for the colour parameter and the output plug to be connected
