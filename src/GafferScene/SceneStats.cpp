@@ -112,28 +112,28 @@ template<typename InputPlugType>
 struct StatsTraits
 {
 	using SumDataType = TypedData<typename InputPlugType::ValueType>;
-	//using AverageType = float;
+	using MinMaxDataType = TypedData<typename InputPlugType::ValueType>;
 };
 
 template<>
 struct StatsTraits<BoolPlug>
 {
 	using SumDataType = IntData;
-	//using AverageType = float;
+	using MinMaxDataType = BoolData;
 };
 
 template<typename T>
 struct StatsTraits<CompoundNumericPlug<Vec2<T>>>
 {
 	using SumDataType = GeometricTypedData<Vec2<T>>;
-	//using AverageType = Imath::V2f;
+	using MinMaxDataType = GeometricTypedData<Vec2<T>>;
 };
 
 template<typename T>
 struct StatsTraits<CompoundNumericPlug<Vec3<T>>>
 {
 	using SumDataType = GeometricTypedData<Vec3<T>>;
-	//using AverageType = Imath::V3f;
+	using MinMaxDataType = GeometricTypedData<Vec3<T>>;
 };
 
 /// TODO : USE RECURSIVE RANGE
@@ -152,41 +152,42 @@ void addLeafPlugs( const Gaffer::Plug *plug, Gaffer::DependencyNode::AffectedPlu
 	}
 }
 
+// Utility class for accumulating statistics from repeated
+// evaluations of a plug.
+struct PlugStats
+{
+
+	template<typename InputPlugType>
+	void update( const InputPlugType *inputPlug )
+	{
+		using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
+		using MinMaxDataType = typename StatsTraits<InputPlugType>::MinMaxDataType;
+		if( !sum )
+		{
+			sum = new SumDataType( inputPlug->getValue() );
+			min = new MinMaxDataType( inputPlug->getValue() );
+			max = new MinMaxDataType( inputPlug->getValue() );
+		}
+		else
+		{
+			static_cast<SumDataType *>( sum.get() )->writable() += inputPlug->getValue();
+			!!!
+		}
+	}
+
+	IECore::DataPtr sum;
+	IECore::DataPtr min;
+	IECore::DataPtr max;
+
+};
+
+// Holds a map from name to PlugStats in a form suitable for storage
+// on a plug. // TODO RENAME INTERNAL PLUG AND MATCH NAMES>
 struct StatsData : public IECore::Data
 {
 
 	IE_CORE_DECLAREMEMBERPTR( StatsData )
-
-	// StatsData( const ValuePlug *queriesPlug )
-	// {
-	// 	for( const auto &queryPlug : ValuePlug::Range( *queriesPlug ) )
-	// 	{
-	// 		dispatchPlugFunction(
-	// 			queryPlug.get(), [&] ( auto *plug ) {
-	// 				map[queryPlug->getName()].init( plug );
-	// 			}
-	// 		);
-	// 	}
-	// }
-
-	struct Stats
-	{
-		template<typename InputPlugType>
-		void update( const InputPlugType *inputPlug )
-		{
-			using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
-			if( !sum )
-			{
-				sum = new SumDataType( typename SumDataType::ValueType( 0 ) );
-			}
-			static_cast<SumDataType *>( sum.get() )->writable() += inputPlug->getValue();
-		}
-
-		IECore::DataPtr sum;
-	};
-
-	// Maps from plug name to stats values.
-	using Map = std::unordered_map<InternedString, Stats>;
+	using Map = std::unordered_map<InternedString, PlugStats>;
 	Map map;
 
 };
