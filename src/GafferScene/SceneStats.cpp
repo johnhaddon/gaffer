@@ -152,6 +152,44 @@ void addLeafPlugs( const Gaffer::Plug *plug, Gaffer::DependencyNode::AffectedPlu
 	}
 }
 
+/// \todo This and `vectorAwareMax()` are borrowed from `TweakPlug.cpp`. Is there
+/// anywhere we could share them?
+template<typename T>
+T vectorAwareMin( const T &v1, const T &v2 )
+{
+	if constexpr( IECore::TypeTraits::IsVec<T>::value || IECore::TypeTraits::IsColor<T>::value )
+	{
+		T result;
+		for( size_t i = 0; i < T::dimensions(); ++i )
+		{
+			result[i] = std::min( v1[i], v2[i] );
+		}
+		return result;
+	}
+	else
+	{
+		return std::min( v1, v2 );
+	}
+}
+
+template<typename T>
+T vectorAwareMax( const T &v1, const T &v2 )
+{
+	if constexpr( IECore::TypeTraits::IsVec<T>::value || IECore::TypeTraits::IsColor<T>::value )
+	{
+		T result;
+		for( size_t i = 0; i < T::dimensions(); ++i )
+		{
+			result[i] = std::max( v1[i], v2[i] );
+		}
+		return result;
+	}
+	else
+	{
+		return std::max( v1, v2 );
+	}
+}
+
 // Utility class for accumulating statistics from repeated
 // evaluations of a plug.
 struct PlugStats
@@ -171,7 +209,10 @@ struct PlugStats
 		else
 		{
 			static_cast<SumDataType *>( sum.get() )->writable() += inputPlug->getValue();
-			!!!
+			auto typedMin = static_cast<MinMaxDataType *>( min.get() );
+			typedMin->writable() = vectorAwareMin( typedMin->readable(), inputPlug->getValue() );
+			auto typedMax = static_cast<MinMaxDataType *>( max.get() );
+			typedMax->writable() = vectorAwareMax( typedMax->readable(), inputPlug->getValue() );
 		}
 	}
 
@@ -280,6 +321,10 @@ Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const st
 			using SumType = typename StatsTraits<InputPlugType>::SumDataType::ValueType;
 			using SumPlugType = typename PlugType<SumType>::Type;
 			outChild->addChild( new SumPlugType( "sum", Plug::Out ) );
+			using MinMaxType = typename StatsTraits<InputPlugType>::MinMaxDataType::ValueType;
+			using MinMaxPlugType = typename PlugType<MinMaxType>::Type;
+			outChild->addChild( new MinMaxPlugType( "min", Plug::Out ) );
+			outChild->addChild( new MinMaxPlugType( "max", Plug::Out ) );
 		}
 	);
 
