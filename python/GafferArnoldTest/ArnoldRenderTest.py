@@ -1626,6 +1626,12 @@ class ArnoldRenderTest( GafferSceneTest.RenderTest ) :
 			with GafferTest.TestRunner.PerformanceScope() :
 				s["render"]["task"].execute()
 
+	def _createConstantShader( self ) :
+
+		shader = GafferArnold.ArnoldShader()
+		shader.loadShader( "flat" )
+		return shader, shader["parameters"]["color"], shader["out"]
+
 	def _createDiffuseShader( self ) :
 
 		shader = GafferArnold.ArnoldShader()
