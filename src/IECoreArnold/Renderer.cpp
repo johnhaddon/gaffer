@@ -4679,15 +4679,18 @@ ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::pointInstancer( const
 	IECoreScene::PointInstancer::Query query( samples[0] );
 	auto matrixArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_MATRIX ); // TODO : MOTION BLUR
 	auto indexArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_UINT );
+	auto visibilityArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_BYTE );
 	for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
 	{
 		Imath::M44f m = query.transform( instanceIndex );
 		AiArraySetMtx( matrixArray, instanceIndex, reinterpret_cast<const AtMatrix&>( m.x ) );
 		AiArraySetInt( indexArray, instanceIndex, prototypeIndex ? (*prototypeIndex)[instanceIndex] : 0 ); // TODO : THE REAL THING
+		AiArraySetByte( visibilityArray, instanceIndex, 255 ); // TODO : THE REAL THING
 	}
 
 	AiNodeSetArray( instancerNode.get(), AtString( "instance_matrix" ), matrixArray );
 	AiNodeSetArray( instancerNode.get(), AtString( "node_idxs" ), indexArray );
+	AiNodeSetArray( instancerNode.get(), AtString( "instance_visibility" ), visibilityArray );
 
 	fmt::print( "ArnoldRendererBase::pointInstancer() - {} prototypes, {} matrices\n", prototypes.size(), query.numInstances() );
 
