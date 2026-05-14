@@ -46,6 +46,7 @@
 #include "Gaffer/TypedPlug.h"
 
 #include "IECore/CompoundData.h"
+#include "IECore/DataAlgo.h"
 #include "IECore/NullObject.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -214,11 +215,38 @@ struct PlugStats
 			auto typedMax = static_cast<MinMaxDataType *>( max.get() );
 			typedMax->writable() = vectorAwareMax( typedMax->readable(), inputPlug->getValue() );
 		}
+		count++;
+	}
+
+	template<typename InputPlugType>
+	void update( const InputPlugType *inputPlug, const PlugStats &other )
+	{
+		if( !sum )
+		{
+			*this = other;
+			return;
+		}
+		else
+		{
+			using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
+			using MinMaxDataType = typename StatsTraits<InputPlugType>::MinMaxDataType;
+			static_cast<SumDataType *>( sum.get() )->writable() += static_cast<const SumDataType *>( other.sum.get() )->readable();
+			static_cast<MinMaxDataType *>( min.get() )->writable() = vectorAwareMin(
+				static_cast<const MinMaxDataType *>( min.get() )->readable(),
+				static_cast<const MinMaxDataType *>( other.min.get() )->readable()
+			);
+			static_cast<MinMaxDataType *>( max.get() )->writable() = vectorAwareMax(
+				static_cast<const MinMaxDataType *>( max.get() )->readable(),
+				static_cast<const MinMaxDataType *>( other.max.get() )->readable()
+			);
+			count += other.count;
+		}
 	}
 
 	IECore::DataPtr sum;
 	IECore::DataPtr min;
 	IECore::DataPtr max;
+	size_t count = 0;
 
 };
 
@@ -226,6 +254,28 @@ struct PlugStats
 // on a plug. // TODO RENAME INTERNAL PLUG AND MATCH NAMES>
 struct StatsData : public IECore::Data
 {
+
+	void update( const ValuePlug *queriesPlug )
+	{
+		for( const auto &queryPlug : ValuePlug::Range( *queriesPlug ) )
+		{
+			dispatchPlugFunction(
+				queryPlug.get(), [&] ( auto *plug ) { map[queryPlug->getName()].update( plug ); }
+			);
+		}
+	}
+
+	void update( const ValuePlug *queriesPlug, const StatsData &other )
+	{
+		for( const auto &queryPlug : ValuePlug::Range( *queriesPlug ) )
+		{
+			dispatchPlugFunction(
+				queryPlug.get(), [&] ( auto *plug ) {
+					map[queryPlug->getName()].update( plug, other.map.at( queryPlug->getName() ) );
+				}
+			);
+		}
+	}
 
 	IE_CORE_DECLAREMEMBERPTR( StatsData )
 	using Map = std::unordered_map<InternedString, PlugStats>;
@@ -318,6 +368,7 @@ Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const st
 	dispatchPlugFunction(
 		plug, [&] ( auto *plug ) {
 			using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
+			outChild->addChild( new IntPlug( "count", Plug::Out ) );
 			using SumType = typename StatsTraits<InputPlugType>::SumDataType::ValueType;
 			using SumPlugType = typename PlugType<SumType>::Type;
 			outChild->addChild( new SumPlugType( "sum", Plug::Out ) );
@@ -391,6 +442,7 @@ void SceneStats::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *c
 		std::atomic<uint64_t> h1( 0 ), h2( 0 );
 		auto functor = [&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> bool
 		{
+			/// TODO : SHOULD HASH NAME? YES.
 			IECore::MurmurHash locationHash;
 			for( const ValuePlugPtr &child : ValuePlug::Range( *queriesPlug() ) )
 			{
@@ -424,32 +476,15 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 
 		auto functor = [&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> bool
 		{
-			auto &statsData = threadStats.local();
-			for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
-			{
-				dispatchPlugFunction(
-					queryPlug.get(), [&] ( auto *plug ) { statsData.map[queryPlug->getName()].update( plug ); }
-				);
-			}
+			threadStats.local().update( queriesPlug() );
 			return true;
 		};
 		SceneAlgo::filteredParallelTraverse( scenePlug(), filterPlug(), functor );
 
 		StatsData::Ptr result = new StatsData;
-		for( const auto &queryPlug : ValuePlug::Range( *queriesPlug() ) )
+		for( const auto &statsData : threadStats )
 		{
-			dispatchPlugFunction(
-				queryPlug.get(), [&] ( auto *plug ) {
-					/// TODO : MOVE TO STATS CLASS
-					using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-					using SumDataType = typename StatsTraits<InputPlugType>::SumDataType;
-					typename SumDataType::Ptr data = new SumDataType( typename SumDataType::ValueType( 0 ) );
-					threadStats.combine_each( [&] ( StatsData &statsData ) {
-						data->writable() += static_cast<SumDataType *>( statsData.map[queryPlug->getName()].sum.get() )->readable();
-					} );
-					result->map[plug->getName()].sum = data;
-				}
-			);
+			result->update( queriesPlug(), statsData );
 		}
 
 		static_cast<ObjectPlug *>( output )->setValue( result );
@@ -459,9 +494,32 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 		auto [topOutput, statOutput] = outPlugAncestors( output );
 
 		StatsData::ConstPtr data = boost::static_pointer_cast<const StatsData>( internalDataPlug()->getValue() );
-		const auto it = data->map.find( topOutput->getName() );
-		assert( it != data->map.end() );
-		PlugAlgo::setValueFromData( statOutput, output, it->second.sum.get() );
+		auto it = data->map.find( topOutput->getName() );
+		if( it == data->map.end() )
+		{
+			// We didn't collect anything.
+			output->setToDefault();
+		}
+		else
+		{
+			const auto &stats = it->second;
+			if( statOutput->getName() == "count" )
+			{
+				static_cast<IntPlug *>( output )->setValue( stats.count );
+			}
+			else if( statOutput->getName() == "sum" ) // TODO : GLOBAL STRINGS
+			{
+				PlugAlgo::setValueFromData( statOutput, output, stats.sum.get() );
+			}
+			else if( statOutput->getName() == "min" )
+			{
+				PlugAlgo::setValueFromData( statOutput, output, stats.min.get() );
+			}
+			else if( statOutput->getName() == "max" )
+			{
+				PlugAlgo::setValueFromData( statOutput, output, stats.max.get() );
+			}
+		}
 	}
 	else
 	{

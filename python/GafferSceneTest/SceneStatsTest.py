@@ -34,9 +34,8 @@
 #
 ##########################################################################
 
+import inspect
 import unittest
-
-import imath
 
 import IECore
 
@@ -78,9 +77,14 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 			stats.queryPlug( stats["out"]["position"]["sum"]["x"] ).isSame( stats["queries"]["position"] )
 		)
 
-	def testSum( self ) :
+	def testStats( self ) :
 
 		# TODO : MERGE WITH TESTCONNECTEDQUERY
+
+		# /group
+		#    /sphere
+		#    /cube
+		#    /plane
 
 		sphere = GafferScene.Sphere()
 		cube = GafferScene.Cube()
@@ -92,18 +96,36 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		group["in"][2].setInput( plane["out"] )
 
 		pathFilter = GafferScene.PathFilter()
-		pathFilter["paths"].setValue( IECore.StringVectorData( [
-			"/group/sphere", "/group/cube", "/group/plane" # TODO : *
-		] ) )
+		pathFilter["paths"].setValue( IECore.StringVectorData( [ "/*/*" ] ) )
 
 		stats = GafferScene.SceneStats()
 		stats["scene"].setInput( group["out"] )
 		stats["filter"].setInput( pathFilter["out"] )
 
-		stats.addQuery( Gaffer.IntPlug(), "count" )
-		stats["queries"]["count"].setValue( 1 )
+		stats.addQuery( Gaffer.IntPlug(), "pInPath" )
+		stats.addQuery( Gaffer.IntPlug(), "hInPath" )
 
-		self.assertEqual( stats["out"]["count"]["sum"].getValue(), 3 )
+		stats["expression"] = Gaffer.Expression()
+		stats["expression"].setExpression(
+			inspect.cleandoc(
+				"""
+				import GafferScene
+				path = GafferScene.ScenePlug.pathToString( context["scene:path"] )
+				parent["queries"]["pInPath"] = path.count( "p" )
+				parent["queries"]["hInPath"] = path.count( "h" )
+				"""
+			)
+		)
+
+		self.assertEqual( stats["out"]["pInPath"]["count"].getValue(), 3 )
+		self.assertEqual( stats["out"]["pInPath"]["sum"].getValue(), 5 )
+		self.assertEqual( stats["out"]["pInPath"]["min"].getValue(), 1 )
+		self.assertEqual( stats["out"]["pInPath"]["max"].getValue(), 2 )
+
+		self.assertEqual( stats["out"]["hInPath"]["count"].getValue(), 3 )
+		self.assertEqual( stats["out"]["hInPath"]["sum"].getValue(), 1 )
+		self.assertEqual( stats["out"]["hInPath"]["min"].getValue(), 0 )
+		self.assertEqual( stats["out"]["hInPath"]["max"].getValue(), 1 )
 
 	def testAllQueryTypes( self ) :
 
@@ -157,18 +179,15 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 
 	def testNoMatches( self ) :
 
-		cube = GafferScene.Cube()
-
-		pathFilter = GafferScene.PathFilter()
-
 		stats = GafferScene.SceneStats()
-		stats["scene"].setInput( cube["out"] )
-		stats["filter"].setInput( pathFilter["out"] )
 
-		stats.addQuery( Gaffer.IntPlug(), "count" )
-		stats["queries"]["count"].setValue( 99 )
+		stats.addQuery( Gaffer.IntPlug(), "test" )
+		stats["queries"]["test"].setValue( 1 )
 
-		self.assertEqual( stats["out"]["count"]["sum"].getValue(), 0 )
+		self.assertEqual( stats["out"]["test"]["count"].getValue(), 0 )
+		self.assertEqual( stats["out"]["test"]["sum"].getValue(), 0 )
+		self.assertEqual( stats["out"]["test"]["min"].getValue(), 0 )
+		self.assertEqual( stats["out"]["test"]["max"].getValue(), 0 )
 
 	def testConnectedQuery( self ) :
 
@@ -178,7 +197,8 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		# the sum equals that value multiplied by the number of matched locations.
 		cube = GafferScene.Cube()
 
-		# TODO : USE TWO DIFFERENT PRIMITIVES WITH DIFFERENT COUNTS
+		# TODO : USE TWO DIFFERENT PRIMITIVES WITH DIFFERENT COUNTS AND
+		# GET RID OF THE IFFY DESCRIPTION ABOVE
 
 		group = GafferScene.Group()
 		group["in"][0].setInput( cube["out"] )
