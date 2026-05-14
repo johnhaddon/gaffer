@@ -943,7 +943,7 @@ class PrototypeCache : public IECore::RefCounted
 		}
 
 		// Can be called concurrently with other get() calls.
-		DelightHandleSharedPtr get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times )
+		DelightHandleSharedPtr get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const std::vector<IECoreScenePreview::Renderer::Prototype> *pointInstancerPrototypes = nullptr )
 		{
 			IECore::MurmurHash hash;
 			for( const auto &sample : samples )
@@ -952,19 +952,39 @@ class PrototypeCache : public IECore::RefCounted
 			}
 			hash.append( times.data(), times.size() );
 
+			if( pointInstancerPrototypes )
+			{
+				for( const auto &p : *pointInstancerPrototypes )
+				{
+					for( const auto &sample : p.samples )
+					{
+						sample->hash( hash );
+					}
+					hash.append( p.times.data(), p.times.size() );
+				}
+			}
+
 			Cache::accessor a;
 			m_cache.insert( a, hash );
 
 			if( !a->second )
 			{
-				const std::string &name = "instance:" + hash.toString();
-				if( NodeAlgo::convert( samples, times, m_context, name.c_str() ) )
+				const std::string &name = "prototype:" + hash.toString();
+				bool converted;
+				if( pointInstancerPrototypes )
 				{
-					a->second = make_shared<DelightHandle>( m_context, name, m_ownership );
+					converted = convertPointInstancer(
+						IECoreScenePreview::Renderer::staticSamplesCast<const PointInstancer *>( samples ), times,
+						*pointInstancerPrototypes, name.c_str()
+					);
 				}
 				else
 				{
-					a->second = nullptr;
+					converted = NodeAlgo::convert( samples, times, m_context, name.c_str() );
+				}
+				if( converted )
+				{
+					a->second = make_shared<DelightHandle>( m_context, name, m_ownership );
 				}
 			}
 
@@ -981,7 +1001,7 @@ class PrototypeCache : public IECore::RefCounted
 				{
 					// Only one reference - this is ours, so
 					// nothing outside of the cache is using the
-					// instance.
+					// prototype.
 					toErase.push_back( it->first );
 				}
 			}
@@ -992,6 +1012,57 @@ class PrototypeCache : public IECore::RefCounted
 		}
 
 	private :
+
+		bool convertPointInstancer(
+			const IECoreScenePreview::Renderer::Samples<const PointInstancer *> &samples,
+			const IECoreScenePreview::Renderer::SampleTimes &times,
+			const std::vector<IECoreScenePreview::Renderer::Prototype> &prototypes, const char *handle
+		)
+		{
+			IECoreScene::PointInstancer::Query query( samples[0] );
+			M44dVectorDataPtr instanceMatricesData = new M44dVectorData();
+			std::vector<M44d> &instanceMatrices = instanceMatricesData->writable();
+			instanceMatrices.reserve( query.numInstances() );
+			for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex )
+			{
+				instanceMatrices.push_back( M44d( query.transform( instanceIndex ) ) );
+			}
+
+			NSICreate( m_context, handle, "instances", 0, nullptr );
+
+			ParameterList parameters;
+			parameters.add( "transformationmatrices", instanceMatricesData.get() );
+
+			NSISetAttribute( m_context, handle, parameters.size(), parameters.data() );
+
+			IntDataPtr modelIndexData = new IntData();
+
+			for( size_t prototypeIndex = 0; prototypeIndex < prototypes.size(); ++prototypeIndex )
+			{
+				const auto &prototype = prototypes[prototypeIndex];
+				DelightHandleSharedPtr prototypeHandle = get( prototype.samples, prototype.times );
+
+				modelIndexData->writable() = prototypeIndex;
+				ParameterList connectionParameters;
+				connectionParameters.add( "index", modelIndexData.get() );
+
+				if( prototypeHandle )
+				{
+					NSIConnect(
+						m_context,
+						prototypeHandle->name(), "",
+						handle, "sourcemodels",
+						connectionParameters.size(), connectionParameters.data()
+					);
+				}
+				else
+				{
+					// TODO : WHAT NOW? INDICES ARE MESSED UP AT THE VERY LEAST
+				}
+			}
+
+			return true;
+		}
 
 		NSIContext_t m_context;
 		DelightHandle::Ownership m_ownership;
@@ -1017,14 +1088,14 @@ class DelightObject: public IECoreScenePreview::Renderer::ObjectInterface
 
 	public :
 
-		DelightObject( NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance, DelightHandle::Ownership ownership )
-			:	m_transformHandle( context, name, ownership, "transform", {} ), m_instance( instance ), m_haveTransform( false )
+		DelightObject( NSIContext_t context, const std::string &name, DelightHandleSharedPtr prototype, DelightHandle::Ownership ownership )
+			:	m_transformHandle( context, name, ownership, "transform", {} ), m_prototype( prototype ), m_haveTransform( false )
 		{
-			if( m_instance )
+			if( m_prototype )
 			{
 				NSIConnect(
 					m_transformHandle.context(),
-					m_instance->name(), "",
+					prototype->name(), "",
 					m_transformHandle.name(), "objects",
 					0, nullptr
 				);
@@ -1141,7 +1212,7 @@ class DelightObject: public IECoreScenePreview::Renderer::ObjectInterface
 	protected :
 
 		const DelightHandle m_transformHandle;
-		// We keep a reference to the instance and attributes so that they
+		// We keep a reference to the prototype and attributes so that they
 		// remain alive for at least as long as the object does.
 		ConstDelightAttributesPtr m_attributes;
 
@@ -1176,7 +1247,7 @@ class DelightObject: public IECoreScenePreview::Renderer::ObjectInterface
 			NSISetAttribute( m_idAttributesHandle.context(), m_idAttributesHandle.name(), 1, &param );
 		}
 
-		DelightHandleSharedPtr m_instance;
+		DelightHandleSharedPtr m_prototype;
 		DelightHandle m_idAttributesHandle;
 
 		bool m_haveTransform;
@@ -1197,8 +1268,8 @@ class DelightLight : public DelightObject
 
 	public :
 
-		DelightLight( NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance, DelightHandle::Ownership ownership )
-			: DelightObject( context, name, instance, ownership ), m_lightGeometryType( nullptr )
+		DelightLight( NSIContext_t context, const std::string &name, DelightHandleSharedPtr prototype, DelightHandle::Ownership ownership )
+			: DelightObject( context, name, prototype, ownership ), m_lightGeometryType( nullptr )
 		{
 		}
 
@@ -1586,13 +1657,13 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		{
 			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-			DelightHandleSharedPtr instance;
+			DelightHandleSharedPtr prototype;
 			if( objectSamples.size() )
 			{
-				instance = m_prototypeCache->get( objectSamples, times );
+				prototype = m_prototypeCache->get( objectSamples, times );
 			}
 
-			ObjectInterfacePtr result = new DelightLight( m_context, name, instance, ownership() );
+			ObjectInterfacePtr result = new DelightLight( m_context, name, prototype, ownership() );
 			result->attributes( attributes );
 
 			return result;
@@ -1607,13 +1678,28 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		{
 			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-			DelightHandleSharedPtr instance = m_prototypeCache->get( samples, times );
-			if( !instance )
+			DelightHandleSharedPtr prototype = m_prototypeCache->get( samples, times );
+			if( !prototype )
 			{
 				return nullptr;
 			}
 
-			ObjectInterfacePtr result = new DelightObject( m_context, name, instance, ownership() );
+			ObjectInterfacePtr result = new DelightObject( m_context, name, prototype, ownership() );
+			result->attributes( attributes );
+			return result;
+		}
+
+		ObjectInterfacePtr pointInstancer( const std::string &name, const PointInstancerSamples &samples, const SampleTimes &times, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes ) override
+		{
+			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
+
+			DelightHandleSharedPtr prototype = m_prototypeCache->get( Renderer::staticSamplesCast<ConstObjectPtr>( samples ), times, &prototypes );
+			if( !prototype )
+			{
+				return nullptr;
+			}
+
+			ObjectInterfacePtr result = new DelightObject( m_context, name, prototype, ownership() );
 			result->attributes( attributes );
 			return result;
 		}
