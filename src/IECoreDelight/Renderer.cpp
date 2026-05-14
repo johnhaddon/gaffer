@@ -926,18 +926,18 @@ IE_CORE_DECLAREPTR( AttributesCache )
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
-// InstanceCache
+// PrototypeCache
 //////////////////////////////////////////////////////////////////////////
 
 namespace
 {
 
-class InstanceCache : public IECore::RefCounted
+class PrototypeCache : public IECore::RefCounted
 {
 
 	public :
 
-		InstanceCache( NSIContext_t context, DelightHandle::Ownership ownership )
+		PrototypeCache( NSIContext_t context, DelightHandle::Ownership ownership )
 			:	m_context( context ), m_ownership( ownership )
 		{
 		}
@@ -1001,7 +1001,7 @@ class InstanceCache : public IECore::RefCounted
 
 };
 
-IE_CORE_DECLAREPTR( InstanceCache )
+IE_CORE_DECLAREPTR( PrototypeCache )
 
 } // namespace
 
@@ -1404,7 +1404,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			}
 
 			m_context = NSIBegin( params.size(), params.data() );
-			m_instanceCache = new InstanceCache( m_context, ownership() );
+			m_prototypeCache = new PrototypeCache( m_context, ownership() );
 			m_attributesCache = new AttributesCache( m_context, ownership() );
 
 			NSICreate( m_context, g_screenHandle, "screen", 0, nullptr );
@@ -1417,7 +1417,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			// Delete nodes we own before we destroy context
 			stop();
 			m_attributesCache.reset();
-			m_instanceCache.reset();
+			m_prototypeCache.reset();
 			m_outputs.clear();
 			m_defaultCamera.reset();
 			NSIEnd( m_context );
@@ -1589,7 +1589,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			DelightHandleSharedPtr instance;
 			if( objectSamples.size() )
 			{
-				instance = m_instanceCache->get( objectSamples, times );
+				instance = m_prototypeCache->get( objectSamples, times );
 			}
 
 			ObjectInterfacePtr result = new DelightLight( m_context, name, instance, ownership() );
@@ -1607,7 +1607,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		{
 			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-			DelightHandleSharedPtr instance = m_instanceCache->get( samples, times );
+			DelightHandleSharedPtr instance = m_prototypeCache->get( samples, times );
 			if( !instance )
 			{
 				return nullptr;
@@ -1622,7 +1622,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		{
 			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-			m_instanceCache->clearUnused();
+			m_prototypeCache->clearUnused();
 			m_attributesCache->clearUnused();
 
 			if( m_rendering )
@@ -1883,7 +1883,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 
 		bool m_rendering = false;
 
-		InstanceCachePtr m_instanceCache;
+		PrototypeCachePtr m_prototypeCache;
 		AttributesCachePtr m_attributesCache;
 
 		unordered_map<InternedString, ConstDelightOutputPtr> m_outputs;
