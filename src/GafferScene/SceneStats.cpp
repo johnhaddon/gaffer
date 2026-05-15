@@ -137,22 +137,6 @@ struct StatsTraits<CompoundNumericPlug<Vec3<T>>>
 	using MinMaxDataType = GeometricTypedData<Vec3<T>>;
 };
 
-/// TODO : USE RECURSIVE RANGE
-void addLeafPlugs( const Gaffer::Plug *plug, Gaffer::DependencyNode::AffectedPlugsContainer &outputs )
-{
-	if( plug->children().empty() )
-	{
-		outputs.push_back( plug );
-	}
-	else
-	{
-		for( const Gaffer::PlugPtr &child : Gaffer::Plug::OutputRange( *plug ) )
-		{
-			addLeafPlugs( child.get(), outputs );
-		}
-	}
-}
-
 /// \todo This and `vectorAwareMax()` are borrowed from `TweakPlug.cpp`. Is there
 /// anywhere we could share them?
 template<typename T>
@@ -434,7 +418,13 @@ void SceneStats::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 
 	if( input == internalDataPlug() )
 	{
-		addLeafPlugs( outPlug(), outputs );
+		for( const auto &output : ValuePlug::RecursiveRange( *outPlug() ) )
+		{
+			if( output->children().empty() )
+			{
+				outputs.push_back( output.get() );
+			}
+		}
 	}
 }
 
