@@ -166,7 +166,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 				self[f"{nodeNamePrefix}PatternMatch"] = patternMatch
 
 				query = self["__statistics"].addQuery( patternMatch["match"], f"{queryPrefix}Count" )
-				query.setInput( patternMatch["match"] )
+				query["value"].setInput( patternMatch["match"] )
 
 				# Query enabled for just this primitive type.
 				typedPrimitiveQuery = GafferScene.PrimitiveQuery()
@@ -179,7 +179,7 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 					interpolationSuffix = interpolation[0].upper() + interpolation[1:]
 					interpolationPlug = typedPrimitiveQuery[interpolation]
 					query = self["__statistics"].addQuery( interpolationPlug, f"{queryPrefix}{interpolationSuffix}" )
-					query.setInput( interpolationPlug )
+					query["value"].setInput( interpolationPlug )
 
 		def _locationComparisonEnablers( self ) :
 

@@ -310,7 +310,7 @@ void GafferSceneModule::bindQueries()
 		.def( "addQuery", &addQuery<GafferScene::SceneStats>, ( arg( "plug" ), arg( "name" ) = "" ) )
 		.def( "removeQuery", &removeQuery<GafferScene::SceneStats, ValuePlug> )
 		.def( "outPlugFromQuery", &outPlugFromQuery<GafferScene::SceneStats, ValuePlug> )
-		.def( "queryPlug", &queryPlug<GafferScene::SceneStats, ValuePlug> )
+		.def( "queryPlug", &queryPlug<GafferScene::SceneStats, OptionalValuePlug> )
 	;
 	GafferBindings::Serialisation::registerSerialiser( GafferScene::SceneStats::staticTypeId(), new SceneStatsSerialiser() );
 }

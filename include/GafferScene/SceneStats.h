@@ -42,6 +42,7 @@
 #include "GafferScene/TypeIds.h"
 
 #include "Gaffer/ComputeNode.h"
+#include "Gaffer/OptionalValuePlug.h"
 #include "Gaffer/TypedObjectPlug.h"
 #include "Gaffer/ValuePlug.h"
 
@@ -84,14 +85,15 @@ class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 		/// TODO : IS THIS A QUERY OR A STATISTIC? SHOULD NAME BE PASSED LIKE THIS? SHOULD WE SUPPORT ON-THE-FLY RENAMING OF THE PLUG?
 		/// TODO : SHOULD THERE BE AN ENABLED PLUG PER QUERY? SO, FOR EXAMPLE, I COULD CALCULATE THE AVERAGE
 		/// FACE COUNT FOR MESHES, SKIPPING OVER LOCATIONS THAT AREN'T MESHES. THIS WOULD HAVE A TOTAL OUTPUT PLUG TO GO WITH IT.
-		Gaffer::ValuePlug *addQuery( const Gaffer::ValuePlug *plug, const std::string &name );
+		/// TODO : CAN WE JUST USE ADDCHILD()?
+		Gaffer::OptionalValuePlug *addQuery( const Gaffer::ValuePlug *plug, const std::string &name );
 		/// Removes a query and its corresponding output. Throws if `plug` is
 		/// not a child of `queriesPlug()`.
 		void removeQuery( Gaffer::ValuePlug *plug );
 
 		/// TODO : WHY THE MISMATCH?
 		const Gaffer::ValuePlug *outPlugFromQuery( const Gaffer::ValuePlug *queryPlug ) const;
-		const Gaffer::ValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
+		const Gaffer::OptionalValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
 		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 

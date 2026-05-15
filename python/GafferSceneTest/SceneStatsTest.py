@@ -52,17 +52,20 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( len( stats["queries"] ), 0 )
 		self.assertEqual( len( stats["out"] ), 0 )
 
-		stats.addQuery( Gaffer.IntPlug(), "count" ) # TODO : THIS IS A SHIT NAME, BECAUSE WE'RE GOING TO HAVE A COUNT CHILD PLUG
+		stats.addQuery( Gaffer.IntPlug(), "test" )
 
 		self.assertEqual( len( stats["queries"] ), 1 )
 		self.assertEqual( len( stats["out"] ), 1 )
-		self.assertIsInstance( stats["queries"]["count"], Gaffer.IntPlug )
-		self.assertIsInstance( stats["out"]["count"]["sum"], Gaffer.IntPlug )
+		self.assertIsInstance( stats["queries"]["test"], Gaffer.OptionalValuePlug )
+		self.assertEqual( stats["queries"]["test"]["enabled"].getValue(), True )
+		self.assertEqual( stats["queries"]["test"]["enabled"].defaultValue(), True )
+		self.assertIsInstance( stats["queries"]["test"]["value"], Gaffer.IntPlug )
+		self.assertIsInstance( stats["out"]["test"]["sum"], Gaffer.IntPlug )
 
-		self.assertTrue( stats.outPlugFromQuery( stats["queries"]["count"] ).isSame( stats["out"]["count"] ) )
-		self.assertTrue( stats.queryPlug( stats["out"]["count"] ).isSame( stats["queries"]["count"] ) )
+		self.assertTrue( stats.outPlugFromQuery( stats["queries"]["test"] ).isSame( stats["out"]["test"] ) )
+		self.assertTrue( stats.queryPlug( stats["out"]["test"] ).isSame( stats["queries"]["test"] ) )
 
-		stats.removeQuery( stats["queries"]["count"] )
+		stats.removeQuery( stats["queries"]["test"] )
 
 		self.assertEqual( len( stats["queries"] ), 0 )
 		self.assertEqual( len( stats["out"] ), 0 )
@@ -78,8 +81,6 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		)
 
 	def testStats( self ) :
-
-		# TODO : MERGE WITH TESTCONNECTEDQUERY
 
 		# /group
 		#    /sphere
@@ -111,8 +112,8 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 				"""
 				import GafferScene
 				path = GafferScene.ScenePlug.pathToString( context["scene:path"] )
-				parent["queries"]["pInPath"] = path.count( "p" )
-				parent["queries"]["hInPath"] = path.count( "h" )
+				parent["queries"]["pInPath"]["value"] = path.count( "p" )
+				parent["queries"]["hInPath"]["value"] = path.count( "h" )
 				"""
 			)
 		)
@@ -126,6 +127,13 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( stats["out"]["hInPath"]["sum"].getValue(), 1 )
 		self.assertEqual( stats["out"]["hInPath"]["min"].getValue(), 0 )
 		self.assertEqual( stats["out"]["hInPath"]["max"].getValue(), 1 )
+
+		stats["queries"]["pInPath"]["enabled"].setValue( False )
+
+		self.assertEqual( stats["out"]["pInPath"]["count"].getValue(), 0 )
+		self.assertEqual( stats["out"]["pInPath"]["sum"].getValue(), 0 )
+		self.assertEqual( stats["out"]["pInPath"]["min"].getValue(), 0 )
+		self.assertEqual( stats["out"]["pInPath"]["max"].getValue(), 0 )
 
 	def testAllInputTypes( self ) :
 
@@ -149,10 +157,10 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		] :
 
 			query = stats.addQuery( plugType() )
-			query.setValue( plugType.ValueType( 1 ) )
+			query["value"].setValue( plugType.ValueType( 1 ) )
 
 			output = stats.outPlugFromQuery( query )
-			self.assertEqual( output["sum"].getValue(), query.getValue() * 2 )
+			self.assertEqual( output["sum"].getValue(), query["value"].getValue() * 2 )
 
 	def testFilterLimitsContributions( self ) :
 
@@ -170,12 +178,16 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		stats["scene"].setInput( group["out"] )
 		stats["filter"].setInput( pathFilter["out"] )
 
-		stats.addQuery( Gaffer.IntPlug(), "count" )
-		stats["queries"]["count"].setValue( 7 )
+		stats.addQuery( Gaffer.IntPlug(), "test" )
+		stats["queries"]["test"]["value"].setValue( 2 )
 
-		self.assertEqual( stats["out"]["count"]["sum"].getValue(), 7 )
+		self.assertEqual( stats["out"]["test"]["count"].getValue(), 1 )
+		self.assertEqual( stats["out"]["test"]["sum"].getValue(), 2 )
 
-		# TODO : CHANGE FILTER AND RETEST
+		pathFilter["paths"].setValue( IECore.StringVectorData( [ "/group", "/group/sphere" ] ) )
+
+		self.assertEqual( stats["out"]["test"]["count"].getValue(), 2 )
+		self.assertEqual( stats["out"]["test"]["sum"].getValue(), 4 )
 
 	def testRenameInput( self ) :
 
@@ -221,46 +233,38 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		stats = GafferScene.SceneStats()
 
 		stats.addQuery( Gaffer.IntPlug(), "test" )
-		stats["queries"]["test"].setValue( 1 )
+		stats["queries"]["test"]["value"].setValue( 1 )
 
 		self.assertEqual( stats["out"]["test"]["count"].getValue(), 0 )
 		self.assertEqual( stats["out"]["test"]["sum"].getValue(), 0 )
 		self.assertEqual( stats["out"]["test"]["min"].getValue(), 0 )
 		self.assertEqual( stats["out"]["test"]["max"].getValue(), 0 )
 
-	def testConnectedQuery( self ) :
+	def testPrimitiveQuery( self ) :
 
-		# Verify that a query input connected to another node is evaluated in
-		# the context of each matched location. PrimitiveQuery with a fixed
-		# location returns the same value regardless of the traversal path, so
-		# the sum equals that value multiplied by the number of matched locations.
 		cube = GafferScene.Cube()
-
-		# TODO : USE TWO DIFFERENT PRIMITIVES WITH DIFFERENT COUNTS AND
-		# GET RID OF THE IFFY DESCRIPTION ABOVE
+		plane = GafferScene.Plane()
 
 		group = GafferScene.Group()
 		group["in"][0].setInput( cube["out"] )
-		group["in"][1].setInput( cube["out"] )
+		group["in"][1].setInput( plane["out"] )
 
 		primitiveQuery = GafferScene.PrimitiveQuery()
 		primitiveQuery["scene"].setInput( group["out"] )
-		primitiveQuery["location"].setValue( "/group/cube" )
+		primitiveQuery["location"].setValue( "${scene:path}" )
 
 		pathFilter = GafferScene.PathFilter()
-		pathFilter["paths"].setValue( IECore.StringVectorData( [ "/group/cube", "/group/cube1" ] ) )
+		pathFilter["paths"].setValue( IECore.StringVectorData( [ "/group/cube", "/group/plane" ] ) )
 
 		stats = GafferScene.SceneStats()
 		stats["scene"].setInput( group["out"] )
 		stats["filter"].setInput( pathFilter["out"] )
 
 		stats.addQuery( Gaffer.IntPlug(), "vertexCount" )
-		stats["queries"]["vertexCount"].setInput( primitiveQuery["vertex"] )
+		stats["queries"]["vertexCount"]["value"].setInput( primitiveQuery["vertex"] )
 
-		self.assertEqual(
-			stats["out"]["vertexCount"]["sum"].getValue(),
-			primitiveQuery["vertex"].getValue() * 2
-		)
+		self.assertEqual( stats["out"]["vertexCount"]["count"].getValue(), 2 )
+		self.assertEqual( stats["out"]["vertexCount"]["sum"].getValue(), 12 )
 
 if __name__ == "__main__" :
 	unittest.main()

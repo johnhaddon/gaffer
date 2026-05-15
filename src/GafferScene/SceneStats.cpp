@@ -241,21 +241,28 @@ struct StatsData : public IECore::Data
 
 	void update( const ValuePlug *queriesPlug )
 	{
-		for( const auto &queryPlug : ValuePlug::Range( *queriesPlug ) )
+		for( const auto &queryPlug : OptionalValuePlug::Range( *queriesPlug ) )
 		{
-			dispatchPlugFunction(
-				queryPlug.get(), [&] ( auto *plug ) { map[queryPlug->getName()].update( plug ); }
-			);
+			if( queryPlug->enabledPlug()->getValue() )
+			{
+				dispatchPlugFunction(
+					queryPlug->valuePlug(), [&] ( auto *plug ) { map[queryPlug->getName()].update( plug ); }
+				);
+			}
 		}
 	}
 
 	void update( const ValuePlug *queriesPlug, const StatsData &other )
 	{
-		for( const auto &queryPlug : ValuePlug::Range( *queriesPlug ) )
+		for( const auto &queryPlug : OptionalValuePlug::Range( *queriesPlug ) )
 		{
 			dispatchPlugFunction(
-				queryPlug.get(), [&] ( auto *plug ) {
-					map[queryPlug->getName()].update( plug, other.map.at( queryPlug->getName() ) );
+				queryPlug->valuePlug(), [&] ( auto *plug ) {
+					auto it = other.map.find( queryPlug->getName() );
+					if( it != other.map.end() )
+					{
+						map[queryPlug->getName()].update( plug, it->second );
+					}
 				}
 			);
 		}
@@ -347,11 +354,11 @@ const Gaffer::ObjectPlug *SceneStats::internalDataPlug() const
 	return getChild<ObjectPlug>( g_firstPlugIndex + 4 );
 }
 
-Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const std::string &name )
+Gaffer::OptionalValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const std::string &name )
 {
 	const std::string actualName = name.empty() ? plug->getName().string() : name;
-	PlugPtr queryChild = plug->createCounterpart( actualName, Plug::In );
-	queryChild->setFlags( Plug::Dynamic, false );
+	ValuePlugPtr valuePlug = boost::static_pointer_cast<ValuePlug>( plug->createCounterpart( actualName, Plug::In ) );
+	OptionalValuePlugPtr inChild = new OptionalValuePlug( actualName, valuePlug, true );
 
 	PlugPtr outChild = new ValuePlug( actualName, Plug::Out );
 	dispatchPlugFunction(
@@ -368,10 +375,10 @@ Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const st
 		}
 	);
 
-	queriesPlug()->addChild( queryChild );
+	queriesPlug()->addChild( inChild );
 	outPlug()->addChild( outChild );
 
-	return static_cast<ValuePlug *>( queryChild.get() );
+	return inChild.get();
 }
 
 void SceneStats::removeQuery( Gaffer::ValuePlug *plug )
@@ -386,14 +393,14 @@ const Gaffer::ValuePlug *SceneStats::outPlugFromQuery( const Gaffer::ValuePlug *
 	return outPlug()->getChild<ValuePlug>( queryPlug->getName() );
 }
 
-const Gaffer::ValuePlug *SceneStats::queryPlug( const Gaffer::ValuePlug *outputPlug ) const
+const Gaffer::OptionalValuePlug *SceneStats::queryPlug( const Gaffer::ValuePlug *outputPlug ) const
 {
 	const ValuePlug *p = outputPlug;
 	while( p->parent<Plug>() != outPlug() )
 	{
 		p = p->parent<ValuePlug>();
 	}
-	return queriesPlug()->getChild<ValuePlug>( p->getName() );
+	return queriesPlug()->getChild<OptionalValuePlug>( p->getName() );
 }
 
 void SceneStats::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
@@ -437,11 +444,15 @@ void SceneStats::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *c
 		std::atomic<uint64_t> h1( 0 ), h2( 0 );
 		auto functor = [&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> bool
 		{
+			/// TODO : SHOULD WE MOVE THE HASH INTO STATSDATA?
 			IECore::MurmurHash locationHash;
-			for( const ValuePlugPtr &child : ValuePlug::Range( *queriesPlug() ) )
+			for( const OptionalValuePlugPtr &child : OptionalValuePlug::Range( *queriesPlug() ) )
 			{
 				locationHash.append( child->getName() );
-				child->hash( locationHash );
+				if( child->enabledPlug()->getValue() )
+				{
+					child->hash( locationHash );
+				}
 			}
 			h1 += locationHash.h1();
 			h2 += locationHash.h2();
