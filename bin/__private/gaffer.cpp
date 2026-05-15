@@ -107,7 +107,7 @@ int wmain( int argc, wchar_t **argv )
 	}
 
 	return launchGaffer<wchar_t>( argc, argv, Py_Main );
-	
+
 }
 #else
 int main( int argc, char **argv )

@@ -72,6 +72,12 @@ Gaffer.Metadata.registerNode(
 			The filter controlling which locations are included in the sums.
 			""",
 
+			"layout:section" : "Filter",
+			"noduleLayout:section" : "right",
+			"layout:index" : -3, # Just before the enabled plug,
+			"nodule:type" : "GafferUI::StandardNodule",
+			"plugValueWidget:type" : "GafferSceneUI.FilterPlugValueWidget",
+
 		},
 
 		"queries" : {
@@ -102,7 +108,9 @@ Gaffer.Metadata.registerNode(
 
 		"queries.*" : {
 
-			"deletable" : True,
+			"deletable" : True, # TODO : WE HAVE OUR OWN MENU THAT DOES THIS. MAYBE WE CAN USE CHILDREMOVED AND THE STANDARD MENU?
+			"renameable" : True,
+			"plugValueWidget:type" : "GafferSceneUI.SceneStatsUI._QueryWidget",
 
 		},
 
@@ -117,7 +125,7 @@ Gaffer.Metadata.registerNode(
 			all matched locations.
 			""",
 
-			"plugValueWidget:type" : "GafferUI.LayoutPlugValueWidget",
+			"plugValueWidget:type" : "",
 
 			"layout:section" : "Settings.Outputs",
 
@@ -127,7 +135,7 @@ Gaffer.Metadata.registerNode(
 
 		},
 
-		"out.*" : {
+		"out.*.sum" : {
 
 			"description" :
 			"""
@@ -136,9 +144,65 @@ Gaffer.Metadata.registerNode(
 
 		},
 
+		## TODO DOCS FOR OTHER PLUGS
+
 	}
 
 )
+
+
+##########################################################################
+# Query widget
+##########################################################################
+
+class _QueryWidget( GafferUI.PlugValueWidget ) :
+
+	def __init__( self, queryPlugs, **kw ) :
+
+		self.__column = GafferUI.ListContainer( GafferUI.ListContainer.Orientation.Vertical, spacing = 4 )
+
+		GafferUI.PlugValueWidget.__init__( self, self.__column, queryPlugs )
+
+		self.__plugWidgets = {}
+		with self.__column :
+
+			self.__plugWidgets["in"] = GafferUI.PlugWidget( GafferUI.PlugValueWidget.create( queryPlugs, typeMetadata = None ) )
+
+			outPlugs = { plug.node().outPlugFromQuery( plug ) for plug in self.getPlugs() }
+			for childName in [ "sum", "min", "max" ] :
+				widget = GafferUI.PlugWidget( GafferUI.PlugValueWidget.create( { plug[childName] for plug in outPlugs } ) )
+				widget.labelPlugValueWidget().setFixedWidth(
+					GafferUI.PlugWidget.labelWidth() + 40
+				)
+				self.__plugWidgets[childName] = widget
+
+		self.dropSignal().connectFront( Gaffer.WeakMethod( self.__drop ) )
+
+	def setPlugs( self, plugs ) :
+
+		GafferUI.PlugValueWidget.setPlugs( self, plugs )
+
+		self.__plugWidgets["in"].setPlugs( plugs )
+		outPlugs = { plug.node().outPlugFromQuery( plug ) for plug in self.getPlugs() }
+		for childName in [ "sum", "min", "max" ] :
+			self.__plugWidgets[childName].setPlugs(
+				{ plug[childName] for plug in outPlugs }
+			)
+
+	def hasLabel( self ) :
+
+		return True
+
+	def childPlugValueWidget( self, childPlug ) :
+
+		return self.__plugWidgets["in"].plugValueWidget().childPlugValueWidget( childPlug )
+
+	def __drop( self, widget, event ) : ## TODO : NEEDED OR NOT?
+
+		# We dont want to accept plugs or values dropped onto the query row
+		# as that would attempt to set the row's query plug, so we always
+		# return `True` to block the PlugValueWidget drop handler.
+		return True
 
 ##########################################################################
 # Popup menu

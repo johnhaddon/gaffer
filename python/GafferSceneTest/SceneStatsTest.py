@@ -127,7 +127,7 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( stats["out"]["hInPath"]["min"].getValue(), 0 )
 		self.assertEqual( stats["out"]["hInPath"]["max"].getValue(), 1 )
 
-	def testAllQueryTypes( self ) :
+	def testAllInputTypes( self ) :
 
 		sphere = GafferScene.Sphere()
 		group = GafferScene.Group()
@@ -176,6 +176,45 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( stats["out"]["count"]["sum"].getValue(), 7 )
 
 		# TODO : CHANGE FILTER AND RETEST
+
+	def testRenameInput( self ) :
+
+		sphere = GafferScene.Sphere()
+
+		allFilter = GafferScene.PathFilter()
+		allFilter["paths"].setValue( IECore.StringVectorData( [ "/*" ] ) )
+
+		stats = GafferScene.SceneStats()
+		stats["scene"].setInput( sphere["out"] )
+		stats["filter"].setInput( allFilter["out"] )
+
+		stats.addQuery( Gaffer.IntPlug( defaultValue = 1 ), "foo" )
+		self.assertEqual( stats["out"]["foo"]["sum"].getValue(), 1 )
+
+		stats["queries"]["foo"].setName( "bar" )
+		self.assertEqual( stats["out"].keys(), [ "bar" ] )
+		self.assertEqual( stats["out"]["bar"]["sum"].getValue(), 1 )
+
+		stats["queries"]["bar"].setValue( 2 )
+		self.assertEqual( stats["out"]["bar"]["sum"].getValue(), 2 )
+
+	def testIdenticalStatsWithDifferentNames( self ) :
+
+		sphere = GafferScene.Sphere()
+
+		allFilter = GafferScene.PathFilter()
+		allFilter["paths"].setValue( IECore.StringVectorData( [ "/*" ] ) )
+
+		for name in ( "toto", "tata" ) :
+
+			with self.subTest( name = name ) :
+
+				stats = GafferScene.SceneStats()
+				stats["scene"].setInput( sphere["out"] )
+				stats["filter"].setInput( allFilter["out"] )
+
+				stats.addQuery( Gaffer.IntPlug( defaultValue = 1 ), name )
+				self.assertEqual( stats["out"][name]["sum"].getValue(), 1 )
 
 	def testNoMatches( self ) :
 

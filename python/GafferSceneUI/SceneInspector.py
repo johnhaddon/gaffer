@@ -1252,20 +1252,21 @@ class _StatisticsPath( Gaffer.DictPath ) :
 	def create( cls, node, contexts ) :
 
 		d = {
-			"Locations" : cls.Statistic( contexts[0], contexts[1], node["out"]["locationCount"] ),
+			"Locations" : cls.Statistic( contexts[0], contexts[1], node["out"]["locationCount"]["sum"] ),
 			"Mesh Primitives" : {
-				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveCount"] ),
-				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveVertex"] ),
-				"Faces" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveUniform"] ),
+				## TODO : IF STATS WERE ENABLED PER-ITEM, THEN WE COULD USE THE COUNT FROM `meshPrimitiveVertex`
+				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveCount"]["sum"] ),
+				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveVertex"]["sum"] ),
+				"Faces" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveUniform"]["sum"] ),
 			},
 			"Curves Primitives" : {
-				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveCount"] ),
-				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveVertex"] ),
-				"Curves" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveUniform"] ),
+				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveCount"]["sum"] ),
+				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveVertex"]["sum"] ),
+				"Curves" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveUniform"]["sum"] ),
 			},
 			"Points Primitives" : {
-				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["pointsPrimitiveCount"] ),
-				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["pointsPrimitiveVertex"] ),
+				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["pointsPrimitiveCount"]["sum"] ),
+				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["pointsPrimitiveVertex"]["sum"] ),
 			}
 		}
 

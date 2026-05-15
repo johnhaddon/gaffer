@@ -2021,6 +2021,7 @@ exeEnv = env.Clone()
 
 # Piggy-back on some of `baseLibEnv` variables.
 exeEnv["PYTHON_ABI_VERSION"] = baseLibEnv["PYTHON_ABI_VERSION"]
+exeEnv["PYTHON_VERSION"] = baseLibEnv["PYTHON_VERSION"]
 
 exeEnv.Append(
 
@@ -2034,10 +2035,10 @@ exeEnv.Append(
 )
 
 if exeEnv["PLATFORM"] != "win32" :
-	exeEnv["LINKFLAGS"].remove( "-Wl,--as-needed" )
+	#exeEnv["LINKFLAGS"].remove( "-Wl,--as-needed" )
 	exeEnv.Append(
 
-		LINKFLAGS = [ "-pthread", "-Wl,-export-dynamic", "-Wl,--no-as-needed" ],
+		LINKFLAGS = [ "-pthread" ],# "-Wl,-export-dynamic", "-Wl,--no-as-needed" ],
 		LIBS = [
 			"dl",
 			"pthread",

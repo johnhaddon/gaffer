@@ -50,9 +50,11 @@ namespace GafferScene
 
 /// TODO
 ///
-/// - Enabled plug per stat
-/// - Min, max, count, average
+/// - Enabled plug per stat?
+/// - Average
 /// - Nice UI
+/// - Plug renaming
+/// - Fix serialisation
 class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 {
 
@@ -78,6 +80,7 @@ class GAFFERSCENE_API SceneStats : public Gaffer::ComputeNode
 		Gaffer::ValuePlug *outPlug();
 		const Gaffer::ValuePlug *outPlug() const;
 
+		/// JUST `addInput()`????
 		/// Adds a query whose input is a counterpart of `plug`. Returns the
 		/// newly created input plug, parented to `queriesPlug()`.
 		/// TODO : IS THIS A QUERY OR A STATISTIC? SHOULD NAME BE PASSED LIKE THIS? SHOULD WE SUPPORT ON-THE-FLY RENAMING OF THE PLUG?

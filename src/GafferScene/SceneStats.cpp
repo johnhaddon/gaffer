@@ -283,6 +283,11 @@ struct StatsData : public IECore::Data
 
 };
 
+const InternedString g_count( "count" );
+const InternedString g_sum( "sum" );
+const InternedString g_min( "min" );
+const InternedString g_max( "max" );
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -362,20 +367,20 @@ Gaffer::ValuePlug *SceneStats::addQuery( const Gaffer::ValuePlug *plug, const st
 {
 	const std::string actualName = name.empty() ? plug->getName().string() : name;
 	PlugPtr queryChild = plug->createCounterpart( actualName, Plug::In );
-	queryChild->setFlags( Plug::Dynamic, true );
+	queryChild->setFlags( Plug::Dynamic, false );
 
 	PlugPtr outChild = new ValuePlug( actualName, Plug::Out );
 	dispatchPlugFunction(
 		plug, [&] ( auto *plug ) {
 			using InputPlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-			outChild->addChild( new IntPlug( "count", Plug::Out ) );
+			outChild->addChild( new IntPlug( g_count, Plug::Out ) );
 			using SumType = typename StatsTraits<InputPlugType>::SumDataType::ValueType;
 			using SumPlugType = typename PlugType<SumType>::Type;
-			outChild->addChild( new SumPlugType( "sum", Plug::Out ) );
+			outChild->addChild( new SumPlugType( g_sum, Plug::Out ) );
 			using MinMaxType = typename StatsTraits<InputPlugType>::MinMaxDataType::ValueType;
 			using MinMaxPlugType = typename PlugType<MinMaxType>::Type;
-			outChild->addChild( new MinMaxPlugType( "min", Plug::Out ) );
-			outChild->addChild( new MinMaxPlugType( "max", Plug::Out ) );
+			outChild->addChild( new MinMaxPlugType( g_min, Plug::Out ) );
+			outChild->addChild( new MinMaxPlugType( g_max, Plug::Out ) );
 		}
 	);
 
@@ -442,10 +447,10 @@ void SceneStats::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *c
 		std::atomic<uint64_t> h1( 0 ), h2( 0 );
 		auto functor = [&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> bool
 		{
-			/// TODO : SHOULD HASH NAME? YES.
 			IECore::MurmurHash locationHash;
 			for( const ValuePlugPtr &child : ValuePlug::Range( *queriesPlug() ) )
 			{
+				locationHash.append( child->getName() );
 				child->hash( locationHash );
 			}
 			h1 += locationHash.h1();
@@ -503,19 +508,19 @@ void SceneStats::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 		else
 		{
 			const auto &stats = it->second;
-			if( statOutput->getName() == "count" )
+			if( statOutput->getName() == g_count )
 			{
 				static_cast<IntPlug *>( output )->setValue( stats.count );
 			}
-			else if( statOutput->getName() == "sum" ) // TODO : GLOBAL STRINGS
+			else if( statOutput->getName() == g_sum )
 			{
 				PlugAlgo::setValueFromData( statOutput, output, stats.sum.get() );
 			}
-			else if( statOutput->getName() == "min" )
+			else if( statOutput->getName() == g_min )
 			{
 				PlugAlgo::setValueFromData( statOutput, output, stats.min.get() );
 			}
-			else if( statOutput->getName() == "max" )
+			else if( statOutput->getName() == g_max )
 			{
 				PlugAlgo::setValueFromData( statOutput, output, stats.max.get() );
 			}
