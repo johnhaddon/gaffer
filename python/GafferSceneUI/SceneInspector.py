@@ -160,25 +160,18 @@ class SceneInspector( GafferSceneUI.SceneEditor ) :
 				queryPrefix = "{}{}".format( primitiveType[0].lower(), primitiveType[1:] )
 				nodeNamePrefix = f"__{queryPrefix}"
 
-				patternMatch = Gaffer.PatternMatch()
-				patternMatch["string"].setInput( self["__primitiveQuery"]["type"] )
-				patternMatch["pattern"].setValue( primitiveType )
-				self[f"{nodeNamePrefix}PatternMatch"] = patternMatch
+				enabler = Gaffer.PatternMatch()
+				enabler["string"].setInput( self["__primitiveQuery"]["type"] )
+				enabler["pattern"].setValue( primitiveType )
+				self[f"{nodeNamePrefix}Enabler"] = enabler
 
-				query = self["__statistics"].addQuery( patternMatch["match"], f"{queryPrefix}Count" )
-				query["value"].setInput( patternMatch["match"] )
-
-				# Query enabled for just this primitive type.
-				typedPrimitiveQuery = GafferScene.PrimitiveQuery()
-				typedPrimitiveQuery["scene"].setInput( self["__switchedIn"] )
-				typedPrimitiveQuery["enabled"].setInput( patternMatch["match"] )
-				typedPrimitiveQuery["location"].setValue( "${scene:path}" )
-				self[f"{nodeNamePrefix}PrimitiveQuery"] = typedPrimitiveQuery
+				# Queries enabled for just this primitive type.
 
 				for interpolation in ( "uniform", "vertex", "varying", "faceVarying" ) :
 					interpolationSuffix = interpolation[0].upper() + interpolation[1:]
-					interpolationPlug = typedPrimitiveQuery[interpolation]
+					interpolationPlug = self["__primitiveQuery"][interpolation]
 					query = self["__statistics"].addQuery( interpolationPlug, f"{queryPrefix}{interpolationSuffix}" )
+					query["enabled"].setInput( enabler["match"] )
 					query["value"].setInput( interpolationPlug )
 
 		def _locationComparisonEnablers( self ) :
@@ -1254,18 +1247,17 @@ class _StatisticsPath( Gaffer.DictPath ) :
 		d = {
 			"Locations" : cls.Statistic( contexts[0], contexts[1], node["out"]["locationCount"]["sum"] ),
 			"Mesh Primitives" : {
-				## TODO : IF STATS WERE ENABLED PER-ITEM, THEN WE COULD USE THE COUNT FROM `meshPrimitiveVertex`
-				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveCount"]["sum"] ),
+				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveVertex"]["count"] ),
 				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveVertex"]["sum"] ),
 				"Faces" : cls.Statistic( contexts[0], contexts[1], node["out"]["meshPrimitiveUniform"]["sum"] ),
 			},
 			"Curves Primitives" : {
-				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveCount"]["sum"] ),
+				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveVertex"]["count"] ),
 				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveVertex"]["sum"] ),
 				"Curves" : cls.Statistic( contexts[0], contexts[1], node["out"]["curvesPrimitiveUniform"]["sum"] ),
 			},
 			"Points Primitives" : {
-				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["pointsPrimitiveCount"]["sum"] ),
+				"Primitives" : cls.Statistic( contexts[0], contexts[1], node["out"]["pointsPrimitiveVertex"]["count"] ),
 				"Vertices" : cls.Statistic( contexts[0], contexts[1], node["out"]["pointsPrimitiveVertex"]["sum"] ),
 			}
 		}
