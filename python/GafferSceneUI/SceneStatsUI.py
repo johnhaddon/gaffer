@@ -168,8 +168,8 @@ class _QueryWidget( GafferUI.PlugValueWidget ) :
 
 			self.__plugWidgets["in"] = GafferUI.PlugWidget( GafferUI.PlugValueWidget.create( queryPlugs, typeMetadata = None ) )
 
-			outPlugs = { plug.node().outPlugFromQuery( plug ) for plug in self.getPlugs() }
-			for childName in [ "sum", "min", "max" ] :
+			outPlugs = [ plug.node().outPlugFromQuery( plug ) for plug in self.getPlugs() ]
+			for childName in outPlugs[0].keys() :
 				widget = GafferUI.PlugWidget( GafferUI.PlugValueWidget.create( { plug[childName] for plug in outPlugs } ) )
 				widget.labelPlugValueWidget().setFixedWidth(
 					GafferUI.PlugWidget.labelWidth() + 40
@@ -183,8 +183,8 @@ class _QueryWidget( GafferUI.PlugValueWidget ) :
 		GafferUI.PlugValueWidget.setPlugs( self, plugs )
 
 		self.__plugWidgets["in"].setPlugs( plugs )
-		outPlugs = { plug.node().outPlugFromQuery( plug ) for plug in self.getPlugs() }
-		for childName in [ "sum", "min", "max" ] :
+		outPlugs = [ plug.node().outPlugFromQuery( plug ) for plug in self.getPlugs() ]
+		for childName in outPlugs[0].keys()  :
 			self.__plugWidgets[childName].setPlugs(
 				{ plug[childName] for plug in outPlugs }
 			)
