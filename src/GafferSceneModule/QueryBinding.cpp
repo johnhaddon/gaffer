@@ -224,12 +224,12 @@ class SceneStatsSerialiser : public NodeSerialiser
 		std::string result = NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
 		const GafferScene::SceneStats *node = static_cast<const GafferScene::SceneStats *>( graphComponent );
-		for( const ValuePlugPtr &queryPlug : ValuePlug::Range( *node->queriesPlug() ) )
+		for( const auto &queryPlug : OptionalValuePlug::Range( *node->queriesPlug() ) )
 		{
 			const Serialisation::Serialiser *serialiser = Serialisation::acquireSerialiser( queryPlug.get() );
 			result +=
 				identifier + ".addQuery( " +
-				serialiser->constructor( queryPlug.get(), serialisation ) +
+				serialiser->constructor( queryPlug->valuePlug(), serialisation ) +
 				", \"" + queryPlug->getName().string() + "\" )\n";
 		}
 

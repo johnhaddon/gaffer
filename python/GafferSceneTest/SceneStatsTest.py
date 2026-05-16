@@ -266,5 +266,11 @@ class SceneStatsTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( stats["out"]["vertexCount"]["count"].getValue(), 2 )
 		self.assertEqual( stats["out"]["vertexCount"]["sum"].getValue(), 12 )
 
+	def testSerialisation( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["stats"] = GafferScene.SceneStats()
+
+
 if __name__ == "__main__" :
 	unittest.main()
