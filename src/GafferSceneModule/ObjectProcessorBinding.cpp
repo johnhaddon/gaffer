@@ -63,6 +63,7 @@
 #include "GafferScene/Parameters.h"
 #include "GafferScene/PointsType.h"
 #include "GafferScene/ReverseWinding.h"
+#include "GafferScene/TemporalFilter.h"
 #include "GafferScene/UDIMQuery.h"
 #include "GafferScene/Wireframe.h"
 
@@ -163,6 +164,28 @@ void GafferSceneModule::bindObjectProcessor()
 		enum_<GafferScene::Orientation::Space>( "Space" )
 			.value( "Local", GafferScene::Orientation::Space::Local )
 			.value( "Parent", GafferScene::Orientation::Space::Parent )
+		;
+	}
+
+	{
+		scope s = GafferBindings::DependencyNodeClass<GafferScene::TemporalFilter>();
+
+		enum_<GafferScene::TemporalFilter::FrameMode>( "FrameMode" )
+			.value( "Relative", GafferScene::TemporalFilter::FrameMode::Relative )
+			.value( "Absolute", GafferScene::TemporalFilter::FrameMode::Absolute )
+		;
+
+		enum_<GafferScene::TemporalFilter::SamplingMode>( "SamplingMode" )
+			.value( "Variable", GafferScene::TemporalFilter::SamplingMode::Variable )
+			.value( "Fixed", GafferScene::TemporalFilter::SamplingMode::Fixed )
+		;
+
+		enum_<GafferScene::TemporalFilter::Filter>( "Filter" )
+			.value( "Box", GafferScene::TemporalFilter::Filter::Box )
+			.value( "Gaussian", GafferScene::TemporalFilter::Filter::Gaussian )
+			.value( "Min", GafferScene::TemporalFilter::Filter::Min )
+			.value( "Max", GafferScene::TemporalFilter::Filter::Max )
+			.value( "Ramp", GafferScene::TemporalFilter::Filter::Ramp )
 		;
 	}
 
