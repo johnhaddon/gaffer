@@ -1,0 +1,81 @@
+---
+# Gaffer C++ formatting configuration for clang-format 22.
+# Based on Microsoft style, which shares the Allman brace style and most
+# structural conventions. Only settings that differ are overridden below.
+
+BasedOnStyle: Microsoft
+Standard: c++17
+
+# Tabs and indentation
+UseTab: Always
+AccessModifierOffset: -4
+IndentAccessModifiers: false
+IndentCaseLabels: true
+
+# Disable column limit — the project does not enforce a line length
+ColumnLimit: 0
+
+# Brace wrapping overrides (Microsoft doesn't wrap after union, does after ObjC)
+BraceWrapping:
+  AfterObjCDeclaration: false
+  AfterUnion: true
+
+# Spaces
+SpaceAfterOperatorKeyword: true
+SpaceAfterTemplateKeyword: false
+SpaceBeforeCaseColon: true
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: false
+  AfterForeachMacros: false
+  AfterIfMacros: false
+  AfterOverloadedOperator: true
+SpacesInParens: Custom
+SpacesInParensOptions:
+  InConditionalStatements: true
+  Other: true
+
+# Alignment
+AlignAfterOpenBracket: BlockIndent
+AlignConsecutiveAssignments:
+  PadOperators: false
+AlignConsecutiveDeclarations:
+  AlignFunctionDeclarations: false
+AlignEscapedNewlines: DontAlign
+AlignOperands: DontAlign
+AlignTrailingComments:
+  Kind: Never
+
+# Pointer / reference alignment
+ReferenceAlignment: Right
+
+# Includes
+SortIncludes:
+  Enabled: false
+
+# Breaking and wrapping
+AllowShortFunctionsOnASingleLine: Inline
+BreakBeforeTernaryOperators: false
+BreakStringLiterals: false
+BreakTemplateDeclarations: Yes
+Cpp11BracedListStyle: Block
+PackConstructorInitializers: CurrentLine
+
+# Empty lines
+EmptyLineAfterAccessModifier: Always
+EmptyLineBeforeAccessModifier: Always
+InsertNewlineAtEOF: true
+MaxEmptyLinesToKeep: 2
+ShortNamespaceLines: 0
+
+# Comments
+ReflowComments: false
+
+# Penalties — with ColumnLimit 0 these mostly prevent unwanted reformatting
+PenaltyBreakAssignment: 1000
+PenaltyBreakBeforeFirstCallParameter: 1000
+PenaltyBreakOpenParenthesis: 1000
+PenaltyBreakTemplateDeclaration: 1000
+PenaltyExcessCharacter: 0
+PenaltyReturnTypeOnItsOwnLine: 10000
+...
