@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( ShadingEngine )
 class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 {
 
-public:
+  public:
 
 	explicit OSLObject( const std::string &name = defaultName<OSLObject>() );
 	~OSLObject() override;
@@ -77,7 +77,7 @@ public:
 	class GAFFEROSL_API SourceLocationPlug : public Gaffer::ValuePlug
 	{
 
-	public:
+	  public:
 
 		GAFFER_PLUG_DECLARE_TYPE( OSLObject::SourceLocationPlug, OSLObjectSourceLocationPlugTypeId, ValuePlug );
 
@@ -113,7 +113,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -124,7 +124,7 @@ protected:
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	GafferScene::ShaderPlug *shaderPlug();
 	const GafferScene::ShaderPlug *shaderPlug() const;

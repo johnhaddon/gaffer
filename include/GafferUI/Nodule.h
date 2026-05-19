@@ -56,7 +56,7 @@ IE_CORE_FORWARDDECLARE( Nodule )
 class GAFFERUI_API Nodule : public ConnectionCreator
 {
 
-public:
+  public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Nodule, NoduleTypeId, ConnectionCreator );
 	~Nodule() override;
@@ -85,7 +85,7 @@ public:
 
 	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-protected:
+  protected:
 
 	explicit Nodule( Gaffer::PlugPtr plug );
 
@@ -97,7 +97,7 @@ protected:
 		static NodulePtr creator( Gaffer::PlugPtr plug ) { return new T( plug ); };
 	};
 
-private:
+  private:
 
 	Gaffer::PlugPtr m_plug;
 

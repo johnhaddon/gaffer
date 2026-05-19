@@ -48,7 +48,7 @@ namespace GafferScene
 class GAFFERSCENE_API Attributes : public AttributeProcessor
 {
 
-public:
+  public:
 
 	explicit Attributes( const std::string &name = defaultName<Attributes>() );
 	~Attributes() override;
@@ -61,7 +61,7 @@ public:
 	Gaffer::CompoundObjectPlug *extraAttributesPlug();
 	const Gaffer::CompoundObjectPlug *extraAttributesPlug() const;
 
-protected:
+  protected:
 
 	/// Automatically adds plugs for all attributes for the specified renderer, based
 	/// on `attribute:{rendererPrefix}:*` metadata registrations.
@@ -71,7 +71,7 @@ protected:
 	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

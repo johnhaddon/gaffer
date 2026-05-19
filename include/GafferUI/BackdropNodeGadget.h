@@ -47,7 +47,7 @@ namespace GafferUI
 class GAFFERUI_API BackdropNodeGadget : public NodeGadget
 {
 
-public:
+  public:
 
 	explicit BackdropNodeGadget( Gaffer::NodePtr node );
 	~BackdropNodeGadget() override;
@@ -67,13 +67,13 @@ public:
 
 	Imath::Box3f bound() const override;
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	void contextChanged();
 	void plugDirtied( const Gaffer::Plug *plug );

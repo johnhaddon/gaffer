@@ -56,7 +56,7 @@ namespace
 class OptionalValuePlugSerialiser : public ValuePlugSerialiser
 {
 
-public:
+  public:
 
 	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
 	{

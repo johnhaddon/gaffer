@@ -54,7 +54,7 @@ namespace
 struct ProcessorProcess : public Process
 {
 
-public:
+  public:
 
 	ProcessorProcess( InternedString type, const OpenColorIOTransform *node )
 		: Process( type, node->outPlug() )

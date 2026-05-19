@@ -68,7 +68,7 @@ ContextPtr contextWrapper( const View &view, bool copy )
 class ViewWrapper : public GafferBindings::NodeWrapper<View>
 {
 
-public:
+  public:
 
 	ViewWrapper( PyObject *self, const std::string &name, ScriptNodePtr scriptNode, PlugPtr input )
 		: GafferBindings::NodeWrapper<View>( self, name, scriptNode, input )
@@ -90,7 +90,7 @@ struct ViewCreator
 		return result;
 	}
 
-private:
+  private:
 
 	object m_fn;
 };

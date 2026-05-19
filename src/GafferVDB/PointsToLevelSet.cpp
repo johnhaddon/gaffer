@@ -119,7 +119,7 @@ struct ParticleList
 		return static_cast<bool>( m_velocityView );
 	}
 
-private:
+  private:
 
 	template<typename T>
 	using OptionalIndexedView = std::optional<PrimitiveVariable::IndexedView<T>>;

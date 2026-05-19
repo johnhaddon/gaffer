@@ -113,7 +113,7 @@ struct CortexMeshAdapter
 		pos = openvdb::math::Vec3s( p.x, p.y, p.z );
 	}
 
-private:
+  private:
 
 	const size_t m_numFaces;
 	const size_t m_numVertices;

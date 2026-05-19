@@ -189,7 +189,7 @@ struct Rename::InputScope : ScenePlug::PathScope
 		return m_inputPath;
 	}
 
-private:
+  private:
 
 	ConstInternedStringVectorDataPtr m_inputPath;
 };
@@ -810,7 +810,7 @@ void Rename::hashSet( const IECore::InternedString &setName, const Gaffer::Conte
 			}
 		}
 
-	private:
+	  private:
 
 		const Rename *m_rename;
 		const LocationProcessor *m_parent;
@@ -927,7 +927,7 @@ IECore::ConstPathMatcherDataPtr Rename::computeSet( const IECore::InternedString
 			}
 		}
 
-	private:
+	  private:
 
 		const Rename *m_rename;
 		const LocationProcessor *m_parent;

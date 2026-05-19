@@ -51,7 +51,7 @@ namespace
 class CoordinateSystemVisualiser : public ObjectVisualiser
 {
 
-public:
+  public:
 
 	using ObjectType = IECoreScene::CoordinateSystem;
 
@@ -93,7 +93,7 @@ public:
 		return m_visualisations;
 	}
 
-protected:
+  protected:
 
 	static ObjectVisualiserDescription<CoordinateSystemVisualiser> g_visualiserDescription;
 

@@ -55,7 +55,7 @@ namespace Gaffer
 
 class GAFFER_API ProcessMessageHandler : public IECore::FilteredMessageHandler
 {
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( ProcessMessageHandler );
 

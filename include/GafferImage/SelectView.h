@@ -47,7 +47,7 @@ namespace GafferImage
 class GAFFERIMAGE_API SelectView : public ImageProcessor
 {
 
-public:
+  public:
 
 	explicit SelectView( const std::string &name = defaultName<SelectView>() );
 	~SelectView() override;
@@ -59,7 +59,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -79,7 +79,7 @@ protected:
 	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	std::string selectViewName( const Gaffer::Context *context ) const;
 

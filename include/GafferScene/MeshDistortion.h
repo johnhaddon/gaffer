@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API MeshDistortion : public ObjectProcessor
 {
 
-public:
+  public:
 
 	explicit MeshDistortion( const std::string &name = defaultName<MeshDistortion>() );
 	~MeshDistortion() override;
@@ -69,13 +69,13 @@ public:
 	Gaffer::StringPlug *uvDistortionPlug();
 	const Gaffer::StringPlug *uvDistortionPlug() const;
 
-protected:
+  protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API Orientation : public ObjectProcessor
 {
 
-public:
+  public:
 
 	explicit Orientation( const std::string &name = defaultName<Orientation>() );
 	~Orientation() override;
@@ -198,13 +198,13 @@ public:
 	// produced by Imath::Quatf::normalized() should be unmodified.
 	static inline Imath::Quatf normalizedIfNeeded( const Imath::Quatf &q );
 
-protected:
+  protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

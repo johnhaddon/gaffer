@@ -58,7 +58,7 @@ namespace Gaffer
 class GAFFER_API FileSystemPath : public Path
 {
 
-public:
+  public:
 
 	explicit FileSystemPath( PathFilterPtr filter = nullptr, bool includeSequences = false );
 	FileSystemPath( const std::string &path, PathFilterPtr filter = nullptr, bool includeSequences = false );
@@ -100,11 +100,11 @@ public:
 
 	static PathFilterPtr createStandardFilter( const std::vector<std::string> &extensions = std::vector<std::string>(), const std::string &extensionsLabel = "", bool includeSequenceFilter = false );
 
-protected:
+  protected:
 
 	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override;
 
-private:
+  private:
 
 #ifdef _MSC_VER
 

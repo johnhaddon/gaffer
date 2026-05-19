@@ -387,7 +387,7 @@ struct ContributionElement
 
 class DeepResampleData : public IECore::Data
 {
-public:
+  public:
 
 	IntVectorDataPtr sampleOffsetsData;
 	FloatVectorDataPtr AData;
@@ -960,7 +960,7 @@ int linearCombineSampledPixels(
 // subset to merge.
 class MergeListsByIndices
 {
-public:
+  public:
 
 	MergeListsByIndices( const std::vector<std::vector<float>> &allLists )
 		: m_allLists( allLists ), m_listPositions( allLists.size() )
@@ -1027,7 +1027,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	struct HeapEntry
 	{

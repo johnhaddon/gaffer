@@ -90,7 +90,7 @@ template<typename T>
 class CompoundNumericPlugSerialiser : public ValuePlugSerialiser
 {
 
-public:
+  public:
 
 	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
 	{

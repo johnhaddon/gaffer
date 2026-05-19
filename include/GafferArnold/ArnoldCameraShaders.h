@@ -51,7 +51,7 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldCameraShaders : public GafferScene::Shader
 {
 
-public:
+  public:
 
 	explicit ArnoldCameraShaders( const std::string &name = defaultName<ArnoldCameraShaders>() );
 	~ArnoldCameraShaders() override;
@@ -67,7 +67,7 @@ public:
 	Gaffer::Plug *outPlug();
 	const Gaffer::Plug *outPlug() const;
 
-protected:
+  protected:
 
 	bool affectsAttributes( const Gaffer::Plug *input ) const override;
 	void attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const override;
@@ -75,7 +75,7 @@ protected:
 
 	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

@@ -53,7 +53,7 @@ IE_CORE_FORWARDDECLARE( FilterPlug )
 class GAFFERSCENE_API FilterQuery : public Gaffer::ComputeNode
 {
 
-public:
+  public:
 
 	explicit FilterQuery( const std::string &name = defaultName<FilterQuery>() );
 	~FilterQuery() override;
@@ -83,7 +83,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	Gaffer::IntPlug *matchPlug();
 	const Gaffer::IntPlug *matchPlug() const;

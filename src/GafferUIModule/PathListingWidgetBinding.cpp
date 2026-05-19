@@ -561,7 +561,7 @@ struct CellVariants
 			m_foreground == rhs.m_foreground;
 	}
 
-private:
+  private:
 
 	QVariant m_display;
 	QVariant m_checkState;
@@ -604,7 +604,7 @@ class PathModel : public QAbstractItemModel
 
 	Q_OBJECT
 
-public:
+  public:
 
 	PathModel( QTreeView *parent )
 		: QAbstractItemModel( parent ),
@@ -997,7 +997,7 @@ public:
 		QCoreApplication::sendPostedEvents( this, EditEvent::staticType() );
 	}
 
-signals:
+  signals:
 
 	void expansionChanged();
 	void selectionChanged();
@@ -1008,7 +1008,7 @@ signals:
 	// QAbstractItemModel implementation - this is what Qt cares about
 	///////////////////////////////////////////////////////////////////
 
-public:
+  public:
 
 	QVariant data( const QModelIndex &index, int role ) const override
 	{
@@ -1127,7 +1127,7 @@ public:
 		scheduleUpdate();
 	}
 
-private:
+  private:
 
 	// Async update mechanism
 	// ======================
@@ -1585,7 +1585,7 @@ private:
 			return *m_childItems;
 		}
 
-	private:
+	  private:
 
 		void dirtyWalk( bool dirtyChildItems, bool dirtyData, const std::vector<int> *dataMapping )
 		{
@@ -2220,7 +2220,7 @@ struct DisplayColorCache : public IECorePreview::LRUCache<QColor, QIcon, IECoreP
 	{
 	}
 
-private:
+  private:
 
 	static QIcon convert( const QColor &qColor, const DisplayTransform &displayTransform )
 	{
@@ -2264,7 +2264,7 @@ struct DisplayGradientCache : public IECorePreview::LRUCache<IECore::MurmurHash,
 	{
 	}
 
-private:
+  private:
 
 	static QBrush convert( const IECore::Data *data, const DisplayTransform &displayTransform )
 	{
@@ -2314,7 +2314,7 @@ namespace
 class PathListingWidgetItemDelegate : public QStyledItemDelegate
 {
 
-public:
+  public:
 
 	PathListingWidgetItemDelegate( QObject *parent = nullptr )
 		: QStyledItemDelegate( parent )
@@ -2355,7 +2355,7 @@ public:
 		m_displayGradientCache = std::make_unique<DisplayGradientCache>( displayTransform );
 	}
 
-protected:
+  protected:
 
 	void initStyleOption( QStyleOptionViewItem *option, const QModelIndex &index ) const override
 	{
@@ -2385,7 +2385,7 @@ protected:
 		}
 	}
 
-private:
+  private:
 
 	std::unique_ptr<DisplayColorCache> m_displayColorCache;
 	std::unique_ptr<DisplayGradientCache> m_displayGradientCache;

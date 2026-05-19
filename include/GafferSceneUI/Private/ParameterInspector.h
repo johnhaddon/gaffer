@@ -51,7 +51,7 @@ namespace Private
 class GAFFERSCENEUI_API ParameterInspector : public AttributeInspector
 {
 
-public:
+  public:
 
 	ParameterInspector(
 		const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope,
@@ -67,11 +67,11 @@ public:
 	/// empty `Parameter` if the input cannot be converted.
 	static IECoreScene::ShaderNetwork::Parameter connectionSource( const IECore::Object *object );
 
-protected:
+  protected:
 
 	GafferScene::SceneAlgo::History::ConstPtr history() const override;
 
-private:
+  private:
 
 	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
 	IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const override;

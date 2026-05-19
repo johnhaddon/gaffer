@@ -52,7 +52,7 @@ namespace IECoreRenderMan
 class Light : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-public:
+  public:
 
 	Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session );
 	~Light() override;
@@ -72,7 +72,7 @@ public:
 	void updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &lightFilterShader );
 	void updateLinking( RtUString memberships, RtUString shadowSubset );
 
-private:
+  private:
 
 	ConstLightShaderPtr acquireLightShader( const Attributes *attributes ) const;
 

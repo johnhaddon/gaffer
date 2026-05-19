@@ -61,7 +61,7 @@ using namespace GafferSceneUI;
 // IECoreGL::Texture doesn't support buffer textures, so we roll our own.
 class OutputBuffer::BufferTexture
 {
-public:
+  public:
 
 	BufferTexture()
 	{
@@ -89,7 +89,7 @@ public:
 		glTexBuffer( GL_TEXTURE_BUFFER, GL_R32UI, m_buffer );
 	}
 
-private:
+  private:
 
 	GLuint m_texture;
 	GLuint m_buffer;
@@ -528,7 +528,7 @@ void OutputBuffer::snapshotToFile(
 class OutputBuffer::DisplayDriver : public IECoreImage::DisplayDriver
 {
 
-public:
+  public:
 
 	// Deliberately "borrowing" DisplayDriverTypeId as we don't need an ID for
 	// a non-public class.
@@ -599,7 +599,7 @@ public:
 		return true;
 	}
 
-private:
+  private:
 
 	Type m_type;
 

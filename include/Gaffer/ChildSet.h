@@ -46,7 +46,7 @@ namespace Gaffer
 class GAFFER_API ChildSet : public Gaffer::Set
 {
 
-public:
+  public:
 
 	explicit ChildSet( GraphComponentPtr parent );
 	~ChildSet() override;
@@ -62,7 +62,7 @@ public:
 	size_t size() const override;
 	//@}
 
-private:
+  private:
 
 	ConstGraphComponentPtr m_parent;
 

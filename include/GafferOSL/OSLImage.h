@@ -52,7 +52,7 @@ namespace GafferOSL
 class GAFFEROSL_API OSLImage : public GafferImage::ImageProcessor
 {
 
-public:
+  public:
 
 	explicit OSLImage( const std::string &name = defaultName<OSLImage>() );
 	~OSLImage() override;
@@ -67,7 +67,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	bool enabled() const override;
 
@@ -84,7 +84,7 @@ protected:
 	GafferImage::Format computeFormat( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	GafferScene::ShaderPlug *shaderPlug();
 	const GafferScene::ShaderPlug *shaderPlug() const;

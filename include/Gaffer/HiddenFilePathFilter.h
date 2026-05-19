@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( HiddenFilePathFilter )
 class GAFFER_API HiddenFilePathFilter : public PathFilter
 {
 
-public:
+  public:
 
 	explicit HiddenFilePathFilter( IECore::CompoundDataPtr userData = nullptr );
 	~HiddenFilePathFilter() override;
@@ -60,11 +60,11 @@ public:
 	void setInverted( bool inverted );
 	bool getInverted() const;
 
-protected:
+  protected:
 
 	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-private:
+  private:
 
 	bool invert( bool b ) const;
 	bool remove( PathPtr path ) const;

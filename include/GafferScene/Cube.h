@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API Cube : public ObjectSource
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::Cube, CubeTypeId, ObjectSource );
 
@@ -61,12 +61,12 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

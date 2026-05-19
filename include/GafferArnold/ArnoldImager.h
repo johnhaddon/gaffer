@@ -48,7 +48,7 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldImager : public GafferScene::GlobalsProcessor
 {
 
-public:
+  public:
 
 	explicit ArnoldImager( const std::string &name = defaultName<ArnoldImager>() );
 	~ArnoldImager() override;
@@ -70,14 +70,14 @@ public:
 	Gaffer::IntPlug *modePlug();
 	const Gaffer::IntPlug *modePlug() const;
 
-protected:
+  protected:
 
 	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

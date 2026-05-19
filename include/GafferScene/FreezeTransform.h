@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API FreezeTransform : public FilteredSceneProcessor
 {
 
-public:
+  public:
 
 	explicit FreezeTransform( const std::string &name = defaultName<FreezeTransform>() );
 	~FreezeTransform() override;
@@ -53,7 +53,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -68,7 +68,7 @@ protected:
 	Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-private:
+  private:
 
 	// Used to compute the transform to freeze in at a given path.
 	Gaffer::M44fPlug *transformPlug();

@@ -44,7 +44,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Dilate : public RankFilter
 {
 
-public:
+  public:
 
 	explicit Dilate( const std::string &name = defaultName<Dilate>() );
 	~Dilate() override;

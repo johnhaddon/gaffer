@@ -55,7 +55,7 @@ namespace GafferScene
 class GAFFERSCENE_API Set : public FilteredSceneProcessor
 {
 
-public:
+  public:
 
 	explicit Set( const std::string &name = defaultName<Set>() );
 	~Set() override;
@@ -84,7 +84,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -95,7 +95,7 @@ protected:
 	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-private:
+  private:
 
 	Gaffer::PathMatcherDataPlug *filterResultsPlug();
 	const Gaffer::PathMatcherDataPlug *filterResultsPlug() const;

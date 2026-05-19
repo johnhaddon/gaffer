@@ -47,7 +47,7 @@ namespace GafferUIBindings
 template<typename T, typename TWrapper = T>
 class NodeGadgetClass : public GadgetClass<T, TWrapper>
 {
-public:
+  public:
 
 	NodeGadgetClass( const char *docString = nullptr );
 };
@@ -56,7 +56,7 @@ template<typename WrappedType>
 class NodeGadgetWrapper : public GadgetWrapper<WrappedType>
 {
 
-public:
+  public:
 
 	template<typename... Args>
 	NodeGadgetWrapper( PyObject *self, Args &&...args )

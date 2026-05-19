@@ -170,7 +170,7 @@ std::shared_ptr<const GafferScene::RenderManifest> findRenderManifest( const Gaf
 class Catalogue::InternalImage : public ImageNode
 {
 
-public:
+  public:
 
 	InternalImage( const std::string &name = "InternalImage" )
 		: ImageNode( name )
@@ -433,7 +433,7 @@ public:
 		m_saver = AsynchronousSaver::create( this, findRenderManifest( outPlug(), false ) );
 	}
 
-protected:
+  protected:
 
 	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override
 	{
@@ -459,7 +459,7 @@ protected:
 		return imageReader()->outPlug()->channelDataPlug()->getValue();
 	}
 
-private:
+  private:
 
 	void isRendering( bool rendering )
 	{
@@ -624,7 +624,7 @@ private:
 		using ChannelDataHashes = boost::unordered_map<TileIndex, IECore::MurmurHash>;
 		ChannelDataHashes channelDataHashes;
 
-	private:
+	  private:
 
 		AsynchronousSaver( InternalImagePtr imageCopy, const std::filesystem::path &filePath, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest )
 			: m_imageCopy( imageCopy )

@@ -390,7 +390,7 @@ bool checkEnvFlag( const char *envVar, bool def )
 class Instancer::EngineData : public Data
 {
 
-public:
+  public:
 
 	EngineData(
 		ConstPrimitivePtr primitive,
@@ -842,7 +842,7 @@ public:
 		}
 	}
 
-protected:
+  protected:
 
 	// Needs to match setPrototypeContextVariables above, except that it operates on one
 	// PrototypeContextVariable at a time instead of iterating through them
@@ -887,7 +887,7 @@ protected:
 		msg( Msg::Warning, "EngineData::load", "Not implemented" );
 	}
 
-private:
+  private:
 
 	using AttributeCreator = std::function<DataPtr( size_t )>;
 
@@ -911,7 +911,7 @@ private:
 			throw IECore::InvalidArgumentException( "Expected VectorTypedData" );
 		}
 
-	private:
+	  private:
 
 		template<typename T>
 		static DataPtr createAttribute( const vector<T> &values, size_t index )
@@ -1150,7 +1150,7 @@ private:
 class Instancer::EngineSplitPrototypesData : public Data
 {
 
-public:
+  public:
 
 	EngineSplitPrototypesData(
 		ConstEngineDataPtr engineData
@@ -1240,7 +1240,7 @@ public:
 	}
 
 
-protected:
+  protected:
 
 	ConstEngineDataPtr m_engineData;
 	std::unordered_map<InternedString, std::vector<size_t>> m_pointIndicesForPrototype;
@@ -1256,7 +1256,7 @@ protected:
 class Instancer::InstancerCapsule : public Capsule
 {
 
-public:
+  public:
 
 	InstancerCapsule()
 		: m_instancer( nullptr )
@@ -1284,7 +1284,7 @@ public:
 	// Defined at the bottom of this file, where it makes more sense
 	void render( IECoreScenePreview::Renderer *renderer ) const override;
 
-private:
+  private:
 
 	const Instancer *m_instancer;
 };

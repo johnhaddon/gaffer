@@ -45,7 +45,7 @@ namespace GafferScene
 class GAFFERSCENE_API Scatter : public BranchCreator
 {
 
-public:
+  public:
 
 	explicit Scatter( const std::string &name = defaultName<Scatter>() );
 	~Scatter() override;
@@ -73,7 +73,7 @@ public:
 	Gaffer::StringPlug *pointTypePlug();
 	const Gaffer::StringPlug *pointTypePlug() const;
 
-protected:
+  protected:
 
 	bool affectsBranchBound( const Gaffer::Plug *input ) const override;
 	void hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -95,7 +95,7 @@ protected:
 	void hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstInternedStringVectorDataPtr computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

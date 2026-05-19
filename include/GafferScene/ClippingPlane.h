@@ -44,14 +44,14 @@ namespace GafferScene
 class GAFFERSCENE_API ClippingPlane : public ObjectSource
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::ClippingPlane, ClippingPlaneTypeId, ObjectSource );
 
 	explicit ClippingPlane( const std::string &name = defaultName<ClippingPlane>() );
 	~ClippingPlane() override;
 
-protected:
+  protected:
 
 	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;

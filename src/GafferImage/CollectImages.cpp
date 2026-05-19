@@ -84,7 +84,7 @@ void copyRegion( const float *fromBuffer, const Box2i &fromWindow, const Box2i &
 class MappingData : public IECore::Data
 {
 
-public:
+  public:
 
 	MappingData( bool addLayerPrefix )
 		: m_addLayerPrefix( addLayerPrefix ), m_outputChannelNames( new StringVectorData )
@@ -139,7 +139,7 @@ public:
 		return it->second;
 	}
 
-private:
+  private:
 
 	const bool m_addLayerPrefix;
 	StringVectorDataPtr m_outputChannelNames;

@@ -50,7 +50,7 @@ namespace GafferUIBindings
 template<typename T, typename TWrapper = T>
 class GadgetClass : public GafferBindings::GraphComponentClass<T, TWrapper>
 {
-public:
+  public:
 
 	GadgetClass( const char *docString = nullptr );
 };
@@ -58,7 +58,7 @@ public:
 template<typename WrappedType>
 class GadgetWrapper : public GafferBindings::GraphComponentWrapper<WrappedType>
 {
-public:
+  public:
 
 	template<typename... Args>
 	GadgetWrapper( PyObject *self, Args &&...args )

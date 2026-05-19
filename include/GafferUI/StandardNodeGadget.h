@@ -61,7 +61,7 @@ class StandardNodule;
 class GAFFERUI_API StandardNodeGadget : public NodeGadget
 {
 
-public:
+  public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::StandardNodeGadget, StandardNodeGadgetTypeId, NodeGadget );
 
@@ -109,7 +109,7 @@ public:
 
 	void setHighlighted( bool highlighted ) override;
 
-protected:
+  protected:
 
 	StandardNodeGadget( Gaffer::NodePtr node, bool auxillary );
 
@@ -121,7 +121,7 @@ protected:
 
 	void updateFromContextTracker( const ContextTracker *contextTracker ) override;
 
-private:
+  private:
 
 	LinearContainer *noduleContainer( Edge edge );
 	const LinearContainer *noduleContainer( Edge edge ) const;

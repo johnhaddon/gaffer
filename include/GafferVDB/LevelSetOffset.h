@@ -50,7 +50,7 @@ namespace GafferVDB
 class GAFFERVDB_API LevelSetOffset : public GafferScene::Deformer
 {
 
-public:
+  public:
 
 	explicit LevelSetOffset( const std::string &name = defaultName<LevelSetOffset>() );
 	~LevelSetOffset() override;
@@ -63,7 +63,7 @@ public:
 	Gaffer::FloatPlug *offsetPlug();
 	const Gaffer::FloatPlug *offsetPlug() const;
 
-protected:
+  protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -74,7 +74,7 @@ protected:
 	void hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	Imath::Box3f computeProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

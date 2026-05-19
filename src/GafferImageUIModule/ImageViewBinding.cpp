@@ -61,7 +61,7 @@ namespace
 class ImageViewWrapper : public NodeWrapper<ImageView>
 {
 
-public:
+  public:
 
 	ImageViewWrapper( PyObject *self, ScriptNodePtr scriptNode )
 		: NodeWrapper<ImageView>( self, scriptNode )

@@ -397,7 +397,7 @@ const InternedString g_zoneParameter( "zone" );
 class RenderManLightVisualiser : public LightVisualiser
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( RenderManLightVisualiser )
 
@@ -406,7 +406,7 @@ public:
 
 	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *shaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-private:
+  private:
 
 	static LightVisualiser::LightVisualiserDescription<RenderManLightVisualiser> g_description;
 };

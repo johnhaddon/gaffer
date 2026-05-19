@@ -44,14 +44,14 @@ namespace GafferScene
 class GAFFERSCENE_API DeletePrimitiveVariables : public PrimitiveVariableProcessor
 {
 
-public:
+  public:
 
 	explicit DeletePrimitiveVariables( const std::string &name = defaultName<DeletePrimitiveVariables>() );
 	~DeletePrimitiveVariables() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeletePrimitiveVariables, DeletePrimitiveVariablesTypeId, PrimitiveVariableProcessor );
 
-protected:
+  protected:
 
 	void processPrimitiveVariable( const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry, IECoreScene::PrimitiveVariable &inputVariable ) const override;
 };

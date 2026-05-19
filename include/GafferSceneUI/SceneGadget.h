@@ -63,7 +63,7 @@ IE_CORE_FORWARDDECLARE( SceneGadget );
 class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 {
 
-public:
+  public:
 
 	SceneGadget();
 	~SceneGadget() override;
@@ -209,13 +209,13 @@ public:
 		const IECore::CompoundData *metadata = nullptr
 	) const;
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const GafferUI::Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	bool openGLObjectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, float &depth ) const;
 

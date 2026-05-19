@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepToFlat : public ImageProcessor
 {
 
-public:
+  public:
 
 	enum class DepthMode
 	{
@@ -67,7 +67,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -83,7 +83,7 @@ protected:
 	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
 
-private:
+  private:
 
 	Gaffer::FloatVectorDataPlug *intermediateChannelDataPlug();
 	const Gaffer::FloatVectorDataPlug *intermediateChannelDataPlug() const;

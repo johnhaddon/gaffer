@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API MergeScenes : public SceneProcessor
 {
 
-public:
+  public:
 
 	explicit MergeScenes( const std::string &name = defaultName<MergeScenes>() );
 	~MergeScenes() override;
@@ -77,7 +77,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -106,7 +106,7 @@ protected:
 	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-private:
+  private:
 
 	using InputMask = std::bitset<32>;
 

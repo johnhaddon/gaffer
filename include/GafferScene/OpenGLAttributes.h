@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API OpenGLAttributes : public GafferScene::Attributes
 {
 
-public:
+  public:
 
 	explicit OpenGLAttributes( const std::string &name = defaultName<OpenGLAttributes>() );
 	~OpenGLAttributes() override;

@@ -62,7 +62,7 @@ namespace GafferUI
 class GAFFERUI_API StandardStyle : public Style
 {
 
-public:
+  public:
 
 	StandardStyle();
 	~StandardStyle() override;
@@ -126,7 +126,7 @@ public:
 	void setFontScale( TextType textType, float scale );
 	float getFontScale( TextType textType ) const;
 
-private:
+  private:
 
 	void renderConnectionInternal( const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition, const Imath::V3f &dstTangent ) const;
 	static unsigned int connectionDisplayList();

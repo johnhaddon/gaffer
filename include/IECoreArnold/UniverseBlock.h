@@ -49,7 +49,7 @@ namespace IECoreArnold
 class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 {
 
-public:
+  public:
 
 	/// Ensures that the Arnold API is initialised and that all plugins and
 	/// metadata files on the ARNOLD_PLUGIN_PATH have been loaded.
@@ -62,7 +62,7 @@ public:
 
 	AtUniverse *universe() { return m_universe; }
 
-private:
+  private:
 
 	const bool m_writable;
 	AtUniverse *m_universe;

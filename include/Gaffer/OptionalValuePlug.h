@@ -46,7 +46,7 @@ namespace Gaffer
 class GAFFER_API OptionalValuePlug : public Gaffer::ValuePlug
 {
 
-public:
+  public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::OptionalValuePlug, OptionalValuePlugTypeId, Gaffer::ValuePlug );
 

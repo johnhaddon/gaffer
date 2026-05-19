@@ -81,7 +81,7 @@ struct Dependencies : public IECore::RefCounted
 class TestProcess : public Process
 {
 
-public:
+  public:
 
 	TestProcess( const Plug *plug, int result, const Dependencies::ConstPtr &dependencies )
 		: Process( g_staticType, plug, plug ), m_result( result ), m_dependencies( dependencies )
@@ -141,7 +141,7 @@ public:
 		return 1;
 	}
 
-private:
+  private:
 
 	const int m_result;
 	const Dependencies::ConstPtr m_dependencies;

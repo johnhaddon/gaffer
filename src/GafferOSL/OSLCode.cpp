@@ -207,7 +207,7 @@ namespace
 class ScopedDirectory : boost::noncopyable
 {
 
-public:
+  public:
 
 	ScopedDirectory( const std::filesystem::path &p )
 		: m_path( p )
@@ -220,7 +220,7 @@ public:
 		std::filesystem::remove_all( m_path );
 	}
 
-private:
+  private:
 
 	std::filesystem::path m_path;
 };

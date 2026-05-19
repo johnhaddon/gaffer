@@ -337,7 +337,7 @@ void addTexturedConstantShader(
 // Customized IECoreGL primitive supporting `uvOrientation`
 class UVOrientedQuadPrimitive : public IECoreGL::QuadPrimitive
 {
-public:
+  public:
 
 	UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation ) : IECoreGL::QuadPrimitive( width, height )
 	{

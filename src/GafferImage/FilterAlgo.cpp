@@ -62,7 +62,7 @@ namespace
 class SmoothGaussian2D : public OIIO::Filter2D
 {
 
-public:
+  public:
 
 	SmoothGaussian2D( float width, float height )
 		: Filter2D( width, height ), m_radiusInverse( 2.0f / width, 2.0f / height )
@@ -98,7 +98,7 @@ public:
 		return "smoothGaussian";
 	}
 
-private:
+  private:
 
 	static float gauss1d( float x )
 	{
@@ -116,7 +116,7 @@ private:
 
 class FilterCubicSimple2D : public OIIO::Filter2D
 {
-public:
+  public:
 
 	FilterCubicSimple2D( float width, float height )
 		: Filter2D( width, height ),
@@ -154,7 +154,7 @@ public:
 		return "cubic";
 	}
 
-protected:
+  protected:
 
 	static float cubicSimple( float x )
 	{

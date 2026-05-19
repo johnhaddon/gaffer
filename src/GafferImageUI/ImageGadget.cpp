@@ -152,7 +152,7 @@ V2i glViewportSize()
 class GafferImageUI::ImageGadget::RenderTexture
 {
 
-public:
+  public:
 
 	RenderTexture()
 		: m_framebuffer( 0 ),
@@ -191,7 +191,7 @@ public:
 	class GAFFERIMAGEUI_API RenderScope : boost::noncopyable
 	{
 
-	public:
+	  public:
 
 		RenderScope( const RenderTexture *framebuffer, bool clearDepth )
 			: m_framebuffer( framebuffer )
@@ -225,13 +225,13 @@ public:
 			glBindFramebuffer( GL_FRAMEBUFFER, m_defaultFramebuffer );
 		}
 
-	private:
+	  private:
 
 		const RenderTexture *m_framebuffer;
 		GLint m_defaultFramebuffer;
 	};
 
-private:
+  private:
 
 	GLuint acquireFramebuffer() const
 	{
@@ -438,7 +438,7 @@ const SelectionPostProcessShader *selectionPostProcessShader()
 // NOTE : Copied from GafferSceneUI::OutputBuffer, would be nice if it was somewhere central.
 class GafferImageUI::ImageGadget::BufferTexture
 {
-public:
+  public:
 
 	BufferTexture()
 	{
@@ -466,7 +466,7 @@ public:
 		glTexBuffer( GL_TEXTURE_BUFFER, GL_R32UI, m_buffer );
 	}
 
-private:
+  private:
 
 	GLuint m_texture;
 	GLuint m_buffer;
@@ -506,7 +506,7 @@ uint64_t g_tileUpdateCount;
 class TileShader
 {
 
-public:
+  public:
 
 	TileShader()
 	{
@@ -602,14 +602,14 @@ public:
 			glUniform1i( m_tileShader.m_activeParameterLocation, active );
 		}
 
-	private:
+	  private:
 
 		const TileShader &m_tileShader;
 		GLint m_previousProgram;
 		GLint m_prevBlendSrc, m_prevBlendDst;
 	};
 
-private:
+  private:
 
 	IECoreGL::ShaderPtr m_shader;
 
@@ -697,7 +697,7 @@ const TileShader *tileShader()
 class TileShaderSelectedIDs
 {
 
-public:
+  public:
 
 	TileShaderSelectedIDs()
 	{
@@ -755,14 +755,14 @@ public:
 			idTexture->bind();
 		}
 
-	private:
+	  private:
 
 		const TileShaderSelectedIDs &m_tileShader;
 		GLint m_previousProgram;
 		GLint m_prevBlendSrc, m_prevBlendDst;
 	};
 
-private:
+  private:
 
 	IECoreGL::ShaderPtr m_shader;
 

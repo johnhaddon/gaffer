@@ -102,7 +102,7 @@ unordered_set<string> &activeRenderIds()
 // A thread-safe message handler for render messaging
 class InteractiveRender::RenderMessageHandler : public MessageHandler
 {
-public:
+  public:
 
 	RenderMessageHandler()
 		: m_messages( new MessagesData )
@@ -146,7 +146,7 @@ public:
 
 	Signals::Signal<void()> messagesChangedSignal;
 
-private:
+  private:
 
 	tbb::mutex m_mutex;
 	MessagesDataPtr m_messages;

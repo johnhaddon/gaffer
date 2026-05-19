@@ -51,7 +51,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Mix : public ImageProcessor
 {
 
-public:
+  public:
 
 	explicit Mix( const std::string &name = defaultName<Mix>() );
 	~Mix() override;
@@ -70,7 +70,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	/// Reimplemented to hash the connected input plugs
 	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -88,7 +88,7 @@ protected:
 	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

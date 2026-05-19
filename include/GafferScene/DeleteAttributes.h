@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteAttributes final : public FilteredSceneProcessor
 {
 
-public:
+  public:
 
 	explicit DeleteAttributes( const std::string &name = defaultName<DeleteAttributes>() );
 	~DeleteAttributes() override;
@@ -61,7 +61,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-private:
+  private:
 
 	enum class Operation
 	{

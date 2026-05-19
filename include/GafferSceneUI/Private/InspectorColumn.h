@@ -55,7 +55,7 @@ namespace Private
 class GAFFERSCENEUI_API InspectorColumn : public GafferUI::PathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( InspectorColumn )
 
@@ -78,14 +78,14 @@ public:
 	/// be reused by `_HistoryWindow`.
 	static CellData cellDataFromValue( const IECore::Object *value );
 
-protected:
+  protected:
 
 	/// The internal implementation of `cellData()`. Available as a separate
 	/// function so that derived classes can override `cellData()` without
 	/// having to make their own separate call to `inspect()`.
 	CellData cellDataFromInspection( const GafferSceneUI::Private::Inspector::Result *inspection ) const;
 
-private:
+  private:
 
 	void inspectorDirtied();
 

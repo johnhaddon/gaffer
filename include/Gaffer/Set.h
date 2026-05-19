@@ -55,7 +55,7 @@ class SetIterator;
 class GAFFER_API Set : public IECore::RunTimeTyped, public Signals::Trackable
 {
 
-public:
+  public:
 
 	Set();
 	~Set() override;
@@ -92,7 +92,7 @@ public:
 	Iterator end();
 	ConstIterator end() const;
 
-private:
+  private:
 
 	MemberSignal m_memberAddedSignal;
 	MemberSignal m_memberRemovedSignal;
@@ -104,7 +104,7 @@ template<typename ContainerType, typename ValueType>
 class SetIterator : public boost::iterator_facade<SetIterator<ContainerType, ValueType>, ValueType, boost::random_access_traversal_tag, ValueType &, int64_t>
 {
 
-public:
+  public:
 
 	SetIterator( ContainerType *set )
 		: SetIterator( set, 0 )
@@ -116,7 +116,7 @@ public:
 	{
 	}
 
-private:
+  private:
 
 	friend class boost::iterator_core_access;
 

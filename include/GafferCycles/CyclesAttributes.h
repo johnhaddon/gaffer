@@ -47,7 +47,7 @@ namespace GafferCycles
 class GAFFERCYCLES_API CyclesAttributes : public GafferScene::Attributes
 {
 
-public:
+  public:
 
 	explicit CyclesAttributes( const std::string &name = defaultName<CyclesAttributes>() );
 	~CyclesAttributes() override;

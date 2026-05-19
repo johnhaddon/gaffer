@@ -67,7 +67,7 @@ namespace Gaffer
 class GAFFER_API Context : public IECore::RefCounted
 {
 
-public:
+  public:
 
 
 	Context();
@@ -181,7 +181,7 @@ public:
 	class GAFFER_API Scope : private ThreadState::Scope
 	{
 
-	public:
+	  public:
 
 		/// Constructing the Scope pushes the current context.
 		/// If context is `nullptr` then this is a no-op.
@@ -201,7 +201,7 @@ public:
 	class GAFFER_API EditableScope : private ThreadState::Scope
 	{
 
-	public:
+	  public:
 
 		/// It is the caller's responsibility to
 		/// guarantee that `context` outlives
@@ -247,7 +247,7 @@ public:
 
 		const Context *context() const { return m_context.get(); }
 
-	private:
+	  private:
 
 		Ptr m_context;
 		// Provides storage for `setFrame()` and `setTime()` to use
@@ -267,7 +267,7 @@ public:
 		TypeDescription();
 	};
 
-private:
+  private:
 
 	// Determines the operation of the private copy constructor.
 	enum class CopyMode
@@ -323,7 +323,7 @@ private:
 		template<typename T>
 		static void registerType();
 
-	private:
+	  private:
 
 		Value( IECore::TypeId typeId, const void *value, const IECore::MurmurHash &hash );
 

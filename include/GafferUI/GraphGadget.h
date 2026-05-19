@@ -82,7 +82,7 @@ constexpr Gadget::Layer Overlay = Gadget::Layer::Front;
 class GAFFERUI_API GraphGadget : public ContainerGadget
 {
 
-public:
+  public:
 
 	/// Creates a graph showing the children of root, optionally
 	/// filtered by the specified set. Nodes are only displayed if
@@ -199,13 +199,13 @@ public:
 	/// Returns the connectionGadget under the specified line.
 	ConnectionGadget *connectionGadgetAt( const IECore::LineSegment3f &lineInGadgetSpace ) const;
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	const Gaffer::V2fPlug *nodePositionPlug( const Gaffer::Node *node ) const;
 	Gaffer::V2fPlug *nodePositionPlug( Gaffer::Node *node, bool createIfMissing ) const;

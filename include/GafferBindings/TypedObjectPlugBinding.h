@@ -47,7 +47,7 @@ template<typename T, typename TWrapper = T>
 class TypedObjectPlugClass : public PlugClass<T, TWrapper>
 {
 
-public:
+  public:
 
 	TypedObjectPlugClass( const char *docString = nullptr );
 };

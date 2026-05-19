@@ -52,7 +52,7 @@ namespace Private
 class GAFFERSCENEUI_API SetMembershipInspector : public Inspector
 {
 
-public:
+  public:
 
 	SetMembershipInspector(
 		const GafferScene::ScenePlugPtr &scene,
@@ -62,7 +62,7 @@ public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::SetMembershipInspector, SetMembershipInspectorTypeId, Inspector );
 
-protected:
+  protected:
 
 	GafferScene::SceneAlgo::History::ConstPtr history() const override;
 	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
@@ -77,7 +77,7 @@ protected:
 	CanEditFunction canEditFunction( const GafferScene::SceneAlgo::History *history ) const override;
 	EditFunction editFunction( const GafferScene::SceneAlgo::History *history ) const override;
 
-private:
+  private:
 
 	const GafferScene::ScenePlugPtr m_scene;
 	const IECore::InternedString m_setName;

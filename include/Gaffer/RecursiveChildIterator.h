@@ -52,7 +52,7 @@ namespace Gaffer
 class RecursiveChildIterator : public boost::iterator_facade<RecursiveChildIterator, const GraphComponentPtr, boost::forward_traversal_tag>
 {
 
-public:
+  public:
 
 	RecursiveChildIterator()
 		: m_pruned( false )
@@ -98,7 +98,7 @@ public:
 		return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end;
 	}
 
-private:
+  private:
 
 	friend class boost::iterator_core_access;
 

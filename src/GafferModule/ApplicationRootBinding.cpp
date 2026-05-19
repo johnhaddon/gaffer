@@ -61,7 +61,7 @@ namespace
 class ApplicationRootWrapper : public IECorePython::RunTimeTypedWrapper<ApplicationRoot>
 {
 
-public:
+  public:
 
 	ApplicationRootWrapper( PyObject *self, const std::string &name = defaultName<ApplicationRoot>() )
 		: IECorePython::RunTimeTypedWrapper<ApplicationRoot>( self, name )

@@ -50,7 +50,7 @@ namespace GafferBindings
 template<typename T, typename TWrapper = T>
 class GraphComponentClass : public IECorePython::RunTimeTypedClass<T, TWrapper>
 {
-public:
+  public:
 
 	GraphComponentClass( const char *docString = nullptr );
 };
@@ -59,7 +59,7 @@ template<typename WrappedType>
 class GraphComponentWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 {
 
-public:
+  public:
 
 	template<typename... Args>
 	GraphComponentWrapper( PyObject *self, Args &&...args )

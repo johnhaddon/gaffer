@@ -56,7 +56,7 @@ namespace GafferScene
 class GAFFERSCENE_API SceneReader : public SceneNode
 {
 
-public:
+  public:
 
 	explicit SceneReader( const std::string &name = defaultName<SceneReader>() );
 	~SceneReader() override;
@@ -81,7 +81,7 @@ public:
 
 	static size_t supportedExtensions( std::vector<std::string> &extensions );
 
-protected:
+  protected:
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
@@ -108,7 +108,7 @@ protected:
 	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-private:
+  private:
 
 	void plugSet( Gaffer::Plug *plug );
 

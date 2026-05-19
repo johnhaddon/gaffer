@@ -57,7 +57,7 @@ namespace GafferImageUI
 class GAFFERIMAGEUI_API ColorInspectorTool : public GafferUI::Tool
 {
 
-public:
+  public:
 
 	explicit ColorInspectorTool( GafferUI::View *view, const std::string &name = defaultName<ColorInspectorTool>() );
 
@@ -67,7 +67,7 @@ public:
 
 	class GAFFERIMAGEUI_API ColorInspectorPlug : public Gaffer::ValuePlug
 	{
-	public:
+	  public:
 
 		enum class GAFFERIMAGEUI_API Mode
 		{
@@ -95,7 +95,7 @@ public:
 	Gaffer::ArrayPlug *inspectorsPlug();
 	const Gaffer::ArrayPlug *inspectorsPlug() const;
 
-private:
+  private:
 
 	void plugSet( Gaffer::Plug *plug );
 	void colorInspectorAdded( GraphComponent *colorInspector );

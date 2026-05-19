@@ -69,7 +69,7 @@ namespace
 class Environment
 {
 
-public:
+  public:
 
 	Environment()
 	{
@@ -96,7 +96,7 @@ public:
 		return nullptr;
 	}
 
-private:
+  private:
 
 	using Map = boost::container::flat_map<IECore::InternedString, IECore::InternedString>;
 	Map m_map;

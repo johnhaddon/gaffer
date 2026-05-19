@@ -57,14 +57,14 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API LightTool : public GafferSceneUI::SelectionTool
 {
 
-public:
+  public:
 
 	LightTool( SceneView *view, const std::string &name = defaultName<LightTool>() );
 	~LightTool() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::LightTool, LightToolTypeId, SelectionTool );
 
-private:
+  private:
 
 	GafferScene::ScenePlug *scenePlug();
 	const GafferScene::ScenePlug *scenePlug() const;

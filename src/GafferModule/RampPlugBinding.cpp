@@ -62,7 +62,7 @@ const IECore::InternedString g_omitParentNodePlugValues( "valuePlugSerialiser:om
 class RampPlugSerialiser : public ValuePlugSerialiser
 {
 
-public:
+  public:
 
 	std::string postConstructor( const Gaffer::GraphComponent *plug, const std::string &identifier, Serialisation &serialisation ) const override
 	{
@@ -88,7 +88,7 @@ public:
 		return !omitValue( child, serialisation );
 	}
 
-private:
+  private:
 
 	bool omitValue( const Gaffer::GraphComponent *plug, const Serialisation &serialisation ) const
 	{

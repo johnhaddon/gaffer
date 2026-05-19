@@ -46,7 +46,7 @@ namespace GafferImage
 class GAFFERIMAGE_API MetadataProcessor : public ImageProcessor
 {
 
-public:
+  public:
 
 	explicit MetadataProcessor( const std::string &name = defaultName<MetadataProcessor>() );
 	~MetadataProcessor() override;
@@ -55,7 +55,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	// Reimplemented to call hashProcessedMetadata()
 	void hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;

@@ -47,7 +47,7 @@ namespace GafferUI
 class GAFFERUI_API TextGadget : public Gadget
 {
 
-public:
+  public:
 
 	explicit TextGadget( const std::string &text );
 	~TextGadget() override;
@@ -62,13 +62,13 @@ public:
 
 	Imath::Box3f bound() const override;
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	std::string m_text;
 	Imath::Box3f m_bound;

@@ -135,7 +135,7 @@ namespace
 class Constraint
 {
 
-public:
+  public:
 
 	enum Type
 	{
@@ -175,7 +175,7 @@ public:
 		return m_category;
 	}
 
-private:
+  private:
 
 	V2f *m_p;
 	V2f *m_q;
@@ -189,7 +189,7 @@ private:
 class LayoutEngine
 {
 
-public:
+  public:
 
 	LayoutEngine( GraphGadget *graphGadget, float edgeLengthScale, float nodeSeparationScale )
 		: m_graphGadget( graphGadget ),
@@ -672,7 +672,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	// The tangents of connection endpoints are specified by NodeGadgets
 	// as arbitrary V3fs. We make the simplifying assumption that they
@@ -1045,7 +1045,7 @@ private:
 			return edge1.targetOffset[m_dimension] < edge2.targetOffset[m_dimension];
 		}
 
-	private:
+	  private:
 
 		int m_dimension;
 		Graph *m_graph;

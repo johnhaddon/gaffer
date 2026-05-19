@@ -43,7 +43,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API CompoundRenderer final : public IECoreScenePreview::Renderer
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( CompoundRenderer )
 
@@ -67,7 +67,7 @@ public:
 	void pause() override;
 	IECore::DataPtr command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters ) override;
 
-private:
+  private:
 
 	Renderers m_renderers;
 };

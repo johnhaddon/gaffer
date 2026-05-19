@@ -114,7 +114,7 @@ void begin()
 
 class ArnoldAPIScope
 {
-public:
+  public:
 
 	~ArnoldAPIScope()
 	{
@@ -149,7 +149,7 @@ public:
 		return g_apiScope;
 	}
 
-private:
+  private:
 
 	ArnoldAPIScope()
 		: m_sharedUniverse( nullptr )

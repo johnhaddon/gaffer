@@ -54,7 +54,7 @@ namespace Gaffer
 class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, const Plug, boost::forward_traversal_tag>
 {
 
-public:
+  public:
 
 	DownstreamIterator( const Plug *plug )
 		: m_root( plug ), m_pruned( false )
@@ -93,14 +93,14 @@ public:
 		return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end;
 	}
 
-private:
+  private:
 
 	friend class boost::iterator_core_access;
 
 	class Level
 	{
 
-	public:
+	  public:
 
 		Level( const Plug *plug )
 			: plugs( plug->outputs().begin(), plug->outputs().end() )
@@ -133,7 +133,7 @@ private:
 		DependencyNode::AffectedPlugsContainer::const_iterator it;
 		DependencyNode::AffectedPlugsContainer::const_iterator end;
 
-	private:
+	  private:
 
 		void addDependentPlugs( const Plug *plug )
 		{

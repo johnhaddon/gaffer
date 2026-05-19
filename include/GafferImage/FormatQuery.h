@@ -72,12 +72,12 @@ struct GAFFERIMAGE_API FormatQuery : Gaffer::ComputeNode
 
 	void affects( Gaffer::Plug const *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &hash ) const override;
 	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

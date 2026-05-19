@@ -180,7 +180,7 @@ const char *constantFragSource()
 class GoboVisualiser final : public LightFilterVisualiser
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( GoboVisualiser )
 
@@ -189,7 +189,7 @@ public:
 
 	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-protected:
+  protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<GoboVisualiser> g_visualiserDescription;
 };

@@ -47,7 +47,7 @@ namespace GafferUSD
 class GAFFERUSD_API USDShader : public GafferScene::Shader
 {
 
-public:
+  public:
 
 	explicit USDShader( const std::string &name = defaultName<USDShader>() );
 	~USDShader() override;
@@ -56,7 +56,7 @@ public:
 
 	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-protected:
+  protected:
 
 	IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
 };

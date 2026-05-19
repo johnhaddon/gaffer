@@ -75,7 +75,7 @@ IE_CORE_FORWARDDECLARE( Monitor );
 class GAFFER_API ThreadState
 {
 
-public:
+  public:
 
 	/// Constructs a default thread state, with no current Process,
 	/// no active monitors, and a default constructed Context.
@@ -84,7 +84,7 @@ public:
 	class GAFFER_API Scope : public boost::noncopyable
 	{
 
-	public:
+	  public:
 
 		/// Scopes a copy of `state` on the current
 		/// thread. When a process spawns TBB tasks, each
@@ -96,7 +96,7 @@ public:
 		/// constructor.
 		~Scope();
 
-	protected:
+	  protected:
 
 		/// Pushes a copy of the current ThreadState onto
 		/// the stack for this thread. Passing `push = false`
@@ -108,7 +108,7 @@ public:
 		/// `push = false`.
 		ThreadState *m_threadState;
 
-	private:
+	  private:
 
 		std::stack<ThreadState> *m_stack;
 	};
@@ -118,7 +118,7 @@ public:
 	const Context *context() const { return m_context; }
 	const Process *process() const { return m_process; }
 
-private:
+  private:
 
 	friend class Process;
 	friend class Context;

@@ -59,7 +59,7 @@ namespace GafferUI
 class GAFFERUI_API ImageGadget : public Gadget
 {
 
-public:
+  public:
 
 	/// Images are searched for on the paths defined by
 	/// the GAFFERUI_IMAGE_PATHS environment variable.
@@ -89,13 +89,13 @@ public:
 	/// returned texture may be shared with other code, and is therefore const.
 	static IECoreGL::ConstTexturePtr loadTexture( const std::string &fileName, const TextureParameters &parameters = TextureParameters::defaultParameters() );
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	Imath::Box3f m_bound;
 	// We can't actually generate the GL texture until renderLayer(), as

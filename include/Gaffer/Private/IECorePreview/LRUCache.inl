@@ -91,7 +91,7 @@ template<typename LRUCache>
 class Serial
 {
 
-public:
+  public:
 
 	using CacheEntry = typename LRUCache::CacheEntry;
 	using Key = typename LRUCache::KeyType;
@@ -191,7 +191,7 @@ public:
 			}
 		}
 
-	private:
+	  private:
 
 		void init( MapIterator it )
 		{
@@ -277,7 +277,7 @@ public:
 
 	typename LRUCache::Cost currentCost;
 
-private:
+  private:
 
 	MapAndList m_mapAndList;
 };
@@ -289,7 +289,7 @@ template<typename LRUCache>
 class Parallel
 {
 
-public:
+  public:
 
 	using CacheEntry = typename LRUCache::CacheEntry;
 	using Key = typename LRUCache::KeyType;
@@ -402,7 +402,7 @@ public:
 			}
 		}
 
-	private:
+	  private:
 
 		bool acquire( Bin &bin, const Key &key, AcquireMode mode, const IECore::Canceller *canceller )
 		{
@@ -596,7 +596,7 @@ public:
 
 	AtomicCost currentCost;
 
-private:
+  private:
 
 	Bins m_bins;
 
@@ -634,7 +634,7 @@ template<typename LRUCache>
 class TaskParallel
 {
 
-public:
+  public:
 
 	using CacheEntry = typename LRUCache::CacheEntry;
 	using Key = typename LRUCache::KeyType;
@@ -762,7 +762,7 @@ public:
 			}
 		}
 
-	private:
+	  private:
 
 		bool acquire( Bin &bin, const Key &key, AcquireMode mode, bool spawnsTasks, const IECore::Canceller *canceller )
 		{
@@ -980,7 +980,7 @@ public:
 
 	AtomicCost currentCost;
 
-private:
+  private:
 
 	Bins m_bins;
 

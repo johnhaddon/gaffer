@@ -65,7 +65,7 @@ namespace
 class BoxIOPlugAdder : public PlugAdder
 {
 
-public:
+  public:
 
 	BoxIOPlugAdder( BoxIOPtr boxIO )
 		: m_boxIO( boxIO )
@@ -75,7 +75,7 @@ public:
 		updateVisibility();
 	}
 
-protected:
+  protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -120,7 +120,7 @@ protected:
 		}
 	}
 
-private:
+  private:
 
 	void childAdded()
 	{
@@ -152,7 +152,7 @@ namespace
 class NameGadget : public TextGadget
 {
 
-public:
+  public:
 
 	NameGadget( BoxIOPtr boxIO )
 		: TextGadget( boxIO->namePlug()->getValue() ), m_boxIO( boxIO )
@@ -160,7 +160,7 @@ public:
 		boxIO->plugSetSignal().connect( boost::bind( &NameGadget::plugSet, this, ::_1 ) );
 	}
 
-private:
+  private:
 
 	void plugSet( const Plug *plug )
 	{

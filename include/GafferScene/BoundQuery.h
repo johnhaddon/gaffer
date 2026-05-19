@@ -82,12 +82,12 @@ struct GAFFERSCENE_API BoundQuery : Gaffer::ComputeNode
 
 	void affects( Gaffer::Plug const *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &hash ) const override;
 	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
-private:
+  private:
 
 	Gaffer::AtomicBox3fPlug *internalBoundPlug();
 	Gaffer::AtomicBox3fPlug const *internalBoundPlug() const;

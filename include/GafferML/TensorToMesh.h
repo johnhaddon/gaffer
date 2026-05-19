@@ -48,7 +48,7 @@ namespace GafferML
 class GAFFERML_API TensorToMesh : public GafferScene::ObjectSource
 {
 
-public:
+  public:
 
 	explicit TensorToMesh( const std::string &name = defaultName<TensorToMesh>() );
 	~TensorToMesh() override;
@@ -63,12 +63,12 @@ public:
 
 	void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 
 	static size_t g_firstPlugIndex;

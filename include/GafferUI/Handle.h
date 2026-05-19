@@ -49,7 +49,7 @@ namespace GafferUI
 class GAFFERUI_API Handle : public Gadget
 {
 
-public:
+  public:
 
 	~Handle() override;
 
@@ -65,7 +65,7 @@ public:
 
 	Imath::Box3f bound() const override;
 
-protected:
+  protected:
 
 	explicit Handle( const std::string &name = defaultName<Handle>() );
 
@@ -101,7 +101,7 @@ protected:
 		float startPosition() const;
 		float updatedPosition( const DragDropEvent &event );
 
-	private:
+	  private:
 
 		const Gadget *m_gadget;
 		// We store the line of the drag in world space so that
@@ -139,7 +139,7 @@ protected:
 		Imath::V2f startPosition() const;
 		Imath::V2f updatedPosition( const DragDropEvent &event );
 
-	private:
+	  private:
 
 		void init( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent );
 
@@ -190,7 +190,7 @@ protected:
 
 		bool isLinearDrag() const;
 
-	private:
+	  private:
 
 		float closestRotation( const Imath::V2f &p, float targetRotation );
 
@@ -211,7 +211,7 @@ protected:
 		float m_preciseMotionOrigin;
 	};
 
-private:
+  private:
 
 	void enter();
 	void leave();

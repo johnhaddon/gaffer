@@ -45,7 +45,7 @@ namespace GafferUI
 class GAFFERUI_API TranslateHandle : public Handle
 {
 
-public:
+  public:
 
 	explicit TranslateHandle( Style::Axes axes );
 	~TranslateHandle() override;
@@ -68,12 +68,12 @@ public:
 	// > will still affect the results of `translation()`.
 	Imath::V3f translation( const DragDropEvent &event );
 
-protected:
+  protected:
 
 	void renderHandle( const Style *style, Style::State state ) const override;
 	void dragBegin( const DragDropEvent &event ) override;
 
-private:
+  private:
 
 	Style::Axes m_axes;
 	LinearDrag m_linearDrag;

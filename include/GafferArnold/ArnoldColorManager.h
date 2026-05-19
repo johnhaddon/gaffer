@@ -52,7 +52,7 @@ class ArnoldShader;
 class GAFFERARNOLD_API ArnoldColorManager : public GafferScene::GlobalsProcessor
 {
 
-public:
+  public:
 
 	explicit ArnoldColorManager( const std::string &name = defaultName<ArnoldColorManager>() );
 	~ArnoldColorManager() override;
@@ -66,12 +66,12 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-private:
+  private:
 
 	GafferScene::ShaderPlug *shaderInPlug();
 	const GafferScene::ShaderPlug *shaderInPlug() const;

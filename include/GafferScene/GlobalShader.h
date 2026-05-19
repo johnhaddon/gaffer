@@ -46,7 +46,7 @@ class ShaderPlug;
 class GAFFERSCENE_API GlobalShader : public GlobalsProcessor
 {
 
-public:
+  public:
 
 	explicit GlobalShader( const std::string &name = defaultName<GlobalShader>() );
 	~GlobalShader() override;
@@ -58,7 +58,7 @@ public:
 	ShaderPlug *shaderPlug();
 	const ShaderPlug *shaderPlug() const;
 
-protected:
+  protected:
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
@@ -67,7 +67,7 @@ protected:
 	virtual void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
 	virtual std::string computeOptionName( const Gaffer::Context *context ) const = 0;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

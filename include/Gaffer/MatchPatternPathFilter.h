@@ -48,7 +48,7 @@ namespace Gaffer
 class GAFFER_API MatchPatternPathFilter : public Gaffer::PathFilter
 {
 
-public:
+  public:
 
 	/// The filter passes through any path whose name matches
 	/// one or more of the patterns (using StringAlgo match()).
@@ -71,11 +71,11 @@ public:
 	void setInverted( bool inverted );
 	bool getInverted() const;
 
-protected:
+  protected:
 
 	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-private:
+  private:
 
 	bool invert( bool b ) const;
 	bool remove( PathPtr path ) const;

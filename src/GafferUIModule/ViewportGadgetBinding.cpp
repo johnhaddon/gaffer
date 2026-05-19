@@ -149,7 +149,7 @@ void render( const ViewportGadget &v )
 class RasterScopeWrapper : boost::noncopyable
 {
 
-public:
+  public:
 
 	RasterScopeWrapper( ViewportGadget &viewportGadget )
 		: m_viewportGadget( &viewportGadget )
@@ -166,7 +166,7 @@ public:
 		m_rasterScope.reset();
 	}
 
-private:
+  private:
 
 	ViewportGadgetPtr m_viewportGadget;
 	std::optional<ViewportGadget::RasterScope> m_rasterScope;

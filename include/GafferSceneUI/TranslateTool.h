@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API TranslateTool : public TransformTool
 {
 
-public:
+  public:
 
 	explicit TranslateTool( SceneView *view, const std::string &name = defaultName<TranslateTool>() );
 	~TranslateTool() override;
@@ -65,12 +65,12 @@ public:
 	/// This is primarily of use in the unit tests.
 	void translate( const Imath::V3f &offset );
 
-protected:
+  protected:
 
 	bool affectsHandles( const Gaffer::Plug *input ) const override;
 	void updateHandles( float rasterScale ) override;
 
-private:
+  private:
 
 	Imath::M44f handlesTransform() const;
 
@@ -85,7 +85,7 @@ private:
 		bool canApply( const Imath::V3f &offset ) const;
 		void apply( const Imath::V3f &offset );
 
-	private:
+	  private:
 
 		// For the validity of this reference, we rely
 		// on `TransformTool::selection()` not changing

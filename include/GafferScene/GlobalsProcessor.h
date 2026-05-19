@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API GlobalsProcessor : public SceneProcessor
 {
 
-public:
+  public:
 
 	explicit GlobalsProcessor( const std::string &name = defaultName<GlobalsProcessor>() );
 	~GlobalsProcessor() override;
@@ -56,7 +56,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	/// Implemented to call hashProcessedGlobals().
 	void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;

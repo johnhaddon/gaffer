@@ -145,7 +145,7 @@ struct CompareV2fX
 class SetPositionsAction : public Gaffer::Action
 {
 
-public:
+  public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SetPositionsAction, GraphGadgetSetPositionsActionTypeId, Gaffer::Action );
 
@@ -160,7 +160,7 @@ public:
 		m_positions[plug] = { v, v + offset };
 	}
 
-protected:
+  protected:
 
 	Gaffer::GraphComponent *subject() const override
 	{
@@ -213,7 +213,7 @@ protected:
 		}
 	}
 
-private:
+  private:
 
 	Gaffer::ScriptNode *m_scriptNode;
 

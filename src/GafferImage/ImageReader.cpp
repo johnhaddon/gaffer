@@ -64,7 +64,7 @@ namespace
 class FrameMaskScope : public Context::EditableScope
 {
 
-public:
+  public:
 
 	FrameMaskScope( const Context *context, const ImageReader *reader, bool clampBlack = false )
 		: EditableScope( context ), m_mode( ImageReader::None )
@@ -98,7 +98,7 @@ public:
 		return m_mode;
 	}
 
-private:
+  private:
 
 	ImageReader::FrameMaskMode m_mode;
 };

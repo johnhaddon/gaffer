@@ -53,7 +53,7 @@ namespace GafferScene
 class GAFFERSCENE_API ScenePlug : public Gaffer::ValuePlug
 {
 
-public:
+  public:
 
 	explicit ScenePlug( const std::string &name = defaultName<ScenePlug>(), Direction direction = In, unsigned flags = Default );
 	~ScenePlug() override;
@@ -277,7 +277,7 @@ public:
 	/// \deprecated Use `existsPlug()->getValue()` instead.
 	bool exists() const;
 
-private:
+  private:
 
 	// Private plug used for the computation of `existsPlug()` by SceneNode.
 	Gaffer::InternedStringVectorDataPlug *sortedChildNamesPlug();

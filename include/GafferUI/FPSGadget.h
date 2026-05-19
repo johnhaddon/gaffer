@@ -47,20 +47,20 @@ namespace GafferUI
 class GAFFERUI_API FPSGadget : public Gadget
 {
 
-public:
+  public:
 
 	explicit FPSGadget( Imath::V3f defaultPosition = Imath::V3f( 5.0f, 50.0f, 0.0f ) );
 	~FPSGadget() override;
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::FPSGadget, FPSGadgetTypeId, Gadget );
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	mutable std::list<std::chrono::time_point<std::chrono::high_resolution_clock>> m_timeBuffer;
 };

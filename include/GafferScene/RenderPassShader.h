@@ -49,7 +49,7 @@ namespace GafferScene
 class GAFFERSCENE_API RenderPassShader : public GafferScene::GlobalShader
 {
 
-public:
+  public:
 
 	explicit RenderPassShader( const std::string &name = defaultName<RenderPassShader>() );
 	~RenderPassShader() override;
@@ -62,13 +62,13 @@ public:
 	Gaffer::StringPlug *usagePlug();
 	const Gaffer::StringPlug *usagePlug() const;
 
-protected:
+  protected:
 
 	bool affectsOptionName( const Gaffer::Plug *input ) const override;
 	void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	std::string computeOptionName( const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

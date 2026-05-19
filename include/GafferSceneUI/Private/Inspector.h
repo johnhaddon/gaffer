@@ -102,7 +102,7 @@ IE_CORE_FORWARDDECLARE( Inspector );
 class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::Signals::Trackable
 {
 
-public:
+  public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::Inspector, InspectorTypeId, IECore::RunTimeTyped );
 	IE_CORE_FORWARDDECLARE( Result );
@@ -135,7 +135,7 @@ public:
 	/// the queries without blocking the UI.
 	Gaffer::PathPtr historyPath() const;
 
-protected:
+  protected:
 
 	/// Protected constructor for use by derived classes. The `name` argument
 	/// will be returned verbatim by the `name()` method.
@@ -210,7 +210,7 @@ protected:
 	/// current context.
 	virtual EditFunction editFunction( const GafferScene::SceneAlgo::History *history ) const;
 
-private:
+  private:
 
 	void inspectHistoryWalk( const GafferScene::SceneAlgo::History *history, Result *result, const IECore::Canceller *canceller ) const;
 	void plugDirtied( Gaffer::Plug *plug );
@@ -224,7 +224,7 @@ private:
 	/// and the context at that point in history, which are used as keys into `PlugMap`.
 	class GAFFERSCENEUI_API HistoryPath : public Gaffer::Path
 	{
-	public:
+	  public:
 
 		HistoryPath(
 			const ConstInspectorPtr &inspector,
@@ -247,11 +247,11 @@ private:
 
 		const Gaffer::Plug *cancellationSubject() const override;
 
-	protected:
+	  protected:
 
 		void doChildren( std::vector<Gaffer::PathPtr> &children, const IECore::Canceller *canceller = nullptr ) const override;
 
-	private:
+	  private:
 
 		struct HistoryProvider;
 		using HistoryProviderPtr = std::shared_ptr<HistoryProvider>;
@@ -284,7 +284,7 @@ private:
 class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( Result );
 
@@ -377,7 +377,7 @@ public:
 	/// receive the value.
 	void edit( const IECore::Object *value ) const;
 
-private:
+  private:
 
 	Result( const IECore::ConstObjectPtr &value, const Gaffer::EditScopePtr &editScope );
 

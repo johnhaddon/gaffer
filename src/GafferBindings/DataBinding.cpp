@@ -66,7 +66,7 @@ struct DataToPython
 		return object( m_copy ? data->copy() : DataPtr( data ) );
 	}
 
-private:
+  private:
 
 	bool m_copy;
 };

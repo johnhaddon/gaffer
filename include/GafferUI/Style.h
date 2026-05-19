@@ -67,7 +67,7 @@ IE_CORE_FORWARDDECLARE( Style );
 class GAFFERUI_API Style : public IECore::RunTimeTyped
 {
 
-public:
+  public:
 
 	Style();
 	~Style() override;
@@ -182,7 +182,7 @@ public:
 	static void setDefaultStyle( StylePtr style );
 	//@}
 
-private:
+  private:
 
 	UnarySignal m_changedSignal;
 

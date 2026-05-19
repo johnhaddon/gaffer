@@ -53,7 +53,7 @@ namespace GafferScene
 
 class GAFFERSCENE_API OptionQuery : public Gaffer::ComputeNode
 {
-public:
+  public:
 
 	explicit OptionQuery( const std::string &name = defaultName<OptionQuery>() );
 	~OptionQuery() override;
@@ -96,12 +96,12 @@ public:
 	const Gaffer::NameValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
 	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

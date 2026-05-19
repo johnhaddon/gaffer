@@ -66,7 +66,7 @@ IE_CORE_FORWARDDECLARE( GraphGadget );
 class GAFFERUI_API GraphLayout : public IECore::RunTimeTyped
 {
 
-public:
+  public:
 
 	~GraphLayout() override;
 
@@ -99,7 +99,7 @@ public:
 	/// \undoable
 	virtual void layoutNodes( GraphGadget *graph, Gaffer::Set *nodes ) const = 0;
 
-protected:
+  protected:
 
 	GraphLayout();
 };

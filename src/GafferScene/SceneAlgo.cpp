@@ -143,7 +143,7 @@ struct ThreadablePathAccumulator
 		);
 	}
 
-private:
+  private:
 
 	tbb::enumerable_thread_specific<PathMatcher> m_threadResults;
 };
@@ -413,7 +413,7 @@ const InternedString g_processedObjectPlugName( "__processedObject" );
 class CapturingMonitor : public Monitor
 {
 
-public:
+  public:
 
 	CapturingMonitor( IECore::InternedString scenePlugChildName ) : m_scenePlugChildName( scenePlugChildName )
 	{
@@ -430,7 +430,7 @@ public:
 		return m_rootProcesses;
 	}
 
-protected:
+  protected:
 
 	void processStarted( const Process *process ) override
 	{
@@ -518,7 +518,7 @@ protected:
 		return !m_monitoredSet.count( h );
 	}
 
-private:
+  private:
 
 	bool shouldCapture( const Plug *plug ) const
 	{
@@ -1340,7 +1340,7 @@ struct AttributesFinder
 		return true;
 	}
 
-private:
+  private:
 
 	const AttributesPredicate &m_predicate;
 

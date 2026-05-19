@@ -57,7 +57,7 @@ namespace GafferBindings
 template<typename T, typename TWrapper = T>
 class NodeClass : public GraphComponentClass<T, TWrapper>
 {
-public:
+  public:
 
 	NodeClass( const char *docString = nullptr );
 	NodeClass( const char *docString, boost::python::no_init_t );
@@ -66,7 +66,7 @@ public:
 template<typename T>
 class NodeWrapper : public GraphComponentWrapper<T>
 {
-public:
+  public:
 
 	using WrappedType = T;
 
@@ -142,7 +142,7 @@ public:
 class GAFFERBINDINGS_API NodeSerialiser : public Serialisation::Serialiser
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( NodeSerialiser )
 

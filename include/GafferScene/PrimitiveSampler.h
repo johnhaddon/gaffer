@@ -50,7 +50,7 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveSampler : public Deformer
 {
 
-public:
+  public:
 
 	~PrimitiveSampler() override;
 
@@ -71,7 +71,7 @@ public:
 	Gaffer::StringPlug *statusPlug();
 	const Gaffer::StringPlug *statusPlug() const;
 
-protected:
+  protected:
 
 	explicit PrimitiveSampler( const std::string &name = defaultName<PrimitiveSampler>() );
 
@@ -113,7 +113,7 @@ protected:
 	/// `index` values in the interval `[ 0, destinationPrimitive->variableSize( interpolation ) )`.
 	virtual SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const = 0;
 
-private:
+  private:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const final;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;

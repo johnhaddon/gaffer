@@ -75,7 +75,7 @@ struct ObjectSets
 	// CompoundObjectInterface.
 	static ObjectSets &instance();
 
-private:
+  private:
 
 	struct ObjectSetData
 	{
@@ -217,7 +217,7 @@ struct CompoundObjectInterface : public IECoreScenePreview::Renderer::ObjectInte
 	/// See comment for CompoundAttributesInterface::attributes.
 	std::array<IECoreScenePreview::Renderer::ObjectInterfacePtr, 2> objects;
 
-private:
+  private:
 
 	// We don't anticipate more than a couple of link types per object, so use
 	// a sorted static vector to store links without the overhead of allocations.

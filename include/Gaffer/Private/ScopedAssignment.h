@@ -58,7 +58,7 @@ struct ScopedAssignment : private boost::noncopyable
 		m_variable = m_value;
 	}
 
-private:
+  private:
 
 	T const m_value;
 	T &m_variable;

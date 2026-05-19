@@ -80,7 +80,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ImagePlug : public Gaffer::ValuePlug
 {
 
-public:
+  public:
 
 	explicit ImagePlug( const std::string &name = defaultName<ImagePlug>(), Direction direction = In, unsigned flags = Default );
 	~ImagePlug() override;
@@ -288,7 +288,7 @@ public:
 
 	static constexpr int tileSizeLog2() { return 7; };
 
-private:
+  private:
 
 	static void compoundObjectToCompoundData( const IECore::CompoundObject *object, IECore::CompoundData *data );
 

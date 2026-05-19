@@ -71,7 +71,7 @@ template<typename WrappedType>
 class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 {
 
-public:
+  public:
 
 	// At one time, the Path class was implemented in pure Python.
 	// Because Python doesn't allow function overloads, we couldn't

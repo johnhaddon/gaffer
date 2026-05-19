@@ -47,7 +47,7 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldLight : public GafferScene::Light
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldLight, ArnoldLightTypeId, GafferScene::Light );
 

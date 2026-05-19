@@ -59,7 +59,7 @@ class LightFilter;
 class LightLinker
 {
 
-public:
+  public:
 
 	LightLinker();
 
@@ -94,7 +94,7 @@ public:
 	// not be called concurrently with other methods.
 	void updateDirtyLinks();
 
-private:
+  private:
 
 	// Light Filter Linking
 	// ====================

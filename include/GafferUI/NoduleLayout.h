@@ -76,7 +76,7 @@ IE_CORE_FORWARDDECLARE( Nodule )
 class GAFFERUI_API NoduleLayout : public Gadget
 {
 
-public:
+  public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NoduleLayout, NoduleLayoutTypeId, Gadget );
 
@@ -96,7 +96,7 @@ public:
 	/// "noduleLayout:customGadget:*"" metadata entries.
 	static void registerCustomGadget( const std::string &gadgetType, CustomGadgetCreator creator );
 
-private:
+  private:
 
 	LinearContainer *noduleContainer();
 	const LinearContainer *noduleContainer() const;

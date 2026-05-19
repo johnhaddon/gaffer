@@ -47,7 +47,7 @@ IE_CORE_FORWARDDECLARE( Resample )
 
 class GAFFERIMAGE_API Blur : public FlatImageProcessor
 {
-public:
+  public:
 
 	explicit Blur( const std::string &name = defaultName<Blur>() );
 	~Blur() override;
@@ -65,7 +65,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	// Output plug to compute the filter width for the internal Resample.
 	Gaffer::V2fPlug *filterScalePlug();

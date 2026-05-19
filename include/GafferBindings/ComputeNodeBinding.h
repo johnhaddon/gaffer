@@ -54,7 +54,7 @@ namespace GafferBindings
 template<typename WrappedType>
 class ComputeNodeWrapper : public DependencyNodeWrapper<WrappedType>
 {
-public:
+  public:
 
 	template<typename... Args>
 	ComputeNodeWrapper( PyObject *self, Args &&...args )

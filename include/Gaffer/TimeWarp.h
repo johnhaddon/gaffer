@@ -45,7 +45,7 @@ namespace Gaffer
 class GAFFER_API TimeWarp : public ContextProcessor
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::TimeWarp, TimeWarpTypeId, ContextProcessor );
 
@@ -58,12 +58,12 @@ public:
 	FloatPlug *offsetPlug();
 	const FloatPlug *offsetPlug() const;
 
-protected:
+  protected:
 
 	bool affectsContext( const Plug *input ) const override;
 	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

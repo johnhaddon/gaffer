@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( GraphGadget );
 class GAFFERUI_API DragEditGadget : public Gadget
 {
 
-public:
+  public:
 
 	~DragEditGadget() override;
 
@@ -57,7 +57,7 @@ public:
 
 	bool acceptsParent( const GraphComponent *potentialParent ) const override;
 
-protected:
+  protected:
 
 	// Protected constructor and friend status so only GraphGadget can
 	// construct us.
@@ -69,7 +69,7 @@ protected:
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	GraphGadget *graphGadget();
 	const GraphGadget *graphGadget() const;

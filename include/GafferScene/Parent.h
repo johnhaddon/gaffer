@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API Parent : public BranchCreator
 {
 
-public:
+  public:
 
 	explicit Parent( const std::string &name = defaultName<Parent>() );
 	~Parent() override;
@@ -61,7 +61,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -95,7 +95,7 @@ protected:
 	void hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstPathMatcherDataPtr computeBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	class ParentScope;
 	class SourceScope;

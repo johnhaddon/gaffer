@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API FramingConstraint : public SceneElementProcessor
 {
 
-public:
+  public:
 
 	explicit FramingConstraint( const std::string &name = defaultName<FramingConstraint>() );
 	~FramingConstraint() override;
@@ -84,7 +84,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	Gaffer::ObjectVectorPlug *transformAndObjectPlug();
 	const Gaffer::ObjectVectorPlug *transformAndObjectPlug() const;
@@ -109,7 +109,7 @@ protected:
 	bool affectsTarget( const Gaffer::Plug *input ) const;
 	std::optional<Target> target() const;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

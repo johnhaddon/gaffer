@@ -48,7 +48,7 @@ namespace GafferScene
 class GAFFERSCENE_API OptionTweaks : public GlobalsProcessor
 {
 
-public:
+  public:
 
 	OptionTweaks( const std::string &name = defaultName<OptionTweaks>() );
 	~OptionTweaks() override;
@@ -63,12 +63,12 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

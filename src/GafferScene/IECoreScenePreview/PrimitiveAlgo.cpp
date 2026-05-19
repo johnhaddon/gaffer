@@ -435,7 +435,7 @@ void copyIndices(
 
 class MergePrimitivesMeshResult
 {
-public:
+  public:
 
 	using PrimitiveType = IECoreScene::MeshPrimitive;
 
@@ -623,7 +623,7 @@ public:
 
 	IECoreScene::MeshPrimitivePtr result;
 
-private:
+  private:
 
 	static void setMeshGlobals(
 		MeshPrimitive *result,
@@ -738,7 +738,7 @@ private:
 
 class MergePrimitivesCurvesResult
 {
-public:
+  public:
 
 	using PrimitiveType = IECoreScene::CurvesPrimitive;
 
@@ -818,7 +818,7 @@ public:
 
 	IECoreScene::CurvesPrimitivePtr result;
 
-private:
+  private:
 
 	static void setCurvesGlobals(
 		CurvesPrimitive *result,
@@ -866,7 +866,7 @@ const std::string pointTypeName = "type";
 
 class MergePrimitivesPointsResult
 {
-public:
+  public:
 
 	using PrimitiveType = IECoreScene::PointsPrimitive;
 
@@ -926,7 +926,7 @@ public:
 
 	IECoreScene::PointsPrimitivePtr result;
 
-private:
+  private:
 
 	const std::string &pointsType( const IECoreScene::Primitive *points, bool &hasType )
 	{

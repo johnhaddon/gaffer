@@ -46,7 +46,7 @@ class StringPlug;
 class GAFFER_API NameSwitch : public Switch
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::NameSwitch, NameSwitchTypeId, Switch );
 
@@ -63,12 +63,12 @@ public:
 
 	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
-private:
+  private:
 
 	IntPlug *outIndexPlug();
 	const IntPlug *outIndexPlug() const;

@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( NoduleLayout );
 class GAFFERUI_API CompoundNodule : public Nodule
 {
 
-public:
+  public:
 
 	explicit CompoundNodule( Gaffer::PlugPtr plug );
 	~CompoundNodule() override;
@@ -65,7 +65,7 @@ public:
 	bool canCreateConnection( const Gaffer::Plug *endpoint ) const override;
 	void createConnection( Gaffer::Plug *endpoint ) override;
 
-private:
+  private:
 
 	NoduleLayout *noduleLayout();
 	const NoduleLayout *noduleLayout() const;

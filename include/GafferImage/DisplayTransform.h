@@ -51,7 +51,7 @@ namespace GafferImage
 class GAFFERIMAGE_API DisplayTransform : public OpenColorIOTransform
 {
 
-public:
+  public:
 
 	explicit DisplayTransform( const std::string &name = defaultName<DisplayTransform>() );
 	~DisplayTransform() override;
@@ -67,13 +67,13 @@ public:
 	Gaffer::StringPlug *viewPlug();
 	const Gaffer::StringPlug *viewPlug() const;
 
-protected:
+  protected:
 
 	bool affectsTransform( const Gaffer::Plug *input ) const override;
 	void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

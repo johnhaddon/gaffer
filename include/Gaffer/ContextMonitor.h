@@ -61,7 +61,7 @@ IE_CORE_FORWARDDECLARE( Context )
 class GAFFER_API ContextMonitor : public Monitor
 {
 
-public:
+  public:
 
 	/// Statistics are only collected for the root and its
 	/// descendants.
@@ -88,7 +88,7 @@ public:
 		bool operator == ( const Statistics &rhs );
 		bool operator != ( const Statistics &rhs );
 
-	private:
+	  private:
 
 		using ContextSet = boost::unordered_set<IECore::MurmurHash>;
 		using VariableMap = std::map<IECore::InternedString, CountingMap>;
@@ -103,12 +103,12 @@ public:
 	const Statistics &plugStatistics( const Plug *plug ) const;
 	const Statistics &combinedStatistics() const;
 
-protected:
+  protected:
 
 	void processStarted( const Process *process ) override;
 	void processFinished( const Process *process ) override;
 
-private:
+  private:
 
 	const GraphComponent *m_root;
 

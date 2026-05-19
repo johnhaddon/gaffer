@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Expression : public ComputeNode
 {
 
-public:
+  public:
 
 	explicit Expression( const std::string &name = defaultName<Expression>() );
 	~Expression() override;
@@ -92,11 +92,11 @@ public:
 	class GAFFER_API Engine : public IECore::RefCounted
 	{
 
-	public:
+	  public:
 
 		IE_CORE_DECLAREMEMBERPTR( Engine );
 
-	protected:
+	  protected:
 
 		/// @name Parsing and execution
 		///
@@ -164,7 +164,7 @@ public:
 			static EnginePtr creator() { return new T; };
 		};
 
-	private:
+	  private:
 
 		friend class Expression;
 
@@ -174,14 +174,14 @@ public:
 
 	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 

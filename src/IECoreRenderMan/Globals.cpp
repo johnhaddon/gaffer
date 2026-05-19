@@ -215,7 +215,7 @@ struct Globals::InteractiveRenderThread
 		);
 	}
 
-private:
+  private:
 
 	void threadFunction()
 	{

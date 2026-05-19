@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API Filter : public Gaffer::ComputeNode
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::Filter, FilterTypeId, Gaffer::ComputeNode );
 
@@ -80,7 +80,7 @@ public:
 	/// \deprecated Use FilterPlug::inputSceneContextName instead
 	static const IECore::InternedString inputSceneContextName;
 
-protected:
+  protected:
 
 	/// Implemented to call hashMatch() below when computing the hash for outPlug().
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -111,7 +111,7 @@ protected:
 	/// enumeration.
 	virtual unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const;
 
-private:
+  private:
 
 	bool enabled( const Gaffer::Context *context ) const;
 

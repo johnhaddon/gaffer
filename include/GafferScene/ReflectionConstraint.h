@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API ReflectionConstraint : public Constraint
 {
 
-public:
+  public:
 
 	explicit ReflectionConstraint( const std::string &name = defaultName<ReflectionConstraint>() );
 	~ReflectionConstraint() override;
@@ -78,13 +78,13 @@ public:
 	Gaffer::FloatPlug *twistPlug();
 	const Gaffer::FloatPlug *twistPlug() const;
 
-protected:
+  protected:
 
 	bool affectsConstraint( const Gaffer::Plug *input ) const override;
 	void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

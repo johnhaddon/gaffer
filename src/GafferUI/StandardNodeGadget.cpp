@@ -103,7 +103,7 @@ const IECoreGL::Texture *focusIconTexture( bool focus, bool hover )
 
 class FocusGadget : public Gadget
 {
-public:
+  public:
 
 	FocusGadget( StandardNodeGadget *parent )
 		: m_oval( false ),
@@ -147,7 +147,7 @@ public:
 		return Box3f();
 	}
 
-protected:
+  protected:
 
 	void toggleFocus()
 	{
@@ -335,7 +335,7 @@ protected:
 		return Box3f( center - V3f( maxRadius ), center + V3f( maxRadius ) );
 	}
 
-private:
+  private:
 
 	bool m_oval;
 	bool m_mouseOver;
@@ -367,7 +367,7 @@ M44f FocusGadget::g_hoveredFocusNodePosition;
 class StandardNodeGadget::ErrorGadget : public Gadget
 {
 
-public:
+  public:
 
 	ErrorGadget( const std::string &name = defaultName<ErrorGadget>() )
 		: Gadget( name ), m_image( new ImageGadget( "gadgetError.png" ) )
@@ -442,7 +442,7 @@ public:
 		return result;
 	}
 
-private:
+  private:
 
 	void plugParentChanged( GraphComponent *plug )
 	{

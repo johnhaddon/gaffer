@@ -45,7 +45,7 @@ namespace GafferScene
 class GAFFERSCENE_API UnionFilter : public FilterProcessor
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::UnionFilter, UnionFilterTypeId, FilterProcessor );
 
@@ -54,7 +54,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const override;

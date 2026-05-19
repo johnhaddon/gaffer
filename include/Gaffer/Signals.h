@@ -53,7 +53,7 @@ namespace Gaffer::Signals
 /// slot.
 class Connection
 {
-public:
+  public:
 
 	Connection() = default;
 	Connection( const Connection &other ) = default;
@@ -70,7 +70,7 @@ public:
 
 	Connection &operator = ( const Connection &rhs ) = default;
 
-private:
+  private:
 
 	template<typename Signature, typename Combiner>
 	friend class Signal;
@@ -107,7 +107,7 @@ template<typename Result, typename... Args, typename Combiner>
 class Signal<Result( Args... ), Combiner> : boost::noncopyable
 {
 
-public:
+  public:
 
 	Signal( const Combiner &combiner = Combiner() );
 	~Signal();
@@ -148,7 +148,7 @@ public:
 	/// Compatibility with `boost::bind`.
 	using result_type = Result;
 
-private:
+  private:
 
 	template<typename SlotFunctor>
 	Connection connectInternal( const SlotFunctor &slot, bool front );
@@ -181,7 +181,7 @@ private:
 class ScopedConnection : public Connection
 {
 
-public:
+  public:
 
 	ScopedConnection() = default;
 	ScopedConnection( const Connection &connection );
@@ -203,7 +203,7 @@ public:
 class BlockedConnection : boost::noncopyable
 {
 
-public:
+  public:
 
 	/// Calls `connection.setBlocked( true )` if `block` is true, otherwise
 	/// does nothing.
@@ -211,7 +211,7 @@ public:
 	/// Restores the connection's blocking to its previous state.
 	~BlockedConnection();
 
-private:
+  private:
 
 	Signals::Connection *m_connection;
 	bool m_previouslyBlocked;
@@ -240,15 +240,15 @@ struct CatchingCombiner;
 class Trackable : boost::noncopyable
 {
 
-public:
+  public:
 
 	virtual ~Trackable();
 
-protected:
+  protected:
 
 	void disconnectTrackedConnections();
 
-private:
+  private:
 
 	friend void GafferModule::bindSignals();
 

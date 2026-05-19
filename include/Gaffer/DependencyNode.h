@@ -52,7 +52,7 @@ namespace Gaffer
 class GAFFER_API DependencyNode : public Node
 {
 
-public:
+  public:
 
 	explicit DependencyNode( const std::string &name = defaultName<DependencyNode>() );
 	~DependencyNode() override;

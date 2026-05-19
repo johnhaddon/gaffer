@@ -66,7 +66,7 @@ struct InputScope
 		m_scope->removeMatching( deleteContextVariables );
 	}
 
-private:
+  private:
 
 	std::optional<Context::EditableScope> m_scope;
 };

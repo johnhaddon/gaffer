@@ -50,7 +50,7 @@ namespace Gaffer
 class GAFFER_API Animation : public ComputeNode
 {
 
-public:
+  public:
 
 	explicit Animation( const std::string &name = defaultName<Animation>() );
 	~Animation() override;
@@ -133,7 +133,7 @@ public:
 	// Defines a tangent
 	class GAFFER_API Tangent : private boost::noncopyable
 	{
-	public:
+	  public:
 
 		~Tangent();
 
@@ -206,7 +206,7 @@ public:
 		/// The position cannot be set if there is no adjacent key in the direction of the tangent.
 		void setPosition( const Imath::V2d &position, bool relative = false );
 
-	private:
+	  private:
 
 		friend class CurvePlug;
 		friend class Key;
@@ -233,7 +233,7 @@ public:
 	class GAFFER_API Key : public IECore::RunTimeTyped
 	{
 
-	public:
+	  public:
 
 		explicit Key( float time = 0.0f, float value = 0.0f, Interpolation interpolation = Animation::defaultInterpolation(), double inSlope = Animation::defaultSlope(), double inScale = Animation::defaultScale(), double outSlope = Animation::defaultSlope(), double outScale = Animation::defaultScale(), TieMode tieMode = Animation::defaultTieMode() );
 		~Key() override;
@@ -293,7 +293,7 @@ public:
 		/// Get parent curve (const access).
 		const CurvePlug *parent() const;
 
-	private:
+	  private:
 
 		friend class CurvePlug;
 		friend class Tangent;
@@ -347,7 +347,7 @@ public:
 	class GAFFER_API CurvePlug : public ValuePlug
 	{
 
-	public:
+	  public:
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Animation::CurvePlug, AnimationCurvePlugTypeId, Gaffer::ValuePlug );
 
@@ -464,7 +464,7 @@ public:
 		FloatPlug *outPlug();
 		const FloatPlug *outPlug() const;
 
-	private:
+	  private:
 
 		friend class Key;
 		friend class Tangent;
@@ -538,13 +538,13 @@ public:
 
 	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 	ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-private:
+  private:
 
 	static CurvePlug *inputCurve( ValuePlug *plug );
 	static const CurvePlug *inputCurve( const ValuePlug *plug );

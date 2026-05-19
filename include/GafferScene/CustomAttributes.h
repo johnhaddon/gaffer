@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API CustomAttributes : public GafferScene::Attributes
 {
 
-public:
+  public:
 
 	explicit CustomAttributes( const std::string &name = defaultName<CustomAttributes>() );
 	~CustomAttributes() override;

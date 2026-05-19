@@ -54,7 +54,7 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API ShaderView : public GafferImageUI::ImageView
 {
 
-public:
+  public:
 
 	explicit ShaderView( Gaffer::ScriptNodePtr scriptNode );
 	~ShaderView() override;
@@ -84,7 +84,7 @@ public:
 	static void registerScene( const std::string &shaderPrefix, const std::string &name, const std::filesystem::path &referenceFileName );
 	static void registeredScenes( const std::string &shaderPrefix, std::vector<std::string> &names );
 
-private:
+  private:
 
 	using PrefixAndName = std::pair<std::string, std::string>;
 	using Scenes = std::map<PrefixAndName, Gaffer::NodePtr>;

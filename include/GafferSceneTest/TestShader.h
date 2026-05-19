@@ -47,7 +47,7 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API TestShader : public GafferScene::Shader
 {
 
-public:
+  public:
 
 	TestShader( const std::string &name = defaultName<TestShader>() );
 	~TestShader() override;

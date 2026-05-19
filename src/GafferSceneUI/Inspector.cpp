@@ -738,7 +738,7 @@ struct Inspector::HistoryPath::HistoryProvider
 		return m_varyingContextVariables.get();
 	}
 
-private:
+  private:
 
 	const ConstContextPtr m_context;
 	std::thread::id m_constructorThreadId;

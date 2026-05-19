@@ -65,7 +65,7 @@ IE_CORE_FORWARDDECLARE( ContextTracker );
 class GAFFERUI_API AnnotationsGadget : public Gadget
 {
 
-public:
+  public:
 
 	~AnnotationsGadget() override;
 
@@ -89,7 +89,7 @@ public:
 	// Returns the node and annotation name under the specified line.
 	std::optional<AnnotationIdentifier> annotationAt( const IECore::LineSegment3f &lineInGadgetSpace ) const;
 
-protected:
+  protected:
 
 	// Protected constructor and friend status so only GraphGadget can
 	// construct us.
@@ -101,7 +101,7 @@ protected:
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	struct Annotations;
 

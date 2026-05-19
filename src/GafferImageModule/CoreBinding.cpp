@@ -260,7 +260,7 @@ std::string formatRepr( const GafferImage::Format &format )
 class AtomicFormatPlugSerialiser : public GafferBindings::ValuePlugSerialiser
 {
 
-public:
+  public:
 
 	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
 	{
@@ -295,7 +295,7 @@ FormatPlugPtr acquireDefaultFormatPlugWrapper( Gaffer::ScriptNode &scriptNode )
 class FormatPlugSerialiser : public GafferBindings::ValuePlugSerialiser
 {
 
-public:
+  public:
 
 	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
 	{

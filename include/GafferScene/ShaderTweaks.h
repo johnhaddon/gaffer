@@ -49,7 +49,7 @@ namespace GafferScene
 class GAFFERSCENE_API ShaderTweaks : public AttributeProcessor
 {
 
-public:
+  public:
 
 	explicit ShaderTweaks( const std::string &name = defaultName<ShaderTweaks>() );
 	~ShaderTweaks() override;
@@ -68,7 +68,7 @@ public:
 	Gaffer::BoolPlug *localisePlug();
 	const Gaffer::BoolPlug *localisePlug() const;
 
-protected:
+  protected:
 
 	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
 	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -79,7 +79,7 @@ protected:
 
 	static size_t g_firstPlugIndex;
 
-private:
+  private:
 
 	bool applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Gaffer::TweakPlug::MissingMode missingMode ) const;
 };

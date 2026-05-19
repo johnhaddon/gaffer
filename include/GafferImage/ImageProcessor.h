@@ -56,7 +56,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ImageProcessor : public ImageNode
 {
 
-public:
+  public:
 
 	/// Constructs with a single input ImagePlug named "in". Use inPlug()
 	/// to access this plug.
@@ -85,14 +85,14 @@ public:
 	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
 	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-protected:
+  protected:
 
 	/// Reimplemented to pass through the hashes of the inPlug() when the node is disabled.
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	/// Reimplemented from ImageNode to pass through the inPlug() computations when the node is disabled.
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

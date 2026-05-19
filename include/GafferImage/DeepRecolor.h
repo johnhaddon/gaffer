@@ -46,7 +46,7 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepRecolor : public ImageProcessor
 {
 
-public:
+  public:
 
 	explicit DeepRecolor( const std::string &name = defaultName<DeepRecolor>() );
 	~DeepRecolor() override;
@@ -61,7 +61,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
@@ -72,7 +72,7 @@ protected:
 	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

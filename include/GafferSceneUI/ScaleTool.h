@@ -48,7 +48,7 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API ScaleTool : public TransformTool
 {
 
-public:
+  public:
 
 	explicit ScaleTool( SceneView *view, const std::string &name = defaultName<ScaleTool>() );
 	~ScaleTool() override;
@@ -60,12 +60,12 @@ public:
 	/// use in the unit tests.
 	void scale( const Imath::V3f &scale );
 
-protected:
+  protected:
 
 	bool affectsHandles( const Gaffer::Plug *input ) const override;
 	void updateHandles( float rasterScale ) override;
 
-private:
+  private:
 
 	// The guts of the scaling logic. This is factored out of the
 	// drag handling so it can be shared with the `scale()` public
@@ -78,7 +78,7 @@ private:
 		bool canApply( const Imath::V3i &axisMask ) const;
 		void apply( const Imath::V3i &axisMask, const Imath::V3f &scale );
 
-	private:
+	  private:
 
 		// For the validity of this reference, we rely
 		// on `TransformTool::selection()` not changing

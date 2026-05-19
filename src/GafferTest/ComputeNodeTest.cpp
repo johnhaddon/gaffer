@@ -70,7 +70,7 @@ struct Edit
 		}
 	}
 
-private:
+  private:
 
 	const std::atomic_bool &m_stop;
 };
@@ -95,7 +95,7 @@ struct Compute
 		}
 	}
 
-private:
+  private:
 
 	GafferTest::MultiplyNodePtr m_node1;
 	GafferTest::MultiplyNodePtr m_node2;

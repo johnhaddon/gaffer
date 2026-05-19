@@ -54,7 +54,7 @@ namespace GafferScene
 class GAFFERSCENE_API AttributeVisualiser : public AttributeProcessor
 {
 
-public:
+  public:
 
 	explicit AttributeVisualiser( const std::string &name = defaultName<AttributeVisualiser>() );
 	~AttributeVisualiser() override;
@@ -93,13 +93,13 @@ public:
 	Gaffer::StringPlug *shaderParameterPlug();
 	const Gaffer::StringPlug *shaderParameterPlug() const;
 
-protected:
+  protected:
 
 	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
 	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

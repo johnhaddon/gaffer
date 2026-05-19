@@ -80,7 +80,7 @@ struct MemberAcceptanceCombiner
 class GAFFER_API StandardSet : public Gaffer::Set
 {
 
-public:
+  public:
 
 	explicit StandardSet( bool removeOrphans = false );
 	~StandardSet() override;
@@ -146,7 +146,7 @@ public:
 	size_t size() const override;
 	//@}
 
-private:
+  private:
 
 	void parentChanged( GraphComponent *member );
 

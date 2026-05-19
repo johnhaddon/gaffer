@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( SceneGadget )
 class GAFFERSCENEUI_API SelectionTool : public GafferUI::Tool
 {
 
-public:
+  public:
 
 	explicit SelectionTool( SceneView *view, const std::string &name = defaultName<SelectionTool>() );
 
@@ -79,7 +79,7 @@ public:
 	static std::vector<std::string> registeredSelectModes();
 	static void deregisterSelectMode( const std::string &mode );
 
-private:
+  private:
 
 	static ToolDescription<SelectionTool, SceneView> g_toolDescription;
 

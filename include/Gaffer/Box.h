@@ -51,7 +51,7 @@ IE_CORE_FORWARDDECLARE( Set )
 class GAFFER_API Box : public SubGraph
 {
 
-public:
+  public:
 
 	explicit Box( const std::string &name = defaultName<Box>() );
 	~Box() override;

@@ -48,7 +48,7 @@ namespace Gaffer
 class GAFFER_API Switch : public ComputeNode
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::Switch, SwitchTypeId, ComputeNode );
 
@@ -100,7 +100,7 @@ public:
 
 	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	// Implemented to reject input branches inputs if they wouldn't be accepted by the output.
 	bool acceptsInput( const Plug *plug, const Plug *inputPlug ) const override;
@@ -112,7 +112,7 @@ protected:
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
-private:
+  private:
 
 	void childAdded( GraphComponent *child );
 	void plugSet( Plug *plug );

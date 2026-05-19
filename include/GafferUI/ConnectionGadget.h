@@ -64,7 +64,7 @@ IE_CORE_FORWARDDECLARE( ConnectionGadget )
 class GAFFERUI_API ConnectionGadget : public ConnectionCreator
 {
 
-public:
+  public:
 
 	~ConnectionGadget() override;
 
@@ -109,7 +109,7 @@ public:
 	/// precedence over those registered above.
 	static void registerConnectionGadget( const IECore::TypeId nodeType, const std::string &dstPlugPathRegex, ConnectionGadgetCreator creator );
 
-protected:
+  protected:
 
 	ConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule );
 
@@ -130,7 +130,7 @@ protected:
 
 	bool m_active;
 
-private:
+  private:
 
 	NodulePtr m_srcNodule;
 	NodulePtr m_dstNodule;

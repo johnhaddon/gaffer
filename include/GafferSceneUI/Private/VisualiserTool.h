@@ -64,7 +64,7 @@ namespace GafferSceneUI
 
 class GAFFERSCENEUI_API VisualiserTool : public SelectionTool
 {
-public:
+  public:
 
 	explicit VisualiserTool( SceneView *view, const std::string &name = defaultName<VisualiserTool>() );
 	~VisualiserTool() override;
@@ -106,7 +106,7 @@ public:
 	Gaffer::Color3fPlug *vectorColorPlug();
 	const Gaffer::Color3fPlug *vectorColorPlug() const;
 
-private:
+  private:
 
 	friend VisualiserGadget;
 
@@ -125,7 +125,7 @@ private:
 		const GafferScene::ScenePlug::ScenePath &path() const;
 		const Gaffer::Context &context() const;
 
-	private:
+	  private:
 
 		GafferScene::ConstScenePlugPtr m_scene;
 		GafferScene::ConstScenePlugPtr m_uniformPScene;

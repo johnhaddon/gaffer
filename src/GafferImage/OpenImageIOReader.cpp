@@ -734,7 +734,7 @@ Box2i expandToGrid( Box2i region, V2i gridOrigin, V2i gridSize )
 class File
 {
 
-public:
+  public:
 
 	// Create a File handle object for an image input and image spec
 	File( std::unique_ptr<ImageInput> imageInput, const std::string &filePath, ImageReader::ChannelInterpretation channelNaming )
@@ -1460,7 +1460,7 @@ public:
 		return m_viewNamesData;
 	}
 
-private:
+  private:
 
 	struct View
 	{
@@ -1481,7 +1481,7 @@ private:
 		std::map<std::string, ChannelMapEntry> channelMap;
 		int firstSubImage;
 
-	private:
+	  private:
 
 		static V2i computeTileBatchSize( const ImageSpec &spec, bool tiled )
 		{

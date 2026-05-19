@@ -154,7 +154,7 @@ void addBarndoor( IECoreGL::GroupPtr result, BarndoorLocation location, float co
 class BarndoorVisualiser final : public LightFilterVisualiser
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( BarndoorVisualiser )
 
@@ -163,7 +163,7 @@ public:
 
 	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-protected:
+  protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<BarndoorVisualiser> g_visualiserDescription;
 };

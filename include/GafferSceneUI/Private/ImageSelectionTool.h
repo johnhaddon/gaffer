@@ -57,7 +57,7 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API ImageSelectionTool : public GafferUI::Tool
 {
 
-public:
+  public:
 
 	explicit ImageSelectionTool( GafferUI::View *view, const std::string &name = defaultName<ImageSelectionTool>() );
 
@@ -73,7 +73,7 @@ public:
 	Gaffer::StringPlug *selectModePlug();
 	const Gaffer::StringPlug *selectModePlug() const;
 
-private:
+  private:
 
 	IE_CORE_FORWARDDECLARE( Rectangle );
 

@@ -53,7 +53,7 @@ using namespace GafferScene;
 class Duplicate::DuplicatesData : public IECore::Data
 {
 
-public:
+  public:
 
 	DuplicatesData( const Duplicate *node, const Context *context )
 	{
@@ -145,7 +145,7 @@ public:
 		return m_transforms.at( name );
 	}
 
-private:
+  private:
 
 	InternedStringVectorDataPtr m_names;
 	unordered_map<InternedString, Imath::M44f> m_transforms;

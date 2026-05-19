@@ -48,7 +48,7 @@ namespace GafferScene
 class GAFFERSCENE_API SceneElementProcessor : public FilteredSceneProcessor
 {
 
-public:
+  public:
 
 	explicit SceneElementProcessor( const std::string &name = defaultName<SceneElementProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
 	~SceneElementProcessor() override;
@@ -58,7 +58,7 @@ public:
 	/// Implemented so that each child of inPlug() affects the corresponding child of outPlug()
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	/// Implemented to call hashProcessedBound() where appropriate.
 	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
@@ -108,7 +108,7 @@ protected:
 	virtual IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const;
 	//@}
 
-private:
+  private:
 
 	enum BoundMethod
 	{

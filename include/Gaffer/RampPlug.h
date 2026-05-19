@@ -59,7 +59,7 @@ template<typename T>
 class GAFFER_API RampPlug : public ValuePlug
 {
 
-public:
+  public:
 
 	using ValueType = T;
 	using XPlugType = typename PlugType<typename T::XType>::Type;
@@ -111,7 +111,7 @@ public:
 	YPlugType *pointYPlug( unsigned pointIndex );
 	const YPlugType *pointYPlug( unsigned pointIndex ) const;
 
-private:
+  private:
 
 	T m_defaultValue;
 };

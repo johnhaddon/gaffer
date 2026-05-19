@@ -54,7 +54,7 @@ namespace GafferUI
 class GAFFERUI_API StandardNodule : public Nodule
 {
 
-public:
+  public:
 
 	explicit StandardNodule( Gaffer::PlugPtr plug );
 	~StandardNodule() override;
@@ -70,7 +70,7 @@ public:
 
 	Imath::Box3f bound() const override;
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
@@ -91,7 +91,7 @@ protected:
 
 	void setCompatibleLabelsVisible( const DragDropEvent &event );
 
-private:
+  private:
 
 	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key );
 

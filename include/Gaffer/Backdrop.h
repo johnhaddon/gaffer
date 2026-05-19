@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Backdrop : public Node
 {
 
-public:
+  public:
 
 	explicit Backdrop( const std::string &name = defaultName<Backdrop>() );
 	~Backdrop() override;
@@ -68,7 +68,7 @@ public:
 	IntPlug *depthPlug();
 	const IntPlug *depthPlug() const;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

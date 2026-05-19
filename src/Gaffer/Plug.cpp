@@ -201,18 +201,18 @@ void Plug::setFlagsInternal( unsigned flags )
 class Plug::AcceptsInputCache
 {
 
-private:
+  private:
 
 	struct ThreadData;
 	using PlugPair = std::pair<const Plug *, const Plug *>;
 	using ResultMap = boost::unordered_map<PlugPair, bool>;
 
-public:
+  public:
 
 	class Accessor
 	{
 
-	public:
+	  public:
 
 		Accessor( const Plug *plug, const Plug *input )
 			: m_threadData( g_threadData.local() )
@@ -243,13 +243,13 @@ public:
 			return m_result;
 		}
 
-	private:
+	  private:
 
 		bool m_result;
 		ThreadData &m_threadData;
 	};
 
-private:
+  private:
 
 	struct ThreadData
 	{
@@ -729,7 +729,7 @@ void Plug::propagateDirtinessAtLeaves( Plug *plugToDirty )
 class Plug::DirtyPlugs
 {
 
-public:
+  public:
 
 	DirtyPlugs()
 		: m_scopeCount( 0 ), m_emitting( false )
@@ -813,7 +813,7 @@ public:
 		return g_dirtyPlugs.local();
 	}
 
-private:
+  private:
 
 	// We use this graph structure to keep track of the dirty propagation.
 	// Vertices in the graph represent plugs which have been dirtied, and

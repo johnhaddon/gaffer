@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API FlatToDeep : public ImageProcessor
 {
 
-public:
+  public:
 
 	enum class ZMode
 	{
@@ -84,7 +84,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -98,7 +98,7 @@ protected:
 	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

@@ -47,7 +47,7 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API TestLightFilter : public GafferScene::LightFilter
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferSceneTest::TestLightFilter, TestLightFilterTypeId, GafferScene::LightFilter );
 

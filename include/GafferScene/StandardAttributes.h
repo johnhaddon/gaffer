@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API StandardAttributes : public Attributes
 {
 
-public:
+  public:
 
 	explicit StandardAttributes( const std::string &name = defaultName<StandardAttributes>() );
 	~StandardAttributes() override;

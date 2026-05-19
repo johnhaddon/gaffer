@@ -63,7 +63,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Sampler
 {
 
-public:
+  public:
 
 	/// Defines how values are sampled for pixels
 	/// outside the data window.
@@ -123,7 +123,7 @@ public:
 	/// empty hash object and return it.
 	IECore::MurmurHash hash() const;
 
-private:
+  private:
 
 	/// Cached data access
 	/// @param p Any point within the cache that we wish to retrieve the data for.

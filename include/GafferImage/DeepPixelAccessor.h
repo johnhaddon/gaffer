@@ -50,7 +50,7 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepPixelAccessor
 {
 
-public:
+  public:
 
 	/// Sampler Constructor
 	/// @param plug The image plug to sample from.
@@ -83,7 +83,7 @@ public:
 	/// empty hash object and return it.
 	IECore::MurmurHash hash() const;
 
-private:
+  private:
 
 	/// Cached data access
 	/// @param p Any point within the cache that we wish to retrieve the data for.

@@ -48,7 +48,7 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API BXDFPlug : public GafferScene::ClosurePlug
 {
 
-public:
+  public:
 
 	explicit BXDFPlug( const std::string &name = defaultName<BXDFPlug>(), Direction direction = In, unsigned flags = Default );
 	~BXDFPlug() override;

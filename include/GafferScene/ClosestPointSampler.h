@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API ClosestPointSampler : public PrimitiveSampler
 {
 
-public:
+  public:
 
 	explicit ClosestPointSampler( const std::string &name = defaultName<ClosestPointSampler>() );
 	~ClosestPointSampler() override;
@@ -54,13 +54,13 @@ public:
 	Gaffer::StringPlug *positionPlug();
 	const Gaffer::StringPlug *positionPlug() const;
 
-protected:
+  protected:
 
 	bool affectsSamplingFunction( const Gaffer::Plug *input ) const override;
 	void hashSamplingFunction( IECore::MurmurHash &h ) const override;
 	SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

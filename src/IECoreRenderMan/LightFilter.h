@@ -50,7 +50,7 @@ namespace IECoreRenderMan
 class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-public:
+  public:
 
 	LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker );
 	~LightFilter() override;
@@ -82,7 +82,7 @@ public:
 	SetMemberships &setMemberships() { return m_setMemberships; }
 	const SetMemberships &setMemberships() const { return m_setMemberships; }
 
-private:
+  private:
 
 	Session *m_session;
 

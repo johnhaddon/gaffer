@@ -47,7 +47,7 @@ namespace Gaffer
 class GAFFER_API ArrayPlug : public Plug
 {
 
-public:
+  public:
 
 	/// All array elements are created by calling
 	/// `elementPrototype->createCounterpart()`. Currently the element names
@@ -86,11 +86,11 @@ public:
 	/// a new element.
 	Gaffer::Plug *next();
 
-protected:
+  protected:
 
 	void parentChanged( GraphComponent *oldParent ) override;
 
-private:
+  private:
 
 	void inputChanged( Gaffer::Plug *plug );
 	void childAdded();

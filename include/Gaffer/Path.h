@@ -74,7 +74,7 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API Path : public IECore::RunTimeTyped
 {
 
-public:
+  public:
 
 	using Names = std::vector<IECore::InternedString>;
 
@@ -197,7 +197,7 @@ public:
 	/// made.
 	virtual const Plug *cancellationSubject() const;
 
-protected:
+  protected:
 
 	/// The subclass specific part of children(). This must be implemented
 	/// by subclasses to return a list of children - filtering will be applied
@@ -223,7 +223,7 @@ protected:
 	/// otherwise.
 	bool havePathChangedSignal() const;
 
-private:
+  private:
 
 	virtual void rootAndNames( const std::string &s, IECore::InternedString &root, Names &names ) const;
 

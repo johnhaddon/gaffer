@@ -77,7 +77,7 @@ void addWireframeCurveState( IECoreGL::Group *group )
 class BarnVisualiser final : public LightFilterVisualiser
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( BarnVisualiser )
 
@@ -86,7 +86,7 @@ public:
 
 	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-protected:
+  protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<BarnVisualiser> g_visualiserDescription;
 };

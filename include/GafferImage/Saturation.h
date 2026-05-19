@@ -45,7 +45,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Saturation : public ColorProcessor
 {
 
-public:
+  public:
 
 	explicit Saturation( const std::string &name = defaultName<Saturation>() );
 	~Saturation() override;
@@ -55,13 +55,13 @@ public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferImage::Saturation, SaturationTypeId, ColorProcessor );
 
-protected:
+  protected:
 
 	bool affectsColorProcessor( const Gaffer::Plug *input ) const override;
 	void hashColorProcessor( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	ColorProcessorFunction colorProcessor( const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

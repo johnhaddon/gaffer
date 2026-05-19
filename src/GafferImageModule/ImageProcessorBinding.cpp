@@ -63,7 +63,7 @@ namespace
 class ImageProcessorSerialiser : public GafferBindings::NodeSerialiser
 {
 
-public:
+  public:
 
 	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
 	{

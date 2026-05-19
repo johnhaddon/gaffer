@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API RankFilter : public FlatImageProcessor
 {
 
-public:
+  public:
 
 	~RankFilter() override;
 
@@ -68,7 +68,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	enum Mode
 	{
@@ -88,7 +88,7 @@ protected:
 	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	// This private plug stores an offset for each pixel to where the rank is located
 	// It should only be evaluated if masterChannelPlug is set, and it should only be evaluated

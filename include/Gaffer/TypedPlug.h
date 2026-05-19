@@ -48,7 +48,7 @@ template<typename T>
 class IECORE_EXPORT TypedPlug : public ValuePlug
 {
 
-public:
+  public:
 
 	using ValueType = T;
 
@@ -85,7 +85,7 @@ public:
 	/// ValuePlug::hash( h )
 	using ValuePlug::hash;
 
-private:
+  private:
 
 	using DataType = IECore::TypedData<T>;
 	using DataTypePtr = typename DataType::Ptr;

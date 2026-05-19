@@ -67,7 +67,7 @@ struct PythonVisitor
 		return boolExtractor;
 	}
 
-private:
+  private:
 
 	object m_visitor;
 };
@@ -101,7 +101,7 @@ struct PythonPredicate
 		return extract<bool>( r );
 	}
 
-private:
+  private:
 
 	object m_predicate;
 };
@@ -169,7 +169,7 @@ struct FindByTypeVisitor
 
 	list result;
 
-private:
+  private:
 
 	const IECore::TypeId m_type;
 };

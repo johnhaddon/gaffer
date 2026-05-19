@@ -52,7 +52,7 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteFaces : public Deformer
 {
 
-public:
+  public:
 
 	explicit DeleteFaces( const std::string &name = defaultName<DeleteFaces>() );
 	~DeleteFaces() override;
@@ -68,13 +68,13 @@ public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteFaces, DeleteFacesTypeId, Deformer );
 
-protected:
+  protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

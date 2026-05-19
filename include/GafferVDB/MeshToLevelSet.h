@@ -54,7 +54,7 @@ namespace GafferVDB
 class GAFFERVDB_API MeshToLevelSet : public GafferScene::MergeObjects
 {
 
-public:
+  public:
 
 	explicit MeshToLevelSet( const std::string &name = defaultName<MeshToLevelSet>() );
 	~MeshToLevelSet() override;
@@ -73,7 +73,7 @@ public:
 	Gaffer::FloatPlug *interiorBandwidthPlug();
 	const Gaffer::FloatPlug *interiorBandwidthPlug() const;
 
-protected:
+  protected:
 
 	bool affectsMergedObject( const Gaffer::Plug *input ) const override;
 
@@ -83,7 +83,7 @@ protected:
 
 	IECore::ConstObjectPtr computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

@@ -47,7 +47,7 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldOptions : public GafferScene::Options
 {
 
-public:
+  public:
 
 	explicit ArnoldOptions( const std::string &name = defaultName<ArnoldOptions>() );
 	~ArnoldOptions() override;

@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API Metadata
 {
 
-public:
+  public:
 
 	using ValueFunction = std::function<IECore::ConstDataPtr( IECore::InternedString )>;
 	using GraphComponentValueFunction = std::function<IECore::ConstDataPtr( const GraphComponent * )>;
@@ -199,7 +199,7 @@ public:
 	/// \deprecated
 	static LegacyPlugValueChangedSignal &plugValueChangedSignal();
 
-private:
+  private:
 
 	/// Per-instance Metadata is stored as a mapping from GraphComponent * to the
 	/// metadata values, and needs to be removed when the instance dies. Currently

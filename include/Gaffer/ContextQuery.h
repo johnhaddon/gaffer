@@ -50,7 +50,7 @@ namespace Gaffer
 
 class GAFFER_API ContextQuery : public Gaffer::ComputeNode
 {
-public:
+  public:
 
 	explicit ContextQuery( const std::string &name = defaultName<ContextQuery>() );
 	~ContextQuery() override;
@@ -91,12 +91,12 @@ public:
 	Gaffer::BoolPlug *existsPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
 	Gaffer::ValuePlug *valuePlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

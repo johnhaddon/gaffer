@@ -52,7 +52,7 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API ThreadMonitor : public Monitor
 {
 
-public:
+  public:
 
 	ThreadMonitor( const std::vector<IECore::InternedString> &processMask = { "computeNode:compute" } );
 	~ThreadMonitor() override;
@@ -77,12 +77,12 @@ public:
 	const ProcessesPerThread &plugStatistics( const Plug *plug ) const;
 	const ProcessesPerThread &combinedStatistics() const;
 
-protected:
+  protected:
 
 	void processStarted( const Process *process ) override;
 	void processFinished( const Process *process ) override;
 
-private:
+  private:
 
 	const std::vector<IECore::InternedString> m_processMask;
 

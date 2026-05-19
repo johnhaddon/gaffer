@@ -44,7 +44,7 @@ namespace GafferImage
 class GAFFERIMAGE_API LookTransform : public OpenColorIOTransform
 {
 
-public:
+  public:
 
 	explicit LookTransform( const std::string &name = defaultName<LookTransform>() );
 	~LookTransform() override;
@@ -56,13 +56,13 @@ public:
 	Gaffer::IntPlug *directionPlug();
 	const Gaffer::IntPlug *directionPlug() const;
 
-protected:
+  protected:
 
 	bool affectsTransform( const Gaffer::Plug *input ) const override;
 	void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

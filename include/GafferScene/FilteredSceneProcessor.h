@@ -53,7 +53,7 @@ namespace GafferScene
 class GAFFERSCENE_API FilteredSceneProcessor : public SceneProcessor
 {
 
-public:
+  public:
 
 	explicit FilteredSceneProcessor( const std::string &name = defaultName<FilteredSceneProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
 	~FilteredSceneProcessor() override;
@@ -65,7 +65,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 	/// convenience for accessing the first child in the array, and use

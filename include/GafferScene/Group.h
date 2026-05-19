@@ -53,7 +53,7 @@ namespace GafferScene
 class GAFFERSCENE_API Group : public SceneProcessor
 {
 
-public:
+  public:
 
 	explicit Group( const std::string &name = defaultName<Group>() );
 	~Group() override;
@@ -75,7 +75,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
@@ -95,7 +95,7 @@ protected:
 	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-private:
+  private:
 
 	Gaffer::ObjectPlug *mappingPlug();
 	const Gaffer::ObjectPlug *mappingPlug() const;

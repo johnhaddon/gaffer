@@ -52,7 +52,7 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API CompoundObjectSource : public GafferScene::SceneNode
 {
 
-public:
+  public:
 
 	CompoundObjectSource( const std::string &name = defaultName<CompoundObjectSource>() );
 	~CompoundObjectSource() override;
@@ -64,7 +64,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashBound( const ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const override;

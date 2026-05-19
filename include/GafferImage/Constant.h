@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Constant : public FlatImageSource
 {
 
-public:
+  public:
 
 	explicit Constant( const std::string &name = defaultName<Constant>() );
 	~Constant() override;
@@ -66,7 +66,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -79,7 +79,7 @@ protected:
 	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

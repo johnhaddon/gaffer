@@ -232,7 +232,7 @@ IECoreGL::RenderablePtr iesVisualisation( const std::string &filename )
 class ArnoldLightVisualiser : public GafferSceneUI::StandardLightVisualiser
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( ArnoldLightVisualiser )
 
@@ -241,7 +241,7 @@ public:
 
 	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-private:
+  private:
 
 	static LightVisualiser::LightVisualiserDescription<ArnoldLightVisualiser> g_description;
 };

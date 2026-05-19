@@ -55,7 +55,7 @@ namespace GafferSceneUI
 class OutputBuffer
 {
 
-public:
+  public:
 
 	/// Calls `renderer->output()` to create outputs that will be sent to
 	/// this buffer.
@@ -89,7 +89,7 @@ public:
 		const IECore::CompoundData *metadata = nullptr
 	);
 
-private:
+  private:
 
 	class DisplayDriver;
 

@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteRenderPasses : public GlobalsProcessor
 {
 
-public:
+  public:
 
 	enum Mode
 	{
@@ -72,12 +72,12 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

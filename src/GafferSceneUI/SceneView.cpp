@@ -99,7 +99,7 @@ using namespace GafferSceneUI;
 class SceneView::Renderer : public Gaffer::Signals::Trackable
 {
 
-public:
+  public:
 
 	Renderer( SceneView *view )
 		: m_view( view )
@@ -180,7 +180,7 @@ public:
 		return m_sceneProcessor.get();
 	}
 
-private:
+  private:
 
 	Plug *rendererPlug()
 	{
@@ -225,7 +225,7 @@ private:
 class SceneView::SelectionMask : public Signals::Trackable
 {
 
-public:
+  public:
 
 	SelectionMask( SceneView *view )
 		: m_view( view )
@@ -243,7 +243,7 @@ public:
 		view->plugSetSignal().connect( boost::bind( &SelectionMask::plugSet, this, ::_1 ) );
 	}
 
-private:
+  private:
 
 	Gaffer::StringVectorDataPlug *selectionMaskPlug()
 	{
@@ -280,7 +280,7 @@ private:
 class SceneView::DrawingMode : public Signals::Trackable
 {
 
-public:
+  public:
 
 	DrawingMode( SceneView *view )
 		: m_view( view )
@@ -395,7 +395,7 @@ public:
 		return m_preprocessor.get();
 	}
 
-private:
+  private:
 
 	Gaffer::Plug *drawingModePlug()
 	{
@@ -450,7 +450,7 @@ private:
 class SceneView::ShadingMode : public Signals::Trackable
 {
 
-public:
+  public:
 
 	ShadingMode( SceneView *view )
 		: m_view( view )
@@ -488,7 +488,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	Gaffer::StringPlug *shadingModePlug()
 	{
@@ -562,7 +562,7 @@ private:
 class SceneView::Grid : public Gaffer::Node
 {
 
-public:
+  public:
 
 	Grid( SceneView *view )
 		: m_gadget( new SceneGadget )
@@ -620,7 +620,7 @@ public:
 		return m_gadget.get();
 	}
 
-private:
+  private:
 
 	BoolPlug *visiblePlug()
 	{
@@ -662,13 +662,13 @@ namespace
 class GnomonGadget : public GafferUI::Gadget
 {
 
-public:
+  public:
 
 	GnomonGadget()
 	{
 	}
 
-protected:
+  protected:
 
 	Imath::Box3f renderBound() const override
 	{
@@ -752,7 +752,7 @@ protected:
 class GnomonAxes : public GnomonGadget
 {
 
-protected:
+  protected:
 
 	void renderGnomon( const Style *style ) const override
 	{
@@ -765,7 +765,7 @@ protected:
 class GnomonPlane : public GnomonGadget
 {
 
-public:
+  public:
 
 	GnomonPlane()
 		: GnomonGadget(), m_hovering( false )
@@ -774,7 +774,7 @@ public:
 		leaveSignal().connect( boost::bind( &GnomonPlane::leave, this ) );
 	}
 
-protected:
+  protected:
 
 	void renderGnomon( const Style *style ) const override
 	{
@@ -786,7 +786,7 @@ protected:
 		}
 	}
 
-private:
+  private:
 
 	void enter()
 	{
@@ -808,7 +808,7 @@ private:
 class SceneView::Gnomon : public Signals::Trackable
 {
 
-public:
+  public:
 
 	Gnomon( SceneView *view )
 		: m_view( view ), m_gadget( new Gadget() )
@@ -864,7 +864,7 @@ public:
 		return m_gadget.get();
 	}
 
-private:
+  private:
 
 	void plugDirtied( Gaffer::Plug *plug )
 	{
@@ -914,7 +914,7 @@ private:
 class SceneView::FPS : public Signals::Trackable
 {
 
-public:
+  public:
 
 	FPS( SceneView *view )
 		: m_view( view ), m_gadget( new FPSGadget() )
@@ -941,7 +941,7 @@ public:
 		return m_view->getChild<Gaffer::ValuePlug>( "fps" );
 	}
 
-private:
+  private:
 
 	void plugDirtied( Gaffer::Plug *plug )
 	{
@@ -970,7 +970,7 @@ namespace
 class CameraOverlay : public GafferUI::Gadget
 {
 
-public:
+  public:
 
 	CameraOverlay()
 		: Gadget()
@@ -1077,7 +1077,7 @@ public:
 		return m_icon;
 	}
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -1210,7 +1210,7 @@ protected:
 		return b;
 	}
 
-private:
+  private:
 
 	Box2f m_resolutionGate;
 	Box2f m_apertureGate;
@@ -1310,7 +1310,7 @@ struct FreeCamera
 class SceneView::Camera : public Signals::Trackable
 {
 
-public:
+  public:
 
 	Camera( SceneView *view )
 		: m_view( view ),
@@ -1448,7 +1448,7 @@ public:
 		return lookThroughCameraPlug()->getValue();
 	}
 
-private:
+  private:
 
 	const GafferScene::ScenePlug *scenePlug() const
 	{

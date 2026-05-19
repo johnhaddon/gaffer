@@ -54,7 +54,7 @@ namespace GafferBindings
 class GAFFERBINDINGS_API ValuePlugSerialiser : public PlugSerialiser
 {
 
-public:
+  public:
 
 	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override;
 	std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override;

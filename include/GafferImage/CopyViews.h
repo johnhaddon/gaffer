@@ -47,7 +47,7 @@ namespace GafferImage
 class GAFFERIMAGE_API CopyViews : public ImageProcessor
 {
 
-public:
+  public:
 
 	explicit CopyViews( const std::string &name = defaultName<CopyViews>() );
 	~CopyViews() override;
@@ -59,7 +59,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -82,7 +82,7 @@ protected:
 	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	const GafferImage::ImagePlug *inputImage( const Gaffer::Context *context ) const;
 

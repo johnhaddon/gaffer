@@ -57,7 +57,7 @@ struct StaticTransform : riley::Transform
 		time = &m_time;
 	}
 
-private:
+  private:
 
 	float m_time;
 };
@@ -88,7 +88,7 @@ struct IdentityTransform : riley::Transform
 		time = &m_time;
 	}
 
-private:
+  private:
 
 	const float m_time;
 	const Imath::M44f m_matrix;

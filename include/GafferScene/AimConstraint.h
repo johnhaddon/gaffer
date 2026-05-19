@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API AimConstraint : public Constraint
 {
 
-public:
+  public:
 
 	explicit AimConstraint( const std::string &name = defaultName<AimConstraint>() );
 	~AimConstraint() override;
@@ -57,13 +57,13 @@ public:
 	Gaffer::V3fPlug *upPlug();
 	const Gaffer::V3fPlug *upPlug() const;
 
-protected:
+  protected:
 
 	bool affectsConstraint( const Gaffer::Plug *input ) const override;
 	void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

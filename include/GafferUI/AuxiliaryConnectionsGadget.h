@@ -65,7 +65,7 @@ class Nodule;
 class GAFFERUI_API AuxiliaryConnectionsGadget : public Gadget
 {
 
-public:
+  public:
 
 	~AuxiliaryConnectionsGadget() override;
 
@@ -81,7 +81,7 @@ public:
 	bool acceptsParent( const GraphComponent *potentialParent ) const override;
 	std::string getToolTip( const IECore::LineSegment3f &position ) const override;
 
-protected:
+  protected:
 
 	// Constructor is protected because we only want
 	// GraphGadget to be able to construct these, which
@@ -95,7 +95,7 @@ protected:
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	GraphGadget *graphGadget();
 	const GraphGadget *graphGadget() const;

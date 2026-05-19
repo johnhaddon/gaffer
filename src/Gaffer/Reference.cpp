@@ -217,7 +217,7 @@ const InternedString g_childNodesAreReadOnlyName( "childNodesAreReadOnly" );
 class Reference::PlugEdits : public Signals::Trackable
 {
 
-public:
+  public:
 
 	PlugEdits( Reference *reference )
 		: m_reference( reference )
@@ -289,7 +289,7 @@ public:
 			m_plugEdits->loadingFinished();
 		}
 
-	private:
+	  private:
 
 		PlugEdits *m_plugEdits;
 		// Changes made during loading aren't user edits and mustn't be
@@ -297,7 +297,7 @@ public:
 		Signals::BlockedConnection m_blockedConnection;
 	};
 
-private:
+  private:
 
 	Reference *m_reference;
 	Signals::ScopedConnection m_connection;

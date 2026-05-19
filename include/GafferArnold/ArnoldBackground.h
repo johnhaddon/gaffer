@@ -47,20 +47,20 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldBackground : public GafferScene::GlobalShader
 {
 
-public:
+  public:
 
 	explicit ArnoldBackground( const std::string &name = defaultName<ArnoldBackground>() );
 	~ArnoldBackground() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldBackground, ArnoldBackgroundTypeId, GafferScene::GlobalShader );
 
-protected:
+  protected:
 
 	bool affectsOptionName( const Gaffer::Plug *input ) const override;
 	void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	std::string computeOptionName( const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

@@ -777,7 +777,7 @@ T lineSphereIntersection( const LineSegment<T> &line, const T &center, const flo
 class LightToolHandle : public Handle
 {
 
-public:
+  public:
 
 	using InspectionMap = std::unordered_map<InternedString, Inspector::ResultPtr>;
 
@@ -932,7 +932,7 @@ public:
 		return visibleInternal();
 	}
 
-protected:
+  protected:
 
 	// Protected to reinforce that `LightToolHandle` can not be created directly, only
 	// derived classes.
@@ -1167,7 +1167,7 @@ protected:
 	// Must be overridden to prepare for the drag in `dragBegin()`.
 	virtual void setupDrag( const DragDropEvent &event ) = 0;
 
-private:
+  private:
 
 	bool mouseMove( const ButtonEvent &event )
 	{
@@ -1296,7 +1296,7 @@ private:
 
 class SpotLightHandle : public LightToolHandle
 {
-public:
+  public:
 
 	enum class HandleType
 	{
@@ -1323,7 +1323,7 @@ public:
 	{
 	}
 
-protected:
+  protected:
 
 	void addHandleVisualisation( IECoreGL::Group *rootGroup, const bool selectionPass, const bool highlighted ) const override
 	{
@@ -1859,7 +1859,7 @@ protected:
 		}
 	}
 
-private:
+  private:
 
 	std::pair<float, std::optional<float>> handleAngles() const
 	{
@@ -1981,7 +1981,7 @@ private:
 
 class EdgeHandle : public LightToolHandle
 {
-public:
+  public:
 
 	enum class LightAxis
 	{
@@ -2023,7 +2023,7 @@ public:
 	{
 	}
 
-protected:
+  protected:
 
 	void handlePathChanged() override
 	{
@@ -2211,7 +2211,7 @@ protected:
 		setTooltipPosition( edgeSegment( m_tooltipT ) );
 	}
 
-private:
+  private:
 
 	float oppositeInspectionValue() const
 	{
@@ -2283,7 +2283,7 @@ private:
 
 class CornerHandle : public LightToolHandle
 {
-public:
+  public:
 
 	CornerHandle(
 		const std::string &lightType,
@@ -2311,7 +2311,7 @@ public:
 	{
 	}
 
-protected:
+  protected:
 
 	bool handleDragMoveInternal( const GafferUI::DragDropEvent &event ) override
 	{
@@ -2462,7 +2462,7 @@ protected:
 		setTooltipPosition( edgeTooltipPosition( widthInspection->typedValue<float>( 0.f ), heightInspection->typedValue<float>( 0.f ) ) );
 	}
 
-private:
+  private:
 
 	V3f edgeTooltipPosition( const float width, const float height ) const
 	{
@@ -2481,7 +2481,7 @@ private:
 
 class RadiusHandle : public LightToolHandle
 {
-public:
+  public:
 
 	RadiusHandle(
 		const std::string &lightType,
@@ -2500,7 +2500,7 @@ public:
 	{
 	}
 
-protected:
+  protected:
 
 	bool handleDragMoveInternal( const GafferUI::DragDropEvent &event ) override
 	{
@@ -2656,7 +2656,7 @@ protected:
 		}
 	}
 
-private:
+  private:
 
 	V3f circlePosition( const LineSegment3f &line ) const
 	{
@@ -2701,7 +2701,7 @@ private:
 
 class LengthHandle : public LightToolHandle
 {
-public:
+  public:
 
 	LengthHandle(
 		const std::string &lightType,
@@ -2723,7 +2723,7 @@ public:
 	{
 	}
 
-protected:
+  protected:
 
 	void handlePathChanged() override
 	{
@@ -2858,7 +2858,7 @@ protected:
 		setTooltipPosition( V3f( 0 ) * transform );
 	}
 
-private:
+  private:
 
 	V3f offset( Inspector::Result *inspection ) const
 	{
@@ -2880,14 +2880,14 @@ private:
 class HandlesGadget : public Gadget
 {
 
-public:
+  public:
 
 	HandlesGadget( const std::string &name = "HandlesGadget" )
 		: Gadget( name )
 	{
 	}
 
-protected:
+  protected:
 
 	Imath::Box3f renderBound() const override
 	{

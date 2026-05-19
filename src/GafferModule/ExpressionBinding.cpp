@@ -84,7 +84,7 @@ struct ExpressionEngineCreator
 		return result;
 	}
 
-private:
+  private:
 
 	object m_fn;
 };
@@ -135,7 +135,7 @@ ValuePlug::CachePolicy defaultExecuteCachePolicy()
 
 class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 {
-public:
+  public:
 
 	EngineWrapper( PyObject *self )
 		: IECorePython::RefCountedWrapper<Expression::Engine>( self )

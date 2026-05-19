@@ -48,7 +48,7 @@ namespace GafferTest
 class GAFFERTEST_API MultiplyNode : public Gaffer::ComputeNode
 {
 
-public:
+  public:
 
 	MultiplyNode( const std::string &name = defaultName<MultiplyNode>(), bool brokenAffects = false );
 	~MultiplyNode() override;
@@ -66,12 +66,12 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	bool m_brokenAffects;
 	static size_t g_firstPlugIndex;

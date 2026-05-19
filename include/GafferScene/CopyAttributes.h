@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API CopyAttributes : public FilteredSceneProcessor
 {
 
-public:
+  public:
 
 	explicit CopyAttributes( const std::string &name = defaultName<CopyAttributes>() );
 	~CopyAttributes() override;
@@ -67,12 +67,12 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

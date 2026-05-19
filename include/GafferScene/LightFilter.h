@@ -54,7 +54,7 @@ namespace GafferScene
 class GAFFERSCENE_API LightFilter : public ObjectSource
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::LightFilter, LightFilterTypeId, ObjectSource );
 
@@ -70,7 +70,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	explicit LightFilter( GafferScene::ShaderPtr shader, const std::string &name = defaultName<LightFilter>() );
 
@@ -86,7 +86,7 @@ protected:
 	void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 
-private:
+  private:
 
 	friend class GafferSceneModule::LightFilterSerialiser;
 

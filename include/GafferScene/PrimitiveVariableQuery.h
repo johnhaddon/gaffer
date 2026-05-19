@@ -93,16 +93,16 @@ struct GAFFERSCENE_API PrimitiveVariableQuery : Gaffer::ComputeNode
 	const Gaffer::NameValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
 	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-public:
+  public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-private:
+  private:
 
 	const Gaffer::ObjectPlug *internalObjectPlug() const;
 

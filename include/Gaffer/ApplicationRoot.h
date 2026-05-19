@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( Preferences )
 class GAFFER_API ApplicationRoot : public GraphComponent
 {
 
-public:
+  public:
 
 	explicit ApplicationRoot( const std::string &name = defaultName<ApplicationRoot>() );
 	~ApplicationRoot() override;
@@ -108,7 +108,7 @@ public:
 	std::filesystem::path preferencesLocation() const;
 	//@}
 
-private:
+  private:
 
 	std::filesystem::path defaultPreferencesFileName() const;
 

@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API ScenePath : public Gaffer::Path
 {
 
-public:
+  public:
 
 	explicit ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr );
 	ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, const std::string &path, Gaffer::PathFilterPtr filter = nullptr );
@@ -87,12 +87,12 @@ public:
 
 	static Gaffer::PathFilterPtr createStandardFilter( const std::vector<std::string> &setNames = std::vector<std::string>(), const std::string &setsLabel = "" );
 
-protected:
+  protected:
 
 	void doChildren( std::vector<Gaffer::PathPtr> &children, const IECore::Canceller *canceller ) const override;
 	void pathChangedSignalCreated() override;
 
-private:
+  private:
 
 	void contextChanged( const IECore::InternedString &key );
 	void plugDirtied( Gaffer::Plug *plug );

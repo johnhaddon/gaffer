@@ -95,7 +95,7 @@ struct SceneFilterPathFilter::Remove
 		return !( m_filter->outPlug()->getValue() & ( IECore::PathMatcher::DescendantMatch | IECore::PathMatcher::ExactMatch ) );
 	}
 
-private:
+  private:
 
 	const Filter *m_filter;
 	Gaffer::ConstContextPtr m_baseContext;

@@ -120,7 +120,7 @@ struct MenuItem
 		return m_plug.get();
 	}
 
-private:
+  private:
 
 	std::string m_name;
 	Gaffer::ConstValuePlugPtr m_plug;
@@ -150,7 +150,7 @@ struct PlugAdder : GafferUI::PlugAdder
 	{
 	}
 
-protected:
+  protected:
 
 	bool canCreateConnection( const Gaffer::Plug *plug ) const override
 	{
@@ -173,7 +173,7 @@ protected:
 		plug->setInput( m_query->valuePlug() );
 	}
 
-private:
+  private:
 
 	bool buttonRelease( const GafferUI::ButtonEvent &event )
 	{

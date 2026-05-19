@@ -68,7 +68,7 @@ namespace Detail
 class TileInputIterator : public boost::iterator_facade<TileInputIterator, const Imath::V2i, boost::forward_traversal_tag>
 {
 
-public:
+  public:
 
 	TileInputIterator(
 		const Imath::Box2i &window,
@@ -93,7 +93,7 @@ public:
 		return !m_range.intersects( m_tileOrigin );
 	}
 
-private:
+  private:
 
 	friend class boost::iterator_core_access;
 
@@ -134,7 +134,7 @@ struct OriginAndName
 template<class Iterator>
 class TileInputFilter
 {
-public:
+  public:
 
 	TileInputFilter( Iterator &it )
 		: m_it( it )
@@ -154,7 +154,7 @@ public:
 		return result;
 	}
 
-private:
+  private:
 
 	Iterator &m_it;
 };

@@ -50,7 +50,7 @@ namespace GafferScene
 class GAFFERSCENE_API SceneNode : public Gaffer::ComputeNode
 {
 
-public:
+  public:
 
 	explicit SceneNode( const std::string &name = defaultName<SceneNode>() );
 	~SceneNode() override;
@@ -69,7 +69,7 @@ public:
 	/// Implemented so that enabledPlug() affects outPlug().
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	using ScenePath = ScenePlug::ScenePath;
 
@@ -131,7 +131,7 @@ protected:
 	/// base classes, so there should be little need to call this.
 	bool enabled( const Gaffer::Context *context ) const;
 
-private:
+  private:
 
 	void plugInputChanged( Gaffer::Plug *plug );
 

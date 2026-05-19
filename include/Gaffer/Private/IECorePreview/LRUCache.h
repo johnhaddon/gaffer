@@ -96,7 +96,7 @@ class TaskParallel;
 template<typename Key, typename Value, template<typename> class Policy = LRUCachePolicy::Parallel, typename GetterKey = Key>
 class LRUCache : private boost::noncopyable
 {
-public:
+  public:
 
 	using Cost = size_t;
 	using KeyType = Key;
@@ -163,7 +163,7 @@ public:
 	/// Returns the current cost of all cached items.
 	Cost currentCost() const;
 
-private:
+  private:
 
 	// Data
 	//////////////////////////////////////////////////////////////////////////

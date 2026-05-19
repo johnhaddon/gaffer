@@ -58,7 +58,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Merge : public FlatImageProcessor
 {
 
-public:
+  public:
 
 	explicit Merge( const std::string &name = defaultName<Merge>() );
 	~Merge() override;
@@ -88,7 +88,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	/// Reimplemented to hash the connected input plugs
 	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -102,7 +102,7 @@ protected:
 	/// Implemented to call doMergeOperation according to operationPlug()
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

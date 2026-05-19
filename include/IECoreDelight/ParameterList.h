@@ -55,7 +55,7 @@ namespace IECoreDelight
 class IECOREDELIGHT_API ParameterList
 {
 
-public:
+  public:
 
 	ParameterList();
 	ParameterList( std::initializer_list<NSIParam_t> parameters );
@@ -81,7 +81,7 @@ public:
 	int size() const;
 	const NSIParam_t *data() const;
 
-private:
+  private:
 
 	template<typename T>
 	T *allocate();

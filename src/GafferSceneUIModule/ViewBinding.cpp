@@ -85,7 +85,7 @@ struct ShadingModeCreator
 		return result;
 	}
 
-private:
+  private:
 
 	object m_fn;
 };
@@ -182,7 +182,7 @@ struct CreatorWrapper
 		return result;
 	}
 
-private:
+  private:
 
 	object m_fn;
 };
@@ -220,7 +220,7 @@ struct ReferenceCreator
 		return reference;
 	}
 
-private:
+  private:
 
 	std::filesystem::path m_referenceFileName;
 };

@@ -49,7 +49,7 @@ namespace GafferCycles
 class GAFFERCYCLES_API CyclesLight : public GafferScene::Light
 {
 
-public:
+  public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferCycles::CyclesLight, CyclesLightTypeId, GafferScene::Light );
 

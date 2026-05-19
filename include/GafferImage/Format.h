@@ -56,7 +56,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Format
 {
 
-public:
+  public:
 
 	Format();
 	explicit Format( const Imath::Box2i &displayWindow, double pixelAspect = 1., bool fromEXRSpace = false );
@@ -119,7 +119,7 @@ public:
 	static std::string name( const Format &format );
 	//@}
 
-private:
+  private:
 
 	Imath::Box2i m_displayWindow;
 	double m_pixelAspect;

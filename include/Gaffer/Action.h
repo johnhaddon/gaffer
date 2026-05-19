@@ -71,7 +71,7 @@ IE_CORE_FORWARDDECLARE( Action );
 class GAFFER_API Action : public IECore::RunTimeTyped
 {
 
-public:
+  public:
 
 	/// The stages of the the do/undo/redo sequence.
 	enum Stage
@@ -108,7 +108,7 @@ public:
 	/// > not allowed to depend on metadata).
 	static void enact( GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks = true );
 
-protected:
+  protected:
 
 	explicit Action( bool cancelBackgroundTasks = true );
 	~Action() override;
@@ -142,7 +142,7 @@ protected:
 	/// implementation before performing their own merging.
 	virtual void merge( const Action *other ) = 0;
 
-private:
+  private:
 
 	friend class ScriptNode;
 

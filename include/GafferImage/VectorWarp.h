@@ -43,7 +43,7 @@ namespace GafferImage
 
 class GAFFERIMAGE_API VectorWarp : public Warp
 {
-public:
+  public:
 
 	explicit VectorWarp( const std::string &name = defaultName<Warp>() );
 	~VectorWarp() override;
@@ -73,7 +73,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	bool affectsEngine( const Gaffer::Plug *input ) const override;
 	void hashEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -83,7 +83,7 @@ protected:
 	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
 
-private:
+  private:
 
 	struct Engine;
 

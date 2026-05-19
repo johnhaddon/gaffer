@@ -48,7 +48,7 @@ namespace GafferScene
 class GAFFERSCENE_API AttributeTweaks : public AttributeProcessor
 {
 
-public:
+  public:
 
 	explicit AttributeTweaks( const std::string &name = defaultName<AttributeTweaks>() );
 	~AttributeTweaks() override;
@@ -64,7 +64,7 @@ public:
 	Gaffer::TweaksPlug *tweaksPlug();
 	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-protected:
+  protected:
 
 	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
 	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;

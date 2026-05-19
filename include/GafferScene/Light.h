@@ -51,7 +51,7 @@ IE_CORE_FORWARDDECLARE( ShaderPlug )
 class GAFFERSCENE_API Light : public ObjectSource
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::Light, LightTypeId, ObjectSource );
 
@@ -78,7 +78,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	Light( const std::string &name, const ShaderPtr &shader );
 
@@ -94,7 +94,7 @@ protected:
 	void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 
-private:
+  private:
 
 	Shader *shaderNode();
 	const Shader *shaderNode() const;

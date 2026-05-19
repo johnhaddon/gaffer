@@ -51,7 +51,7 @@ namespace GafferOSL
 class GAFFEROSL_API ClosurePlug : public GafferScene::ClosurePlug
 {
 
-public:
+  public:
 
 	explicit ClosurePlug( const std::string &name = defaultName<ClosurePlug>(), Direction direction = In, unsigned flags = Default );
 	~ClosurePlug() override;

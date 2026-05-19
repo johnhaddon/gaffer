@@ -63,7 +63,7 @@ namespace
 class GeometryCollector
 {
 
-public:
+  public:
 
 	//! dispatch a base grid to a typed grid
 	void collect( openvdb::GridBase::ConstPtr grid )
@@ -97,7 +97,7 @@ public:
 
 	std::vector<IECore::V3fVectorDataPtr> points;
 
-private:
+  private:
 
 	template<typename GridType>
 	void collectTyped( openvdb::GridBase::ConstPtr baseGrid )
@@ -275,7 +275,7 @@ private:
 class VDBVisualiser : public ObjectVisualiser
 {
 
-public:
+  public:
 
 	using ObjectType = VDBObject;
 
@@ -376,7 +376,7 @@ public:
 		return { Visualisation::createGeometry( rootGroup ) };
 	}
 
-protected:
+  protected:
 
 	static ObjectVisualiserDescription<VDBVisualiser> g_visualiserDescription;
 

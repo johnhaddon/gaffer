@@ -54,7 +54,7 @@ IE_CORE_FORWARDDECLARE( DependencyNode )
 class GAFFER_API ValuePlug : public Plug
 {
 
-public:
+  public:
 
 	/// Constructs a ValuePlug which can be used as a parent for other ValuePlugs.
 	explicit ValuePlug( const std::string &name = defaultName<ValuePlug>(), Direction direction = In, unsigned flags = Default );
@@ -200,7 +200,7 @@ public:
 	static const IECore::InternedString &hashProcessType();
 	static const IECore::InternedString &computeProcessType();
 
-protected:
+  protected:
 
 	/// This constructor must be used by all derived classes which wish
 	/// to store their own values - without calling it defaultObjectValue()
@@ -248,7 +248,7 @@ protected:
 	/// Reimplemented for cache management.
 	void dirty() override;
 
-private:
+  private:
 
 	class HashProcess;
 	class ComputeProcess;

@@ -58,7 +58,7 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteGlobals : public GlobalsProcessor
 {
 
-public:
+  public:
 
 	explicit DeleteGlobals( const std::string &name = defaultName<DeleteGlobals>() );
 	~DeleteGlobals() override;
@@ -73,14 +73,14 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	virtual std::string namePrefix() const;
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 

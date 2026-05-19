@@ -99,7 +99,7 @@ IE_CORE_FORWARDDECLARE( Node )
 class GAFFER_API Plug : public GraphComponent
 {
 
-public:
+  public:
 
 	enum Direction
 	{
@@ -225,7 +225,7 @@ public:
 	/// Creates a new Plug which is a copy of this, but with a specified name and direction.
 	virtual PlugPtr createCounterpart( const std::string &name, Direction direction ) const;
 
-protected:
+  protected:
 
 	void nameChanged( IECore::InternedString oldName ) override;
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
@@ -255,7 +255,7 @@ protected:
 	/// > deferred until the DirtyPropagationScope closes.
 	static void flushDirtyPropagationScope();
 
-private:
+  private:
 
 	static void propagateDirtinessAtLeaves( Plug *plugToDirty );
 

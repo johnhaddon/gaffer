@@ -148,7 +148,7 @@ struct GILReleaseUIThreadFunction
 		m_function();
 	}
 
-private:
+  private:
 
 	ParallelAlgo::UIThreadFunction m_function;
 };

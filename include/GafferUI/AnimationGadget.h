@@ -53,7 +53,7 @@ namespace GafferUI
 
 class GAFFERUI_API AnimationGadget : public Gadget
 {
-public:
+  public:
 
 	AnimationGadget();
 	~AnimationGadget() override;
@@ -77,13 +77,13 @@ public:
 
 	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-private:
+  private:
 
 	struct SelectionSet;
 	IE_CORE_DECLAREPTR( SelectionSet )

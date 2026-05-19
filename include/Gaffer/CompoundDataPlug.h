@@ -54,7 +54,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API CompoundDataPlug : public Gaffer::ValuePlug
 {
 
-public:
+  public:
 
 	explicit CompoundDataPlug(
 		const std::string &name = defaultName<CompoundDataPlug>(),

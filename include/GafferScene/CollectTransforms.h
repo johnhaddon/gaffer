@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API CollectTransforms : public AttributeProcessor
 {
 
-public:
+  public:
 
 	explicit CollectTransforms( const std::string &name = defaultName<CollectTransforms>() );
 	~CollectTransforms() override;
@@ -75,7 +75,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -84,7 +84,7 @@ protected:
 	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-private:
+  private:
 
 	static size_t g_firstPlugIndex;
 };

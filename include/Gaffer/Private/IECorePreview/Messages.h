@@ -71,7 +71,7 @@ struct GAFFER_API Message
 ///
 class GAFFER_API Messages
 {
-public:
+  public:
 
 	Messages();
 	Messages( const Messages &other ) = default;
@@ -103,7 +103,7 @@ public:
 	/// when they are added, so this is cheap.
 	IECore::MurmurHash hash() const;
 
-private:
+  private:
 
 	// \todo The current implementation is naive and is sensitive to
 	// bucketSize .vs. ingest/copy rate and total number of messages.

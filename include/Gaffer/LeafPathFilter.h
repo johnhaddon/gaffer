@@ -45,7 +45,7 @@ namespace Gaffer
 class GAFFER_API LeafPathFilter : public Gaffer::PathFilter
 {
 
-public:
+  public:
 
 	/// The filter passes through any path whose name matches
 	/// one or more of the patterns (using StringAlgo match()).
@@ -56,11 +56,11 @@ public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::LeafPathFilter, LeafPathFilterTypeId, PathFilter );
 
-protected:
+  protected:
 
 	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-private:
+  private:
 
 	bool remove( PathPtr path ) const;
 };

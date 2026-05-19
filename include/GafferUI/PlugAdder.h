@@ -45,7 +45,7 @@ namespace GafferUI
 class GAFFERUI_API PlugAdder : public ConnectionCreator
 {
 
-public:
+  public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::PlugAdder, PlugAdderTypeId, ConnectionCreator );
 
@@ -67,7 +67,7 @@ public:
 	using MenuSignal = Gaffer::Signals::Signal<std::string( const std::string &title, const std::vector<std::string> & )>;
 	static MenuSignal &menuSignal();
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
@@ -75,7 +75,7 @@ protected:
 
 	void applyEdgeMetadata( Gaffer::Plug *plug, bool opposite = false ) const;
 
-private:
+  private:
 
 	bool couldCreateConnection() const;
 

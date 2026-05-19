@@ -202,7 +202,7 @@ ccl::Attribute *convertTypedPrimitiveVariable( const std::string &name, const Pr
 // otherwise-protected `precision` member.
 class VolumeLoader : public ccl::VDBImageLoader
 {
-public:
+  public:
 
 	VolumeLoader( openvdb::GridBase::ConstPtr grid, const string &gridName, int precision_, float clipping )
 		: VDBImageLoader( grid, gridName, clipping )

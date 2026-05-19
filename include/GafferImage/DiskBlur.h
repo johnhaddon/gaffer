@@ -52,7 +52,7 @@ namespace GafferImage
 
 class GAFFERIMAGE_API DiskBlur : public ImageProcessor
 {
-public:
+  public:
 
 	// This is similar to Sampler::BoundingMode, but Mirror isn't yet supported by the
 	// sampler
@@ -89,7 +89,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -99,7 +99,7 @@ protected:
 	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	Gaffer::ObjectVectorPlug *tileBoundPlug();
 	const Gaffer::ObjectVectorPlug *tileBoundPlug() const;

@@ -80,7 +80,7 @@ namespace
 class InclusionsColumn : public PathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( InclusionsColumn )
 
@@ -164,7 +164,7 @@ public:
 		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_ancestorIncludedIconName : g_locationIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
 	}
 
-private:
+  private:
 
 	void visibleSetChanged()
 	{
@@ -309,7 +309,7 @@ StringDataPtr InclusionsColumn::g_descendantIncludedOverrideToolTip = new String
 class ExclusionsColumn : public PathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( ExclusionsColumn )
 
@@ -366,7 +366,7 @@ public:
 		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_ancestorExcludedIconName : g_locationExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
 	}
 
-private:
+  private:
 
 	void visibleSetChanged()
 	{

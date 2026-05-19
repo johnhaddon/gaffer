@@ -47,7 +47,7 @@ namespace GafferUSD
 class GAFFERUSD_API USDAttributes : public GafferScene::Attributes
 {
 
-public:
+  public:
 
 	explicit USDAttributes( const std::string &name = defaultName<USDAttributes>() );
 	~USDAttributes() override;

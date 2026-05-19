@@ -173,7 +173,7 @@ const InternedString g_setPropertyName( "setPath:set" );
 class SetPath : public Gaffer::Path
 {
 
-public:
+  public:
 
 	SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr )
 		: Path( filter )
@@ -311,7 +311,7 @@ public:
 		return m_scene.get();
 	}
 
-protected:
+  protected:
 
 	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override
 	{
@@ -340,7 +340,7 @@ protected:
 	}
 
 
-private:
+  private:
 
 	const IECore::PathMatcher pathMatcher( const IECore::Canceller *canceller ) const
 	{
@@ -396,7 +396,7 @@ ConstStringDataPtr g_setFolderIcon = new StringData( "setFolder.png" );
 class SetNameColumn : public StandardPathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetNameColumn )
 
@@ -434,7 +434,7 @@ public:
 class SetMembersColumn : public StandardPathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetMembersColumn )
 
@@ -474,7 +474,7 @@ public:
 class SetSelectionColumn : public PathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetSelectionColumn )
 
@@ -507,7 +507,7 @@ public:
 		return result;
 	}
 
-private:
+  private:
 
 	void selectedPathsChanged()
 	{
@@ -533,7 +533,7 @@ const ConstStringDataPtr SetSelectionColumn::g_headerToolTip = new StringData( "
 class VisibleSetInclusionsColumn : public PathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( VisibleSetInclusionsColumn )
 
@@ -621,7 +621,7 @@ public:
 		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_inclusionsEmptyIconName : g_setIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
 	}
 
-private:
+  private:
 
 	void visibleSetChanged()
 	{
@@ -772,7 +772,7 @@ StringDataPtr VisibleSetInclusionsColumn::g_setPartiallyIncludedPartialOverrideT
 class VisibleSetExclusionsColumn : public PathColumn
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( VisibleSetExclusionsColumn )
 
@@ -834,7 +834,7 @@ public:
 		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_exclusionsEmptyIconName : g_setExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
 	}
 
-private:
+  private:
 
 	void visibleSetChanged()
 	{
@@ -960,7 +960,7 @@ StringDataPtr VisibleSetExclusionsColumn::g_setPartiallyExcludedToolTip = new St
 class SetEditorSearchFilter : public Gaffer::PathFilter
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetEditorSearchFilter )
 
@@ -1024,7 +1024,7 @@ public:
 		return leaf && !match;
 	}
 
-private:
+  private:
 
 	std::string m_matchPattern;
 	std::string m_wildcardPattern;
@@ -1039,7 +1039,7 @@ private:
 class SetEditorEmptySetFilter : public Gaffer::PathFilter
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetEditorEmptySetFilter )
 
@@ -1097,7 +1097,7 @@ public:
 		return leaf && !members;
 	}
 
-private:
+  private:
 
 	void selectedPathsChanged()
 	{

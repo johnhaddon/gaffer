@@ -51,7 +51,7 @@ namespace
 class DirtyPropagationScopeWrapper : boost::noncopyable
 {
 
-public:
+  public:
 
 	DirtyPropagationScopeWrapper()
 		: m_scope( nullptr )
@@ -74,7 +74,7 @@ public:
 		reset();
 	}
 
-private:
+  private:
 
 	void reset()
 	{

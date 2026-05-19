@@ -187,7 +187,7 @@ bool getAttributeInternal( OSL::ShaderGlobals *sg, bool derivatives, ustringhash
 class RendererServices : public OSL::RendererServices
 {
 
-public:
+  public:
 
 	RendererServices()
 	{
@@ -322,7 +322,7 @@ void replaceAll( std::string &s, vector<Replacement> &replacements )
 class OSLExpressionEngine : public Gaffer::Expression::Engine
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( OSLExpressionEngine );
 
@@ -731,7 +731,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	static EngineDescription<OSLExpressionEngine> g_engineDescription;
 

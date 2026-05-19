@@ -58,7 +58,7 @@ namespace
 class SwitchPlugAdder : public PlugAdder
 {
 
-public:
+  public:
 
 	SwitchPlugAdder( SwitchPtr node )
 		: m_switch( node )
@@ -69,7 +69,7 @@ public:
 		updateVisibility();
 	}
 
-protected:
+  protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -123,7 +123,7 @@ protected:
 		applyEdgeMetadata( outPlug, !inOpposite );
 	}
 
-private:
+  private:
 
 	void childAdded()
 	{
@@ -151,7 +151,7 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.SwitchUI.PlugAdder", &create );
 	}
 
-private:
+  private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

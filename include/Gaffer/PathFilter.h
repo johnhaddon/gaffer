@@ -57,7 +57,7 @@ IE_CORE_FORWARDDECLARE( PathFilter )
 class GAFFER_API PathFilter : public IECore::RunTimeTyped
 {
 
-public:
+  public:
 
 	explicit PathFilter( IECore::CompoundDataPtr userData = nullptr );
 	~PathFilter() override;
@@ -74,13 +74,13 @@ public:
 	using ChangedSignal = Signals::Signal<void( PathFilter * )>;
 	ChangedSignal &changedSignal();
 
-protected:
+  protected:
 
 	/// Must be implemented by derived classes to filter the passed
 	/// paths in place.
 	virtual void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const = 0;
 
-private:
+  private:
 
 	IECore::CompoundDataPtr m_userData;
 	bool m_enabled;

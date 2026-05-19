@@ -52,7 +52,7 @@ namespace GafferUI
 class GAFFERUI_API ContainerGadget : public Gadget
 {
 
-public:
+  public:
 
 	explicit ContainerGadget( const std::string &name = defaultName<ContainerGadget>() );
 	~ContainerGadget() override;
@@ -70,7 +70,7 @@ public:
 	/// bounding box.
 	Imath::Box3f bound() const override;
 
-private:
+  private:
 
 	Imath::Box3f m_padding;
 };

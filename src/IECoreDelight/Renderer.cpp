@@ -142,7 +142,7 @@ namespace
 class DelightHandle
 {
 
-public:
+  public:
 
 	enum Ownership
 	{
@@ -227,7 +227,7 @@ public:
 		return m_context != NSI_BAD_CONTEXT;
 	}
 
-private:
+  private:
 
 	void release()
 	{
@@ -258,7 +258,7 @@ const std::string g_headerPrefix( "header:" );
 class DelightOutput : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	DelightOutput( NSIContext_t context, const std::string &name, const IECoreScene::Output *output, DelightHandle::Ownership ownership )
 		: m_context( context )
@@ -442,7 +442,7 @@ public:
 		return m_layerHandle;
 	}
 
-private:
+  private:
 
 	const char *scalarFormat( const IECoreScene::Output *output ) const
 	{
@@ -483,7 +483,7 @@ namespace
 
 class DelightShader : public IECore::RefCounted
 {
-public:
+  public:
 
 	DelightShader( NSIContext_t context, const IECoreScene::ShaderNetwork *shaderNetwork, DelightHandle::Ownership ownership )
 	{
@@ -548,7 +548,7 @@ public:
 		return m_handles.back();
 	}
 
-private:
+  private:
 
 	std::vector<DelightHandle> m_handles;
 };
@@ -567,7 +567,7 @@ namespace
 class ShaderCache : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	ShaderCache( NSIContext_t context, DelightHandle::Ownership ownership )
 		: m_context( context ), m_ownership( ownership )
@@ -648,7 +648,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	NSIContext_t m_context;
 	DelightHandle::Ownership m_ownership;
@@ -684,7 +684,7 @@ const IECore::InternedString g_lightMuteAttributeName( "light:mute" );
 class DelightAttributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-public:
+  public:
 
 	DelightAttributes( NSIContext_t context, const IECore::CompoundObject *attributes, ShaderCache *shaderCache, DelightHandle::Ownership ownership )
 		: m_handle( context, "attributes:" + attributes->Object::hash().toString(), ownership, "attributes", {} ),
@@ -825,7 +825,7 @@ public:
 		return m_lightMute;
 	}
 
-private:
+  private:
 
 	static ConstDelightShaderPtr shader( const IECore::InternedString &name, const IECore::CompoundObject *attributes, ShaderCache *shaderCache )
 	{
@@ -862,7 +862,7 @@ namespace
 class AttributesCache : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	AttributesCache( NSIContext_t context, DelightHandle::Ownership ownership )
 		: m_context( context ), m_ownership( ownership ), m_shaderCache( new ShaderCache( context, ownership ) )
@@ -903,7 +903,7 @@ public:
 		m_shaderCache->clearUnused();
 	}
 
-private:
+  private:
 
 	NSIContext_t m_context;
 	DelightHandle::Ownership m_ownership;
@@ -928,7 +928,7 @@ namespace
 class InstanceCache : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	InstanceCache( NSIContext_t context, DelightHandle::Ownership ownership )
 		: m_context( context ), m_ownership( ownership )
@@ -984,7 +984,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	NSIContext_t m_context;
 	DelightHandle::Ownership m_ownership;
@@ -1007,7 +1007,7 @@ namespace
 class DelightObject : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-public:
+  public:
 
 	DelightObject( NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance, DelightHandle::Ownership ownership )
 		: m_transformHandle( context, name, ownership, "transform", {} ), m_instance( instance ), m_haveTransform( false )
@@ -1130,14 +1130,14 @@ public:
 		assignIDInternal( instanceID, "cortexInstanceID" );
 	}
 
-protected:
+  protected:
 
 	const DelightHandle m_transformHandle;
 	// We keep a reference to the instance and attributes so that they
 	// remain alive for at least as long as the object does.
 	ConstDelightAttributesPtr m_attributes;
 
-private:
+  private:
 
 	void assignIDInternal( uint32_t id, const char *attrName )
 	{
@@ -1186,7 +1186,7 @@ namespace
 class DelightLight : public DelightObject
 {
 
-public:
+  public:
 
 	DelightLight( NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance, DelightHandle::Ownership ownership )
 		: DelightObject( context, name, instance, ownership ), m_lightGeometryType( nullptr )
@@ -1269,7 +1269,7 @@ public:
 		return true;
 	}
 
-private:
+  private:
 
 	const char *m_lightGeometryType;
 	DelightHandleSharedPtr m_lightGeometry;
@@ -1352,7 +1352,7 @@ IE_CORE_FORWARDDECLARE( DelightRenderer )
 class DelightRenderer final : public IECoreScenePreview::Renderer
 {
 
-public:
+  public:
 
 	DelightRenderer( RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler, bool cloud = false )
 		: m_renderType( renderType ), m_messageHandler( messageHandler )
@@ -1685,7 +1685,7 @@ public:
 		return nullptr;
 	}
 
-private:
+  private:
 
 	DelightHandle::Ownership ownership() const
 	{

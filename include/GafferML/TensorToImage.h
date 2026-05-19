@@ -47,7 +47,7 @@ namespace GafferML
 class GAFFERML_API TensorToImage : public GafferImage::FlatImageSource
 {
 
-public:
+  public:
 
 	explicit TensorToImage( const std::string &name = defaultName<TensorToImage>() );
 	~TensorToImage() override;
@@ -65,7 +65,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	void hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;

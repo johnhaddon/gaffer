@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API MeshNormals : public ObjectProcessor
 {
 
-public:
+  public:
 
 	MeshNormals( const std::string &name = defaultName<MeshNormals>() );
 	~MeshNormals() override;
@@ -69,13 +69,13 @@ public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshNormals, MeshNormalsTypeId, ObjectProcessor );
 
-protected:
+  protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-private:
+  private:
 
 	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
 

@@ -48,7 +48,7 @@ template<typename T>
 class IECORE_EXPORT NumericPlug : public ValuePlug
 {
 
-public:
+  public:
 
 	using ValueType = T;
 
@@ -86,7 +86,7 @@ public:
 
 	void setFrom( const ValuePlug *other ) override;
 
-private:
+  private:
 
 	using DataType = IECore::TypedData<T>;
 	using DataTypePtr = typename DataType::Ptr;

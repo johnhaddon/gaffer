@@ -238,7 +238,7 @@ struct NodeDeleter
 			}
 		}
 
-	private:
+	  private:
 
 		NodeDeleter *m_nodeDeleter;
 	};
@@ -263,7 +263,7 @@ struct NodeDeleter
 		}
 	}
 
-private:
+  private:
 
 	void scheduleDeletion( ccl::Object *object )
 	{
@@ -315,7 +315,7 @@ void updateCryptomatteMetadata( IECore::CompoundData *metadata, std::string &nam
 class CyclesOutput : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	CyclesOutput( const IECore::InternedString &name, const IECoreScene::Output *output )
 		: m_passType( ccl::PASS_NONE ), m_denoise( false ), m_useIEDisplay( output->getType() == "ieDisplay" ), m_lightgroup( false )
@@ -452,7 +452,7 @@ IECore::InternedString g_shaderVolumeStepRateAttributeName( "cycles:shader:volum
 class CyclesShader : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	CyclesShader(
 		const IECoreScene::ShaderNetwork *surfaceShader,
@@ -518,7 +518,7 @@ public:
 		return m_shader;
 	}
 
-private:
+  private:
 
 	/// Note : `ccl::Scene::delete_nodes()` doesn't actually delete shader
 	/// nodes, and `ShaderCache::clearUnused()` is a no-op, so we don't
@@ -536,7 +536,7 @@ IE_CORE_DECLAREPTR( CyclesShader )
 class ShaderCache
 {
 
-public:
+  public:
 
 	ShaderCache( ccl::Scene *scene )
 		: m_scene( scene )
@@ -698,7 +698,7 @@ public:
 		return;
 	}
 
-private:
+  private:
 
 	ccl::Scene *m_scene;
 	using Cache = tbb::concurrent_hash_map<IECore::MurmurHash, CyclesShaderPtr>;
@@ -837,7 +837,7 @@ IECoreScene::ConstShaderNetworkPtr g_facingRatio = []() {
 class CyclesAttributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-public:
+  public:
 
 	CyclesAttributes( const IECore::CompoundObject *attributes, ShaderCache *shaderCache )
 		: m_shaderHash( IECore::MurmurHash() ),
@@ -1202,7 +1202,7 @@ public:
 		return m_volume.clipping ? m_volume.clipping.value() : 0.001f;
 	}
 
-private:
+  private:
 
 	void updateVisibility( const IECore::InternedString &name, int rayType, const IECore::CompoundObject *attributes )
 	{
@@ -1372,7 +1372,7 @@ namespace
 class AttributesCache
 {
 
-public:
+  public:
 
 	AttributesCache( ShaderCache *shaderCache )
 		: m_shaderCache( shaderCache )
@@ -1413,7 +1413,7 @@ public:
 		m_shaderCache->clearUnused();
 	}
 
-private:
+  private:
 
 	ShaderCache *m_shaderCache;
 
@@ -1437,7 +1437,7 @@ using SharedGeometryPtr = std::shared_ptr<ccl::Geometry>;
 class GeometryCache
 {
 
-public:
+  public:
 
 	GeometryCache( ccl::Scene *scene, NodeDeleter *nodeDeleter )
 		: m_scene( scene ), m_nodeDeleter( nodeDeleter )
@@ -1503,7 +1503,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	SharedGeometryPtr convert(
 		const IECoreScenePreview::Renderer::ObjectSamples &samples,
@@ -1545,7 +1545,7 @@ namespace
 class LightLinker
 {
 
-public:
+  public:
 
 	LightLinker( IECoreScenePreview::Renderer::RenderType renderType );
 
@@ -1558,7 +1558,7 @@ public:
 	uint32_t registerLightSet( SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights );
 	void deregisterLightSet( SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights );
 
-private:
+  private:
 
 	const IECoreScenePreview::Renderer::RenderType m_renderType;
 
@@ -1599,7 +1599,7 @@ const IECore::InternedString g_shadowedLights( "shadowedLights" );
 class CyclesObject : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-public:
+  public:
 
 	CyclesObject( ccl::Scene *scene, const SharedGeometryPtr &geometry, const std::string &name, const float frame, LightLinker *lightLinker, NodeDeleter *nodeDeleter )
 		: m_scene( scene ),
@@ -1823,7 +1823,7 @@ public:
 		// Instance IDs not needed in Cycles, because encapsulated instancers aren't supported.
 	}
 
-private:
+  private:
 
 	ccl::Scene *m_scene;
 	using UniqueObjectPtr = std::unique_ptr<ccl::Object, NodeDeleter::ObjectDeleter>;
@@ -1848,7 +1848,7 @@ namespace
 class CyclesLight : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-public:
+  public:
 
 	CyclesLight( ccl::Scene *scene, const std::string &name, NodeDeleter *nodeDeleter )
 		: m_scene( scene ), m_light( SceneAlgo::createNodeWithLock<ccl::Light>( scene ), NodeDeleter::GeometryDeleter( nodeDeleter ) ), m_object( SceneAlgo::createNodeWithLock<ccl::Object>( scene ), NodeDeleter::ObjectDeleter( nodeDeleter ) )
@@ -1948,7 +1948,7 @@ public:
 		SceneAlgo::tagUpdateWithLock( m_object.get(), m_scene );
 	}
 
-private:
+  private:
 
 	ccl::Scene *m_scene;
 	using UniqueLightPtr = std::unique_ptr<ccl::Light, NodeDeleter::GeometryDeleter>;
@@ -2078,7 +2078,7 @@ namespace
 class CyclesCamera : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( CyclesCamera );
 
@@ -2187,7 +2187,7 @@ public:
 		destination->set_motion( motion );
 	}
 
-private:
+  private:
 
 	IECoreScene::ConstCameraPtr m_camera;
 	IECoreScenePreview::Renderer::TransformSamples m_transformSamples;
@@ -2441,7 +2441,7 @@ IE_CORE_FORWARDDECLARE( CyclesRenderer )
 class CyclesRenderer final : public IECoreScenePreview::Renderer
 {
 
-public:
+  public:
 
 	CyclesRenderer( RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
 		: m_optionsChanged( true ),
@@ -2669,7 +2669,7 @@ public:
 		return nullptr;
 	}
 
-private:
+  private:
 
 	int frame() const
 	{

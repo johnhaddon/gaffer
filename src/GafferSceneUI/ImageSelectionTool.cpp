@@ -128,7 +128,7 @@ std::tuple<bool, Imath::V2f, Imath::V2f> effectiveWipePlane( const ImageGadget *
 class ImageSelectionTool::DragOverlay : public GafferUI::Gadget
 {
 
-public:
+  public:
 
 	DragOverlay()
 		: Gadget()
@@ -171,7 +171,7 @@ public:
 		return m_endPosition;
 	}
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -205,7 +205,7 @@ protected:
 		return b;
 	}
 
-private:
+  private:
 
 	Imath::V3f m_startPosition;
 	Imath::V3f m_endPosition;

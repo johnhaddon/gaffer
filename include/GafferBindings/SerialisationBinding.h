@@ -51,7 +51,7 @@ namespace GafferBindings
 template<typename T, typename Base, typename TWrapper = T>
 class SerialiserClass : public IECorePython::RefCountedClass<T, Base, TWrapper>
 {
-public:
+  public:
 
 	SerialiserClass( const char *name );
 };
@@ -60,7 +60,7 @@ template<typename WrappedType>
 class SerialiserWrapper : public IECorePython::RefCountedWrapper<WrappedType>
 {
 
-public:
+  public:
 
 	SerialiserWrapper( PyObject *self )
 		: IECorePython::RefCountedWrapper<WrappedType>( self )

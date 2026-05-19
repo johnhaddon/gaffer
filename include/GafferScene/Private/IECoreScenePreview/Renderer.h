@@ -75,7 +75,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API Renderer : public IECore::RefCounted
 {
 
-public:
+  public:
 
 	enum GAFFERSCENE_API RenderType
 	{
@@ -124,11 +124,11 @@ public:
 	class GAFFERSCENE_API AttributesInterface : public IECore::RefCounted
 	{
 
-	public:
+	  public:
 
 		IE_CORE_DECLAREMEMBERPTR( AttributesInterface );
 
-	protected:
+	  protected:
 
 		~AttributesInterface() override;
 	};
@@ -196,7 +196,7 @@ public:
 	class GAFFERSCENE_API ObjectInterface : public IECore::RefCounted
 	{
 
-	public:
+	  public:
 
 		IE_CORE_DECLAREMEMBERPTR( ObjectInterface )
 
@@ -228,7 +228,7 @@ public:
 
 		virtual void assignInstanceID( uint32_t id ) = 0;
 
-	protected:
+	  protected:
 
 		~ObjectInterface() override;
 	};
@@ -329,7 +329,7 @@ public:
 	static void registerType( const IECore::InternedString &typeName, Creator creator );
 	static void deregisterType( const IECore::InternedString &typeName );
 
-protected:
+  protected:
 
 	Renderer();
 	~Renderer() override;
@@ -346,7 +346,7 @@ protected:
 			registerType( typeName, creator );
 		}
 
-	private:
+	  private:
 
 		static Ptr creator( RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
 		{

@@ -44,14 +44,14 @@ namespace GafferScene
 class GAFFERSCENE_API ReverseWinding : public ObjectProcessor
 {
 
-public:
+  public:
 
 	explicit ReverseWinding( const std::string &name = defaultName<ReverseWinding>() );
 	~ReverseWinding() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::ReverseWinding, ReverseWindingTypeId, ObjectProcessor );
 
-protected:
+  protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;

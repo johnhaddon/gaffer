@@ -52,7 +52,7 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API Render : public GafferDispatch::TaskNode
 {
 
-public:
+  public:
 
 	explicit Render( const std::string &name = defaultName<Render>() );
 	~Render() override;
@@ -91,7 +91,7 @@ public:
 	// sequence, this is emitted once per frame.
 	static RenderSignal &postRenderSignal();
 
-protected:
+  protected:
 
 	void preTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
 	void postTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
@@ -99,7 +99,7 @@ protected:
 	void execute() const override;
 	void executeSequence( const std::vector<float> &frames ) const override;
 
-private:
+  private:
 
 	void executeInternal( bool flushCaches ) const;
 

@@ -176,7 +176,7 @@ void setFalloffGroupSettings( IECoreGL::Group *group, const IECore::CompoundData
 class LightBlockerVisualiser : public LightFilterVisualiser
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( LightBlockerVisualiser )
 
@@ -185,11 +185,11 @@ public:
 
 	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-protected:
+  protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<LightBlockerVisualiser> g_visualiserDescription;
 
-private:
+  private:
 
 	/// \todo: can this be consolidated with the StandardLightVisualiser?
 	static IECoreGL::ConstRenderablePtr boxShape( const IECore::CompoundData *shaderParameters );

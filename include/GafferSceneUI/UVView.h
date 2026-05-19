@@ -59,7 +59,7 @@ class SceneGadget;
 class GAFFERSCENEUI_API UVView : public GafferUI::View
 {
 
-public:
+  public:
 
 	explicit UVView( Gaffer::ScriptNodePtr scriptNode );
 	~UVView() override;
@@ -90,7 +90,7 @@ public:
 	using UVViewSignal = Gaffer::Signals::Signal<void( UVView * )>;
 	UVViewSignal &stateChangedSignal();
 
-private:
+  private:
 
 	Gaffer::CompoundObjectPlug *texturesPlug();
 	const Gaffer::CompoundObjectPlug *texturesPlug() const;

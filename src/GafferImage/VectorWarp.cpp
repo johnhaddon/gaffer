@@ -96,7 +96,7 @@ struct VectorWarp::Engine : public Warp::Engine
 		}
 	}
 
-private:
+  private:
 
 	inline V2f screenToPixel( const V2f &vector ) const
 	{

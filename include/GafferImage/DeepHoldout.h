@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepHoldout : public ImageProcessor
 {
 
-public:
+  public:
 
 	explicit DeepHoldout( const std::string &name = defaultName<DeepHoldout>() );
 	~DeepHoldout() override;
@@ -60,7 +60,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-protected:
+  protected:
 
 	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -72,7 +72,7 @@ protected:
 	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-private:
+  private:
 
 	GafferImage::ImagePlug *intermediateInPlug();
 	const GafferImage::ImagePlug *intermediateInPlug() const;

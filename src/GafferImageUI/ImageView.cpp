@@ -116,7 +116,7 @@ const float g_wipeHandleThickness = 14.0f;
 class ImageView::WipeHandle : public GafferUI::Gadget
 {
 
-public:
+  public:
 
 	WipeHandle()
 		: Gadget(), m_pos( 0 ), m_dir( 1, 0 ), m_editable( true ), m_dragHandle( HandleSelect::None )
@@ -170,7 +170,7 @@ public:
 		return m_editable;
 	}
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -214,7 +214,7 @@ protected:
 		return b;
 	}
 
-private:
+  private:
 
 	void renderHandle( const Style *style, float rotateHandleSize, float thickness, float offset, const Color4f &color ) const
 	{

@@ -206,7 +206,7 @@ namespace
 
 class PointsWriter
 {
-public:
+  public:
 
 	PointsWriter()
 		: pointsData( new IECore::V3fVectorData() ), points( pointsData->writable() )

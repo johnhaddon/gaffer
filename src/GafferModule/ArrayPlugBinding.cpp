@@ -103,7 +103,7 @@ std::string repr( const ArrayPlug &plug )
 class ArrayPlugSerialiser : public PlugSerialiser
 {
 
-public:
+  public:
 
 	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
 	{

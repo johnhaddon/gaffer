@@ -51,7 +51,7 @@ namespace GafferUI
 class GAFFERUI_API ConnectionCreator : public Gadget
 {
 
-public:
+  public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ConnectionCreator, ConnectionCreatorTypeId, Gadget );
 

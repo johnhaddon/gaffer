@@ -123,7 +123,7 @@ struct TestLRUCache
 		);
 	}
 
-private:
+  private:
 
 	const int m_numIterations;
 	const int m_numValues;
@@ -233,7 +233,7 @@ struct TestLRUCacheContentionForOneItem
 		);
 	}
 
-private:
+  private:
 
 	bool m_withCanceller;
 };
@@ -292,7 +292,7 @@ struct TestLRUCacheRecursion
 		);
 	}
 
-private:
+  private:
 
 	const int m_numIterations;
 	const int m_numValues;

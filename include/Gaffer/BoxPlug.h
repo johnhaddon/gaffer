@@ -53,7 +53,7 @@ template<typename T>
 class GAFFER_API BoxPlug : public ValuePlug
 {
 
-public:
+  public:
 
 	using ValueType = T;
 	using PointType = typename IECore::BoxTraits<T>::BaseType;

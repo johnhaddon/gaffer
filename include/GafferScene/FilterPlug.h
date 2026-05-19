@@ -56,7 +56,7 @@ class ScenePlug;
 class GAFFERSCENE_API FilterPlug : public Gaffer::IntPlug
 {
 
-public:
+  public:
 
 	explicit FilterPlug(
 		const std::string &name = defaultName<FilterPlug>(),
@@ -100,7 +100,7 @@ public:
 	{
 		SceneScope( const Gaffer::Context *context, const ScenePlug *scenePlug );
 
-	private:
+	  private:
 
 		const ScenePlug *m_scenePlug;
 	};

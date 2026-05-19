@@ -49,7 +49,7 @@ static IECore::InternedString g_outPlugName( "out" );
 class ContextProcessor::ProcessedScope : public Context::EditableScope
 {
 
-public:
+  public:
 
 	ProcessedScope( const Context *context, const ContextProcessor *processor )
 		: EditableScope( context )
@@ -61,7 +61,7 @@ public:
 		}
 	}
 
-private:
+  private:
 
 	IECore::ConstRefCountedPtr m_storage;
 };

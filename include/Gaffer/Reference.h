@@ -48,7 +48,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Reference : public SubGraph
 {
 
-public:
+  public:
 
 	explicit Reference( const std::string &name = defaultName<Reference>() );
 	~Reference() override;
@@ -78,7 +78,7 @@ public:
 	/// Returns true if `plug` has been added as a child of a referenced plug.
 	bool isChildEdit( const Plug *plug ) const;
 
-private:
+  private:
 
 	void loadInternal( const std::filesystem::path &fileName );
 	bool isReferencePlug( const Plug *plug ) const;

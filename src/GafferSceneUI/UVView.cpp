@@ -93,7 +93,7 @@ static const boost::regex g_attrRegex( "<attr:([^>]+)>" );
 class UVView::UVScene : public SceneProcessor
 {
 
-public:
+  public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::UVView::UVScene, UVSceneTypeId, SceneProcessor );
 
@@ -213,7 +213,7 @@ public:
 		}
 	}
 
-protected:
+  protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override
 	{
@@ -333,7 +333,7 @@ protected:
 		}
 	}
 
-private:
+  private:
 
 	StringVectorDataPlug *udimQueryPathsPlug()
 	{
@@ -391,13 +391,13 @@ namespace
 class GridGadget : public GafferUI::Gadget
 {
 
-public:
+  public:
 
 	GridGadget()
 	{
 	}
 
-protected:
+  protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -490,7 +490,7 @@ InternedString g_imageGadgetName( "imageGadget" );
 class TextureGadget : public GafferUI::Gadget
 {
 
-public:
+  public:
 
 	IE_CORE_DECLAREMEMBERPTR( TextureGadget )
 
@@ -544,7 +544,7 @@ public:
 		return getFileName();
 	}
 
-private:
+  private:
 
 	ImageReaderPtr m_imageReader;
 	ResizePtr m_resize;

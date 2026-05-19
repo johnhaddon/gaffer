@@ -52,7 +52,7 @@ namespace GafferBindings
 template<typename T, typename TWrapper = T>
 class PlugClass : public GraphComponentClass<T, TWrapper>
 {
-public:
+  public:
 
 	PlugClass( const char *docString = nullptr );
 };
@@ -60,7 +60,7 @@ public:
 template<typename WrappedType>
 class PlugWrapper : public GraphComponentWrapper<WrappedType>
 {
-public:
+  public:
 
 	template<typename... Args>
 	PlugWrapper( PyObject *self, Args &&...args )
@@ -158,7 +158,7 @@ public:
 class GAFFERBINDINGS_API PlugSerialiser : public Serialisation::Serialiser
 {
 
-public:
+  public:
 
 	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override;
 	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override;

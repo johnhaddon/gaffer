@@ -50,7 +50,7 @@ class Resample;
 class GAFFERIMAGE_API ContactSheetCore : public FlatImageProcessor
 {
 
-public:
+  public:
 
 	explicit ContactSheetCore( const std::string &name = defaultName<ContactSheetCore>() );
 	~ContactSheetCore() override;
@@ -71,7 +71,7 @@ public:
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const final;
 
-private:
+  private:
 
 	Gaffer::ObjectPlug *coveragePlug();
 	const Gaffer::ObjectPlug *coveragePlug() const;

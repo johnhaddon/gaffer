@@ -47,7 +47,7 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManShader : public GafferScene::Shader
 {
 
-public:
+  public:
 
 	RenderManShader( const std::string &name = defaultName<RenderManShader>() );
 	~RenderManShader() override;

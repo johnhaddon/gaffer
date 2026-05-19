@@ -52,7 +52,7 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API RotateTool : public TransformTool
 {
 
-public:
+  public:
 
 	explicit RotateTool( SceneView *view, const std::string &name = defaultName<RotateTool>() );
 	~RotateTool() override;
@@ -67,12 +67,12 @@ public:
 	/// for use in the unit tests.
 	void rotate( const Imath::Eulerf &degrees );
 
-protected:
+  protected:
 
 	bool affectsHandles( const Gaffer::Plug *input ) const override;
 	void updateHandles( float rasterScale ) override;
 
-private:
+  private:
 
 	// The guts of the rotation logic. This is factored out of the
 	// drag handling so it can be shared with the `rotate()` public
@@ -85,7 +85,7 @@ private:
 		bool canApply( const Imath::V3i &axisMask, const bool maintainRoll ) const;
 		void apply( const Imath::Eulerf &rotation, const bool maintainRoll );
 
-	private:
+	  private:
 
 		Imath::V3f updatedRotateValue( const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll, Imath::V3f *currentValue = nullptr ) const;
 

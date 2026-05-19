@@ -82,7 +82,7 @@ struct PythonValueFunction
 		}
 	}
 
-private:
+  private:
 
 	object m_fn;
 };
@@ -108,7 +108,7 @@ struct PythonGraphComponentValueFunction
 		}
 	}
 
-private:
+  private:
 
 	object m_fn;
 };
@@ -134,7 +134,7 @@ struct PythonPlugValueFunction
 		}
 	}
 
-private:
+  private:
 
 	object m_fn;
 };
