@@ -46,7 +46,7 @@ class BoxIn;
 class GAFFER_API BoxOut : public BoxIO
 {
 
-  public:
+	public:
 
 	explicit BoxOut( const std::string &name = defaultName<BoxOut>() );
 	~BoxOut() override;
@@ -58,11 +58,11 @@ class GAFFER_API BoxOut : public BoxIO
 	template<typename T = Plug>
 	const T *passThroughPlug() const;
 
-  protected:
+	protected:
 
 	bool acceptsInput( const Plug *plug, const Plug *inputPlug ) const override;
 
-  private:
+	private:
 
 	const BoxIn *sourceBoxIn( const Plug *plug ) const;
 };

@@ -49,7 +49,7 @@ namespace GafferScene
 class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 {
 
-  public:
+	public:
 
 	~ObjectProcessor() override;
 
@@ -57,7 +57,7 @@ class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// Constructs with a single input ScenePlug named "in". Use inPlug()
 	/// to access this plug.
@@ -87,7 +87,7 @@ class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-  private:
+	private:
 
 	void init();
 

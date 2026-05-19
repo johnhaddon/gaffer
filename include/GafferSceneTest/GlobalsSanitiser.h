@@ -56,18 +56,18 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API GlobalsSanitiser : public Gaffer::Monitor
 {
 
-  public:
+	public:
 
 	GlobalsSanitiser();
 
 	IE_CORE_DECLAREMEMBERPTR( GlobalsSanitiser )
 
-  protected:
+	protected:
 
 	void processStarted( const Gaffer::Process *process ) override;
 	void processFinished( const Gaffer::Process *process ) override;
 
-  private:
+	private:
 
 	// Maps from a process to the closest `ScenePlug.globals` that depends on it.
 	using DependentGlobalsMap = tbb::concurrent_unordered_map<const Gaffer::Process *, const Gaffer::CompoundObjectPlug *>;

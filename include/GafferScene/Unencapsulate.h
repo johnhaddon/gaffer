@@ -46,14 +46,14 @@ namespace GafferScene
 class GAFFERSCENE_API Unencapsulate : public BranchCreator
 {
 
-  public:
+	public:
 
 	explicit Unencapsulate( const std::string &name = defaultName<Unencapsulate>() );
 	~Unencapsulate() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::Unencapsulate, UnencapsulateTypeId, BranchCreator );
 
-  protected:
+	protected:
 
 	bool affectsBranchBound( const Gaffer::Plug *input ) const override;
 	void hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -84,7 +84,7 @@ class GAFFERSCENE_API Unencapsulate : public BranchCreator
 	void hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstPathMatcherDataPtr computeBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

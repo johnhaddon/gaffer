@@ -53,7 +53,7 @@ namespace
 class BoundVisualiser : public ObjectVisualiser
 {
 
-  public:
+	public:
 
 	BoundVisualiser()
 	{
@@ -130,11 +130,11 @@ class BoundVisualiser : public ObjectVisualiser
 class ProceduralVisualiser : public BoundVisualiser
 {
 
-  public:
+	public:
 
 	using ObjectType = IECoreScenePreview::Procedural;
 
-  protected:
+	protected:
 
 	static ObjectVisualiserDescription<ProceduralVisualiser> g_visualiserDescription;
 };
@@ -144,11 +144,11 @@ ObjectVisualiser::ObjectVisualiserDescription<ProceduralVisualiser> ProceduralVi
 class ExternalProceduralVisualiser : public BoundVisualiser
 {
 
-  public:
+	public:
 
 	using ObjectType = IECoreScene::ExternalProcedural;
 
-  protected:
+	protected:
 
 	static ObjectVisualiserDescription<ExternalProceduralVisualiser> g_visualiserDescription;
 };
@@ -158,11 +158,11 @@ ObjectVisualiser::ObjectVisualiserDescription<ExternalProceduralVisualiser> Exte
 class PlaceholderVisualiser : public BoundVisualiser
 {
 
-  public:
+	public:
 
 	using ObjectType = IECoreScenePreview::Placeholder;
 
-  protected:
+	protected:
 
 	static ObjectVisualiserDescription<PlaceholderVisualiser> g_visualiserDescription;
 };

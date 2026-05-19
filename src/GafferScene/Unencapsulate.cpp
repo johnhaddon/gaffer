@@ -62,7 +62,7 @@ ScenePlug::ScenePath concatScenePath( const ScenePlug::ScenePath &a, const Scene
 
 class CapsuleScope : boost::noncopyable
 {
-  private:
+	private:
 
 	// Base constructor used by the two public constructors
 	CapsuleScope(
@@ -73,7 +73,7 @@ class CapsuleScope : boost::noncopyable
 		m_capsule = IECore::runTimeCast<const Capsule>( m_object.get() );
 	}
 
-  public:
+	public:
 
 	CapsuleScope(
 		const Gaffer::Context *context, const ScenePlug *inPlug,
@@ -129,7 +129,7 @@ class CapsuleScope : boost::noncopyable
 		return m_capsule->root();
 	}
 
-  private:
+	private:
 
 	// We use `optional` here to avoid the expense of constructing
 	// an EditableScope when we don't need one.

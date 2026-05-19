@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( SceneView );
 class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 {
 
-  public:
+	public:
 
 	LightPositionTool( SceneView *view, const std::string &name = defaultName<LightPositionTool>() );
 	~LightPositionTool() override;
@@ -92,12 +92,12 @@ class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 		Last = Diffuse
 	};
 
-  protected:
+	protected:
 
 	bool affectsHandles( const Gaffer::Plug *input ) const override;
 	void updateHandles( float rasterScale ) override;
 
-  private:
+	private:
 
 	struct TranslationRotation
 	{
@@ -109,7 +109,7 @@ class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 		void applyTranslation( const Imath::V3f &translation );
 		void applyRotation( const Imath::Eulerf &rotation, const bool maintainRoll );
 
-	  private:
+		private:
 
 		Imath::V3f updatedRotateValue( const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll, Imath::V3f *currentValue = nullptr ) const;
 

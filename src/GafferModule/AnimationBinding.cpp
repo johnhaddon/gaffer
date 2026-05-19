@@ -223,7 +223,7 @@ struct CurvePlugDirectionSlotCaller
 class CurvePlugSerialiser : public ValuePlugSerialiser
 {
 
-  public:
+	public:
 
 	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
 	{

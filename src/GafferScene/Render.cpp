@@ -88,7 +88,7 @@ struct RenderScope : public Context::EditableScope
 		return m_sceneTranslationOnly;
 	}
 
-  private:
+	private:
 
 	bool m_sceneTranslationOnly;
 };

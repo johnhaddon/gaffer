@@ -408,7 +408,7 @@ IE_CORE_FORWARDDECLARE( ArnoldObject );
 class ArnoldRendererBase : public IECoreScenePreview::Renderer
 {
 
-  public:
+	public:
 
 	~ArnoldRendererBase() override;
 
@@ -421,7 +421,7 @@ class ArnoldRendererBase : public IECoreScenePreview::Renderer
 	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times, const AttributesInterface *attributes ) override;
 	ObjectInterfacePtr object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
 
-  protected:
+	protected:
 
 	ArnoldRendererBase( NodeDeleter nodeDeleter, AtUniverse *universe, AtNode *parentNode = nullptr, const IECore::MessageHandlerPtr &messageHandler = IECore::MessageHandlerPtr() );
 
@@ -432,7 +432,7 @@ class ArnoldRendererBase : public IECoreScenePreview::Renderer
 
 	IECore::MessageHandlerPtr m_messageHandler;
 
-  private:
+	private:
 
 	AtNode *m_parentNode;
 };
@@ -457,7 +457,7 @@ const IECore::InternedString g_updateInteractivelyInternedString( "updateInterac
 
 class ArnoldDriver : public IECore::RefCounted
 {
-  public:
+	public:
 
 	ArnoldDriver( AtUniverse *universe, const IECore::InternedString &name, const IECore::CompoundData *parameters, NodeDeleter nodeDeleter )
 		: m_universe( universe ), m_name( name ), m_nodeDeleter( nodeDeleter )
@@ -543,7 +543,7 @@ class ArnoldDriver : public IECore::RefCounted
 		return AiNodeGetName( m_driver.get() );
 	}
 
-  private:
+	private:
 
 	AtUniverse *m_universe;
 	const IECore::InternedString m_name;
@@ -559,7 +559,7 @@ const std::string g_filterPrefix( "filter" );
 class FilterCache
 {
 
-  public:
+	public:
 
 	FilterCache( NodeDeleter nodeDeleter, AtUniverse *universe )
 		: m_nodeDeleter( nodeDeleter ), m_universe( universe )
@@ -650,7 +650,7 @@ class FilterCache
 		m_filters.clear();
 	}
 
-  private:
+	private:
 
 	NodeDeleter m_nodeDeleter;
 	AtUniverse *m_universe;
@@ -661,7 +661,7 @@ class FilterCache
 class ArnoldOutput : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	ArnoldOutput( const string &name, const IECoreScene::Output *output, FilterCache &filterCache )
 	{
@@ -959,7 +959,7 @@ class ArnoldOutput : public IECore::RefCounted
 		return m_data < other.m_data;
 	}
 
-  private:
+	private:
 
 	IECore::InternedString m_driverName;
 	IECore::CompoundDataPtr m_driverParameters;
@@ -990,7 +990,7 @@ namespace
 class ArnoldShader : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	ArnoldShader( const IECoreScene::ShaderNetwork *shaderNetwork, NodeDeleter nodeDeleter, AtUniverse *universe, const std::string &name, const AtNode *parentNode )
 		: m_nodeDeleter( nodeDeleter ), m_hash( shaderNetwork->Object::hash() )
@@ -1037,7 +1037,7 @@ class ArnoldShader : public IECore::RefCounted
 		}
 	}
 
-  private:
+	private:
 
 	NodeDeleter m_nodeDeleter;
 	std::vector<AtNode *> m_nodes;
@@ -1050,7 +1050,7 @@ IE_CORE_DECLAREPTR( ArnoldShader )
 class ShaderCache : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	ShaderCache( NodeDeleter nodeDeleter, AtUniverse *universe, AtNode *parentNode )
 		: m_nodeDeleter( nodeDeleter ), m_universe( universe ), m_parentNode( parentNode )
@@ -1146,7 +1146,7 @@ class ShaderCache : public IECore::RefCounted
 		}
 	}
 
-  private:
+	private:
 
 	NodeDeleter m_nodeDeleter;
 	AtUniverse *m_universe;
@@ -1284,7 +1284,7 @@ const char *customAttributeName( const std::string &attributeName, bool *hasPrec
 class ArnoldAttributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-  public:
+	public:
 
 	ArnoldAttributes( const IECore::CompoundObject *attributes, ShaderCache *shaderCache )
 		: m_visibility( AI_RAY_ALL ), m_sidedness( AI_RAY_ALL ), m_shadingFlags( Default ), m_stepSize( 0.0f ), m_stepScale( 1.0f ), m_volumePadding( 0.0f ), m_polyMesh( attributes ), m_displacement( attributes, shaderCache ), m_curves( attributes ), m_points( attributes ), m_volume( attributes ), m_allAttributes( attributes )
@@ -1732,7 +1732,7 @@ class ArnoldAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 		return m_allAttributes.get();
 	}
 
-  private:
+	private:
 
 	struct PolyMesh
 	{
@@ -2337,7 +2337,7 @@ namespace
 class Instance
 {
 
-  public:
+	public:
 
 	AtNode *node()
 	{
@@ -2359,7 +2359,7 @@ class Instance
 		}
 	}
 
-  private:
+	private:
 
 	// Constructors are private as they are only intended for use in
 	// `InstanceCache::get()`. See comment in `nodesCreated()`.
@@ -2396,7 +2396,7 @@ AtNode *convertProcedural( IECoreScenePreview::ConstProceduralPtr procedural, co
 class InstanceCache : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	InstanceCache( NodeDeleter nodeDeleter, AtUniverse *universe, AtNode *parentNode )
 		: m_nodeDeleter( nodeDeleter ), m_universe( universe ), m_parentNode( parentNode )
@@ -2488,7 +2488,7 @@ class InstanceCache : public IECore::RefCounted
 		}
 	}
 
-  private:
+	private:
 
 	SharedAtNodePtr convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const ArnoldAttributes *attributes, const std::string &nodeName, const std::string &messageContext )
 	{
@@ -2543,7 +2543,7 @@ IE_CORE_FORWARDDECLARE( ArnoldLight )
 class ArnoldObjectBase : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-  public:
+	public:
 
 	ArnoldObjectBase( const Instance &instance )
 		: m_instance( instance ), m_attributes( nullptr )
@@ -2618,7 +2618,7 @@ class ArnoldObjectBase : public IECoreScenePreview::Renderer::ObjectInterface
 		return m_instance;
 	}
 
-  protected:
+	protected:
 
 	void applyTransform( AtNode *node, const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, const AtString matrixParameterName = g_matrixArnoldString )
 	{
@@ -2670,7 +2670,7 @@ namespace
 class ArnoldLightFilter : public ArnoldObjectBase
 {
 
-  public:
+	public:
 
 	ArnoldLightFilter( const std::string &name, const Instance &instance, NodeDeleter nodeDeleter, AtUniverse *universe, const AtNode *parentNode )
 		: ArnoldObjectBase( instance ), m_name( name ), m_nodeDeleter( nodeDeleter ), m_universe( universe ), m_parentNode( parentNode )
@@ -2744,7 +2744,7 @@ class ArnoldLightFilter : public ArnoldObjectBase
 		return m_lightFilterShader.get();
 	}
 
-  private:
+	private:
 
 	void applyLightFilterTransform()
 	{
@@ -2781,7 +2781,7 @@ IECore::InternedString g_lightFilters( "lightFilters" );
 class ArnoldLight : public ArnoldObjectBase
 {
 
-  public:
+	public:
 
 	ArnoldLight( const std::string &name, const Instance &instance, NodeDeleter nodeDeleter, AtUniverse *universe, const AtNode *parentNode )
 		: ArnoldObjectBase( instance ), m_name( name ), m_nodeDeleter( nodeDeleter ), m_universe( universe ), m_parentNode( parentNode )
@@ -2934,7 +2934,7 @@ class ArnoldLight : public ArnoldObjectBase
 		}
 	}
 
-  private:
+	private:
 
 	void applyLightTransform()
 	{
@@ -3011,7 +3011,7 @@ IECore::InternedString g_lights( "lights" );
 class ArnoldObject : public ArnoldObjectBase
 {
 
-  public:
+	public:
 
 	ArnoldObject( const Instance &instance )
 		: ArnoldObjectBase( instance )
@@ -3099,7 +3099,7 @@ namespace
 class ProceduralRenderer final : public ArnoldRendererBase
 {
 
-  public:
+	public:
 
 	// We use a null node deleter because Arnold will automatically
 	// destroy all nodes belonging to the procedural when the procedural
@@ -3206,7 +3206,7 @@ class ProceduralRenderer final : public ArnoldRendererBase
 		m_shaderCache->nodesCreated( nodes );
 	}
 
-  private:
+	private:
 
 	IECore::ConstCompoundObjectPtr m_attributesToInherit;
 	tbb::enumerable_thread_specific<vector<AtNode *>> m_nodesCreated;
@@ -3369,7 +3369,7 @@ const boost::container::flat_map<IECore::InternedString, IECore::ConstDataPtr> g
 class ArnoldGlobals
 {
 
-  public:
+	public:
 
 	ArnoldGlobals( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
 		: m_renderType( renderType ),
@@ -4009,7 +4009,7 @@ class ArnoldGlobals
 		AiRenderInterrupt( m_renderSession.get(), AI_BLOCKING );
 	}
 
-  private:
+	private:
 
 	bool updateLogFlags( const std::string name, const IECore::Data *value, bool console )
 	{
@@ -4613,7 +4613,7 @@ namespace
 class ArnoldRenderer final : public ArnoldRendererBase
 {
 
-  public:
+	public:
 
 	// Public constructor makes ArnoldGlobals and delegates to a private internal
 	// constructor. This allows us to pass the universe from the globals to the
@@ -4690,7 +4690,7 @@ class ArnoldRenderer final : public ArnoldRendererBase
 		return nullptr;
 	}
 
-  private:
+	private:
 
 	ArnoldRenderer( NodeDeleter nodeDeleter, std::unique_ptr<ArnoldGlobals> globals, const IECore::MessageHandlerPtr &messageHandler )
 		: ArnoldRendererBase( nodeDeleter, globals->universe(), /* parentNode = */ nullptr, messageHandler ),

@@ -259,7 +259,7 @@ struct PrimitiveVariableConverter
 		);
 	}
 
-  private:
+	private:
 
 	const std::string &m_messageContext;
 

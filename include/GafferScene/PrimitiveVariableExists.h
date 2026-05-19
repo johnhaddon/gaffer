@@ -49,7 +49,7 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveVariableExists : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit PrimitiveVariableExists( const std::string &name = defaultName<PrimitiveVariableExists>() );
 	~PrimitiveVariableExists() override;
@@ -67,12 +67,12 @@ class GAFFERSCENE_API PrimitiveVariableExists : public Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

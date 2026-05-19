@@ -47,7 +47,7 @@ namespace GafferUI
 class GAFFERUI_API IndividualContainer : public ContainerGadget
 {
 
-  public:
+	public:
 
 	explicit IndividualContainer( GadgetPtr child = nullptr );
 	~IndividualContainer() override;

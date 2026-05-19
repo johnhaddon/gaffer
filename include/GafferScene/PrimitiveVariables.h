@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveVariables : public ObjectProcessor
 {
 
-  public:
+	public:
 
 	explicit PrimitiveVariables( const std::string &name = defaultName<PrimitiveVariables>() );
 	~PrimitiveVariables() override;
@@ -56,13 +56,13 @@ class GAFFERSCENE_API PrimitiveVariables : public ObjectProcessor
 	Gaffer::CompoundDataPlug *primitiveVariablesPlug();
 	const Gaffer::CompoundDataPlug *primitiveVariablesPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

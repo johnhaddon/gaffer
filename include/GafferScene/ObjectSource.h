@@ -55,7 +55,7 @@ namespace GafferScene
 class GAFFERSCENE_API ObjectSource : public SceneNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::ObjectSource, ObjectSourceTypeId, SceneNode );
 
@@ -72,7 +72,7 @@ class GAFFERSCENE_API ObjectSource : public SceneNode
 
 	void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	ObjectSource( const std::string &name, const std::string &namePlugDefaultValue );
 
@@ -106,7 +106,7 @@ class GAFFERSCENE_API ObjectSource : public SceneNode
 	virtual void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
 	virtual IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const;
 
-  private:
+	private:
 
 	IECore::InternedString validatedName() const;
 	bool setNameValid( const IECore::InternedString &setName ) const;

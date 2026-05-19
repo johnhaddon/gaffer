@@ -45,7 +45,7 @@ namespace Gaffer
 class GAFFER_API Preferences : public Node
 {
 
-  public:
+	public:
 
 	explicit Preferences( const std::string &name = defaultName<Preferences>() );
 	~Preferences() override;

@@ -76,7 +76,7 @@ static const std::string g_headerPrefix = "header:";
 class GafferDisplayDriver : public IECoreImage::DisplayDriver
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::GafferDisplayDriver, GafferDisplayDriverTypeId, DisplayDriver );
 
@@ -303,7 +303,7 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 		return m_closed;
 	}
 
-  private:
+	private:
 
 	static const DisplayDriverDescription<GafferDisplayDriver> g_description;
 

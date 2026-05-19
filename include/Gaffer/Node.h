@@ -66,7 +66,7 @@ IE_CORE_FORWARDDECLARE( ScriptNode )
 class GAFFER_API Node : public GraphComponent
 {
 
-  public:
+	public:
 
 	explicit Node( const std::string &name = defaultName<Node>() );
 	~Node() override;
@@ -165,7 +165,7 @@ class GAFFER_API Node : public GraphComponent
 	ErrorSignal &errorSignal();
 	const ErrorSignal &errorSignal() const;
 
-  protected:
+	protected:
 
 	/// May be overridden to restrict the inputs that plugs on this node will
 	/// accept. Default implementation accepts all plugs. Note that
@@ -185,7 +185,7 @@ class GAFFER_API Node : public GraphComponent
 	/// unparented.
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 

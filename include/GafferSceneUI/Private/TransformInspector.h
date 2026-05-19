@@ -51,7 +51,7 @@ namespace Private
 class GAFFERSCENEUI_API TransformInspector : public Inspector
 {
 
-  public:
+	public:
 
 	enum class Space
 	{
@@ -80,14 +80,14 @@ class GAFFERSCENEUI_API TransformInspector : public Inspector
 	static const char *toString( Space space );
 	static const char *toString( Component component );
 
-  protected:
+	protected:
 
 	GafferScene::SceneAlgo::History::ConstPtr history() const override;
 	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
 	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
 	AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
 
-  private:
+	private:
 
 	const GafferScene::ScenePlugPtr m_scene;
 	const Space m_space;

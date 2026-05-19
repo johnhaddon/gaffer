@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API CurveSampler : public PrimitiveSampler
 {
 
-  public:
+	public:
 
 	explicit CurveSampler( const std::string &name = defaultName<CurveSampler>() );
 	~CurveSampler() override;
@@ -57,13 +57,13 @@ class GAFFERSCENE_API CurveSampler : public PrimitiveSampler
 	Gaffer::StringPlug *vPlug();
 	const Gaffer::StringPlug *vPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsSamplingFunction( const Gaffer::Plug *input ) const override;
 	void hashSamplingFunction( IECore::MurmurHash &h ) const override;
 	SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

@@ -69,7 +69,7 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API SceneView : public GafferUI::View
 {
 
-  public:
+	public:
 
 	explicit SceneView( Gaffer::ScriptNodePtr scriptNode );
 	~SceneView() override;
@@ -106,7 +106,7 @@ class GAFFERSCENEUI_API SceneView : public GafferUI::View
 	static void registerRenderer( const std::string &name, const RendererSettingsCreator &settingsCreator );
 	static std::vector<std::string> registeredRenderers();
 
-  private:
+	private:
 
 	// The filter for a preprocessing node used to hide things.
 	GafferScene::PathFilter *deleteObjectFilter();

@@ -63,7 +63,7 @@ namespace
 
 class DispatcherWrapper : public NodeWrapper<Dispatcher>
 {
-  public:
+	public:
 
 	DispatcherWrapper( PyObject *self, const std::string &name )
 		: NodeWrapper<Dispatcher>( self, name )
@@ -232,7 +232,7 @@ struct DispatcherHelper
 		}
 	}
 
-  private:
+	private:
 
 	object m_fn;
 	object m_setupFn;

@@ -171,7 +171,7 @@ using ImageOutputPtr = std::shared_ptr<ImageOutput>;
 
 class TileSampleOffsetsProcessor
 {
-  public:
+	public:
 
 	using Result = ConstIntVectorDataPtr;
 
@@ -185,7 +185,7 @@ class TileSampleOffsetsProcessor
 
 class TileChannelDataProcessor
 {
-  public:
+	public:
 
 	using Result = ConstFloatVectorDataPtr;
 
@@ -214,7 +214,7 @@ class TileChannelDataProcessor
 		return imagePlug->channelDataPlug()->getValue();
 	}
 
-  private:
+	private:
 
 	const std::map<std::string, std::pair<std::string, bool>> &m_colorSpaceByView;
 };
@@ -230,7 +230,7 @@ struct V2iHash
 
 class SampleOffsetsAccumulator
 {
-  public:
+	public:
 
 	using Result = std::unordered_map<Imath::V2i, ConstIntVectorDataPtr, V2iHash>;
 
@@ -286,7 +286,7 @@ class FlatTileWriter
 	// if memory has been allocated for that tile, write it to the file, and if
 	// nothing has been allocated, write a black tile.
 
-  public:
+	public:
 
 	FlatTileWriter(
 		ImageOutputPtr out,
@@ -376,7 +376,7 @@ class FlatTileWriter
 		writeFilledTiles();
 	}
 
-  private:
+	private:
 
 	inline ConstFloatVectorDataPtr blackTile()
 	{
@@ -504,7 +504,7 @@ class FlatScanlineWriter
 	// of the last tile of each row, it writes all of the data from the buffer
 	// into the ImageOutput object.
 
-  public:
+	public:
 
 	FlatScanlineWriter(
 		ImageOutputPtr out,
@@ -569,7 +569,7 @@ class FlatScanlineWriter
 		}
 	}
 
-  private:
+	private:
 
 	inline bool firstTileOfRow( const size_t channelIndex, const Imath::V2i &tileOrigin ) const
 	{
@@ -638,7 +638,7 @@ class DeepTileWriter
 	// the data windows are expected to match, since EXR supports setting the
 	// data window ).
 
-  public:
+	public:
 
 	DeepTileWriter(
 		ImageOutputPtr out,
@@ -725,7 +725,7 @@ class DeepTileWriter
 		}
 	}
 
-  private:
+	private:
 
 	inline size_t outTileIndex( const Imath::V2i &tileOrigin ) const
 	{
@@ -904,7 +904,7 @@ class DeepScanlineWriter
 	// of the last tile of each row, it writes all of the data from the buffer
 	// into the ImageOutput object.
 
-  public:
+	public:
 
 	DeepScanlineWriter(
 		ImageOutputPtr out,
@@ -970,7 +970,7 @@ class DeepScanlineWriter
 		}
 	}
 
-  private:
+	private:
 
 	std::pair<int, int> scanlineRange()
 	{

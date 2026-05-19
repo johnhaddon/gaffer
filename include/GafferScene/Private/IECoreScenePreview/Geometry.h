@@ -50,7 +50,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API Geometry : public IECoreScene::VisibleRenderable
 {
 
-  public:
+	public:
 
 	Geometry( const std::string &type = "", const Imath::Box3f &bound = Imath::Box3f(), const IECore::CompoundDataPtr &parameters = nullptr );
 
@@ -71,7 +71,7 @@ class GAFFERSCENE_API Geometry : public IECoreScene::VisibleRenderable
 	void render( IECoreScene::Renderer *renderer ) const override {};
 #endif
 
-  private:
+	private:
 
 	static const unsigned int m_ioVersion;
 

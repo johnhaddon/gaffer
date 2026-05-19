@@ -49,7 +49,7 @@ namespace GafferImage
 class GAFFERIMAGE_API OpenColorIOTransform : public ColorProcessor
 {
 
-  public:
+	public:
 
 	~OpenColorIOTransform() override;
 
@@ -77,7 +77,7 @@ class GAFFERIMAGE_API OpenColorIOTransform : public ColorProcessor
 	/// `processor()` in the current context.
 	IECore::MurmurHash processorHash() const;
 
-  protected:
+	protected:
 
 	explicit OpenColorIOTransform( const std::string &name = defaultName<OpenColorIOTransform>(), bool withContextPlug = false );
 
@@ -91,7 +91,7 @@ class GAFFERIMAGE_API OpenColorIOTransform : public ColorProcessor
 	/// pointer if no processing should take place.
 	virtual OCIO_NAMESPACE::ConstTransformRcPtr transform() const = 0;
 
-  private:
+	private:
 
 	bool affectsColorProcessor( const Gaffer::Plug *input ) const final;
 	void hashColorProcessor( const Gaffer::Context *context, IECore::MurmurHash &h ) const final;

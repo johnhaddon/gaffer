@@ -185,7 +185,7 @@ struct CycleDetector
 		m_downstreamShaders.erase( m_shaderAndContext );
 	}
 
-  private:
+	private:
 
 	DownstreamShaders &m_downstreamShaders;
 	const ShaderAndHash m_shaderAndContext;
@@ -214,7 +214,7 @@ struct OptionalScopedContext
 class Shader::NetworkBuilder
 {
 
-  public:
+	public:
 
 	NetworkBuilder( const Gaffer::Plug *output )
 		: m_output( output ), m_hasProxyNodes( false )
@@ -274,7 +274,7 @@ class Shader::NetworkBuilder
 		return nullptr;
 	}
 
-  private:
+	private:
 
 	// Returns the effective shader parameter that should be used taking into account
 	// enabledPlug() and correspondingInput(). Accepts either output or input parameters

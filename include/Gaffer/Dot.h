@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Dot : public DependencyNode
 {
 
-  public:
+	public:
 
 	explicit Dot( const std::string &name = defaultName<Dot>() );
 	~Dot() override;
@@ -96,7 +96,7 @@ class GAFFER_API Dot : public DependencyNode
 	Plug *correspondingInput( const Plug *output ) override;
 	const Plug *correspondingInput( const Plug *output ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

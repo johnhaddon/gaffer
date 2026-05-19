@@ -51,7 +51,7 @@ namespace
 class ClippingPlaneVisualiser : public ObjectVisualiser
 {
 
-  public:
+	public:
 
 	using ObjectType = IECoreScene::ClippingPlane;
 
@@ -105,7 +105,7 @@ class ClippingPlaneVisualiser : public ObjectVisualiser
 		return m_visualisations;
 	}
 
-  protected:
+	protected:
 
 	static ObjectVisualiserDescription<ClippingPlaneVisualiser> g_visualiserDescription;
 

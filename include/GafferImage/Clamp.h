@@ -53,7 +53,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Clamp : public ChannelDataProcessor
 {
 
-  public:
+	public:
 
 	explicit Clamp( const std::string &name = defaultName<Clamp>() );
 	~Clamp() override;
@@ -85,14 +85,14 @@ class GAFFERIMAGE_API Clamp : public ChannelDataProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	bool enabled() const override;
 
 	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelName, IECore::FloatVectorDataPtr outData ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

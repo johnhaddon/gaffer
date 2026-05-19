@@ -56,7 +56,7 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveVariableProcessor : public SceneElementProcessor
 {
 
-  public:
+	public:
 
 	explicit PrimitiveVariableProcessor( const std::string &name = defaultName<PrimitiveVariableProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
 	~PrimitiveVariableProcessor() override;
@@ -72,7 +72,7 @@ class GAFFERSCENE_API PrimitiveVariableProcessor : public SceneElementProcessor
 	/// Implemented so that namesPlug() affects outPlug()->objectPlug().
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// Implemented to call processPrimitiveVariable() for the appropriate variables of inputObject.
 	bool processesObject() const override;
@@ -82,7 +82,7 @@ class GAFFERSCENE_API PrimitiveVariableProcessor : public SceneElementProcessor
 	/// Must be implemented by subclasses to process the primitive variable in place.
 	virtual void processPrimitiveVariable( const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry, IECoreScene::PrimitiveVariable &inputVariable ) const = 0;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

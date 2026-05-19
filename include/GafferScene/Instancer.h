@@ -55,7 +55,7 @@ namespace GafferScene
 class GAFFERSCENE_API Instancer : public BranchCreator
 {
 
-  public:
+	public:
 
 
 	/// Compound plug for representing context variables to be created
@@ -63,7 +63,7 @@ class GAFFERSCENE_API Instancer : public BranchCreator
 	class GAFFERSCENE_API ContextVariablePlug : public Gaffer::ValuePlug
 	{
 
-	  public:
+		public:
 
 		GAFFER_PLUG_DECLARE_TYPE( ContextVariablePlug, InstancerContextVariablePlugTypeId, Gaffer::ValuePlug );
 
@@ -175,7 +175,7 @@ class GAFFERSCENE_API Instancer : public BranchCreator
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -222,7 +222,7 @@ class GAFFERSCENE_API Instancer : public BranchCreator
 	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-  private:
+	private:
 
 	IE_CORE_FORWARDDECLARE( EngineData );
 	IE_CORE_FORWARDDECLARE( EngineSplitPrototypesData );
@@ -261,7 +261,7 @@ class GAFFERSCENE_API Instancer : public BranchCreator
 		PrototypeScope( const Gaffer::ObjectPlug *enginePlug, const Gaffer::Context *context, const ScenePath *parentPath, const ScenePath *branchPath );
 		PrototypeScope( const EngineData *engine, const Gaffer::Context *context, const ScenePath *parentPath, const ScenePath *branchPath );
 
-	  private:
+		private:
 
 		ScenePlug::ScenePath m_prototypePath;
 		void setPrototype( const EngineData *engine, const ScenePath *sourcePath, const ScenePath *branchPath );

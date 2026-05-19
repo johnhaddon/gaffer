@@ -53,7 +53,7 @@ namespace GafferDispatchBindings
 template<typename T, typename TWrapper = T>
 class TaskNodeClass : public GafferBindings::DependencyNodeClass<T, TWrapper>
 {
-  public:
+	public:
 
 	TaskNodeClass( const char *docString = nullptr );
 };
@@ -61,7 +61,7 @@ class TaskNodeClass : public GafferBindings::DependencyNodeClass<T, TWrapper>
 template<typename WrappedType>
 class TaskNodeWrapper : public GafferBindings::DependencyNodeWrapper<WrappedType>
 {
-  public:
+	public:
 
 	template<typename... Args>
 	TaskNodeWrapper( PyObject *self, Args &&...args )

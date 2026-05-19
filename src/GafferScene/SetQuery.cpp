@@ -102,7 +102,7 @@ struct ParentScope : public Context::EditableScope
 		}
 	}
 
-  private:
+	private:
 
 	ScenePlug::ScenePath m_parentPath;
 };

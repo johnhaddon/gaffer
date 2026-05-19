@@ -336,7 +336,7 @@ namespace
 class ScriptNodeWrapper : public NodeWrapper<ScriptNode>
 {
 
-  public:
+	public:
 
 	ScriptNodeWrapper( PyObject *self, const std::string &name )
 		: NodeWrapper<ScriptNode>( self, name )

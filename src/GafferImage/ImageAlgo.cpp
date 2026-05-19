@@ -58,7 +58,7 @@ namespace
 class CopyTile
 {
 
-  public:
+	public:
 
 	CopyTile(
 		const vector<float *> &imageChannelData,
@@ -92,7 +92,7 @@ class CopyTile
 		}
 	}
 
-  private:
+	private:
 
 	const vector<float *> &m_imageChannelData;
 	const vector<string> &m_channelNames;
@@ -164,7 +164,7 @@ struct NaturalOrder
 		return false;
 	}
 
-  private:
+	private:
 
 	int compareToken( const std::smatch &l, const std::smatch &r )
 	{

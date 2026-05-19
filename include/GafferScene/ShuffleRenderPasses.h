@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API ShuffleRenderPasses : public Gaffer::ContextProcessor
 {
 
-  public:
+	public:
 
 	explicit ShuffleRenderPasses( const std::string &name = defaultName<ShuffleRenderPasses>() );
 	~ShuffleRenderPasses() override;
@@ -65,7 +65,7 @@ class GAFFERSCENE_API ShuffleRenderPasses : public Gaffer::ContextProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -73,7 +73,7 @@ class GAFFERSCENE_API ShuffleRenderPasses : public Gaffer::ContextProcessor
 	bool affectsContext( const Gaffer::Plug *input ) const override;
 	void processContext( Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-  private:
+	private:
 
 	class ProcessedScope;
 

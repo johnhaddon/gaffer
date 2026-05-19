@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API MeshSplit : public BranchCreator
 {
 
-  public:
+	public:
 
 	explicit MeshSplit( const std::string &name = defaultName<MeshSplit>() );
 	~MeshSplit() override;
@@ -64,7 +64,7 @@ class GAFFERSCENE_API MeshSplit : public BranchCreator
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -89,7 +89,7 @@ class GAFFERSCENE_API MeshSplit : public BranchCreator
 	void hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstInternedStringVectorDataPtr computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	IE_CORE_FORWARDDECLARE( MeshSplitterData );
 

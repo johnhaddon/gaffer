@@ -48,7 +48,7 @@ namespace Gaffer
 class GAFFER_API SubGraph : public DependencyNode
 {
 
-  public:
+	public:
 
 	explicit SubGraph( const std::string &name = defaultName<SubGraph>() );
 	~SubGraph() override;

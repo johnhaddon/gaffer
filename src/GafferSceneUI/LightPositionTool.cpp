@@ -324,7 +324,7 @@ std::string selectedUpstreamPathToString( const std::vector<TransformTool::Selec
 class DistanceHandle : public Handle
 {
 
-  public:
+	public:
 
 	DistanceHandle( const bool requiresPivot ) : m_requiresPivot( requiresPivot )
 	{
@@ -388,7 +388,7 @@ class DistanceHandle : public Handle
 		return m_requiresPivot;
 	}
 
-  protected:
+	protected:
 
 	void renderHandle( const Style *style, Style::State state ) const override
 	{
@@ -516,7 +516,7 @@ class DistanceHandle : public Handle
 		m_startDistance = m_pivotDistance.value();
 	}
 
-  private:
+	private:
 
 	// As with `LightPositionTool::m_pivotMap` and `LightPositionTool::m_targetMap`,
 	// we store the pivot and target position in transform space.

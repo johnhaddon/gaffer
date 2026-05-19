@@ -49,7 +49,7 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldLightFilter : public GafferScene::LightFilter
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldLightFilter, ArnoldLightFilterTypeId, GafferScene::LightFilter );
 

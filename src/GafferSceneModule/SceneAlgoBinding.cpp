@@ -419,7 +419,7 @@ struct RenderAdaptorWrapper
 		}
 	}
 
-  private:
+	private:
 
 	object m_pythonAdaptor;
 };

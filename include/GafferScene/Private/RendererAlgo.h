@@ -153,7 +153,7 @@ GAFFERSCENE_API void outputOutputs( const ScenePlug *scene, const RenderOptions 
 class GAFFERSCENE_API RenderSets : boost::noncopyable
 {
 
-  public:
+	public:
 
 	RenderSets();
 	RenderSets( const ScenePlug *scene );
@@ -179,7 +179,7 @@ class GAFFERSCENE_API RenderSets : boost::noncopyable
 
 	void attributes( IECore::CompoundObject::ObjectMap &attributes, const ScenePlug::ScenePath &path ) const;
 
-  private:
+	private:
 
 	IECore::ConstInternedStringVectorDataPtr setsAttribute( const std::vector<IECore::InternedString> &path ) const;
 
@@ -206,7 +206,7 @@ class GAFFERSCENE_API RenderSets : boost::noncopyable
 class GAFFERSCENE_API LightLinks : boost::noncopyable
 {
 
-  public:
+	public:
 
 	LightLinks( const IECoreScenePreview::Renderer *renderer );
 
@@ -262,7 +262,7 @@ class GAFFERSCENE_API LightLinks : boost::noncopyable
 	/// and `outputLightFilterLinks()` have been made.
 	void clean();
 
-  private:
+	private:
 
 	void addFilterLink( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression );
 	void removeFilterLink( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression );

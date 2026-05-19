@@ -120,7 +120,7 @@ float pixelAspectFromImageGadget( const ImageGadget *imageGadget )
 class Box2iGadget : public GafferUI::Gadget
 {
 
-  public:
+	public:
 
 	Box2iGadget( Box2iPlugPtr plug, std::string id )
 		: Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deletePressed( false )
@@ -160,7 +160,7 @@ class Box2iGadget : public GafferUI::Gadget
 		return m_deleteClickedSignal;
 	}
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -266,7 +266,7 @@ class Box2iGadget : public GafferUI::Gadget
 		return b;
 	}
 
-  private:
+	private:
 
 	void plugDirtied( Plug *plug )
 	{
@@ -525,7 +525,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Box2iGadget )
 class V2iGadget : public GafferUI::Gadget
 {
 
-  public:
+	public:
 
 	V2iGadget( V2iPlugPtr plug, std::string id )
 		: Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deletePressed( false )
@@ -565,7 +565,7 @@ class V2iGadget : public GafferUI::Gadget
 		return m_deleteClickedSignal;
 	}
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -646,7 +646,7 @@ class V2iGadget : public GafferUI::Gadget
 		return b;
 	}
 
-  private:
+	private:
 
 	void plugDirtied( Plug *plug )
 	{

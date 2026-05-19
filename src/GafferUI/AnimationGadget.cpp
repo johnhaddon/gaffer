@@ -309,7 +309,7 @@ struct AnimationGadget::SelectionSet : public Gaffer::Set
 	void clear( const Gaffer::Animation::CurvePlug *curve );
 	bool empty() const;
 
-  private:
+	private:
 
 	friend class AnimationGadget;
 

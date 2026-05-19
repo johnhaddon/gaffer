@@ -106,7 +106,7 @@ Imath::Box2i samplerWindow( const Imath::V2i &tileOrigin, const Imath::M33f &sam
 class ImageTransform::ChainingScope : boost::noncopyable
 {
 
-  public:
+	public:
 
 	ChainingScope( const Gaffer::Context *context, const ImageTransform *imageTransform )
 		: m_chained( context->get<bool>( chainedContextName, false ) ), m_true( true )
@@ -151,7 +151,7 @@ class ImageTransform::ChainingScope : boost::noncopyable
 
 	static InternedString chainedContextName;
 
-  private:
+	private:
 
 	// We use `optional` here to avoid the expense of constructing
 	// an EditableScope when we don't need one.
@@ -166,7 +166,7 @@ InternedString ImageTransform::ChainingScope::chainedContextName( "__imageTransf
 class ImageTransform::CleanScope : boost::noncopyable
 {
 
-  public:
+	public:
 
 	CleanScope( const Gaffer::Context *context )
 	{
@@ -187,7 +187,7 @@ class ImageTransform::CleanScope : boost::noncopyable
 		return m_context;
 	}
 
-  private:
+	private:
 
 	const Context *m_context;
 	std::optional<Context::EditableScope> m_scope;

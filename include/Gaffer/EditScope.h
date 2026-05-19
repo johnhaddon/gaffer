@@ -67,7 +67,7 @@ class BoxOut;
 class GAFFER_API EditScope : public Box
 {
 
-  public:
+	public:
 
 	explicit EditScope( const std::string &name = defaultName<EditScope>() );
 	~EditScope() override;
@@ -132,7 +132,7 @@ class GAFFER_API EditScope : public Box
 		}
 	};
 
-  private:
+	private:
 
 	BoxOut *boxOut();
 	DependencyNode *acquireProcessorInternal( const std::string &type, bool createIfNecessary );

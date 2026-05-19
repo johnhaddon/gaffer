@@ -108,7 +108,7 @@ ValuePlugPtr activeInPlug( Spreadsheet &s, const ValuePlug &outPlug )
 class RowsPlugSerialiser : public ValuePlugSerialiser
 {
 
-  public:
+	public:
 
 	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
 	{
@@ -199,7 +199,7 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 		return false;
 	}
 
-  private:
+	private:
 
 	// Fills `result` with calls to restore default values that have been modified from those of the
 	// default row. We must fit the following constraints :

@@ -56,7 +56,7 @@ IE_CORE_FORWARDDECLARE( GafferDisplayDriver )
 class GAFFERSCENE_API Display : public GafferImage::ImageNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::Display, DisplayTypeId, GafferImage::ImageNode );
 
@@ -86,7 +86,7 @@ class GAFFERSCENE_API Display : public GafferImage::ImageNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
@@ -112,7 +112,7 @@ class GAFFERSCENE_API Display : public GafferImage::ImageNode
 	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
 
-  private:
+	private:
 
 	GafferDisplayDriverPtr m_driver;
 	Gaffer::Signals::Connection m_dataReceivedConnection;

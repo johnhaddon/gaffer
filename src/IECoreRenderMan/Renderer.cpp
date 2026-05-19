@@ -81,7 +81,7 @@ const InternedString g_acquireRiley( "ri:acquireRiley" );
 class RenderManRenderer final : public IECoreScenePreview::Renderer
 {
 
-  public:
+	public:
 
 	RenderManRenderer( RtUString rileyVariant, RenderType renderType, const std::string &fileName, const MessageHandlerPtr &messageHandler )
 		: m_messageHandler( messageHandler ),
@@ -227,7 +227,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		return nullptr;
 	}
 
-  private:
+	private:
 
 	IECore::MessageHandlerPtr m_messageHandler;
 	std::unique_ptr<Globals> m_globals;

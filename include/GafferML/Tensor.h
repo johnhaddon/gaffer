@@ -53,7 +53,7 @@ namespace GafferML
 class GAFFERML_API Tensor : public IECore::Object
 {
 
-  public:
+	public:
 
 	/// Enum to be used in `IntPlug` values when a node requires a tensor type to be specified.
 	/// Values currently match one-to-one with `ONNXTensorElementDataType`, but have Python
@@ -105,7 +105,7 @@ class GAFFERML_API Tensor : public IECore::Object
 	IECore::DataPtr asData();
 	IECore::ConstDataPtr asData() const;
 
-  private:
+	private:
 
 	struct State : public IECore::RefCounted
 	{

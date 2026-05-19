@@ -54,7 +54,7 @@ IE_CORE_FORWARDDECLARE( FilterPlug )
 class GAFFERIMAGE_API ImageSampler : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit ImageSampler( const std::string &name = defaultName<ImageSampler>() );
 	~ImageSampler() override;
@@ -81,12 +81,12 @@ class GAFFERIMAGE_API ImageSampler : public Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	// Returns the channel to be read for the specified child of colorPlug(),
 	// returning the empty string if the channel doesn't exist.

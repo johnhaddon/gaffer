@@ -54,7 +54,7 @@ namespace GafferUI
 class GAFFERUI_API DotNodeGadget : public StandardNodeGadget
 {
 
-  public:
+	public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::DotNodeGadget, DotNodeGadgetTypeId, StandardNodeGadget );
 
@@ -63,12 +63,12 @@ class GAFFERUI_API DotNodeGadget : public StandardNodeGadget
 
 	Imath::Box3f bound() const override;
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	void updateFromContextTracker( const ContextTracker *contextTracker ) override;
 
-  private:
+	private:
 
 	Gaffer::Dot *dotNode();
 	const Gaffer::Dot *dotNode() const;

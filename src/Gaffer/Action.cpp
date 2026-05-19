@@ -123,7 +123,7 @@ namespace Gaffer
 class SimpleAction : public Action
 {
 
-  public:
+	public:
 
 	SimpleAction( const GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks )
 		: Action( cancelBackgroundTasks ), m_subject( subject.get() ), m_doFn( doFn ), m_undoFn( undoFn )
@@ -149,7 +149,7 @@ class SimpleAction : public Action
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::SimpleAction, SimpleActionTypeId, Action );
 
-  protected:
+	protected:
 
 	GraphComponent *subject() const override
 	{
@@ -183,7 +183,7 @@ class SimpleAction : public Action
 	{
 	}
 
-  private:
+	private:
 
 	GraphComponent *m_subject;
 	Function m_doFn;

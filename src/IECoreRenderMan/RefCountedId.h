@@ -50,7 +50,7 @@ template<typename T>
 class RefCountedId : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	RefCountedId( T id, Session *session )
 		: m_session( session ), m_id( id )
@@ -87,7 +87,7 @@ class RefCountedId : public IECore::RefCounted
 
 	const T &id() const { return m_id; }
 
-  private:
+	private:
 
 	Session *m_session;
 	T m_id;

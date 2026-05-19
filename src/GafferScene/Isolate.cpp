@@ -90,7 +90,7 @@ struct Isolate::SetsToKeep
 		return result;
 	}
 
-  private:
+	private:
 
 	boost::container::static_vector<IECore::PathMatcher, 3> m_sets;
 };

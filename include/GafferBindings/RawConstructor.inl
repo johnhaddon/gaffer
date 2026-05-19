@@ -70,7 +70,7 @@ struct RawConstructorDispatcher
 		return boost::python::detail::none();
 	}
 
-  private:
+	private:
 
 	F m_f;
 };

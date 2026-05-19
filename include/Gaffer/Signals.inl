@@ -298,7 +298,7 @@ class Signal<Result( Args... ), Combiner>::SlotCallIterator : public boost::iter
 																  boost::single_pass_traversal_tag>
 {
 
-  public:
+	public:
 
 	SlotCallIterator( const Private::SlotBase::Ptr &slot, const ArgsTuple &args )
 		: m_slot( slot ), m_args( args )
@@ -306,7 +306,7 @@ class Signal<Result( Args... ), Combiner>::SlotCallIterator : public boost::iter
 		skipBlocked();
 	}
 
-  private:
+	private:
 
 	friend class boost::iterator_core_access;
 

@@ -125,7 +125,7 @@ const IECore::InternedString g_globalsPathName( "Globals" );
 class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( InspectorTree )
 
@@ -283,7 +283,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		}
 	};
 
-  protected:
+	protected:
 
 	friend class InspectorPath;
 
@@ -368,7 +368,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		return m_scene.get();
 	}
 
-  private:
+	private:
 
 	// A single entry in the tree, corresponding to a particular path.
 	// May hold an Inspector and child items indexed by name.
@@ -639,7 +639,7 @@ IE_CORE_DECLAREPTR( InspectorTree )
 class InspectorPath : public Gaffer::Path
 {
 
-  public:
+	public:
 
 	InspectorPath( const InspectorTreePtr &tree, const Names &names, const IECore::InternedString &root = "/", const Gaffer::PathFilterPtr &filter = nullptr )
 		: Path( names, root, filter ), m_tree( tree )
@@ -695,7 +695,7 @@ class InspectorPath : public Gaffer::Path
 		return m_tree->cancellationSubject();
 	}
 
-  protected:
+	protected:
 
 	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override
 	{
@@ -716,7 +716,7 @@ class InspectorPath : public Gaffer::Path
 		m_treeDirtiedConnection = m_tree->dirtiedSignal().connect( boost::bind( &InspectorPath::treeDirtied, this ) );
 	}
 
-  private:
+	private:
 
 	void treeDirtied()
 	{
@@ -1440,7 +1440,7 @@ const std::array<InternedString, 2> g_diffColumnContextProperties = { "inspector
 class InspectorDiffColumn : public GafferSceneUI::Private::InspectorColumn
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( InspectorDiffColumn )
 
@@ -1488,7 +1488,7 @@ class InspectorDiffColumn : public GafferSceneUI::Private::InspectorColumn
 		return result;
 	}
 
-  private:
+	private:
 
 	GafferSceneUI::Private::ConstInspectorColumnPtr m_otherColumn;
 	ConstColor4fDataPtr m_backgroundColor;

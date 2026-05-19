@@ -204,7 +204,7 @@ inline IECore::InternedString formatAsInternedString( const T &a, std::string &b
 class MeshSplit::MeshSplitterData : public IECore::Data
 {
 
-  public:
+	public:
 
 	MeshSplitterData( ConstMeshPrimitivePtr mesh, const PrimitiveVariable &primitiveVariable, bool nameFromSegment, const IECore::Canceller *canceller ) : m_splitter( mesh, primitiveVariable, canceller )
 	{
@@ -269,7 +269,7 @@ class MeshSplit::MeshSplitterData : public IECore::Data
 		return m_splitter.bound( indexFromName( name ) );
 	}
 
-  private:
+	private:
 
 	inline int indexFromName( const IECore::InternedString &name ) const
 	{

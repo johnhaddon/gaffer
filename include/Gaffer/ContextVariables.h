@@ -46,7 +46,7 @@ namespace Gaffer
 class GAFFER_API ContextVariables : public ContextProcessor
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextVariables, ContextVariablesTypeId, ContextProcessor );
 
@@ -61,7 +61,7 @@ class GAFFER_API ContextVariables : public ContextProcessor
 
 	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// Implemented to compute combinedVariablesPlug
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
@@ -70,7 +70,7 @@ class GAFFER_API ContextVariables : public ContextProcessor
 	bool affectsContext( const Plug *input ) const override;
 	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-  private:
+	private:
 
 	AtomicCompoundDataPlug *combinedVariablesPlug();
 	const AtomicCompoundDataPlug *combinedVariablesPlug() const;

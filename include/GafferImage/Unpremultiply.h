@@ -47,7 +47,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Unpremultiply : public ChannelDataProcessor
 {
 
-  public:
+	public:
 
 	explicit Unpremultiply( const std::string &name = defaultName<Unpremultiply>() );
 	~Unpremultiply() override;
@@ -67,12 +67,12 @@ class GAFFERIMAGE_API Unpremultiply : public ChannelDataProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelIndex, IECore::FloatVectorDataPtr outData ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

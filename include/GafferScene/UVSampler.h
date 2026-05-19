@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API UVSampler : public PrimitiveSampler
 {
 
-  public:
+	public:
 
 	explicit UVSampler( const std::string &name = defaultName<UVSampler>() );
 	~UVSampler() override;
@@ -54,13 +54,13 @@ class GAFFERSCENE_API UVSampler : public PrimitiveSampler
 	Gaffer::StringPlug *uvPlug();
 	const Gaffer::StringPlug *uvPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsSamplingFunction( const Gaffer::Plug *input ) const override;
 	void hashSamplingFunction( IECore::MurmurHash &h ) const override;
 	SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *primitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

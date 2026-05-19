@@ -105,7 +105,7 @@ struct MappingData : public IECore::Data
 		return it->second;
 	}
 
-  private:
+	private:
 
 	StringVectorDataPtr m_outRenderPassNames;
 
@@ -136,7 +136,7 @@ bool enabled( const BoolPlug *enabledPlug, const Gaffer::Context *context )
 class ShuffleRenderPasses::ProcessedScope : public Context::EditableScope
 {
 
-  public:
+	public:
 
 	ProcessedScope( const Context *context, const ShuffleRenderPasses *processor )
 		: EditableScope( context )
@@ -148,7 +148,7 @@ class ShuffleRenderPasses::ProcessedScope : public Context::EditableScope
 		}
 	}
 
-  private:
+	private:
 
 	IECore::ConstRefCountedPtr m_storage;
 };

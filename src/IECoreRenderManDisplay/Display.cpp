@@ -701,7 +701,7 @@ struct IEDisplay : public display::Display
 		}
 	}
 
-  private:
+	private:
 
 	CompoundDataPtr m_parameters;
 	Box2i m_dataWindow;

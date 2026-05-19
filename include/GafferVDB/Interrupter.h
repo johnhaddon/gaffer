@@ -44,7 +44,7 @@ namespace GafferVDB
 class Interrupter
 {
 
-  public:
+	public:
 
 	Interrupter( const IECore::Canceller *canceller )
 		: m_canceller( canceller )
@@ -64,7 +64,7 @@ class Interrupter
 		return m_canceller && m_canceller->cancelled();
 	}
 
-  private:
+	private:
 
 	const IECore::Canceller *m_canceller;
 };

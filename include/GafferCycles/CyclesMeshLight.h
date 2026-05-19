@@ -47,14 +47,14 @@ namespace GafferCycles
 class GAFFERCYCLES_API CyclesMeshLight : public GafferScene::FilteredSceneProcessor
 {
 
-  public:
+	public:
 
 	explicit CyclesMeshLight( const std::string &name = defaultName<CyclesMeshLight>() );
 	~CyclesMeshLight() override;
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferCycles::CyclesMeshLight, CyclesMeshLightTypeId, FilteredSceneProcessor );
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

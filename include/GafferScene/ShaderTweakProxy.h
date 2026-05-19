@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API ShaderTweakProxy : public Shader
 {
 
-  public:
+	public:
 
 	ShaderTweakProxy( const std::string &name = defaultName<ShaderTweakProxy>() );
 
@@ -80,7 +80,7 @@ class GAFFERSCENE_API ShaderTweakProxy : public Shader
 		}
 	};
 
-  private:
+	private:
 
 	using ShaderLoaderCreator = std::function<ShaderPtr()>;
 	using ShaderLoaderCreatorMap = std::map<std::string, ShaderTweakProxy::ShaderLoaderCreator>;

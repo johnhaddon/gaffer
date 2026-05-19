@@ -60,7 +60,7 @@ template<typename Signal, typename SignalCaller = DefaultSignalCaller<Signal>, t
 class SignalClass : public boost::python::class_<Signal, boost::noncopyable>
 {
 
-  public:
+	public:
 
 	SignalClass( const char *className, const char *docString = nullptr );
 };

@@ -54,7 +54,7 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldDisplacement : public GafferScene::Shader
 {
 
-  public:
+	public:
 
 	explicit ArnoldDisplacement( const std::string &name = defaultName<ArnoldDisplacement>() );
 	~ArnoldDisplacement() override;
@@ -79,7 +79,7 @@ class GAFFERARNOLD_API ArnoldDisplacement : public GafferScene::Shader
 	Gaffer::Plug *outPlug();
 	const Gaffer::Plug *outPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsAttributes( const Gaffer::Plug *input ) const override;
 	void attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const override;
@@ -87,7 +87,7 @@ class GAFFERARNOLD_API ArnoldDisplacement : public GafferScene::Shader
 
 	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

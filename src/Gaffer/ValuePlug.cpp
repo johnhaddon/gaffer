@@ -195,7 +195,7 @@ struct hash<HashCacheKey>
 class ValuePlug::HashProcess : public Process
 {
 
-  public:
+	public:
 
 	// Interface used by ValuePlug.
 
@@ -460,7 +460,7 @@ class ValuePlug::HashProcess : public Process
 		return 1;
 	}
 
-  private:
+	private:
 
 	const ComputeNode *m_computeNode;
 
@@ -498,7 +498,7 @@ ValuePlug::HashCacheMode ValuePlug::HashProcess::g_hashCacheMode( defaultHashCac
 class ValuePlug::ComputeProcess : public Process
 {
 
-  public:
+	public:
 
 	// Interface used by ValuePlug.
 
@@ -700,7 +700,7 @@ class ValuePlug::ComputeProcess : public Process
 		return v->memoryUsage();
 	}
 
-  private:
+	private:
 
 	const ComputeNode *m_computeNode;
 	IECore::ConstObjectPtr m_result;
@@ -718,7 +718,7 @@ ValuePlug::ComputeProcess::CacheType ValuePlug::ComputeProcess::g_cache( CacheTy
 class ValuePlug::SetValueAction : public Gaffer::Action
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ValuePlug::SetValueAction, SetValueActionTypeId, Gaffer::Action );
 
@@ -727,7 +727,7 @@ class ValuePlug::SetValueAction : public Gaffer::Action
 	{
 	}
 
-  protected:
+	protected:
 
 	GraphComponent *subject() const override
 	{
@@ -762,7 +762,7 @@ class ValuePlug::SetValueAction : public Gaffer::Action
 		m_doValue = setValueAction->m_doValue;
 	}
 
-  private:
+	private:
 
 	ValuePlugPtr m_plug;
 	IECore::ConstObjectPtr m_doValue;

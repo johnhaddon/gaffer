@@ -48,7 +48,7 @@ namespace Gaffer
 class GAFFER_API NumericBookmarkSet : public Gaffer::Set
 {
 
-  public:
+	public:
 
 	NumericBookmarkSet( Gaffer::ScriptNodePtr script, int bookmark );
 	~NumericBookmarkSet() override;
@@ -67,7 +67,7 @@ class GAFFER_API NumericBookmarkSet : public Gaffer::Set
 	size_t size() const override;
 	//@}
 
-  private:
+	private:
 
 	Gaffer::ScriptNodePtr m_script;
 	int m_bookmark;

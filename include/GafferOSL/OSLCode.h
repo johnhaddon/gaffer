@@ -46,7 +46,7 @@ namespace GafferOSL
 class GAFFEROSL_API OSLCode : public OSLShader
 {
 
-  public:
+	public:
 
 	explicit OSLCode( const std::string &name = defaultName<OSLCode>() );
 	~OSLCode() override;
@@ -68,7 +68,7 @@ class GAFFEROSL_API OSLCode : public OSLShader
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  private:
+	private:
 
 	// We connect the output from this into our `name` plug, allowing us
 	// to generate the shader on disk "just in time", when the NetworkCreator

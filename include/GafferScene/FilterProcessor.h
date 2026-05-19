@@ -53,7 +53,7 @@ namespace GafferScene
 class GAFFERSCENE_API FilterProcessor : public Filter
 {
 
-  public:
+	public:
 
 	/// Constructs with a single input filter plug named "in". Use inPlug()
 	/// to access this plug.
@@ -86,14 +86,14 @@ class GAFFERSCENE_API FilterProcessor : public Filter
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// Reimplemented to pass through the inPlug() hash when the node is disabled.
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	/// Reimplemented to pass through the inPlug() result when the node is disabled.
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

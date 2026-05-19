@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API Duplicate : public BranchCreator
 {
 
-  public:
+	public:
 
 	explicit Duplicate( const std::string &name = defaultName<Duplicate>() );
 	~Duplicate() override;
@@ -68,7 +68,7 @@ class GAFFERSCENE_API Duplicate : public BranchCreator
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -101,7 +101,7 @@ class GAFFERSCENE_API Duplicate : public BranchCreator
 	void hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstPathMatcherDataPtr computeBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	IE_CORE_FORWARDDECLARE( DuplicatesData );
 

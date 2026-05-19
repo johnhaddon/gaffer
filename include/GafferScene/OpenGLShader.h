@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API OpenGLShader : public GafferScene::Shader
 {
 
-  public:
+	public:
 
 	explicit OpenGLShader( const std::string &name = defaultName<OpenGLShader>() );
 	~OpenGLShader() override;
@@ -53,7 +53,7 @@ class GAFFERSCENE_API OpenGLShader : public GafferScene::Shader
 
 	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-  protected:
+	protected:
 
 	/// Reimplemented to allow ImageNodes to be plugged in to texture parameters.
 	void parameterHash( const Gaffer::Plug *parameterPlug, IECore::MurmurHash &h ) const override;

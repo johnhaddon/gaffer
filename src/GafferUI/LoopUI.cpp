@@ -52,7 +52,7 @@ namespace
 class LoopPlugAdder : public PlugAdder
 {
 
-  public:
+	public:
 
 	LoopPlugAdder( LoopPtr node )
 		: m_node( node )
@@ -63,7 +63,7 @@ class LoopPlugAdder : public PlugAdder
 		updateVisibility();
 	}
 
-  protected:
+	protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -102,7 +102,7 @@ class LoopPlugAdder : public PlugAdder
 		applyEdgeMetadata( m_node->previousPlug(), !inOpposite );
 	}
 
-  private:
+	private:
 
 	void childAdded()
 	{
@@ -130,7 +130,7 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.LoopUI.PlugAdder", &create );
 	}
 
-  private:
+	private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

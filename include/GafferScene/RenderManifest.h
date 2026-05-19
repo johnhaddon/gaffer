@@ -56,7 +56,7 @@ namespace GafferScene
 class GAFFERSCENE_API RenderManifest : boost::noncopyable
 {
 
-  public:
+	public:
 
 	RenderManifest();
 
@@ -100,7 +100,7 @@ class GAFFERSCENE_API RenderManifest : boost::noncopyable
 	// but uses the EXR id manifest format to store this manifest in the header.
 	void writeEXRManifest( const std::filesystem::path &filePath ) const;
 
-  private:
+	private:
 
 	using PathAndID = std::pair<ScenePlug::ScenePath, uint32_t>;
 	using Map = boost::multi_index::multi_index_container<

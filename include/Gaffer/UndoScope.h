@@ -53,7 +53,7 @@ IE_CORE_FORWARDDECLARE( ScriptNode );
 class GAFFER_API UndoScope : DirtyPropagationScope
 {
 
-  public:
+	public:
 
 	enum State
 	{
@@ -74,7 +74,7 @@ class GAFFER_API UndoScope : DirtyPropagationScope
 	explicit UndoScope( ScriptNodePtr script, State state = Enabled, const std::string &mergeGroup = std::string() );
 	~UndoScope();
 
-  private:
+	private:
 
 	ScriptNodePtr m_script;
 };

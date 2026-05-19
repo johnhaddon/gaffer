@@ -273,7 +273,7 @@ struct AstSerialiser
 		return "";
 	}
 
-  private:
+	private:
 
 	struct OpInfo
 	{
@@ -460,7 +460,7 @@ struct SimplifyVisitor
 		return BinaryOp( left, expr.op, right );
 	}
 
-  private:
+	private:
 
 	std::vector<ExpressionAst> uniqueOperands( std::vector<ExpressionAst> &operands ) const
 	{
@@ -622,7 +622,7 @@ struct RemovalVisitor
 		return BinaryOp( filteredLeft, expr.op, filteredRight );
 	}
 
-  private:
+	private:
 
 	ExpressionAst filter( const ExpressionAst &ast ) const
 	{

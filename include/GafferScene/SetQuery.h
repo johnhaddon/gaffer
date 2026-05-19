@@ -51,7 +51,7 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API SetQuery : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit SetQuery( const std::string &name = defaultName<SetQuery>() );
 	~SetQuery() override;
@@ -78,7 +78,7 @@ class GAFFERSCENE_API SetQuery : public Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	// Internal plug used to compute MatchesData, from which the output
 	// for `matchesPlug()` and `firstMatch()` plug is derived. This uses
@@ -92,7 +92,7 @@ class GAFFERSCENE_API SetQuery : public Gaffer::ComputeNode
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-  private:
+	private:
 
 	bool affectsMatchesInternal( const Gaffer::Plug *input ) const;
 	void hashMatchesInternal( const Gaffer::Context *context, IECore::MurmurHash &h ) const;

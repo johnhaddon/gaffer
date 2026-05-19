@@ -45,7 +45,7 @@ namespace GafferUI
 class GAFFERUI_API LinearContainer : public ContainerGadget
 {
 
-  public:
+	public:
 
 	enum Orientation
 	{
@@ -88,7 +88,7 @@ class GAFFERUI_API LinearContainer : public ContainerGadget
 	void setDirection( Direction direction );
 	Direction getDirection() const;
 
-  protected:
+	protected:
 
 	void updateLayout() const override;
 

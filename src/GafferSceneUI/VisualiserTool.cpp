@@ -587,7 +587,7 @@ class UniformPLocator : public PrimitiveVariableProcessor
 	/// Peforming this operation as a node allows us to use Gaffer's usual plug caching to store the result
 	/// of the computation, rather than using a separate cache just for this.
 
-  public:
+	public:
 
 	UniformPLocator( const std::string &name = defaultName<UniformPLocator>() ) : PrimitiveVariableProcessor( name, IECore::PathMatcher::NoMatch )
 	{
@@ -600,7 +600,7 @@ class UniformPLocator : public PrimitiveVariableProcessor
 
 	GAFFER_NODE_DECLARE_TYPE( UniformPLocator, UniformPLocatorTypeId, PrimitiveVariableProcessor );
 
-  protected:
+	protected:
 
 	void processPrimitiveVariable( const ScenePath &path, const Context *context, ConstPrimitivePtr inputGeometry, PrimitiveVariable &inputVariable ) const override
 	{
@@ -713,7 +713,7 @@ enum class VisualiserShaderType
 class VisualiserGadget : public Gadget
 {
 
-  public:
+	public:
 
 	explicit VisualiserGadget( const VisualiserTool &tool, const std::string &name = defaultName<VisualiserGadget>() ) : Gadget( name ),
 																														 m_tool( &tool ),
@@ -727,7 +727,7 @@ class VisualiserGadget : public Gadget
 		m_tool = nullptr;
 	}
 
-  protected:
+	protected:
 
 	void renderLayer( Gadget::Layer layer, const Style *style, Gadget::RenderReason reason ) const override
 	{
@@ -778,7 +778,7 @@ class VisualiserGadget : public Gadget
 		return m_tool ? static_cast<unsigned>( Gadget::Layer::MidFront | Gadget::Layer::Front ) : static_cast<unsigned>( 0 );
 	}
 
-  private:
+	private:
 
 	friend VisualiserTool;
 

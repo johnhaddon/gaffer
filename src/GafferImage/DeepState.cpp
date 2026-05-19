@@ -74,7 +74,7 @@ const IECore::InternedString g_contributionOffsetsName = "contributionOffsets";
 // Converting this into an alpha value is done in alphaToLinearWeights
 class SampleMerge
 {
-  public:
+	public:
 
 	SampleMerge( const vector<int> &inSampleOffsets, const vector<float> *inZ, const vector<float> *inZBack )
 		: zData( new FloatVectorData() ),
@@ -205,7 +205,7 @@ class SampleMerge
 	IntVectorDataPtr contributionOffsetsData;
 
 
-  private:
+	private:
 
 	void closeOpenSamples( float currentDepth, const float closeUpToZ )
 	{

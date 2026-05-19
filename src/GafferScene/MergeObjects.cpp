@@ -123,7 +123,7 @@ using SourcePaths = std::vector<ScenePlug::ScenePath>;
 class TreeData : public IECore::Data
 {
 
-  public:
+	public:
 
 	struct Location
 	{
@@ -197,7 +197,7 @@ class TreeData : public IECore::Data
 		return result;
 	}
 
-  private:
+	private:
 
 	static void hashDestination( const StringPlug *destinationPlug, const ScenePlug::ScenePath &sourcePath, IECore::MurmurHash &h )
 	{
@@ -240,7 +240,7 @@ IE_CORE_DECLAREPTR( TreeData )
 class MergeLocationData : public IECore::Data
 {
 
-  public:
+	public:
 
 	MergeLocationData( const TreeData::Location *location, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects, const Context *context, const int rootFilterValue )
 	{

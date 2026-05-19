@@ -8,7 +8,7 @@ Standard: c++17
 
 # Tabs and indentation
 UseTab: Always
-AccessModifierOffset: -2
+AccessModifierOffset: 0
 IndentAccessModifiers: false
 IndentCaseLabels: true
 

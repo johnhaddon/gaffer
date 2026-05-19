@@ -139,7 +139,7 @@ const V2f Warp::Engine::black( std::numeric_limits<float>::infinity() );
 class Warp::EngineData : public Data
 {
 
-  public:
+	public:
 
 	EngineData( const Engine *engine )
 		: engine( engine )
@@ -153,7 +153,7 @@ class Warp::EngineData : public Data
 
 	const Engine *engine;
 
-  protected:
+	protected:
 
 	void copyFrom( const Object *other, CopyContext *context ) override
 	{

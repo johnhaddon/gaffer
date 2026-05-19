@@ -52,7 +52,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ImageStats : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit ImageStats( const std::string &name = defaultName<ImageStats>() );
 	~ImageStats() override;
@@ -92,7 +92,7 @@ class GAFFERIMAGE_API ImageStats : public Gaffer::ComputeNode
 	Gaffer::Color4fPlug *maxPlug();
 	const Gaffer::Color4fPlug *maxPlug() const;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -100,7 +100,7 @@ class GAFFERIMAGE_API ImageStats : public Gaffer::ComputeNode
 	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
 
-  private:
+	private:
 
 	// Stats for individual tiles
 	Gaffer::ObjectPlug *tileStatsPlug();

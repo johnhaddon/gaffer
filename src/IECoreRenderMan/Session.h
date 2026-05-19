@@ -130,7 +130,7 @@ struct Session
 	/// portal lights and the associated dome light.
 	void updatePortals();
 
-  private:
+	private:
 
 	RixRiCtl *m_riCtl;
 

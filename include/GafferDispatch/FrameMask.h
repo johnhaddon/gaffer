@@ -46,7 +46,7 @@ namespace GafferDispatch
 class GAFFERDISPATCH_API FrameMask : public TaskNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferDispatch::FrameMask, FrameMaskTypeId, TaskNode );
 
@@ -56,13 +56,13 @@ class GAFFERDISPATCH_API FrameMask : public TaskNode
 	Gaffer::StringPlug *maskPlug();
 	const Gaffer::StringPlug *maskPlug() const;
 
-  protected:
+	protected:
 
 	void preTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
 	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
 	void execute() const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 

@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API CropWindowTool : public GafferUI::Tool
 {
 
-  public:
+	public:
 
 	explicit CropWindowTool( GafferUI::View *view, const std::string &name = defaultName<CropWindowTool>() );
 
@@ -70,7 +70,7 @@ class GAFFERSCENEUI_API CropWindowTool : public GafferUI::Tool
 
 	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::CropWindowTool, CropWindowToolTypeId, GafferUI::Tool );
 
-  private:
+	private:
 
 	IE_CORE_FORWARDDECLARE( Rectangle );
 

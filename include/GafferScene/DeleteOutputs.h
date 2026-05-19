@@ -44,14 +44,14 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteOutputs : public DeleteGlobals
 {
 
-  public:
+	public:
 
 	explicit DeleteOutputs( const std::string &name = defaultName<DeleteOutputs>() );
 	~DeleteOutputs() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteOutputs, DeleteOutputsTypeId, DeleteGlobals );
 
-  protected:
+	protected:
 
 	std::string namePrefix() const override;
 };

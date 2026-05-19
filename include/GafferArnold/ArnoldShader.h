@@ -48,7 +48,7 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldShader : public GafferScene::Shader
 {
 
-  public:
+	public:
 
 	explicit ArnoldShader( const std::string &name = defaultName<ArnoldShader>() );
 	~ArnoldShader() override;
@@ -62,11 +62,11 @@ class GAFFERARNOLD_API ArnoldShader : public GafferScene::Shader
 
 	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-  protected:
+	protected:
 
 	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-  private:
+	private:
 
 	// Shader metadata is stored in a "shader" member of the result and
 	// parameter metadata is stored indexed by name inside a

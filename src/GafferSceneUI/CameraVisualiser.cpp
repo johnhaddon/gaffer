@@ -54,7 +54,7 @@ namespace
 class CameraVisualiser : public ObjectVisualiser
 {
 
-  public:
+	public:
 
 	using ObjectType = IECoreScene::Camera;
 
@@ -302,7 +302,7 @@ class CameraVisualiser : public ObjectVisualiser
 		return { boxVis, frustumVis };
 	}
 
-  protected:
+	protected:
 
 	static ObjectVisualiserDescription<CameraVisualiser> g_visualiserDescription;
 };

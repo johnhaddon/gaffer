@@ -811,7 +811,7 @@ struct RenderSets::Updater
 
 	unsigned changed;
 
-  private:
+	private:
 
 	const ScenePlug *m_scene;
 	const ThreadState &m_threadState;
@@ -1351,7 +1351,7 @@ struct LocationOutput
 		return true;
 	}
 
-  protected:
+	protected:
 
 	const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions() const
 	{
@@ -1415,7 +1415,7 @@ struct LocationOutput
 		objectInterface->transform( m_fullTransform.samples, m_fullTransform.sampleTimes );
 	}
 
-  private:
+	private:
 
 	void updateAttributes( const ScenePlug *scene, const ScenePlug::ScenePath &path )
 	{
@@ -1526,7 +1526,7 @@ struct CameraOutput : public LocationOutput
 		return cameraMatch & IECore::PathMatcher::DescendantMatch;
 	}
 
-  private:
+	private:
 
 	const IECore::CompoundObject *m_globals;
 	const PathMatcher &m_cameraSet;
@@ -1615,7 +1615,7 @@ struct LightFiltersOutput : public LocationOutput
 		return lightFilterMatch & IECore::PathMatcher::DescendantMatch;
 	}
 
-  private:
+	private:
 
 	const PathMatcher &m_lightFiltersSet;
 	GafferScene::Private::RendererAlgo::LightLinks *m_lightLinks;

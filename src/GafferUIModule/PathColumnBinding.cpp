@@ -68,7 +68,7 @@ namespace
 class PathListingWidgetAccessor : public GafferUI::PathListingWidget
 {
 
-  public:
+	public:
 
 	PathListingWidgetAccessor( object widget )
 		: m_widget(
@@ -150,7 +150,7 @@ class PathListingWidgetAccessor : public GafferUI::PathListingWidget
 		return result;
 	}
 
-  private:
+	private:
 
 	// A `weakref` for the Python PathListingWidget object. We use a
 	// weak reference to avoid `PathListingWidget->Menu->MenuDefinition->PathListingWidget`
@@ -181,7 +181,7 @@ struct GILReleaseMenuCommand
 		m_command();
 	}
 
-  private:
+	private:
 
 	MenuDefinition::MenuItem::Command m_command;
 };
@@ -191,7 +191,7 @@ struct GILReleaseMenuCommand
 class MenuDefinitionAccessor : public GafferUI::MenuDefinition
 {
 
-  public:
+	public:
 
 	MenuDefinitionAccessor( object menuDefinition )
 		: m_menuDefinition( menuDefinition )
@@ -227,7 +227,7 @@ class MenuDefinitionAccessor : public GafferUI::MenuDefinition
 		m_menuDefinition.attr( "append" )( path, pythonItem );
 	}
 
-  private:
+	private:
 
 	// The Python MenuDefinition object.
 	object m_menuDefinition;
@@ -245,7 +245,7 @@ namespace
 class PathColumnWrapper : public IECorePython::RefCountedWrapper<PathColumn>
 {
 
-  public:
+	public:
 
 	PathColumnWrapper( PyObject *self, PathColumn::SizeMode sizeMode )
 		: IECorePython::RefCountedWrapper<PathColumn>( self, sizeMode )

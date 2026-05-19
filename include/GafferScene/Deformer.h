@@ -50,7 +50,7 @@ namespace GafferScene
 class GAFFERSCENE_API Deformer : public ObjectProcessor
 {
 
-  public:
+	public:
 
 	~Deformer() override;
 
@@ -61,7 +61,7 @@ class GAFFERSCENE_API Deformer : public ObjectProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// Constructs with a single input ScenePlug named "in". Use inPlug()
 	/// to access this plug.
@@ -99,7 +99,7 @@ class GAFFERSCENE_API Deformer : public ObjectProcessor
 	/// > and `in.childBound` plugs instead.
 	virtual Imath::Box3f computeProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context ) const;
 
-  private:
+	private:
 
 	void init();
 

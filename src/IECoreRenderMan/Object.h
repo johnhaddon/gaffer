@@ -49,7 +49,7 @@ namespace IECoreRenderMan
 class Object : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-  public:
+	public:
 
 	Object( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session );
 	~Object() override;
@@ -60,7 +60,7 @@ class Object : public IECoreScenePreview::Renderer::ObjectInterface
 	void assignID( uint32_t id ) override;
 	void assignInstanceID( uint32_t id ) override;
 
-  protected:
+	protected:
 
 	const Session *m_session;
 	LightLinker *m_lightLinker;

@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API MeshTessellate : public ObjectProcessor
 {
 
-  public:
+	public:
 
 	MeshTessellate( const std::string &name = defaultName<MeshTessellate>() );
 	~MeshTessellate() override;
@@ -75,13 +75,13 @@ class GAFFERSCENE_API MeshTessellate : public ObjectProcessor
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshTessellate, MeshTessellateTypeId, ObjectProcessor );
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-  private:
+	private:
 
 	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
 

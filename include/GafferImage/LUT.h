@@ -53,7 +53,7 @@ namespace GafferImage
 class GAFFERIMAGE_API LUT : public OpenColorIOTransform
 {
 
-  public:
+	public:
 
 	explicit LUT( const std::string &name = defaultName<LUT>() );
 	~LUT() override;
@@ -81,13 +81,13 @@ class GAFFERIMAGE_API LUT : public OpenColorIOTransform
 	/// file extensions for the LUT node.
 	static size_t supportedExtensions( std::vector<std::string> &extensions );
 
-  protected:
+	protected:
 
 	bool affectsTransform( const Gaffer::Plug *input ) const override;
 	void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

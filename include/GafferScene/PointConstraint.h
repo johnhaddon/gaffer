@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API PointConstraint : public Constraint
 {
 
-  public:
+	public:
 
 	explicit PointConstraint( const std::string &name = defaultName<PointConstraint>() );
 	~PointConstraint() override;
@@ -63,13 +63,13 @@ class GAFFERSCENE_API PointConstraint : public Constraint
 	Gaffer::V3fPlug *offsetPlug();
 	const Gaffer::V3fPlug *offsetPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsConstraint( const Gaffer::Plug *input ) const override;
 	void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

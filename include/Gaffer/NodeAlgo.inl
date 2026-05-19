@@ -195,7 +195,7 @@ struct FindVisitor
 
 	Node *result = nullptr;
 
-  private:
+	private:
 
 	Predicate &m_predicate;
 };
@@ -220,7 +220,7 @@ struct FindAllVisitor
 
 	std::vector<Node *> result;
 
-  private:
+	private:
 
 	Predicate &m_predicate;
 };

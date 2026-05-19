@@ -122,7 +122,7 @@ GafferScene::ScenePlug *findSceneForImage( GafferImage::ImagePlug *image, std::s
 class CropWindowTool::Rectangle : public GafferUI::Gadget
 {
 
-  public:
+	public:
 
 	enum RectangleChangedReason
 	{
@@ -202,7 +202,7 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 		return m_rectangleChangedSignal;
 	}
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -291,7 +291,7 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 		}
 	}
 
-  private:
+	private:
 
 	void setRectangleInternal( const Imath::Box2f &rectangle, RectangleChangedReason reason )
 	{

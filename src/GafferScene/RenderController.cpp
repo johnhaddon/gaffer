@@ -222,7 +222,7 @@ struct ObjectInterfaceHandle : public boost::noncopyable
 		return m_isCapsule;
 	}
 
-  private:
+	private:
 
 	IECoreScenePreview::Renderer::ObjectInterfacePtr m_objectInterface;
 	RemovalCallback m_removalCallback;
@@ -243,7 +243,7 @@ struct ObjectInterfaceHandle : public boost::noncopyable
 class RenderController::SceneGraph
 {
 
-  public:
+	public:
 
 	// We store separate scene graphs for
 	// objects which are classified differently
@@ -439,7 +439,7 @@ class RenderController::SceneGraph
 		return m_cleared;
 	}
 
-  private:
+	private:
 
 	SceneGraph( const InternedString &name, const SceneGraph *parent )
 		: m_name( name ), m_parent( parent ), m_fullAttributes( new CompoundObject ), m_purposeIncluded( true )

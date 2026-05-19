@@ -67,7 +67,7 @@ struct NodeParameter
 	/// parameter.
 	void updateParameter() const;
 
-  private:
+	private:
 
 	AtNode *m_node;
 	AtString m_parameterName;

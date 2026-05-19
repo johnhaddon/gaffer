@@ -52,7 +52,7 @@ namespace GafferScene
 class GAFFERSCENE_API DeletePoints : public Deformer
 {
 
-  public:
+	public:
 
 	enum class SelectionMode
 	{
@@ -87,13 +87,13 @@ class GAFFERSCENE_API DeletePoints : public Deformer
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeletePoints, DeletePointsTypeId, Deformer );
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

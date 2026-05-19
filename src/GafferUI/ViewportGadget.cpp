@@ -172,7 +172,7 @@ V2i glViewportSize()
 class ViewportGadget::CameraController : public boost::noncopyable
 {
 
-  public:
+	public:
 
 	CameraController()
 		: m_planarMovement( true ), m_tumblingEnabled( true ), m_dollyingEnabled( true ), m_camera( new IECoreScene::Camera() ), m_maxPlanarZoom( 0.0f ), m_planarScale( 1.0f ), m_centerOfInterest( 1.0f )
@@ -597,7 +597,7 @@ class ViewportGadget::CameraController : public boost::noncopyable
 		return CameraController::None;
 	}
 
-  private:
+	private:
 
 	CameraFlags track( const Imath::V2f &p )
 	{

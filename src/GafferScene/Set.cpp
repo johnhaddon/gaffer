@@ -70,7 +70,7 @@ struct PathMatcherScope : public ScenePlug::GlobalScope
 		}
 	}
 
-  private:
+	private:
 
 	const InternedString m_setName;
 };

@@ -50,7 +50,7 @@ namespace GafferOSL
 class GAFFEROSL_API ShadingEngine : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( ShadingEngine )
 
@@ -93,7 +93,7 @@ class GAFFEROSL_API ShadingEngine : public IECore::RefCounted
 	bool needsAttribute( const std::string &name ) const;
 	bool hasDeformation() const;
 
-  private:
+	private:
 
 	void queryShaderGroup();
 

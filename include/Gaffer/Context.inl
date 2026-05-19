@@ -297,14 +297,14 @@ inline const IECore::Canceller *Context::canceller() const
 class Context::SubstitutionProvider : public IECore::StringAlgo::VariableProvider
 {
 
-  public:
+	public:
 
 	SubstitutionProvider( const Context *context );
 
 	int frame() const override;
 	const std::string &variable( const boost::string_view &name, bool &recurse ) const override;
 
-  private:
+	private:
 
 	const Context *m_context;
 	mutable std::string m_formattedString;

@@ -48,7 +48,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Random : public ComputeNode
 {
 
-  public:
+	public:
 
 	explicit Random( const std::string &name = defaultName<Random>() );
 	~Random() override;
@@ -80,12 +80,12 @@ class GAFFER_API Random : public ComputeNode
 
 	Imath::Color3f randomColor( unsigned long int seed ) const;
 
-  protected:
+	protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
-  private:
+	private:
 
 	void hashSeed( const Context *context, IECore::MurmurHash &h ) const;
 	unsigned long int computeSeed( const Context *context ) const;

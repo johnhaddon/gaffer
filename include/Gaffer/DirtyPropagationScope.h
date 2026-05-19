@@ -60,7 +60,7 @@ namespace Gaffer
 class GAFFER_API DirtyPropagationScope : boost::noncopyable
 {
 
-  public:
+	public:
 
 	DirtyPropagationScope();
 	~DirtyPropagationScope();

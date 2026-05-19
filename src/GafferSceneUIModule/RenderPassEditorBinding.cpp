@@ -95,7 +95,7 @@ struct PathGroupingFunctionWrapper
 		}
 	}
 
-  private:
+	private:
 
 	object m_fn;
 };
@@ -208,7 +208,7 @@ const InternedString g_renderPassEnabledOption( "option:renderPass:enabled" );
 class RenderPassPath : public Gaffer::Path
 {
 
-  public:
+	public:
 
 	RenderPassPath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr, const bool grouped = false )
 		: Path( filter ), m_grouped( grouped )
@@ -373,7 +373,7 @@ class RenderPassPath : public Gaffer::Path
 		return m_scene.get();
 	}
 
-  protected:
+	protected:
 
 	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override
 	{
@@ -402,7 +402,7 @@ class RenderPassPath : public Gaffer::Path
 	}
 
 
-  private:
+	private:
 
 	// We construct our path from a pathMatcher as we anticipate users requiring render passes to be organised
 	// hierarchically, with the last part of the path representing the render pass name. While it's technically
@@ -493,7 +493,7 @@ const Color4fDataPtr g_dimmedForegroundColor = new Color4fData( Imath::Color4f( 
 class RenderPassNameColumn : public StandardPathColumn
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( RenderPassNameColumn )
 
@@ -560,7 +560,7 @@ class RenderPassNameColumn : public StandardPathColumn
 class RenderPassActiveColumn : public PathColumn
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( RenderPassActiveColumn )
 

@@ -52,7 +52,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Grade : public ChannelDataProcessor
 {
 
-  public:
+	public:
 
 	explicit Grade( const std::string &name = defaultName<Grade>() );
 	~Grade() override;
@@ -80,14 +80,14 @@ class GAFFERIMAGE_API Grade : public ChannelDataProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	bool channelEnabled( const std::string &channel ) const override;
 
 	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelIndex, IECore::FloatVectorDataPtr outData ) const override;
 
-  private:
+	private:
 
 	void parameters( size_t channelIndex, float &a, float &b, float &gamma ) const;
 

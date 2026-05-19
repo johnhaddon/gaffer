@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API LightToCamera : public SceneElementProcessor
 {
 
-  public:
+	public:
 
 	explicit LightToCamera( const std::string &name = defaultName<LightToCamera>() );
 	~LightToCamera() override;
@@ -62,7 +62,7 @@ class GAFFERSCENE_API LightToCamera : public SceneElementProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	bool processesAttributes() const override;
 	void hashProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -82,7 +82,7 @@ class GAFFERSCENE_API LightToCamera : public SceneElementProcessor
 	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

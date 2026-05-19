@@ -47,7 +47,7 @@ namespace GafferCycles
 class GAFFERCYCLES_API CyclesShader : public GafferScene::Shader
 {
 
-  public:
+	public:
 
 	explicit CyclesShader( const std::string &name = defaultName<CyclesShader>() );
 	~CyclesShader() override;
@@ -56,13 +56,13 @@ class GAFFERCYCLES_API CyclesShader : public GafferScene::Shader
 
 	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-  protected:
+	protected:
 
 	/// Overrides attributes for when an AOV is assigned and we need to set the name of
 	/// the AOV name eg. cycles:aov:customName
 	IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
 
-  private:
+	private:
 
 	// Shader metadata is stored in a "shader" member of the result and
 	// parameter metadata is stored indexed by name inside a

@@ -72,7 +72,7 @@ std::string cleanupChannelName( std::string s )
 class OSLImagePlugAdder : public PlugAdder
 {
 
-  public:
+	public:
 
 	OSLImagePlugAdder( GraphComponentPtr plugsParent )
 		: m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
@@ -84,7 +84,7 @@ class OSLImagePlugAdder : public PlugAdder
 		buttonReleaseSignal().connect( boost::bind( &OSLImagePlugAdder::buttonRelease, this, ::_2 ) );
 	}
 
-  protected:
+	protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -117,7 +117,7 @@ class OSLImagePlugAdder : public PlugAdder
 		newPlug->valuePlug()->setInput( endpoint );
 	}
 
-  private:
+	private:
 
 	std::set<std::string> usedNames() const
 	{
@@ -324,7 +324,7 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLImageUI.PlugAdder", &create );
 	}
 
-  private:
+	private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

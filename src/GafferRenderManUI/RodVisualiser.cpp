@@ -77,7 +77,7 @@ void addWireframeCurveState( IECoreGL::Group *group )
 class RodVisualiser final : public LightFilterVisualiser
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( RodVisualiser )
 
@@ -86,7 +86,7 @@ class RodVisualiser final : public LightFilterVisualiser
 
 	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-  protected:
+	protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<RodVisualiser> g_visualiserDescription;
 };

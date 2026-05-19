@@ -92,7 +92,7 @@ template class Container<GraphComponent, ScriptNode>;
 class ScriptNode::CompoundAction : public Gaffer::Action
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::CompoundAction, CompoundActionTypeId, Gaffer::Action );
 
@@ -111,7 +111,7 @@ class ScriptNode::CompoundAction : public Gaffer::Action
 		return m_actions.size();
 	}
 
-  protected:
+	protected:
 
 	friend class ScriptNode;
 
@@ -195,7 +195,7 @@ class ScriptNode::CompoundAction : public Gaffer::Action
 		}
 	}
 
-  private:
+	private:
 
 	// this can't be a smart pointer because then we'd get
 	// a reference cycle between us and the script.
@@ -251,7 +251,7 @@ const IECore::InternedString g_framesPerSecond( "framesPerSecond" );
 class ScriptNode::FocusSet : public Gaffer::Set
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::FocusSet, ScriptNodeFocusSetTypeId, Gaffer::Set );
 
@@ -308,7 +308,7 @@ class ScriptNode::FocusSet : public Gaffer::Set
 	}
 	//@}
 
-  private:
+	private:
 
 	void parentChanged( GraphComponent *member, GraphComponent *oldParent )
 	{

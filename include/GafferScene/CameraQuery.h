@@ -50,7 +50,7 @@ namespace GafferScene
 struct GAFFERSCENE_API CameraQuery : Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	enum class CameraMode
 	{
@@ -113,12 +113,12 @@ struct GAFFERSCENE_API CameraQuery : Gaffer::ComputeNode
 	const Gaffer::StringPlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
 	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-  protected:
+	protected:
 
 	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
-  private:
+	private:
 
 	Gaffer::AtomicCompoundDataPlug *internalParametersPlug();
 	const Gaffer::AtomicCompoundDataPlug *internalParametersPlug() const;

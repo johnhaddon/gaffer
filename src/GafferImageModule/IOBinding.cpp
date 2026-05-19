@@ -83,7 +83,7 @@ struct DefaultColorSpaceFunction
 		}
 	}
 
-  private:
+	private:
 
 	object m_fn;
 };

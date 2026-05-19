@@ -116,7 +116,7 @@ struct BatchContextPool
 		return it->second;
 	}
 
-  private:
+	private:
 
 	std::unordered_map<IECore::MurmurHash, ConstContextPtr> m_contexts;
 	// Scratch space to avoid allocations every time we query names.
@@ -558,7 +558,7 @@ FrameListPtr Dispatcher::frameRange() const
 class Dispatcher::TaskBatch::Namer
 {
 
-  public:
+	public:
 
 	Namer( const Context &baseContext )
 		: m_baseContext( baseContext )
@@ -587,7 +587,7 @@ class Dispatcher::TaskBatch::Namer
 		return result;
 	}
 
-  private:
+	private:
 
 	const string &nodeLabel( const Node *node )
 	{
@@ -956,7 +956,7 @@ void Dispatcher::TaskBatch::isolate()
 class Dispatcher::Batcher
 {
 
-  public:
+	public:
 
 	Batcher()
 		: m_rootBatch( new TaskBatch() )
@@ -991,7 +991,7 @@ class Dispatcher::Batcher
 		return h;
 	}
 
-  private:
+	private:
 
 	TaskBatchPtr batchTasksWalk( TaskNode::Task task, const std::set<const TaskBatch *> &ancestors = std::set<const TaskBatch *>() )
 	{
@@ -1198,7 +1198,7 @@ namespace
 class DispatcherSignalGuard
 {
 
-  public:
+	public:
 
 	DispatcherSignalGuard( const Dispatcher *dispatcher ) : m_cancelledByPreDispatch( false ), m_dispatcher( dispatcher )
 	{
@@ -1242,7 +1242,7 @@ class DispatcherSignalGuard
 		}
 	}
 
-  private:
+	private:
 
 	bool m_cancelledByPreDispatch;
 	const Dispatcher *m_dispatcher;

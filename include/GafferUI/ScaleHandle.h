@@ -45,7 +45,7 @@ namespace GafferUI
 class GAFFERUI_API ScaleHandle : public Handle
 {
 
-  public:
+	public:
 
 	explicit ScaleHandle( Style::Axes axes );
 	~ScaleHandle() override;
@@ -62,12 +62,12 @@ class GAFFERUI_API ScaleHandle : public Handle
 
 	Imath::V3f scaling( const DragDropEvent &event );
 
-  protected:
+	protected:
 
 	void renderHandle( const Style *style, Style::State state ) const override;
 	void dragBegin( const DragDropEvent &event ) override;
 
-  private:
+	private:
 
 	Style::Axes m_axes;
 	LinearDrag m_drag;

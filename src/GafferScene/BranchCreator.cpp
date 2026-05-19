@@ -200,7 +200,7 @@ IECore::CompoundObjectPtr attributesAfterCommonRoot(
 class BranchCreator::BranchesData : public IECore::Data
 {
 
-  public:
+	public:
 
 	struct Location
 	{
@@ -358,7 +358,7 @@ class BranchCreator::BranchesData : public IECore::Data
 		);
 	}
 
-  private:
+	private:
 
 	template<typename F>
 	void visitLocationsWalk( F &&f, const ScenePlug::ScenePath &path, Location *location ) const

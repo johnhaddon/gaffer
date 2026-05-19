@@ -50,7 +50,7 @@ class Process;
 class GAFFER_API Monitor : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	~Monitor() override;
 
@@ -61,7 +61,7 @@ class GAFFER_API Monitor : public IECore::RefCounted
 	class GAFFER_API Scope : private ThreadState::Scope
 	{
 
-	  public:
+		public:
 
 		/// Constructs a Scope where the monitor has the specified
 		/// active state. If monitor is null, the scope is a no-op.
@@ -72,7 +72,7 @@ class GAFFER_API Monitor : public IECore::RefCounted
 		/// Returns to the previously active set of monitors.
 		~Scope();
 
-	  private:
+		private:
 
 		void initializeMightForce();
 
@@ -83,7 +83,7 @@ class GAFFER_API Monitor : public IECore::RefCounted
 	/// on this thread.
 	static const MonitorSet &current();
 
-  protected:
+	protected:
 
 	Monitor();
 

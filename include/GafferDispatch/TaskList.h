@@ -44,7 +44,7 @@ namespace GafferDispatch
 class GAFFERDISPATCH_API TaskList : public TaskNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferDispatch::TaskList, TaskListTypeId, TaskNode );
 
@@ -54,13 +54,13 @@ class GAFFERDISPATCH_API TaskList : public TaskNode
 	Gaffer::BoolPlug *sequencePlug();
 	const Gaffer::BoolPlug *sequencePlug() const;
 
-  protected:
+	protected:
 
 	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
 	void execute() const override;
 	bool requiresSequenceExecution() const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 

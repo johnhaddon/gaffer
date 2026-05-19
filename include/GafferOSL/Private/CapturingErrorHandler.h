@@ -47,7 +47,7 @@ namespace Private
 class CapturingErrorHandler : public OIIO::ErrorHandler
 {
 
-  public:
+	public:
 
 	CapturingErrorHandler();
 
@@ -55,7 +55,7 @@ class CapturingErrorHandler : public OIIO::ErrorHandler
 
 	const std::string &errors();
 
-  private:
+	private:
 
 	std::string m_errors;
 };

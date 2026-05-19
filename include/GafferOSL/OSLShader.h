@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( ShadingEngine )
 class GAFFEROSL_API OSLShader : public GafferScene::Shader
 {
 
-  public:
+	public:
 
 	explicit OSLShader( const std::string &name = defaultName<OSLShader>() );
 	~OSLShader() override;
@@ -79,11 +79,11 @@ class GAFFEROSL_API OSLShader : public GafferScene::Shader
 	static bool registerCompatibleShader( const IECore::InternedString shaderType );
 
 
-  protected:
+	protected:
 
 	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-  private:
+	private:
 
 	// Shader metadata is stored in a "shader" member of the result and
 	// parameter metadata is stored indexed by name inside a

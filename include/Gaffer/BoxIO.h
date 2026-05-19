@@ -76,7 +76,7 @@ IE_CORE_FORWARDDECLARE( Switch )
 class GAFFER_API BoxIO : public Node
 {
 
-  public:
+	public:
 
 	~BoxIO() override;
 
@@ -139,7 +139,7 @@ class GAFFER_API BoxIO : public Node
 	/// \undoable
 	static bool canInsert( const Box *box );
 
-  protected:
+	protected:
 
 	explicit BoxIO( Plug::Direction direction, const std::string &name = defaultName<BoxIO>() );
 
@@ -158,7 +158,7 @@ class GAFFER_API BoxIO : public Node
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
 	void parentChanged( Gaffer::GraphComponent *oldParent ) override;
 
-  private:
+	private:
 
 	friend class GafferModule::BoxIOSerialiser;
 

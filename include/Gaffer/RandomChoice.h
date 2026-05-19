@@ -47,7 +47,7 @@ namespace Gaffer
 class GAFFER_API RandomChoice : public ComputeNode
 {
 
-  public:
+	public:
 
 	explicit RandomChoice( const std::string &name = defaultName<RandomChoice>() );
 	~RandomChoice() override;
@@ -94,12 +94,12 @@ class GAFFER_API RandomChoice : public ComputeNode
 
 	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
-  private:
+	private:
 
 	ValuePlug *outPlugInternal();
 	const ValuePlug *outPlugInternal() const;

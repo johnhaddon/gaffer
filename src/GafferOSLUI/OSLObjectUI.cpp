@@ -65,7 +65,7 @@ namespace
 class OSLObjectPlugAdder : public PlugAdder
 {
 
-  public:
+	public:
 
 	OSLObjectPlugAdder( GraphComponentPtr plugsParent )
 		: m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
@@ -77,7 +77,7 @@ class OSLObjectPlugAdder : public PlugAdder
 		buttonReleaseSignal().connect( boost::bind( &OSLObjectPlugAdder::buttonRelease, this, ::_2 ) );
 	}
 
-  protected:
+	protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -110,7 +110,7 @@ class OSLObjectPlugAdder : public PlugAdder
 		newPlug->valuePlug()->setInput( endpoint );
 	}
 
-  private:
+	private:
 
 	std::set<std::string> usedNames() const
 	{
@@ -283,7 +283,7 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLObjectUI.PlugAdder", &create );
 	}
 
-  private:
+	private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

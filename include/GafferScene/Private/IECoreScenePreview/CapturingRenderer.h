@@ -56,7 +56,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API CapturingRenderer : public Renderer
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( CapturingRenderer )
 
@@ -73,13 +73,13 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 	class GAFFERSCENE_API CapturedAttributes : public AttributesInterface
 	{
 
-	  public:
+		public:
 
 		IE_CORE_DECLAREMEMBERPTR( CapturedAttributes );
 
 		const IECore::CompoundObject *attributes() const;
 
-	  private:
+		private:
 
 		CapturedAttributes( const IECore::ConstCompoundObjectPtr &attributes );
 
@@ -96,7 +96,7 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 	class GAFFERSCENE_API CapturedObject : public ObjectInterface
 	{
 
-	  public:
+		public:
 
 		IE_CORE_DECLAREMEMBERPTR( CapturedObject )
 
@@ -132,7 +132,7 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 		void assignID( uint32_t id ) override;
 		void assignInstanceID( uint32_t instanceID ) override;
 
-	  private:
+		private:
 
 		CapturedObject( CapturingRenderer *renderer, const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times );
 
@@ -170,7 +170,7 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 	void render() override;
 	void pause() override;
 
-  private:
+	private:
 
 	void checkPaused() const;
 

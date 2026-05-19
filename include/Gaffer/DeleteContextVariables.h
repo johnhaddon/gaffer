@@ -45,7 +45,7 @@ namespace Gaffer
 class GAFFER_API DeleteContextVariables : public ContextProcessor
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::DeleteContextVariables, DeleteContextVariablesTypeId, ContextProcessor );
 
@@ -55,12 +55,12 @@ class GAFFER_API DeleteContextVariables : public ContextProcessor
 	StringPlug *variablesPlug();
 	const StringPlug *variablesPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsContext( const Plug *input ) const override;
 	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

@@ -52,7 +52,7 @@ namespace GafferScene
 class GAFFERSCENE_API SceneWriter : public GafferDispatch::TaskNode
 {
 
-  public:
+	public:
 
 	explicit SceneWriter( const std::string &name = defaultName<SceneWriter>() );
 	~SceneWriter() override;
@@ -70,7 +70,7 @@ class GAFFERSCENE_API SceneWriter : public GafferDispatch::TaskNode
 
 	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
 
-  protected:
+	protected:
 
 	void execute() const override;
 
@@ -81,7 +81,7 @@ class GAFFERSCENE_API SceneWriter : public GafferDispatch::TaskNode
 	/// Re-implemented to return true, since the entire file must be written at once.
 	bool requiresSequenceExecution() const override;
 
-  private:
+	private:
 
 	void createDirectories( const std::string &fileName ) const;
 

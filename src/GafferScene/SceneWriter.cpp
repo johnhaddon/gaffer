@@ -122,7 +122,7 @@ struct LocationData
 		}
 	}
 
-  private:
+	private:
 
 	ScenePlug::ScenePath m_path;
 	ConstCompoundObjectPtr m_attributes;

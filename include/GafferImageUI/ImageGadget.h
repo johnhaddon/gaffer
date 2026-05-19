@@ -94,7 +94,7 @@ namespace GafferImageUI
 class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 {
 
-  public:
+	public:
 
 	ImageGadget();
 	~ImageGadget() override;
@@ -177,13 +177,13 @@ class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 	void setHighlightID( uint32_t id );
 	uint32_t getHighlightID();
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const GafferUI::Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-  private:
+	private:
 
 	// Image and context. We must monitor these so
 	// that dirtying of the plug or changes to the context
@@ -308,7 +308,7 @@ class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 		// Called from the UI thread.
 		const IECoreGL::Texture *texture( bool &active );
 
-	  private:
+		private:
 
 		IECore::MurmurHash m_channelDataHash;
 		IECore::ConstFloatVectorDataPtr m_channelDataToConvert;

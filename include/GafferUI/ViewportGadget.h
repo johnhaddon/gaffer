@@ -59,7 +59,7 @@ namespace GafferUI
 class GAFFERUI_API ViewportGadget : public Gadget
 {
 
-  public:
+	public:
 
 	using UnarySignal = Gaffer::Signals::Signal<void( ViewportGadget * ), Gaffer::Signals::CatchingCombiner<void>>;
 
@@ -255,7 +255,7 @@ class GAFFERUI_API ViewportGadget : public Gadget
 	class GAFFERUI_API RasterScope : boost::noncopyable
 	{
 
-	  public:
+		public:
 
 		RasterScope( const ViewportGadget *viewportGadget );
 		~RasterScope();
@@ -300,7 +300,7 @@ class GAFFERUI_API ViewportGadget : public Gadget
 	class GAFFERUI_API SelectionScope : boost::noncopyable
 	{
 
-	  public:
+		public:
 
 		/// Start an OpenGL selection operation for the specified position in the specified gadget. After construction,
 		/// perform drawing as usual in the object space of the Gadget, and upon destruction the selection
@@ -321,7 +321,7 @@ class GAFFERUI_API ViewportGadget : public Gadget
 		/// Returns the IECoreGL::State which should be used for rendering while selecting.
 		IECoreGL::State *baseState();
 
-	  private:
+		private:
 
 		/// Private constructor for use by ViewportGadget.
 		SelectionScope( const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode );
@@ -337,7 +337,7 @@ class GAFFERUI_API ViewportGadget : public Gadget
 		std::vector<IECoreGL::HitRecord> &m_selection;
 	};
 
-  private:
+	private:
 
 	// Called by `Gadget::dirty()` to notify ViewportGadget of changes
 	// that may affect the rendering it is responsible for.

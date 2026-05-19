@@ -57,7 +57,7 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API PerformanceMonitor : public Monitor
 {
 
-  public:
+	public:
 
 	PerformanceMonitor();
 	~PerformanceMonitor() override;
@@ -92,12 +92,12 @@ class GAFFER_API PerformanceMonitor : public Monitor
 	const Statistics &combinedStatistics() const;
 
 
-  protected:
+	protected:
 
 	void processStarted( const Process *process ) override;
 	void processFinished( const Process *process ) override;
 
-  private:
+	private:
 
 	// For performance reasons we accumulate our statistics into
 	// thread local storage while computations are running.

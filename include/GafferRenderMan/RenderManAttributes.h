@@ -47,7 +47,7 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManAttributes : public GafferScene::Attributes
 {
 
-  public:
+	public:
 
 	RenderManAttributes( const std::string &name = defaultName<RenderManAttributes>() );
 	~RenderManAttributes() override;

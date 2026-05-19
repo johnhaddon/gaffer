@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API ParentConstraint : public Constraint
 {
 
-  public:
+	public:
 
 	explicit ParentConstraint( const std::string &name = defaultName<ParentConstraint>() );
 	~ParentConstraint() override;
@@ -56,13 +56,13 @@ class GAFFERSCENE_API ParentConstraint : public Constraint
 	Gaffer::TransformPlug *relativeTransformPlug();
 	const Gaffer::TransformPlug *relativeTransformPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsConstraint( const Gaffer::Plug *input ) const override;
 	void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

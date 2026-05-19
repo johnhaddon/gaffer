@@ -60,7 +60,7 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 {
 
-  public:
+	public:
 
 	RenderController( const ConstScenePlugPtr &scene, const Gaffer::ConstContextPtr &context, const IECoreScenePreview::RendererPtr &renderer );
 	~RenderController() override;
@@ -111,7 +111,7 @@ class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 	bool getManifestRequired();
 
 
-  private:
+	private:
 
 	enum GlobalComponents
 	{

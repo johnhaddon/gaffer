@@ -46,7 +46,7 @@ namespace GafferImage
 class GAFFERIMAGE_API CreateViews : public ImageNode
 {
 
-  public:
+	public:
 
 	explicit CreateViews( const std::string &name = defaultName<CreateViews>() );
 	~CreateViews() override;
@@ -58,7 +58,7 @@ class GAFFERIMAGE_API CreateViews : public ImageNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
@@ -68,7 +68,7 @@ class GAFFERIMAGE_API CreateViews : public ImageNode
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	Gaffer::IntPlug *indexPlug();
 	const Gaffer::IntPlug *indexPlug() const;

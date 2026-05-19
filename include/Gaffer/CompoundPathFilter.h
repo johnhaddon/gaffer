@@ -48,7 +48,7 @@ namespace Gaffer
 class GAFFER_API CompoundPathFilter : public Gaffer::PathFilter
 {
 
-  public:
+	public:
 
 	using Filters = std::vector<PathFilterPtr>;
 
@@ -63,11 +63,11 @@ class GAFFER_API CompoundPathFilter : public Gaffer::PathFilter
 	void setFilters( const Filters &filters );
 	void getFilters( Filters &filters ) const;
 
-  protected:
+	protected:
 
 	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-  private:
+	private:
 
 	// Doesn't emit changed signal.
 	void addFilterInternal( PathFilterPtr filter );

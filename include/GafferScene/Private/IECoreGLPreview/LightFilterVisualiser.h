@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( LightFilterVisualiser )
 class GAFFERSCENE_API LightFilterVisualiser : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( LightFilterVisualiser )
 
@@ -94,7 +94,7 @@ class GAFFERSCENE_API LightFilterVisualiser : public IECore::RefCounted
 		IECoreGL::ConstStatePtr &state
 	);
 
-  protected:
+	protected:
 
 	template<typename FilterVisualiserType>
 	struct LightFilterVisualiserDescription

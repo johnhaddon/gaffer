@@ -50,7 +50,7 @@ namespace GafferImage
 class GAFFERIMAGE_API OpenColorIOContext : public Gaffer::ContextProcessor
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferImage::OpenColorIOContext, OpenColorIOContextTypeId, Gaffer::ContextProcessor );
 
@@ -71,7 +71,7 @@ class GAFFERIMAGE_API OpenColorIOContext : public Gaffer::ContextProcessor
 
 	void affects( const Gaffer::Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -79,7 +79,7 @@ class GAFFERIMAGE_API OpenColorIOContext : public Gaffer::ContextProcessor
 	bool affectsContext( const Gaffer::Plug *input ) const override;
 	void processContext( Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-  private:
+	private:
 
 	// We combine everything into this plug, so that we have all variables
 	// cached and can push them into the context without needing to perform

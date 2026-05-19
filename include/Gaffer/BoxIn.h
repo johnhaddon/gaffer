@@ -44,7 +44,7 @@ namespace Gaffer
 class GAFFER_API BoxIn : public BoxIO
 {
 
-  public:
+	public:
 
 	explicit BoxIn( const std::string &name = defaultName<BoxIn>() );
 	~BoxIn() override;

@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API CollectScenes : public SceneProcessor
 {
 
-  public:
+	public:
 
 	explicit CollectScenes( const std::string &name = defaultName<CollectScenes>() );
 	~CollectScenes() override;
@@ -72,7 +72,7 @@ class GAFFERSCENE_API CollectScenes : public SceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -104,7 +104,7 @@ class GAFFERSCENE_API CollectScenes : public SceneProcessor
 	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-  private:
+	private:
 
 	class SourceScope;
 	class SourcePathScope;

@@ -47,7 +47,7 @@ namespace Gaffer
 class GAFFER_API ContextVariableTweaks : public ContextProcessor
 {
 
-  public:
+	public:
 
 	explicit ContextVariableTweaks( const std::string &name = defaultName<ContextVariableTweaks>() );
 	~ContextVariableTweaks() override;
@@ -60,12 +60,12 @@ class GAFFER_API ContextVariableTweaks : public ContextProcessor
 	Gaffer::TweaksPlug *tweaksPlug();
 	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsContext( const Plug *input ) const override;
 	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

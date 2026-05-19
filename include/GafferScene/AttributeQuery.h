@@ -83,12 +83,12 @@ struct GAFFERSCENE_API AttributeQuery : Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	IECore::InternedString valuePlugName() const;
 	IECore::InternedString defaultPlugName() const;

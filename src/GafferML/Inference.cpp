@@ -180,7 +180,7 @@ struct AsyncWaiter
 		that->m_conditionVariable.notify_all();
 	}
 
-  private:
+	private:
 
 	Ort::RunOptions &m_runOptions;
 	std::mutex m_mutex;

@@ -47,7 +47,7 @@ namespace GafferDelight
 class GAFFERDELIGHT_API DelightAttributes : public GafferScene::Attributes
 {
 
-  public:
+	public:
 
 	explicit DelightAttributes( const std::string &name = defaultName<DelightAttributes>() );
 	~DelightAttributes() override;

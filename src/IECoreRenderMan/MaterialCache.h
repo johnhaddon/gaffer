@@ -58,7 +58,7 @@ IE_CORE_DECLAREPTR( LightShader );
 class MaterialCache
 {
 
-  public:
+	public:
 
 	MaterialCache( Session *session );
 
@@ -70,7 +70,7 @@ class MaterialCache
 	// Must not be called concurrently with anything.
 	void clearUnused();
 
-  private:
+	private:
 
 	Session *m_session;
 

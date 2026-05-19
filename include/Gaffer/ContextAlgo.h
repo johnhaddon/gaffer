@@ -56,7 +56,7 @@ namespace ContextAlgo
 class GAFFER_API GlobalScope : boost::noncopyable
 {
 
-  public:
+	public:
 
 	GlobalScope( const Context *context, const Plug *plug );
 	~GlobalScope();
@@ -66,7 +66,7 @@ class GAFFER_API GlobalScope : boost::noncopyable
 		Registration( IECore::TypeId plugTypeId, const std::initializer_list<IECore::InternedString> &variablesToRemove );
 	};
 
-  private:
+	private:
 
 	std::optional<Context::EditableScope> m_scope;
 };

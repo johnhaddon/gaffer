@@ -46,7 +46,7 @@ namespace IECoreRenderMan
 class Camera : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-  public:
+	public:
 
 	Camera( const std::string &name, const IECoreScene::Camera *camera, Session *session );
 	~Camera() override;
@@ -57,7 +57,7 @@ class Camera : public IECoreScenePreview::Renderer::ObjectInterface
 	void assignID( uint32_t id ) override;
 	void assignInstanceID( uint32_t id ) override;
 
-  private:
+	private:
 
 	Session *m_session;
 	riley::CameraId m_cameraId;

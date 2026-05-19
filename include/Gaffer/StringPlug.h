@@ -85,7 +85,7 @@ namespace Gaffer
 class GAFFER_API StringPlug : public ValuePlug
 {
 
-  public:
+	public:
 
 	using ValueType = std::string;
 
@@ -128,7 +128,7 @@ class GAFFER_API StringPlug : public ValuePlug
 	/// ValuePlug::hash( h )
 	using ValuePlug::hash;
 
-  private:
+	private:
 
 	unsigned m_substitutions;
 };

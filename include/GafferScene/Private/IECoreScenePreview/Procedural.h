@@ -54,7 +54,7 @@ class Renderer;
 class GAFFERSCENE_API Procedural : public IECoreScene::VisibleRenderable
 {
 
-  public:
+	public:
 
 	Procedural();
 	~Procedural() override;

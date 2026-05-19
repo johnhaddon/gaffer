@@ -54,7 +54,7 @@ namespace GafferImage
 class GAFFERIMAGE_API OpenImageIOReader : public ImageNode
 {
 
-  public:
+	public:
 
 	explicit OpenImageIOReader( const std::string &name = defaultName<OpenImageIOReader>() );
 	~OpenImageIOReader() override;
@@ -94,7 +94,7 @@ class GAFFERIMAGE_API OpenImageIOReader : public ImageNode
 
 	static size_t supportedExtensions( std::vector<std::string> &extensions );
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -118,7 +118,7 @@ class GAFFERIMAGE_API OpenImageIOReader : public ImageNode
 	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-  private:
+	private:
 
 	std::shared_ptr<void> retrieveFile( const Gaffer::Context *context, bool holdForBlack = false ) const;
 

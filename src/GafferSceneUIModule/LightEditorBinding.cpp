@@ -85,7 +85,7 @@ const InternedString g_lightFilterSetName( "__lightFilters" );
 class LocationNameColumn : public StandardPathColumn
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( LocationNameColumn )
 
@@ -173,7 +173,7 @@ class LocationNameColumn : public StandardPathColumn
 class MuteColumn : public InspectorColumn
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( MuteColumn )
 
@@ -222,7 +222,7 @@ class MuteColumn : public InspectorColumn
 		return result;
 	}
 
-  private:
+	private:
 
 	static IECore::CompoundDataPtr m_muteIconData;
 	static IECore::CompoundDataPtr m_unMuteIconData;
@@ -258,7 +258,7 @@ StringDataPtr MuteColumn::m_muteBlankIconName = new StringData( "muteLightUndefi
 class SetMembershipColumn : public InspectorColumn
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetMembershipColumn )
 
@@ -321,7 +321,7 @@ class SetMembershipColumn : public InspectorColumn
 		return result;
 	}
 
-  private:
+	private:
 
 	const IECore::InternedString m_setName;
 	const GafferScene::ScenePlugPtr m_scene;

@@ -51,7 +51,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API Placeholder : public IECoreScene::VisibleRenderable
 {
 
-  public:
+	public:
 
 	enum Mode
 	{
@@ -76,7 +76,7 @@ class GAFFERSCENE_API Placeholder : public IECoreScene::VisibleRenderable
 	void render( IECoreScene::Renderer *renderer ) const override {};
 #endif
 
-  private:
+	private:
 
 	static const unsigned int m_ioVersion;
 	Mode m_mode;

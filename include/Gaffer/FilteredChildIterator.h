@@ -58,7 +58,7 @@ template<typename Predicate>
 class FilteredChildIterator : public boost::filter_iterator<Predicate, GraphComponent::ChildIterator>
 {
 
-  public:
+	public:
 
 	using ChildType = typename Predicate::ChildType;
 	using BaseIterator = boost::filter_iterator<Predicate, GraphComponent::ChildIterator>;
@@ -127,7 +127,7 @@ template<typename Predicate>
 class FilteredChildRange
 {
 
-  public:
+	public:
 
 	FilteredChildRange( const GraphComponent &parent )
 		: m_parent( parent )
@@ -146,7 +146,7 @@ class FilteredChildRange
 		return Iterator( m_parent.children().end(), m_parent.children().end() );
 	}
 
-  private:
+	private:
 
 	const GraphComponent &m_parent;
 };

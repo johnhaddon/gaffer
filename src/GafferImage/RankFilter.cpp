@@ -203,7 +203,7 @@ const float infinity = std::numeric_limits<float>::infinity();
 // To compute the maximum of all pixels, we only need to hold the maximum value for each row
 class RankMaxBuffer
 {
-  public:
+	public:
 
 	inline RankMaxBuffer( const V2i &size ) : m_values( size.y )
 	{
@@ -236,7 +236,7 @@ class RankMaxBuffer
 		return m_values[rowIndex] == result;
 	}
 
-  private:
+	private:
 
 	std::vector<float> m_values;
 };
@@ -244,7 +244,7 @@ class RankMaxBuffer
 // To compute the minimum of all pixels, we only need to hold the minimum value for each row
 class RankMinBuffer
 {
-  public:
+	public:
 
 	inline RankMinBuffer( const V2i &size ) : m_values( size.y )
 	{
@@ -277,7 +277,7 @@ class RankMinBuffer
 		return m_values[rowIndex] == result;
 	}
 
-  private:
+	private:
 
 	std::vector<float> m_values;
 };
@@ -341,7 +341,7 @@ class RankMinBuffer
 
 class RankMedianBuffer
 {
-  public:
+	public:
 
 	inline RankMedianBuffer( const V2i &size ) : m_size( size ), m_sortedRows( size.x * size.y ), m_splits( size.y ), m_splitValue( 0 )
 	{
@@ -516,7 +516,7 @@ class RankMedianBuffer
 		return false;
 	}
 
-  private:
+	private:
 
 	// Size of the filter, x is the size of each row, y is the number of rows
 	V2i m_size;

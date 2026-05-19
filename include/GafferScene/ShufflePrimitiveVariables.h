@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API ShufflePrimitiveVariables : public Deformer
 {
 
-  public:
+	public:
 
 	explicit ShufflePrimitiveVariables( const std::string &name = defaultName<ShufflePrimitiveVariables>() );
 	~ShufflePrimitiveVariables() override;
@@ -56,14 +56,14 @@ class GAFFERSCENE_API ShufflePrimitiveVariables : public Deformer
 	Gaffer::ShufflesPlug *shufflesPlug();
 	const Gaffer::ShufflesPlug *shufflesPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 	bool adjustBounds() const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

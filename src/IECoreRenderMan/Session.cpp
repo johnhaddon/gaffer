@@ -134,7 +134,7 @@ struct Session::ExceptionHandler : public RixXcpt::XcptHandler
 		/// any further attempt to interact with the renderer?
 	}
 
-  private:
+	private:
 
 	IECore::MessageHandlerPtr m_messageHandler;
 };

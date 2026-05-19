@@ -195,7 +195,7 @@ void addKnot( IECoreGL::GroupPtr group, const Knot &knot, const float visualiser
 class DecayVisualiser final : public LightFilterVisualiser
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( DecayVisualiser )
 
@@ -204,7 +204,7 @@ class DecayVisualiser final : public LightFilterVisualiser
 
 	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-  protected:
+	protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<DecayVisualiser> g_visualiserDescription;
 };

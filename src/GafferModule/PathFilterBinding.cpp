@@ -70,7 +70,7 @@ template<typename WrappedType>
 class PathFilterWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 {
 
-  public:
+	public:
 
 	PathFilterWrapper( PyObject *self, IECore::CompoundDataPtr userData )
 		: IECorePython::RunTimeTypedWrapper<WrappedType>( self, userData )

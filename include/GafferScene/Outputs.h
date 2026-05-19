@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API Outputs : public GlobalsProcessor
 {
 
-  public:
+	public:
 
 	explicit Outputs( const std::string &name = defaultName<Outputs>() );
 	~Outputs() override;
@@ -68,12 +68,12 @@ class GAFFERSCENE_API Outputs : public GlobalsProcessor
 
 	static void registeredOutputs( std::vector<std::string> &names );
 
-  protected:
+	protected:
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

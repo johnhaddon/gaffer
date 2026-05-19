@@ -59,7 +59,7 @@ template<typename T>
 class IECORE_EXPORT TypedObjectPlug : public ValuePlug
 {
 
-  public:
+	public:
 
 	using ValueType = T;
 	using ValuePtr = typename ValueType::Ptr;

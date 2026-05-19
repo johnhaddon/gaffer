@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API SubTree : public SceneProcessor
 {
 
-  public:
+	public:
 
 	explicit SubTree( const std::string &name = defaultName<SubTree>() );
 	~SubTree() override;
@@ -75,7 +75,7 @@ class GAFFERSCENE_API SubTree : public SceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
@@ -91,7 +91,7 @@ class GAFFERSCENE_API SubTree : public SceneProcessor
 	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-  private:
+	private:
 
 	enum SourceMode
 	{

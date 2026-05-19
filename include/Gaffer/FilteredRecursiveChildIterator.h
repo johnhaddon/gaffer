@@ -48,7 +48,7 @@ template<typename Predicate, typename RecursionPredicate = TypePredicate<GraphCo
 class FilteredRecursiveChildIterator : public boost::iterator_adaptor<FilteredRecursiveChildIterator<Predicate, RecursionPredicate>, RecursiveChildIterator, const typename Predicate::ChildType::Ptr>
 {
 
-  public:
+	public:
 
 	using ChildType = typename Predicate::ChildType;
 	using BaseIterator = boost::iterator_adaptor<FilteredRecursiveChildIterator<Predicate, RecursionPredicate>, RecursiveChildIterator, const typename Predicate::ChildType::Ptr>;
@@ -95,7 +95,7 @@ class FilteredRecursiveChildIterator : public boost::iterator_adaptor<FilteredRe
 		return BaseIterator::base().done();
 	}
 
-  private:
+	private:
 
 	friend class boost::iterator_core_access;
 
@@ -137,7 +137,7 @@ template<typename Predicate, typename RecursionPredicate = TypePredicate<GraphCo
 class FilteredRecursiveChildRange
 {
 
-  public:
+	public:
 
 	FilteredRecursiveChildRange( const GraphComponent &parent )
 		: m_parent( parent )
@@ -156,7 +156,7 @@ class FilteredRecursiveChildRange
 		return Iterator( &m_parent, m_parent.children().end() );
 	}
 
-  private:
+	private:
 
 	const GraphComponent &m_parent;
 };

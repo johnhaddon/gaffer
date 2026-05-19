@@ -47,7 +47,7 @@ namespace Gaffer
 class GAFFER_API Loop : public ComputeNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::Loop, LoopTypeId, ComputeNode );
 
@@ -88,12 +88,12 @@ class GAFFER_API Loop : public ComputeNode
 
 	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
-  private:
+	private:
 
 	size_t m_inPlugIndex;
 	size_t m_outPlugIndex;

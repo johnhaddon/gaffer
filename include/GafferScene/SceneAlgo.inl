@@ -139,7 +139,7 @@ struct PathMatcherFunctor
 		return match & IECore::PathMatcher::DescendantMatch;
 	}
 
-  private:
+	private:
 
 	ThreadableFunctor &m_f;
 	const IECore::PathMatcher &m_filter;

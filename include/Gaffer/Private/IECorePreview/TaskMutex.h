@@ -110,7 +110,7 @@ class TaskMutex : boost::noncopyable
 
 	using InternalMutex = tbb::spin_rw_mutex;
 
-  public:
+	public:
 
 	TaskMutex()
 	{
@@ -122,7 +122,7 @@ class TaskMutex : boost::noncopyable
 	class ScopedLock : boost::noncopyable
 	{
 
-	  public:
+		public:
 
 		ScopedLock()
 			: m_mutex( nullptr ), m_writer( false )
@@ -287,14 +287,14 @@ class TaskMutex : boost::noncopyable
 			return m_writer;
 		}
 
-	  private:
+		private:
 
 		InternalMutex::scoped_lock m_lock;
 		TaskMutex *m_mutex;
 		bool m_writer;
 	};
 
-  private:
+	private:
 
 	// The actual mutex that is held by the ScopedLock.
 	InternalMutex m_mutex;

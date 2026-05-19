@@ -83,7 +83,7 @@ namespace GafferUI
 class GAFFERUI_API View : public Gaffer::Node
 {
 
-  public:
+	public:
 
 	~View() override;
 
@@ -141,7 +141,7 @@ class GAFFERUI_API View : public Gaffer::Node
 	static void registerView( const IECore::TypeId nodeType, const std::string &plugPathRegex, ViewCreator creator );
 	//@}
 
-  protected:
+	protected:
 
 	/// The input plug is added to the View to form inPlug() - the derived
 	/// class should construct a plug of a suitable type and pass it
@@ -181,7 +181,7 @@ class GAFFERUI_API View : public Gaffer::Node
 
 	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-  private:
+	private:
 
 	void contextTrackerChanged();
 	void toolsChildAdded( Gaffer::GraphComponent *child );
@@ -216,7 +216,7 @@ class GAFFERUI_API View : public Gaffer::Node
 class GAFFERUI_API View::DisplayTransform : public Gaffer::Node
 {
 
-  public:
+	public:
 
 	/// The new DisplayTransform will be owned by `view`.
 	DisplayTransform( View *view );
@@ -240,7 +240,7 @@ class GAFFERUI_API View::DisplayTransform : public Gaffer::Node
 	static void deregisterDisplayTransform( const std::string &name );
 	static std::vector<std::string> registeredDisplayTransforms();
 
-  private:
+	private:
 
 	View *view();
 	Gaffer::StringPlug *namePlug();

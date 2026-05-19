@@ -191,7 +191,7 @@ Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene
 class ScopedDirectory : boost::noncopyable
 {
 
-  public:
+	public:
 
 	ScopedDirectory( const std::filesystem::path &p )
 		: m_path( p )
@@ -204,7 +204,7 @@ class ScopedDirectory : boost::noncopyable
 		std::filesystem::remove_all( m_path );
 	}
 
-  private:
+	private:
 
 	std::filesystem::path m_path;
 };

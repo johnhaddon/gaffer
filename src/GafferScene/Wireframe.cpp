@@ -83,7 +83,7 @@ struct MakeWireframe
 		);
 	}
 
-  private:
+	private:
 
 	template<typename T>
 	CurvesPrimitivePtr makeWireframe( const T *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )

@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API CameraTweaks : public ObjectProcessor
 {
 
-  public:
+	public:
 
 	explicit CameraTweaks( const std::string &name = defaultName<CameraTweaks>() );
 	~CameraTweaks() override;
@@ -60,7 +60,7 @@ class GAFFERSCENE_API CameraTweaks : public ObjectProcessor
 	Gaffer::TweaksPlug *tweaksPlug();
 	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;

@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API Constraint : public SceneElementProcessor
 {
 
-  public:
+	public:
 
 	explicit Constraint( const std::string &name = defaultName<Constraint>() );
 	~Constraint() override;
@@ -97,7 +97,7 @@ class GAFFERSCENE_API Constraint : public SceneElementProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -115,7 +115,7 @@ class GAFFERSCENE_API Constraint : public SceneElementProcessor
 	/// fullTargetTransform in some way.
 	virtual Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const = 0;
 
-  private:
+	private:
 
 	// Plug used to cache the matrix computed from the `TargetMode`
 	// separately. The UV mode in particular is expensive, and caching it

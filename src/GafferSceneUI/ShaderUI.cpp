@@ -62,7 +62,7 @@ IECore::InternedString g_noduleTypeKey( "nodule:type" );
 class ShaderPlugAdder : public PlugAdder
 {
 
-  public:
+	public:
 
 	ShaderPlugAdder( GraphComponentPtr plugsParent )
 		: m_plugsParent( plugsParent )
@@ -76,7 +76,7 @@ class ShaderPlugAdder : public PlugAdder
 		updateVisibility();
 	}
 
-  protected:
+	protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -104,7 +104,7 @@ class ShaderPlugAdder : public PlugAdder
 		}
 	}
 
-  private:
+	private:
 
 	bool buttonRelease( const ButtonEvent &event )
 	{
@@ -194,7 +194,7 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferSceneUI.ShaderUI.PlugAdder", &create );
 	}
 
-  private:
+	private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

@@ -53,14 +53,14 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API CameraTool : public GafferSceneUI::SelectionTool
 {
 
-  public:
+	public:
 
 	explicit CameraTool( SceneView *view, const std::string &name = defaultName<CameraTool>() );
 	~CameraTool() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::CameraTool, CameraToolTypeId, GafferSceneUI::SelectionTool );
 
-  private:
+	private:
 
 	const GafferScene::ScenePlug *scenePlug() const;
 	const Gaffer::BoolPlug *lookThroughEnabledPlug() const;

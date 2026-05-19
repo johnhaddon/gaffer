@@ -135,7 +135,7 @@ void addWireframeCurveState( IECoreGL::Group *group )
 // Customized IECoreGL primitive supporting `uvOrientation`
 class UVOrientedQuadPrimitive : public IECoreGL::QuadPrimitive
 {
-  public:
+	public:
 
 	UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation ) : IECoreGL::QuadPrimitive( width, height )
 	{
@@ -184,7 +184,7 @@ AspectRatioQueryCache g_aspectRatioQueryCache(
 class CookieVisualiser final : public LightFilterVisualiser
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( CookieVisualiser )
 
@@ -193,7 +193,7 @@ class CookieVisualiser final : public LightFilterVisualiser
 
 	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-  protected:
+	protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<CookieVisualiser> g_visualiserDescription;
 };

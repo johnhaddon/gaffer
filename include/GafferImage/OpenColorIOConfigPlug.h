@@ -52,7 +52,7 @@ namespace GafferImage
 class GAFFERIMAGE_API OpenColorIOConfigPlug final : public Gaffer::ValuePlug
 {
 
-  public:
+	public:
 
 	GAFFER_PLUG_DECLARE_TYPE( GafferImage::OpenColorIOConfigPlug, OpenColorIOConfigPlugTypeId, Gaffer::ValuePlug );
 
@@ -75,11 +75,11 @@ class GAFFERIMAGE_API OpenColorIOConfigPlug final : public Gaffer::ValuePlug
 
 	static OpenColorIOConfigPlug *acquireDefaultConfigPlug( Gaffer::ScriptNode *scriptNode, bool createIfNecessary = true );
 
-  protected:
+	protected:
 
 	void parentChanged( Gaffer::GraphComponent *oldParent ) override;
 
-  private:
+	private:
 
 	void plugSet( Gaffer::Plug *plug );
 	Gaffer::Signals::ScopedConnection m_plugSetConnection;

@@ -50,7 +50,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ImageNode : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit ImageNode( const std::string &name = defaultName<ImageNode>() );
 	~ImageNode() override;
@@ -69,7 +69,7 @@ class GAFFERIMAGE_API ImageNode : public Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// The enabled() and channelEnabled( channel ) methods provide a means to disable the node
 	/// under particular circumstances such as when the input plugs produce no effect.
@@ -130,7 +130,7 @@ class GAFFERIMAGE_API ImageNode : public Gaffer::ComputeNode
 	virtual IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const;
 	virtual IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

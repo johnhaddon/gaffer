@@ -68,7 +68,7 @@ class Plug;
 class GAFFER_API BackgroundTask : public boost::noncopyable
 {
 
-  public:
+	public:
 
 	using Function = std::function<void( const IECore::Canceller & )>;
 
@@ -119,7 +119,7 @@ class GAFFER_API BackgroundTask : public boost::noncopyable
 	/// >   for cancellation.
 	Status status() const;
 
-  private:
+	private:
 
 	// Called by `Action` to ensure that any related tasks are cancelled
 	// before an edit is made to `actionSubject`.

@@ -51,18 +51,18 @@ IE_CORE_FORWARDDECLARE( Filter )
 class GAFFERSCENE_API SceneFilterPathFilter : public Gaffer::PathFilter
 {
 
-  public:
+	public:
 
 	explicit SceneFilterPathFilter( FilterPtr sceneFilter, IECore::CompoundDataPtr userData = nullptr );
 	~SceneFilterPathFilter() override;
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::SceneFilterPathFilter, SceneFilterPathFilterTypeId, Gaffer::PathFilter );
 
-  protected:
+	protected:
 
 	void doFilter( std::vector<Gaffer::PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-  private:
+	private:
 
 	void plugDirtied( const Gaffer::Plug *plug );
 

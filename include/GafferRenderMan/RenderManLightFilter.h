@@ -47,7 +47,7 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManLightFilter : public GafferScene::LightFilter
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManLightFilter, RenderManLightFilterTypeId, GafferScene::LightFilter );
 

@@ -77,7 +77,7 @@ namespace GafferScene
 class GAFFERSCENE_API BranchCreator : public FilteredSceneProcessor
 {
 
-  public:
+	public:
 
 	~BranchCreator() override;
 
@@ -94,7 +94,7 @@ class GAFFERSCENE_API BranchCreator : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	explicit BranchCreator( const std::string &name = defaultName<BranchCreator>() );
 
@@ -177,7 +177,7 @@ class GAFFERSCENE_API BranchCreator : public FilteredSceneProcessor
 	/// \deprecated
 	IECore::PathMatcher::Result parentAndBranchPaths( const ScenePath &path, ScenePath &parentPath, ScenePath &branchPath ) const;
 
-  private:
+	private:
 
 	IE_CORE_FORWARDDECLARE( BranchesData );
 

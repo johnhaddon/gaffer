@@ -53,7 +53,7 @@ IE_CORE_FORWARDDECLARE( ImageTransform )
 class GAFFERIMAGE_API Shape : public FlatImageProcessor
 {
 
-  public:
+	public:
 
 	explicit Shape( const std::string &name = defaultName<Shape>() );
 	~Shape() override;
@@ -77,7 +77,7 @@ class GAFFERIMAGE_API Shape : public FlatImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -107,7 +107,7 @@ class GAFFERIMAGE_API Shape : public FlatImageProcessor
 	/// Must be implemented to return the channel data for the shape.
 	virtual IECore::ConstFloatVectorDataPtr computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const = 0;
 
-  private:
+	private:
 
 	ImagePlug *shapePlug();
 	const ImagePlug *shapePlug() const;

@@ -46,7 +46,7 @@ namespace GafferUI
 class GAFFERUI_API Frame : public IndividualContainer
 {
 
-  public:
+	public:
 
 	explicit Frame( GadgetPtr child );
 	~Frame() override;
@@ -55,13 +55,13 @@ class GAFFERUI_API Frame : public IndividualContainer
 
 	Imath::Box3f bound() const override;
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-  private:
+	private:
 
 	float m_border;
 };

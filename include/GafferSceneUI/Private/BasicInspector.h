@@ -51,7 +51,7 @@ namespace GafferSceneUI::Private
 class GAFFERSCENEUI_API BasicInspector : public Inspector
 {
 
-  public:
+	public:
 
 	/// Constructs an inspector to inspect `plug` and its history by calling
 	/// `valueFunction`.
@@ -68,13 +68,13 @@ class GAFFERSCENEUI_API BasicInspector : public Inspector
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BasicInspector, BasicInspectorTypeId, Inspector );
 
-  protected:
+	protected:
 
 	GafferScene::SceneAlgo::History::ConstPtr history() const override;
 	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
 	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
 
-  private:
+	private:
 
 	// Logically part of constructor, but in a separate function to avoid
 	// bloating the template.

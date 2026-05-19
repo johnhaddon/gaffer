@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( ConnectionCreator )
 class GAFFERUI_API NodeGadget : public Gadget
 {
 
-  public:
+	public:
 
 	~NodeGadget() override;
 
@@ -102,7 +102,7 @@ class GAFFERUI_API NodeGadget : public Gadget
 
 	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-  protected:
+	protected:
 
 	explicit NodeGadget( Gaffer::NodePtr node );
 
@@ -123,7 +123,7 @@ class GAFFERUI_API NodeGadget : public Gadget
 
 	bool m_active;
 
-  private:
+	private:
 
 	Gaffer::Node *m_node;
 	NoduleSignal m_noduleAddedSignal;

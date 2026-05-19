@@ -55,14 +55,14 @@ IE_CORE_FORWARDDECLARE( Context )
 class GAFFER_API ComputeNode : public DependencyNode
 {
 
-  public:
+	public:
 
 	explicit ComputeNode( const std::string &name = defaultName<ComputeNode>() );
 	~ComputeNode() override;
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::ComputeNode, ComputeNodeTypeId, DependencyNode );
 
-  protected:
+	protected:
 
 	/// Called to compute the hashes for output Plugs. Must be implemented to call the base
 	/// class method, then call input->hash( h ) for all input plugs used in the computation
@@ -84,7 +84,7 @@ class GAFFER_API ComputeNode : public DependencyNode
 	/// will spawn TBB tasks then one of the task-based policies _must_ be used.
 	virtual ValuePlug::CachePolicy computeCachePolicy( const ValuePlug *output ) const;
 
-  private:
+	private:
 
 	friend class ValuePlug;
 };

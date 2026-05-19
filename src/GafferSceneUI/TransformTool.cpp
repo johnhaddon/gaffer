@@ -144,14 +144,14 @@ GraphComponent *editTargetOrNull( const TransformTool::Selection &selection )
 class HandlesGadget : public Gadget
 {
 
-  public:
+	public:
 
 	HandlesGadget( const std::string &name = "HandlesGadget" )
 		: Gadget( name )
 	{
 	}
 
-  protected:
+	protected:
 
 	Imath::Box3f renderBound() const override
 	{

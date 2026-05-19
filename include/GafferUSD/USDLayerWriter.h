@@ -53,7 +53,7 @@ namespace GafferUSD
 class GAFFERUSD_API USDLayerWriter : public GafferDispatch::TaskNode
 {
 
-  public:
+	public:
 
 	explicit USDLayerWriter( const std::string &name = defaultName<USDLayerWriter>() );
 	~USDLayerWriter() override;
@@ -72,14 +72,14 @@ class GAFFERUSD_API USDLayerWriter : public GafferDispatch::TaskNode
 	GafferScene::ScenePlug *outPlug();
 	const GafferScene::ScenePlug *outPlug() const;
 
-  protected:
+	protected:
 
 	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
 	bool requiresSequenceExecution() const override;
 	void execute() const override;
 	void executeSequence( const std::vector<float> &frames ) const override;
 
-  private:
+	private:
 
 	const GafferScene::SceneWriter *sceneWriter() const;
 

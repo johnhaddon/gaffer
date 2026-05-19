@@ -421,7 +421,7 @@ struct Annotate
 		walk<Metric>( m_root, metric );
 	}
 
-  private:
+	private:
 
 	Node &m_root;
 	const PerformanceMonitor::StatisticsMap &m_statistics;

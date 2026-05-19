@@ -56,7 +56,7 @@ namespace GafferScene
 class GAFFERSCENE_API SceneProcessor : public SceneNode
 {
 
-  public:
+	public:
 
 	/// Constructs with a single input ScenePlug named "in". Use inPlug()
 	/// to access this plug.
@@ -86,14 +86,14 @@ class GAFFERSCENE_API SceneProcessor : public SceneNode
 	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
 	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-  protected:
+	protected:
 
 	/// Reimplemented from SceneNode to pass through the inPlug() hashes when the node is disabled.
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	/// Reimplemented from SceneNode to pass through the inPlug() computations when the node is disabled.
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

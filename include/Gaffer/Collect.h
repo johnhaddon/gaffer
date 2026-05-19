@@ -50,7 +50,7 @@ namespace Gaffer
 class GAFFER_API Collect : public ComputeNode
 {
 
-  public:
+	public:
 
 	Collect( const std::string &name = defaultName<Collect>() );
 	~Collect() override;
@@ -90,7 +90,7 @@ class GAFFER_API Collect : public ComputeNode
 
 	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
@@ -98,7 +98,7 @@ class GAFFER_API Collect : public ComputeNode
 	ValuePlug::CachePolicy hashCachePolicy( const ValuePlug *output ) const override;
 	ValuePlug::CachePolicy computeCachePolicy( const ValuePlug *output ) const override;
 
-  private:
+	private:
 
 	// We collect the values for all output plugs in a single compute and cache
 	// them in a CompoundObject on this internal plug, indexing them by plug name.

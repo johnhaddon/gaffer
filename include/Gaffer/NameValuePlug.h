@@ -47,7 +47,7 @@ namespace Gaffer
 class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 {
 
-  public:
+	public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::NameValuePlug, NameValuePlugTypeId, Gaffer::ValuePlug );
 

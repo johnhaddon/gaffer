@@ -77,7 +77,7 @@ IE_CORE_DECLAREPTR( ScriptContainer );
 class GAFFER_API ScriptNode : public Node
 {
 
-  public:
+	public:
 
 	explicit ScriptNode( const std::string &name = defaultName<Node>() );
 	~ScriptNode() override;
@@ -289,11 +289,11 @@ class GAFFER_API ScriptNode : public Node
 	const CompoundDataPlug *variablesPlug() const;
 	//@}
 
-  protected:
+	protected:
 
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
 
-  private:
+	private:
 
 	// Selection
 	// =========

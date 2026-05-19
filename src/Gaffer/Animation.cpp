@@ -53,7 +53,7 @@ namespace Gaffer
 
 class Animation::Interpolator : public IECore::RefCounted
 {
-  public:
+	public:
 
 	enum Hint
 	{
@@ -67,12 +67,12 @@ class Animation::Interpolator : public IECore::RefCounted
 	static ConstInterpolatorPtr get( Animation::Interpolation interpolation );
 	static ConstInterpolatorPtr getDefault();
 
-  protected:
+	protected:
 
 	// construct with specified interpolation and hints
 	explicit Interpolator( Animation::Interpolation interpolation, unsigned hints = 0 );
 
-  private:
+	private:
 
 	friend class CurvePlug;
 	friend class Tangent;
@@ -98,14 +98,14 @@ class Animation::Interpolator : public IECore::RefCounted
 
 class Animation::Extrapolator : public IECore::RefCounted
 {
-  public:
+	public:
 
 	Animation::Extrapolation getExtrapolation() const;
 
 	static ConstExtrapolatorPtr get( Animation::Extrapolation extrapolation );
 	static ConstExtrapolatorPtr getDefault();
 
-  protected:
+	protected:
 
 	// construct with specified extrapolation
 	explicit Extrapolator( Animation::Extrapolation extrapolation );
@@ -113,7 +113,7 @@ class Animation::Extrapolator : public IECore::RefCounted
 	// evaluate curve without doing extrapolation
 	double evaluateInKeyRange( const CurvePlug &curve, double time ) const;
 
-  private:
+	private:
 
 	friend class CurvePlug;
 
@@ -322,7 +322,7 @@ struct InterpolatorCubic
 		return ( 1.0 / 3.0 ) * maxScale( clampSlope( tangent.getSlope() * dt ) / dt );
 	}
 
-  private:
+	private:
 
 	void computeCoeffs(
 		const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key &keyHi,
@@ -414,7 +414,7 @@ struct InterpolatorBezier
 		newTangentHi.setPosition( r3 );
 	}
 
-  private:
+	private:
 
 	double solveForTime( const double tl, const double th, const double time ) const
 	{

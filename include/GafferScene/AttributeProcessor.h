@@ -45,7 +45,7 @@ namespace GafferScene
 class GAFFERSCENE_API AttributeProcessor : public FilteredSceneProcessor
 {
 
-  public:
+	public:
 
 	~AttributeProcessor() override;
 
@@ -56,7 +56,7 @@ class GAFFERSCENE_API AttributeProcessor : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// Constructs with a single input ScenePlug named "in". Use inPlug()
 	/// to access this plug.
@@ -80,7 +80,7 @@ class GAFFERSCENE_API AttributeProcessor : public FilteredSceneProcessor
 	/// Would be better as private and final, but needs to be protected so that it can be called by ShaderTweaks.
 	IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-  private:
+	private:
 
 	void init();
 	void plugSet( Gaffer::Plug *plug );

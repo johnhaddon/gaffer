@@ -45,7 +45,7 @@ namespace GafferScene
 class GAFFERSCENE_API StandardOptions : public Options
 {
 
-  public:
+	public:
 
 	explicit StandardOptions( const std::string &name = defaultName<StandardOptions>() );
 	~StandardOptions() override;

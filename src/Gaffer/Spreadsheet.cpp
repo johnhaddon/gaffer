@@ -89,7 +89,7 @@ void appendLeafPlugs( const Gaffer::Plug *p, DependencyNode::AffectedPlugsContai
 class RowsMap : public IECore::Data
 {
 
-  public:
+	public:
 
 	using Selector = std::variant<const vector<InternedString> *, string>;
 
@@ -212,7 +212,7 @@ class RowsMap : public IECore::Data
 		return m_enabledRowNames.get();
 	}
 
-  private:
+	private:
 
 	// Rows without wildcards. We can look these up
 	// directly.
@@ -278,7 +278,7 @@ const InternedString g_firstMatch( "firstMatch" );
 class RowsMapScope : boost::noncopyable, public Context::SubstitutionProvider
 {
 
-  public:
+	public:
 
 	RowsMapScope( const Context *context, const StringPlug *selectorPlug )
 		: SubstitutionProvider( context ), m_context( context ), m_selectorPlug( selectorPlug )
@@ -349,7 +349,7 @@ class RowsMapScope : boost::noncopyable, public Context::SubstitutionProvider
 		return SubstitutionProvider::variable( name, recurse );
 	}
 
-  private:
+	private:
 
 	static bool mightContainSubstitutions( const StringPlug *plug )
 	{
@@ -415,7 +415,7 @@ GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::RowsPlug );
 class Spreadsheet::RowsPlug::RowNameMap
 {
 
-  public:
+	public:
 
 	RowNameMap( Spreadsheet::RowsPlug *rowsPlug )
 		: m_rowsPlug( rowsPlug )
@@ -471,7 +471,7 @@ class Spreadsheet::RowsPlug::RowNameMap
 		}
 	}
 
-  private:
+	private:
 
 	string rowName( const RowPlug *row )
 	{

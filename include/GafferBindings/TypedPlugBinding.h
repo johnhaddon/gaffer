@@ -44,7 +44,7 @@ namespace GafferBindings
 template<typename T, typename TWrapper = T>
 class TypedPlugClass : public PlugClass<T, TWrapper>
 {
-  public:
+	public:
 
 	TypedPlugClass( const char *docString = nullptr );
 };

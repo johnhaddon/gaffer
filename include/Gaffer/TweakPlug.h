@@ -56,7 +56,7 @@ namespace Gaffer
 class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 {
 
-  public:
+	public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweakPlug, TweakPlugTypeId, Gaffer::ValuePlug );
 
@@ -178,7 +178,7 @@ class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 
 	static const char *modeToString( Gaffer::TweakPlug::Mode mode );
 
-  private:
+	private:
 
 	Gaffer::ValuePlug *valuePlugInternal();
 	const Gaffer::ValuePlug *valuePlugInternal() const;
@@ -199,7 +199,7 @@ IE_CORE_DECLAREPTR( TweakPlug )
 class GAFFER_API TweaksPlug : public Gaffer::ValuePlug
 {
 
-  public:
+	public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweaksPlug, TweaksPlugTypeId, Gaffer::ValuePlug );
 

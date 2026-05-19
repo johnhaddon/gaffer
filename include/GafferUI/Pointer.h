@@ -52,7 +52,7 @@ IE_CORE_FORWARDDECLARE( Pointer )
 class GAFFERUI_API Pointer : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( Pointer )
 
@@ -79,7 +79,7 @@ class GAFFERUI_API Pointer : public IECore::RefCounted
 	using ChangedSignal = Gaffer::Signals::Signal<void()>;
 	static ChangedSignal &changedSignal();
 
-  private:
+	private:
 
 	std::string m_fileName;
 	Imath::V2i m_hotspot;

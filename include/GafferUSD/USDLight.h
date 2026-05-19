@@ -47,7 +47,7 @@ namespace GafferUSD
 class GAFFERUSD_API USDLight : public GafferScene::Light
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDLight, USDLightTypeId, GafferScene::Light );
 

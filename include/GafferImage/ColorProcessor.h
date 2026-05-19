@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ColorProcessor : public ImageProcessor
 {
 
-  public:
+	public:
 
 	explicit ColorProcessor( const std::string &name = defaultName<ColorProcessor>() );
 	~ColorProcessor() override;
@@ -63,7 +63,7 @@ class GAFFERIMAGE_API ColorProcessor : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -80,7 +80,7 @@ class GAFFERIMAGE_API ColorProcessor : public ImageProcessor
 	/// may be returned, in which case the node will pass through the input image data unchanged.
 	virtual ColorProcessorFunction colorProcessor( const Gaffer::Context *context ) const = 0;
 
-  private:
+	private:
 
 	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
 	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const final;

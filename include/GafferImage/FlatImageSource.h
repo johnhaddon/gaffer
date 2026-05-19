@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API FlatImageSource : public ImageNode
 {
 
-  public:
+	public:
 
 	explicit FlatImageSource( const std::string &name = defaultName<FlatImageSource>() );
 
@@ -56,7 +56,7 @@ class GAFFERIMAGE_API FlatImageSource : public ImageNode
 
 	GAFFER_NODE_DECLARE_TYPE( GafferImage::FlatImageSource, FlatImageSourceTypeId, ImageNode );
 
-  protected:
+	protected:
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 

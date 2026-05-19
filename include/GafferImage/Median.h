@@ -44,7 +44,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Median : public RankFilter
 {
 
-  public:
+	public:
 
 	explicit Median( const std::string &name = defaultName<Median>() );
 	~Median() override;

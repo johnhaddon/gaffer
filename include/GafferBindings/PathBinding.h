@@ -45,7 +45,7 @@ template<typename T, typename TWrapper = T>
 class PathClass : public IECorePython::RunTimeTypedClass<T, TWrapper>
 {
 
-  public:
+	public:
 
 	PathClass( const char *docString = nullptr );
 };

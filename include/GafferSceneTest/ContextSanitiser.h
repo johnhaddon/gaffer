@@ -52,18 +52,18 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API ContextSanitiser : public Gaffer::Monitor
 {
 
-  public:
+	public:
 
 	ContextSanitiser();
 
 	IE_CORE_DECLAREMEMBERPTR( ContextSanitiser )
 
-  protected:
+	protected:
 
 	void processStarted( const Gaffer::Process *process ) override;
 	void processFinished( const Gaffer::Process *process ) override;
 
-  private:
+	private:
 
 	/// First is the upstream plug where the problem was detected. Second
 	/// is the plug from the parent process responsible for calling upstream.

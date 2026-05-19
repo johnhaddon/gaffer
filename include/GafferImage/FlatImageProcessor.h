@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API FlatImageProcessor : public ImageProcessor
 {
 
-  public:
+	public:
 
 	/// Constructs with a single input ImagePlug named "in". Use inPlug()
 	/// to access this plug.
@@ -64,7 +64,7 @@ class GAFFERIMAGE_API FlatImageProcessor : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 

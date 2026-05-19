@@ -64,7 +64,7 @@ namespace GafferScene
 class GAFFERSCENE_API Catalogue : public GafferImage::ImageNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::Catalogue, CatalogueTypeId, GafferImage::ImageNode );
 
@@ -75,7 +75,7 @@ class GAFFERSCENE_API Catalogue : public GafferImage::ImageNode
 	class GAFFERSCENE_API Image : public Gaffer::Plug
 	{
 
-	  public:
+		public:
 
 		GAFFER_PLUG_DECLARE_TYPE( GafferScene::Catalogue::Image, CatalogueImageTypeId, Gaffer::Plug );
 
@@ -101,7 +101,7 @@ class GAFFERSCENE_API Catalogue : public GafferImage::ImageNode
 
 		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-	  private:
+		private:
 
 		// The Catalogue needs to know the name of each image
 		// so it can support the `catalogue:imageName` context
@@ -144,7 +144,7 @@ class GAFFERSCENE_API Catalogue : public GafferImage::ImageNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  private:
+	private:
 
 	Gaffer::IntPlug *internalImageIndexPlug();
 	const Gaffer::IntPlug *internalImageIndexPlug() const;

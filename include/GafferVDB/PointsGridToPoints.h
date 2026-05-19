@@ -54,7 +54,7 @@ namespace GafferVDB
 class GAFFERVDB_API PointsGridToPoints : public GafferScene::ObjectProcessor
 {
 
-  public:
+	public:
 
 	explicit PointsGridToPoints( const std::string &name = defaultName<PointsGridToPoints>() );
 	~PointsGridToPoints() override;
@@ -70,13 +70,13 @@ class GAFFERVDB_API PointsGridToPoints : public GafferScene::ObjectProcessor
 	Gaffer::BoolPlug *invertNamesPlug();
 	const Gaffer::BoolPlug *invertNamesPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

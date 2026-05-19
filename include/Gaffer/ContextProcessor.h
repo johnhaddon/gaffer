@@ -48,7 +48,7 @@ namespace Gaffer
 class GAFFER_API ContextProcessor : public ComputeNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextProcessor, ContextProcessorTypeId, ComputeNode );
 
@@ -76,7 +76,7 @@ class GAFFER_API ContextProcessor : public ComputeNode
 	/// when `outPlug()` is evaluated in the current context.
 	ContextPtr inPlugContext() const;
 
-  protected:
+	protected:
 
 	/// Implemented to return the hash of the matching input using a context modified by
 	/// processContext() - derived class should therefore not need to reimplement hash(),
@@ -89,7 +89,7 @@ class GAFFER_API ContextProcessor : public ComputeNode
 	/// Must be implemented to modify context in place.
 	virtual void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const = 0;
 
-  private:
+	private:
 
 	class ProcessedScope;
 

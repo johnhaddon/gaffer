@@ -53,7 +53,7 @@ namespace GafferScene
 class GAFFERSCENE_API Grid : public SceneNode
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::Grid, GridTypeId, SceneNode );
 
@@ -92,7 +92,7 @@ class GAFFERSCENE_API Grid : public SceneNode
 
 	void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	void hashTransform( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
@@ -112,7 +112,7 @@ class GAFFERSCENE_API Grid : public SceneNode
 	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

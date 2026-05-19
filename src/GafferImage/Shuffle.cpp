@@ -91,7 +91,7 @@ struct MappingData : public IECore::Data
 		return it->second;
 	}
 
-  private:
+	private:
 
 	StringVectorDataPtr m_outChannelNames;
 

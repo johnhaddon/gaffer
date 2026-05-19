@@ -54,7 +54,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Text : public Shape
 {
 
-  public:
+	public:
 
 	explicit Text( const std::string &name = defaultName<Text>() );
 	~Text() override;
@@ -98,7 +98,7 @@ class GAFFERIMAGE_API Text : public Shape
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -115,7 +115,7 @@ class GAFFERIMAGE_API Text : public Shape
 	void hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstFloatVectorDataPtr computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	// We compute out layout once and cache it on this plug,
 	// for subsequent use in computing the data window and

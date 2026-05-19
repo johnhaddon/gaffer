@@ -233,7 +233,7 @@ namespace Gaffer
 class GAFFER_API Process::Collaboration : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	// Work around https://bugs.llvm.org/show_bug.cgi?id=32978
 	~Collaboration() noexcept( true ) override;
@@ -267,7 +267,7 @@ class GAFFER_API Process::Collaboration : public IECore::RefCounted
 template<typename ProcessType>
 class Process::TypedCollaboration : public Process::Collaboration
 {
-  public:
+	public:
 
 	std::variant<std::monostate, std::exception_ptr, typename ProcessType::ResultType> result;
 

@@ -99,7 +99,7 @@ IE_CORE_FORWARDDECLARE( Dispatcher )
 /// plugs which affect Task execution.
 class GAFFERDISPATCH_API Dispatcher : public TaskNode
 {
-  public:
+	public:
 
 	explicit Dispatcher( const std::string &name = defaultName<Dispatcher>() );
 	~Dispatcher() override;
@@ -199,7 +199,7 @@ class GAFFERDISPATCH_API Dispatcher : public TaskNode
 	static void deregisterDispatcher( const std::string &dispatcherType );
 	//@}
 
-  protected:
+	protected:
 
 	IE_CORE_FORWARDDECLARE( TaskBatch )
 
@@ -215,7 +215,7 @@ class GAFFERDISPATCH_API Dispatcher : public TaskNode
 	/// number.
 	class GAFFERDISPATCH_API TaskBatch : public IECore::RefCounted
 	{
-	  public:
+		public:
 
 		IE_CORE_DECLAREMEMBERPTR( TaskBatch );
 
@@ -235,7 +235,7 @@ class GAFFERDISPATCH_API Dispatcher : public TaskNode
 		IECore::CompoundData *blindData();
 		const IECore::CompoundData *blindData() const;
 
-	  private:
+		private:
 
 		TaskBatch();
 		TaskBatch( TaskNode::ConstTaskPlugPtr plug, Gaffer::ConstContextPtr context );
@@ -277,7 +277,7 @@ class GAFFERDISPATCH_API Dispatcher : public TaskNode
 	/// batches have been dispatched in order to prevent duplicate work.
 	virtual void doDispatch( const TaskBatch *batch ) const = 0;
 
-  private:
+	private:
 
 	// Friendship to allow `setupPlugs()` to be called.
 	friend GAFFERDISPATCH_API void intrusive_ptr_add_ref( TaskNode *node );

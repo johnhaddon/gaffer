@@ -49,7 +49,7 @@ namespace Private
 class GAFFERSCENEUI_API OptionInspector : public Inspector
 {
 
-  public:
+	public:
 
 	OptionInspector(
 		const GafferScene::ScenePlugPtr &scene,
@@ -59,7 +59,7 @@ class GAFFERSCENEUI_API OptionInspector : public Inspector
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::OptionInspector, OptionInspectorTypeId, Inspector );
 
-  protected:
+	protected:
 
 	GafferScene::SceneAlgo::History::ConstPtr history() const override;
 	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
@@ -67,7 +67,7 @@ class GAFFERSCENEUI_API OptionInspector : public Inspector
 	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
 	AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
 
-  private:
+	private:
 
 	const GafferScene::ScenePlugPtr m_scene;
 	const IECore::InternedString m_option;

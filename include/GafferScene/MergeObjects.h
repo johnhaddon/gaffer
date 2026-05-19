@@ -68,7 +68,7 @@ namespace GafferScene
 class GAFFERSCENE_API MergeObjects : public FilteredSceneProcessor
 {
 
-  public:
+	public:
 
 	enum class SortKey
 	{
@@ -103,7 +103,7 @@ class GAFFERSCENE_API MergeObjects : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	MergeObjects( const std::string &name, const std::string &defaultDestination );
 
@@ -151,13 +151,13 @@ class GAFFERSCENE_API MergeObjects : public FilteredSceneProcessor
 	// \todo - should we offer alternate ways to merge bounds? Can we think of any use cases for this?
 	//virtual Imath::Box3f mergeBounds( const std::vector< ScenePath > &sourcePaths, const Gaffer::Context *context ) const;
 
-  protected:
+	protected:
 
 	/// The source plug currently being used for merge sources - will be `source` if connected, otherwise
 	/// `in`.
 	const GafferScene::ScenePlug *effectiveSourcePlug() const;
 
-  private:
+	private:
 
 	/// The tree holds all destinations, with their corresponding sources.
 	Gaffer::ObjectPlug *treePlug();

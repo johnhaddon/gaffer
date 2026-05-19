@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( ObjectVisualiser )
 class GAFFERSCENE_API ObjectVisualiser : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( ObjectVisualiser )
 
@@ -78,7 +78,7 @@ class GAFFERSCENE_API ObjectVisualiser : public IECore::RefCounted
 	static void registerVisualiser( IECore::TypeId objectType, ConstObjectVisualiserPtr visualiser );
 	//@}
 
-  protected:
+	protected:
 
 	ObjectVisualiser();
 

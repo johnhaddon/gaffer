@@ -44,7 +44,7 @@ namespace GafferUI
 class GAFFERUI_API SpacerGadget : public Gadget
 {
 
-  public:
+	public:
 
 	explicit SpacerGadget( const Imath::Box3f &size );
 	~SpacerGadget() override;
@@ -59,7 +59,7 @@ class GAFFERUI_API SpacerGadget : public Gadget
 	/// Rejects all children.
 	bool acceptsChild( const GraphComponent *potentialChild ) const override;
 
-  private:
+	private:
 
 	Imath::Box3f m_bound;
 };

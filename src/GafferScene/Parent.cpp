@@ -69,7 +69,7 @@ const ScenePlug::ScenePath g_root;
 class Parent::ParentScope : public ScenePlug::GlobalScope
 {
 
-  public:
+	public:
 
 	ParentScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const Context *context )
 		: ScenePlug::GlobalScope( context )
@@ -82,7 +82,7 @@ class Parent::ParentScope : public ScenePlug::GlobalScope
 		}
 	}
 
-  private:
+	private:
 
 	std::string m_sourceString;
 };
@@ -91,7 +91,7 @@ class Parent::ParentScope : public ScenePlug::GlobalScope
 class Parent::SourceScope : public ParentScope
 {
 
-  public:
+	public:
 
 	SourceScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath, const Context *context )
 		: ParentScope( parent, sourcePath, context )
@@ -113,7 +113,7 @@ class Parent::SourceScope : public ParentScope
 		return m_sourcePlug;
 	}
 
-  private:
+	private:
 
 	const ScenePlug *m_sourcePlug;
 	ScenePlug::ScenePath m_sourcePath;

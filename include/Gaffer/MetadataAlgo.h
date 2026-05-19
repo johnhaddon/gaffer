@@ -172,7 +172,7 @@ struct GAFFER_API Annotation
 	const std::string &text() const { return textData ? textData->readable() : g_defaultText; }
 	const Imath::Color3f &color() const { return colorData ? colorData->readable() : g_defaultColor; }
 
-  private:
+	private:
 
 	static std::string g_defaultText;
 	static Imath::Color3f g_defaultColor;

@@ -48,7 +48,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Spreadsheet : public ComputeNode
 {
 
-  public:
+	public:
 
 	explicit Spreadsheet( const std::string &name = defaultName<Spreadsheet>() );
 	~Spreadsheet() override;
@@ -72,7 +72,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 	class GAFFER_API RowsPlug : public ValuePlug
 	{
 
-	  public:
+		public:
 
 		RowsPlug( const std::string &name = defaultName<RowsPlug>(), Direction direction = In, unsigned flags = Default );
 		~RowsPlug() override;
@@ -128,7 +128,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 		bool acceptsChild( const GraphComponent *potentialChild ) const override;
 		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-	  private:
+		private:
 
 		std::vector<ValuePlug *> outPlugs();
 
@@ -144,7 +144,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 	class GAFFER_API RowPlug : public ValuePlug
 	{
 
-	  public:
+		public:
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowPlug, Gaffer::SpreadsheetRowPlugTypeId, Gaffer::ValuePlug );
 
@@ -159,7 +159,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 
 		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-	  private:
+		private:
 
 		RowPlug( const std::string &name, Plug::Direction direction = Plug::In, unsigned flags = Default );
 		friend class Spreadsheet;
@@ -171,7 +171,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 	class GAFFER_API CellPlug : public ValuePlug
 	{
 
-	  public:
+		public:
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::CellPlug, Gaffer::SpreadsheetCellPlugTypeId, Gaffer::ValuePlug );
 
@@ -190,7 +190,7 @@ class GAFFER_API Spreadsheet : public ComputeNode
 
 		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-	  private:
+		private:
 
 		CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug = false, Plug::Direction direction = Plug::In );
 		friend class Spreadsheet;
@@ -233,12 +233,12 @@ class GAFFER_API Spreadsheet : public ComputeNode
 	Plug *correspondingInput( const Plug *output ) override;
 	const Plug *correspondingInput( const Plug *output ) const override;
 
-  protected:
+	protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
-  private:
+	private:
 
 	ObjectPlug *rowsMapPlug();
 	const ObjectPlug *rowsMapPlug() const;

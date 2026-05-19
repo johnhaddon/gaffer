@@ -110,7 +110,7 @@ struct VStructConditionalExpression
 		return result;
 	}
 
-  private:
+	private:
 
 	vector<InternedString> m_tokens;
 

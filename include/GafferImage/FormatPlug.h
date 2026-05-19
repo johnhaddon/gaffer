@@ -58,7 +58,7 @@ namespace GafferImage
 class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 {
 
-  public:
+	public:
 
 	using ValueType = Format;
 
@@ -123,7 +123,7 @@ class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 	static FormatPlug *acquireDefaultFormatPlug( Gaffer::ScriptNode *scriptNode );
 	//@}
 
-  private:
+	private:
 
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
 	void plugDirtied( Gaffer::Plug *plug );

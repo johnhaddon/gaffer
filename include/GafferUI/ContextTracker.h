@@ -71,7 +71,7 @@ namespace GafferUI
 class GAFFERUI_API ContextTracker final : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
-  public:
+	public:
 
 	/// Constructs an instance that will track the graph upstream of the
 	/// target `node`, taking into account what connections are active in
@@ -156,7 +156,7 @@ class GAFFERUI_API ContextTracker final : public IECore::RefCounted, public Gaff
 	/// in `context( node )`. If the node is not tracked, returns `false`.
 	bool isEnabled( const Gaffer::DependencyNode *node ) const;
 
-  private:
+	private:
 
 	void updateNode( const Gaffer::NodePtr &node );
 	void plugDirtied( const Gaffer::Plug *plug );

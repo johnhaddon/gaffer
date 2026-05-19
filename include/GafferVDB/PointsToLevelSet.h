@@ -54,7 +54,7 @@ namespace GafferVDB
 class GAFFERVDB_API PointsToLevelSet : public GafferScene::ObjectProcessor
 {
 
-  public:
+	public:
 
 	explicit PointsToLevelSet( const std::string &name = defaultName<PointsToLevelSet>() );
 	~PointsToLevelSet() override;
@@ -85,14 +85,14 @@ class GAFFERVDB_API PointsToLevelSet : public GafferScene::ObjectProcessor
 	Gaffer::FloatPlug *halfBandwidthPlug();
 	const Gaffer::FloatPlug *halfBandwidthPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *plug ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

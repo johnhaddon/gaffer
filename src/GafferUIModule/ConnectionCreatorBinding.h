@@ -52,7 +52,7 @@ namespace GafferUIModule
 template<typename T, typename TWrapper = T>
 class ConnectionCreatorClass : public GafferUIBindings::GadgetClass<T, TWrapper>
 {
-  public:
+	public:
 
 	ConnectionCreatorClass( const char *docString = nullptr );
 };
@@ -61,7 +61,7 @@ template<typename WrappedType>
 class ConnectionCreatorWrapper : public GafferUIBindings::GadgetWrapper<WrappedType>
 {
 
-  public:
+	public:
 
 	template<typename... Args>
 	ConnectionCreatorWrapper( PyObject *self, Args &&...args )

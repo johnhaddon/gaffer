@@ -49,7 +49,7 @@ namespace Gaffer
 class GAFFER_API ShufflePlug : public ValuePlug
 {
 
-  public:
+	public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflePlug, ShufflePlugTypeId, ValuePlug );
 
@@ -83,7 +83,7 @@ IE_CORE_DECLAREPTR( ShufflePlug )
 class GAFFER_API ShufflesPlug : public ValuePlug
 {
 
-  public:
+	public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflesPlug, ShufflesPlugTypeId, ValuePlug );
 
@@ -107,7 +107,7 @@ class GAFFER_API ShufflesPlug : public ValuePlug
 	template<typename T>
 	T shuffleWithExtraSources( const T &sourceContainer, const T &extraSources, bool ignoreMissingSource = true ) const;
 
-  private:
+	private:
 
 	template<typename T>
 	T shuffleInternal( const T &sourceContainer, const T *extraSources, bool ignoreMissingSource ) const;

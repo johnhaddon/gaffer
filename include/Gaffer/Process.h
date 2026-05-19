@@ -60,7 +60,7 @@ IE_CORE_FORWARDDECLARE( Plug );
 class GAFFER_API Process : private ThreadState::Scope
 {
 
-  public:
+	public:
 
 	/// The type of process being performed.
 	const IECore::InternedString type() const { return m_type; }
@@ -86,7 +86,7 @@ class GAFFER_API Process : private ThreadState::Scope
 	/// may allow skipping the execution ( obviously, this is much slower than using the caches )
 	inline static bool forceMonitoring( const ThreadState &s, const Plug *plug, const IECore::InternedString &processType );
 
-  protected:
+	protected:
 
 	/// Protected constructor for use by derived classes only.
 	Process( const IECore::InternedString &type, const Plug *plug, const Plug *destinationPlug = nullptr );
@@ -121,7 +121,7 @@ class GAFFER_API Process : private ThreadState::Scope
 		const typename ProcessType::CacheType::KeyType &cacheKey, ProcessArguments &&...args
 	);
 
-  private:
+	private:
 
 	class Collaboration;
 	template<typename T>
@@ -143,7 +143,7 @@ class GAFFER_API Process : private ThreadState::Scope
 class GAFFER_API ProcessException : public std::runtime_error
 {
 
-  public:
+	public:
 
 	ProcessException( const ProcessException &rhs ) = default;
 
@@ -159,7 +159,7 @@ class GAFFER_API ProcessException : public std::runtime_error
 	[[noreturn]] static void wrapCurrentException( const Process &process );
 	[[noreturn]] static void wrapCurrentException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType );
 
-  private:
+	private:
 
 	ProcessException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType, const std::exception_ptr &exception, const char *what );
 

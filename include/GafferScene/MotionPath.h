@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API MotionPath : public FilteredSceneProcessor
 {
 
-  public:
+	public:
 
 	explicit MotionPath( const std::string &name = defaultName<MotionPath>() );
 	~MotionPath() override;
@@ -89,7 +89,7 @@ class GAFFERSCENE_API MotionPath : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
@@ -105,7 +105,7 @@ class GAFFERSCENE_API MotionPath : public FilteredSceneProcessor
 	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-  private:
+	private:
 
 	ScenePlug *isolatedInPlug();
 	const ScenePlug *isolatedInPlug() const;

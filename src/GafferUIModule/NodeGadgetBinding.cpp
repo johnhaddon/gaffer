@@ -93,7 +93,7 @@ struct NodeGadgetCreator
 		return result;
 	}
 
-  private:
+	private:
 
 	object m_fn;
 };
@@ -111,7 +111,7 @@ void registerNodeGadget2( const std::string &nodeGadgetType, object creator, IEC
 class StandardNodeGadgetWrapper : public NodeGadgetWrapper<StandardNodeGadget>
 {
 
-  public:
+	public:
 
 	StandardNodeGadgetWrapper( PyObject *self, Gaffer::NodePtr node )
 		: NodeGadgetWrapper<StandardNodeGadget>( self, node )

@@ -55,7 +55,7 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API StandardLightVisualiser : public IECoreGLPreview::LightVisualiser
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( StandardLightVisualiser )
 
@@ -100,7 +100,7 @@ class GAFFERSCENEUI_API StandardLightVisualiser : public IECoreGLPreview::LightV
 		}
 	};
 
-  private:
+	private:
 
 	IECore::DataPtr surfaceTexture( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, int maxTextureResolution ) const;
 

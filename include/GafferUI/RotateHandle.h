@@ -48,7 +48,7 @@ namespace GafferUI
 class GAFFERUI_API RotateHandle : public Handle
 {
 
-  public:
+	public:
 
 	explicit RotateHandle( Style::Axes axes );
 	~RotateHandle() override;
@@ -66,12 +66,12 @@ class GAFFERUI_API RotateHandle : public Handle
 	// Measured in radians
 	Imath::Eulerf rotation( const DragDropEvent &event );
 
-  protected:
+	protected:
 
 	void renderHandle( const Style *style, Style::State state ) const override;
 	void dragBegin( const DragDropEvent &event ) override;
 
-  private:
+	private:
 
 	bool dragMove( const DragDropEvent &event );
 	bool mouseMove( const ButtonEvent &event );

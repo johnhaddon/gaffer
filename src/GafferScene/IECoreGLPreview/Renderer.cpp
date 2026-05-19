@@ -96,7 +96,7 @@ namespace
 {
 class ScopedTransform
 {
-  public:
+	public:
 
 	ScopedTransform( const M44f &transform )
 	{
@@ -116,7 +116,7 @@ class ScopedTransform
 		}
 	}
 
-  private:
+	private:
 
 	bool m_nonIdentity;
 };
@@ -336,7 +336,7 @@ namespace
 class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-  public:
+	public:
 
 	OpenGLAttributes( const IECore::CompoundObject *attributes )
 		: m_frustumMode( FrustumMode::WhenSelected ), m_visualisationStateColorSpace( Visualisation::ColorSpace::Display )
@@ -464,7 +464,7 @@ class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 		}
 	}
 
-  private:
+	private:
 
 	ConstStatePtr m_state;
 	ConstStatePtr m_visualisationState;
@@ -501,7 +501,7 @@ using EditQueue = tbb::concurrent_queue<Edit>;
 class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-  public:
+	public:
 
 	OpenGLObject( const std::string &name, const IECore::Object *object, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
 		: m_objectType( object ? object->typeId() : IECore::NullObjectTypeId ),
@@ -692,7 +692,7 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 		return m_objectType;
 	}
 
-  protected:
+	protected:
 
 	EditQueue &editQueue()
 	{
@@ -704,7 +704,7 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 		return attributes.visualisations();
 	}
 
-  private:
+	private:
 
 	// sansScalingAndShear is expensive, so we store that, the other
 	// visualiser scaled variants we compute in transformedBound/render
@@ -741,7 +741,7 @@ namespace
 class OpenGLCamera : public OpenGLObject
 {
 
-  public:
+	public:
 
 	OpenGLCamera( const std::string &name, const IECoreScene::Camera *camera, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
 		: OpenGLObject( name, camera, attributes, editQueue )
@@ -777,7 +777,7 @@ class OpenGLCamera : public OpenGLObject
 		return m_resolution;
 	}
 
-  private:
+	private:
 
 	IECoreGL::CameraPtr m_camera;
 	V2i m_resolution;
@@ -797,14 +797,14 @@ namespace
 class OpenGLLight : public OpenGLObject
 {
 
-  public:
+	public:
 
 	OpenGLLight( const std::string &name, const IECore::Object *light, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
 		: OpenGLObject( name, light, attributes, editQueue )
 	{
 	}
 
-  protected:
+	protected:
 
 	const Visualisations &visualisations( const OpenGLAttributes &attributes ) const override
 	{
@@ -817,14 +817,14 @@ IE_CORE_FORWARDDECLARE( OpenGLLight )
 class OpenGLLightFilter : public OpenGLObject
 {
 
-  public:
+	public:
 
 	OpenGLLightFilter( const std::string &name, const IECore::Object *object, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
 		: OpenGLObject( name, object, attributes, editQueue )
 	{
 	}
 
-  protected:
+	protected:
 
 	const Visualisations &visualisations( const OpenGLAttributes &attributes ) const override
 	{
@@ -847,7 +847,7 @@ const std::string g_headerPrefix( "header:" );
 class OpenGLRenderer final : public IECoreScenePreview::Renderer
 {
 
-  public:
+	public:
 
 	OpenGLRenderer( RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
 		: m_renderType( renderType ), m_baseStateOptions( new CompoundObject ), m_renderObjects( true ), m_messageHandler( messageHandler )
@@ -1046,7 +1046,7 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		return nullptr;
 	}
 
-  private:
+	private:
 
 	void renderToCurrentContext( const IECore::CompoundDataMap &parameters )
 	{

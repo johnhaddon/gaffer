@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveVariableTweaks : public Deformer
 {
 
-  public:
+	public:
 
 	enum class SelectionMode
 	{
@@ -88,7 +88,7 @@ class GAFFERSCENE_API PrimitiveVariableTweaks : public Deformer
 	Gaffer::TweaksPlug *tweaksPlug();
 	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
@@ -96,7 +96,7 @@ class GAFFERSCENE_API PrimitiveVariableTweaks : public Deformer
 
 	bool adjustBounds() const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

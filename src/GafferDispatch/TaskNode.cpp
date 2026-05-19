@@ -85,7 +85,7 @@ namespace
 class TaskNodeProcess : public Gaffer::Process
 {
 
-  public:
+	public:
 
 	TaskNodeProcess( const IECore::InternedString &type, const TaskNode::TaskPlug *plug )
 		: Process( type, plug->source(), plug )

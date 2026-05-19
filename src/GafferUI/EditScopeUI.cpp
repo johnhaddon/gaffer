@@ -53,7 +53,7 @@ namespace
 class EditScopePlugAdder : public PlugAdder
 {
 
-  public:
+	public:
 
 	EditScopePlugAdder( EditScopePtr editScope )
 		: m_editScope( editScope )
@@ -63,7 +63,7 @@ class EditScopePlugAdder : public PlugAdder
 		updateVisibility();
 	}
 
-  protected:
+	protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -104,7 +104,7 @@ class EditScopePlugAdder : public PlugAdder
 		applyEdgeMetadata( m_editScope->outPlug(), endpoint->direction() == Plug::Out );
 	}
 
-  private:
+	private:
 
 	void updateVisibility()
 	{

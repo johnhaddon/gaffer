@@ -78,7 +78,7 @@ IE_CORE_FORWARDDECLARE( ImageGadget )
 class GAFFERIMAGEUI_API ImageView : public GafferUI::View
 {
 
-  public:
+	public:
 
 	explicit ImageView( Gaffer::ScriptNodePtr scriptNode );
 	~ImageView() override;
@@ -105,7 +105,7 @@ class GAFFERIMAGEUI_API ImageView : public GafferUI::View
 	ImageGadget *imageGadget();
 	const ImageGadget *imageGadget() const;
 
-  protected:
+	protected:
 
 	/// May be called from a subclass constructor to add a converter
 	/// from non-image input types, allowing them to be viewed as images.
@@ -117,7 +117,7 @@ class GAFFERIMAGEUI_API ImageView : public GafferUI::View
 	/// preprocessor is managed by the ImageView base class.
 	void insertConverter( Gaffer::NodePtr converter );
 
-  private:
+	private:
 
 	void contextChanged();
 	void plugSet( Gaffer::Plug *plug );

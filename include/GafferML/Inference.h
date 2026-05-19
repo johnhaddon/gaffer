@@ -50,7 +50,7 @@ namespace GafferML
 class GAFFERML_API Inference : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit Inference( const std::string &name = defaultName<Inference>() );
 	~Inference() override;
@@ -70,13 +70,13 @@ class GAFFERML_API Inference : public Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-  private:
+	private:
 
 	// We assume that if a model has multiple outputs, then it is more
 	// efficient to compute them all at once. We do that and cache it

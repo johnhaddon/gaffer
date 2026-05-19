@@ -76,7 +76,7 @@ IE_CORE_FORWARDDECLARE( TaskNode )
 class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 {
 
-  public:
+	public:
 
 	IE_CORE_FORWARDDECLARE( TaskPlug )
 
@@ -86,7 +86,7 @@ class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 	/// individual tasks.
 	class GAFFERDISPATCH_API Task
 	{
-	  public:
+		public:
 
 		/// Constructs a task representing a call to `plug->execute()`
 		/// in the specified context.
@@ -108,7 +108,7 @@ class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 
 		bool operator == ( const Task &rhs ) const;
 
-	  private:
+		private:
 
 		ConstTaskPlugPtr m_plug;
 		Gaffer::ConstContextPtr m_context;
@@ -127,7 +127,7 @@ class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 	class GAFFERDISPATCH_API TaskPlug : public Gaffer::Plug
 	{
 
-	  public:
+		public:
 
 		GAFFER_PLUG_DECLARE_TYPE( GafferDispatch::TaskNode::TaskPlug, TaskNodeTaskPlugTypeId, Gaffer::Plug );
 
@@ -185,7 +185,7 @@ class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	/// The default implementation of `affects()` calls this and appends
 	/// `taskPlug()` to the outputs if it returns true. The default implementation
@@ -224,7 +224,7 @@ class GAFFERDISPATCH_API TaskNode : public Gaffer::DependencyNode
 	/// \todo Add `const TaskPlug *plug, const Context *context` arguments.
 	virtual bool requiresSequenceExecution() const;
 
-  private:
+	private:
 
 	// Friendship for the bindings.
 	friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;

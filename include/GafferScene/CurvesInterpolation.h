@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API CurvesInterpolation : public ObjectProcessor
 {
 
-  public:
+	public:
 
 	explicit CurvesInterpolation( const std::string &name = defaultName<CurvesInterpolation>() );
 	~CurvesInterpolation() override;
@@ -63,13 +63,13 @@ class GAFFERSCENE_API CurvesInterpolation : public ObjectProcessor
 	Gaffer::BoolPlug *expandPinnedPlug();
 	const Gaffer::BoolPlug *expandPinnedPlug() const;
 
-  protected:
+	protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
 	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

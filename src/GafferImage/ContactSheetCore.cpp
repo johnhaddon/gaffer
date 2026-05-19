@@ -106,7 +106,7 @@ struct CoverageData : public IECore::Data
 		return m_coverage[BufferAlgo::index( tileIndex, m_tileWindow )];
 	}
 
-  private:
+	private:
 
 	const Format m_format;
 	const Box2i m_tileWindow; // Tile indices, not pixel indices

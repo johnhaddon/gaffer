@@ -74,7 +74,7 @@ struct NoduleCreator
 		return result;
 	}
 
-  private:
+	private:
 
 	object m_fn;
 };

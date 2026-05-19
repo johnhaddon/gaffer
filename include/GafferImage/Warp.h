@@ -58,7 +58,7 @@ namespace GafferImage
 ///   and return the Engine subclass.
 class GAFFERIMAGE_API Warp : public FlatImageProcessor
 {
-  public:
+	public:
 
 	explicit Warp( const std::string &name = defaultName<Warp>() );
 	~Warp() override;
@@ -76,7 +76,7 @@ class GAFFERIMAGE_API Warp : public FlatImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -111,7 +111,7 @@ class GAFFERIMAGE_API Warp : public FlatImageProcessor
 	/// of answering all queries for the specified tile.
 	virtual const Engine *computeEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const = 0;
 
-  private:
+	private:
 
 	IE_CORE_FORWARDDECLARE( EngineData );
 

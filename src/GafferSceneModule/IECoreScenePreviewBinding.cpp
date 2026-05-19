@@ -253,7 +253,7 @@ RendererPtr compoundRendererConstructor( object pythonRenderers )
 class ProceduralWrapper : public IECorePython::RunTimeTypedWrapper<IECoreScenePreview::Procedural>
 {
 
-  public:
+	public:
 
 	ProceduralWrapper( PyObject *self )
 		: IECorePython::RunTimeTypedWrapper<IECoreScenePreview::Procedural>( self )

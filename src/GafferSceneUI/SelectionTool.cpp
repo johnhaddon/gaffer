@@ -119,7 +119,7 @@ const GafferScene::ScenePlug::ScenePath modifyPath(
 class SelectionTool::DragOverlay : public GafferUI::Gadget
 {
 
-  public:
+	public:
 
 	DragOverlay()
 		: Gadget()
@@ -162,7 +162,7 @@ class SelectionTool::DragOverlay : public GafferUI::Gadget
 		return m_endPosition;
 	}
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -196,7 +196,7 @@ class SelectionTool::DragOverlay : public GafferUI::Gadget
 		return b;
 	}
 
-  private:
+	private:
 
 	Imath::V3f m_startPosition;
 	Imath::V3f m_endPosition;

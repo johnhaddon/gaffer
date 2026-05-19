@@ -50,7 +50,7 @@ namespace GafferVDB
 class GAFFERVDB_API SphereLevelSet : public GafferScene::ObjectSource
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferVDB::SphereLevelSet, GafferVDB::SphereLevelSetTypeId, ObjectSource );
 
@@ -74,7 +74,7 @@ class GAFFERVDB_API SphereLevelSet : public GafferScene::ObjectSource
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	// The ObjectSource base class does implement these bound methods for
 	// us, but only by computing the source object and taking its bound.
@@ -90,7 +90,7 @@ class GAFFERVDB_API SphereLevelSet : public GafferScene::ObjectSource
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

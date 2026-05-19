@@ -55,7 +55,7 @@ IE_CORE_DECLAREPTR( GeometryPrototype )
 class GeometryPrototypeCache
 {
 
-  public:
+	public:
 
 	GeometryPrototypeCache( Session *session );
 
@@ -66,7 +66,7 @@ class GeometryPrototypeCache
 	// Must not be called concurrently with anything.
 	void clearUnused();
 
-  private:
+	private:
 
 	Session *m_session;
 

@@ -492,7 +492,7 @@ struct PointCloud
 		return 1;
 	}
 
-  private:
+	private:
 
 	IECore::V3fTree m_kdTree;
 	IECore::V3fTree::Iterator m_firstPoint;
@@ -503,7 +503,7 @@ struct PointCloud
 class RenderState
 {
 
-  public:
+	public:
 
 	RenderState(
 		const IECore::CompoundData *shadingPoints,
@@ -712,7 +712,7 @@ class RenderState
 		return it != m_pointClouds.end() ? it->second.get() : nullptr;
 	}
 
-  private:
+	private:
 
 	using RenderStateTransforms = boost::unordered_map<OIIO::ustringhash, ShadingEngine::Transform, std::hash<ustringhash>>;
 	RenderStateTransforms m_transforms;
@@ -761,7 +761,7 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 	// find the names unless we do it here.
 	OSL_USING_DATA_WIDTH( WidthT );
 
-  public:
+	public:
 
 	GafferBatchedRendererServices<WidthT>( OSL::TextureSystem *textureSystem )
 		: OSL::BatchedRendererServices<WidthT>( textureSystem )
@@ -1028,7 +1028,7 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 class RendererServices : public OSL::RendererServices
 {
 
-  public:
+	public:
 
 	RendererServices( OSL::TextureSystem *textureSystem )
 		: OSL::RendererServices( textureSystem )
@@ -1218,7 +1218,7 @@ class RendererServices : public OSL::RendererServices
 		return &m_batchedRendererServices8;
 	}
 
-  private:
+	private:
 
 	GafferBatchedRendererServices<8> m_batchedRendererServices8;
 	GafferBatchedRendererServices<16> m_batchedRendererServices16;
@@ -1464,7 +1464,7 @@ OIIO::ustring g_uvType( "uv" );
 class ShadingResults
 {
 
-  public:
+	public:
 
 	ShadingResults( size_t numPoints )
 		: m_results( new CompoundData ), m_ci( nullptr )
@@ -1502,7 +1502,7 @@ class ShadingResults
 		return m_results;
 	}
 
-  private:
+	private:
 
 	void addResult( size_t pointIndex, const ClosureColor *closure, const Color3f &weight, DebugResultsMap &threadCache )
 	{

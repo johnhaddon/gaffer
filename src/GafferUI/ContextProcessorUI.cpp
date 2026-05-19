@@ -52,7 +52,7 @@ namespace
 class ContextProcessorPlugAdder : public PlugAdder
 {
 
-  public:
+	public:
 
 	ContextProcessorPlugAdder( ContextProcessorPtr node )
 		: m_node( node )
@@ -88,7 +88,7 @@ class ContextProcessorPlugAdder : public PlugAdder
 		applyEdgeMetadata( m_node->outPlug(), !inOpposite );
 	}
 
-  private:
+	private:
 
 	void childAdded()
 	{
@@ -116,7 +116,7 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.ContextProcessorUI.PlugAdder", &create );
 	}
 
-  private:
+	private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

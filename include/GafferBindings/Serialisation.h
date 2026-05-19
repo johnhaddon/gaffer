@@ -51,7 +51,7 @@ namespace GafferBindings
 class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 {
 
-  public:
+	public:
 
 	/// Supports cancellation via the usual mechanism of scoping a Context
 	/// containing an `IECore::Canceller`.
@@ -114,7 +114,7 @@ class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 	class GAFFERBINDINGS_API Serialiser : public IECore::RefCounted
 	{
 
-	  public:
+		public:
 
 		IE_CORE_DECLAREMEMBERPTR( Serialiser );
 
@@ -155,7 +155,7 @@ class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 	/// different calls even when the objects are different.
 	static const Serialiser *acquireSerialiser( const Gaffer::GraphComponent *graphComponent );
 
-  private:
+	private:
 
 	const Gaffer::GraphComponent *m_parent;
 	const std::string m_parentName;

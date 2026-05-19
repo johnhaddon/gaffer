@@ -79,7 +79,7 @@ class FilteredRecursiveChildRange;
 class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public Signals::Trackable
 {
 
-  public:
+	public:
 
 	explicit GraphComponent( const std::string &name = GraphComponent::defaultName<GraphComponent>() );
 	~GraphComponent() override;
@@ -231,7 +231,7 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public Signals::T
 	ChildrenReorderedSignal &childrenReorderedSignal();
 	//@}
 
-  protected:
+	protected:
 
 	/// Called by `setName()` immediately prior to emitting
 	/// `nameChangedSignal()`. This provides an opportunity to respond to
@@ -292,7 +292,7 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public Signals::T
 	/// if it discovers that not to be the case.
 	void storeIndexOfNextChild( size_t &index ) const;
 
-  private:
+	private:
 
 	static std::string unprefixedTypeName( const char *typeName );
 

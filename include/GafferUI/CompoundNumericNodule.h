@@ -49,7 +49,7 @@ class NoduleLayout;
 class GAFFERUI_API CompoundNumericNodule : public StandardNodule
 {
 
-  public:
+	public:
 
 	explicit CompoundNumericNodule( Gaffer::PlugPtr plug );
 	~CompoundNumericNodule() override;
@@ -64,13 +64,13 @@ class GAFFERUI_API CompoundNumericNodule : public StandardNodule
 
 	Imath::Box3f bound() const override;
 
-  protected:
+	protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-  private:
+	private:
 
 	NoduleLayout *noduleLayout();
 	const NoduleLayout *noduleLayout() const;

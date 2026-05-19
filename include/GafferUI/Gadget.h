@@ -78,7 +78,7 @@ IE_CORE_FORWARDDECLARE( ViewportGadget );
 class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 {
 
-  public:
+	public:
 
 	explicit Gadget( const std::string &name = defaultName<Gadget>() );
 	~Gadget() override;
@@ -263,7 +263,7 @@ class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 	static IdleSignal &idleSignal();
 	//@}
 
-  protected:
+	protected:
 
 	enum class DirtyType
 	{
@@ -321,7 +321,7 @@ class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 	/// Implemented to dirty the layout for both the old and the new parent.
 	void parentChanged( GraphComponent *oldParent ) override;
 
-  private:
+	private:
 
 	void styleChanged();
 	void emitDescendantVisibilityChanged();

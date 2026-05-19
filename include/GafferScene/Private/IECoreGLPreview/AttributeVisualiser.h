@@ -52,7 +52,7 @@ IE_CORE_FORWARDDECLARE( AttributeVisualiser )
 class GAFFERSCENE_API AttributeVisualiser : public IECore::RefCounted
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( AttributeVisualiser )
 	~AttributeVisualiser() override;
@@ -74,7 +74,7 @@ class GAFFERSCENE_API AttributeVisualiser : public IECore::RefCounted
 		IECoreGL::ConstStatePtr &state
 	);
 
-  protected:
+	protected:
 
 	AttributeVisualiser();
 

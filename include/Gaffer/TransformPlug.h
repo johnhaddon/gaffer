@@ -45,7 +45,7 @@ namespace Gaffer
 class GAFFER_API TransformPlug : public ValuePlug
 {
 
-  public:
+	public:
 
 	explicit TransformPlug(
 		const std::string &name = defaultName<TransformPlug>(),
@@ -74,7 +74,7 @@ class GAFFER_API TransformPlug : public ValuePlug
 
 	Imath::M44f matrix() const;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

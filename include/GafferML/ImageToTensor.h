@@ -50,7 +50,7 @@ namespace GafferML
 class GAFFERML_API ImageToTensor : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit ImageToTensor( const std::string &name = defaultName<ImageToTensor>() );
 	~ImageToTensor() override;
@@ -77,7 +77,7 @@ class GAFFERML_API ImageToTensor : public Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -85,7 +85,7 @@ class GAFFERML_API ImageToTensor : public Gaffer::ComputeNode
 	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };

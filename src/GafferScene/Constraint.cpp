@@ -474,7 +474,7 @@ struct UVIndexer
 		return ( *m_view )[index];
 	}
 
-  private:
+	private:
 
 	const std::vector<int> *m_indices;
 	std::optional<IECoreScene::PrimitiveVariable::IndexedView<Imath::V2f>> m_view;

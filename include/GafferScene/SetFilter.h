@@ -54,7 +54,7 @@ namespace GafferScene
 class GAFFERSCENE_API SetFilter : public Filter
 {
 
-  public:
+	public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::SetFilter, SetFilterTypeId, Filter );
 
@@ -66,7 +66,7 @@ class GAFFERSCENE_API SetFilter : public Filter
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -74,7 +74,7 @@ class GAFFERSCENE_API SetFilter : public Filter
 	void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const override;
 
-  private:
+	private:
 
 	Gaffer::PathMatcherDataPlug *expressionResultPlug();
 	const Gaffer::PathMatcherDataPlug *expressionResultPlug() const;

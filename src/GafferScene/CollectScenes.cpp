@@ -68,7 +68,7 @@ namespace
 class RootTree : public IECore::Data
 {
 
-  public:
+	public:
 
 	struct Location;
 	using LocationPtr = std::unique_ptr<Location>;
@@ -171,7 +171,7 @@ class RootTree : public IECore::Data
 		return RootRange( m_roots.begin(), m_roots.end() );
 	}
 
-  private:
+	private:
 
 	LocationPtr m_treeRoot;
 	vector<string> m_roots;
@@ -188,7 +188,7 @@ IE_CORE_DECLAREPTR( RootTree )
 class CollectScenes::SourceScope : public Context::EditableScope
 {
 
-  public:
+	public:
 
 	SourceScope( const Context *context, const InternedString &rootVariable )
 		: EditableScope( context ), m_rootVariable( rootVariable )
@@ -208,7 +208,7 @@ class CollectScenes::SourceScope : public Context::EditableScope
 		}
 	}
 
-  private:
+	private:
 
 	InternedString m_rootVariable;
 };
@@ -216,7 +216,7 @@ class CollectScenes::SourceScope : public Context::EditableScope
 class CollectScenes::SourcePathScope : public SourceScope
 {
 
-  public:
+	public:
 
 	SourcePathScope( const Context *context, const CollectScenes *collectScenes, const ScenePlug::ScenePath &downstreamPath )
 		: SourceScope( context, collectScenes->rootNameVariablePlug()->getValue() )
@@ -253,7 +253,7 @@ class CollectScenes::SourcePathScope : public SourceScope
 			input == collectScenes->sourceRootPlug();
 	}
 
-  private:
+	private:
 
 	ScenePlug::ScenePath m_upstreamPath;
 	ConstRootTreePtr m_rootTree;

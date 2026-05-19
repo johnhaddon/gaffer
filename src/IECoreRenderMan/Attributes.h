@@ -46,7 +46,7 @@ namespace IECoreRenderMan
 class Attributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-  public:
+	public:
 
 	Attributes( const IECore::CompoundObject *attributes, MaterialCache *materialCache );
 	~Attributes() override;
@@ -75,7 +75,7 @@ class Attributes : public IECoreScenePreview::Renderer::AttributesInterface
 
 	const IECoreScene::ShaderNetwork *lightFilter() const;
 
-  private:
+	private:
 
 	std::optional<IECore::MurmurHash> m_prototypeHash;
 	RtParamList m_prototypeAttributes;

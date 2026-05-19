@@ -49,7 +49,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ChannelDataProcessor : public ImageProcessor
 {
 
-  public:
+	public:
 
 	explicit ChannelDataProcessor( const std::string &name = defaultName<ChannelDataProcessor>(), bool premultiplyPlug = false );
 	~ChannelDataProcessor() override;
@@ -64,7 +64,7 @@ class GAFFERIMAGE_API ChannelDataProcessor : public ImageProcessor
 	Gaffer::BoolPlug *processUnpremultipliedPlug();
 	const Gaffer::BoolPlug *processUnpremultipliedPlug() const;
 
-  protected:
+	protected:
 
 	/// This implementation queries whether or not the requested channel is masked by the channelMaskPlug().
 	bool channelEnabled( const std::string &channel ) const override;
@@ -83,7 +83,7 @@ class GAFFERIMAGE_API ChannelDataProcessor : public ImageProcessor
 
 	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-  private:
+	private:
 
 	bool m_hasUnpremultPlug;
 

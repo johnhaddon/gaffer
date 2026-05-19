@@ -46,7 +46,7 @@ template<typename Base, typename T>
 class IECORE_EXPORT Container : public Base
 {
 
-  public:
+	public:
 
 	IE_CORE_DECLAREMEMBERPTR( Container );
 
@@ -70,7 +70,7 @@ class IECORE_EXPORT Container : public Base
 	/// Accepts only type T.
 	bool acceptsChild( const GraphComponent *potentialChild ) const override;
 
-  private:
+	private:
 
 	static const IECore::RunTimeTyped::TypeDescription<Container<Base, T>> g_typeDescription;
 };

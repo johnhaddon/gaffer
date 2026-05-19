@@ -45,7 +45,7 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManSampleFilter : public RenderManOutputFilter
 {
 
-  public:
+	public:
 
 	explicit RenderManSampleFilter( const std::string &name = defaultName<RenderManSampleFilter>() );
 	~RenderManSampleFilter() override;

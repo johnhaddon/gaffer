@@ -75,7 +75,7 @@ template<typename T>
 class ConverterDescription
 {
 
-  public:
+	public:
 
 	/// Type-specific conversion functions.
 	using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;

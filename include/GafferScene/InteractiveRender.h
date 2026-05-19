@@ -57,7 +57,7 @@ namespace GafferScene
 class GAFFERSCENE_API InteractiveRender : public Gaffer::ComputeNode
 {
 
-  public:
+	public:
 
 	explicit InteractiveRender( const std::string &name = defaultName<InteractiveRender>() );
 	~InteractiveRender() override;
@@ -107,7 +107,7 @@ class GAFFERSCENE_API InteractiveRender : public Gaffer::ComputeNode
 
 	std::shared_ptr<const RenderManifest> renderManifest() const;
 
-  protected:
+	protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -118,7 +118,7 @@ class GAFFERSCENE_API InteractiveRender : public Gaffer::ComputeNode
 
 	IECoreScenePreview::Renderer *renderer() { return m_renderer.get(); }
 
-  private:
+	private:
 
 	ScenePlug *adaptedInPlug();
 	const ScenePlug *adaptedInPlug() const;

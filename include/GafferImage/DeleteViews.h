@@ -47,7 +47,7 @@ namespace GafferImage
 class GAFFERIMAGE_API DeleteViews : public ImageProcessor
 {
 
-  public:
+	public:
 
 	enum Mode
 	{
@@ -68,13 +68,13 @@ class GAFFERIMAGE_API DeleteViews : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-  protected:
+	protected:
 
 	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
 	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-  private:
+	private:
 
 	static size_t g_firstPlugIndex;
 };
