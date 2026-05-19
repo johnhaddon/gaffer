@@ -49,7 +49,7 @@ size_t FilterQuery::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( FilterQuery )
 
 FilterQuery::FilterQuery( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );

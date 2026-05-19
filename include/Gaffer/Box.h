@@ -51,26 +51,25 @@ IE_CORE_FORWARDDECLARE( Set )
 class GAFFER_API Box : public SubGraph
 {
 
-	public :
+public:
 
-		explicit Box( const std::string &name=defaultName<Box>() );
-		~Box() override;
+	explicit Box( const std::string &name = defaultName<Box>() );
+	~Box() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Box, BoxTypeId, SubGraph );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Box, BoxTypeId, SubGraph );
 
-		/// Exports the contents of the Box so that it can be referenced
-		/// by a Reference node.
-		void exportForReference( const std::filesystem::path &fileName ) const;
+	/// Exports the contents of the Box so that it can be referenced
+	/// by a Reference node.
+	void exportForReference( const std::filesystem::path &fileName ) const;
 
-		/// Creates a Box by containing a set of child nodes which
-		/// were previously held by a different parent.
-		/// \undoable
-		static BoxPtr create( Node *parent, const Set *childNodes );
-
+	/// Creates a Box by containing a set of child nodes which
+	/// were previously held by a different parent.
+	/// \undoable
+	static BoxPtr create( Node *parent, const Set *childNodes );
 };
 
 /// \deprecated Use Box::Iterator etc instead.
-using BoxIterator = FilteredChildIterator<TypePredicate<Box> >;
-using RecursiveBoxIterator = FilteredRecursiveChildIterator<TypePredicate<Box> >;
+using BoxIterator = FilteredChildIterator<TypePredicate<Box>>;
+using RecursiveBoxIterator = FilteredRecursiveChildIterator<TypePredicate<Box>>;
 
 } // namespace Gaffer

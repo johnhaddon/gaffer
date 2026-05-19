@@ -51,36 +51,35 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteRenderPasses : public GlobalsProcessor
 {
 
-	public :
+public:
 
-		enum Mode
-		{
-			Delete = 0,
-			Keep = 1
-		};
+	enum Mode
+	{
+		Delete = 0,
+		Keep = 1
+	};
 
-		explicit DeleteRenderPasses( const std::string &name=defaultName<DeleteRenderPasses>() );
-		~DeleteRenderPasses() override;
+	explicit DeleteRenderPasses( const std::string &name = defaultName<DeleteRenderPasses>() );
+	~DeleteRenderPasses() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteRenderPasses, DeleteRenderPassesTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteRenderPasses, DeleteRenderPassesTypeId, GlobalsProcessor );
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::StringPlug *namesPlug();
-		const Gaffer::StringPlug *namesPlug() const;
+	Gaffer::StringPlug *namesPlug();
+	const Gaffer::StringPlug *namesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteRenderPasses );

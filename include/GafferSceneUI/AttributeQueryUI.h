@@ -45,7 +45,7 @@ namespace GafferSceneUI
 namespace AttributeQueryUI
 {
 
-	GAFFERSCENEUI_API bool showSetupMenu( GafferScene::AttributeQuery& query );
+GAFFERSCENEUI_API bool showSetupMenu( GafferScene::AttributeQuery &query );
 
-} // AttributeQueryUI
-} // GafferSceneUI
+} // namespace AttributeQueryUI
+} // namespace GafferSceneUI

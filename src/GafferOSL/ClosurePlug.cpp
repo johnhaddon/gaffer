@@ -54,7 +54,7 @@ using namespace GafferOSL;
 GAFFER_PLUG_DEFINE_TYPE( ClosurePlug );
 
 ClosurePlug::ClosurePlug( const std::string &name, Direction direction, unsigned flags )
-	:	GafferScene::ClosurePlug( name, direction, flags )
+	: GafferScene::ClosurePlug( name, direction, flags )
 {
 }
 
@@ -108,9 +108,7 @@ bool ClosurePlug::acceptsInput( const Gaffer::Plug *input ) const
 	}
 
 	const Node *node = input->node();
-	return
-		runTimeCast<const SubGraph>( node ) ||
+	return runTimeCast<const SubGraph>( node ) ||
 		runTimeCast<const Switch>( node ) ||
-		runTimeCast<const Dot>( node )
-	;
+		runTimeCast<const Dot>( node );
 }

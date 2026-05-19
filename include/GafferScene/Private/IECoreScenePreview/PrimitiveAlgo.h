@@ -57,10 +57,10 @@ GAFFERSCENE_API void transformPrimitive(
 // Supports meshes, curves and points ( all primitives in the list must be of a matching
 // type ).
 GAFFERSCENE_API IECoreScene::PrimitivePtr mergePrimitives(
-	const std::vector< std::pair< const IECoreScene::Primitive*, Imath::M44f > > &primitives,
+	const std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> &primitives,
 	const IECore::Canceller *canceller = nullptr
 );
 
-} // namespace MeshAlgo
+} // namespace PrimitiveAlgo
 
 } // namespace IECoreScenePreview

@@ -46,7 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( MultiplyNode )
 size_t MultiplyNode::g_firstPlugIndex = 0;
 
 MultiplyNode::MultiplyNode( const std::string &name, bool brokenAffects )
-	:	ComputeNode( name ), m_brokenAffects( brokenAffects )
+	: ComputeNode( name ), m_brokenAffects( brokenAffects )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "op1" ) );

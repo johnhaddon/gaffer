@@ -123,8 +123,7 @@ inline Imath::V2i clamp( const Imath::V2i &point, const Imath::Box2i &window )
 inline size_t index( const Imath::V2i &p, const Imath::Box2i &b )
 {
 	assert( contains( b, p ) );
-	return
-		( p.y - b.min.y ) * b.size().x +
+	return ( p.y - b.min.y ) * b.size().x +
 		( p.x - b.min.x );
 }
 

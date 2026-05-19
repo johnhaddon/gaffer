@@ -52,32 +52,31 @@ namespace GafferScene
 class GAFFERSCENE_API MapOffset : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit MapOffset( const std::string &name=defaultName<MapOffset>() );
-		~MapOffset() override;
+	explicit MapOffset( const std::string &name = defaultName<MapOffset>() );
+	~MapOffset() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MapOffset, MapOffsetTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MapOffset, MapOffsetTypeId, ObjectProcessor );
 
-		Gaffer::V2fPlug *offsetPlug();
-		const Gaffer::V2fPlug *offsetPlug() const;
+	Gaffer::V2fPlug *offsetPlug();
+	const Gaffer::V2fPlug *offsetPlug() const;
 
-		Gaffer::IntPlug *udimPlug();
-		const Gaffer::IntPlug *udimPlug() const;
+	Gaffer::IntPlug *udimPlug();
+	const Gaffer::IntPlug *udimPlug() const;
 
-		Gaffer::StringPlug *uvSetPlug();
-		const Gaffer::StringPlug *uvSetPlug() const;
+	Gaffer::StringPlug *uvSetPlug();
+	const Gaffer::StringPlug *uvSetPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MapOffset )

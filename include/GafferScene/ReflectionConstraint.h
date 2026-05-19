@@ -44,50 +44,49 @@ namespace GafferScene
 class GAFFERSCENE_API ReflectionConstraint : public Constraint
 {
 
-	public :
+public:
 
-		explicit ReflectionConstraint( const std::string &name=defaultName<ReflectionConstraint>() );
-		~ReflectionConstraint() override;
+	explicit ReflectionConstraint( const std::string &name = defaultName<ReflectionConstraint>() );
+	~ReflectionConstraint() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ReflectionConstraint, ReflectionConstraintTypeId, Constraint );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ReflectionConstraint, ReflectionConstraintTypeId, Constraint );
 
-		Gaffer::StringPlug *cameraPlug();
-		const Gaffer::StringPlug *cameraPlug() const;
+	Gaffer::StringPlug *cameraPlug();
+	const Gaffer::StringPlug *cameraPlug() const;
 
-		enum class DistanceMode
-		{
-			Camera,
-			Constant
-		};
+	enum class DistanceMode
+	{
+		Camera,
+		Constant
+	};
 
-		Gaffer::IntPlug *distanceModePlug();
-		const Gaffer::IntPlug *distanceModePlug() const;
+	Gaffer::IntPlug *distanceModePlug();
+	const Gaffer::IntPlug *distanceModePlug() const;
 
-		Gaffer::FloatPlug *distancePlug();
-		const Gaffer::FloatPlug *distancePlug() const;
+	Gaffer::FloatPlug *distancePlug();
+	const Gaffer::FloatPlug *distancePlug() const;
 
-		Gaffer::BoolPlug *aimEnabledPlug();
-		const Gaffer::BoolPlug *aimEnabledPlug() const;
+	Gaffer::BoolPlug *aimEnabledPlug();
+	const Gaffer::BoolPlug *aimEnabledPlug() const;
 
-		Gaffer::V3fPlug *aimPlug();
-		const Gaffer::V3fPlug *aimPlug() const;
+	Gaffer::V3fPlug *aimPlug();
+	const Gaffer::V3fPlug *aimPlug() const;
 
-		Gaffer::V3fPlug *upPlug();
-		const Gaffer::V3fPlug *upPlug() const;
+	Gaffer::V3fPlug *upPlug();
+	const Gaffer::V3fPlug *upPlug() const;
 
-		Gaffer::FloatPlug *twistPlug();
-		const Gaffer::FloatPlug *twistPlug() const;
+	Gaffer::FloatPlug *twistPlug();
+	const Gaffer::FloatPlug *twistPlug() const;
 
-	protected :
+protected:
 
-		bool affectsConstraint( const Gaffer::Plug *input ) const override;
-		void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
+	bool affectsConstraint( const Gaffer::Plug *input ) const override;
+	void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ReflectionConstraint )

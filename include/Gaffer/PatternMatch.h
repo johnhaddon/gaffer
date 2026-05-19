@@ -47,34 +47,33 @@ namespace Gaffer
 class GAFFER_API PatternMatch : public ComputeNode
 {
 
-	public :
+public:
 
-		PatternMatch( const std::string &name = defaultName<PatternMatch>() );
-		~PatternMatch() override;
+	PatternMatch( const std::string &name = defaultName<PatternMatch>() );
+	~PatternMatch() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::PatternMatch, PatternMatchTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::PatternMatch, PatternMatchTypeId, ComputeNode );
 
-		StringPlug *stringPlug();
-		const StringPlug *stringPlug() const;
+	StringPlug *stringPlug();
+	const StringPlug *stringPlug() const;
 
-		StringPlug *patternPlug();
-		const StringPlug *patternPlug() const;
+	StringPlug *patternPlug();
+	const StringPlug *patternPlug() const;
 
-		BoolPlug *enabledPlug() override;
-		const BoolPlug *enabledPlug() const override;
+	BoolPlug *enabledPlug() override;
+	const BoolPlug *enabledPlug() const override;
 
-		BoolPlug *matchPlug();
-		const BoolPlug *matchPlug() const;
+	BoolPlug *matchPlug();
+	const BoolPlug *matchPlug() const;
 
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context) const override;
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
-}  // namespace Gaffer
+} // namespace Gaffer

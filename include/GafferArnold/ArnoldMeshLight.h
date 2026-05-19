@@ -47,13 +47,12 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldMeshLight : public GafferScene::MeshLight
 {
 
-	public :
+public:
 
-		explicit ArnoldMeshLight( const std::string &name=defaultName<ArnoldMeshLight>() );
-		~ArnoldMeshLight() override;
+	explicit ArnoldMeshLight( const std::string &name = defaultName<ArnoldMeshLight>() );
+	~ArnoldMeshLight() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldMeshLight, ArnoldMeshLightTypeId, GafferScene::MeshLight );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldMeshLight, ArnoldMeshLightTypeId, GafferScene::MeshLight );
 };
 
 IE_CORE_DECLAREPTR( ArnoldMeshLight )

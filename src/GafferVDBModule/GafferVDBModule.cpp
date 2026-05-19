@@ -58,5 +58,4 @@ BOOST_PYTHON_MODULE( _GafferVDB )
 	GafferBindings::DependencyNodeClass<SphereLevelSet>();
 	GafferBindings::DependencyNodeClass<PointsToLevelSet>();
 	GafferBindings::DependencyNodeClass<VolumeScatter>();
-
 }

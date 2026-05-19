@@ -45,7 +45,7 @@ using namespace GafferImage;
 GAFFER_NODE_DEFINE_TYPE( FlatImageSource );
 
 FlatImageSource::FlatImageSource( const std::string &name )
-	:	ImageNode( name )
+	: ImageNode( name )
 {
 }
 

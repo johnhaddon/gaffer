@@ -55,7 +55,7 @@ GAFFER_NODE_DEFINE_TYPE( ObjectSource );
 size_t ObjectSource::g_firstPlugIndex = 0;
 
 ObjectSource::ObjectSource( const std::string &name, const std::string &namePlugDefaultValue )
-	:	SceneNode( name )
+	: SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Gaffer::StringPlug( "name", Gaffer::Plug::In, namePlugDefaultValue ) );
@@ -122,7 +122,6 @@ void ObjectSource::affects( const Gaffer::Plug *input, Gaffer::DependencyNode::A
 		outputs.push_back( outPlug()->setNamesPlug() );
 		outputs.push_back( outPlug()->setPlug() );
 	}
-
 }
 
 Gaffer::ObjectPlug *ObjectSource::sourcePlug()
@@ -276,7 +275,7 @@ IECore::ConstInternedStringVectorDataPtr ObjectSource::computeSetNames( const Ga
 	IECore::InternedStringVectorDataPtr result = new IECore::InternedStringVectorData;
 	IECore::StringAlgo::tokenize( setsPlug()->getValue(), ' ', result->writable() );
 	IECore::ConstInternedStringVectorDataPtr setNames = computeStandardSetNames();
-	for(unsigned int i = 0; i < setNames->readable().size(); ++i)
+	for( unsigned int i = 0; i < setNames->readable().size(); ++i )
 	{
 		result->writable().push_back( setNames->readable()[i] );
 	}

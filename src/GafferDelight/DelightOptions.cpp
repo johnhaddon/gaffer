@@ -41,7 +41,7 @@ using namespace GafferDelight;
 GAFFER_NODE_DEFINE_TYPE( DelightOptions );
 
 DelightOptions::DelightOptions( const std::string &name )
-	:	GafferScene::Options( name, "dl" )
+	: GafferScene::Options( name, "dl" )
 {
 }
 

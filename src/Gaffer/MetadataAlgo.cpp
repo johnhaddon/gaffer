@@ -74,16 +74,16 @@ const InternedString g_maxValue( "maxValue" );
 const InternedString g_childNodesAreViewable( "ui:childNodesAreViewable" );
 const InternedString g_childrenViewable( "graphEditor:childrenViewable" );
 
-void copy( const Gaffer::GraphComponent *src , Gaffer::GraphComponent *dst , IECore::InternedString key , bool overwrite )
+void copy( const Gaffer::GraphComponent *src, Gaffer::GraphComponent *dst, IECore::InternedString key, bool overwrite )
 {
-	if ( !overwrite && Gaffer::Metadata::value<IECore::Data>( dst, key ) )
+	if( !overwrite && Gaffer::Metadata::value<IECore::Data>( dst, key ) )
 	{
 		return;
 	}
 
 	if( IECore::ConstDataPtr data = Gaffer::Metadata::value<IECore::Data>( src, key ) )
 	{
-		Gaffer::Metadata::registerValue(dst, key, data, /* persistent =*/ true);
+		Gaffer::Metadata::registerValue( dst, key, data, /* persistent =*/true );
 	}
 }
 
@@ -109,7 +109,8 @@ const Gaffer::GraphComponent *readOnlyReason( const Gaffer::GraphComponent *grap
 
 		if(
 			Gaffer::MetadataAlgo::getReadOnly( graphComponent ) ||
-			( node && haveNodeDescendants && Gaffer::MetadataAlgo::getChildNodesAreReadOnly( node ) ) )
+			( node && haveNodeDescendants && Gaffer::MetadataAlgo::getChildNodesAreReadOnly( node ) )
+		)
 		{
 			reason = graphComponent;
 			if( first )
@@ -134,7 +135,7 @@ bool ancestorChildNodesAreReadOnly( const Gaffer::GraphComponent *graphComponent
 
 	bool haveNodeDescendants = false;
 	const Gaffer::Node *node = runTimeCast<const Gaffer::Node>( graphComponent );
-	if ( node )
+	if( node )
 	{
 		haveNodeDescendants = true;
 	}
@@ -460,7 +461,7 @@ void setNumericBookmark( ScriptNode *scriptNode, int bookmark, Node *node )
 	int currentValue = numericBookmark( node );
 	if( currentValue )
 	{
-		Metadata::deregisterValue( node, numericBookmarkMetadataName( currentValue) );
+		Metadata::deregisterValue( node, numericBookmarkMetadataName( currentValue ) );
 	}
 
 	Metadata::registerValue( node, metadataName, new BoolData( true ), /* persistent = */ true );
@@ -500,23 +501,23 @@ Imath::Color3f Annotation::g_defaultColor( 0.05 );
 std::string Annotation::g_defaultText;
 
 Annotation::Annotation( const std::string &text )
-	:	textData( new StringData( text ) ), colorData( nullptr )
+	: textData( new StringData( text ) ), colorData( nullptr )
 {
 }
 
 Annotation::Annotation( const std::string &text, const Imath::Color3f &color )
-	:	textData( new StringData( text ) ), colorData( new Color3fData( color ) )
+	: textData( new StringData( text ) ), colorData( new Color3fData( color ) )
 {
 }
 
 Annotation::Annotation( const IECore::ConstStringDataPtr &text, const IECore::ConstColor3fDataPtr &color )
-	:	textData( text ), colorData( color )
+	: textData( text ), colorData( color )
 {
 }
 
 bool Annotation::operator == ( const Annotation &rhs )
 {
-	auto dataEqual = [] ( const Data *a, const Data *b ) {
+	auto dataEqual = []( const Data *a, const Data *b ) {
 		if( a )
 		{
 			return b && b->isEqualTo( a );
@@ -527,10 +528,8 @@ bool Annotation::operator == ( const Annotation &rhs )
 		}
 	};
 
-	return
-		dataEqual( textData.get(), rhs.textData.get() ) &&
-		dataEqual( colorData.get(), rhs.colorData.get() )
-	;
+	return dataEqual( textData.get(), rhs.textData.get() ) &&
+		dataEqual( colorData.get(), rhs.colorData.get() );
 }
 
 void addAnnotation( Node *node, const std::string &name, const Annotation &annotation, bool persistent )
@@ -565,7 +564,7 @@ Annotation getAnnotation( const Node *node, const std::string &name, bool inheri
 	}
 
 	Annotation result( text, Metadata::value<Color3fData>( node, prefix + "color" ) );
-	if( !result.colorData && inheritTemplate  )
+	if( !result.colorData && inheritTemplate )
 	{
 		result.colorData = Metadata::value<Color3fData>( g_annotations, name + ":color" );
 	}
@@ -757,7 +756,7 @@ bool childAffectedByChange( const GraphComponent *parent, IECore::TypeId changed
 
 	for( Node::Iterator it( parent ); !it.done(); ++it )
 	{
-		if( (*it)->isInstanceOf( changedNodeTypeId ) )
+		if( ( *it )->isInstanceOf( changedNodeTypeId ) )
 		{
 			return true;
 		}
@@ -860,17 +859,17 @@ void copy( const GraphComponent *from, GraphComponent *to, const IECore::StringA
 
 	for( GraphComponent::ChildIterator it = from->children().begin(), eIt = from->children().end(); it != eIt; ++it )
 	{
-		if( GraphComponent *childTo = to->getChild( (*it)->getName() ) )
+		if( GraphComponent *childTo = to->getChild( ( *it )->getName() ) )
 		{
 			copy( it->get(), childTo, exclude, persistentOnly, persistent );
 		}
 	}
 }
 
-void copyColors( const Gaffer::Plug *srcPlug , Gaffer::Plug *dstPlug, bool overwrite )
+void copyColors( const Gaffer::Plug *srcPlug, Gaffer::Plug *dstPlug, bool overwrite )
 {
-	::copy(srcPlug, dstPlug, g_connectionColorKey, overwrite);
-	::copy(srcPlug, dstPlug, g_noduleColorKey, overwrite);
+	::copy( srcPlug, dstPlug, g_connectionColorKey, overwrite );
+	::copy( srcPlug, dstPlug, g_noduleColorKey, overwrite );
 }
 
 // Promotability

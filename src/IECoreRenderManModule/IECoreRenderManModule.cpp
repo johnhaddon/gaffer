@@ -61,10 +61,10 @@ ShaderNetworkAlgo::VStructAction evaluateVStructConditionalWrapper( const std::s
 {
 	return ShaderNetworkAlgo::evaluateVStructConditional(
 		expression,
-		[&valueFunction] ( InternedString parameterName ) {
+		[&valueFunction]( InternedString parameterName ) {
 			return extract<ConstDataPtr>( valueFunction( parameterName.string() ) );
 		},
-		[&isConnectedFunction] ( InternedString parameterName ) {
+		[&isConnectedFunction]( InternedString parameterName ) {
 			return extract<bool>( isConnectedFunction( parameterName.string() ) );
 		}
 	);
@@ -87,18 +87,15 @@ BOOST_PYTHON_MODULE( _IECoreRenderMan )
 
 	{
 		scope s = class_<ShaderNetworkAlgo::VStructAction>( "VStructAction" )
-			.def_readonly( "type", &ShaderNetworkAlgo::VStructAction::type )
-			.def_readonly( "value", &ShaderNetworkAlgo::VStructAction::value )
-		;
+					  .def_readonly( "type", &ShaderNetworkAlgo::VStructAction::type )
+					  .def_readonly( "value", &ShaderNetworkAlgo::VStructAction::value );
 
 		enum_<ShaderNetworkAlgo::VStructAction::Type>( "Type" )
 			.value( "None_", ShaderNetworkAlgo::VStructAction::Type::None )
 			.value( "Connect", ShaderNetworkAlgo::VStructAction::Type::Connect )
-			.value( "Set", ShaderNetworkAlgo::VStructAction::Type::Set )
-		;
+			.value( "Set", ShaderNetworkAlgo::VStructAction::Type::Set );
 	}
 
 	def( "evaluateVStructConditional", &evaluateVStructConditionalWrapper );
 	def( "resolveVStructs", &ShaderNetworkAlgo::resolveVStructs );
-
 }

@@ -49,7 +49,7 @@ using namespace Gaffer;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PlugGadget );
 
 PlugGadget::PlugGadget( Gaffer::PlugPtr plug )
-	:	ContainerGadget( defaultName<PlugGadget>() ), m_plug( nullptr )
+	: ContainerGadget( defaultName<PlugGadget>() ), m_plug( nullptr )
 {
 	setPlug( plug );
 }

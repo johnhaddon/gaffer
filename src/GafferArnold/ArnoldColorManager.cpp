@@ -48,7 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldColorManager );
 size_t ArnoldColorManager::g_firstPlugIndex = 0;
 
 ArnoldColorManager::ArnoldColorManager( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Plug( "parameters" ) );

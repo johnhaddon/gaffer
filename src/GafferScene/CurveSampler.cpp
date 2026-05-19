@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( CurveSampler );
 size_t CurveSampler::g_firstPlugIndex = 0;
 
 CurveSampler::CurveSampler( const std::string &name )
-	:	PrimitiveSampler( name )
+	: PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -84,11 +84,9 @@ const Gaffer::StringPlug *CurveSampler::vPlug() const
 
 bool CurveSampler::affectsSamplingFunction( const Gaffer::Plug *input ) const
 {
-	return
-		PrimitiveSampler::affectsSamplingFunction( input ) ||
+	return PrimitiveSampler::affectsSamplingFunction( input ) ||
 		input == curveIndexPlug() ||
-		input == vPlug()
-	;
+		input == vPlug();
 }
 
 void CurveSampler::hashSamplingFunction( IECore::MurmurHash &h ) const
@@ -138,7 +136,7 @@ PrimitiveSampler::SamplingFunction CurveSampler::computeSamplingFunction( const 
 		}
 	}
 
-	return [curveIndexView, vView] ( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
+	return [curveIndexView, vView]( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
 		auto curvesEvaluator = runTimeCast<const CurvesPrimitiveEvaluator>( &evaluator );
 		if( !curvesEvaluator )
 		{
@@ -146,8 +144,8 @@ PrimitiveSampler::SamplingFunction CurveSampler::computeSamplingFunction( const 
 		}
 
 		return curvesEvaluator->pointAtV(
-			curveIndexView ? (*curveIndexView)[index] : 0,
-			vView ? (*vView)[index] : 0.0f,
+			curveIndexView ? ( *curveIndexView )[index] : 0,
+			vView ? ( *vView )[index] : 0.0f,
 			&result
 		);
 	};

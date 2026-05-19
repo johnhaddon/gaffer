@@ -146,4 +146,4 @@ GAFFERSCENEUI_API void addWireframeCurveState( IECoreGL::Group *group, const flo
 /// made into a function that can be called by implementation shaders.
 GAFFERSCENEUI_API void addConstantShader( IECoreGL::Group *group, const Imath::Color3f &tint, int aimType = -1 );
 
-}  // namespace GafferSceneUI::Private::LightVisualiserAlgo
+} // namespace GafferSceneUI::Private::LightVisualiserAlgo

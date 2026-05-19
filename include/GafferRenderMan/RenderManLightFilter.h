@@ -47,13 +47,12 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManLightFilter : public GafferScene::LightFilter
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManLightFilter, RenderManLightFilterTypeId, GafferScene::LightFilter );
+	GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManLightFilter, RenderManLightFilterTypeId, GafferScene::LightFilter );
 
-		explicit RenderManLightFilter( const std::string &name=defaultName<RenderManLightFilter>() );
-		~RenderManLightFilter() override;
-
+	explicit RenderManLightFilter( const std::string &name = defaultName<RenderManLightFilter>() );
+	~RenderManLightFilter() override;
 };
 
 IE_CORE_DECLAREPTR( RenderManLightFilter )

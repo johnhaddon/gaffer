@@ -85,183 +85,172 @@ const InternedString g_lightFilterSetName( "__lightFilters" );
 class LocationNameColumn : public StandardPathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( LocationNameColumn )
+	IE_CORE_DECLAREMEMBERPTR( LocationNameColumn )
 
-		LocationNameColumn()
-			:	StandardPathColumn( "Name", "name" )
+	LocationNameColumn()
+		: StandardPathColumn( "Name", "name" )
+	{
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result = StandardPathColumn::cellData( path, canceller );
+
+		auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
+		if( !scenePath )
 		{
-		}
-
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result = StandardPathColumn::cellData( path, canceller );
-
-			auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
-			if( !scenePath )
-			{
-				return result;
-			}
-
-			Context::EditableScope scope( scenePath->getContext() );
-			scope.setCanceller( canceller );
-
-			ConstCompoundObjectPtr attributes;
-			try
-			{
-				attributes = scenePath->getScene()->fullAttributes( scenePath->names() );
-			}
-			catch( const std::exception &e )
-			{
-				result.icon = new IECore::StringData( "errorSmall.png" );
-				result.toolTip = new IECore::StringData( e.what() );
-				return result;
-			}
-
-			for( const auto &attribute : attributes->members() )
-			{
-				std::vector<InternedString> tokens;
-				StringAlgo::tokenize( attribute.first, ':', tokens );
-				if(
-					attribute.first != "light" &&
-					tokens.back() != "light" &&
-					attribute.first != "lightFilter" &&
-					( tokens.size() < 2 || tokens[1] != "lightFilter" )
-				)
-				{
-					continue;
-				}
-				const auto *shaderNetwork = IECore::runTimeCast<const ShaderNetwork>( attribute.second.get() );
-				if( !shaderNetwork )
-				{
-					continue;
-				}
-
-				const IECoreScene::Shader *shader = shaderNetwork->outputShader();
-				const string metadataTarget = attribute.first.string() + ":" + shader->getName();
-				ConstStringDataPtr type = Metadata::value<StringData>( metadataTarget, "type" );
-				if( !type )
-				{
-					continue;
-				}
-
-				if( type->readable() == "lightBlocker" )
-				{
-					if( ConstStringDataPtr blockerTypeParameter = Metadata::value<StringData>( metadataTarget, "typeParameter" ) )
-					{
-						if( ConstStringDataPtr blockerType = shader->parametersData()->member<StringData>( blockerTypeParameter->readable() ) )
-						{
-							result.icon = new StringData( blockerType->readable() + "Blocker.png" );
-						}
-					}
-				}
-				else
-				{
-					result.icon = new StringData( type->readable() + "Light.png" );
-				}
-			}
-
-			/// \todo Add support for icons based on object type. We don't want to have
-			/// to compute the object itself for that though, so maybe we need to add
-			/// `ScenePlug::objectTypePlug()`?
-
 			return result;
 		}
 
+		Context::EditableScope scope( scenePath->getContext() );
+		scope.setCanceller( canceller );
+
+		ConstCompoundObjectPtr attributes;
+		try
+		{
+			attributes = scenePath->getScene()->fullAttributes( scenePath->names() );
+		}
+		catch( const std::exception &e )
+		{
+			result.icon = new IECore::StringData( "errorSmall.png" );
+			result.toolTip = new IECore::StringData( e.what() );
+			return result;
+		}
+
+		for( const auto &attribute : attributes->members() )
+		{
+			std::vector<InternedString> tokens;
+			StringAlgo::tokenize( attribute.first, ':', tokens );
+			if(
+				attribute.first != "light" &&
+				tokens.back() != "light" &&
+				attribute.first != "lightFilter" &&
+				( tokens.size() < 2 || tokens[1] != "lightFilter" )
+			)
+			{
+				continue;
+			}
+			const auto *shaderNetwork = IECore::runTimeCast<const ShaderNetwork>( attribute.second.get() );
+			if( !shaderNetwork )
+			{
+				continue;
+			}
+
+			const IECoreScene::Shader *shader = shaderNetwork->outputShader();
+			const string metadataTarget = attribute.first.string() + ":" + shader->getName();
+			ConstStringDataPtr type = Metadata::value<StringData>( metadataTarget, "type" );
+			if( !type )
+			{
+				continue;
+			}
+
+			if( type->readable() == "lightBlocker" )
+			{
+				if( ConstStringDataPtr blockerTypeParameter = Metadata::value<StringData>( metadataTarget, "typeParameter" ) )
+				{
+					if( ConstStringDataPtr blockerType = shader->parametersData()->member<StringData>( blockerTypeParameter->readable() ) )
+					{
+						result.icon = new StringData( blockerType->readable() + "Blocker.png" );
+					}
+				}
+			}
+			else
+			{
+				result.icon = new StringData( type->readable() + "Light.png" );
+			}
+		}
+
+		/// \todo Add support for icons based on object type. We don't want to have
+		/// to compute the object itself for that though, so maybe we need to add
+		/// `ScenePlug::objectTypePlug()`?
+
+		return result;
+	}
 };
 
 class MuteColumn : public InspectorColumn
 {
 
-	public :
-		IE_CORE_DECLAREMEMBERPTR( MuteColumn )
+public:
 
-		MuteColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope )
-			: InspectorColumn( new GafferSceneUI::Private::AttributeInspector( scene, editScope, "light:mute" ), "Mute" )
+	IE_CORE_DECLAREMEMBERPTR( MuteColumn )
+
+	MuteColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope )
+		: InspectorColumn( new GafferSceneUI::Private::AttributeInspector( scene, editScope, "light:mute" ), "Mute" )
+	{
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		Inspector::ConstResultPtr inspection = inspect( path, canceller );
+		CellData result = InspectorColumn::cellDataFromInspection( inspection.get() );
+		if( !inspection )
 		{
-
-		}
-
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			Inspector::ConstResultPtr inspection = inspect( path, canceller );
-			CellData result = InspectorColumn::cellDataFromInspection( inspection.get() );
-			if( !inspection )
-			{
-				return result;
-			}
-
-			if( auto value = runTimeCast<const BoolData>( inspection->value() ) )
-			{
-				if( inspection->fallbackDescription().empty() )
-				{
-					result.icon = value->readable() ? m_muteIconData : m_unMuteIconData;
-				}
-				else
-				{
-					result.icon = value->readable() ? m_muteFadedIconData : m_unMuteFadedIconData;
-				}
-			}
-			else
-			{
-				// Use a transparent icon to reserve space in the UI. Without this,
-				// the top row will resize when setting the mute value, causing a full
-				// table resize.
-				if( path.isEmpty() )
-				{
-					result.icon = m_muteBlankIconName;
-				}
-				else
-				{
-					result.icon = m_muteUndefinedIconData;
-				}
-			}
-
-			result.value = nullptr;
-
 			return result;
 		}
 
-	private :
+		if( auto value = runTimeCast<const BoolData>( inspection->value() ) )
+		{
+			if( inspection->fallbackDescription().empty() )
+			{
+				result.icon = value->readable() ? m_muteIconData : m_unMuteIconData;
+			}
+			else
+			{
+				result.icon = value->readable() ? m_muteFadedIconData : m_unMuteFadedIconData;
+			}
+		}
+		else
+		{
+			// Use a transparent icon to reserve space in the UI. Without this,
+			// the top row will resize when setting the mute value, causing a full
+			// table resize.
+			if( path.isEmpty() )
+			{
+				result.icon = m_muteBlankIconName;
+			}
+			else
+			{
+				result.icon = m_muteUndefinedIconData;
+			}
+		}
 
-		static IECore::CompoundDataPtr m_muteIconData;
-		static IECore::CompoundDataPtr m_unMuteIconData;
-		static IECore::CompoundDataPtr m_muteFadedIconData;
-		static IECore::CompoundDataPtr m_unMuteFadedIconData;
-		static IECore::CompoundDataPtr m_muteUndefinedIconData;
-		static IECore::StringDataPtr m_muteBlankIconName;
+		result.value = nullptr;
+
+		return result;
+	}
+
+private:
+
+	static IECore::CompoundDataPtr m_muteIconData;
+	static IECore::CompoundDataPtr m_unMuteIconData;
+	static IECore::CompoundDataPtr m_muteFadedIconData;
+	static IECore::CompoundDataPtr m_unMuteFadedIconData;
+	static IECore::CompoundDataPtr m_muteUndefinedIconData;
+	static IECore::StringDataPtr m_muteBlankIconName;
 };
 
 CompoundDataPtr MuteColumn::m_muteIconData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "muteLight.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "muteLightHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "muteLight.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "muteLightHighlighted.png" ) } }
 );
 CompoundDataPtr MuteColumn::m_unMuteIconData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "unMuteLight.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "unMuteLightHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "unMuteLight.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "unMuteLightHighlighted.png" ) } }
 );
 CompoundDataPtr MuteColumn::m_muteFadedIconData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "muteLightFaded.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "muteLightFadedHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "muteLightFaded.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "muteLightFadedHighlighted.png" ) } }
 );
 CompoundDataPtr MuteColumn::m_unMuteFadedIconData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "unMuteLightFaded.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "unMuteLightFadedHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "unMuteLightFaded.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "unMuteLightFadedHighlighted.png" ) } }
 );
 CompoundDataPtr MuteColumn::m_muteUndefinedIconData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "muteLightUndefined.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "muteLightFadedHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "muteLightUndefined.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "muteLightFadedHighlighted.png" ) } }
 );
 
 StringDataPtr MuteColumn::m_muteBlankIconName = new StringData( "muteLightUndefined.png" );
@@ -269,99 +258,94 @@ StringDataPtr MuteColumn::m_muteBlankIconName = new StringData( "muteLightUndefi
 class SetMembershipColumn : public InspectorColumn
 {
 
-	public :
-		IE_CORE_DECLAREMEMBERPTR( SetMembershipColumn )
+public:
 
-		SetMembershipColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr editScope, const IECore::InternedString &setName, const std::string &columnName )
-			: InspectorColumn( new GafferSceneUI::Private::SetMembershipInspector( scene, editScope, setName ), columnName ), m_setName( setName ), m_scene( scene )
+	IE_CORE_DECLAREMEMBERPTR( SetMembershipColumn )
+
+	SetMembershipColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr editScope, const IECore::InternedString &setName, const std::string &columnName )
+		: InspectorColumn( new GafferSceneUI::Private::SetMembershipInspector( scene, editScope, setName ), columnName ), m_setName( setName ), m_scene( scene )
+	{
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		// Get basic cell data from base class, including the tooltip and
+		// background colour to indicate source type.
+
+		Inspector::ConstResultPtr inspection = inspect( path, canceller );
+		CellData result = InspectorColumn::cellDataFromInspection( inspection.get() );
+		if( !inspection )
 		{
-
+			return result;
 		}
 
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+		// Replace value with an improved icon indicating set membership.
+
+		if( inspection->typedValue<bool>( false ) )
 		{
-			// Get basic cell data from base class, including the tooltip and
-			// background colour to indicate source type.
-
-			Inspector::ConstResultPtr inspection = inspect( path, canceller );
-			CellData result = InspectorColumn::cellDataFromInspection( inspection.get() );
-			if( !inspection )
+			if( inspection->fallbackDescription().empty() )
 			{
-				return result;
-			}
-
-			// Replace value with an improved icon indicating set membership.
-
-			if( inspection->typedValue<bool>( false ) )
-			{
-				if( inspection->fallbackDescription().empty() )
-				{
-					result.icon = m_setMemberIconData;
-				}
-				else
-				{
-					result.icon = m_setMemberIconFadedData;
-				}
+				result.icon = m_setMemberIconData;
 			}
 			else
 			{
-				result.icon = m_setMemberUndefinedIconData;
+				result.icon = m_setMemberIconFadedData;
 			}
-
-			result.value = nullptr;
-
-			return result;
 		}
-
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+		else
 		{
-			CellData result = InspectorColumn::headerData( rootPath, canceller );
+			result.icon = m_setMemberUndefinedIconData;
+		}
 
-			ConstContextPtr context = inspectorContext( rootPath, canceller );
-			if( !context )
-			{
-				return result;
-			}
+		result.value = nullptr;
 
-			Context::EditableScope contextScope( context.get() );
-			contextScope.setCanceller( canceller );
+		return result;
+	}
 
-			ConstPathMatcherDataPtr setMembersData = m_scene->set( m_setName );
-			result.icon = setMembersData->readable().isEmpty() ? m_setEmpty : m_setHasMembers;
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+	{
+		CellData result = InspectorColumn::headerData( rootPath, canceller );
 
+		ConstContextPtr context = inspectorContext( rootPath, canceller );
+		if( !context )
+		{
 			return result;
 		}
 
-	private :
-		const IECore::InternedString m_setName;
-		const GafferScene::ScenePlugPtr m_scene;
+		Context::EditableScope contextScope( context.get() );
+		contextScope.setCanceller( canceller );
 
-		static IECore::CompoundDataPtr m_setMemberIconData;
-		static IECore::CompoundDataPtr m_setMemberIconFadedData;
-		static IECore::CompoundDataPtr m_setMemberUndefinedIconData;
-		static IECore::StringDataPtr m_setHasMembers;
-		static IECore::StringDataPtr m_setEmpty;
+		ConstPathMatcherDataPtr setMembersData = m_scene->set( m_setName );
+		result.icon = setMembersData->readable().isEmpty() ? m_setEmpty : m_setHasMembers;
+
+		return result;
+	}
+
+private:
+
+	const IECore::InternedString m_setName;
+	const GafferScene::ScenePlugPtr m_scene;
+
+	static IECore::CompoundDataPtr m_setMemberIconData;
+	static IECore::CompoundDataPtr m_setMemberIconFadedData;
+	static IECore::CompoundDataPtr m_setMemberUndefinedIconData;
+	static IECore::StringDataPtr m_setHasMembers;
+	static IECore::StringDataPtr m_setEmpty;
 };
 
 CompoundDataPtr SetMembershipColumn::m_setMemberIconData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "setMember.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "setMemberHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "setMember.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "setMemberHighlighted.png" ) } }
 );
 
 CompoundDataPtr SetMembershipColumn::m_setMemberIconFadedData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "setMemberFaded.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "setMemberFadedHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "setMemberFaded.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "setMemberFadedHighlighted.png" ) } }
 );
 
 CompoundDataPtr SetMembershipColumn::m_setMemberUndefinedIconData = new CompoundData(
-	{
-		{ InternedString( "state:normal" ), new StringData( "muteLightUndefined.png" ) },
-		{ InternedString( "state:highlighted" ), new StringData( "setMemberFadedHighlighted.png" ) }
-	}
+	{ { InternedString( "state:normal" ), new StringData( "muteLightUndefined.png" ) },
+	  { InternedString( "state:highlighted" ), new StringData( "setMemberFadedHighlighted.png" ) } }
 );
 
 StringDataPtr SetMembershipColumn::m_setHasMembers = new StringData( "setMember.png" );
@@ -377,27 +361,11 @@ void GafferSceneUIModule::bindLightEditor()
 {
 
 	IECorePython::RefCountedClass<LocationNameColumn, GafferUI::StandardPathColumn>( "_LightEditorLocationNameColumn" )
-		.def( init<>() )
-	;
+		.def( init<>() );
 
 	IECorePython::RefCountedClass<MuteColumn, GafferSceneUI::Private::InspectorColumn>( "_LightEditorMuteColumn" )
-		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &>(
-			(
-				arg_( "scene" ),
-				arg_( "editScope" )
-			)
-		) )
-	;
+		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &>( ( arg_( "scene" ), arg_( "editScope" ) ) ) );
 
 	IECorePython::RefCountedClass<SetMembershipColumn, GafferSceneUI::Private::InspectorColumn>( "_LightEditorSetMembershipColumn" )
-		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &, const IECore::InternedString &, const std::string &>(
-			(
-				arg_( "scene" ),
-				arg_( "editScope" ),
-				arg_( "setName" ),
-				arg_( "columnName" )
-			)
-		) )
-	;
-
+		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &, const IECore::InternedString &, const std::string &>( ( arg_( "scene" ), arg_( "editScope" ), arg_( "setName" ), arg_( "columnName" ) ) ) );
 }

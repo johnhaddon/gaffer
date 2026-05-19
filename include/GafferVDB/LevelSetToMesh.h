@@ -50,36 +50,35 @@ namespace GafferVDB
 class GAFFERVDB_API LevelSetToMesh : public GafferScene::MergeObjects
 {
 
-	public :
+public:
 
-		explicit LevelSetToMesh( const std::string &name=defaultName<LevelSetToMesh>() );
-		~LevelSetToMesh() override;
+	explicit LevelSetToMesh( const std::string &name = defaultName<LevelSetToMesh>() );
+	~LevelSetToMesh() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferVDB::LevelSetToMesh, LevelSetToMeshTypeId, GafferScene::MergeObjects );
+	GAFFER_NODE_DECLARE_TYPE( GafferVDB::LevelSetToMesh, LevelSetToMeshTypeId, GafferScene::MergeObjects );
 
-		Gaffer::StringPlug *gridPlug();
-		const Gaffer::StringPlug *gridPlug() const;
+	Gaffer::StringPlug *gridPlug();
+	const Gaffer::StringPlug *gridPlug() const;
 
-		Gaffer::FloatPlug *isoValuePlug();
-		const Gaffer::FloatPlug *isoValuePlug() const;
+	Gaffer::FloatPlug *isoValuePlug();
+	const Gaffer::FloatPlug *isoValuePlug() const;
 
-		Gaffer::FloatPlug *adaptivityPlug();
-		const Gaffer::FloatPlug *adaptivityPlug() const;
+	Gaffer::FloatPlug *adaptivityPlug();
+	const Gaffer::FloatPlug *adaptivityPlug() const;
 
-	protected :
+protected:
 
-		bool affectsMergedObject( const Gaffer::Plug *input ) const override;
+	bool affectsMergedObject( const Gaffer::Plug *input ) const override;
 
-		void hashMergedObject(
-			const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
-		) const override;
+	void hashMergedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 
-		IECore::ConstObjectPtr computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const override;
+	IECore::ConstObjectPtr computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( LevelSetToMesh )

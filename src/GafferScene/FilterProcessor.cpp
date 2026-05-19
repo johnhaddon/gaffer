@@ -49,14 +49,14 @@ GAFFER_NODE_DEFINE_TYPE( FilterProcessor );
 size_t FilterProcessor::g_firstPlugIndex = 0;
 
 FilterProcessor::FilterProcessor( const std::string &name )
-	:	Filter( name )
+	: Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( outPlug()->createCounterpart( "in", Plug::In ) );
 }
 
 FilterProcessor::FilterProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	Filter( name )
+	: Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild(
@@ -114,7 +114,7 @@ void FilterProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContainer
 		{
 			for( FilterPlug::InputIterator it( arrayIn ); !it.done(); ++it )
 			{
-				(*it)->sceneAffects( input, outputs );
+				( *it )->sceneAffects( input, outputs );
 			}
 		}
 		else

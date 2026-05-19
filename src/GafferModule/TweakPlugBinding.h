@@ -41,4 +41,4 @@ namespace GafferModule
 
 void bindTweakPlugs();
 
-} // namespace GafferSceneModule
+} // namespace GafferModule

@@ -75,7 +75,7 @@ const Dot *dotChainSource( const Plug *plug )
 GAFFER_NODE_DEFINE_TYPE( BoxOut )
 
 BoxOut::BoxOut( const std::string &name )
-	:	BoxIO( Plug::Out, name )
+	: BoxIO( Plug::Out, name )
 {
 }
 

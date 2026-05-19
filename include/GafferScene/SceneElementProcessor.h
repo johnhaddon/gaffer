@@ -48,79 +48,78 @@ namespace GafferScene
 class GAFFERSCENE_API SceneElementProcessor : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		explicit SceneElementProcessor( const std::string &name=defaultName<SceneElementProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
-		~SceneElementProcessor() override;
+	explicit SceneElementProcessor( const std::string &name = defaultName<SceneElementProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
+	~SceneElementProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::SceneElementProcessor, SceneElementProcessorTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::SceneElementProcessor, SceneElementProcessorTypeId, FilteredSceneProcessor );
 
-		/// Implemented so that each child of inPlug() affects the corresponding child of outPlug()
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	/// Implemented so that each child of inPlug() affects the corresponding child of outPlug()
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Implemented to call hashProcessedBound() where appropriate.
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		/// Implemented to call hashProcessedTransform() where appropriate.
-		void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		/// Implemented to call hashProcessedAttributes() where appropriate.
-		void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		/// Implemented to call hashProcessedObject() where appropriate.
-		void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	/// Implemented to call hashProcessedBound() where appropriate.
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	/// Implemented to call hashProcessedTransform() where appropriate.
+	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	/// Implemented to call hashProcessedAttributes() where appropriate.
+	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	/// Implemented to call hashProcessedObject() where appropriate.
+	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 
-		/// Implemented to call computeProcessedBound() where appropriate.
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		/// Implemented to call computeProcessedTransform() where appropriate.
-		Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		/// Implemented to call computeProcessedAttributes() where appropriate.
-		IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		/// Implemented to call computeProcessedObject() where appropriate.
-		IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	/// Implemented to call computeProcessedBound() where appropriate.
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	/// Implemented to call computeProcessedTransform() where appropriate.
+	Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	/// Implemented to call computeProcessedAttributes() where appropriate.
+	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	/// Implemented to call computeProcessedObject() where appropriate.
+	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		/// @name Scene processing methods
-		/// These methods should be reimplemented by derived classes to process the input scene - they will be called as
-		/// appropriate based on the result of the filter applied to the node. To process a particular
-		/// aspect of the scene you must reimplement processesAspect() to return true, reimplement
-		/// hashAspect() to append to the hash appropriately (the path will already have been appended),
-		/// and finally reimplement the processAspect() function to perform the processing. Note that the implementation
-		/// of processesAspect() is expected to return a constant - returning different values for different scene paths
-		/// is currently not supported (this is because the bound computation may need to take into account child locations).
-		/// \todo Review the use of the processes*() methods - see comments in StandardAttributes.cpp.
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		//@{
-		virtual bool processesBound() const;
-		virtual void hashProcessedBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		virtual Imath::Box3f computeProcessedBound( const ScenePath &path, const Gaffer::Context *context, const Imath::Box3f &inputBound ) const;
+	/// @name Scene processing methods
+	/// These methods should be reimplemented by derived classes to process the input scene - they will be called as
+	/// appropriate based on the result of the filter applied to the node. To process a particular
+	/// aspect of the scene you must reimplement processesAspect() to return true, reimplement
+	/// hashAspect() to append to the hash appropriately (the path will already have been appended),
+	/// and finally reimplement the processAspect() function to perform the processing. Note that the implementation
+	/// of processesAspect() is expected to return a constant - returning different values for different scene paths
+	/// is currently not supported (this is because the bound computation may need to take into account child locations).
+	/// \todo Review the use of the processes*() methods - see comments in StandardAttributes.cpp.
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	//@{
+	virtual bool processesBound() const;
+	virtual void hashProcessedBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	virtual Imath::Box3f computeProcessedBound( const ScenePath &path, const Gaffer::Context *context, const Imath::Box3f &inputBound ) const;
 
-		virtual bool processesTransform() const;
-		virtual void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		virtual Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const;
+	virtual bool processesTransform() const;
+	virtual void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	virtual Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const;
 
-		virtual bool processesAttributes() const;
-		virtual void hashProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		virtual IECore::ConstCompoundObjectPtr computeProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputAttributes ) const;
+	virtual bool processesAttributes() const;
+	virtual void hashProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	virtual IECore::ConstCompoundObjectPtr computeProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputAttributes ) const;
 
-		/// Note that if you implement processesObject() in such a way as to deform the object, you /must/ also
-		/// implement processesBound() appropriately.
-		virtual bool processesObject() const;
-		virtual void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		virtual IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const;
-		//@}
+	/// Note that if you implement processesObject() in such a way as to deform the object, you /must/ also
+	/// implement processesBound() appropriately.
+	virtual bool processesObject() const;
+	virtual void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	virtual IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const;
+	//@}
 
-	private :
+private:
 
-		enum BoundMethod
-		{
-			PassThrough = 0,
-			Processed = 1,
-			Union = 2
-		};
+	enum BoundMethod
+	{
+		PassThrough = 0,
+		Processed = 1,
+		Union = 2
+	};
 
-		BoundMethod boundMethod( const Gaffer::Context *context ) const;
+	BoundMethod boundMethod( const Gaffer::Context *context ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( SceneElementProcessor )

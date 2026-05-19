@@ -44,32 +44,31 @@ namespace GafferScene
 class GAFFERSCENE_API Prune : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		explicit Prune( const std::string &name=defaultName<Prune>() );
-		~Prune() override;
+	explicit Prune( const std::string &name = defaultName<Prune>() );
+	~Prune() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Prune, PruneTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Prune, PruneTypeId, FilteredSceneProcessor );
 
-		Gaffer::BoolPlug *adjustBoundsPlug();
-		const Gaffer::BoolPlug *adjustBoundsPlug() const;
+	Gaffer::BoolPlug *adjustBoundsPlug();
+	const Gaffer::BoolPlug *adjustBoundsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Prune )

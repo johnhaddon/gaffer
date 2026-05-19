@@ -48,7 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( LUT );
 size_t LUT::g_firstPlugIndex = 0;
 
 LUT::LUT( const std::string &name )
-	:	OpenColorIOTransform( name )
+	: OpenColorIOTransform( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );
@@ -66,7 +66,6 @@ LUT::LUT( const std::string &name )
 		Forward,
 		Inverse
 	) );
-
 }
 
 LUT::~LUT()
@@ -142,13 +141,11 @@ OCIO_NAMESPACE::ConstTransformRcPtr LUT::transform() const
 
 	switch( (Direction)directionPlug()->getValue() )
 	{
-		case Forward :
-		{
+		case Forward : {
 			result->setDirection( OCIO_NAMESPACE::TRANSFORM_DIR_FORWARD );
 			break;
 		}
-		case Inverse :
-		{
+		case Inverse : {
 			result->setDirection( OCIO_NAMESPACE::TRANSFORM_DIR_INVERSE );
 			break;
 		}
@@ -156,23 +153,19 @@ OCIO_NAMESPACE::ConstTransformRcPtr LUT::transform() const
 
 	switch( (Interpolation)interpolationPlug()->getValue() )
 	{
-		case Best :
-		{
+		case Best : {
 			result->setInterpolation( OCIO_NAMESPACE::INTERP_BEST );
 			break;
 		}
-		case Nearest :
-		{
+		case Nearest : {
 			result->setInterpolation( OCIO_NAMESPACE::INTERP_NEAREST );
 			break;
 		}
-		case Linear :
-		{
+		case Linear : {
 			result->setInterpolation( OCIO_NAMESPACE::INTERP_LINEAR );
 			break;
 		}
-		case Tetrahedral :
-		{
+		case Tetrahedral : {
 			result->setInterpolation( OCIO_NAMESPACE::INTERP_TETRAHEDRAL );
 			break;
 		}

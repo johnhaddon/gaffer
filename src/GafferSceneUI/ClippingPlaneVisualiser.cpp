@@ -51,66 +51,65 @@ namespace
 class ClippingPlaneVisualiser : public ObjectVisualiser
 {
 
-	public :
+public:
 
-		using ObjectType = IECoreScene::ClippingPlane;
+	using ObjectType = IECoreScene::ClippingPlane;
 
-		ClippingPlaneVisualiser()
-		{
-			IECoreGL::GroupPtr group = new IECoreGL::Group();
-			m_visualisations.push_back( Visualisation::createGeometry( group ) );
+	ClippingPlaneVisualiser()
+	{
+		IECoreGL::GroupPtr group = new IECoreGL::Group();
+		m_visualisations.push_back( Visualisation::createGeometry( group ) );
 
-			group->getState()->add( new IECoreGL::Primitive::DrawWireframe( true ) );
-			group->getState()->add( new IECoreGL::Primitive::DrawSolid( false ) );
-			group->getState()->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
-			group->getState()->add( new IECoreGL::WireframeColorStateComponent( Color4f( 0.06, 0.2, 0.56, 1 ) ) );
-			group->getState()->add( new IECoreGL::CurvesPrimitive::GLLineWidth( 1.0f ) );
+		group->getState()->add( new IECoreGL::Primitive::DrawWireframe( true ) );
+		group->getState()->add( new IECoreGL::Primitive::DrawSolid( false ) );
+		group->getState()->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
+		group->getState()->add( new IECoreGL::WireframeColorStateComponent( Color4f( 0.06, 0.2, 0.56, 1 ) ) );
+		group->getState()->add( new IECoreGL::CurvesPrimitive::GLLineWidth( 1.0f ) );
 
-			IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
-			IECore::IntVectorDataPtr vertsPerCurveData = new IECore::IntVectorData;
-			vector<V3f> &p = pData->writable();
-			vector<int> &vertsPerCurve = vertsPerCurveData->writable();
-			p.reserve( 11 );
-			vertsPerCurve.reserve( 4 );
-			// square
-			p.push_back( V3f( -0.5, -0.5, 0 ) );
-			p.push_back( V3f( -0.5, 0.5, 0 ) );
-			p.push_back( V3f( 0.5, 0.5, 0 ) );
-			p.push_back( V3f( 0.5, -0.5, 0 ) );
-			p.push_back( V3f( -0.5, -0.5, 0 ) );
-			vertsPerCurve.push_back( 5 );
-			// cross
-			p.push_back( V3f( -0.5, -0.5, 0 ) );
-			p.push_back( V3f( 0.5, 0.5, 0 ) );
-			vertsPerCurve.push_back( 2 );
-			p.push_back( V3f( -0.5, 0.5, 0 ) );
-			p.push_back( V3f( 0.5, -0.5, 0 ) );
-			vertsPerCurve.push_back( 2 );
-			// normal
-			p.push_back( V3f( 0, 0, 0 ) );
-			p.push_back( V3f( 0, 0, 0.5 ) );
-			vertsPerCurve.push_back( 2 );
+		IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+		IECore::IntVectorDataPtr vertsPerCurveData = new IECore::IntVectorData;
+		vector<V3f> &p = pData->writable();
+		vector<int> &vertsPerCurve = vertsPerCurveData->writable();
+		p.reserve( 11 );
+		vertsPerCurve.reserve( 4 );
+		// square
+		p.push_back( V3f( -0.5, -0.5, 0 ) );
+		p.push_back( V3f( -0.5, 0.5, 0 ) );
+		p.push_back( V3f( 0.5, 0.5, 0 ) );
+		p.push_back( V3f( 0.5, -0.5, 0 ) );
+		p.push_back( V3f( -0.5, -0.5, 0 ) );
+		vertsPerCurve.push_back( 5 );
+		// cross
+		p.push_back( V3f( -0.5, -0.5, 0 ) );
+		p.push_back( V3f( 0.5, 0.5, 0 ) );
+		vertsPerCurve.push_back( 2 );
+		p.push_back( V3f( -0.5, 0.5, 0 ) );
+		p.push_back( V3f( 0.5, -0.5, 0 ) );
+		vertsPerCurve.push_back( 2 );
+		// normal
+		p.push_back( V3f( 0, 0, 0 ) );
+		p.push_back( V3f( 0, 0, 0.5 ) );
+		vertsPerCurve.push_back( 2 );
 
-			IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
-			curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-			group->addChild( curves );
-		}
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
+		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		group->addChild( curves );
+	}
 
-		~ClippingPlaneVisualiser() override
-		{
-		}
+	~ClippingPlaneVisualiser() override
+	{
+	}
 
-		Visualisations visualise( const IECore::Object *object ) const override
-		{
-			return m_visualisations;
-		}
+	Visualisations visualise( const IECore::Object *object ) const override
+	{
+		return m_visualisations;
+	}
 
-	protected :
+protected:
 
-		static ObjectVisualiserDescription<ClippingPlaneVisualiser> g_visualiserDescription;
+	static ObjectVisualiserDescription<ClippingPlaneVisualiser> g_visualiserDescription;
 
-		Visualisations m_visualisations;
-
+	Visualisations m_visualisations;
 };
 
 ObjectVisualiser::ObjectVisualiserDescription<ClippingPlaneVisualiser> ClippingPlaneVisualiser::g_visualiserDescription;

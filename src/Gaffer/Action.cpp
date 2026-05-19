@@ -52,7 +52,7 @@ using namespace Gaffer;
 IE_CORE_DEFINERUNTIMETYPED( Action );
 
 Action::Action( bool cancelBackgroundTasks )
-	:	m_done( false ), m_cancelBackgroundTasks( cancelBackgroundTasks )
+	: m_done( false ), m_cancelBackgroundTasks( cancelBackgroundTasks )
 {
 }
 
@@ -76,7 +76,6 @@ void Action::enact( ActionPtr action )
 	{
 		action->doAction();
 	}
-
 }
 
 void Action::doAction()
@@ -124,72 +123,71 @@ namespace Gaffer
 class SimpleAction : public Action
 {
 
-	public :
+public:
 
-		SimpleAction( const GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks )
-			:	Action( cancelBackgroundTasks ), m_subject( subject.get() ), m_doFn( doFn ), m_undoFn( undoFn )
+	SimpleAction( const GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks )
+		: Action( cancelBackgroundTasks ), m_subject( subject.get() ), m_doFn( doFn ), m_undoFn( undoFn )
+	{
+		// In the documentation for Action::enact(), we promise that we'll keep
+		// the subject alive for as long as the Functions are in use. If the subject
+		// is a ScriptNode, that is taken care of for us, as the ScriptNode has ownership
+		// of the SimpleAction. If the subject is not a ScriptNode, we must increment
+		// the reference count and decrement it again in our destructor.
+		if( !m_subject->isInstanceOf( Gaffer::ScriptNode::staticTypeId() ) )
 		{
-			// In the documentation for Action::enact(), we promise that we'll keep
-			// the subject alive for as long as the Functions are in use. If the subject
-			// is a ScriptNode, that is taken care of for us, as the ScriptNode has ownership
-			// of the SimpleAction. If the subject is not a ScriptNode, we must increment
-			// the reference count and decrement it again in our destructor.
-			if( !m_subject->isInstanceOf( Gaffer::ScriptNode::staticTypeId() ) )
-			{
-				m_subject->addRef();
-			}
+			m_subject->addRef();
 		}
+	}
 
-		~SimpleAction() override
+	~SimpleAction() override
+	{
+		if( !m_subject->isInstanceOf( Gaffer::ScriptNode::staticTypeId() ) )
 		{
-			if( !m_subject->isInstanceOf( Gaffer::ScriptNode::staticTypeId() ) )
-			{
-				m_subject->removeRef();
-			}
+			m_subject->removeRef();
 		}
+	}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::SimpleAction, SimpleActionTypeId, Action );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::SimpleAction, SimpleActionTypeId, Action );
 
-	protected :
+protected:
 
-		GraphComponent *subject() const override
+	GraphComponent *subject() const override
+	{
+		return m_subject;
+	}
+
+	void doAction() override
+	{
+		Action::doAction();
+		if( m_doFn )
 		{
-			return m_subject;
+			m_doFn();
 		}
+	}
 
-		void doAction() override
+	void undoAction() override
+	{
+		Action::undoAction();
+		if( m_undoFn )
 		{
-			Action::doAction();
-			if( m_doFn )
-			{
-				m_doFn();
-			}
+			m_undoFn();
 		}
+	}
 
-		void undoAction() override
-		{
-			Action::undoAction();
-			if( m_undoFn )
-			{
-				m_undoFn();
-			}
-		}
+	bool canMerge( const Action *other ) const override
+	{
+		return false;
+	}
 
-		bool canMerge( const Action *other ) const override
-		{
-			return false;
-		}
+	void merge( const Action *other ) override
+	{
+	}
 
-		void merge( const Action *other ) override
-		{
-		}
+private:
 
-	private :
-
-		GraphComponent *m_subject;
-		Function m_doFn;
-		Function m_undoFn;
-
+	GraphComponent *m_subject;
+	Function m_doFn;
+	Function m_undoFn;
 };
 
 IE_CORE_DEFINERUNTIMETYPED( SimpleAction );

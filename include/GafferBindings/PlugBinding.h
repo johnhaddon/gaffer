@@ -49,129 +49,126 @@
 namespace GafferBindings
 {
 
-template<typename T, typename TWrapper=T>
+template<typename T, typename TWrapper = T>
 class PlugClass : public GraphComponentClass<T, TWrapper>
 {
-	public :
+public:
 
-		PlugClass( const char *docString = nullptr );
-
+	PlugClass( const char *docString = nullptr );
 };
 
 template<typename WrappedType>
 class PlugWrapper : public GraphComponentWrapper<WrappedType>
 {
-	public :
+public:
 
-		template<typename... Args>
-		PlugWrapper( PyObject *self, Args&&... args )
-			:	GraphComponentWrapper<WrappedType>( self, std::forward<Args>( args )... )
+	template<typename... Args>
+	PlugWrapper( PyObject *self, Args &&...args )
+		: GraphComponentWrapper<WrappedType>( self, std::forward<Args>( args )... )
+	{
+	}
+
+	bool isInstanceOf( IECore::TypeId typeId ) const override
+	{
+		// Optimise for common queries we know should fail.
+		// The standard wrapper implementation of isInstanceOf()
+		// would have to enter Python only to discover this inevitable
+		// failure as it doesn't have knowledge of the relationships
+		// among types. Entering Python is incredibly costly for such
+		// a simple operation, and we perform these operations often,
+		// so this optimisation is well worth it.
+		if(
+			typeId == (IECore::TypeId)Gaffer::ScriptNodeTypeId ||
+			typeId == (IECore::TypeId)Gaffer::NodeTypeId ||
+			typeId == (IECore::TypeId)Gaffer::DependencyNodeTypeId ||
+			typeId == (IECore::TypeId)Gaffer::ComputeNodeTypeId
+		)
 		{
+			return false;
 		}
+		return GraphComponentWrapper<WrappedType>::isInstanceOf( typeId );
+	}
 
-		bool isInstanceOf( IECore::TypeId typeId ) const override
+	bool acceptsInput( const Gaffer::Plug *input ) const override
+	{
+		if( this->isSubclassed() )
 		{
-			// Optimise for common queries we know should fail.
-			// The standard wrapper implementation of isInstanceOf()
-			// would have to enter Python only to discover this inevitable
-			// failure as it doesn't have knowledge of the relationships
-			// among types. Entering Python is incredibly costly for such
-			// a simple operation, and we perform these operations often,
-			// so this optimisation is well worth it.
-			if(
-				typeId == (IECore::TypeId)Gaffer::ScriptNodeTypeId ||
-				typeId == (IECore::TypeId)Gaffer::NodeTypeId ||
-				typeId == (IECore::TypeId)Gaffer::DependencyNodeTypeId ||
-				typeId == (IECore::TypeId)Gaffer::ComputeNodeTypeId
-			)
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				return false;
-			}
-			return GraphComponentWrapper<WrappedType>::isInstanceOf( typeId );
-		}
-
-		bool acceptsInput( const Gaffer::Plug *input ) const override
-		{
-			if( this->isSubclassed() )
-			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				boost::python::object f = this->methodOverride( "acceptsInput" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "acceptsInput" );
-					if( f )
-					{
-						return f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( input ) ) );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( input ) ) );
 				}
 			}
-			return WrappedType::acceptsInput( input );
-		}
-
-		void setInput( Gaffer::PlugPtr input ) override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::acceptsInput( input );
+	}
+
+	void setInput( Gaffer::PlugPtr input ) override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "setInput" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "setInput" );
-					if( f )
-					{
-						f( boost::const_pointer_cast<Gaffer::Plug>( input ) );
-						return;
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					f( boost::const_pointer_cast<Gaffer::Plug>( input ) );
+					return;
 				}
 			}
-			WrappedType::setInput( input );
-		}
-
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Gaffer::Plug::Direction direction ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		WrappedType::setInput( input );
+	}
+
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Gaffer::Plug::Direction direction ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "createCounterpart" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "createCounterpart" );
-					if( f )
-					{
-						Gaffer::PlugPtr result = boost::python::extract<Gaffer::PlugPtr>( f( name, direction ) );
-						return result;
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					Gaffer::PlugPtr result = boost::python::extract<Gaffer::PlugPtr>( f( name, direction ) );
+					return result;
 				}
 			}
-			return WrappedType::createCounterpart( name, direction );
+			catch( const boost::python::error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
-
+		return WrappedType::createCounterpart( name, direction );
+	}
 };
 
 class GAFFERBINDINGS_API PlugSerialiser : public Serialisation::Serialiser
 {
 
-	public :
+public:
 
-		void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override;
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override;
-		std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override;
-		bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
+	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override;
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override;
+	std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override;
+	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
 
-		static std::string directionRepr( Gaffer::Plug::Direction direction );
-		static std::string flagsRepr( unsigned flags );
-		static std::string repr( const Gaffer::Plug *plug, unsigned flagsMask = Gaffer::Plug::All );
-
+	static std::string directionRepr( Gaffer::Plug::Direction direction );
+	static std::string flagsRepr( unsigned flags );
+	static std::string repr( const Gaffer::Plug *plug, unsigned flagsMask = Gaffer::Plug::All );
 };
 
 } // namespace GafferBindings

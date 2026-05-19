@@ -244,11 +244,8 @@ using Values = multi_index::multi_index_container<
 	NamedValue,
 	multi_index::indexed_by<
 		multi_index::ordered_unique<
-			multi_index::key<&NamedValue::first>
-		>,
-		multi_index::sequenced<>
-	>
->;
+			multi_index::key<&NamedValue::first>>,
+		multi_index::sequenced<>>>;
 
 using NamedValues = std::pair<InternedString, Values>;
 
@@ -256,11 +253,8 @@ using MetadataMap = multi_index::multi_index_container<
 	NamedValues,
 	multi_index::indexed_by<
 		multi_index::ordered_unique<
-			multi_index::key<&NamedValues::first>
-		>,
-		multi_index::sequenced<>
-	>
->;
+			multi_index::key<&NamedValues::first>>,
+		multi_index::sequenced<>>>;
 
 MetadataMap &metadataMap()
 {
@@ -289,27 +283,20 @@ struct GraphComponentMetadata
 		NamedValue,
 		multi_index::indexed_by<
 			multi_index::ordered_unique<
-				multi_index::key<&NamedValue::first>
-			>,
-			multi_index::sequenced<>
-		>
-	>;
+				multi_index::key<&NamedValue::first>>,
+			multi_index::sequenced<>>>;
 
 	using PlugValues = multi_index::multi_index_container<
 		NamedPlugValue,
 		multi_index::indexed_by<
 			multi_index::ordered_unique<
-				multi_index::key<&NamedPlugValue::first>
-			>,
-			multi_index::sequenced<>
-		>
-	>;
+				multi_index::key<&NamedPlugValue::first>>,
+			multi_index::sequenced<>>>;
 
 	using PlugPathsToValues = map<StringAlgo::MatchPatternPath, PlugValues>;
 
 	Values values;
 	PlugPathsToValues plugPathsToValues;
-
 };
 
 using GraphComponentMetadataMap = std::map<IECore::TypeId, GraphComponentMetadata>;
@@ -326,7 +313,7 @@ GraphComponentMetadataMap &graphComponentMetadataMap()
 struct NamedInstanceValue
 {
 	NamedInstanceValue( InternedString n, ConstDataPtr v, bool p )
-		:	name( n ), value( v ), persistent( p )
+		: name( n ), value( v ), persistent( p )
 	{
 	}
 
@@ -339,11 +326,8 @@ using InstanceValues = multi_index::multi_index_container<
 	NamedInstanceValue,
 	multi_index::indexed_by<
 		multi_index::ordered_unique<
-			multi_index::key<&NamedInstanceValue::name>
-		>,
-		multi_index::sequenced<>
-	>
->;
+			multi_index::key<&NamedInstanceValue::name>>,
+		multi_index::sequenced<>>>;
 
 using InstanceMetadataMap = concurrent_hash_map<const GraphComponent *, std::unique_ptr<InstanceValues>>;
 
@@ -460,7 +444,7 @@ void registerInstanceValue( GraphComponent *instance, IECore::InternedString key
 		// the new one.
 		if(
 			( *currentValue == *value ) ||
-			( *currentValue && *value && (*currentValue)->isEqualTo( value->get() ) )
+			( *currentValue && *value && ( *currentValue )->isEqualTo( value->get() ) )
 		)
 		{
 			return;
@@ -527,7 +511,7 @@ unsigned registrationTypes( bool instanceOnly, bool persistentOnly = false )
 
 void Metadata::registerValue( IECore::InternedString target, IECore::InternedString key, IECore::ConstDataPtr value )
 {
-	registerValue( target, key, [value] ( InternedString key ) { return value; } );
+	registerValue( target, key, [value]( InternedString key ) { return value; } );
 }
 
 void Metadata::registerValue( IECore::InternedString target, IECore::InternedString key, ValueFunction value )
@@ -566,8 +550,7 @@ void Metadata::registerValue( IECore::InternedString target, IECore::InternedStr
 
 void Metadata::deregisterValue( IECore::InternedString target, IECore::InternedString key )
 {
-	auto erase = [] ( InternedString target, InternedString key, auto &map ) -> bool {
-
+	auto erase = []( InternedString target, InternedString key, auto &map ) -> bool {
 		auto targetIt = map.find( target );
 		if( targetIt == map.end() )
 		{
@@ -699,7 +682,7 @@ std::vector<IECore::InternedString> Metadata::targetsWithMetadata( const IECore:
 
 void Metadata::registerValue( IECore::TypeId typeId, IECore::InternedString key, IECore::ConstDataPtr value )
 {
-	registerValue( typeId, key, [value]( const GraphComponent * ){ return value; } );
+	registerValue( typeId, key, [value]( const GraphComponent * ) { return value; } );
 }
 
 void Metadata::registerValue( IECore::TypeId typeId, IECore::InternedString key, GraphComponentValueFunction value )
@@ -756,9 +739,9 @@ void Metadata::deregisterValue( GraphComponent *target, IECore::InternedString k
 	registerInstanceValue( target, key, OptionalData(), /* persistent = */ false );
 }
 
-std::vector<Node*> Metadata::nodesWithMetadata( GraphComponent *root, IECore::InternedString key, bool instanceOnly )
+std::vector<Node *> Metadata::nodesWithMetadata( GraphComponent *root, IECore::InternedString key, bool instanceOnly )
 {
-	std::vector<Node*> nodes;
+	std::vector<Node *> nodes;
 	if( instanceOnly )
 	{
 		// if we're only looking for instance data, we can improve the performance
@@ -767,7 +750,7 @@ std::vector<Node*> Metadata::nodesWithMetadata( GraphComponent *root, IECore::In
 		InstanceMetadataMap::const_iterator end = instanceMetadataMap().end();
 		for( ; it != end; ++it )
 		{
-			const Node* node = runTimeCast<const Node>( it->first );
+			const Node *node = runTimeCast<const Node>( it->first );
 			if( !node || !root->isAncestorOf( node ) )
 			{
 				continue;
@@ -775,7 +758,7 @@ std::vector<Node*> Metadata::nodesWithMetadata( GraphComponent *root, IECore::In
 
 			if( it->second->find( key ) != it->second->end() )
 			{
-				nodes.push_back( const_cast<Node*>( node ) );
+				nodes.push_back( const_cast<Node *>( node ) );
 			}
 		}
 	}
@@ -794,7 +777,7 @@ std::vector<Node*> Metadata::nodesWithMetadata( GraphComponent *root, IECore::In
 
 void Metadata::registerValue( IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key, IECore::ConstDataPtr value )
 {
-	registerValue( ancestorTypeId, plugPath, key, [value](const Plug *){ return value; } );
+	registerValue( ancestorTypeId, plugPath, key, [value]( const Plug * ) { return value; } );
 }
 
 void Metadata::registerValue( IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key, PlugValueFunction value )
@@ -818,9 +801,9 @@ void Metadata::registerValue( IECore::TypeId ancestorTypeId, const StringAlgo::M
 	emitPlugValueChangedSignals( ancestorTypeId, plugPath, matchPatternPath, key, Metadata::ValueChangedReason::StaticRegistration );
 }
 
-std::vector<Plug*> Metadata::plugsWithMetadata( GraphComponent *root, IECore::InternedString key, bool instanceOnly )
+std::vector<Plug *> Metadata::plugsWithMetadata( GraphComponent *root, IECore::InternedString key, bool instanceOnly )
 {
-	std::vector<Plug*> plugs;
+	std::vector<Plug *> plugs;
 	if( instanceOnly )
 	{
 		// If we're only looking for instance data, we can improve the performance
@@ -832,7 +815,7 @@ std::vector<Plug*> Metadata::plugsWithMetadata( GraphComponent *root, IECore::In
 		InstanceMetadataMap::const_iterator end = instanceMetadataMap().end();
 		for( ; it != end; ++it )
 		{
-			const Plug* plug = runTimeCast<const Plug>( it->first );
+			const Plug *plug = runTimeCast<const Plug>( it->first );
 			if( !plug || !root->isAncestorOf( plug ) )
 			{
 				continue;
@@ -840,13 +823,13 @@ std::vector<Plug*> Metadata::plugsWithMetadata( GraphComponent *root, IECore::In
 
 			if( it->second->find( key ) != it->second->end() )
 			{
-				plugs.push_back( const_cast<Plug*>( plug ) );
+				plugs.push_back( const_cast<Plug *>( plug ) );
 			}
 		}
 	}
 	else
 	{
-		for( FilteredRecursiveChildIterator<TypePredicate<Plug> > it( root ); !it.done(); ++it )
+		for( FilteredRecursiveChildIterator<TypePredicate<Plug>> it( root ); !it.done(); ++it )
 		{
 			if( valueInternal( it->get(), key, false ) )
 			{
@@ -867,7 +850,7 @@ std::vector<IECore::InternedString> Metadata::registeredValues( const GraphCompo
 	std::vector<IECore::InternedString> keys;
 
 	size_t numSources = 0;
-	if( registrationTypes & RegistrationTypes::TypeId  )
+	if( registrationTypes & RegistrationTypes::TypeId )
 	{
 		IECore::TypeId typeId = target->typeId();
 		while( typeId != InvalidTypeId )
@@ -942,7 +925,7 @@ std::vector<IECore::InternedString> Metadata::registeredValues( const GraphCompo
 		keys.erase(
 			std::remove_if(
 				keys.begin(), keys.end(),
-				[&] ( const InternedString &key ) {
+				[&]( const InternedString &key ) {
 					return std::find( const_cast<const InternedString *>( keys.data() ), &key, key ) != &key;
 				}
 			),
@@ -970,7 +953,7 @@ IECore::ConstDataPtr Metadata::valueInternal( const GraphComponent *target, IECo
 		{
 			if(
 				( !persistent && ( registrationTypes & RegistrationTypes::InstanceNonPersistent ) ) ||
-				( persistent  && ( registrationTypes & RegistrationTypes::InstancePersistent ) )
+				( persistent && ( registrationTypes & RegistrationTypes::InstancePersistent ) )
 			)
 			{
 				return *iv;

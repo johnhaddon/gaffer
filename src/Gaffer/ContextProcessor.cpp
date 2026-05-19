@@ -49,22 +49,21 @@ static IECore::InternedString g_outPlugName( "out" );
 class ContextProcessor::ProcessedScope : public Context::EditableScope
 {
 
-	public :
+public:
 
-		ProcessedScope( const Context *context, const ContextProcessor *processor )
-			:	EditableScope( context )
+	ProcessedScope( const Context *context, const ContextProcessor *processor )
+		: EditableScope( context )
+	{
+		ContextAlgo::GlobalScope globalScope( context, processor->inPlug() );
+		if( processor->enabledPlug()->getValue() )
 		{
-			ContextAlgo::GlobalScope globalScope( context, processor->inPlug() );
-			if( processor->enabledPlug()->getValue() )
-			{
-				processor->processContext( *this, m_storage );
-			}
+			processor->processContext( *this, m_storage );
 		}
+	}
 
-	private :
+private:
 
-		IECore::ConstRefCountedPtr m_storage;
-
+	IECore::ConstRefCountedPtr m_storage;
 };
 
 GAFFER_NODE_DEFINE_TYPE( ContextProcessor );
@@ -72,7 +71,7 @@ GAFFER_NODE_DEFINE_TYPE( ContextProcessor );
 size_t ContextProcessor::g_firstPlugIndex = 0;
 
 ContextProcessor::ContextProcessor( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "enabled", Gaffer::Plug::In, true ) );
@@ -94,12 +93,12 @@ void ContextProcessor::setup( const Plug *plug )
 	}
 
 	PlugPtr in = plug->createCounterpart( g_inPlugName, Plug::In );
-	MetadataAlgo::copyColors( plug , in.get() , /* overwrite = */ false  );
+	MetadataAlgo::copyColors( plug, in.get(), /* overwrite = */ false );
 	in->setFlags( Plug::Serialisable, true );
 	addChild( in );
 
 	PlugPtr out = plug->createCounterpart( g_outPlugName, Plug::Out );
-	MetadataAlgo::copyColors( plug , out.get() , /* overwrite = */ false  );
+	MetadataAlgo::copyColors( plug, out.get(), /* overwrite = */ false );
 	addChild( out );
 }
 
@@ -171,7 +170,7 @@ void ContextProcessor::affects( const Plug *input, DependencyNode::AffectedPlugs
 			{
 				for( Plug::RecursiveOutputIterator it( out ); !it.done(); ++it )
 				{
-					if( !(*it)->children().size() )
+					if( !( *it )->children().size() )
 					{
 						outputs.push_back( it->get() );
 					}

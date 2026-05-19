@@ -85,7 +85,7 @@ float divRoundDown( int a, int b )
 } // namespace
 
 Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Session *session )
-	:	m_session( session )
+	: m_session( session )
 {
 	// Parameters
 
@@ -193,7 +193,6 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 		cameraParamList,
 		options
 	);
-
 }
 
 Camera::~Camera()

@@ -68,73 +68,72 @@ class Plug;
 class GAFFER_API BackgroundTask : public boost::noncopyable
 {
 
-	public :
+public:
 
-		using Function = std::function<void ( const IECore::Canceller & )>;
+	using Function = std::function<void( const IECore::Canceller & )>;
 
-		/// Launches a background task to run `function`, which is expected
-		/// to perform asynchronous computes using the `subject` plug.
-		/// The `function` is passed an `IECore::Canceller` object which must
-		/// be checked periodically via `IECore::Canceller::check()`.
-		///
-		/// > Note : Gaffer's responsiveness to asynchronous edits is entirely
-		/// > dependent on prompt responses to cancellation requests.
-		BackgroundTask( const Plug *subject, const Function &function );
-		/// Calls `cancelAndWait()`. This allows the lifetime of the
-		/// BackgroundTask to be used to protect access to resources
-		//  required by the background function.
-		~BackgroundTask();
+	/// Launches a background task to run `function`, which is expected
+	/// to perform asynchronous computes using the `subject` plug.
+	/// The `function` is passed an `IECore::Canceller` object which must
+	/// be checked periodically via `IECore::Canceller::check()`.
+	///
+	/// > Note : Gaffer's responsiveness to asynchronous edits is entirely
+	/// > dependent on prompt responses to cancellation requests.
+	BackgroundTask( const Plug *subject, const Function &function );
+	/// Calls `cancelAndWait()`. This allows the lifetime of the
+	/// BackgroundTask to be used to protect access to resources
+	//  required by the background function.
+	~BackgroundTask();
 
-		/// Cancels the background call.
-		void cancel();
-		/// Blocks until the background call returns, either through
-		/// cancellation or running to completion.
-		void wait();
-		/// As above, but times out after the specified number of
-		/// seconds. Returns true on success, and false on timeout.
-		bool waitFor( float seconds );
-		/// Utility to call `cancel()` then `wait()`.
-		void cancelAndWait();
+	/// Cancels the background call.
+	void cancel();
+	/// Blocks until the background call returns, either through
+	/// cancellation or running to completion.
+	void wait();
+	/// As above, but times out after the specified number of
+	/// seconds. Returns true on success, and false on timeout.
+	bool waitFor( float seconds );
+	/// Utility to call `cancel()` then `wait()`.
+	void cancelAndWait();
 
-		enum Status
-		{
-			Pending,
-			Running,
-			Completed,
-			Cancelled,
-			Errored
-		};
+	enum Status
+	{
+		Pending,
+		Running,
+		Completed,
+		Cancelled,
+		Errored
+	};
 
-		/// Returns the status of the task.
-		//
-		/// > Note :
-		/// >
-		/// > - A return value of Pending or Running may
-		/// >   be invalidated immediately by a change of
-		/// >   status on the background thread.
-		/// > - Calls to `cancel()` or `cancelAndWait()` do
-		/// >   not _guarantee_ that the status will ever
-		/// >   become `Cancelled`. The `function` may have completed
-		/// >   concurrently, or may have ignored the request
-		/// >   for cancellation.
-		Status status() const;
+	/// Returns the status of the task.
+	//
+	/// > Note :
+	/// >
+	/// > - A return value of Pending or Running may
+	/// >   be invalidated immediately by a change of
+	/// >   status on the background thread.
+	/// > - Calls to `cancel()` or `cancelAndWait()` do
+	/// >   not _guarantee_ that the status will ever
+	/// >   become `Cancelled`. The `function` may have completed
+	/// >   concurrently, or may have ignored the request
+	/// >   for cancellation.
+	Status status() const;
 
-	private :
+private:
 
-		// Called by `Action` to ensure that any related tasks are cancelled
-		// before an edit is made to `actionSubject`.
-		static void cancelAffectedTasks( const GraphComponent *actionSubject );
-		friend class Action;
-		friend class ScriptNode;
+	// Called by `Action` to ensure that any related tasks are cancelled
+	// before an edit is made to `actionSubject`.
+	static void cancelAffectedTasks( const GraphComponent *actionSubject );
+	friend class Action;
+	friend class ScriptNode;
 
-		// Function to be executed.
-		Function m_function;
+	// Function to be executed.
+	Function m_function;
 
-		// Control structure for the TBB task we use to execute
-		// `m_function`. This is shared with the TBB task.
-		struct TaskData;
-		std::shared_ptr<TaskData> m_taskData;
-
+	// Control structure for the TBB task we use to execute
+	// `m_function`. This is shared with the TBB task.
+	struct TaskData;
+	std::shared_ptr<TaskData> m_taskData;
 };
 
 } // namespace Gaffer

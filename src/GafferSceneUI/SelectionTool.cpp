@@ -66,11 +66,8 @@ using SelectModeMap = boost::multi_index::multi_index_container<
 	NamedSelectMode,
 	boost::multi_index::indexed_by<
 		boost::multi_index::ordered_unique<
-			boost::multi_index::key<&NamedSelectMode::first>
-		>,
-		boost::multi_index::sequenced<>
-	>
->;
+			boost::multi_index::key<&NamedSelectMode::first>>,
+		boost::multi_index::sequenced<>>>;
 
 const std::string g_standardSelectModeName = "/Standard";
 
@@ -84,14 +81,11 @@ SelectModeMap &selectModes()
 	if( g_selectModes->empty() )
 	{
 		g_selectModes->insert(
-		{
-			g_standardSelectModeName,
-			[]( const ScenePlug *scene, const ScenePlug::ScenePath &path )
-			{
-				return path;
-			}
-		}
-	);
+			{ g_standardSelectModeName,
+			  []( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
+				  return path;
+			  } }
+		);
 	}
 	return *g_selectModes;
 }
@@ -116,7 +110,7 @@ const GafferScene::ScenePlug::ScenePath modifyPath(
 	return path;
 }
 
-}  // namespace
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // DragOverlay implementation
@@ -125,88 +119,87 @@ const GafferScene::ScenePlug::ScenePath modifyPath(
 class SelectionTool::DragOverlay : public GafferUI::Gadget
 {
 
-	public :
+public:
 
-		DragOverlay()
-			:	Gadget()
+	DragOverlay()
+		: Gadget()
+	{
+	}
+
+	Imath::Box3f bound() const override
+	{
+		// we draw in raster space so don't have a sensible bound
+		return Box3f();
+	}
+
+	void setStartPosition( const V3f &p )
+	{
+		if( m_startPosition == p )
 		{
+			return;
+		}
+		m_startPosition = p;
+		dirty( DirtyType::Render );
+	}
+
+	const V3f &getStartPosition() const
+	{
+		return m_startPosition;
+	}
+
+	void setEndPosition( const V3f &p )
+	{
+		if( m_endPosition == p )
+		{
+			return;
+		}
+		m_endPosition = p;
+		dirty( DirtyType::Render );
+	}
+
+	const V3f &getEndPosition() const
+	{
+		return m_endPosition;
+	}
+
+protected:
+
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+	{
+		assert( layer == Layer::MidFront );
+
+		if( isSelectionRender( reason ) )
+		{
+			return;
 		}
 
-		Imath::Box3f bound() const override
-		{
-			// we draw in raster space so don't have a sensible bound
-			return Box3f();
-		}
+		const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+		ViewportGadget::RasterScope rasterScope( viewportGadget );
 
-		void setStartPosition( const V3f &p )
-		{
-			if( m_startPosition == p )
-			{
-				return;
-			}
-			m_startPosition = p;
-			dirty( DirtyType::Render );
-		}
+		Box2f b;
+		b.extendBy( viewportGadget->gadgetToRasterSpace( m_startPosition, this ) );
+		b.extendBy( viewportGadget->gadgetToRasterSpace( m_endPosition, this ) );
 
-		const V3f &getStartPosition() const
-		{
-			return m_startPosition;
-		}
+		style->renderSelectionBox( b );
+	}
 
-		void setEndPosition( const V3f &p )
-		{
-			if( m_endPosition == p )
-			{
-				return;
-			}
-			m_endPosition = p;
-			dirty( DirtyType::Render );
-		}
+	unsigned layerMask() const override
+	{
+		return (unsigned)Layer::MidFront;
+	}
 
-		const V3f &getEndPosition() const
-		{
-			return m_endPosition;
-		}
+	Imath::Box3f renderBound() const override
+	{
+		// we draw in raster space so don't have a sensible bound
+		Box3f b;
+		b.makeInfinite();
+		return b;
+	}
 
-	protected :
+private:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
-		{
-			assert( layer == Layer::MidFront );
-
-			if( isSelectionRender( reason ) )
-			{
-				return;
-			}
-
-			const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
-			ViewportGadget::RasterScope rasterScope( viewportGadget );
-
-			Box2f b;
-			b.extendBy( viewportGadget->gadgetToRasterSpace( m_startPosition, this ) );
-			b.extendBy( viewportGadget->gadgetToRasterSpace( m_endPosition, this ) );
-
-			style->renderSelectionBox( b );
-		}
-
-		unsigned layerMask() const override
-		{
-			return (unsigned)Layer::MidFront;
-		}
-
-		Imath::Box3f renderBound() const override
-		{
-			// we draw in raster space so don't have a sensible bound
-			Box3f b;
-			b.makeInfinite();
-			return b;
-		}
-
-	private :
-
-		Imath::V3f m_startPosition;
-		Imath::V3f m_endPosition;
-
+	Imath::V3f m_startPosition;
+	Imath::V3f m_endPosition;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -221,7 +214,7 @@ static IECore::InternedString g_dragOverlayName( "__selectionToolDragOverlay" );
 size_t SelectionTool::g_firstPlugIndex = 0;
 
 SelectionTool::SelectionTool( SceneView *view, const std::string &name )
-	:	Tool( view, name )
+	: Tool( view, name )
 {
 	SceneGadget *sg = sceneGadget();
 

@@ -46,29 +46,28 @@ namespace Gaffer
 class GAFFER_API ChildSet : public Gaffer::Set
 {
 
-	public :
+public:
 
-		explicit ChildSet( GraphComponentPtr parent );
-		~ChildSet() override;
+	explicit ChildSet( GraphComponentPtr parent );
+	~ChildSet() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ChildSet, ChildSetTypeId, Gaffer::Set );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ChildSet, ChildSetTypeId, Gaffer::Set );
 
-		/// @name Implementation of the Set interface
-		////////////////////////////////////////////////////////////////////
-		//@{
-		bool contains( const Member *object ) const override;
-		Member *member( size_t index ) override;
-		const Member *member( size_t index ) const override;
-		size_t size() const override;
-		//@}
+	/// @name Implementation of the Set interface
+	////////////////////////////////////////////////////////////////////
+	//@{
+	bool contains( const Member *object ) const override;
+	Member *member( size_t index ) override;
+	const Member *member( size_t index ) const override;
+	size_t size() const override;
+	//@}
 
-	private :
+private:
 
-		ConstGraphComponentPtr m_parent;
+	ConstGraphComponentPtr m_parent;
 
-		void childAdded( GraphComponent *parent, GraphComponent *child );
-		void childRemoved( GraphComponent *parent, GraphComponent *child );
-
+	void childAdded( GraphComponent *parent, GraphComponent *child );
+	void childRemoved( GraphComponent *parent, GraphComponent *child );
 };
 
 IE_CORE_DECLAREPTR( ChildSet );

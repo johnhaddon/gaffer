@@ -53,12 +53,12 @@ struct PlugType
 	using Type = void;
 };
 
-#define GAFFER_PLUGTYPE_SPECIALISE( VALUETYPE, PLUGTYPE ) 	\
-	template<>												\
-	struct PlugType<VALUETYPE>								\
-	{														\
-		using Type = PLUGTYPE;								\
-	};														\
+#define GAFFER_PLUGTYPE_SPECIALISE( VALUETYPE, PLUGTYPE ) \
+	template<> \
+	struct PlugType<VALUETYPE> \
+	{ \
+		using Type = PLUGTYPE; \
+	};
 
 GAFFER_PLUGTYPE_SPECIALISE( float, FloatPlug )
 GAFFER_PLUGTYPE_SPECIALISE( int, IntPlug )

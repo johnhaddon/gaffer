@@ -143,7 +143,7 @@ struct AsyncWaiter
 {
 
 	AsyncWaiter( Ort::RunOptions &runOptions )
-		:	m_runOptions( runOptions )
+		: m_runOptions( runOptions )
 	{
 	}
 
@@ -180,13 +180,12 @@ struct AsyncWaiter
 		that->m_conditionVariable.notify_all();
 	}
 
-	private :
+private:
 
-		Ort::RunOptions &m_runOptions;
-		std::mutex m_mutex;
-		std::condition_variable m_conditionVariable;
-		std::optional<OrtStatusPtr> m_resultStatus;
-
+	Ort::RunOptions &m_runOptions;
+	std::mutex m_mutex;
+	std::condition_variable m_conditionVariable;
+	std::optional<OrtStatusPtr> m_resultStatus;
 };
 
 } // namespace
@@ -200,7 +199,7 @@ GAFFER_NODE_DEFINE_TYPE( Inference );
 size_t Inference::g_firstPlugIndex = 0;
 
 Inference::Inference( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "model" ) );
@@ -293,7 +292,7 @@ const Gaffer::ArrayPlug *Inference::outPlug() const
 
 Gaffer::CompoundObjectPlug *Inference::inferencePlug()
 {
-	return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3);
+	return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 );
 }
 
 const Gaffer::CompoundObjectPlug *Inference::inferencePlug() const

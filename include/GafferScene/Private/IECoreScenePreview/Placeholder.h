@@ -51,37 +51,36 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API Placeholder : public IECoreScene::VisibleRenderable
 {
 
-	public :
+public:
 
-		enum Mode
-		{
-			/// A standard collapsed location
-			Default = 0,
-			/// A location that has been excluded from the VisibleSet
-			Excluded = 1,
-		};
+	enum Mode
+	{
+		/// A standard collapsed location
+		Default = 0,
+		/// A location that has been excluded from the VisibleSet
+		Excluded = 1,
+	};
 
-		Placeholder( const Imath::Box3f &bound = Imath::Box3f(), const Placeholder::Mode mode = Placeholder::Mode::Default );
+	Placeholder( const Imath::Box3f &bound = Imath::Box3f(), const Placeholder::Mode mode = Placeholder::Mode::Default );
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( IECoreScenePreview::Placeholder, IECoreScenePreview::PreviewPlaceholderTypeId, IECoreScene::VisibleRenderable );
+	IE_CORE_DECLAREEXTENSIONOBJECT( IECoreScenePreview::Placeholder, IECoreScenePreview::PreviewPlaceholderTypeId, IECoreScene::VisibleRenderable );
 
-		void setMode( Mode mode );
-		Mode getMode() const;
+	void setMode( Mode mode );
+	Mode getMode() const;
 
-		void setBound( const Imath::Box3f &bound );
-		const Imath::Box3f &getBound() const;
+	void setBound( const Imath::Box3f &bound );
+	const Imath::Box3f &getBound() const;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 #if CORTEX_COMPATIBILITY_VERSION < MAKE_CORTEX_COMPATIBILITY_VERSION( 10, 6 )
-		void render( IECoreScene::Renderer *renderer ) const override {};
+	void render( IECoreScene::Renderer *renderer ) const override {};
 #endif
 
-	private :
+private:
 
-		static const unsigned int m_ioVersion;
-		Mode m_mode;
-		Imath::Box3f m_bound;
-
+	static const unsigned int m_ioVersion;
+	Mode m_mode;
+	Imath::Box3f m_bound;
 };
 
 IE_CORE_DECLAREPTR( Placeholder );

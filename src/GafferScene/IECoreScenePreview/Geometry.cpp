@@ -47,7 +47,7 @@ const unsigned int Geometry::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Geometry );
 
 Geometry::Geometry( const std::string &type, const Imath::Box3f &bound, const IECore::CompoundDataPtr &parameters )
-	:	m_type( type ), m_bound( bound ), m_parameters( parameters ? parameters : new CompoundData )
+	: m_type( type ), m_bound( bound ), m_parameters( parameters ? parameters : new CompoundData )
 {
 }
 
@@ -94,12 +94,9 @@ bool Geometry::isEqualTo( const IECore::Object *other ) const
 	}
 
 	const Geometry *geometry = static_cast<const Geometry *>( other );
-	return
-		m_type == geometry->m_type &&
+	return m_type == geometry->m_type &&
 		m_bound == geometry->m_bound &&
-		m_parameters->isEqualTo( geometry->m_parameters.get() )
-	;
-
+		m_parameters->isEqualTo( geometry->m_parameters.get() );
 }
 
 void Geometry::hash( IECore::MurmurHash &h ) const

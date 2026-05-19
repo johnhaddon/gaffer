@@ -44,7 +44,7 @@ GAFFER_NODE_DEFINE_TYPE( ParentConstraint );
 size_t ParentConstraint::g_firstPlugIndex = 0;
 
 ParentConstraint::ParentConstraint( const std::string &name )
-	:	Constraint( name )
+	: Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new TransformPlug( "relativeTransform" ) );
@@ -66,10 +66,8 @@ const Gaffer::TransformPlug *ParentConstraint::relativeTransformPlug() const
 
 bool ParentConstraint::affectsConstraint( const Gaffer::Plug *input ) const
 {
-	return
-		input == keepReferencePositionPlug() ||
-		relativeTransformPlug()->isAncestorOf( input )
-	;
+	return input == keepReferencePositionPlug() ||
+		relativeTransformPlug()->isAncestorOf( input );
 }
 
 void ParentConstraint::hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const

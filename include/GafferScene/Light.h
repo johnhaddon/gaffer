@@ -51,59 +51,58 @@ IE_CORE_FORWARDDECLARE( ShaderPlug )
 class GAFFERSCENE_API Light : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Light, LightTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Light, LightTypeId, ObjectSource );
 
-		~Light() override;
+	~Light() override;
 
-		Gaffer::CompoundDataPlug *attributesPlug();
-		const Gaffer::CompoundDataPlug *attributesPlug() const;
+	Gaffer::CompoundDataPlug *attributesPlug();
+	const Gaffer::CompoundDataPlug *attributesPlug() const;
 
-		Gaffer::Plug *parametersPlug();
-		const Gaffer::Plug *parametersPlug() const;
+	Gaffer::Plug *parametersPlug();
+	const Gaffer::Plug *parametersPlug() const;
 
-		Gaffer::BoolPlug *defaultLightPlug();
-		const Gaffer::BoolPlug *defaultLightPlug() const;
+	Gaffer::BoolPlug *defaultLightPlug();
+	const Gaffer::BoolPlug *defaultLightPlug() const;
 
-		/// \todo Consolidate into `attributesPlug()`.
-		Gaffer::NameValuePlug *mutePlug();
-		const Gaffer::NameValuePlug *mutePlug() const;
+	/// \todo Consolidate into `attributesPlug()`.
+	Gaffer::NameValuePlug *mutePlug();
+	const Gaffer::NameValuePlug *mutePlug() const;
 
-		/// \todo Consolidate into `attributesPlug()`.
-		Gaffer::CompoundDataPlug *visualiserAttributesPlug();
-		const Gaffer::CompoundDataPlug *visualiserAttributesPlug() const;
+	/// \todo Consolidate into `attributesPlug()`.
+	Gaffer::CompoundDataPlug *visualiserAttributesPlug();
+	const Gaffer::CompoundDataPlug *visualiserAttributesPlug() const;
 
-		void loadShader( const std::string &shaderName, bool keepExistingValues = false );
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		Light( const std::string &name, const ShaderPtr &shader );
+	Light( const std::string &name, const ShaderPtr &shader );
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-		void hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
+	void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 
-	private :
+private:
 
-		Shader *shaderNode();
-		const Shader *shaderNode() const;
+	Shader *shaderNode();
+	const Shader *shaderNode() const;
 
-		ShaderPlug *shaderInPlug();
-		const ShaderPlug *shaderInPlug() const;
+	ShaderPlug *shaderInPlug();
+	const ShaderPlug *shaderInPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Light )

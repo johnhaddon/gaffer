@@ -275,7 +275,7 @@ void edit( Gaffer::ValuePlug *plug, const IECore::Object *value )
 IE_CORE_DEFINERUNTIMETYPED( Inspector )
 
 Inspector::Inspector( const std::vector<Gaffer::PlugPtr> &targets, const std::string &type, const std::string &name, const Gaffer::PlugPtr &editScope )
-	:	m_targets( targets ), m_type( type ), m_name( name ), m_editScope( editScope )
+	: m_targets( targets ), m_type( type ), m_name( name ), m_editScope( editScope )
 {
 	assert( !targets.empty() );
 	for( const auto &target : targets )
@@ -466,7 +466,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 			if( nonEditableReason.empty() )
 			{
 				result->m_editors = {
-					[source = source] ( bool unused ) { return source; },
+					[source = source]( bool unused ) { return source; },
 					editWarning,
 					disableEditFunction( source.get(), history ),
 					canEditFunction( history ),
@@ -545,7 +545,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 
 	for( const auto &predecessor : history->predecessors )
 	{
-		if( result->m_source && ((bool)result->m_editScope == result->m_editScopeInHistory) && result->m_editors )
+		if( result->m_source && ( (bool)result->m_editScope == result->m_editScopeInHistory ) && result->m_editors )
 		{
 			return;
 		}
@@ -565,12 +565,12 @@ Inspector::AcquireEditFunctionOrFailure Inspector::acquireEditFunction( Gaffer::
 
 Inspector::CanEditFunction Inspector::canEditFunction( const GafferScene::SceneAlgo::History *history ) const
 {
-	return [] ( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason ) { return ::canEdit( plug, value, failureReason ); };
+	return []( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason ) { return ::canEdit( plug, value, failureReason ); };
 }
 
 Inspector::EditFunction Inspector::editFunction( const GafferScene::SceneAlgo::History *history ) const
 {
-	return [] ( Gaffer::ValuePlug *plug, const IECore::Object *value ) { ::edit( plug, value ); };
+	return []( Gaffer::ValuePlug *plug, const IECore::Object *value ) { ::edit( plug, value ); };
 }
 
 Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const
@@ -605,7 +605,7 @@ Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction( Gaffer::
 		}
 		else
 		{
-			return [ enabledPlug ] () { enabledPlug->setValue( false ); };
+			return [enabledPlug]() { enabledPlug->setValue( false ); };
 		}
 	}
 	else
@@ -628,7 +628,7 @@ Gaffer::EditScope *Inspector::targetEditScope() const
 
 	return PlugAlgo::findSource(
 		m_editScope.get(),
-		[] ( Plug *plug ) {
+		[]( Plug *plug ) {
 			return runTimeCast<EditScope>( plug->node() );
 		}
 	);
@@ -708,7 +708,7 @@ struct Inspector::HistoryPath::HistoryProvider
 {
 
 	HistoryProvider( const ConstInspectorPtr &inspector, const ConstContextPtr &context )
-		:	inspector( inspector ), m_context( context ), m_constructorThreadId( std::this_thread::get_id() )
+		: inspector( inspector ), m_context( context ), m_constructorThreadId( std::this_thread::get_id() )
 	{
 	}
 
@@ -738,145 +738,144 @@ struct Inspector::HistoryPath::HistoryProvider
 		return m_varyingContextVariables.get();
 	}
 
-	private :
+private:
 
-		const ConstContextPtr m_context;
-		std::thread::id m_constructorThreadId;
+	const ConstContextPtr m_context;
+	std::thread::id m_constructorThreadId;
 
-		void initHistory( const IECore::Canceller *canceller )
+	void initHistory( const IECore::Canceller *canceller )
+	{
+		assert( m_historyVector.empty() );
+
+		if( std::this_thread::get_id() == m_constructorThreadId )
 		{
-			assert( m_historyVector.empty() );
+			// Our intention is that HistoryPath is constructed on the main
+			// thread and then only ever evaluated in BackgroundTasks by a
+			// PathListingWidget, to avoid blocking the UI. Warn if we fail
+			// in this regard.
+			IECore::msg( IECore::Msg::Warning, "HistoryPath", "Path evaluated on unexpected thread" );
+		}
 
-			if( std::this_thread::get_id() == m_constructorThreadId )
-			{
-				// Our intention is that HistoryPath is constructed on the main
-				// thread and then only ever evaluated in BackgroundTasks by a
-				// PathListingWidget, to avoid blocking the UI. Warn if we fail
-				// in this regard.
-				IECore::msg( IECore::Msg::Warning, "HistoryPath", "Path evaluated on unexpected thread" );
-			}
+		Context::EditableScope scope( m_context.get() );
+		if( canceller )
+		{
+			scope.setCanceller( canceller );
+		}
 
-			Context::EditableScope scope( m_context.get() );
+		SceneAlgo::History::ConstPtr history = inspector->history();
+		if( !history )
+		{
+			return;
+		}
+
+		std::string editWarning;
+
+		std::unordered_set<InternedString> contextVariables;
+		std::unordered_set<InternedString> varyingContextVariables;
+
+		ConstObjectPtr successorValue;
+		const SceneAlgo::History *successor = nullptr;
+		const SceneAlgo::History *current = history.get();
+		while( current )
+		{
+			Context::EditableScope scope( current->context.get() );
 			if( canceller )
 			{
 				scope.setCanceller( canceller );
 			}
 
-			SceneAlgo::History::ConstPtr history = inspector->history();
-			if( !history )
+			std::vector<InternedString> currentContextVariables;
+			current->context->names( currentContextVariables );
+			contextVariables.insert( currentContextVariables.begin(), currentContextVariables.end() );
+
+			ConstObjectPtr currentValue = inspector->value( current );
+
+			const bool currentViewableAncestorInHistory = m_historyVector.size() && MetadataAlgo::firstViewableNode( m_historyVector.back()->scene.get() ) == MetadataAlgo::firstViewableNode( current->scene.get() );
+			if( !currentViewableAncestorInHistory )
 			{
-				return;
-			}
-
-			std::string editWarning;
-
-			std::unordered_set<InternedString> contextVariables;
-			std::unordered_set<InternedString> varyingContextVariables;
-
-			ConstObjectPtr successorValue;
-			const SceneAlgo::History *successor = nullptr;
-			const SceneAlgo::History *current = history.get();
-			while( current )
-			{
-				Context::EditableScope scope( current->context.get() );
-				if( canceller )
+				if( successor && !endsWith( m_historyVector, successor ) )
 				{
-					scope.setCanceller( canceller );
-				}
-
-				std::vector<InternedString> currentContextVariables;
-				current->context->names( currentContextVariables );
-				contextVariables.insert( currentContextVariables.begin(), currentContextVariables.end() );
-
-				ConstObjectPtr currentValue = inspector->value( current );
-
-				const bool currentViewableAncestorInHistory = m_historyVector.size() && MetadataAlgo::firstViewableNode( m_historyVector.back()->scene.get() ) == MetadataAlgo::firstViewableNode( current->scene.get() );
-				if( !currentViewableAncestorInHistory )
-				{
-					if( successor && !endsWith( m_historyVector, successor ) )
+					// The result of `inspector->source()` was null on the
+					// previous (`successor`) iteration. But there may still
+					// have been a value change at that point, in which case the
+					// `successor` belongs in our history.
+					if(
+						(bool)currentValue != (bool)successorValue ||
+						( currentValue && currentValue->isNotEqualTo( successorValue.get() ) )
+					)
 					{
-						// The result of `inspector->source()` was null on the
-						// previous (`successor`) iteration. But there may still
-						// have been a value change at that point, in which case the
-						// `successor` belongs in our history.
-						if(
-							(bool)currentValue != (bool)successorValue ||
-							( currentValue && currentValue->isNotEqualTo( successorValue.get() ) )
-						)
+						m_historyVector.push_back( successor );
+					}
+
+					if( *successor->context != *current->context )
+					{
+						addVaryingContextVariables( successor->context.get(), current->context.get(), varyingContextVariables );
+						if( !endsWith( m_historyVector, successor ) )
 						{
 							m_historyVector.push_back( successor );
 						}
-
-						if( *successor->context != *current->context )
-						{
-							addVaryingContextVariables( successor->context.get(), current->context.get(), varyingContextVariables );
-							if( !endsWith( m_historyVector, successor ) )
-							{
-								m_historyVector.push_back( successor );
-							}
-						}
-					}
-
-					if( inspector->source( current, editWarning ) )
-					{
-						m_historyVector.push_back( current );
-					}
-					else if( current->predecessors.empty() )
-					{
-						// Make sure we include the tip of the history whether or not
-						// there is an edit there. Among other things this allows us to
-						// show where a value is loaded from a SceneReader.
-						m_historyVector.push_back( current );
 					}
 				}
 
-				if( current->predecessors.size() > 1 )
+				if( inspector->source( current, editWarning ) )
 				{
-					IECore::msg(
-						IECore::Msg::Warning,
-						"Inspector::HistoryPath",
-						"Branching histories are not supported, using first predecessor history only."
-					);
+					m_historyVector.push_back( current );
 				}
-
-				successor = current;
-				successorValue = currentValue;
-				current = current->predecessors.size() ? current->predecessors[0].get() : nullptr;
+				else if( current->predecessors.empty() )
+				{
+					// Make sure we include the tip of the history whether or not
+					// there is an edit there. Among other things this allows us to
+					// show where a value is loaded from a SceneReader.
+					m_historyVector.push_back( current );
+				}
 			}
 
-			std::reverse( m_historyVector.begin(), m_historyVector.end() );
-			m_contextVariables = new StringVectorData(
-				std::vector<std::string>( contextVariables.begin(), contextVariables.end() )
-			);
-			m_varyingContextVariables = new StringVectorData(
-				std::vector<std::string>( varyingContextVariables.begin(), varyingContextVariables.end() )
-			);
-		}
-
-		static bool endsWith( const std::vector<SceneAlgo::History::ConstPtr> historyVector, const SceneAlgo::History *history )
-		{
-			return historyVector.size() && historyVector.back() == history;
-		}
-
-		static void addVaryingContextVariables( const Context *context0, const Context *context1, std::unordered_set<InternedString> &variables )
-		{
-			std::vector<InternedString> variableNames;
-			context0->names( variableNames );
-			context1->names( variableNames );
-			for( auto variable : variableNames )
+			if( current->predecessors.size() > 1 )
 			{
-				if( context0->variableHash( variable ) != context1->variableHash( variable ) )
-				{
-					variables.insert( variable );
-				}
+				IECore::msg(
+					IECore::Msg::Warning,
+					"Inspector::HistoryPath",
+					"Branching histories are not supported, using first predecessor history only."
+				);
 			}
+
+			successor = current;
+			successorValue = currentValue;
+			current = current->predecessors.size() ? current->predecessors[0].get() : nullptr;
 		}
 
-		std::once_flag m_initFlag;
-		std::vector<SceneAlgo::History::ConstPtr> m_historyVector;
-		ConstStringVectorDataPtr m_contextVariables;
-		ConstStringVectorDataPtr m_varyingContextVariables;
+		std::reverse( m_historyVector.begin(), m_historyVector.end() );
+		m_contextVariables = new StringVectorData(
+			std::vector<std::string>( contextVariables.begin(), contextVariables.end() )
+		);
+		m_varyingContextVariables = new StringVectorData(
+			std::vector<std::string>( varyingContextVariables.begin(), varyingContextVariables.end() )
+		);
+	}
 
+	static bool endsWith( const std::vector<SceneAlgo::History::ConstPtr> historyVector, const SceneAlgo::History *history )
+	{
+		return historyVector.size() && historyVector.back() == history;
+	}
+
+	static void addVaryingContextVariables( const Context *context0, const Context *context1, std::unordered_set<InternedString> &variables )
+	{
+		std::vector<InternedString> variableNames;
+		context0->names( variableNames );
+		context1->names( variableNames );
+		for( auto variable : variableNames )
+		{
+			if( context0->variableHash( variable ) != context1->variableHash( variable ) )
+			{
+				variables.insert( variable );
+			}
+		}
+	}
+
+	std::once_flag m_initFlag;
+	std::vector<SceneAlgo::History::ConstPtr> m_historyVector;
+	ConstStringVectorDataPtr m_contextVariables;
+	ConstStringVectorDataPtr m_varyingContextVariables;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -889,7 +888,7 @@ Inspector::HistoryPath::HistoryPath(
 	const std::string &path,
 	PathFilterPtr filter
 )
-	:	Path( path, filter ), m_historyProvider( std::make_shared<HistoryProvider>( inspector, context ) )
+	: Path( path, filter ), m_historyProvider( std::make_shared<HistoryProvider>( inspector, context ) )
 {
 }
 
@@ -898,13 +897,12 @@ Inspector::HistoryPath::HistoryPath(
 	const std::string &path,
 	PathFilterPtr filter
 )
-	:	Path( path, filter ), m_historyProvider( historyProvider )
+	: Path( path, filter ), m_historyProvider( historyProvider )
 {
 }
 
 Inspector::HistoryPath::~HistoryPath()
 {
-
 }
 
 void Inspector::HistoryPath::propertyNames( std::vector<InternedString> &names, const Canceller *canceller ) const
@@ -922,7 +920,7 @@ void Inspector::HistoryPath::propertyNames( std::vector<InternedString> &names, 
 	{
 		names.push_back( g_valuePropertyName );
 		names.push_back( g_fallbackValuePropertyName );
-		names.push_back( g_operationPropertyName);
+		names.push_back( g_operationPropertyName );
 		names.push_back( g_sourcePropertyName );
 		names.push_back( g_editWarningPropertyName );
 		names.push_back( g_nodePropertyName );
@@ -1038,7 +1036,7 @@ const Gaffer::Plug *Inspector::HistoryPath::cancellationSubject() const
 	return m_historyProvider->inspector->m_targets[0].get();
 }
 
-void Inspector::HistoryPath::doChildren( std::vector<PathPtr> &children, const Canceller *canceller) const
+void Inspector::HistoryPath::doChildren( std::vector<PathPtr> &children, const Canceller *canceller ) const
 {
 	if( names().size() != 0 )
 	{
@@ -1084,7 +1082,7 @@ const GafferScene::SceneAlgo::History *Inspector::HistoryPath::history( const IE
 //////////////////////////////////////////////////////////////////////////
 
 Inspector::Result::Result( const IECore::ConstObjectPtr &value, const Gaffer::EditScopePtr &editScope )
-	:	m_value( value ), m_sourceType( SourceType::Other ), m_editScope( editScope ), m_editScopeInHistory( false )
+	: m_value( value ), m_sourceType( SourceType::Other ), m_editScope( editScope ), m_editScopeInHistory( false )
 {
 }
 
@@ -1143,7 +1141,7 @@ Gaffer::ValuePlugPtr Inspector::Result::acquireEdit( bool createIfNecessary ) co
 {
 	if( auto f = std::get_if<AcquireEditFunction>( &m_editors.value().acquireEditFunction ) )
 	{
-		return (*f)( createIfNecessary );
+		return ( *f )( createIfNecessary );
 	}
 
 	throw IECore::Exception( "Not editable : " + std::get<std::string>( m_editors.value().acquireEditFunction ) );
@@ -1168,7 +1166,7 @@ void Inspector::Result::disableEdit() const
 {
 	if( auto f = std::get_if<DisableEditFunction>( &m_editors.value().disableEditFunction ) )
 	{
-		return (*f)();
+		return ( *f )();
 	}
 
 	throw IECore::Exception( "Cannot disable edit : " + std::get<std::string>( m_editors.value().disableEditFunction ) );
@@ -1191,7 +1189,7 @@ bool Inspector::Result::canEdit( const IECore::Object *value, std::string &failu
 	if( auto f = std::get_if<AcquireEditFunction>( &m_editors.value().acquireEditFunction ) )
 	{
 		// Attempt to acquire an existing edit to test against.
-		plug = (*f)( /* createIfNecessary = */ false );
+		plug = ( *f )( /* createIfNecessary = */ false );
 
 		if( !plug )
 		{

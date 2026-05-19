@@ -50,33 +50,32 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepSampler : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit DeepSampler( const std::string &name=defaultName<DeepSampler>() );
-		~DeepSampler() override;
+	explicit DeepSampler( const std::string &name = defaultName<DeepSampler>() );
+	~DeepSampler() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepSampler, DeepSamplerTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepSampler, DeepSamplerTypeId, ComputeNode );
 
-		ImagePlug *imagePlug();
-		const ImagePlug *imagePlug() const;
+	ImagePlug *imagePlug();
+	const ImagePlug *imagePlug() const;
 
-		Gaffer::V2iPlug *pixelPlug();
-		const Gaffer::V2iPlug *pixelPlug() const;
+	Gaffer::V2iPlug *pixelPlug();
+	const Gaffer::V2iPlug *pixelPlug() const;
 
-		Gaffer::AtomicCompoundDataPlug *pixelDataPlug();
-		const Gaffer::AtomicCompoundDataPlug *pixelDataPlug() const;
+	Gaffer::AtomicCompoundDataPlug *pixelDataPlug();
+	const Gaffer::AtomicCompoundDataPlug *pixelDataPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeepSampler )

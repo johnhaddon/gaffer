@@ -48,29 +48,28 @@ namespace GafferScene
 class GAFFERSCENE_API ShaderAssignment : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit ShaderAssignment( const std::string &name=defaultName<ShaderAssignment>() );
-		~ShaderAssignment() override;
+	explicit ShaderAssignment( const std::string &name = defaultName<ShaderAssignment>() );
+	~ShaderAssignment() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ShaderAssignment, ShaderAssignmentTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ShaderAssignment, ShaderAssignmentTypeId, AttributeProcessor );
 
-		GafferScene::ShaderPlug *shaderPlug();
-		const GafferScene::ShaderPlug *shaderPlug() const;
+	GafferScene::ShaderPlug *shaderPlug();
+	const GafferScene::ShaderPlug *shaderPlug() const;
 
-		Gaffer::StringPlug *labelPlug();
-		const Gaffer::StringPlug *labelPlug() const;
+	Gaffer::StringPlug *labelPlug();
+	const Gaffer::StringPlug *labelPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ShaderAssignment )

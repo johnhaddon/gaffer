@@ -47,13 +47,12 @@ namespace GafferUSD
 class GAFFERUSD_API USDLight : public GafferScene::Light
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDLight, USDLightTypeId, GafferScene::Light );
+	GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDLight, USDLightTypeId, GafferScene::Light );
 
-		USDLight( const std::string &name=defaultName<USDLight>() );
-		~USDLight() override;
-
+	USDLight( const std::string &name = defaultName<USDLight>() );
+	~USDLight() override;
 };
 
 IE_CORE_DECLAREPTR( USDLight )

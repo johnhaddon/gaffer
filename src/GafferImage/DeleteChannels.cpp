@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteChannels );
 size_t DeleteChannels::g_firstPlugIndex = 0;
 
 DeleteChannels::DeleteChannels( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

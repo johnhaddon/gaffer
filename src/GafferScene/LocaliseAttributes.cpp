@@ -46,7 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( LocaliseAttributes );
 size_t LocaliseAttributes::g_firstPlugIndex = 0;
 
 LocaliseAttributes::LocaliseAttributes( const std::string &name )
-	:	AttributeProcessor( name )
+	: AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "attributes", Plug::In, "*" ) );
@@ -81,12 +81,10 @@ const Gaffer::BoolPlug *LocaliseAttributes::includeGlobalAttributesPlug() const
 
 bool LocaliseAttributes::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		AttributeProcessor::affectsProcessedAttributes( input ) ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) ||
 		input == attributesPlug() ||
 		input == includeGlobalAttributesPlug() ||
-		( input == inPlug()->globalsPlug() && !includeGlobalAttributesPlug()->isSetToDefault() )
-	;
+		( input == inPlug()->globalsPlug() && !includeGlobalAttributesPlug()->isSetToDefault() );
 }
 
 void LocaliseAttributes::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const

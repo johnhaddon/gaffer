@@ -47,18 +47,18 @@ GAFFER_NODE_DEFINE_TYPE( ObjectProcessor );
 size_t ObjectProcessor::g_firstPlugIndex;
 
 ObjectProcessor::ObjectProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
-	:	FilteredSceneProcessor( name, filterDefault )
+	: FilteredSceneProcessor( name, filterDefault )
 {
 	init();
 }
 
 ObjectProcessor::ObjectProcessor( const std::string &name )
-	:	ObjectProcessor( name, IECore::PathMatcher::NoMatch )
+	: ObjectProcessor( name, IECore::PathMatcher::NoMatch )
 {
 }
 
 ObjectProcessor::ObjectProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	FilteredSceneProcessor( name, minInputs, maxInputs )
+	: FilteredSceneProcessor( name, minInputs, maxInputs )
 {
 	init();
 }

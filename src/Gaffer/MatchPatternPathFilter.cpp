@@ -52,7 +52,7 @@ static IECore::InternedString g_namePropertyName( "name" );
 IE_CORE_DEFINERUNTIMETYPED( MatchPatternPathFilter );
 
 MatchPatternPathFilter::MatchPatternPathFilter( const std::vector<IECore::StringAlgo::MatchPattern> &patterns, IECore::InternedString propertyName, bool leafOnly, IECore::CompoundDataPtr userData )
-	:	PathFilter( userData ), m_patterns( patterns ), m_propertyName( propertyName ), m_leafOnly( leafOnly ), m_inverted( false )
+	: PathFilter( userData ), m_patterns( patterns ), m_propertyName( propertyName ), m_leafOnly( leafOnly ), m_inverted( false )
 {
 }
 
@@ -140,7 +140,7 @@ bool MatchPatternPathFilter::remove( PathPtr path ) const
 				return invert( true );
 			}
 			// quicker to retrieve the value from the path than as a property
-			propertyValue = &(path->names().back().string());
+			propertyValue = &( path->names().back().string() );
 		}
 		else
 		{

@@ -44,19 +44,18 @@ namespace GafferScene
 class GAFFERSCENE_API ReverseWinding : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit ReverseWinding( const std::string &name=defaultName<ReverseWinding>() );
-		~ReverseWinding() override;
+	explicit ReverseWinding( const std::string &name = defaultName<ReverseWinding>() );
+	~ReverseWinding() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ReverseWinding, ReverseWindingTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ReverseWinding, ReverseWindingTypeId, ObjectProcessor );
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
-
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 };
 
 IE_CORE_DECLAREPTR( ReverseWinding )

@@ -41,32 +41,32 @@
 namespace GafferVDB
 {
 
-class Interrupter {
+class Interrupter
+{
 
-	public:
+public:
 
-		Interrupter(const IECore::Canceller *canceller)
-			:	m_canceller( canceller )
-		{
-		}
+	Interrupter( const IECore::Canceller *canceller )
+		: m_canceller( canceller )
+	{
+	}
 
-		void start(const char* name = nullptr)
-		{
-		}
+	void start( const char *name = nullptr )
+	{
+	}
 
-		void end()
-		{
-		}
+	void end()
+	{
+	}
 
-		bool wasInterrupted( int percent = -1 )
-		{
-			return m_canceller && m_canceller->cancelled();
-		}
+	bool wasInterrupted( int percent = -1 )
+	{
+		return m_canceller && m_canceller->cancelled();
+	}
 
-	private:
+private:
 
-		const IECore::Canceller* m_canceller;
-
+	const IECore::Canceller *m_canceller;
 };
 
 } // namespace GafferVDB

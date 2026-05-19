@@ -54,42 +54,41 @@ namespace GafferUI
 class GAFFERUI_API DotNodeGadget : public StandardNodeGadget
 {
 
-	public :
+public:
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::DotNodeGadget, DotNodeGadgetTypeId, StandardNodeGadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::DotNodeGadget, DotNodeGadgetTypeId, StandardNodeGadget );
 
-		explicit DotNodeGadget( Gaffer::NodePtr node );
-		~DotNodeGadget() override;
+	explicit DotNodeGadget( Gaffer::NodePtr node );
+	~DotNodeGadget() override;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		void updateFromContextTracker( const ContextTracker *contextTracker ) override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	void updateFromContextTracker( const ContextTracker *contextTracker ) override;
 
-	private :
+private:
 
-		Gaffer::Dot *dotNode();
-		const Gaffer::Dot *dotNode() const;
-		Gaffer::Node *upstreamNode();
+	Gaffer::Dot *dotNode();
+	const Gaffer::Dot *dotNode() const;
+	Gaffer::Node *upstreamNode();
 
-		void plugDirtied( const Gaffer::Plug *plug );
-		void nodeNameChanged( const Gaffer::GraphComponent *graphComponent );
-		void updateUpstreamNameChangedConnection();
-		void updateLabel();
+	void plugDirtied( const Gaffer::Plug *plug );
+	void nodeNameChanged( const Gaffer::GraphComponent *graphComponent );
+	void updateUpstreamNameChangedConnection();
+	void updateLabel();
 
-		bool dragEnter( const DragDropEvent &event );
-		bool drop( const DragDropEvent &event );
+	bool dragEnter( const DragDropEvent &event );
+	bool drop( const DragDropEvent &event );
 
-		Gaffer::Signals::ScopedConnection m_upstreamNameChangedConnection;
+	Gaffer::Signals::ScopedConnection m_upstreamNameChangedConnection;
 
-		Gaffer::ConstContextPtr m_labelContext;
-		std::string m_label;
-		Imath::V2f m_labelPosition;
+	Gaffer::ConstContextPtr m_labelContext;
+	std::string m_label;
+	Imath::V2f m_labelPosition;
 
-		static NodeGadgetTypeDescription<DotNodeGadget> g_nodeGadgetTypeDescription;
-
+	static NodeGadgetTypeDescription<DotNodeGadget> g_nodeGadgetTypeDescription;
 };
 
 IE_CORE_DECLAREPTR( DotNodeGadget )

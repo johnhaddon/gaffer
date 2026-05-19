@@ -48,7 +48,6 @@ enum TypeId
 	USDLightTypeId = 119103,
 
 	LastTypeId = 119199
-
 };
 
 } // namespace GafferUSD

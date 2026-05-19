@@ -57,5 +57,4 @@ void GafferSceneModule::bindPrimitiveSampler()
 	GafferBindings::DependencyNodeClass<GafferScene::ClosestPointSampler>();
 	GafferBindings::DependencyNodeClass<GafferScene::CurveSampler>();
 	GafferBindings::DependencyNodeClass<GafferScene::UVSampler>();
-
 }

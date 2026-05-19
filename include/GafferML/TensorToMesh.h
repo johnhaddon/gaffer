@@ -48,31 +48,30 @@ namespace GafferML
 class GAFFERML_API TensorToMesh : public GafferScene::ObjectSource
 {
 
-	public :
+public:
 
-		explicit TensorToMesh( const std::string &name=defaultName<TensorToMesh>() );
-		~TensorToMesh() override;
+	explicit TensorToMesh( const std::string &name = defaultName<TensorToMesh>() );
+	~TensorToMesh() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferML::TensorToMesh, TensorToMeshTypeId, GafferScene::ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferML::TensorToMesh, TensorToMeshTypeId, GafferScene::ObjectSource );
 
-		TensorPlug *positionTensorPlug();
-		const TensorPlug *positionTensorPlug() const;
+	TensorPlug *positionTensorPlug();
+	const TensorPlug *positionTensorPlug() const;
 
-		TensorPlug *vertexIdsTensorPlug();
-		const TensorPlug *vertexIdsTensorPlug() const;
+	TensorPlug *vertexIdsTensorPlug();
+	const TensorPlug *vertexIdsTensorPlug() const;
 
-		void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( TensorToMesh )

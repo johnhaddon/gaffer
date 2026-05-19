@@ -55,81 +55,79 @@ IE_CORE_FORWARDDECLARE( ConnectionCreator )
 class GAFFERUI_API NodeGadget : public Gadget
 {
 
-	public :
+public:
 
-		~NodeGadget() override;
+	~NodeGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NodeGadget, NodeGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NodeGadget, NodeGadgetTypeId, Gadget );
 
-		Gaffer::Node *node();
-		const Gaffer::Node *node() const;
+	Gaffer::Node *node();
+	const Gaffer::Node *node() const;
 
-		/// Should be overridden by derived classes to return a nodule for
-		/// the plug if it has one, and 0 otherwise.
-		virtual Nodule *nodule( const Gaffer::Plug *plug );
-		virtual const Nodule *nodule( const Gaffer::Plug *plug ) const;
-		/// Returns the tangent for a nodule - this is a direction which
-		/// can be considered to be "away" from the NodeGadget for the
-		/// purposes of drawing connections.
-		virtual Imath::V3f connectionTangent( const ConnectionCreator *creator ) const;
+	/// Should be overridden by derived classes to return a nodule for
+	/// the plug if it has one, and 0 otherwise.
+	virtual Nodule *nodule( const Gaffer::Plug *plug );
+	virtual const Nodule *nodule( const Gaffer::Plug *plug ) const;
+	/// Returns the tangent for a nodule - this is a direction which
+	/// can be considered to be "away" from the NodeGadget for the
+	/// purposes of drawing connections.
+	virtual Imath::V3f connectionTangent( const ConnectionCreator *creator ) const;
 
-		using NoduleSignal = Gaffer::Signals::Signal<void ( NodeGadget *, Nodule * )>;
-		/// Emitted when a nodule is added. It is the responsibility
-		/// of derived classes and compound nodules to emit this when
-		/// appropriate.
-		NoduleSignal &noduleAddedSignal();
-		/// Emitted when a nodule is removed. It is the responsibility
-		/// of derived classes and compound nodules to emit this when
-		/// appropriate.
-		NoduleSignal &noduleRemovedSignal();
+	using NoduleSignal = Gaffer::Signals::Signal<void( NodeGadget *, Nodule * )>;
+	/// Emitted when a nodule is added. It is the responsibility
+	/// of derived classes and compound nodules to emit this when
+	/// appropriate.
+	NoduleSignal &noduleAddedSignal();
+	/// Emitted when a nodule is removed. It is the responsibility
+	/// of derived classes and compound nodules to emit this when
+	/// appropriate.
+	NoduleSignal &noduleRemovedSignal();
 
-		/// Creates a NodeGadget for the specified node. The type of
-		/// NodeGadget created can be controlled by registering a
-		/// "nodeGadget:type" metadata value for the node. Registering
-		/// "" suppresses creation of a NodeGadget, in which case
-		/// nullptr will be returned.
-		static NodeGadgetPtr create( Gaffer::NodePtr node );
+	/// Creates a NodeGadget for the specified node. The type of
+	/// NodeGadget created can be controlled by registering a
+	/// "nodeGadget:type" metadata value for the node. Registering
+	/// "" suppresses creation of a NodeGadget, in which case
+	/// nullptr will be returned.
+	static NodeGadgetPtr create( Gaffer::NodePtr node );
 
-		using NodeGadgetCreator = std::function<NodeGadgetPtr ( Gaffer::NodePtr )>;
-		/// Registers a named NodeGadget creator, optionally registering it as the default
-		/// creator for a particular type of node. The nodeGadgetType may subsequently be
-		/// used in a "nodeGadget:type" metadata registration to register the creator with
-		/// other nodes or node instances.
-		static void registerNodeGadget( const std::string &nodeGadgetType, NodeGadgetCreator creator, IECore::TypeId nodeType = IECore::InvalidTypeId );
+	using NodeGadgetCreator = std::function<NodeGadgetPtr( Gaffer::NodePtr )>;
+	/// Registers a named NodeGadget creator, optionally registering it as the default
+	/// creator for a particular type of node. The nodeGadgetType may subsequently be
+	/// used in a "nodeGadget:type" metadata registration to register the creator with
+	/// other nodes or node instances.
+	static void registerNodeGadget( const std::string &nodeGadgetType, NodeGadgetCreator creator, IECore::TypeId nodeType = IECore::InvalidTypeId );
 
-		/// \deprecated Use the function above, or register "nodeGadget:type" metadata instead.
-		static void registerNodeGadget( IECore::TypeId nodeType, NodeGadgetCreator creator );
+	/// \deprecated Use the function above, or register "nodeGadget:type" metadata instead.
+	static void registerNodeGadget( IECore::TypeId nodeType, NodeGadgetCreator creator );
 
-		std::string getToolTip( const IECore::LineSegment3f &line ) const override;
+	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-	protected :
+protected:
 
-		explicit NodeGadget( Gaffer::NodePtr node );
+	explicit NodeGadget( Gaffer::NodePtr node );
 
-		/// Creating a static one of these is a convenient way of registering a NodeGadget type.
-		template<class T>
-		struct NodeGadgetTypeDescription
-		{
-			NodeGadgetTypeDescription( IECore::TypeId nodeType ) { NodeGadget::registerNodeGadget( T::staticTypeName(), &creator, nodeType ); };
-			static NodeGadgetPtr creator( Gaffer::NodePtr node ) { return new T( node ); };
-		};
+	/// Creating a static one of these is a convenient way of registering a NodeGadget type.
+	template<class T>
+	struct NodeGadgetTypeDescription
+	{
+		NodeGadgetTypeDescription( IECore::TypeId nodeType ) { NodeGadget::registerNodeGadget( T::staticTypeName(), &creator, nodeType ); };
+		static NodeGadgetPtr creator( Gaffer::NodePtr node ) { return new T( node ); };
+	};
 
-		/// May be overridden to update the UI state to reflect changes in the ContextTracker.
-		/// Calls to this are made by the parent GraphGadget, to avoid every individual
-		/// NodeGadget needing to connect to the ContextTracker signals itself.
-		virtual void updateFromContextTracker( const ContextTracker *contextTracker );
-		/// Friendship to allow calling `updateFromContextTracker()`.
-		friend class GraphGadget;
+	/// May be overridden to update the UI state to reflect changes in the ContextTracker.
+	/// Calls to this are made by the parent GraphGadget, to avoid every individual
+	/// NodeGadget needing to connect to the ContextTracker signals itself.
+	virtual void updateFromContextTracker( const ContextTracker *contextTracker );
+	/// Friendship to allow calling `updateFromContextTracker()`.
+	friend class GraphGadget;
 
-		bool m_active;
+	bool m_active;
 
-	private :
+private:
 
-		Gaffer::Node *m_node;
-		NoduleSignal m_noduleAddedSignal;
-		NoduleSignal m_noduleRemovedSignal;
-
-
+	Gaffer::Node *m_node;
+	NoduleSignal m_noduleAddedSignal;
+	NoduleSignal m_noduleRemovedSignal;
 };
 
 IE_CORE_DECLAREPTR( NodeGadget );

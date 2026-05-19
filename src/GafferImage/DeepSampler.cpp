@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepSampler );
 size_t DeepSampler::g_firstPlugIndex = 0;
 
 DeepSampler::DeepSampler( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -158,8 +158,8 @@ void DeepSampler::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 			ConstIntVectorDataPtr sampleOffsetsData = imagePlug()->sampleOffsetsPlug()->getValue();
 
 			int pixelIndex = ImagePlug::pixelIndex( pixel, tileOrigin );
-			int offset = sampleOffsetsData->readable()[pixelIndex ];
-			int prevOffset = pixelIndex > 0 ? sampleOffsetsData->readable()[pixelIndex - 1 ] : 0;
+			int offset = sampleOffsetsData->readable()[pixelIndex];
+			int prevOffset = pixelIndex > 0 ? sampleOffsetsData->readable()[pixelIndex - 1] : 0;
 			int pixelSize = offset - prevOffset;
 
 			if( pixelSize > 0 )
@@ -176,7 +176,7 @@ void DeepSampler::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 						&channelData->readable()[prevOffset],
 						sizeof( float ) * pixelSize
 					);
-					result->writable()[ i ] = pixelChannelData;
+					result->writable()[i] = pixelChannelData;
 				}
 			}
 		}

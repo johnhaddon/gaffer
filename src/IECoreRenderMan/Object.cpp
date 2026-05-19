@@ -85,7 +85,7 @@ RtParamList mergedAttributes( const RtParamList &attributes, const RtParamList &
 } // namespace
 
 Object::Object( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session )
-	:	m_session( session ), m_lightLinker( lightLinker ), m_geometryInstance( riley::GeometryInstanceId::InvalidId() ), m_attributes( attributes ), m_geometryPrototype( geometryPrototype )
+	: m_session( session ), m_lightLinker( lightLinker ), m_geometryInstance( riley::GeometryInstanceId::InvalidId() ), m_attributes( attributes ), m_geometryPrototype( geometryPrototype )
 {
 	m_extraAttributes.SetString( Loader::strings().k_identifier_name, RtUString( name.c_str() ) );
 	m_extraAttributes.SetString( Loader::strings().k_grouping_membership, g_defaultShadowGroup );

@@ -46,49 +46,49 @@ template<typename Base, typename T>
 class IECORE_EXPORT Container : public Base
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( Container );
+	IE_CORE_DECLAREMEMBERPTR( Container );
 
-		explicit Container( const std::string &name=GraphComponent::defaultName<Container>() );
-		~Container() override;
+	explicit Container( const std::string &name = GraphComponent::defaultName<Container>() );
+	~Container() override;
 
-		//! @name RunTimeTyped interface
-		////////////////////////////////////////////////////////////
-		//@{
-		IECore::TypeId typeId() const override;
-		const char *typeName() const override;
-		bool isInstanceOf( IECore::TypeId typeId ) const override;
-		bool isInstanceOf( const char *typeName ) const override;
-		static IECore::TypeId staticTypeId();
-		static const char *staticTypeName();
-		static bool inheritsFrom( IECore::TypeId typeId );
-		static bool inheritsFrom( const char *typeName );
-		using BaseClass = Base;
-		//@}
+	//! @name RunTimeTyped interface
+	////////////////////////////////////////////////////////////
+	//@{
+	IECore::TypeId typeId() const override;
+	const char *typeName() const override;
+	bool isInstanceOf( IECore::TypeId typeId ) const override;
+	bool isInstanceOf( const char *typeName ) const override;
+	static IECore::TypeId staticTypeId();
+	static const char *staticTypeName();
+	static bool inheritsFrom( IECore::TypeId typeId );
+	static bool inheritsFrom( const char *typeName );
+	using BaseClass = Base;
+	//@}
 
-		/// Accepts only type T.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	/// Accepts only type T.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
 
-	private :
+private:
 
-		static const IECore::RunTimeTyped::TypeDescription< Container<Base, T> > g_typeDescription;
+	static const IECore::RunTimeTyped::TypeDescription<Container<Base, T>> g_typeDescription;
 };
 
-#define GAFFER_DECLARECONTAINERSPECIALISATIONS( TYPENAME, TYPEID  )			\
-																			\
-	template<>																\
-	IECore::TypeId TYPENAME::staticTypeId()									\
-	{																		\
-		return (IECore::TypeId)TYPEID;										\
-	}																		\
-	template<>																\
-	const char *TYPENAME::staticTypeName()									\
-	{																		\
-		return #TYPENAME;													\
-	}																		\
-	template<> 																\
-	const IECore::RunTimeTyped::TypeDescription<TYPENAME>  TYPENAME::g_typeDescription; \
+#define GAFFER_DECLARECONTAINERSPECIALISATIONS( TYPENAME, TYPEID ) \
+\
+	template<> \
+	IECore::TypeId TYPENAME::staticTypeId() \
+	{ \
+		return (IECore::TypeId)TYPEID; \
+	} \
+	template<> \
+	const char *TYPENAME::staticTypeName() \
+	{ \
+		return #TYPENAME; \
+	} \
+	template<> \
+	const IECore::RunTimeTyped::TypeDescription<TYPENAME> TYPENAME::g_typeDescription;
 
 
 } // namespace Gaffer

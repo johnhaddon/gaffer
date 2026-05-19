@@ -104,7 +104,7 @@ DataPtr gridMetadata( const ObjectPlug &objectPlug, const std::string &gridName,
 	IECorePython::ScopedGILRelease gilRelease;
 	if( openvdb::GridBase::ConstPtr g = grid( objectPlug, gridName ) )
 	{
-		openvdb::Metadata::ConstPtr m = (*g)[metadataName];
+		openvdb::Metadata::ConstPtr m = ( *g )[metadataName];
 		if( !m )
 		{
 			return nullptr;
@@ -153,7 +153,7 @@ struct GridPropertyCacheGetterKey
 {
 
 	GridPropertyCacheGetterKey( const ObjectPlug *objectPlug, const std::string &gridName )
-		:	objectPlug( objectPlug ), gridName( gridName )
+		: objectPlug( objectPlug ), gridName( gridName )
 	{
 		hash = objectPlug->hash();
 		hash.append( gridName );
@@ -167,43 +167,41 @@ struct GridPropertyCacheGetterKey
 	IECore::MurmurHash hash;
 	const ObjectPlug *objectPlug;
 	const string gridName;
-
 };
 
 struct GridPropertyCache : public IECorePreview::LRUCache<MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>
 {
 
-	using PropertyGetter = std::function<ConstDataPtr ( const openvdb::GridBase *grid )>;
+	using PropertyGetter = std::function<ConstDataPtr( const openvdb::GridBase *grid )>;
 
 	GridPropertyCache( PropertyGetter propertyGetter )
-		:	IECorePreview::LRUCache<MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>(
-				[propertyGetter] ( const GridPropertyCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller ) -> ConstDataPtr {
-					cost = 1;
-					if( openvdb::GridBase::ConstPtr g = grid( *key.objectPlug, key.gridName ) )
-					{
-						// The OpenVDB function called by our PropertyGetters typically
-						// use TBB tasks. Isolate them so they don't go stealing unrelated
-						// tasks that could lead to deadlock.
-						return tbb::this_task_arena::isolate(
-							[&] () {
-								return propertyGetter( g.get() );
-							}
-						);
-					}
-					return nullptr;
-				},
-				/* maxCost = */ 1000 // Properties are small but expensive to compute - might as well cache a bunch of them.
-			)
+		: IECorePreview::LRUCache<MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>(
+			  [propertyGetter]( const GridPropertyCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller ) -> ConstDataPtr {
+				  cost = 1;
+				  if( openvdb::GridBase::ConstPtr g = grid( *key.objectPlug, key.gridName ) )
+				  {
+					  // The OpenVDB function called by our PropertyGetters typically
+					  // use TBB tasks. Isolate them so they don't go stealing unrelated
+					  // tasks that could lead to deadlock.
+					  return tbb::this_task_arena::isolate(
+						  [&]() {
+							  return propertyGetter( g.get() );
+						  }
+					  );
+				  }
+				  return nullptr;
+			  },
+			  /* maxCost = */ 1000 // Properties are small but expensive to compute - might as well cache a bunch of them.
+		  )
 	{
 	}
-
 };
 
 DataPtr gridActiveVoxels( const ObjectPlug &objectPlug, const std::string &gridName )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	static GridPropertyCache g_cache(
-		[] ( const openvdb::GridBase *grid ) {
+		[]( const openvdb::GridBase *grid ) {
 			return new Int64Data( grid->activeVoxelCount() );
 		}
 	);
@@ -215,7 +213,7 @@ DataPtr gridVoxelBound( const ObjectPlug &objectPlug, const std::string &gridNam
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	static GridPropertyCache g_cache(
-		[] ( const openvdb::GridBase *grid ) {
+		[]( const openvdb::GridBase *grid ) {
 			const auto box = grid->evalActiveVoxelBoundingBox();
 			return new Box3iData(
 				Imath::Box3i(
@@ -233,7 +231,7 @@ DataPtr gridMemoryUsage( const ObjectPlug &objectPlug, const std::string &gridNa
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	static GridPropertyCache g_cache(
-		[] ( const openvdb::GridBase *grid ) {
+		[]( const openvdb::GridBase *grid ) {
 			return new UInt64Data( grid->memUsage() );
 		}
 	);
@@ -246,8 +244,7 @@ DataPtr gridMinMaxValue( const ObjectPlug &objectPlug, const std::string &gridNa
 	IECorePython::ScopedGILRelease gilRelease;
 	static GridPropertyCache g_cache(
 
-		[] ( const openvdb::GridBase *grid ) {
-
+		[]( const openvdb::GridBase *grid ) {
 			CompoundDataPtr result;
 
 			using SupportedGridTypes = openvdb::NumericGridTypes::Append<openvdb::Vec3GridTypes>;
@@ -255,13 +252,11 @@ DataPtr gridMinMaxValue( const ObjectPlug &objectPlug, const std::string &gridNa
 			grid->apply<SupportedGridTypes>(
 
 				[&result]( auto &grid ) {
-
 					auto minMax = openvdb::tools::minMax( grid.tree() );
 
 					result = new CompoundData;
 					result->writable()["min"] = dataFromVDB( minMax.min() );
 					result->writable()["max"] = dataFromVDB( minMax.max() );
-
 				}
 
 			);
@@ -286,5 +281,4 @@ BOOST_PYTHON_MODULE( _GafferVDBUI )
 	def( "_gridMinMaxValue", &gridMinMaxValue, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
 	def( "_gridMetadataNames", &gridMetadataNames, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
 	def( "_gridMetadata", &gridMetadata, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ), boost::python::arg( "metadataName" ) ) );
-
 }

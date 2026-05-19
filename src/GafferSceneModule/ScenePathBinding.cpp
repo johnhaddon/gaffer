@@ -108,19 +108,12 @@ void GafferSceneModule::bindScenePath()
 			)
 		)
 		.def( "setScene", &ScenePath::setScene )
-		.def( "getScene", (ScenePlug *(ScenePath::*)())&ScenePath::getScene, return_value_policy<CastToIntrusivePtr>() )
+		.def( "getScene", ( ScenePlug * (ScenePath::*)() ) & ScenePath::getScene, return_value_policy<CastToIntrusivePtr>() )
 		.def( "setContext", &ScenePath::setContext )
-		.def( "getContext", (Context *(ScenePath::*)())&ScenePath::getContext, return_value_policy<CastToIntrusivePtr>() )
-		.def( "createStandardFilter", &createStandardFilter, (
-				arg( "setNames" ) = list(),
-				arg( "setsLabel" ) = ""
-			)
-		)
-		.staticmethod( "createStandardFilter" )
-	;
+		.def( "getContext", ( Context * (ScenePath::*)() ) & ScenePath::getContext, return_value_policy<CastToIntrusivePtr>() )
+		.def( "createStandardFilter", &createStandardFilter, ( arg( "setNames" ) = list(), arg( "setsLabel" ) = "" ) )
+		.staticmethod( "createStandardFilter" );
 
 	RunTimeTypedClass<SceneFilterPathFilter>()
-		.def( init<FilterPtr, IECore::CompoundDataPtr>( ( arg( "filter" ), arg( "userData" ) = object() ) ) )
-	;
-
+		.def( init<FilterPtr, IECore::CompoundDataPtr>( ( arg( "filter" ), arg( "userData" ) = object() ) ) );
 }

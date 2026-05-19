@@ -72,7 +72,7 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Ext
 	{
 		type = "lua";
 	}
-	else if ( boost::ends_with( filename, "nsi" ) or boost::ends_with( filename, "nsia" ) or boost::ends_with( filename, "nsi.gz" ) or boost::ends_with( filename, "nsia.gz" ) )
+	else if( boost::ends_with( filename, "nsi" ) or boost::ends_with( filename, "nsia" ) or boost::ends_with( filename, "nsi.gz" ) or boost::ends_with( filename, "nsia.gz" ) )
 	{
 		type = "apistream";
 	}

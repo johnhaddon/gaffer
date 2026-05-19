@@ -45,39 +45,38 @@ namespace Gaffer
 class GAFFER_API TransformPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		explicit TransformPlug(
-			const std::string &name = defaultName<TransformPlug>(),
-			Direction direction=In,
-			const Imath::V3f &defaultTranslate = Imath::V3f( 0 ),
-			const Imath::V3f &defaultRotate = Imath::V3f( 0 ),
-			const Imath::V3f &defaultScale = Imath::V3f( 1 ),
-			const Imath::V3f &defaultPivot = Imath::V3f( 0 ),
-			unsigned flags = Default
-		);
-		~TransformPlug() override;
+	explicit TransformPlug(
+		const std::string &name = defaultName<TransformPlug>(),
+		Direction direction = In,
+		const Imath::V3f &defaultTranslate = Imath::V3f( 0 ),
+		const Imath::V3f &defaultRotate = Imath::V3f( 0 ),
+		const Imath::V3f &defaultScale = Imath::V3f( 1 ),
+		const Imath::V3f &defaultPivot = Imath::V3f( 0 ),
+		unsigned flags = Default
+	);
+	~TransformPlug() override;
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::TransformPlug, TransformPlugTypeId, ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::TransformPlug, TransformPlugTypeId, ValuePlug );
 
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		V3fPlug *translatePlug();
-		const V3fPlug *translatePlug() const;
-		V3fPlug *rotatePlug();
-		const V3fPlug *rotatePlug() const;
-		V3fPlug *scalePlug();
-		const V3fPlug *scalePlug() const;
-		V3fPlug *pivotPlug();
-		const V3fPlug *pivotPlug() const;
+	V3fPlug *translatePlug();
+	const V3fPlug *translatePlug() const;
+	V3fPlug *rotatePlug();
+	const V3fPlug *rotatePlug() const;
+	V3fPlug *scalePlug();
+	const V3fPlug *scalePlug() const;
+	V3fPlug *pivotPlug();
+	const V3fPlug *pivotPlug() const;
 
-		Imath::M44f matrix() const;
+	Imath::M44f matrix() const;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( TransformPlug );

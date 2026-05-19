@@ -77,9 +77,9 @@ boost::python::list items( GraphComponent &c )
 {
 	const GraphComponent::ChildContainer &ch = c.children();
 	boost::python::list l;
-	for( GraphComponent::ChildContainer::const_iterator it=ch.begin(); it!=ch.end(); it++ )
+	for( GraphComponent::ChildContainer::const_iterator it = ch.begin(); it != ch.end(); it++ )
 	{
-		l.append( boost::python::make_tuple( (*it)->getName().c_str(), *it ) );
+		l.append( boost::python::make_tuple( ( *it )->getName().c_str(), *it ) );
 	}
 	return l;
 }
@@ -88,9 +88,9 @@ boost::python::list keys( GraphComponent &c )
 {
 	const GraphComponent::ChildContainer &ch = c.children();
 	boost::python::list l;
-	for( GraphComponent::ChildContainer::const_iterator it=ch.begin(); it!=ch.end(); it++ )
+	for( GraphComponent::ChildContainer::const_iterator it = ch.begin(); it != ch.end(); it++ )
 	{
-		l.append( (*it)->getName().c_str() );
+		l.append( ( *it )->getName().c_str() );
 	}
 	return l;
 }
@@ -99,7 +99,7 @@ boost::python::list values( GraphComponent &c )
 {
 	const GraphComponent::ChildContainer &ch = c.children();
 	boost::python::list l;
-	for( GraphComponent::ChildContainer::const_iterator it=ch.begin(); it!=ch.end(); it++ )
+	for( GraphComponent::ChildContainer::const_iterator it = ch.begin(); it != ch.end(); it++ )
 	{
 		l.append( *it );
 	}
@@ -110,9 +110,9 @@ boost::python::tuple children( GraphComponent &c, IECore::TypeId typeId )
 {
 	const GraphComponent::ChildContainer &ch = c.children();
 	boost::python::list l;
-	for( GraphComponent::ChildContainer::const_iterator it=ch.begin(); it!=ch.end(); it++ )
+	for( GraphComponent::ChildContainer::const_iterator it = ch.begin(); it != ch.end(); it++ )
 	{
-		if( (*it)->isInstanceOf( typeId ) )
+		if( ( *it )->isInstanceOf( typeId ) )
 		{
 			l.append( *it );
 		}
@@ -173,7 +173,7 @@ GraphComponentPtr descendant( GraphComponent &g, const std::string &n )
 		return nullptr;
 	}
 
-	using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
+	using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
 	Tokenizer tokens( n, boost::char_separator<char>( "." ) );
 	GraphComponentPtr result = &g;
 	for( const auto &token : tokens )
@@ -283,7 +283,7 @@ std::string repr( const GraphComponent *g )
 
 struct UnarySlotCaller
 {
-	void operator()( boost::python::object slot, GraphComponentPtr g )
+	void operator () ( boost::python::object slot, GraphComponentPtr g )
 	{
 		try
 		{
@@ -298,7 +298,7 @@ struct UnarySlotCaller
 
 struct NameChangedSlotCaller
 {
-	void operator()( boost::python::object slot, GraphComponentPtr g, IECore::InternedString oldName )
+	void operator () ( boost::python::object slot, GraphComponentPtr g, IECore::InternedString oldName )
 	{
 		try
 		{
@@ -314,7 +314,7 @@ struct NameChangedSlotCaller
 struct BinarySlotCaller
 {
 
-	void operator()( boost::python::object slot, GraphComponentPtr g, GraphComponentPtr gg )
+	void operator () ( boost::python::object slot, GraphComponentPtr g, GraphComponentPtr gg )
 	{
 		try
 		{
@@ -330,7 +330,7 @@ struct BinarySlotCaller
 struct ChildrenReorderedSlotCaller
 {
 
-	void operator()( boost::python::object slot, GraphComponentPtr g, const std::vector<size_t> &oldIndices )
+	void operator () ( boost::python::object slot, GraphComponentPtr g, const std::vector<size_t> &oldIndices )
 	{
 		try
 		{
@@ -355,50 +355,48 @@ void GafferModule::bindGraphComponent()
 	using Wrapper = GraphComponentWrapper<GraphComponent>;
 
 	scope s = GraphComponentClass<GraphComponent, Wrapper>()
-		.def( init<>() )
-		.def( init<const std::string &>() )
-		.def( "setName", &setName )
-		.def( "getName", &getName )
-		.def( "fullName", &GraphComponent::fullName )
-		.def( "relativeName", &GraphComponent::relativeName )
-		.def( "nameChangedSignal", &GraphComponent::nameChangedSignal, return_internal_reference<1>() )
-		.def( "addChild", &addChild )
-		.def( "removeChild", &removeChild )
-		.def( "clearChildren", &clearChildren )
-		.def( "reorderChildren", &reorderChildren )
-		.def( "setChild", &setChild )
-		.def( "getChild", &getChild )
-		.def( "descendant", &descendant )
-		.def( "__getitem__", (GraphComponentPtr (*)( GraphComponent &, const IECore::InternedString & ))&getItem )
-		.def( "__getitem__", (GraphComponentPtr (*)( GraphComponent &, long ))&getItem )
-		.def( "__setitem__", &setChild )
-		.def( "__delitem__", (void (*)( GraphComponent &, const IECore::InternedString & ))delItem )
-		.def( "__delitem__", (void (*)( GraphComponent &, long ))&delItem )
-		.def( "__contains__", contains )
-		.def( "__len__", &length )
-// The default conversion to bool uses `__len__`, which trips a lot of
-// people up as they expect `if graphComponent` to be equivalent to
-// `if graphComponent is not None`. So we provide a more specific conversion
-// which is always true.
-		.def( "__bool__", &toBool )
-		.def( "__repr__", &repr )
-		.def( "items", &items )
-		.def( "keys", &keys )
-		.def( "values", &values )
-		.def( "children", &children, ( arg_( "self" ), arg_( "typeId" ) = GraphComponent::staticTypeId() ) )
-		.def( "parent", &parent )
-		.def( "ancestor", &ancestor )
-		.def( "commonAncestor", &commonAncestor, ( arg_( "self" ), arg_( "other" ), arg_( "ancestorType" ) = GraphComponent::staticTypeId() ) )
-		.def( "isAncestorOf", &GraphComponent::isAncestorOf )
-		.def( "childAddedSignal", &GraphComponent::childAddedSignal, return_internal_reference<1>() )
-		.def( "childRemovedSignal", &GraphComponent::childRemovedSignal, return_internal_reference<1>() )
-		.def( "parentChangedSignal", &GraphComponent::parentChangedSignal, return_internal_reference<1>() )
-		.def( "childrenReorderedSignal", &GraphComponent::childrenReorderedSignal, return_internal_reference<1>() )
-	;
+				  .def( init<>() )
+				  .def( init<const std::string &>() )
+				  .def( "setName", &setName )
+				  .def( "getName", &getName )
+				  .def( "fullName", &GraphComponent::fullName )
+				  .def( "relativeName", &GraphComponent::relativeName )
+				  .def( "nameChangedSignal", &GraphComponent::nameChangedSignal, return_internal_reference<1>() )
+				  .def( "addChild", &addChild )
+				  .def( "removeChild", &removeChild )
+				  .def( "clearChildren", &clearChildren )
+				  .def( "reorderChildren", &reorderChildren )
+				  .def( "setChild", &setChild )
+				  .def( "getChild", &getChild )
+				  .def( "descendant", &descendant )
+				  .def( "__getitem__", (GraphComponentPtr ( * )( GraphComponent &, const IECore::InternedString & ))&getItem )
+				  .def( "__getitem__", (GraphComponentPtr ( * )( GraphComponent &, long ))&getItem )
+				  .def( "__setitem__", &setChild )
+				  .def( "__delitem__", (void ( * )( GraphComponent &, const IECore::InternedString & ))delItem )
+				  .def( "__delitem__", (void ( * )( GraphComponent &, long ))&delItem )
+				  .def( "__contains__", contains )
+				  .def( "__len__", &length )
+				  // The default conversion to bool uses `__len__`, which trips a lot of
+				  // people up as they expect `if graphComponent` to be equivalent to
+				  // `if graphComponent is not None`. So we provide a more specific conversion
+				  // which is always true.
+				  .def( "__bool__", &toBool )
+				  .def( "__repr__", &repr )
+				  .def( "items", &items )
+				  .def( "keys", &keys )
+				  .def( "values", &values )
+				  .def( "children", &children, ( arg_( "self" ), arg_( "typeId" ) = GraphComponent::staticTypeId() ) )
+				  .def( "parent", &parent )
+				  .def( "ancestor", &ancestor )
+				  .def( "commonAncestor", &commonAncestor, ( arg_( "self" ), arg_( "other" ), arg_( "ancestorType" ) = GraphComponent::staticTypeId() ) )
+				  .def( "isAncestorOf", &GraphComponent::isAncestorOf )
+				  .def( "childAddedSignal", &GraphComponent::childAddedSignal, return_internal_reference<1>() )
+				  .def( "childRemovedSignal", &GraphComponent::childRemovedSignal, return_internal_reference<1>() )
+				  .def( "parentChangedSignal", &GraphComponent::parentChangedSignal, return_internal_reference<1>() )
+				  .def( "childrenReorderedSignal", &GraphComponent::childrenReorderedSignal, return_internal_reference<1>() );
 
 	SignalClass<GraphComponent::UnarySignal, DefaultSignalCaller<GraphComponent::UnarySignal>, UnarySlotCaller>( "UnarySignal" );
 	SignalClass<GraphComponent::NameChangedSignal, DefaultSignalCaller<GraphComponent::NameChangedSignal>, NameChangedSlotCaller>( "NameChangedSignal" );
 	SignalClass<GraphComponent::BinarySignal, DefaultSignalCaller<GraphComponent::BinarySignal>, BinarySlotCaller>( "BinarySignal" );
 	SignalClass<GraphComponent::ChildrenReorderedSignal, DefaultSignalCaller<GraphComponent::ChildrenReorderedSignal>, ChildrenReorderedSlotCaller>( "BinarySignal" );
-
 }

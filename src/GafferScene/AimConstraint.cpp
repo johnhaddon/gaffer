@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( AimConstraint );
 size_t AimConstraint::g_firstPlugIndex = 0;
 
 AimConstraint::AimConstraint( const std::string &name )
-	:	Constraint( name )
+	: Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V3fPlug( "aim", Plug::In, V3f( 0, 0, -1 ) ) );

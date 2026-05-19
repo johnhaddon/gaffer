@@ -45,13 +45,12 @@ namespace GafferScene
 class GAFFERSCENE_API StandardOptions : public Options
 {
 
-	public :
+public:
 
-		explicit StandardOptions( const std::string &name=defaultName<StandardOptions>() );
-		~StandardOptions() override;
+	explicit StandardOptions( const std::string &name = defaultName<StandardOptions>() );
+	~StandardOptions() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::StandardOptions, StandardOptionsTypeId, Options );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::StandardOptions, StandardOptionsTypeId, Options );
 };
 
 IE_CORE_DECLAREPTR( StandardOptions );

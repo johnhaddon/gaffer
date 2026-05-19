@@ -55,70 +55,69 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API Filter : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Filter, FilterTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Filter, FilterTypeId, Gaffer::ComputeNode );
 
-		explicit Filter( const std::string &name=defaultName<Filter>() );
-		~Filter() override;
+	explicit Filter( const std::string &name = defaultName<Filter>() );
+	~Filter() override;
 
-		Gaffer::BoolPlug *enabledPlug() override;
-		const Gaffer::BoolPlug *enabledPlug() const override;
+	Gaffer::BoolPlug *enabledPlug() override;
+	const Gaffer::BoolPlug *enabledPlug() const override;
 
-		FilterPlug *outPlug();
-		const FilterPlug *outPlug() const;
+	FilterPlug *outPlug();
+	const FilterPlug *outPlug() const;
 
-		/// > Note : `affects()` receives special treatment for Filter nodes. In addition to the
-		/// > regular calls where `input` is a plug belonging to the filter, calls are also made
-		/// > where `input` is a child of a ScenePlug that will later be provided to `computeMatch()`.
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	/// > Note : `affects()` receives special treatment for Filter nodes. In addition to the
+	/// > regular calls where `input` is a plug belonging to the filter, calls are also made
+	/// > where `input` is a child of a ScenePlug that will later be provided to `computeMatch()`.
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		/// \deprecated Use FilterPlug::SceneScope or FilterPlug::match instead.
-		static void setInputScene( Gaffer::Context *context, const ScenePlug *scenePlug );
-		/// \deprecated
-		static const ScenePlug *getInputScene( const Gaffer::Context *context );
-		/// \deprecated Use FilterPlug::inputSceneContextName instead
-		static const IECore::InternedString inputSceneContextName;
+	/// \deprecated Use FilterPlug::SceneScope or FilterPlug::match instead.
+	static void setInputScene( Gaffer::Context *context, const ScenePlug *scenePlug );
+	/// \deprecated
+	static const ScenePlug *getInputScene( const Gaffer::Context *context );
+	/// \deprecated Use FilterPlug::inputSceneContextName instead
+	static const IECore::InternedString inputSceneContextName;
 
-	protected :
+protected:
 
-		/// Implemented to call hashMatch() below when computing the hash for outPlug().
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		/// Implemented to call computeMatch() below when computing the value of outPlug().
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
-		/// Implemented to disable compute caching for the filter result.
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	/// Implemented to call hashMatch() below when computing the hash for outPlug().
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	/// Implemented to call computeMatch() below when computing the value of outPlug().
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	/// Implemented to disable compute caching for the filter result.
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		/// Hash method for outPlug(). A derived class must either :
-		///
-		///    * Implement the method to call the base class implementation and then append to the hash.
-		///
-		/// or :
-		///
-		///    * Implement the method to assign directly to the hash from some input hash to signify that
-		///      an input will be passed through unchanged by the corresponding computeMatch() method. Note
-		///      that if you wish to pass through an input unconditionally, regardless of context, it is
-		///      faster to use a connection as described below.
-		///
-		/// or :
-		///
-		///    * Make an input connection into outPlug(), so that the hash and compute methods
-		///      are never called for it.
-		virtual void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		/// Must be implemented by derived classes to compute the result of the filter, or
-		/// an input connection must be made into outPlug(), so that the method is not called.
-		/// Results must be a bitwise combination of values from the IECore::PathMatcher::Result
-		/// enumeration.
-		virtual unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const;
+	/// Hash method for outPlug(). A derived class must either :
+	///
+	///    * Implement the method to call the base class implementation and then append to the hash.
+	///
+	/// or :
+	///
+	///    * Implement the method to assign directly to the hash from some input hash to signify that
+	///      an input will be passed through unchanged by the corresponding computeMatch() method. Note
+	///      that if you wish to pass through an input unconditionally, regardless of context, it is
+	///      faster to use a connection as described below.
+	///
+	/// or :
+	///
+	///    * Make an input connection into outPlug(), so that the hash and compute methods
+	///      are never called for it.
+	virtual void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	/// Must be implemented by derived classes to compute the result of the filter, or
+	/// an input connection must be made into outPlug(), so that the method is not called.
+	/// Results must be a bitwise combination of values from the IECore::PathMatcher::Result
+	/// enumeration.
+	virtual unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const;
 
-	private :
+private:
 
-		bool enabled( const Gaffer::Context *context ) const;
+	bool enabled( const Gaffer::Context *context ) const;
 
-		friend class FilterPlug;
+	friend class FilterPlug;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Filter )

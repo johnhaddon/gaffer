@@ -51,33 +51,32 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteSets : public SceneProcessor
 {
 
-	public :
+public:
 
-		explicit DeleteSets( const std::string &name=defaultName<DeleteSets>() );
-		~DeleteSets() override;
+	explicit DeleteSets( const std::string &name = defaultName<DeleteSets>() );
+	~DeleteSets() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteSets, DeleteSetsTypeId, SceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteSets, DeleteSetsTypeId, SceneProcessor );
 
-		Gaffer::StringPlug *namesPlug();
-		const Gaffer::StringPlug *namesPlug() const;
+	Gaffer::StringPlug *namesPlug();
+	const Gaffer::StringPlug *namesPlug() const;
 
-		Gaffer::BoolPlug *invertNamesPlug();
-		const Gaffer::BoolPlug *invertNamesPlug() const;
+	Gaffer::BoolPlug *invertNamesPlug();
+	const Gaffer::BoolPlug *invertNamesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteSets )

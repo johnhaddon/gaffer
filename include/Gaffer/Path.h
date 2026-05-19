@@ -74,172 +74,171 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API Path : public IECore::RunTimeTyped
 {
 
-	public :
+public:
 
-		using Names = std::vector<IECore::InternedString>;
+	using Names = std::vector<IECore::InternedString>;
 
-		explicit Path( PathFilterPtr filter = nullptr );
-		explicit Path( const std::string &path, PathFilterPtr filter = nullptr );
-		explicit Path( const Names &names, const IECore::InternedString &root = "/", PathFilterPtr filter = nullptr );
+	explicit Path( PathFilterPtr filter = nullptr );
+	explicit Path( const std::string &path, PathFilterPtr filter = nullptr );
+	explicit Path( const Names &names, const IECore::InternedString &root = "/", PathFilterPtr filter = nullptr );
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Path, PathTypeId, IECore::RunTimeTyped );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Path, PathTypeId, IECore::RunTimeTyped );
 
-		~Path() override;
+	~Path() override;
 
-		/// Returns the root of the path - this will be "/" for absolute
-		/// paths and "" for relative paths.
-		const IECore::InternedString &root() const;
+	/// Returns the root of the path - this will be "/" for absolute
+	/// paths and "" for relative paths.
+	const IECore::InternedString &root() const;
 
-		/// Returns true if this path is empty.
-		bool isEmpty() const;
+	/// Returns true if this path is empty.
+	bool isEmpty() const;
 
-		/// Returns true if this path is valid - ie references something
-		/// which actually exists.
-		virtual bool isValid( const IECore::Canceller *canceller = nullptr ) const;
+	/// Returns true if this path is valid - ie references something
+	/// which actually exists.
+	virtual bool isValid( const IECore::Canceller *canceller = nullptr ) const;
 
-		/// Returns true if this path can never have child Paths.
-		virtual bool isLeaf( const IECore::Canceller *canceller = nullptr ) const;
+	/// Returns true if this path can never have child Paths.
+	virtual bool isLeaf( const IECore::Canceller *canceller = nullptr ) const;
 
-		/// Fills the vector with the names of all the properties queryable via property().
-		/// Derived class implementations must call the base class implementation first.
-		virtual void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const;
-		/// Queries a property, whose name must have first been retrieved via propertyNames().
-		/// Derived class implementations should fall back to the base class implementation for
-		/// any unrecognised names. Returns null for unknown properties. May return null for invalid paths.
-		virtual IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
-		/// As above but for properties of type Context, since Context does not yet derive from
-		/// RunTimeTyped.
-		/// \todo Refactor Context so that EditableScope doesn't use a full reference-counted Context internally, and
-		/// then make long-lived contexts derive from RunTimeTyped. We don't want to derive from RunTimeTyped
-		/// now due to concerns about potential overhead in EditableScopes.
-		virtual ConstContextPtr contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
+	/// Fills the vector with the names of all the properties queryable via property().
+	/// Derived class implementations must call the base class implementation first.
+	virtual void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const;
+	/// Queries a property, whose name must have first been retrieved via propertyNames().
+	/// Derived class implementations should fall back to the base class implementation for
+	/// any unrecognised names. Returns null for unknown properties. May return null for invalid paths.
+	virtual IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
+	/// As above but for properties of type Context, since Context does not yet derive from
+	/// RunTimeTyped.
+	/// \todo Refactor Context so that EditableScope doesn't use a full reference-counted Context internally, and
+	/// then make long-lived contexts derive from RunTimeTyped. We don't want to derive from RunTimeTyped
+	/// now due to concerns about potential overhead in EditableScopes.
+	virtual ConstContextPtr contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
 
-		/// Returns the parent of this path, or None if the path
-		/// has no parent (is the root).
-		PathPtr parent() const;
+	/// Returns the parent of this path, or None if the path
+	/// has no parent (is the root).
+	PathPtr parent() const;
 
-		/// Fills the vector with Path instances representing all the children
-		/// of this path. Note that an empty list may be returned even if
-		/// isLeaf() is false.
-		///
-		/// > Caution : This is a flawed API. It is possible to implement
-		/// > `children()` to return children of a different type than
-		/// > this, but the type change cannot be reverted by `parent()`,
-		/// > nor repeated by methods like `append()` and `setFromString()`.
-		/// > Changing type in `children()` is not supported by UI components
-		/// > such as PathListingWidget and PathChooserWidget.
-		///
-		/// \todo Replace with a `childNames()` method.
-		size_t children( std::vector<PathPtr> &children, const IECore::Canceller *canceller = nullptr ) const;
+	/// Fills the vector with Path instances representing all the children
+	/// of this path. Note that an empty list may be returned even if
+	/// isLeaf() is false.
+	///
+	/// > Caution : This is a flawed API. It is possible to implement
+	/// > `children()` to return children of a different type than
+	/// > this, but the type change cannot be reverted by `parent()`,
+	/// > nor repeated by methods like `append()` and `setFromString()`.
+	/// > Changing type in `children()` is not supported by UI components
+	/// > such as PathListingWidget and PathChooserWidget.
+	///
+	/// \todo Replace with a `childNames()` method.
+	size_t children( std::vector<PathPtr> &children, const IECore::Canceller *canceller = nullptr ) const;
 
-		void setFilter( PathFilterPtr filter );
-		/// Filter may be null.
-		PathFilter *getFilter();
-		const PathFilter *getFilter() const;
+	void setFilter( PathFilterPtr filter );
+	/// Filter may be null.
+	PathFilter *getFilter();
+	const PathFilter *getFilter() const;
 
-		using PathChangedSignal = Signals::Signal<void ( Path *path )>;
-		PathChangedSignal &pathChangedSignal();
+	using PathChangedSignal = Signals::Signal<void( Path *path )>;
+	PathChangedSignal &pathChangedSignal();
 
-		/// Sets the path root and names from the other
-		/// path, leaving the current filter intact.
-		void setFromPath( const Path *path );
+	/// Sets the path root and names from the other
+	/// path, leaving the current filter intact.
+	void setFromPath( const Path *path );
 
-		/// Sets the path root and names from a "/"
-		/// separated string.
-		void setFromString( const std::string &string );
+	/// Sets the path root and names from a "/"
+	/// separated string.
+	void setFromString( const std::string &string );
 
-		/// Returns a copy of this path. Must be reimplemented
-		/// by derived classes so that the copy has the appropriate
-		/// type.
-		virtual PathPtr copy() const;
+	/// Returns a copy of this path. Must be reimplemented
+	/// by derived classes so that the copy has the appropriate
+	/// type.
+	virtual PathPtr copy() const;
 
-		/// Keeps removing names from the back of
-		/// names() until isValid() returns true.
-		void truncateUntilValid();
+	/// Keeps removing names from the back of
+	/// names() until isValid() returns true.
+	void truncateUntilValid();
 
-		/// @name Name accessors
-		/// These methods provide access to the vector or names that
-		/// make up the path.
-		////////////////////////////////////////////////////////////////////
-		//@{
-		/// Direct (const) access to the internal names. Use the
-		/// methods below to modify them.
-		const Names &names() const;
-		/// Sets the name at the specified index, throwing if the
-		/// index does not exist.
-		void set( size_t index, const IECore::InternedString &name );
-		/// Replaces the names in the specified range with the
-		/// specified names. Throws if the range does not exist.
-		/// The new range may be shorter or longer than the one
-		/// it replaces.
-		void set( size_t begin, size_t end, const Names &names );
-		/// Removes the name at the specified index, throwing if
-		/// the index is out of range,
-		void remove( size_t index );
-		/// Removes the names in the specified range, throwing
-		/// if the index is out of range.
-		void remove( size_t begin, size_t end );
-		/// Appends a name to the end of the path.
-		void append( const IECore::InternedString &name );
-		//@}
+	/// @name Name accessors
+	/// These methods provide access to the vector or names that
+	/// make up the path.
+	////////////////////////////////////////////////////////////////////
+	//@{
+	/// Direct (const) access to the internal names. Use the
+	/// methods below to modify them.
+	const Names &names() const;
+	/// Sets the name at the specified index, throwing if the
+	/// index does not exist.
+	void set( size_t index, const IECore::InternedString &name );
+	/// Replaces the names in the specified range with the
+	/// specified names. Throws if the range does not exist.
+	/// The new range may be shorter or longer than the one
+	/// it replaces.
+	void set( size_t begin, size_t end, const Names &names );
+	/// Removes the name at the specified index, throwing if
+	/// the index is out of range,
+	void remove( size_t index );
+	/// Removes the names in the specified range, throwing
+	/// if the index is out of range.
+	void remove( size_t begin, size_t end );
+	/// Appends a name to the end of the path.
+	void append( const IECore::InternedString &name );
+	//@}
 
-		/// Returns the path concatenated into a string, using '/'
-		/// as a separator between names.
-		std::string string() const;
+	/// Returns the path concatenated into a string, using '/'
+	/// as a separator between names.
+	std::string string() const;
 
-		bool operator == ( const Path &other ) const;
-		bool operator != ( const Path &other ) const;
+	bool operator == ( const Path &other ) const;
+	bool operator != ( const Path &other ) const;
 
-		/// Must be implemented by Paths which access node graphs. The result
-		/// must be suitable for pasing to `ParallelAlgo::callOnBackgroundThread()` by
-		/// code which will query the Path in the background. This allows the background
-		/// processing to be cancelled before node graph edits that affect the Path are
-		/// made.
-		virtual const Plug *cancellationSubject() const;
+	/// Must be implemented by Paths which access node graphs. The result
+	/// must be suitable for pasing to `ParallelAlgo::callOnBackgroundThread()` by
+	/// code which will query the Path in the background. This allows the background
+	/// processing to be cancelled before node graph edits that affect the Path are
+	/// made.
+	virtual const Plug *cancellationSubject() const;
 
-	protected :
+protected:
 
-		/// The subclass specific part of children(). This must be implemented
-		/// by subclasses to return a list of children - filtering will be applied
-		/// in the children() method so can be ignored by the derived classes.
-		/// \todo Allocating new children and then filtering some of them away
-		/// seems incredibly wasteful. Perhaps it would be better to have a
-		/// virtual childNames() method, and then implement filtering by manipulating
-		/// a single path and returning copies for the ones that passed?
-		virtual void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const;
+	/// The subclass specific part of children(). This must be implemented
+	/// by subclasses to return a list of children - filtering will be applied
+	/// in the children() method so can be ignored by the derived classes.
+	/// \todo Allocating new children and then filtering some of them away
+	/// seems incredibly wasteful. Perhaps it would be better to have a
+	/// virtual childNames() method, and then implement filtering by manipulating
+	/// a single path and returning copies for the ones that passed?
+	virtual void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const;
 
-		/// May be called by subclasses to signify that the path has changed
-		/// and to emit pathChangedSignal() if necessary. Note that it can be
-		/// much more efficient to call this than to call pathChangedSignal()( this ),
-		/// because the signal itself is created lazily on demand in pathChangedSignal().
-		void emitPathChanged();
-		/// Called when the PathChangedSignal is constructed - for performance
-		/// reasons this is delayed until it is accessed for the first time
-		/// via pathChangedSignal(). This method may be reimplemented to perform
-		/// any setup needed to emit the signal appropriately. Implementations
-		/// must call the base class implementation first.
-		virtual void pathChangedSignalCreated();
-		/// Returns true if the PathChangedSignal has been constructed, false
-		/// otherwise.
-		bool havePathChangedSignal() const;
+	/// May be called by subclasses to signify that the path has changed
+	/// and to emit pathChangedSignal() if necessary. Note that it can be
+	/// much more efficient to call this than to call pathChangedSignal()( this ),
+	/// because the signal itself is created lazily on demand in pathChangedSignal().
+	void emitPathChanged();
+	/// Called when the PathChangedSignal is constructed - for performance
+	/// reasons this is delayed until it is accessed for the first time
+	/// via pathChangedSignal(). This method may be reimplemented to perform
+	/// any setup needed to emit the signal appropriately. Implementations
+	/// must call the base class implementation first.
+	virtual void pathChangedSignalCreated();
+	/// Returns true if the PathChangedSignal has been constructed, false
+	/// otherwise.
+	bool havePathChangedSignal() const;
 
-	private :
+private:
 
-		virtual void rootAndNames( const std::string &s, IECore::InternedString &root, Names &names ) const;
+	virtual void rootAndNames( const std::string &s, IECore::InternedString &root, Names &names ) const;
 
-		void filterChanged();
-		void checkName( const IECore::InternedString &name ) const;
+	void filterChanged();
+	void checkName( const IECore::InternedString &name ) const;
 
-		IECore::InternedString m_root;
-		Names m_names;
+	IECore::InternedString m_root;
+	Names m_names;
 
-		PathFilterPtr m_filter;
-		PathChangedSignal *m_pathChangedSignal;
-		Signals::ScopedConnection m_filterChangedConnection;
+	PathFilterPtr m_filter;
+	PathChangedSignal *m_pathChangedSignal;
+	Signals::ScopedConnection m_filterChangedConnection;
 
-		// So we can bind the emitPathChanged() method.
-		friend void GafferModule::bindPath();
-
+	// So we can bind the emitPathChanged() method.
+	friend void GafferModule::bindPath();
 };
 
 } // namespace Gaffer

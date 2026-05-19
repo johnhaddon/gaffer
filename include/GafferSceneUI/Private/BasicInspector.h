@@ -51,39 +51,38 @@ namespace GafferSceneUI::Private
 class GAFFERSCENEUI_API BasicInspector : public Inspector
 {
 
-	public :
+public:
 
-		/// Constructs an inspector to inspect `plug` and its history by calling
-		/// `valueFunction`.
-		template<typename PlugType, typename ValueFunctionType>
-		BasicInspector(
-			PlugType *plug, const Gaffer::PlugPtr &editScope,
-			/// The function used to inspect the value. Signature must be
-			/// `ConstObjectPtr ( const PlugType * )`.
-			const ValueFunctionType &&valueFunction,
-			const std::string &type = "", const std::string &name = ""
-		);
+	/// Constructs an inspector to inspect `plug` and its history by calling
+	/// `valueFunction`.
+	template<typename PlugType, typename ValueFunctionType>
+	BasicInspector(
+		PlugType *plug, const Gaffer::PlugPtr &editScope,
+		/// The function used to inspect the value. Signature must be
+		/// `ConstObjectPtr ( const PlugType * )`.
+		const ValueFunctionType &&valueFunction,
+		const std::string &type = "", const std::string &name = ""
+	);
 
-		~BasicInspector() override;
+	~BasicInspector() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BasicInspector, BasicInspectorTypeId, Inspector );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( BasicInspector, BasicInspectorTypeId, Inspector );
 
-	protected :
+protected:
 
-		GafferScene::SceneAlgo::History::ConstPtr history() const override;
-		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
-		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
+	GafferScene::SceneAlgo::History::ConstPtr history() const override;
+	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
+	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
 
-	private :
+private:
 
-		// Logically part of constructor, but in a separate function to avoid
-		// bloating the template.
-		void init();
+	// Logically part of constructor, but in a separate function to avoid
+	// bloating the template.
+	void init();
 
-		const Gaffer::ValuePlugPtr m_plug;
-		using ValueFunction = std::function<IECore::ConstObjectPtr( const Gaffer::Plug * )>;
-		ValueFunction m_valueFunction;
-
+	const Gaffer::ValuePlugPtr m_plug;
+	using ValueFunction = std::function<IECore::ConstObjectPtr( const Gaffer::Plug * )>;
+	ValueFunction m_valueFunction;
 };
 
 IE_CORE_DECLAREPTR( BasicInspector )

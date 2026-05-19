@@ -102,4 +102,4 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBOb
 
 NodeAlgo::ConverterDescription<IECoreVDB::VDBObject> g_description( convert );
 
-}  // namespace
+} // namespace

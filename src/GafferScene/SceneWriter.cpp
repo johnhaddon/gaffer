@@ -59,12 +59,12 @@ namespace
 struct LocationData
 {
 	LocationData( const ScenePlug *scene, const ScenePlug::ScenePath &path, const CompoundData *setsForTags )
-		:	m_path( path ),
-			m_attributes( scene->attributesPlug()->getValue() ),
-			m_object( scene->objectPlug()->getValue() ),
-			m_bound( scene->boundPlug()->getValue() ),
-			m_transform( scene->transformPlug()->getValue() ),
-			m_childNames( scene->childNamesPlug()->getValue() )
+		: m_path( path ),
+		  m_attributes( scene->attributesPlug()->getValue() ),
+		  m_object( scene->objectPlug()->getValue() ),
+		  m_bound( scene->boundPlug()->getValue() ),
+		  m_transform( scene->transformPlug()->getValue() ),
+		  m_childNames( scene->childNamesPlug()->getValue() )
 	{
 		if( setsForTags )
 		{
@@ -99,12 +99,7 @@ struct LocationData
 
 		if( m_path.size() )
 		{
-			M44dDataPtr td = new IECore::M44dData( Imath::M44d (
-				m_transform[0][0], m_transform[0][1], m_transform[0][2], m_transform[0][3],
-				m_transform[1][0], m_transform[1][1], m_transform[1][2], m_transform[1][3],
-				m_transform[2][0], m_transform[2][1], m_transform[2][2], m_transform[2][3],
-				m_transform[3][0], m_transform[3][1], m_transform[3][2], m_transform[3][3]
-			) );
+			M44dDataPtr td = new IECore::M44dData( Imath::M44d( m_transform[0][0], m_transform[0][1], m_transform[0][2], m_transform[0][3], m_transform[1][0], m_transform[1][1], m_transform[1][2], m_transform[1][3], m_transform[2][0], m_transform[2][1], m_transform[2][2], m_transform[2][3], m_transform[3][0], m_transform[3][1], m_transform[3][2], m_transform[3][3] ) );
 			scene->writeTransform( td.get(), time );
 		}
 
@@ -127,16 +122,15 @@ struct LocationData
 		}
 	}
 
-	private :
+private:
 
-		ScenePlug::ScenePath m_path;
-		ConstCompoundObjectPtr m_attributes;
-		ConstObjectPtr m_object;
-		Imath::Box3f m_bound;
-		Imath::M44f m_transform;
-		ConstInternedStringVectorDataPtr m_childNames;
-		SceneInterface::NameList m_tags;
-
+	ScenePlug::ScenePath m_path;
+	ConstCompoundObjectPtr m_attributes;
+	ConstObjectPtr m_object;
+	Imath::Box3f m_bound;
+	Imath::M44f m_transform;
+	ConstInternedStringVectorDataPtr m_childNames;
+	SceneInterface::NameList m_tags;
 };
 
 } // namespace
@@ -192,7 +186,7 @@ const ScenePlug *SceneWriter::outPlug() const
 IECore::MurmurHash SceneWriter::hash( const Gaffer::Context *context ) const
 {
 	const ScenePlug *scenePlug = inPlug()->source<ScenePlug>();
-	if ( ( fileNamePlug()->getValue() == "" ) || ( scenePlug == inPlug() ) )
+	if( ( fileNamePlug()->getValue() == "" ) || ( scenePlug == inPlug() ) )
 	{
 		return IECore::MurmurHash();
 	}
@@ -244,14 +238,14 @@ void SceneWriter::executeSequence( const std::vector<float> &frames ) const
 
 			// Collect LocationData from each location in parallel.
 
-			[&] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
+			[&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
 				return LocationData( scene, path, useSetsAPI ? nullptr : sets.get() );
 			},
 
 			// Write to output serially, because SceneInterfaces are not
 			// thread-safe for writing.
 
-			[&] ( const LocationData &locationData ) {
+			[&]( const LocationData &locationData ) {
 				locationData.write( output.get(), scope.context()->getTime() );
 			}
 
@@ -270,7 +264,6 @@ void SceneWriter::executeSequence( const std::vector<float> &frames ) const
 		{
 			output->writeAttribute( "gaffer:globals", globals.get(), scope.context()->getTime() );
 		}
-
 	}
 }
 

@@ -58,63 +58,62 @@ namespace Gaffer
 class GAFFER_API FileSystemPath : public Path
 {
 
-	public :
+public:
 
-		explicit FileSystemPath( PathFilterPtr filter = nullptr, bool includeSequences = false );
-		FileSystemPath( const std::string &path, PathFilterPtr filter = nullptr, bool includeSequences = false );
-		FileSystemPath( const std::filesystem::path &path, PathFilterPtr filter = nullptr, bool includeSequences = false );
-		FileSystemPath( const Names &names, const IECore::InternedString &root = "/", PathFilterPtr filter = nullptr, bool includeSequences = false );
+	explicit FileSystemPath( PathFilterPtr filter = nullptr, bool includeSequences = false );
+	FileSystemPath( const std::string &path, PathFilterPtr filter = nullptr, bool includeSequences = false );
+	FileSystemPath( const std::filesystem::path &path, PathFilterPtr filter = nullptr, bool includeSequences = false );
+	FileSystemPath( const Names &names, const IECore::InternedString &root = "/", PathFilterPtr filter = nullptr, bool includeSequences = false );
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::FileSystemPath, FileSystemPathTypeId, Path );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::FileSystemPath, FileSystemPathTypeId, Path );
 
-		~FileSystemPath() override;
+	~FileSystemPath() override;
 
-		bool isValid( const IECore::Canceller *canceller = nullptr ) const override;
-		bool isLeaf( const IECore::Canceller *canceller = nullptr ) const override;
-		void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override;
-		/// Supported properties :
-		///
-		/// "fileSystem:owner" -> StringData
-		/// "fileSystem:group" -> StringData
-		/// "fileSystem:modificationTime" -> DateTimeData, in UTC time
-		/// "fileSystem:size" -> UInt64Data, in bytes
-		/// "fileSystem:frameRange" -> StringData
-		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
-		PathPtr copy() const override;
+	bool isValid( const IECore::Canceller *canceller = nullptr ) const override;
+	bool isLeaf( const IECore::Canceller *canceller = nullptr ) const override;
+	void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override;
+	/// Supported properties :
+	///
+	/// "fileSystem:owner" -> StringData
+	/// "fileSystem:group" -> StringData
+	/// "fileSystem:modificationTime" -> DateTimeData, in UTC time
+	/// "fileSystem:size" -> UInt64Data, in bytes
+	/// "fileSystem:frameRange" -> StringData
+	IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
+	PathPtr copy() const override;
 
-		// Returns true if this FileSystemPath includes FileSequences
-		bool getIncludeSequences() const;
-		// Determines whether this FileSystemPath includes FileSequences
-		void setIncludeSequences( bool includeSequences );
-		// Returns true if the path represents a FileSequence.
-		bool isFileSequence() const;
-		// Returns the FileSequence that represents the current leaf
-		// or nullptr if this path is not a leaf, or does not represent
-		// a FileSequence.
-		IECore::FileSequencePtr fileSequence() const;
+	// Returns true if this FileSystemPath includes FileSequences
+	bool getIncludeSequences() const;
+	// Determines whether this FileSystemPath includes FileSequences
+	void setIncludeSequences( bool includeSequences );
+	// Returns true if the path represents a FileSequence.
+	bool isFileSequence() const;
+	// Returns the FileSequence that represents the current leaf
+	// or nullptr if this path is not a leaf, or does not represent
+	// a FileSequence.
+	IECore::FileSequencePtr fileSequence() const;
 
-		// Returns the path converted to the OS native format
-		std::string nativeString() const;
+	// Returns the path converted to the OS native format
+	std::string nativeString() const;
 
-		std::filesystem::path standardPath() const;
+	std::filesystem::path standardPath() const;
 
-		static PathFilterPtr createStandardFilter( const std::vector<std::string> &extensions = std::vector<std::string>(), const std::string &extensionsLabel = "", bool includeSequenceFilter = false );
+	static PathFilterPtr createStandardFilter( const std::vector<std::string> &extensions = std::vector<std::string>(), const std::string &extensionsLabel = "", bool includeSequenceFilter = false );
 
-	protected :
+protected:
 
-		void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override;
+	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override;
 
-	private :
+private:
 
 #ifdef _MSC_VER
 
-		/// Sets the path root and names in generic format from an OS native path string
-		void rootAndNames( const std::string &string, IECore::InternedString &root, Names &names ) const override;
+	/// Sets the path root and names in generic format from an OS native path string
+	void rootAndNames( const std::string &string, IECore::InternedString &root, Names &names ) const override;
 
 #endif
 
-		bool m_includeSequences;
-
+	bool m_includeSequences;
 };
 
 } // namespace Gaffer

@@ -63,9 +63,9 @@ namespace
 
 ContextPtr taskContext( const TaskNode::Task &t, bool copy = true )
 {
-	if ( ConstContextPtr context = t.context() )
+	if( ConstContextPtr context = t.context() )
 	{
-		if ( copy )
+		if( copy )
 		{
 			return new Context( *context );
 		}
@@ -145,18 +145,10 @@ void GafferDispatchModule::bindTaskNode()
 			.def( init<GafferDispatch::TaskNode::TaskPlugPtr, const Gaffer::Context *>() )
 			.def( "plug", &taskPlug )
 			.def( "context", &taskContext, ( boost::python::arg_( "_copy" ) = true ) )
-			.def("__eq__", &TaskNode::Task::operator== )
-		;
+			.def( "__eq__", &TaskNode::Task::operator == );
 
 		PlugClass<TaskNode::TaskPlug>()
-			.def( init<const char *, Plug::Direction, unsigned>(
-					(
-						boost::python::arg_( "name" )=GraphComponent::defaultName<TaskNode::TaskPlug>(),
-						boost::python::arg_( "direction" )=Plug::In,
-						boost::python::arg_( "flags" )=Plug::Default
-					)
-				)
-			)
+			.def( init<const char *, Plug::Direction, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<TaskNode::TaskPlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default ) ) )
 			.def( "hash", &taskPlugHash )
 			.def( "execute", &taskPlugExecute )
 			.def( "executeSequence", &taskPlugExecuteSequence )
@@ -165,11 +157,9 @@ void GafferDispatchModule::bindTaskNode()
 			.def( "postTasks", &taskPlugPostTasks )
 			// Adjusting the name so that it correctly reflects
 			// the nesting, and can be used by the PlugSerialiser.
-			.attr( "__qualname__" ) = "TaskNode.TaskPlug"
-		;
+			.attr( "__qualname__" ) = "TaskNode.TaskPlug";
 	}
 
 	TaskNodeClass<TaskList>();
 	TaskNodeClass<FrameMask>();
-
 }

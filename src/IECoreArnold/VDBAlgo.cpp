@@ -58,11 +58,11 @@ using namespace IECoreArnold;
 namespace
 {
 
-IECore::InternedString g_filedataParam("filedata");
-IECore::InternedString g_filenameParam("filename");
+IECore::InternedString g_filedataParam( "filedata" );
+IECore::InternedString g_filenameParam( "filename" );
 
-IECore::InternedString g_gridParam("grids");
-AtString g_volume("volume");
+IECore::InternedString g_gridParam( "grids" );
+AtString g_volume( "volume" );
 
 ///! utility to allow us to stream directly into a UCharVectorData
 struct UCharVectorDataSink
@@ -83,7 +83,7 @@ struct UCharVectorDataSink
 	std::vector<unsigned char> &m_storage;
 };
 
-UCharVectorDataPtr createMemoryBuffer(const IECoreVDB::VDBObject* vdbObject)
+UCharVectorDataPtr createMemoryBuffer( const IECoreVDB::VDBObject *vdbObject )
 {
 	IECore::UCharVectorDataPtr buffer = new IECore::UCharVectorData();
 	UCharVectorDataSink sink( buffer.get() );
@@ -93,7 +93,7 @@ UCharVectorDataPtr createMemoryBuffer(const IECoreVDB::VDBObject* vdbObject)
 
 	openvdb::GridCPtrVec gridsToWrite;
 	std::vector<std::string> gridNames = vdbObject->gridNames();
-	for( const std::string& gridName : gridNames )
+	for( const std::string &gridName : gridNames )
 	{
 		gridsToWrite.push_back( vdbObject->findGrid( gridName ) );
 	}
@@ -102,14 +102,14 @@ UCharVectorDataPtr createMemoryBuffer(const IECoreVDB::VDBObject* vdbObject)
 	return buffer;
 }
 
-CompoundDataPtr createParameters(const IECoreVDB::VDBObject* vdbObject)
+CompoundDataPtr createParameters( const IECoreVDB::VDBObject *vdbObject )
 {
 	CompoundDataPtr parameters = new CompoundData();
-	CompoundDataMap& compoundData = parameters->writable();
+	CompoundDataMap &compoundData = parameters->writable();
 
 	compoundData[g_gridParam] = new StringVectorData( vdbObject->gridNames() );
 
-	if ( vdbObject->unmodifiedFromFile() )
+	if( vdbObject->unmodifiedFromFile() )
 	{
 		compoundData[g_filenameParam] = new StringData( vdbObject->fileName() );
 	}
@@ -121,7 +121,7 @@ CompoundDataPtr createParameters(const IECoreVDB::VDBObject* vdbObject)
 	return parameters;
 }
 
-AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &name, const AtNode* parent, const std::string &messageContext )
+AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &name, const AtNode *parent, const std::string &messageContext )
 {
 	AtNode *node = AiNode( universe, g_volume, AtString( name.c_str() ), parent );
 

@@ -46,48 +46,47 @@ namespace GafferScene
 class GAFFERSCENE_API Sphere : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Sphere, SphereTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Sphere, SphereTypeId, ObjectSource );
 
-		explicit Sphere( const std::string &name=defaultName<Sphere>() );
-		~Sphere() override;
+	explicit Sphere( const std::string &name = defaultName<Sphere>() );
+	~Sphere() override;
 
-		enum Type
-		{
-			Primitive = 0,
-			Mesh
-		};
+	enum Type
+	{
+		Primitive = 0,
+		Mesh
+	};
 
-		Gaffer::IntPlug *typePlug();
-		const Gaffer::IntPlug *typePlug() const;
+	Gaffer::IntPlug *typePlug();
+	const Gaffer::IntPlug *typePlug() const;
 
-		Gaffer::FloatPlug *radiusPlug();
-		const Gaffer::FloatPlug *radiusPlug() const;
+	Gaffer::FloatPlug *radiusPlug();
+	const Gaffer::FloatPlug *radiusPlug() const;
 
-		Gaffer::FloatPlug *zMinPlug();
-		const Gaffer::FloatPlug *zMinPlug() const;
+	Gaffer::FloatPlug *zMinPlug();
+	const Gaffer::FloatPlug *zMinPlug() const;
 
-		Gaffer::FloatPlug *zMaxPlug();
-		const Gaffer::FloatPlug *zMaxPlug() const;
+	Gaffer::FloatPlug *zMaxPlug();
+	const Gaffer::FloatPlug *zMaxPlug() const;
 
-		Gaffer::FloatPlug *thetaMaxPlug();
-		const Gaffer::FloatPlug *thetaMaxPlug() const;
+	Gaffer::FloatPlug *thetaMaxPlug();
+	const Gaffer::FloatPlug *thetaMaxPlug() const;
 
-		Gaffer::V2iPlug *divisionsPlug();
-		const Gaffer::V2iPlug *divisionsPlug() const;
+	Gaffer::V2iPlug *divisionsPlug();
+	const Gaffer::V2iPlug *divisionsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Sphere )

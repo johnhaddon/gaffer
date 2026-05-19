@@ -58,7 +58,7 @@ const string g_emptyString;
 const string g_sceneLinearString( OCIO_NAMESPACE::ROLE_SCENE_LINEAR );
 
 IECorePreview::LRUCache<std::string, OCIO_NAMESPACE::ConstConfigRcPtr> g_configCache(
-	[] ( const std::string &fileName, size_t &cost, const IECore::Canceller *canceller ) {
+	[]( const std::string &fileName, size_t &cost, const IECore::Canceller *canceller ) {
 		cost = 1;
 		OCIO_NAMESPACE::ConstConfigRcPtr config;
 		if( fileName.empty() )

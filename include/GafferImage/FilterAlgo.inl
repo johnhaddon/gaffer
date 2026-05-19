@@ -43,10 +43,10 @@ namespace GafferImage
 
 inline Imath::Box2f FilterAlgo::filterSupport( const Imath::V2f &p, float dx, float dy, float filterWidth )
 {
-	return Imath::Box2f (
+	return Imath::Box2f(
 		p - 0.5f * filterWidth * Imath::V2f( dx, dy ),
-		p + 0.5f * filterWidth * Imath::V2f( dx, dy ) );
-
+		p + 0.5f * filterWidth * Imath::V2f( dx, dy )
+	);
 }
 
 inline Imath::V2f FilterAlgo::derivativesToAxisAligned( const Imath::V2f &p, const Imath::V2f &dpdx, const Imath::V2f &dpdy )
@@ -59,7 +59,7 @@ inline Imath::V2f FilterAlgo::derivativesToAxisAligned( const Imath::V2f &p, con
 	if( dxLength == 0 && dyLength == 0 )
 	{
 		minLength = 1.0f;
-		majorVector = Imath::V2f(0.0f);
+		majorVector = Imath::V2f( 0.0f );
 	}
 	else if( dxLength > dyLength )
 	{
@@ -75,4 +75,4 @@ inline Imath::V2f FilterAlgo::derivativesToAxisAligned( const Imath::V2f &p, con
 	return Imath::V2f( minLength ) + Imath::V2f( fabs( majorVector.x ), fabs( majorVector.y ) );
 }
 
-}
+} // namespace GafferImage

@@ -54,55 +54,54 @@ namespace GafferScene
 class GAFFERSCENE_API AttributeVisualiser : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit AttributeVisualiser( const std::string &name=defaultName<AttributeVisualiser>() );
-		~AttributeVisualiser() override;
+	explicit AttributeVisualiser( const std::string &name = defaultName<AttributeVisualiser>() );
+	~AttributeVisualiser() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::AttributeVisualiser, AttributeVisualiserTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::AttributeVisualiser, AttributeVisualiserTypeId, AttributeProcessor );
 
-		enum Mode
-		{
-			Color,
-			FalseColor,
-			Random,
-			ShaderNodeColor
-		};
+	enum Mode
+	{
+		Color,
+		FalseColor,
+		Random,
+		ShaderNodeColor
+	};
 
-		Gaffer::StringPlug *attributeNamePlug();
-		const Gaffer::StringPlug *attributeNamePlug() const;
+	Gaffer::StringPlug *attributeNamePlug();
+	const Gaffer::StringPlug *attributeNamePlug() const;
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::FloatPlug *minPlug();
-		const Gaffer::FloatPlug *minPlug() const;
+	Gaffer::FloatPlug *minPlug();
+	const Gaffer::FloatPlug *minPlug() const;
 
-		Gaffer::FloatPlug *maxPlug();
-		const Gaffer::FloatPlug *maxPlug() const;
+	Gaffer::FloatPlug *maxPlug();
+	const Gaffer::FloatPlug *maxPlug() const;
 
-		Gaffer::RampfColor3fPlug *rampPlug();
-		const Gaffer::RampfColor3fPlug *rampPlug() const;
+	Gaffer::RampfColor3fPlug *rampPlug();
+	const Gaffer::RampfColor3fPlug *rampPlug() const;
 
-		Gaffer::StringPlug *shaderTypePlug();
-		const Gaffer::StringPlug *shaderTypePlug() const;
+	Gaffer::StringPlug *shaderTypePlug();
+	const Gaffer::StringPlug *shaderTypePlug() const;
 
-		Gaffer::StringPlug *shaderNamePlug();
-		const Gaffer::StringPlug *shaderNamePlug() const;
+	Gaffer::StringPlug *shaderNamePlug();
+	const Gaffer::StringPlug *shaderNamePlug() const;
 
-		Gaffer::StringPlug *shaderParameterPlug();
-		const Gaffer::StringPlug *shaderParameterPlug() const;
+	Gaffer::StringPlug *shaderParameterPlug();
+	const Gaffer::StringPlug *shaderParameterPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( AttributeVisualiser )

@@ -43,17 +43,16 @@
 namespace
 {
 
-template <typename T>
-void
-setV2PlugComponentValue( T const& parent, Gaffer::NumericPlug< typename T::ValueType::BaseType >& child, typename T::ValueType const& value )
+template<typename T>
+void setV2PlugComponentValue( T const &parent, Gaffer::NumericPlug<typename T::ValueType::BaseType> &child, typename T::ValueType const &value )
 {
 	float cv;
 
-	if( & child == parent.getChild( 0 ) )
+	if( &child == parent.getChild( 0 ) )
 	{
 		cv = value.x;
 	}
-	else if( & child == parent.getChild( 1 ) )
+	else if( &child == parent.getChild( 1 ) )
 	{
 		cv = value.y;
 	}
@@ -64,7 +63,6 @@ setV2PlugComponentValue( T const& parent, Gaffer::NumericPlug< typename T::Value
 	}
 
 	child.setValue( cv );
-
 }
 
 } // namespace
@@ -76,8 +74,8 @@ size_t FormatQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( FormatQuery );
 
-FormatQuery::FormatQuery( std::string const& name )
-: Gaffer::ComputeNode( name )
+FormatQuery::FormatQuery( std::string const &name )
+	: Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image" ) );
@@ -88,62 +86,66 @@ FormatQuery::FormatQuery( std::string const& name )
 }
 
 FormatQuery::~FormatQuery()
-{}
-
-ImagePlug* FormatQuery::imagePlug()
 {
-	return const_cast< ImagePlug* >(
-		static_cast< FormatQuery const* >( this )->imagePlug() );
 }
 
-ImagePlug const* FormatQuery::imagePlug() const
+ImagePlug *FormatQuery::imagePlug()
 {
-	return getChild< ImagePlug >( g_firstPlugIndex );
+	return const_cast<ImagePlug *>(
+		static_cast<FormatQuery const *>( this )->imagePlug()
+	);
 }
 
-Gaffer::StringPlug* FormatQuery::viewPlug()
+ImagePlug const *FormatQuery::imagePlug() const
 {
-	return const_cast< Gaffer::StringPlug* >( static_cast< FormatQuery const* >( this )->viewPlug() );
+	return getChild<ImagePlug>( g_firstPlugIndex );
 }
 
-Gaffer::StringPlug const* FormatQuery::viewPlug() const
+Gaffer::StringPlug *FormatQuery::viewPlug()
 {
-	return getChild< Gaffer::StringPlug >( g_firstPlugIndex + 1 );
+	return const_cast<Gaffer::StringPlug *>( static_cast<FormatQuery const *>( this )->viewPlug() );
 }
 
-FormatPlug* FormatQuery::formatPlug()
+Gaffer::StringPlug const *FormatQuery::viewPlug() const
 {
-	return const_cast< FormatPlug* >( static_cast< FormatQuery const* >( this )->formatPlug() );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 1 );
 }
 
-FormatPlug const* FormatQuery::formatPlug() const
+FormatPlug *FormatQuery::formatPlug()
 {
-	return getChild< FormatPlug >( g_firstPlugIndex + 2 );
+	return const_cast<FormatPlug *>( static_cast<FormatQuery const *>( this )->formatPlug() );
 }
 
-Gaffer::V2fPlug* FormatQuery::centerPlug()
+FormatPlug const *FormatQuery::formatPlug() const
 {
-	return const_cast< Gaffer::V2fPlug* >(
-		static_cast< FormatQuery const* >( this )->centerPlug() );
+	return getChild<FormatPlug>( g_firstPlugIndex + 2 );
 }
 
-Gaffer::V2fPlug const* FormatQuery::centerPlug() const
+Gaffer::V2fPlug *FormatQuery::centerPlug()
 {
-	return getChild< Gaffer::V2fPlug >( g_firstPlugIndex + 3 );
+	return const_cast<Gaffer::V2fPlug *>(
+		static_cast<FormatQuery const *>( this )->centerPlug()
+	);
 }
 
-Gaffer::V2iPlug* FormatQuery::sizePlug()
+Gaffer::V2fPlug const *FormatQuery::centerPlug() const
 {
-	return const_cast< Gaffer::V2iPlug* >(
-		static_cast< FormatQuery const* >( this )->sizePlug() );
+	return getChild<Gaffer::V2fPlug>( g_firstPlugIndex + 3 );
 }
 
-Gaffer::V2iPlug const* FormatQuery::sizePlug() const
+Gaffer::V2iPlug *FormatQuery::sizePlug()
 {
-	return getChild< Gaffer::V2iPlug >( g_firstPlugIndex + 4 );
+	return const_cast<Gaffer::V2iPlug *>(
+		static_cast<FormatQuery const *>( this )->sizePlug()
+	);
 }
 
-void FormatQuery::affects( Gaffer::Plug const* const input, AffectedPlugsContainer& outputs ) const
+Gaffer::V2iPlug const *FormatQuery::sizePlug() const
+{
+	return getChild<Gaffer::V2iPlug>( g_firstPlugIndex + 4 );
+}
+
+void FormatQuery::affects( Gaffer::Plug const *const input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 
@@ -161,7 +163,7 @@ void FormatQuery::affects( Gaffer::Plug const* const input, AffectedPlugsContain
 	}
 }
 
-void FormatQuery::hash( Gaffer::ValuePlug const* const output, Gaffer::Context const* const context, IECore::MurmurHash& h ) const
+void FormatQuery::hash( Gaffer::ValuePlug const *const output, Gaffer::Context const *const context, IECore::MurmurHash &h ) const
 {
 	ComputeNode::hash( output, context, h );
 
@@ -174,12 +176,11 @@ void FormatQuery::hash( Gaffer::ValuePlug const* const output, Gaffer::Context c
 	ImagePlug::ViewScope viewScope( context );
 	viewScope.setViewNameChecked( &view, imagePlug()->viewNames().get() );
 	h.append( imagePlug()->formatHash() );
-
 }
 
-void FormatQuery::compute( Gaffer::ValuePlug* const output, Gaffer::Context const* const context ) const
+void FormatQuery::compute( Gaffer::ValuePlug *const output, Gaffer::Context const *const context ) const
 {
-	Gaffer::GraphComponent* const parent = output->parent();
+	Gaffer::GraphComponent *const parent = output->parent();
 
 	std::string view = viewPlug()->getValue();
 	if( !view.size() )
@@ -193,33 +194,37 @@ void FormatQuery::compute( Gaffer::ValuePlug* const output, Gaffer::Context cons
 
 	if( output == formatPlug()->pixelAspectPlug() )
 	{
-		static_cast< Gaffer::FloatPlug *>( output )->setValue( f.getPixelAspect() );
+		static_cast<Gaffer::FloatPlug *>( output )->setValue( f.getPixelAspect() );
 	}
 	else if( parent == formatPlug()->displayWindowPlug()->minPlug() )
 	{
 		setV2PlugComponentValue(
-			*( IECore::assertedStaticCast< Gaffer::V2iPlug >( parent ) ),
-			*( IECore::assertedStaticCast< Gaffer::IntPlug >( output ) ), f.getDisplayWindow().min );
+			*( IECore::assertedStaticCast<Gaffer::V2iPlug>( parent ) ),
+			*( IECore::assertedStaticCast<Gaffer::IntPlug>( output ) ), f.getDisplayWindow().min
+		);
 	}
 	else if( parent == formatPlug()->displayWindowPlug()->maxPlug() )
 	{
 		setV2PlugComponentValue(
-			*( IECore::assertedStaticCast< Gaffer::V2iPlug >( parent ) ),
-			*( IECore::assertedStaticCast< Gaffer::IntPlug >( output ) ), f.getDisplayWindow().max );
+			*( IECore::assertedStaticCast<Gaffer::V2iPlug>( parent ) ),
+			*( IECore::assertedStaticCast<Gaffer::IntPlug>( output ) ), f.getDisplayWindow().max
+		);
 	}
 	else if( parent == centerPlug() )
 	{
 		// If the size is odd, then the center will be aligned to a half pixel, so we use float for the center
 		Imath::Box2f floatBound( f.getDisplayWindow().min, f.getDisplayWindow().max );
 		setV2PlugComponentValue(
-			*( IECore::assertedStaticCast< Gaffer::V2fPlug >( parent ) ),
-			*( IECore::assertedStaticCast< Gaffer::FloatPlug >( output ) ), floatBound.center() );
+			*( IECore::assertedStaticCast<Gaffer::V2fPlug>( parent ) ),
+			*( IECore::assertedStaticCast<Gaffer::FloatPlug>( output ) ), floatBound.center()
+		);
 	}
 	else if( parent == sizePlug() )
 	{
 		setV2PlugComponentValue(
-			*( IECore::assertedStaticCast< Gaffer::V2iPlug >( parent ) ),
-			*( IECore::assertedStaticCast< Gaffer::IntPlug >( output ) ), Imath::V2i( f.width(), f.height() ) );
+			*( IECore::assertedStaticCast<Gaffer::V2iPlug>( parent ) ),
+			*( IECore::assertedStaticCast<Gaffer::IntPlug>( output ) ), Imath::V2i( f.width(), f.height() )
+		);
 	}
 	else
 	{
@@ -227,4 +232,4 @@ void FormatQuery::compute( Gaffer::ValuePlug* const output, Gaffer::Context cons
 	}
 }
 
-} // GafferImage
+} // namespace GafferImage

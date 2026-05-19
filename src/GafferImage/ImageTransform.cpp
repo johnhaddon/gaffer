@@ -106,59 +106,58 @@ Imath::Box2i samplerWindow( const Imath::V2i &tileOrigin, const Imath::M33f &sam
 class ImageTransform::ChainingScope : boost::noncopyable
 {
 
-	public :
+public:
 
-		ChainingScope( const Gaffer::Context *context, const ImageTransform *imageTransform )
-			:	m_chained( context->get<bool>( chainedContextName, false ) ), m_true( true )
+	ChainingScope( const Gaffer::Context *context, const ImageTransform *imageTransform )
+		: m_chained( context->get<bool>( chainedContextName, false ) ), m_true( true )
+	{
+		if( !m_chained )
 		{
-			if( !m_chained )
+			if( imageTransform->inTransformPlug()->getInput() && imageTransform->concatenatePlug()->getValue() )
 			{
-				if( imageTransform->inTransformPlug()->getInput() && imageTransform->concatenatePlug()->getValue() )
-				{
-					// We're the bottom of a chain. Tell the upstream
-					// nodes they've been chained.
-					m_scope.emplace( context );
-					m_scope->set( chainedContextName, &m_true );
-				}
-			}
-			else
-			{
-				const bool concatenate = imageTransform->concatenatePlug()->getValue();
-				m_chained = concatenate;
-				if(
-					!imageTransform->inTransformPlug()->getInput() ||
-					!concatenate
-				)
-				{
-					// Either we're at the top of a chain, in which case we
-					// want to remove the context variable so it doesn't leak out
-					// to unrelated nodes. Or we want to break concatenation,
-					// in which case we need to do the same thing.
-					m_scope.emplace( context );
-					m_scope->remove( chainedContextName );
-				}
+				// We're the bottom of a chain. Tell the upstream
+				// nodes they've been chained.
+				m_scope.emplace( context );
+				m_scope->set( chainedContextName, &m_true );
 			}
 		}
-
-		// Returns true if the current operation is part of a chain.
-		// In this case, the operation should be implemented as a pass
-		// through, as the bottom of the chain will do all the work
-		// in a single operation.
-		bool chained() const
+		else
 		{
-			return m_chained;
+			const bool concatenate = imageTransform->concatenatePlug()->getValue();
+			m_chained = concatenate;
+			if(
+				!imageTransform->inTransformPlug()->getInput() ||
+				!concatenate
+			)
+			{
+				// Either we're at the top of a chain, in which case we
+				// want to remove the context variable so it doesn't leak out
+				// to unrelated nodes. Or we want to break concatenation,
+				// in which case we need to do the same thing.
+				m_scope.emplace( context );
+				m_scope->remove( chainedContextName );
+			}
 		}
+	}
 
-		static InternedString chainedContextName;
+	// Returns true if the current operation is part of a chain.
+	// In this case, the operation should be implemented as a pass
+	// through, as the bottom of the chain will do all the work
+	// in a single operation.
+	bool chained() const
+	{
+		return m_chained;
+	}
 
-	private :
+	static InternedString chainedContextName;
 
-		// We use `optional` here to avoid the expense of constructing
-		// an EditableScope when we don't need one.
-		std::optional<Context::EditableScope> m_scope;
-		bool m_chained;
-		bool m_true;
+private:
 
+	// We use `optional` here to avoid the expense of constructing
+	// an EditableScope when we don't need one.
+	std::optional<Context::EditableScope> m_scope;
+	bool m_chained;
+	bool m_true;
 };
 
 InternedString ImageTransform::ChainingScope::chainedContextName( "__imageTransform:chained" );
@@ -167,32 +166,31 @@ InternedString ImageTransform::ChainingScope::chainedContextName( "__imageTransf
 class ImageTransform::CleanScope : boost::noncopyable
 {
 
-	public :
+public:
 
-		CleanScope( const Gaffer::Context *context )
+	CleanScope( const Gaffer::Context *context )
+	{
+		if( context->get<bool>( ChainingScope::chainedContextName, false ) )
 		{
-			if( context->get<bool>( ChainingScope::chainedContextName, false ) )
-			{
-				m_scope.emplace( context );
-				m_scope->remove( ChainingScope::chainedContextName );
-				m_context = m_scope->context();
-			}
-			else
-			{
-				m_context = context;
-			}
+			m_scope.emplace( context );
+			m_scope->remove( ChainingScope::chainedContextName );
+			m_context = m_scope->context();
 		}
-
-		const Context *context() const
+		else
 		{
-			return m_context;
+			m_context = context;
 		}
+	}
 
-	private :
+	const Context *context() const
+	{
+		return m_context;
+	}
 
-		const Context *m_context;
-		std::optional<Context::EditableScope> m_scope;
+private:
 
+	const Context *m_context;
+	std::optional<Context::EditableScope> m_scope;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -204,7 +202,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageTransform );
 size_t ImageTransform::g_firstPlugIndex = 0;
 
 ImageTransform::ImageTransform( const std::string &name )
-	:	FlatImageProcessor( name )
+	: FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -385,7 +383,6 @@ void ImageTransform::affects( const Gaffer::Plug *input, AffectedPlugsContainer 
 	{
 		outputs.push_back( outTransformPlug() );
 	}
-
 }
 
 void ImageTransform::hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const
@@ -480,7 +477,7 @@ void ImageTransform::hashDataWindow( const GafferImage::ImagePlug *parent, const
 
 	M33f matrix, resampleMatrix;
 	const unsigned op = operation( matrix, resampleMatrix );
-	if( !(op & Rotate) )
+	if( !( op & Rotate ) )
 	{
 		h = resampledInPlug()->dataWindowPlug()->hash();
 	}
@@ -502,7 +499,7 @@ Imath::Box2i ImageTransform::computeDataWindow( const Gaffer::Context *context, 
 
 	M33f matrix, resampleMatrix;
 	const unsigned op = operation( matrix, resampleMatrix );
-	if( !(op & Rotate) )
+	if( !( op & Rotate ) )
 	{
 		return resampledInPlug()->dataWindowPlug()->getValue();
 	}
@@ -528,7 +525,7 @@ void ImageTransform::hashChannelData( const GafferImage::ImagePlug *parent, cons
 
 	M33f matrix, resampleMatrix;
 	const unsigned op = operation( matrix, resampleMatrix );
-	if( !(op & Rotate) )
+	if( !( op & Rotate ) )
 	{
 		h = resampledInPlug()->channelDataPlug()->hash();
 	}
@@ -560,7 +557,7 @@ IECore::ConstFloatVectorDataPtr ImageTransform::computeChannelData( const std::s
 
 	M33f matrix, resampleMatrix;
 	const unsigned op = operation( matrix, resampleMatrix );
-	if( !(op & Rotate) )
+	if( !( op & Rotate ) )
 	{
 		return resampledInPlug()->channelDataPlug()->getValue();
 	}

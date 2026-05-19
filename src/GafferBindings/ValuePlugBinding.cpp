@@ -163,7 +163,7 @@ std::string ValuePlugSerialiser::repr( const Gaffer::ValuePlug *plug, const std:
 {
 	std::string result = Serialisation::classPath( plug ) + "( \"" + plug->getName().string() + "\", ";
 
-	if( plug->direction()!=Plug::In )
+	if( plug->direction() != Plug::In )
 	{
 		result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
 	}
@@ -219,7 +219,6 @@ std::string ValuePlugSerialiser::repr( const Gaffer::ValuePlug *plug, const std:
 	result += ")";
 
 	return result;
-
 }
 
 std::string ValuePlugSerialiser::constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const
@@ -266,7 +265,7 @@ std::string ValuePlugSerialiser::valueRepr( const boost::python::object &value, 
 	// up during static destruction, _after_ Python has already shut
 	// down.
 	static object *g_repr = new boost::python::object( boost::python::import( "IECore" ).attr( "repr" ) );
-	std::string result = extract<std::string>( (*g_repr)( value ) );
+	std::string result = extract<std::string>( ( *g_repr )( value ) );
 	if( result.size() && result[0] != '<' )
 	{
 		if( serialisation )
@@ -285,11 +284,9 @@ std::string ValuePlugSerialiser::valueRepr( const boost::python::object &value, 
 	{
 		// Fall back to base64 encoding
 		IECore::ConstObjectPtr object = objectExtractor();
-		return
-			"Gaffer.Serialisation.objectFromBase64( \"" +
+		return "Gaffer.Serialisation.objectFromBase64( \"" +
 			Serialisation::objectToBase64( object.get() ) +
-			"\" )"
-		;
+			"\" )";
 	}
 
 	return "";

@@ -73,25 +73,25 @@ Color3f blackbody( float kelvins )
 	static SplinefColor3f g_spline(
 		CubicBasisf::catmullRom(),
 		{
-			{  1000.0f, Color3f( 1.000000f, 0.117531f, 0.033965f ) },
-			{  1000.0f, Color3f( 1.000000f, 0.117531f, 0.033965f ) },
-			{  1500.0f, Color3f( 1.000000f, 0.142142f, 0.036718f ) },
-			{  2000.0f, Color3f( 1.000000f, 0.188965f, 0.042816f ) },
-			{  2500.0f, Color3f( 1.000000f, 0.268097f, 0.058378f ) },
-			{  3000.0f, Color3f( 1.000000f, 0.364075f, 0.087632f ) },
-			{  3500.0f, Color3f( 1.000000f, 0.466183f, 0.139475f ) },
-			{  4000.0f, Color3f( 1.000000f, 0.566143f, 0.220068f ) },
-			{  4500.0f, Color3f( 1.000000f, 0.658711f, 0.331499f ) },
-			{  5000.0f, Color3f( 1.000000f, 0.741232f, 0.471858f ) },
-			{  5500.0f, Color3f( 1.000000f, 0.812843f, 0.636389f ) },
-			{  6000.0f, Color3f( 1.000000f, 0.873825f, 0.819128f ) },
-			{  6500.0f, Color3f( 0.986339f, 0.912465f, 1.000000f ) },
-			{  7000.0f, Color3f( 0.823835f, 0.797532f, 1.000000f ) },
-			{  7500.0f, Color3f( 0.707631f, 0.710010f, 1.000000f ) },
-			{  8000.0f, Color3f( 0.621684f, 0.641759f, 1.000000f ) },
-			{  8500.0f, Color3f( 0.556315f, 0.587453f, 1.000000f ) },
-			{  9000.0f, Color3f( 0.505383f, 0.543478f, 1.000000f ) },
-			{  9500.0f, Color3f( 0.464866f, 0.507313f, 1.000000f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.117531f, 0.033965f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.117531f, 0.033965f ) },
+			{ 1500.0f, Color3f( 1.000000f, 0.142142f, 0.036718f ) },
+			{ 2000.0f, Color3f( 1.000000f, 0.188965f, 0.042816f ) },
+			{ 2500.0f, Color3f( 1.000000f, 0.268097f, 0.058378f ) },
+			{ 3000.0f, Color3f( 1.000000f, 0.364075f, 0.087632f ) },
+			{ 3500.0f, Color3f( 1.000000f, 0.466183f, 0.139475f ) },
+			{ 4000.0f, Color3f( 1.000000f, 0.566143f, 0.220068f ) },
+			{ 4500.0f, Color3f( 1.000000f, 0.658711f, 0.331499f ) },
+			{ 5000.0f, Color3f( 1.000000f, 0.741232f, 0.471858f ) },
+			{ 5500.0f, Color3f( 1.000000f, 0.812843f, 0.636389f ) },
+			{ 6000.0f, Color3f( 1.000000f, 0.873825f, 0.819128f ) },
+			{ 6500.0f, Color3f( 0.986339f, 0.912465f, 1.000000f ) },
+			{ 7000.0f, Color3f( 0.823835f, 0.797532f, 1.000000f ) },
+			{ 7500.0f, Color3f( 0.707631f, 0.710010f, 1.000000f ) },
+			{ 8000.0f, Color3f( 0.621684f, 0.641759f, 1.000000f ) },
+			{ 8500.0f, Color3f( 0.556315f, 0.587453f, 1.000000f ) },
+			{ 9000.0f, Color3f( 0.505383f, 0.543478f, 1.000000f ) },
+			{ 9500.0f, Color3f( 0.464866f, 0.507313f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.432048f, 0.477160f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.432048f, 0.477160f, 1.000000f ) },
 		}
@@ -162,13 +162,12 @@ V3f sunPosition(
 		4.f * ( longitude - 15.f * timeZone ) +
 		9.87f * sin( 2.f * dayAngle ) -
 		7.53f * cos( dayAngle ) -
-		1.5f * sin( dayAngle )
-	;
+		1.5f * sin( dayAngle );
 	const float hourAngle = degreesToRadians( 15.f ) * ( hour + timeCorrection / 60.f - 12.f );
 	const float declination = asin( sin( degreesToRadians( 23.45f ) ) * sin( dayAngle ) );
 	const float latRadians = degreesToRadians( latitude );
 	const float elevation = asin( sin( declination ) * sin( latRadians ) + cos( declination ) * cos( latRadians ) * cos( hourAngle ) );
-	float azimuth = acos( ( sin( declination ) *  cos( latRadians ) - cos( declination ) * sin( latRadians ) * cos( hourAngle ) ) / cos( elevation ) );
+	float azimuth = acos( ( sin( declination ) * cos( latRadians ) - cos( declination ) * sin( latRadians ) * cos( hourAngle ) ) / cos( elevation ) );
 
 	if( hourAngle > 0.f )
 	{
@@ -318,12 +317,10 @@ IECoreGL::ConstRenderablePtr spotLightRound( const float angle, const float heig
 
 	IntVectorDataPtr vertsPerCurve = new IntVectorData( { 2, 2, 2, 2 } );
 	V3fVectorDataPtr p = new V3fVectorData(
-		{
-			V3f( 0, 0.f, 0.f ), V3f( baseRadius, 0.f, -baseDistance ),
-			V3f( 0.f, 0, 0.f ), V3f( 0.f, baseRadius, -baseDistance ),
-			V3f( -0, 0.f, 0.f ), V3f( -baseRadius, 0.f, -baseDistance ),
-			V3f( 0.f, -0, 0.f ), V3f( 0.f, -baseRadius, -baseDistance )
-		}
+		{ V3f( 0, 0.f, 0.f ), V3f( baseRadius, 0.f, -baseDistance ),
+		  V3f( 0.f, 0, 0.f ), V3f( 0.f, baseRadius, -baseDistance ),
+		  V3f( -0, 0.f, 0.f ), V3f( -baseRadius, 0.f, -baseDistance ),
+		  V3f( 0.f, -0, 0.f ), V3f( 0.f, -baseRadius, -baseDistance ) }
 	);
 
 	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
@@ -357,12 +354,10 @@ IECoreGL::ConstRenderablePtr spotLightSquare( const float angle, const float hei
 
 	IntVectorDataPtr vertsPerCurve = new IntVectorData( { 2, 2, 2, 2 } );
 	V3fVectorDataPtr p = new V3fVectorData(
-		{
-			V3f( 0, 0.f, 0.f ), V3f( halfWidth, halfWidth, -baseDistance ),
-			V3f( 0.f, 0, 0.f ), V3f( -halfWidth, halfWidth, -baseDistance ),
-			V3f( -0, 0.f, 0.f ), V3f( -halfWidth, -halfWidth, -baseDistance ),
-			V3f( 0.f, -0, 0.f ), V3f( halfWidth, -halfWidth, -baseDistance )
-		}
+		{ V3f( 0, 0.f, 0.f ), V3f( halfWidth, halfWidth, -baseDistance ),
+		  V3f( 0.f, 0, 0.f ), V3f( -halfWidth, halfWidth, -baseDistance ),
+		  V3f( -0, 0.f, 0.f ), V3f( -halfWidth, -halfWidth, -baseDistance ),
+		  V3f( 0.f, -0, 0.f ), V3f( halfWidth, -halfWidth, -baseDistance ) }
 	);
 
 	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
@@ -397,24 +392,23 @@ const InternedString g_temperatureParameter( "temperature" );
 const InternedString g_yearParameter( "year" );
 const InternedString g_zoneParameter( "zone" );
 
-}  // namespace
+} // namespace
 
 class RenderManLightVisualiser : public LightVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( RenderManLightVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( RenderManLightVisualiser )
 
-		RenderManLightVisualiser();
-		~RenderManLightVisualiser() override;
+	RenderManLightVisualiser();
+	~RenderManLightVisualiser() override;
 
-		Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *shaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *shaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	private :
+private:
 
-		static LightVisualiser::LightVisualiserDescription<RenderManLightVisualiser> g_description;
-
+	static LightVisualiser::LightVisualiserDescription<RenderManLightVisualiser> g_description;
 };
 
 IE_CORE_DECLAREPTR( RenderManLightVisualiser )
@@ -437,8 +431,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 
 	const Color3f tempColor = parameterOrDefault<int>( lightParameters, g_enableTemperatureParameter, 0 ) ?
 		blackbody( parameterOrDefault( lightParameters, g_temperatureParameter, 6500.f ) ) :
-		Color3f( 1.f )
-	;
+		Color3f( 1.f );
 	const Color3f color = parameterOrDefault( lightParameters, g_lightColorParameter, Color3f( 1.f ) ) * tempColor;
 	const float saturation = parameterOrDefault( lightParameters, g_colorMapSaturationParameter, 1.f );
 	// RenderMan uses a vector for the gamma, we treat it as a color
@@ -485,12 +478,9 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		else
 		{
 			surfaceGroup->addChild( boost::const_pointer_cast<IECoreGL::Renderable>( colorIndicator( color ) ) );
-			result.push_back( Visualisation::createOrnament(
-					surfaceGroup,
-					false,  // affectsFramingBound
-					Visualisation::ColorSpace::Scene
-				)
-			);
+			result.push_back( Visualisation::createOrnament( surfaceGroup,
+															 false, // affectsFramingBound
+															 Visualisation::ColorSpace::Scene ) );
 		}
 
 		if( coneAngle < 90.f )
@@ -498,7 +488,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			result.push_back(
 				Visualisation::createOrnament(
 					spotLightSquare( coneAngle, 1.f, 1.f, muted ),
-					true  // affectsFramingBound
+					true // affectsFramingBound
 				)
 			);
 			result.push_back(
@@ -526,7 +516,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			result.push_back(
 				Visualisation::createOrnament(
 					colorIndicator( color ),
-					false,  // affectsFramingBounds
+					false, // affectsFramingBounds
 					Visualisation::ColorSpace::Scene
 				)
 			);
@@ -546,7 +536,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			result.push_back(
 				Visualisation::createOrnament(
 					spotLightRound( coneAngle, 1.f, 1.f, muted ),
-					true  // affectsFramingBounds
+					true // affectsFramingBounds
 				)
 			);
 			result.push_back(
@@ -574,18 +564,17 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			result.push_back(
 				Visualisation::createOrnament(
 					environmentSphereSurface( textureData, color, saturation, gamma, maxTextureResolution, Color3f( 1.f ) ),
-					true,  // affectsFramingBound
+					true, // affectsFramingBound
 					Visualisation::ColorSpace::Scene
 				)
 			);
 		}
-		result.push_back( Visualisation::createOrnament(
-			sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
-			true  // affectsFramingBound
+		result.push_back( Visualisation::createOrnament( sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
+														 true // affectsFramingBound
 		) );
 	}
 
-	else if ( lightShader->getName() == "PxrEnvDayLight" )
+	else if( lightShader->getName() == "PxrEnvDayLight" )
 	{
 		ConstCompoundObjectPtr emptyParameters = new CompoundObject();
 		const float compassScale = 5.f;
@@ -620,7 +609,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 						V3f( compassScale * -0.1f, 0.f, 0.f ),
 						V3f( compassScale * 0.1f, 0.f, 0.f ),
 						V3f( 0.f, 0.f, -compassScale * 0.5f ),
-						false  // Wireframe
+						false // Wireframe
 					)
 				)
 			);
@@ -630,7 +619,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 						V3f( compassScale * 0.1f, 0.f, 0.f ),
 						V3f( compassScale * -0.1f, 0.f, 0.f ),
 						V3f( 0.f, 0.f, compassScale * 0.5f ),
-						true  // Wireframe
+						true // Wireframe
 					)
 				)
 			);
@@ -670,7 +659,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		result.push_back(
 			Visualisation::createOrnament(
 				tintIndicatorGroup,
-				true,  //affectsFramingBound
+				true, //affectsFramingBound
 				Visualisation::ColorSpace::Scene
 			)
 		);
@@ -693,7 +682,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		result.push_back(
 			Visualisation::createOrnament(
 				sunIndicatorGroup,
-				true,  // affects FramingBound
+				true, // affects FramingBound
 				Visualisation::ColorSpace::Display
 			)
 		);
@@ -749,7 +738,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			result.push_back(
 				Visualisation::createOrnament(
 					spotLightSquare( coneAngle, 1.f, 1.f, muted ),
-					true  // affectsFramingBound
+					true // affectsFramingBound
 				)
 			);
 			result.push_back(
@@ -770,7 +759,8 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		else
 		{
 			result.push_back(
-				Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBounds = */ false, Visualisation::ColorSpace::Scene ) );
+				Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBounds = */ false, Visualisation::ColorSpace::Scene )
+			);
 		}
 
 		result.push_back( Visualisation::createGeometry( pointShape( 0.5f, muted ) ) );
@@ -782,7 +772,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			result.push_back(
 				Visualisation::createOrnament(
 					spotLightRound( coneAngle, 1.f, 1.f, muted ),
-					true  // affectsFramingBound
+					true // affectsFramingBound
 				)
 			);
 			result.push_back(

@@ -49,23 +49,22 @@ IE_CORE_FORWARDDECLARE( Shader );
 class GAFFERSCENE_API MeshLight : public GafferScene::FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		~MeshLight() override;
+	~MeshLight() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshLight, MeshLightTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshLight, MeshLightTypeId, FilteredSceneProcessor );
 
-	protected :
+protected:
 
-		MeshLight( const std::string &name, const ShaderPtr &shader );
+	MeshLight( const std::string &name, const ShaderPtr &shader );
 
-		// Derived classes may use this to add attributes to the created light.
-		CustomAttributes *customAttributes();
+	// Derived classes may use this to add attributes to the created light.
+	CustomAttributes *customAttributes();
 
-	private :
+private:
 
-		static size_t g_firstChildIndex;
-
+	static size_t g_firstChildIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshLight )

@@ -130,5 +130,4 @@ void GafferImageModule::bindOpenColorIOAlgo()
 
 	IECorePython::PyBindConverter<OCIO_NAMESPACE::ConstConfigRcPtr>::registerConverters();
 	IECorePython::PyBindConverter<OCIO_NAMESPACE::ConstContextRcPtr>::registerConverters();
-
 }

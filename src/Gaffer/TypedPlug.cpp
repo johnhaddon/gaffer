@@ -62,12 +62,10 @@ bool BoolPlug::acceptsInput( const Plug *input ) const
 	}
 	if( input )
 	{
-		return
-			input->isInstanceOf( staticTypeId() ) ||
+		return input->isInstanceOf( staticTypeId() ) ||
 			input->isInstanceOf( IntPlug::staticTypeId() ) ||
 			input->isInstanceOf( FloatPlug::staticTypeId() ) ||
-			input->isInstanceOf( StringPlug::staticTypeId() )
-		;
+			input->isInstanceOf( StringPlug::staticTypeId() );
 	}
 	return true;
 }
@@ -75,7 +73,7 @@ bool BoolPlug::acceptsInput( const Plug *input ) const
 template<>
 void BoolPlug::setFrom( const ValuePlug *other )
 {
-	switch( static_cast<Gaffer::TypeId>(other->typeId()) )
+	switch( static_cast<Gaffer::TypeId>( other->typeId() ) )
 	{
 		case BoolPlugTypeId :
 			setValue( static_cast<const BoolPlug *>( other )->getValue() );

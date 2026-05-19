@@ -50,60 +50,59 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepPixelAccessor
 {
 
-	public :
+public:
 
-		/// Sampler Constructor
-		/// @param plug The image plug to sample from.
-		/// @param channelName The channel to sample ( or empty string, if you only need sample counts )
-		/// @param sampleWindow The area from which samples may be requested. It is an error to request samples outside this area.
-		/// @param boundingMode The method of handling samples that fall outside the data window.
-		DeepPixelAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode = Sampler::Black );
+	/// Sampler Constructor
+	/// @param plug The image plug to sample from.
+	/// @param channelName The channel to sample ( or empty string, if you only need sample counts )
+	/// @param sampleWindow The area from which samples may be requested. It is an error to request samples outside this area.
+	/// @param boundingMode The method of handling samples that fall outside the data window.
+	DeepPixelAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode = Sampler::Black );
 
-		/// Construct from another DeepPixelAccessor with a different channelName, in order to reuse the
-		/// sample offsets data.
-		DeepPixelAccessor( const DeepPixelAccessor &source, const std::string &channelName );
+	/// Construct from another DeepPixelAccessor with a different channelName, in order to reuse the
+	/// sample offsets data.
+	DeepPixelAccessor( const DeepPixelAccessor &source, const std::string &channelName );
 
-		/// Uses `parallelProcessTiles()` to fill the internal tile cache
-		/// with all tiles in the sample window. Allows `sample()` and
-		/// `visitPixels()` to subsequently be called concurrently.
-		void populate();
+	/// Uses `parallelProcessTiles()` to fill the internal tile cache
+	/// with all tiles in the sample window. Allows `sample()` and
+	/// `visitPixels()` to subsequently be called concurrently.
+	void populate();
 
-		/// Gets the list of channel values at the specified integer pixel coordinate.
-		/// It is the caller's responsibility to ensure that this point is contained
-		/// within the sample window passed to the constructor, and that the channel name is set.
-		boost::span<const float> sample( int x, int y );
+	/// Gets the list of channel values at the specified integer pixel coordinate.
+	/// It is the caller's responsibility to ensure that this point is contained
+	/// within the sample window passed to the constructor, and that the channel name is set.
+	boost::span<const float> sample( int x, int y );
 
-		/// Like above, but only returns the count, and may be called with an empty channel name.
-		unsigned int sampleCount( int x, int y );
+	/// Like above, but only returns the count, and may be called with an empty channel name.
+	unsigned int sampleCount( int x, int y );
 
-		/// Appends a hash that represent all the pixel
-		/// values within the requested sample area.
-		void hash( IECore::MurmurHash &h ) const;
-		/// Convenience function to append into an
-		/// empty hash object and return it.
-		IECore::MurmurHash hash() const;
+	/// Appends a hash that represent all the pixel
+	/// values within the requested sample area.
+	void hash( IECore::MurmurHash &h ) const;
+	/// Convenience function to append into an
+	/// empty hash object and return it.
+	IECore::MurmurHash hash() const;
 
-	private :
+private:
 
-		/// Cached data access
-		/// @param p Any point within the cache that we wish to retrieve the data for.
-		/// @param tileData Is set to the tile's channel data.
-		/// @param tilePixelIndex Is set to the index used to access the colour value of point 'p' from tileData.
-		void cachedData( Imath::V2i p, const float *& tileData, const int *& tileOffsets, int &tilePixelIndex );
+	/// Cached data access
+	/// @param p Any point within the cache that we wish to retrieve the data for.
+	/// @param tileData Is set to the tile's channel data.
+	/// @param tilePixelIndex Is set to the index used to access the colour value of point 'p' from tileData.
+	void cachedData( Imath::V2i p, const float *&tileData, const int *&tileOffsets, int &tilePixelIndex );
 
-		const ImagePlug *m_plug;
-		const std::string m_channelName;
-		Imath::Box2i m_sampleWindow;
-		Imath::Box2i m_dataWindow;
+	const ImagePlug *m_plug;
+	const std::string m_channelName;
+	Imath::Box2i m_sampleWindow;
+	Imath::Box2i m_dataWindow;
 
-		std::vector< IECore::ConstFloatVectorDataPtr > m_dataCache;
-		std::vector< IECore::ConstIntVectorDataPtr > m_offsetsCache;
-		Imath::Box2i m_cacheWindow;
-		int m_cacheOriginIndex;
-		int m_cacheWidth;
+	std::vector<IECore::ConstFloatVectorDataPtr> m_dataCache;
+	std::vector<IECore::ConstIntVectorDataPtr> m_offsetsCache;
+	Imath::Box2i m_cacheWindow;
+	int m_cacheOriginIndex;
+	int m_cacheWidth;
 
-		int m_boundingMode;
-
+	int m_boundingMode;
 };
 
 }; // namespace GafferImage

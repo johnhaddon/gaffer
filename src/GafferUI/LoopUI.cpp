@@ -52,75 +52,74 @@ namespace
 class LoopPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		LoopPlugAdder( LoopPtr node )
-			:	m_node( node )
+	LoopPlugAdder( LoopPtr node )
+		: m_node( node )
+	{
+		node->childAddedSignal().connect( boost::bind( &LoopPlugAdder::childAdded, this ) );
+		node->childRemovedSignal().connect( boost::bind( &LoopPlugAdder::childRemoved, this ) );
+
+		updateVisibility();
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		if( !PlugAdder::canCreateConnection( endpoint ) )
 		{
-			node->childAddedSignal().connect( boost::bind( &LoopPlugAdder::childAdded, this ) );
-			node->childRemovedSignal().connect( boost::bind( &LoopPlugAdder::childRemoved, this ) );
-
-			updateVisibility();
+			return false;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		if( MetadataAlgo::readOnly( m_node.get() ) )
 		{
-			if( !PlugAdder::canCreateConnection( endpoint ) )
-			{
-				return false;
-			}
-
-			if( MetadataAlgo::readOnly( m_node.get() ) )
-			{
-				return false;
-			}
-
-			return runTimeCast<const ValuePlug>( endpoint );
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		return runTimeCast<const ValuePlug>( endpoint );
+	}
+
+	void createConnection( Plug *endpoint ) override
+	{
+		m_node->setup( static_cast<const ValuePlug *>( endpoint ) );
+
+		bool inOpposite = false;
+		if( endpoint->direction() == Plug::Out )
 		{
-			m_node->setup( static_cast<const ValuePlug *>( endpoint ) );
-
-			bool inOpposite = false;
-			if( endpoint->direction() == Plug::Out )
-			{
-				m_node->inPlug()->setInput( endpoint );
-				inOpposite = false;
-			}
-			else
-			{
-				endpoint->setInput( m_node->outPlug() );
-				inOpposite = true;
-			}
-
-			applyEdgeMetadata( m_node->inPlug(), inOpposite );
-			applyEdgeMetadata( m_node->outPlug(), !inOpposite );
-			applyEdgeMetadata( m_node->nextPlug(), inOpposite );
-			applyEdgeMetadata( m_node->previousPlug(), !inOpposite );
+			m_node->inPlug()->setInput( endpoint );
+			inOpposite = false;
+		}
+		else
+		{
+			endpoint->setInput( m_node->outPlug() );
+			inOpposite = true;
 		}
 
-	private :
+		applyEdgeMetadata( m_node->inPlug(), inOpposite );
+		applyEdgeMetadata( m_node->outPlug(), !inOpposite );
+		applyEdgeMetadata( m_node->nextPlug(), inOpposite );
+		applyEdgeMetadata( m_node->previousPlug(), !inOpposite );
+	}
 
-		void childAdded()
-		{
-			updateVisibility();
-		}
+private:
 
-		void childRemoved()
-		{
-			updateVisibility();
-		}
+	void childAdded()
+	{
+		updateVisibility();
+	}
 
-		void updateVisibility()
-		{
-			setVisible( !m_node->inPlug() );
-		}
+	void childRemoved()
+	{
+		updateVisibility();
+	}
 
-		LoopPtr m_node;
+	void updateVisibility()
+	{
+		setVisible( !m_node->inPlug() );
+	}
 
+	LoopPtr m_node;
 };
 
 struct Registration
@@ -131,19 +130,18 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.LoopUI.PlugAdder", &create );
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		LoopPtr loop = runTimeCast<Loop>( parent );
+		if( !loop )
 		{
-			LoopPtr loop = runTimeCast<Loop>( parent );
-			if( !loop )
-			{
-				throw Exception( "LoopPlugAdder requires a Loop" );
-			}
-
-			return new LoopPlugAdder( loop );
+			throw Exception( "LoopPlugAdder requires a Loop" );
 		}
 
+		return new LoopPlugAdder( loop );
+	}
 };
 
 Registration g_registration;

@@ -87,14 +87,14 @@ IECore::InternedString g_noduleTypeKey( "nodule:type" );
 // Deprecated metadata keys
 /// \todo Remove support for these
 
-IECore::InternedString g_horizontalNoduleSpacingKey( "nodeGadget:horizontalNoduleSpacing"  );
-IECore::InternedString g_verticalNoduleSpacingKey( "nodeGadget:verticalNoduleSpacing"  );
+IECore::InternedString g_horizontalNoduleSpacingKey( "nodeGadget:horizontalNoduleSpacing" );
+IECore::InternedString g_verticalNoduleSpacingKey( "nodeGadget:verticalNoduleSpacing" );
 IECore::InternedString g_nodulePositionKey( "nodeGadget:nodulePosition" );
 IECore::InternedString g_noduleIndexKey( "nodeGadget:noduleIndex" );
 
-IECore::InternedString g_compoundNoduleSpacingKey( "compoundNodule:spacing"  );
-IECore::InternedString g_compoundNoduleOrientationKey( "compoundNodule:orientation"  );
-IECore::InternedString g_compoundNoduleDirectionKey( "compoundNodule:direction"  );
+IECore::InternedString g_compoundNoduleSpacingKey( "compoundNodule:spacing" );
+IECore::InternedString g_compoundNoduleOrientationKey( "compoundNodule:orientation" );
+IECore::InternedString g_compoundNoduleDirectionKey( "compoundNodule:direction" );
 
 // Custom gadget factory
 
@@ -383,7 +383,7 @@ bool affectsDirection( IECore::InternedString key, IECore::InternedString sectio
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( NoduleLayout );
 
 NoduleLayout::NoduleLayout( Gaffer::GraphComponentPtr parent, IECore::InternedString section )
-	:	Gadget(), m_parent( parent ), m_section( section )
+	: Gadget(), m_parent( parent ), m_section( section )
 {
 	LinearContainerPtr noduleContainer = new LinearContainer(
 		"__noduleContainer",
@@ -665,7 +665,8 @@ void NoduleLayout::updateNoduleLayout()
 	boost::container::flat_set<GadgetKey> itemsSet( items.begin(), items.end() );
 	for( GadgetMap::iterator it = m_gadgets.begin(), eIt = m_gadgets.end(); it != eIt; )
 	{
-		GadgetMap::iterator next = it; ++next;
+		GadgetMap::iterator next = it;
+		++next;
 		if( itemsSet.find( it->first ) == itemsSet.end() )
 		{
 			removed.push_back( it->second.gadget );

@@ -48,7 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( ShuffleOptions );
 size_t ShuffleOptions::g_firstPlugIndex = 0;
 
 ShuffleOptions::ShuffleOptions( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );
@@ -96,7 +96,7 @@ IECore::ConstCompoundObjectPtr ShuffleOptions::computeProcessedGlobals( const Ga
 	{
 		if( boost::starts_with( name.string(), prefix ) )
 		{
-			options[name.string().substr(prefix.size())] = value;
+			options[name.string().substr( prefix.size() )] = value;
 		}
 		else
 		{
@@ -108,7 +108,7 @@ IECore::ConstCompoundObjectPtr ShuffleOptions::computeProcessedGlobals( const Ga
 	options = shufflesPlug()->shuffle( options );
 	for( const auto &[name, value] : options )
 	{
-		result->members()[prefix+name] = value;
+		result->members()[prefix + name] = value;
 	}
 
 	return result;

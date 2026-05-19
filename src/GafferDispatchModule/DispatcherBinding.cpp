@@ -63,146 +63,145 @@ namespace
 
 class DispatcherWrapper : public NodeWrapper<Dispatcher>
 {
-	public :
+public:
 
-		DispatcherWrapper( PyObject *self, const std::string &name )
-			: NodeWrapper<Dispatcher>( self, name )
+	DispatcherWrapper( PyObject *self, const std::string &name )
+		: NodeWrapper<Dispatcher>( self, name )
+	{
+	}
+
+	~DispatcherWrapper() override
+	{
+	}
+
+	void doDispatch( const TaskBatch *batch ) const override
+	{
+		ScopedGILLock gilLock;
+
+		boost::python::object f = this->methodOverride( "_doDispatch" );
+		if( f )
 		{
-		}
-
-		~DispatcherWrapper() override
-		{
-		}
-
-		void doDispatch( const TaskBatch *batch ) const override
-		{
-			ScopedGILLock gilLock;
-
-			boost::python::object f = this->methodOverride( "_doDispatch" );
-			if( f )
+			try
 			{
-				try
-				{
-					f( boost::const_pointer_cast<Dispatcher::TaskBatch>( ConstTaskBatchPtr( batch ) ) );
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					ExceptionAlgo::translatePythonException();
-				}
+				f( boost::const_pointer_cast<Dispatcher::TaskBatch>( ConstTaskBatchPtr( batch ) ) );
 			}
-			else
+			catch( const boost::python::error_already_set & )
 			{
-				throw Exception( "doDispatch() python method not defined" );
+				ExceptionAlgo::translatePythonException();
 			}
 		}
-
-		FrameListPtr frameRange() const override
+		else
 		{
-			ScopedGILLock gilLock;
+			throw Exception( "doDispatch() python method not defined" );
+		}
+	}
 
-			boost::python::object f = this->methodOverride( "frameRange" );
-			if( f )
+	FrameListPtr frameRange() const override
+	{
+		ScopedGILLock gilLock;
+
+		boost::python::object f = this->methodOverride( "frameRange" );
+		if( f )
+		{
+			try
 			{
-				try
-				{
-					object obj = f();
-					return extract<FrameListPtr>( obj );
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					ExceptionAlgo::translatePythonException();
-				}
+				object obj = f();
+				return extract<FrameListPtr>( obj );
+			}
+			catch( const boost::python::error_already_set & )
+			{
+				ExceptionAlgo::translatePythonException();
+			}
+		}
+
+		return Dispatcher::frameRange();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// TashBatch method wrappers. These are defined here rather than as free
+	// functions because TaskBatch is a protected member of Dispatcher.
+	//////////////////////////////////////////////////////////////////////////
+
+	using TaskBatch = Dispatcher::TaskBatch;
+
+	static void taskBatchExecute( const Dispatcher::TaskBatch &batch )
+	{
+		ScopedGILRelease gilRelease;
+		batch.execute();
+	}
+
+	static TaskNodePtr taskBatchGetNode( const Dispatcher::TaskBatchPtr &batch )
+	{
+		if( ConstTaskNodePtr node = batch->node() )
+		{
+			return boost::const_pointer_cast<TaskNode>( node );
+		}
+		return nullptr;
+	}
+
+	static TaskNode::TaskPlugPtr taskBatchPlug( const Dispatcher::TaskBatchPtr &batch )
+	{
+		if( const TaskNode::TaskPlug *p = batch->plug() )
+		{
+			return const_cast<TaskNode::TaskPlug *>( p );
+		}
+		return nullptr;
+	}
+
+	static ContextPtr taskBatchGetContext( const Dispatcher::TaskBatchPtr &batch, bool copy = true )
+	{
+		if( ConstContextPtr context = batch->context() )
+		{
+			if( copy )
+			{
+				return new Context( *context );
 			}
 
-			return Dispatcher::frameRange();
+			return boost::const_pointer_cast<Context>( context );
 		}
 
-		//////////////////////////////////////////////////////////////////////////
-		// TashBatch method wrappers. These are defined here rather than as free
-		// functions because TaskBatch is a protected member of Dispatcher.
-		//////////////////////////////////////////////////////////////////////////
+		return nullptr;
+	}
 
-		using TaskBatch = Dispatcher::TaskBatch;
-
-		static void taskBatchExecute( const Dispatcher::TaskBatch &batch )
+	static boost::python::list taskBatchGetFrames( const Dispatcher::TaskBatchPtr &batch )
+	{
+		boost::python::list result;
+		for( std::vector<float>::const_iterator it = batch->frames().begin(); it != batch->frames().end(); ++it )
 		{
-			ScopedGILRelease gilRelease;
-			batch.execute();
+			result.append( *it );
 		}
+		return result;
+	}
 
-		static TaskNodePtr taskBatchGetNode( const Dispatcher::TaskBatchPtr &batch )
+	static boost::python::list taskBatchGetPreTasks( const Dispatcher::TaskBatchPtr &batch )
+	{
+		boost::python::list result;
+		for( std::vector<TaskBatchPtr>::const_iterator it = batch->preTasks().begin(); it != batch->preTasks().end(); ++it )
 		{
-			if ( ConstTaskNodePtr node = batch->node() )
-			{
-				return boost::const_pointer_cast<TaskNode>( node );
-			}
-			return nullptr;
+			result.append( *it );
 		}
+		return result;
+	}
 
-		static TaskNode::TaskPlugPtr taskBatchPlug( const Dispatcher::TaskBatchPtr &batch )
-		{
-			if( const TaskNode::TaskPlug *p = batch->plug() )
-			{
-				return const_cast<TaskNode::TaskPlug *>( p );
-			}
-			return nullptr;
-		}
+	static const char *taskBatchName( Dispatcher::TaskBatch &batch )
+	{
+		return batch.name().c_str();
+	}
 
-		static ContextPtr taskBatchGetContext( const Dispatcher::TaskBatchPtr &batch, bool copy = true )
-		{
-			if ( ConstContextPtr context = batch->context() )
-			{
-				if ( copy )
-				{
-					return new Context( *context );
-				}
-
-				return boost::const_pointer_cast<Context>( context );
-			}
-
-			return nullptr;
-		}
-
-		static boost::python::list taskBatchGetFrames( const Dispatcher::TaskBatchPtr &batch )
-		{
-			boost::python::list result;
-			for ( std::vector<float>::const_iterator it = batch->frames().begin(); it != batch->frames().end(); ++it )
-			{
-				result.append( *it );
-			}
-			return result;
-		}
-
-		static boost::python::list taskBatchGetPreTasks( const Dispatcher::TaskBatchPtr &batch )
-		{
-			boost::python::list result;
-			for( std::vector<TaskBatchPtr>::const_iterator it = batch->preTasks().begin(); it != batch->preTasks().end(); ++it )
-			{
-				result.append( *it );
-			}
-			return result;
-		}
-
-		static const char *taskBatchName( Dispatcher::TaskBatch &batch )
-		{
-			return batch.name().c_str();
-		}
-
-		static CompoundDataPtr taskBatchGetBlindData( Dispatcher::TaskBatch &batch )
-		{
-			return batch.blindData();
-		}
-
+	static CompoundDataPtr taskBatchGetBlindData( Dispatcher::TaskBatch &batch )
+	{
+		return batch.blindData();
+	}
 };
 
 struct DispatcherHelper
 {
 	DispatcherHelper( object fn, object setupPlugsFn )
-		:	m_fn( fn ), m_setupFn( setupPlugsFn )
+		: m_fn( fn ), m_setupFn( setupPlugsFn )
 	{
 	}
 
-	DispatcherPtr operator()()
+	DispatcherPtr operator () ()
 	{
 		IECorePython::ScopedGILLock gilLock;
 
@@ -217,10 +216,10 @@ struct DispatcherHelper
 		}
 	}
 
-	void operator()( Plug *parentPlug )
+	void operator () ( Plug *parentPlug )
 	{
 		IECorePython::ScopedGILLock gilLock;
-		if ( m_setupFn )
+		if( m_setupFn )
 		{
 			try
 			{
@@ -233,11 +232,10 @@ struct DispatcherHelper
 		}
 	}
 
-	private :
+private:
 
-		object m_fn;
-		object m_setupFn;
-
+	object m_fn;
+	object m_setupFn;
 };
 
 IECore::FrameListPtr frameRange( Dispatcher &n )
@@ -256,7 +254,7 @@ tuple registeredDispatchersWrapper()
 	std::vector<std::string> types;
 	Dispatcher::registeredDispatchers( types );
 	list result;
-	for ( std::vector<std::string>::const_iterator it = types.begin(); it != types.end(); ++it )
+	for( std::vector<std::string>::const_iterator it = types.begin(); it != types.end(); ++it )
 	{
 		result.append( *it );
 	}
@@ -265,11 +263,11 @@ tuple registeredDispatchersWrapper()
 
 struct PreDispatchSlotCaller
 {
-	bool operator()( boost::python::object slot, const Dispatcher *d )
+	bool operator () ( boost::python::object slot, const Dispatcher *d )
 	{
 		try
 		{
-			DispatcherPtr dd = const_cast<Dispatcher*>(d);
+			DispatcherPtr dd = const_cast<Dispatcher *>( d );
 			return slot( dd );
 		}
 		catch( const boost::python::error_already_set & )
@@ -282,11 +280,11 @@ struct PreDispatchSlotCaller
 
 struct DispatchSlotCaller
 {
-	void operator()( boost::python::object slot, const Dispatcher *d )
+	void operator () ( boost::python::object slot, const Dispatcher *d )
 	{
 		try
 		{
-			DispatcherPtr dd = const_cast<Dispatcher*>(d);
+			DispatcherPtr dd = const_cast<Dispatcher *>( d );
 			slot( dd );
 		}
 		catch( const boost::python::error_already_set & )
@@ -298,11 +296,11 @@ struct DispatchSlotCaller
 
 struct PostDispatchSlotCaller
 {
-	void operator()( boost::python::object slot, const Dispatcher *d, bool success )
+	void operator () ( boost::python::object slot, const Dispatcher *d, bool success )
 	{
 		try
 		{
-			DispatcherPtr dd = const_cast<Dispatcher*>(d);
+			DispatcherPtr dd = const_cast<Dispatcher *>( d );
 			slot( dd, success );
 		}
 		catch( const boost::python::error_already_set & )
@@ -317,24 +315,31 @@ struct PostDispatchSlotCaller
 void GafferDispatchModule::bindDispatcher()
 {
 	scope s = NodeClass<Dispatcher, DispatcherWrapper>()
-		.def( "jobDirectory", &Dispatcher::jobDirectory )
-		.def( "frameRange", &frameRange )
-		.def( "create", &Dispatcher::create ).staticmethod( "create" )
-		.def( "getDefaultDispatcherType", &Dispatcher::getDefaultDispatcherType, return_value_policy<copy_const_reference>() ).staticmethod( "getDefaultDispatcherType" )
-		.def( "setDefaultDispatcherType", &Dispatcher::setDefaultDispatcherType ).staticmethod( "setDefaultDispatcherType" )
-		.def( "registerDispatcher", &registerDispatcher, ( arg( "dispatcherType" ), arg( "creator" ), arg( "setupPlugsFn" ) = 0 ) ).staticmethod( "registerDispatcher" )
-		.def( "registeredDispatchers", &registeredDispatchersWrapper ).staticmethod( "registeredDispatchers" )
-		.def( "deregisterDispatcher", &Dispatcher::deregisterDispatcher, ( arg( "dispatcherType" ) ) ).staticmethod( "deregisterDispatcher" )
-		.def( "preDispatchSignal", &Dispatcher::preDispatchSignal, return_value_policy<reference_existing_object>() ).staticmethod( "preDispatchSignal" )
-		.def( "dispatchSignal", &Dispatcher::dispatchSignal, return_value_policy<reference_existing_object>() ).staticmethod( "dispatchSignal" )
-		.def( "postDispatchSignal", &Dispatcher::postDispatchSignal, return_value_policy<reference_existing_object>() ).staticmethod( "postDispatchSignal" )
-	;
+				  .def( "jobDirectory", &Dispatcher::jobDirectory )
+				  .def( "frameRange", &frameRange )
+				  .def( "create", &Dispatcher::create )
+				  .staticmethod( "create" )
+				  .def( "getDefaultDispatcherType", &Dispatcher::getDefaultDispatcherType, return_value_policy<copy_const_reference>() )
+				  .staticmethod( "getDefaultDispatcherType" )
+				  .def( "setDefaultDispatcherType", &Dispatcher::setDefaultDispatcherType )
+				  .staticmethod( "setDefaultDispatcherType" )
+				  .def( "registerDispatcher", &registerDispatcher, ( arg( "dispatcherType" ), arg( "creator" ), arg( "setupPlugsFn" ) = 0 ) )
+				  .staticmethod( "registerDispatcher" )
+				  .def( "registeredDispatchers", &registeredDispatchersWrapper )
+				  .staticmethod( "registeredDispatchers" )
+				  .def( "deregisterDispatcher", &Dispatcher::deregisterDispatcher, ( arg( "dispatcherType" ) ) )
+				  .staticmethod( "deregisterDispatcher" )
+				  .def( "preDispatchSignal", &Dispatcher::preDispatchSignal, return_value_policy<reference_existing_object>() )
+				  .staticmethod( "preDispatchSignal" )
+				  .def( "dispatchSignal", &Dispatcher::dispatchSignal, return_value_policy<reference_existing_object>() )
+				  .staticmethod( "dispatchSignal" )
+				  .def( "postDispatchSignal", &Dispatcher::postDispatchSignal, return_value_policy<reference_existing_object>() )
+				  .staticmethod( "postDispatchSignal" );
 
 	enum_<Dispatcher::FramesMode>( "FramesMode" )
 		.value( "CurrentFrame", Dispatcher::CurrentFrame )
 		.value( "FullRange", Dispatcher::FullRange )
-		.value( "CustomRange", Dispatcher::CustomRange )
-	;
+		.value( "CustomRange", Dispatcher::CustomRange );
 
 	RefCountedClass<DispatcherWrapper::TaskBatch, RefCounted>( "_TaskBatch" )
 		.def( "execute", &DispatcherWrapper::taskBatchExecute )
@@ -344,10 +349,9 @@ void GafferDispatchModule::bindDispatcher()
 		.def( "frames", &DispatcherWrapper::taskBatchGetFrames )
 		.def( "preTasks", &DispatcherWrapper::taskBatchGetPreTasks )
 		.def( "name", &DispatcherWrapper::taskBatchName )
-		.def( "blindData", &DispatcherWrapper::taskBatchGetBlindData )
-	;
+		.def( "blindData", &DispatcherWrapper::taskBatchGetBlindData );
 
-	SignalClass<Dispatcher::PreDispatchSignal, DefaultSignalCaller<Dispatcher::PreDispatchSignal>, PreDispatchSlotCaller >( "PreDispatchSignal" );
-	SignalClass<Dispatcher::DispatchSignal, DefaultSignalCaller<Dispatcher::DispatchSignal>, DispatchSlotCaller >( "DispatchSignal" );
-	SignalClass<Dispatcher::PostDispatchSignal, DefaultSignalCaller<Dispatcher::PostDispatchSignal>, PostDispatchSlotCaller >( "PostDispatchSignal" );
+	SignalClass<Dispatcher::PreDispatchSignal, DefaultSignalCaller<Dispatcher::PreDispatchSignal>, PreDispatchSlotCaller>( "PreDispatchSignal" );
+	SignalClass<Dispatcher::DispatchSignal, DefaultSignalCaller<Dispatcher::DispatchSignal>, DispatchSlotCaller>( "DispatchSignal" );
+	SignalClass<Dispatcher::PostDispatchSignal, DefaultSignalCaller<Dispatcher::PostDispatchSignal>, PostDispatchSlotCaller>( "PostDispatchSignal" );
 }

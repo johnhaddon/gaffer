@@ -56,6 +56,6 @@ const T Inspector::Result::typedValue( const T &defaultValue, bool useFallbacks 
 	return defaultValue;
 }
 
-}  // namespace Private
+} // namespace Private
 
-}  // namespace GafferScene
+} // namespace GafferSceneUI

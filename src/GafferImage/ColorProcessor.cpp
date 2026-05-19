@@ -53,7 +53,7 @@ namespace
 
 struct ColorProcessorData : public IECore::Data
 {
-	using ColorProcessorFunction = std::function<void ( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b )>;
+	using ColorProcessorFunction = std::function<void( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b )>;
 	ColorProcessorFunction colorProcessor;
 };
 
@@ -68,7 +68,7 @@ GAFFER_NODE_DEFINE_TYPE( ColorProcessor );
 size_t ColorProcessor::g_firstPlugIndex = 0;
 
 ColorProcessor::ColorProcessor( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -301,7 +301,6 @@ void ColorProcessor::compute( Gaffer::ValuePlug *output, const Gaffer::Context *
 					rgb[k]->writable().resize( samples, 0.0f );
 				}
 			}
-
 		}
 
 		colorProcessorData->colorProcessor( rgb[0].get(), rgb[1].get(), rgb[2].get() );
@@ -427,5 +426,5 @@ IECore::ConstFloatVectorDataPtr ColorProcessor::computeChannelData( const std::s
 		layerScope.set( g_layerNameKey, &layerNameStr );
 		colorData = boost::static_pointer_cast<const ObjectVector>( colorDataPlug()->getValue() );
 	}
-	return boost::static_pointer_cast<const FloatVectorData>( colorData->members()[ImageAlgo::colorIndex( baseName)] );
+	return boost::static_pointer_cast<const FloatVectorData>( colorData->members()[ImageAlgo::colorIndex( baseName )] );
 }

@@ -47,29 +47,28 @@ namespace GafferScene
 class GAFFERSCENE_API MeshSegments : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit MeshSegments( const std::string &name=defaultName<MeshSegments>() );
-		~MeshSegments() override;
+	explicit MeshSegments( const std::string &name = defaultName<MeshSegments>() );
+	~MeshSegments() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshSegments, MeshSegmentsTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshSegments, MeshSegmentsTypeId, ObjectProcessor );
 
-		Gaffer::StringPlug *connectivityPlug();
-		const Gaffer::StringPlug *connectivityPlug() const;
+	Gaffer::StringPlug *connectivityPlug();
+	const Gaffer::StringPlug *connectivityPlug() const;
 
-		Gaffer::StringPlug *segmentPlug();
-		const Gaffer::StringPlug *segmentPlug() const;
+	Gaffer::StringPlug *segmentPlug();
+	const Gaffer::StringPlug *segmentPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshSegments )

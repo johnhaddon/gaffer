@@ -57,7 +57,7 @@ CompoundDataPlugPtr compoundDataPlugConstructor( const char *name, Plug::Directi
 {
 	CompoundDataPlugPtr result = new CompoundDataPlug( name, direction, flags );
 	size_t s = extract<size_t>( children.attr( "__len__" )() );
-	for( size_t i=0; i<s; i++ )
+	for( size_t i = 0; i < s; i++ )
 	{
 		Gaffer::PlugPtr c = extract<Gaffer::PlugPtr>( children[i] );
 		result->addChild( c );
@@ -100,18 +100,9 @@ void GafferModule::bindCompoundDataPlug()
 {
 
 	scope s = PlugClass<CompoundDataPlug>()
-		.def( "__init__", make_constructor( compoundDataPlugConstructor, default_call_policies(),
-				(
-					arg( "name" ) = GraphComponent::defaultName<CompoundDataPlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default,
-					arg( "children" ) = tuple()
-				)
-			)
-		)
-		.def( "addMembers", &addMembersWrapper, ( arg_( "members" ), arg_( "useNameAsPlugName" ) = false ) )
-		.def( "memberDataAndName", &memberDataAndNameWrapper )
-		.def( "fillCompoundData", &fillCompoundData )
-		.def( "fillCompoundObject", &fillCompoundObject )
-	;
+				  .def( "__init__", make_constructor( compoundDataPlugConstructor, default_call_policies(), ( arg( "name" ) = GraphComponent::defaultName<CompoundDataPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default, arg( "children" ) = tuple() ) ) )
+				  .def( "addMembers", &addMembersWrapper, ( arg_( "members" ), arg_( "useNameAsPlugName" ) = false ) )
+				  .def( "memberDataAndName", &memberDataAndNameWrapper )
+				  .def( "fillCompoundData", &fillCompoundData )
+				  .def( "fillCompoundObject", &fillCompoundObject );
 }

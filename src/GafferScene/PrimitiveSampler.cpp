@@ -59,7 +59,7 @@ using namespace GafferScene;
 namespace
 {
 
-using OutputVariableFunction = std::function<void ( size_t, const PrimitiveEvaluator::Result & )>;
+using OutputVariableFunction = std::function<void( size_t, const PrimitiveEvaluator::Result & )>;
 
 M44f matrix( const M44f &transform, GeometricData::Interpretation interpretation )
 {
@@ -101,7 +101,7 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 			outputPrimitive->variables[name] = PrimitiveVariable( outputInterpolation, data );
 			V3f *d = data->writable().data();
 			const M44f m = matrix( transform, interpretation );
-			return [d, &sourceVariable, m ] ( size_t index, const PrimitiveEvaluator::Result &result ) {
+			return [d, &sourceVariable, m]( size_t index, const PrimitiveEvaluator::Result &result ) {
 				d[index] = result.vectorPrimVar( sourceVariable ) * m;
 			};
 		}
@@ -111,7 +111,7 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 			data->setInterpretation( static_cast<const V2fVectorData *>( sourceVariable.data.get() )->getInterpretation() );
 			outputPrimitive->variables[name] = PrimitiveVariable( outputInterpolation, data );
 			V2f *d = data->writable().data();
-			return [d, &sourceVariable] ( size_t index, const PrimitiveEvaluator::Result &result ) {
+			return [d, &sourceVariable]( size_t index, const PrimitiveEvaluator::Result &result ) {
 				d[index] = result.vec2PrimVar( sourceVariable );
 			};
 		}
@@ -120,7 +120,7 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 			data->writable().resize( size, Color3f( 0 ) );
 			outputPrimitive->variables[name] = PrimitiveVariable( outputInterpolation, data );
 			Color3f *d = data->writable().data();
-			return [d, &sourceVariable] ( size_t index, const PrimitiveEvaluator::Result &result ) {
+			return [d, &sourceVariable]( size_t index, const PrimitiveEvaluator::Result &result ) {
 				d[index] = result.colorPrimVar( sourceVariable );
 			};
 		}
@@ -129,7 +129,7 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 			data->writable().resize( size, 0 );
 			outputPrimitive->variables[name] = PrimitiveVariable( outputInterpolation, data );
 			float *d = data->writable().data();
-			return [d, &sourceVariable] ( size_t index, const PrimitiveEvaluator::Result &result ) {
+			return [d, &sourceVariable]( size_t index, const PrimitiveEvaluator::Result &result ) {
 				d[index] = result.floatPrimVar( sourceVariable );
 			};
 		}
@@ -138,7 +138,7 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 			data->writable().resize( size, 0 );
 			outputPrimitive->variables[name] = PrimitiveVariable( outputInterpolation, data );
 			int *d = data->writable().data();
-			return [d, &sourceVariable] ( size_t index, const PrimitiveEvaluator::Result &result ) {
+			return [d, &sourceVariable]( size_t index, const PrimitiveEvaluator::Result &result ) {
 				d[index] = result.intPrimVar( sourceVariable );
 			};
 		}
@@ -146,7 +146,6 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 			// Unsupported type
 			return OutputVariableFunction();
 	};
-
 }
 
 } // namespace
@@ -160,7 +159,7 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveSampler );
 size_t PrimitiveSampler::g_firstPlugIndex = 0;
 
 PrimitiveSampler::PrimitiveSampler( const std::string &name )
-	:	Deformer( name )
+	: Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -227,8 +226,7 @@ const Gaffer::StringPlug *PrimitiveSampler::statusPlug() const
 
 bool PrimitiveSampler::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		Deformer::affectsProcessedObject( input ) ||
+	return Deformer::affectsProcessedObject( input ) ||
 		input == sourceLocationPlug() ||
 		input == primitiveVariablesPlug() ||
 		input == prefixPlug() ||
@@ -237,8 +235,7 @@ bool PrimitiveSampler::affectsProcessedObject( const Gaffer::Plug *input ) const
 		input == sourcePlug()->objectPlug() ||
 		input == inPlug()->transformPlug() ||
 		input == sourcePlug()->transformPlug() ||
-		affectsSamplingFunction( input )
-	;
+		affectsSamplingFunction( input );
 }
 
 void PrimitiveSampler::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -381,11 +378,9 @@ Gaffer::ValuePlug::CachePolicy PrimitiveSampler::processedObjectComputeCachePoli
 
 bool PrimitiveSampler::adjustBounds() const
 {
-	return
-		Deformer::adjustBounds() &&
+	return Deformer::adjustBounds() &&
 		prefixPlug()->getValue().empty() &&
-		StringAlgo::matchMultiple( "P", primitiveVariablesPlug()->getValue() )
-	;
+		StringAlgo::matchMultiple( "P", primitiveVariablesPlug()->getValue() );
 }
 
 bool PrimitiveSampler::affectsSamplingFunction( const Gaffer::Plug *input ) const

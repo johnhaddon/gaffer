@@ -46,7 +46,7 @@
 namespace Gaffer
 {
 class StringPlug;
-}
+} // namespace Gaffer
 
 namespace GafferVDB
 {
@@ -54,39 +54,38 @@ namespace GafferVDB
 class GAFFERVDB_API MeshToLevelSet : public GafferScene::MergeObjects
 {
 
-	public :
+public:
 
-		explicit MeshToLevelSet( const std::string &name=defaultName<MeshToLevelSet>() );
-		~MeshToLevelSet() override;
+	explicit MeshToLevelSet( const std::string &name = defaultName<MeshToLevelSet>() );
+	~MeshToLevelSet() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferVDB::MeshToLevelSet, MeshToLevelSetTypeId, GafferScene::MergeObjects );
+	GAFFER_NODE_DECLARE_TYPE( GafferVDB::MeshToLevelSet, MeshToLevelSetTypeId, GafferScene::MergeObjects );
 
-		Gaffer::StringPlug *gridPlug();
-		const Gaffer::StringPlug *gridPlug() const;
+	Gaffer::StringPlug *gridPlug();
+	const Gaffer::StringPlug *gridPlug() const;
 
-		Gaffer::FloatPlug *voxelSizePlug();
-		const Gaffer::FloatPlug *voxelSizePlug() const;
+	Gaffer::FloatPlug *voxelSizePlug();
+	const Gaffer::FloatPlug *voxelSizePlug() const;
 
-		Gaffer::FloatPlug *exteriorBandwidthPlug();
-		const Gaffer::FloatPlug *exteriorBandwidthPlug() const;
+	Gaffer::FloatPlug *exteriorBandwidthPlug();
+	const Gaffer::FloatPlug *exteriorBandwidthPlug() const;
 
-		Gaffer::FloatPlug *interiorBandwidthPlug();
-		const Gaffer::FloatPlug *interiorBandwidthPlug() const;
+	Gaffer::FloatPlug *interiorBandwidthPlug();
+	const Gaffer::FloatPlug *interiorBandwidthPlug() const;
 
-	protected :
+protected:
 
-		bool affectsMergedObject( const Gaffer::Plug *input ) const override;
+	bool affectsMergedObject( const Gaffer::Plug *input ) const override;
 
-		void hashMergedObject(
-			const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
-		) const override;
+	void hashMergedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 
-		IECore::ConstObjectPtr computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const override;
+	IECore::ConstObjectPtr computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshToLevelSet )

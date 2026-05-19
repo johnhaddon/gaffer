@@ -54,111 +54,110 @@ namespace GafferBindings
 template<typename WrappedType>
 class ComputeNodeWrapper : public DependencyNodeWrapper<WrappedType>
 {
-	public :
+public:
 
-		template<typename... Args>
-		ComputeNodeWrapper( PyObject *self, Args&&... args )
-			:	DependencyNodeWrapper<WrappedType>( self, std::forward<Args>( args )... )
-		{
-		}
+	template<typename... Args>
+	ComputeNodeWrapper( PyObject *self, Args &&...args )
+		: DependencyNodeWrapper<WrappedType>( self, std::forward<Args>( args )... )
+	{
+	}
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override
+	{
+		/// \todo Stop calling the base class unconditionally - if an override
+		/// exists then the override should call the base class explicitly itself
+		/// if required. Having a disparity between the python bindings and the
+		/// C++ form here does us no favours.
+		WrappedType::hash( output, context, h );
+		if( this->isSubclassed() )
 		{
-			/// \todo Stop calling the base class unconditionally - if an override
-			/// exists then the override should call the base class explicitly itself
-			/// if required. Having a disparity between the python bindings and the
-			/// C++ form here does us no favours.
-			WrappedType::hash( output, context, h );
-			if( this->isSubclassed() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				boost::python::object f = this->methodOverride( "hash" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "hash" );
-					if( f )
-					{
-						boost::python::object pythonHash( h );
-						f(
-							Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ),
-							Gaffer::ContextPtr( const_cast<Gaffer::Context *>( context ) ),
-							pythonHash
-						);
-						h = boost::python::extract<IECore::MurmurHash>( pythonHash );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					boost::python::object pythonHash( h );
+					f(
+						Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ),
+						Gaffer::ContextPtr( const_cast<Gaffer::Context *>( context ) ),
+						pythonHash
+					);
+					h = boost::python::extract<IECore::MurmurHash>( pythonHash );
 				}
 			}
-		}
-
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+	}
+
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "compute" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "compute" );
-					if( f )
-					{
-						f( Gaffer::ValuePlugPtr( output ), Gaffer::ContextPtr( const_cast<Gaffer::Context *>( context ) ) );
-						return;
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					f( Gaffer::ValuePlugPtr( output ), Gaffer::ContextPtr( const_cast<Gaffer::Context *>( context ) ) );
+					return;
 				}
 			}
-			WrappedType::compute( output, context );
-		}
-
-		Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		WrappedType::compute( output, context );
+	}
+
+	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "hashCachePolicy" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "hashCachePolicy" );
-					if( f )
-					{
-						boost::python::object policy = f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
-						return boost::python::extract<Gaffer::ValuePlug::CachePolicy>( policy );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					boost::python::object policy = f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
+					return boost::python::extract<Gaffer::ValuePlug::CachePolicy>( policy );
 				}
 			}
-			return WrappedType::hashCachePolicy( output );
-		}
-
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::hashCachePolicy( output );
+	}
+
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "computeCachePolicy" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "computeCachePolicy" );
-					if( f )
-					{
-						boost::python::object policy = f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
-						return boost::python::extract<Gaffer::ValuePlug::CachePolicy>( policy );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					boost::python::object policy = f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
+					return boost::python::extract<Gaffer::ValuePlug::CachePolicy>( policy );
 				}
 			}
-			return WrappedType::computeCachePolicy( output );
+			catch( const boost::python::error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
-
+		return WrappedType::computeCachePolicy( output );
+	}
 };
 
 } // namespace GafferBindings

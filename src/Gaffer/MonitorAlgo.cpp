@@ -65,7 +65,7 @@ struct InvalidMetric
 
 	using ResultType = size_t;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return 0;
 	}
@@ -73,7 +73,6 @@ struct InvalidMetric
 	const std::string description = "invalid";
 	const std::string annotation = "invalid";
 	const std::string annotationPrefix = "invalid";
-
 };
 
 struct HashCountMetric
@@ -81,7 +80,7 @@ struct HashCountMetric
 
 	using ResultType = size_t;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return s.hashCount;
 	}
@@ -89,7 +88,6 @@ struct HashCountMetric
 	const std::string description = "number of hash processes";
 	const std::string annotation = "performanceMonitor:hashCount";
 	const std::string annotationPrefix = "Hash count : ";
-
 };
 
 struct ComputeCountMetric
@@ -97,7 +95,7 @@ struct ComputeCountMetric
 
 	using ResultType = size_t;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return s.computeCount;
 	}
@@ -105,7 +103,6 @@ struct ComputeCountMetric
 	const std::string description = "number of compute processes";
 	const std::string annotation = "performanceMonitor:computeCount";
 	const std::string annotationPrefix = "Compute count : ";
-
 };
 
 struct HashDurationMetric
@@ -113,7 +110,7 @@ struct HashDurationMetric
 
 	using ResultType = boost::chrono::duration<double>;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return s.hashDuration;
 	}
@@ -121,7 +118,6 @@ struct HashDurationMetric
 	const std::string description = "time spent in hash processes";
 	const std::string annotation = "performanceMonitor:hashDuration";
 	const std::string annotationPrefix = "Hash time : ";
-
 };
 
 struct ComputeDurationMetric
@@ -129,7 +125,7 @@ struct ComputeDurationMetric
 
 	using ResultType = boost::chrono::duration<double>;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return s.computeDuration;
 	}
@@ -137,7 +133,6 @@ struct ComputeDurationMetric
 	const std::string description = "time spent in compute processes";
 	const std::string annotation = "performanceMonitor:computeDuration";
 	const std::string annotationPrefix = "Compute time : ";
-
 };
 
 struct TotalDurationMetric
@@ -145,7 +140,7 @@ struct TotalDurationMetric
 
 	using ResultType = boost::chrono::duration<double>;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return s.hashDuration + s.computeDuration;
 	}
@@ -153,7 +148,6 @@ struct TotalDurationMetric
 	const std::string description = "sum of time spent in hash and compute processes";
 	const std::string annotation = "performanceMonitor:totalDuration";
 	const std::string annotationPrefix = "Time : ";
-
 };
 
 struct PerHashDurationMetric
@@ -161,7 +155,7 @@ struct PerHashDurationMetric
 
 	using ResultType = boost::chrono::duration<double>;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return ResultType( s.hashDuration ) / std::max( 1.0, static_cast<double>( s.hashCount ) );
 	}
@@ -169,7 +163,6 @@ struct PerHashDurationMetric
 	const std::string description = "time spent per hash process";
 	const std::string annotation = "performanceMonitor:perHashDuration";
 	const std::string annotationPrefix = "Time per hash : ";
-
 };
 
 struct PerComputeDurationMetric
@@ -177,7 +170,7 @@ struct PerComputeDurationMetric
 
 	using ResultType = boost::chrono::duration<double>;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return ResultType( s.computeDuration ) / std::max( 1.0, static_cast<double>( s.computeCount ) );
 	}
@@ -185,7 +178,6 @@ struct PerComputeDurationMetric
 	const std::string description = "time spent per compute process";
 	const std::string annotation = "performanceMonitor:perComputeDuration";
 	const std::string annotationPrefix = "Time per compute : ";
-
 };
 
 struct HashesPerComputeMetric
@@ -193,7 +185,7 @@ struct HashesPerComputeMetric
 
 	using ResultType = double;
 
-	ResultType operator() ( const PerformanceMonitor::Statistics &s ) const
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
 	{
 		return static_cast<double>( s.hashCount ) / std::max( 1.0, static_cast<double>( s.computeCount ) );
 	}
@@ -201,7 +193,6 @@ struct HashesPerComputeMetric
 	const std::string description = "number of hash processes per compute process";
 	const std::string annotation = "performanceMonitor:hashesPerCompute";
 	const std::string annotationPrefix = "Hashes per compute : ";
-
 };
 
 // Utility for invoking a templated functor with a particular metric.
@@ -243,7 +234,7 @@ struct AnnotationRegistrations
 			// template we get included nicely in the UI for filtering
 			// annotations in the GraphEditor.
 			dispatchMetric(
-				[] ( auto metric ) {
+				[]( auto metric ) {
 					MetadataAlgo::addAnnotationTemplate(
 						metric.annotation,
 						MetadataAlgo::Annotation( "" ),
@@ -277,26 +268,24 @@ struct PlugAndStatistics
 {
 
 	PlugAndStatistics( const PerformanceMonitor::StatisticsMap::value_type &v )
-		:	plug( v.first.get() ), statistics( v.second )
+		: plug( v.first.get() ), statistics( v.second )
 	{
 	}
 
 	const Plug *plug;
 	PerformanceMonitor::Statistics statistics;
-
 };
 
 template<typename Metric>
 struct MetricGreater
 {
 
-	bool operator() ( const PlugAndStatistics &lhs, const PlugAndStatistics &rhs ) const
+	bool operator () ( const PlugAndStatistics &lhs, const PlugAndStatistics &rhs ) const
 	{
 		return metric( lhs.statistics ) > metric( rhs.statistics );
 	}
 
 	Metric metric;
-
 };
 
 template<typename Item>
@@ -319,20 +308,22 @@ struct FormatStatistics
 {
 
 	FormatStatistics( const PerformanceMonitor::StatisticsMap &statistics, size_t maxLines )
-		:	statistics( statistics ), maxLines( maxLines )
+		: statistics( statistics ), maxLines( maxLines )
 	{
 	}
 
 	using ResultType = std::string;
 
 	template<typename Metric>
-	std::string operator() ( const Metric &metric ) const
+	std::string operator () ( const Metric &metric ) const
 	{
 		std::vector<PlugAndStatistics> v( statistics.begin(), statistics.end() );
 		std::sort( v.begin(), v.end(), MetricGreater<Metric>() );
 
-		std::vector<std::string> plugNames; plugNames.reserve( maxLines );
-		std::vector<typename Metric::ResultType> metrics; metrics.reserve( maxLines );
+		std::vector<std::string> plugNames;
+		plugNames.reserve( maxLines );
+		std::vector<typename Metric::ResultType> metrics;
+		metrics.reserve( maxLines );
 
 		ResultType result;
 		for( size_t i = 0; i < maxLines && i < v.size(); ++i )
@@ -361,25 +352,24 @@ struct FormatStatistics
 
 	const PerformanceMonitor::StatisticsMap &statistics;
 	const size_t maxLines;
-
 };
 
 struct FormatTotalStatistics
 {
 
 	FormatTotalStatistics( const PerformanceMonitor::Statistics &combinedStatistics )
-		:	combinedStatistics( combinedStatistics )
+		: combinedStatistics( combinedStatistics )
 	{
 	}
 
 	using ResultType = std::pair<std::string, std::string>;
 
 	template<typename Metric>
-	ResultType operator() ( const Metric &metric ) const
+	ResultType operator () ( const Metric &metric ) const
 	{
 		std::stringstream s;
 
-		s << std::fixed << ": " <<  metric( combinedStatistics );
+		s << std::fixed << ": " << metric( combinedStatistics );
 
 		return ResultType( "Total " + metric.description, s.str() );
 	}
@@ -419,83 +409,82 @@ struct Annotate
 {
 
 	Annotate( Node &root, const PerformanceMonitor::StatisticsMap &statistics, bool persistent )
-		:	m_root( root ), m_statistics( statistics ), m_persistent( persistent )
+		: m_root( root ), m_statistics( statistics ), m_persistent( persistent )
 	{
 	}
 
 	using ResultType = void;
 
 	template<typename Metric>
-	ResultType operator() ( const Metric &metric ) const
+	ResultType operator () ( const Metric &metric ) const
 	{
 		walk<Metric>( m_root, metric );
 	}
 
-	private :
+private:
 
-		Node &m_root;
-		const PerformanceMonitor::StatisticsMap &m_statistics;
-		const bool m_persistent;
+	Node &m_root;
+	const PerformanceMonitor::StatisticsMap &m_statistics;
+	const bool m_persistent;
 
-		template<typename Metric>
-		PerformanceMonitor::Statistics walk( Node &node, const Metric &metric ) const
+	template<typename Metric>
+	PerformanceMonitor::Statistics walk( Node &node, const Metric &metric ) const
+	{
+		using Value = typename Metric::ResultType;
+		using ChildStatistics = std::pair<Node &, PerformanceMonitor::Statistics>;
+
+		// Accumulate the statistics for all plugs belonging to this node.
+
+		PerformanceMonitor::Statistics result;
+		for( Plug::RecursiveIterator plugIt( &node ); !plugIt.done(); ++plugIt )
 		{
-			using Value = typename Metric::ResultType;
-			using ChildStatistics = std::pair<Node &, PerformanceMonitor::Statistics>;
-
-			// Accumulate the statistics for all plugs belonging to this node.
-
-			PerformanceMonitor::Statistics result;
-			for( Plug::RecursiveIterator plugIt( &node ); !plugIt.done(); ++plugIt )
+			auto it = m_statistics.find( plugIt->get() );
+			if( it != m_statistics.end() )
 			{
-				auto it = m_statistics.find( plugIt->get() );
-				if( it != m_statistics.end() )
-				{
-					result += it->second;
-				}
+				result += it->second;
 			}
-
-			// Gather statistics for all child nodes.
-
-			std::vector<ChildStatistics> childStatistics;
-			Value maxChildValue( 0 );
-
-			for( Node::Iterator childNodeIt( &node ); !childNodeIt.done(); ++childNodeIt )
-			{
-				Node &childNode = **childNodeIt;
-				const auto cs = walk( childNode, metric );
-				childStatistics.push_back( ChildStatistics( childNode, cs ) );
-				maxChildValue = std::max( maxChildValue, metric( cs ) );
-			}
-
-			// Apply metadata for child nodes. We must do this
-			// after gathering because we need `maxChildValue` to
-			// calculate the heat map.
-
-			for( const auto &cs : childStatistics )
-			{
-				const Value value = metric( cs.second );
-				if( value == Value( 0 ) )
-				{
-					continue;
-				}
-
-				MetadataAlgo::addAnnotation(
-					&cs.first,
-					metric.annotation,
-					MetadataAlgo::Annotation(
-						metric.annotationPrefix + boost::lexical_cast<std::string>( value ),
-						heat( value, maxChildValue )
-					),
-					m_persistent
-				);
-
-				result += cs.second;
-			}
-
-			return result;
 		}
 
+		// Gather statistics for all child nodes.
+
+		std::vector<ChildStatistics> childStatistics;
+		Value maxChildValue( 0 );
+
+		for( Node::Iterator childNodeIt( &node ); !childNodeIt.done(); ++childNodeIt )
+		{
+			Node &childNode = **childNodeIt;
+			const auto cs = walk( childNode, metric );
+			childStatistics.push_back( ChildStatistics( childNode, cs ) );
+			maxChildValue = std::max( maxChildValue, metric( cs ) );
+		}
+
+		// Apply metadata for child nodes. We must do this
+		// after gathering because we need `maxChildValue` to
+		// calculate the heat map.
+
+		for( const auto &cs : childStatistics )
+		{
+			const Value value = metric( cs.second );
+			if( value == Value( 0 ) )
+			{
+				continue;
+			}
+
+			MetadataAlgo::addAnnotation(
+				&cs.first,
+				metric.annotation,
+				MetadataAlgo::Annotation(
+					metric.annotationPrefix + boost::lexical_cast<std::string>( value ),
+					heat( value, maxChildValue )
+				),
+				m_persistent
+			);
+
+			result += cs.second;
+		}
+
+		return result;
+	}
 };
 
 ContextMonitor::Statistics annotateContextWalk( Node &node, const ContextMonitor::StatisticsMap &statistics, bool persistent )
@@ -562,7 +551,6 @@ ContextMonitor::Statistics annotateContextWalk( Node &node, const ContextMonitor
 	}
 
 	return result;
-
 }
 
 } // namespace
@@ -638,7 +626,7 @@ void removePerformanceAnnotations( Node &root )
 	for( int m = Gaffer::MonitorAlgo::First; m <= Gaffer::MonitorAlgo::Last; ++m )
 	{
 		dispatchMetric(
-			[&root] ( auto metric ) {
+			[&root]( auto metric ) {
 				MetadataAlgo::removeAnnotation( &root, metric.annotation );
 			},
 			static_cast<Gaffer::MonitorAlgo::PerformanceMetric>( m )

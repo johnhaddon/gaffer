@@ -87,8 +87,8 @@ namespace
 // are currently comfortable with.
 void renderUnitSquare( const IECoreGL::Shader::Parameter *pParameter, const IECoreGL::Shader::Parameter *uvParameter = nullptr )
 {
-	static float rectPBufferData[12] = { -1, -1, 0,  -1, 1, 0,  1, -1, 0,  1, 1, 0 };
-	static float rectUvBufferData[8] = { 0, 0,  0, 1,  1, 0,  1, 1 };
+	static float rectPBufferData[12] = { -1, -1, 0, -1, 1, 0, 1, -1, 0, 1, 1, 0 };
+	static float rectUvBufferData[8] = { 0, 0, 0, 1, 1, 0, 1, 1 };
 	static IECoreGL::BufferPtr g_rectPBuffer = new IECoreGL::Buffer( rectPBufferData, sizeof( float ) * 12 );
 	static IECoreGL::BufferPtr g_rectUvBuffer = new IECoreGL::Buffer( rectUvBufferData, sizeof( float ) * 8 );
 
@@ -118,7 +118,7 @@ void renderUnitSquare( const IECoreGL::Shader::Parameter *pParameter, const IECo
 
 bool checkGLArbTextureFloat()
 {
-	bool supported = std::regex_match( std::string( (const char*)glGetString( GL_EXTENSIONS ) ), std::regex( R"(.*GL_ARB_texture_float( |\n).*)" ) );
+	bool supported = std::regex_match( std::string( (const char *)glGetString( GL_EXTENSIONS ) ), std::regex( R"(.*GL_ARB_texture_float( |\n).*)" ) );
 	if( !supported )
 	{
 		IECore::msg(
@@ -152,170 +152,171 @@ V2i glViewportSize()
 class GafferImageUI::ImageGadget::RenderTexture
 {
 
-	public :
-		RenderTexture()
-			:	m_framebuffer( 0 ),
-				m_framebufferSize( -1 ),
-				m_colorBuffer( 0 ),
-				m_depthBuffer( 0 ),
-				m_downsampledFramebuffer( 0 ),
-				m_downsampledFramebufferTexture( 0 )
-		{
-		}
+public:
 
-		~RenderTexture()
+	RenderTexture()
+		: m_framebuffer( 0 ),
+		  m_framebufferSize( -1 ),
+		  m_colorBuffer( 0 ),
+		  m_depthBuffer( 0 ),
+		  m_downsampledFramebuffer( 0 ),
+		  m_downsampledFramebufferTexture( 0 )
+	{
+	}
+
+	~RenderTexture()
+	{
+		// We should technically ensure that the right GL context is current when
+		// making these calls, but this seems to work without, because all our GL
+		// contexts are sharing the same resources.
+		if( m_framebuffer )
 		{
-			// We should technically ensure that the right GL context is current when
-			// making these calls, but this seems to work without, because all our GL
-			// contexts are sharing the same resources.
-			if( m_framebuffer )
+			glDeleteFramebuffers( 1, &m_framebuffer );
+			glDeleteRenderbuffers( 1, &m_colorBuffer );
+			glDeleteRenderbuffers( 1, &m_depthBuffer );
+			glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
+			glDeleteTextures( 1, &m_downsampledFramebufferTexture );
+		}
+	}
+
+	// Access the texture that contains everything that has been rendered to this.
+	// Note : If we were going to make this a public API, maybe we would want to make this
+	// return an IECoreGL::Texture?
+	GLint texture()
+	{
+		return m_downsampledFramebufferTexture;
+	}
+
+	/// The RenderScope binds a RenderTexture so that rendering goes to it.
+	class GAFFERIMAGEUI_API RenderScope : boost::noncopyable
+	{
+
+	public:
+
+		RenderScope( const RenderTexture *framebuffer, bool clearDepth )
+			: m_framebuffer( framebuffer )
+		{
+			glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &m_defaultFramebuffer );
+
+			// Render to intermediate framebuffer.
+
+			glEnable( GL_BLEND );
+			glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer->acquireFramebuffer() );
+			glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+			glClear( GL_COLOR_BUFFER_BIT );
+			glEnable( GL_MULTISAMPLE );
+
+			if( clearDepth )
 			{
-				glDeleteFramebuffers( 1, &m_framebuffer );
-				glDeleteRenderbuffers( 1, &m_colorBuffer );
-				glDeleteRenderbuffers( 1, &m_depthBuffer );
-				glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
-				glDeleteTextures( 1, &m_downsampledFramebufferTexture );
+				glClearDepth( 1.0f );
+				glClear( GL_DEPTH_BUFFER_BIT );
 			}
 		}
-
-		// Access the texture that contains everything that has been rendered to this.
-		// Note : If we were going to make this a public API, maybe we would want to make this
-		// return an IECoreGL::Texture?
-		GLint texture()
+		~RenderScope()
 		{
-			return m_downsampledFramebufferTexture;
-		}
+			// Blit to downsampled framebuffer, to get the image into a texture
+			// format we can read from a shader.
 
-		/// The RenderScope binds a RenderTexture so that rendering goes to it.
-		class GAFFERIMAGEUI_API RenderScope : boost::noncopyable
-		{
-
-			public :
-
-				RenderScope( const RenderTexture *framebuffer, bool clearDepth )
-					: m_framebuffer( framebuffer )
-				{
-					glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &m_defaultFramebuffer );
-
-					// Render to intermediate framebuffer.
-
-					glEnable( GL_BLEND );
-					glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer->acquireFramebuffer() );
-					glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-					glClear( GL_COLOR_BUFFER_BIT );
-					glEnable( GL_MULTISAMPLE );
-
-					if( clearDepth )
-					{
-						glClearDepth( 1.0f );
-						glClear( GL_DEPTH_BUFFER_BIT );
-					}
-				}
-				~RenderScope()
-				{
-					// Blit to downsampled framebuffer, to get the image into a texture
-					// format we can read from a shader.
-
-					glBindFramebuffer( GL_READ_FRAMEBUFFER, m_framebuffer->m_framebuffer );
-					glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer->m_downsampledFramebuffer );
-					const V2i size = glViewportSize();
-					glBlitFramebuffer( 0, 0, size.x, size.y, 0, 0, size.x, size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST );
-
-					glBindFramebuffer( GL_FRAMEBUFFER, m_defaultFramebuffer );
-				}
-
-			private :
-
-				const RenderTexture* m_framebuffer;
-				GLint m_defaultFramebuffer;
-		};
-
-	private :
-
-		GLuint acquireFramebuffer() const
-		{
+			glBindFramebuffer( GL_READ_FRAMEBUFFER, m_framebuffer->m_framebuffer );
+			glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer->m_downsampledFramebuffer );
 			const V2i size = glViewportSize();
-			if( m_framebuffer && m_framebufferSize == size )
-			{
-				// Reuse existing buffer.
-				return m_framebuffer;
-			}
+			glBlitFramebuffer( 0, 0, size.x, size.y, 0, 0, size.x, size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST );
 
-			if( !m_colorBuffer )
-			{
-				glGenRenderbuffers( 1, &m_colorBuffer );
-				glGenRenderbuffers( 1, &m_depthBuffer );
+			glBindFramebuffer( GL_FRAMEBUFFER, m_defaultFramebuffer );
+		}
 
-				glGenTextures( 1, &m_downsampledFramebufferTexture );
-				glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-			}
+	private:
 
-			if( m_framebuffer )
-			{
-				// There is contradictory information out there about whether a
-				// framebuffer can handle the attached textures and render buffers being
-				// resized - sounds like it depends on the driver. Safer to just
-				// recreate it.
-				glDeleteFramebuffers( 1, &m_framebuffer );
-				glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
-			}
+		const RenderTexture *m_framebuffer;
+		GLint m_defaultFramebuffer;
+	};
 
-			// Create framebuffer
-			glGenFramebuffers( 1, &m_framebuffer );
-			glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer );
+private:
 
-			// Resize color buffer and attach to framebuffer
-			static const GLint colorFormat = checkGLArbTextureFloat() ? GL_RGBA16F : GL_RGBA8;
-			static const GLsizei samples = numSamples();
-
-			glBindRenderbuffer( GL_RENDERBUFFER, m_colorBuffer );
-			glRenderbufferStorageMultisample( GL_RENDERBUFFER, samples, colorFormat, size.x, size.y );
-			glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_colorBuffer );
-
-			// Resize depth buffer and attach to framebuffer
-			glBindRenderbuffer( GL_RENDERBUFFER, m_depthBuffer );
-			glRenderbufferStorageMultisample( GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT32F, size.x, size.y );
-			glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer );
-
-			// Validate framebuffer
-			GLenum framebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
-			if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
-			{
-				IECore::msg( IECore::Msg::Warning, "GafferUI::RenderTexture", "Multisampled framebuffer error : " + std::to_string( framebufferStatus ) );
-			}
-
-			// Create downsampled framebuffer
-			glGenFramebuffers( 1, &m_downsampledFramebuffer );
-			glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_downsampledFramebuffer );
-
-			// Resize color texture and attach to downsampled framebuffer
-			glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
-			glTexImage2D( GL_TEXTURE_2D, 0, colorFormat, size.x, size.y, 0, GL_RGBA, GL_FLOAT, nullptr );
-			glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_downsampledFramebufferTexture, 0 );
-			// Validate downsampled framebuffer
-			framebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
-			if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
-			{
-				IECore::msg( IECore::Msg::Warning, "GafferUI::RenderTexture", "Downsampled framebuffer error : " + std::to_string( framebufferStatus ) );
-			}
-
-			m_framebufferSize = size;
+	GLuint acquireFramebuffer() const
+	{
+		const V2i size = glViewportSize();
+		if( m_framebuffer && m_framebufferSize == size )
+		{
+			// Reuse existing buffer.
 			return m_framebuffer;
 		}
 
-		// Framebuffer used for intermediate renders before
-		// transferring to the output framebuffer using the
-		// post-process shaders.
-		mutable GLuint m_framebuffer;
-		mutable Imath::V2i m_framebufferSize;
-		mutable GLuint m_colorBuffer;
-		mutable GLuint m_depthBuffer;
-		mutable GLuint m_downsampledFramebuffer;
-		mutable GLuint m_downsampledFramebufferTexture;
+		if( !m_colorBuffer )
+		{
+			glGenRenderbuffers( 1, &m_colorBuffer );
+			glGenRenderbuffers( 1, &m_depthBuffer );
+
+			glGenTextures( 1, &m_downsampledFramebufferTexture );
+			glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		}
+
+		if( m_framebuffer )
+		{
+			// There is contradictory information out there about whether a
+			// framebuffer can handle the attached textures and render buffers being
+			// resized - sounds like it depends on the driver. Safer to just
+			// recreate it.
+			glDeleteFramebuffers( 1, &m_framebuffer );
+			glDeleteFramebuffers( 1, &m_downsampledFramebuffer );
+		}
+
+		// Create framebuffer
+		glGenFramebuffers( 1, &m_framebuffer );
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebuffer );
+
+		// Resize color buffer and attach to framebuffer
+		static const GLint colorFormat = checkGLArbTextureFloat() ? GL_RGBA16F : GL_RGBA8;
+		static const GLsizei samples = numSamples();
+
+		glBindRenderbuffer( GL_RENDERBUFFER, m_colorBuffer );
+		glRenderbufferStorageMultisample( GL_RENDERBUFFER, samples, colorFormat, size.x, size.y );
+		glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_colorBuffer );
+
+		// Resize depth buffer and attach to framebuffer
+		glBindRenderbuffer( GL_RENDERBUFFER, m_depthBuffer );
+		glRenderbufferStorageMultisample( GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT32F, size.x, size.y );
+		glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer );
+
+		// Validate framebuffer
+		GLenum framebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
+		if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
+		{
+			IECore::msg( IECore::Msg::Warning, "GafferUI::RenderTexture", "Multisampled framebuffer error : " + std::to_string( framebufferStatus ) );
+		}
+
+		// Create downsampled framebuffer
+		glGenFramebuffers( 1, &m_downsampledFramebuffer );
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_downsampledFramebuffer );
+
+		// Resize color texture and attach to downsampled framebuffer
+		glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
+		glTexImage2D( GL_TEXTURE_2D, 0, colorFormat, size.x, size.y, 0, GL_RGBA, GL_FLOAT, nullptr );
+		glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_downsampledFramebufferTexture, 0 );
+		// Validate downsampled framebuffer
+		framebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
+		if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
+		{
+			IECore::msg( IECore::Msg::Warning, "GafferUI::RenderTexture", "Downsampled framebuffer error : " + std::to_string( framebufferStatus ) );
+		}
+
+		m_framebufferSize = size;
+		return m_framebuffer;
+	}
+
+	// Framebuffer used for intermediate renders before
+	// transferring to the output framebuffer using the
+	// post-process shaders.
+	mutable GLuint m_framebuffer;
+	mutable Imath::V2i m_framebufferSize;
+	mutable GLuint m_colorBuffer;
+	mutable GLuint m_depthBuffer;
+	mutable GLuint m_downsampledFramebuffer;
+	mutable GLuint m_downsampledFramebufferTexture;
 };
 
 
@@ -326,10 +327,10 @@ struct SelectionPostProcessShader
 {
 	SelectionPostProcessShader()
 		: m_setup( new IECoreGL::Shader::Setup(
-			IECoreGL::ShaderLoader::defaultShaderLoader()->create(
-				vertexSource(), "", fragmentSource()
-			)
-		) )
+			  IECoreGL::ShaderLoader::defaultShaderLoader()->create(
+				  vertexSource(), "", fragmentSource()
+			  )
+		  ) )
 	{
 		m_textureParameter = m_setup->shader()->uniformParameter( "framebufferTexture" );
 		if( !m_textureParameter || m_textureParameter->type != GL_SAMPLER_2D )
@@ -437,43 +438,43 @@ const SelectionPostProcessShader *selectionPostProcessShader()
 // NOTE : Copied from GafferSceneUI::OutputBuffer, would be nice if it was somewhere central.
 class GafferImageUI::ImageGadget::BufferTexture
 {
-	public :
+public:
 
-		BufferTexture()
-		{
-			glGenTextures( 1, &m_texture );
-			glGenBuffers( 1, &m_buffer );
-		}
+	BufferTexture()
+	{
+		glGenTextures( 1, &m_texture );
+		glGenBuffers( 1, &m_buffer );
+	}
 
-		~BufferTexture()
-		{
-			glDeleteBuffers( 1, &m_buffer );
-			glDeleteTextures( 1, &m_texture );
-		}
+	~BufferTexture()
+	{
+		glDeleteBuffers( 1, &m_buffer );
+		glDeleteTextures( 1, &m_texture );
+	}
 
-		GLuint texture() const
-		{
-			return m_texture;
-		}
+	GLuint texture() const
+	{
+		return m_texture;
+	}
 
-		void updateBuffer( const vector<uint32_t> &data )
-		{
-			glBindBuffer( GL_TEXTURE_BUFFER, m_buffer );
-			glBufferData( GL_TEXTURE_BUFFER, sizeof( uint32_t ) * data.size(), data.data(), GL_STREAM_DRAW );
+	void updateBuffer( const vector<uint32_t> &data )
+	{
+		glBindBuffer( GL_TEXTURE_BUFFER, m_buffer );
+		glBufferData( GL_TEXTURE_BUFFER, sizeof( uint32_t ) * data.size(), data.data(), GL_STREAM_DRAW );
 
-			glBindTexture( GL_TEXTURE_BUFFER, m_texture );
-			glTexBuffer( GL_TEXTURE_BUFFER, GL_R32UI, m_buffer );
-		}
+		glBindTexture( GL_TEXTURE_BUFFER, m_texture );
+		glTexBuffer( GL_TEXTURE_BUFFER, GL_R32UI, m_buffer );
+	}
 
-	private :
+private:
 
-		GLuint m_texture;
-		GLuint m_buffer;
-
+	GLuint m_texture;
+	GLuint m_buffer;
 };
 
 
-namespace {
+namespace
+{
 void findUsableTextureFormats( GLenum &monochromeFormat, GLenum &colorFormat )
 {
 	static bool g_textureFormatsInitialized = false;
@@ -482,7 +483,7 @@ void findUsableTextureFormats( GLenum &monochromeFormat, GLenum &colorFormat )
 
 	if( !g_textureFormatsInitialized )
 	{
-		std::string extensions( (char*)glGetString( GL_EXTENSIONS ) );
+		std::string extensions( (char *)glGetString( GL_EXTENSIONS ) );
 		if( extensions.find( "GL_ARB_texture_float" ) != string::npos )
 		{
 			g_monochromeFormat = GL_INTENSITY16F_ARB;
@@ -505,120 +506,119 @@ uint64_t g_tileUpdateCount;
 class TileShader
 {
 
-	public :
+public:
 
-		TileShader()
+	TileShader()
+	{
+
+		// Build and compile GLSL shader
+		std::string combinedFragmentCode;
+		if( glslVersion() >= 330 )
 		{
+			// the __VERSION__ define is a workaround for the fact that cortex's source preprocessing doesn't
+			// define it correctly in the same way as the OpenGL shader preprocessing would.
+			combinedFragmentCode = "#version 330 compatibility\n #define __VERSION__ 330\n\n";
+		}
+		combinedFragmentCode += fragmentSource();
 
-			// Build and compile GLSL shader
-			std::string combinedFragmentCode;
-			if( glslVersion() >= 330 )
+		m_shader = ShaderLoader::defaultShaderLoader()->create( vertexSource(), "", combinedFragmentCode );
+
+		// Query shader parameters
+
+		m_channelTextureUnits[0] = m_shader->uniformParameter( "redTexture" )->textureUnit;
+		m_channelTextureUnits[1] = m_shader->uniformParameter( "greenTexture" )->textureUnit;
+		m_channelTextureUnits[2] = m_shader->uniformParameter( "blueTexture" )->textureUnit;
+		m_channelTextureUnits[3] = m_shader->uniformParameter( "alphaTexture" )->textureUnit;
+
+		m_activeParameterLocation = m_shader->uniformParameter( "activeParam" )->location;
+	}
+
+	~TileShader()
+	{
+	}
+
+	// Binds shader and provides `loadTile()` method to update
+	// parameters for a specific tile.
+	struct ScopedBinding : PushAttrib
+	{
+
+		ScopedBinding( const TileShader &tileShader, V2f wipePos, V2f wipeDir, ImageGadget::BlendMode blendMode )
+			: PushAttrib( GL_COLOR_BUFFER_BIT ), m_tileShader( tileShader )
+		{
+			glGetIntegerv( GL_CURRENT_PROGRAM, &m_previousProgram );
+			glUseProgram( m_tileShader.m_shader->program() );
+
+			glEnable( GL_TEXTURE_2D );
+
+			glGetIntegerv( GL_BLEND_SRC, &m_prevBlendSrc );
+			glGetIntegerv( GL_BLEND_DST, &m_prevBlendDst );
+
+			bool negative = false;
+			if( blendMode == ImageGadget::BlendMode::Over )
 			{
-				// the __VERSION__ define is a workaround for the fact that cortex's source preprocessing doesn't
-				// define it correctly in the same way as the OpenGL shader preprocessing would.
-				combinedFragmentCode = "#version 330 compatibility\n #define __VERSION__ 330\n\n";
+				glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 			}
-			combinedFragmentCode += fragmentSource();
+			else if( blendMode == ImageGadget::BlendMode::Under )
+			{
+				glBlendFunc( GL_ONE_MINUS_DST_ALPHA, GL_ONE );
+			}
+			else if( blendMode == ImageGadget::BlendMode::Difference )
+			{
+				negative = true;
+				glBlendFunc( GL_ONE, GL_ONE );
+			}
+			else if( blendMode == ImageGadget::BlendMode::Add )
+			{
+				glBlendFunc( GL_ONE, GL_ONE );
+			}
+			else
+			{
+				glBlendFunc( GL_ONE, GL_ZERO );
+			}
 
-			m_shader = ShaderLoader::defaultShaderLoader()->create( vertexSource(), "", combinedFragmentCode );
+			glUniform2f( tileShader.m_shader->uniformParameter( "wipePos" )->location, wipePos.x, wipePos.y );
+			glUniform2f( tileShader.m_shader->uniformParameter( "wipeDir" )->location, wipeDir.x, wipeDir.y );
 
-			// Query shader parameters
-
-			m_channelTextureUnits[0] = m_shader->uniformParameter( "redTexture" )->textureUnit;
-			m_channelTextureUnits[1] = m_shader->uniformParameter( "greenTexture" )->textureUnit;
-			m_channelTextureUnits[2] = m_shader->uniformParameter( "blueTexture" )->textureUnit;
-			m_channelTextureUnits[3] = m_shader->uniformParameter( "alphaTexture" )->textureUnit;
-
-			m_activeParameterLocation = m_shader->uniformParameter( "activeParam" )->location;
+			glUniform1i( tileShader.m_shader->uniformParameter( "redTexture" )->location, tileShader.m_channelTextureUnits[0] );
+			glUniform1i( tileShader.m_shader->uniformParameter( "greenTexture" )->location, tileShader.m_channelTextureUnits[1] );
+			glUniform1i( tileShader.m_shader->uniformParameter( "blueTexture" )->location, tileShader.m_channelTextureUnits[2] );
+			glUniform1i( tileShader.m_shader->uniformParameter( "alphaTexture" )->location, tileShader.m_channelTextureUnits[3] );
+			glUniform1i( tileShader.m_shader->uniformParameter( "negative" )->location, negative );
 		}
 
-		~TileShader()
+		~ScopedBinding()
 		{
+			glUseProgram( m_previousProgram );
+			glBlendFunc( m_prevBlendSrc, m_prevBlendDst );
 		}
 
-		// Binds shader and provides `loadTile()` method to update
-		// parameters for a specific tile.
-		struct ScopedBinding : PushAttrib
+		void loadTile( IECoreGL::ConstTexturePtr channelTextures[4], bool active )
 		{
-
-			ScopedBinding( const TileShader &tileShader, V2f wipePos, V2f wipeDir, ImageGadget::BlendMode blendMode )
-				:	PushAttrib( GL_COLOR_BUFFER_BIT ), m_tileShader( tileShader )
+			for( int i = 0; i < 4; ++i )
 			{
-				glGetIntegerv( GL_CURRENT_PROGRAM, &m_previousProgram );
-				glUseProgram( m_tileShader.m_shader->program() );
-
-				glEnable( GL_TEXTURE_2D );
-
-				glGetIntegerv( GL_BLEND_SRC, &m_prevBlendSrc );
-				glGetIntegerv( GL_BLEND_DST, &m_prevBlendDst );
-
-				bool negative = false;
-				if( blendMode == ImageGadget::BlendMode::Over )
-				{
-					glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-				}
-				else if( blendMode == ImageGadget::BlendMode::Under )
-				{
-					glBlendFunc( GL_ONE_MINUS_DST_ALPHA, GL_ONE );
-				}
-				else if( blendMode == ImageGadget::BlendMode::Difference )
-				{
-					negative = true;
-					glBlendFunc( GL_ONE, GL_ONE );
-				}
-				else if( blendMode == ImageGadget::BlendMode::Add )
-				{
-					glBlendFunc( GL_ONE, GL_ONE );
-				}
-				else
-				{
-					glBlendFunc( GL_ONE, GL_ZERO );
-				}
-
-				glUniform2f( tileShader.m_shader->uniformParameter( "wipePos" )->location, wipePos.x, wipePos.y );
-				glUniform2f( tileShader.m_shader->uniformParameter( "wipeDir" )->location, wipeDir.x, wipeDir.y );
-
-				glUniform1i( tileShader.m_shader->uniformParameter( "redTexture" )->location, tileShader.m_channelTextureUnits[0] );
-				glUniform1i( tileShader.m_shader->uniformParameter( "greenTexture" )->location, tileShader.m_channelTextureUnits[1] );
-				glUniform1i( tileShader.m_shader->uniformParameter( "blueTexture" )->location, tileShader.m_channelTextureUnits[2] );
-				glUniform1i( tileShader.m_shader->uniformParameter( "alphaTexture" )->location, tileShader.m_channelTextureUnits[3] );
-				glUniform1i( tileShader.m_shader->uniformParameter( "negative" )->location, negative );
-
+				glActiveTexture( GL_TEXTURE0 + m_tileShader.m_channelTextureUnits[i] );
+				channelTextures[i]->bind();
 			}
+			glUniform1i( m_tileShader.m_activeParameterLocation, active );
+		}
 
-			~ScopedBinding()
-			{
-				glUseProgram( m_previousProgram );
-				glBlendFunc( m_prevBlendSrc, m_prevBlendDst );
-			}
+	private:
 
-			void loadTile( IECoreGL::ConstTexturePtr channelTextures[4], bool active )
-			{
-				for( int i = 0; i < 4; ++i )
-				{
-					glActiveTexture( GL_TEXTURE0 + m_tileShader.m_channelTextureUnits[i] );
-					channelTextures[i]->bind();
-				}
-				glUniform1i( m_tileShader.m_activeParameterLocation, active );
-			}
+		const TileShader &m_tileShader;
+		GLint m_previousProgram;
+		GLint m_prevBlendSrc, m_prevBlendDst;
+	};
 
-			private :
+private:
 
-				const TileShader &m_tileShader;
-				GLint m_previousProgram;
-				GLint m_prevBlendSrc, m_prevBlendDst;
-		};
+	IECoreGL::ShaderPtr m_shader;
 
-	private :
+	GLuint m_channelTextureUnits[4];
+	GLint m_activeParameterLocation;
 
-		IECoreGL::ShaderPtr m_shader;
-
-		GLuint m_channelTextureUnits[4];
-		GLint m_activeParameterLocation;
-
-		static const char *vertexSource()
-		{
-			static const char *g_vertexSource =
+	static const char *vertexSource()
+	{
+		static const char *g_vertexSource =
 			"void main()"
 			"{"
 			"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"
@@ -626,15 +626,15 @@ class TileShader
 			"	gl_TexCoord[1] = gl_MultiTexCoord1;"
 			"}";
 
-			return g_vertexSource;
-		}
+		return g_vertexSource;
+	}
 
-		static const std::string &fragmentSource()
+	static const std::string &fragmentSource()
+	{
+		static std::string g_fragmentSource;
+		if( g_fragmentSource.empty() )
 		{
-			static std::string g_fragmentSource;
-			if( g_fragmentSource.empty() )
-			{
-				g_fragmentSource =
+			g_fragmentSource =
 
 				"uniform sampler2D redTexture;\n"
 				"uniform sampler2D greenTexture;\n"
@@ -683,10 +683,9 @@ class TileShader
 				"		OUTCOLOR += vec4( 0.15 ) * e;\n"
 				"	}\n"
 				"}";
-			}
-			return g_fragmentSource;
 		}
-
+		return g_fragmentSource;
+	}
 };
 
 const TileShader *tileShader()
@@ -698,81 +697,81 @@ const TileShader *tileShader()
 class TileShaderSelectedIDs
 {
 
-	public :
+public:
 
-		TileShaderSelectedIDs()
+	TileShaderSelectedIDs()
+	{
+		m_shader = ShaderLoader::defaultShaderLoader()->create( vertexSource(), "", fragmentSource() );
+
+		// Query shader parameters
+
+		m_idTextureUnit = m_shader->uniformParameter( "idTexture" )->textureUnit;
+		m_selectionTextureUnit = m_shader->uniformParameter( "selectionTexture" )->textureUnit;
+	}
+
+	~TileShaderSelectedIDs()
+	{
+	}
+
+	// Binds shader and provides `loadTile()` method to update
+	// parameters for a specific tile.
+	struct ScopedBinding : PushAttrib
+	{
+
+		ScopedBinding( const TileShaderSelectedIDs &tileShader, GLuint idsTexture, uint32_t highlightID, V2f wipePos, V2f wipeDir )
+			: PushAttrib( GL_COLOR_BUFFER_BIT ), m_tileShader( tileShader )
 		{
-			m_shader = ShaderLoader::defaultShaderLoader()->create( vertexSource(), "", fragmentSource() );
+			glGetIntegerv( GL_CURRENT_PROGRAM, &m_previousProgram );
+			glUseProgram( m_tileShader.m_shader->program() );
 
-			// Query shader parameters
+			glEnable( GL_TEXTURE_2D );
 
-			m_idTextureUnit = m_shader->uniformParameter( "idTexture" )->textureUnit;
-			m_selectionTextureUnit = m_shader->uniformParameter( "selectionTexture" )->textureUnit;
+			glGetIntegerv( GL_BLEND_SRC, &m_prevBlendSrc );
+			glGetIntegerv( GL_BLEND_DST, &m_prevBlendDst );
+
+			glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+
+			glActiveTexture( GL_TEXTURE0 + tileShader.m_selectionTextureUnit );
+			glBindTexture( GL_TEXTURE_BUFFER, idsTexture );
+			glUniform1i( tileShader.m_shader->uniformParameter( "selectionTexture" )->location, tileShader.m_selectionTextureUnit );
+
+			glUniform1ui( tileShader.m_shader->uniformParameter( "highlightID" )->location, highlightID );
+
+			glUniform1i( tileShader.m_shader->uniformParameter( "idTexture" )->location, tileShader.m_idTextureUnit );
+
+			glUniform2f( tileShader.m_shader->uniformParameter( "wipePos" )->location, wipePos.x, wipePos.y );
+			glUniform2f( tileShader.m_shader->uniformParameter( "wipeDir" )->location, wipeDir.x, wipeDir.y );
 		}
 
-		~TileShaderSelectedIDs()
+		~ScopedBinding()
 		{
+			glUseProgram( m_previousProgram );
+			glBlendFunc( m_prevBlendSrc, m_prevBlendDst );
 		}
 
-		// Binds shader and provides `loadTile()` method to update
-		// parameters for a specific tile.
-		struct ScopedBinding : PushAttrib
+		void loadTile( IECoreGL::ConstTexturePtr idTexture )
 		{
+			glActiveTexture( GL_TEXTURE0 + m_tileShader.m_idTextureUnit );
+			idTexture->bind();
+		}
 
-			ScopedBinding( const TileShaderSelectedIDs &tileShader, GLuint idsTexture, uint32_t highlightID, V2f wipePos, V2f wipeDir )
-				:	PushAttrib( GL_COLOR_BUFFER_BIT ), m_tileShader( tileShader )
-			{
-				glGetIntegerv( GL_CURRENT_PROGRAM, &m_previousProgram );
-				glUseProgram( m_tileShader.m_shader->program() );
+	private:
 
-				glEnable( GL_TEXTURE_2D );
+		const TileShaderSelectedIDs &m_tileShader;
+		GLint m_previousProgram;
+		GLint m_prevBlendSrc, m_prevBlendDst;
+	};
 
-				glGetIntegerv( GL_BLEND_SRC, &m_prevBlendSrc );
-				glGetIntegerv( GL_BLEND_DST, &m_prevBlendDst );
+private:
 
-				glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+	IECoreGL::ShaderPtr m_shader;
 
-				glActiveTexture( GL_TEXTURE0 + tileShader.m_selectionTextureUnit );
-				glBindTexture( GL_TEXTURE_BUFFER, idsTexture );
-				glUniform1i( tileShader.m_shader->uniformParameter( "selectionTexture" )->location, tileShader.m_selectionTextureUnit );
+	GLuint m_idTextureUnit;
+	GLuint m_selectionTextureUnit;
 
-				glUniform1ui( tileShader.m_shader->uniformParameter( "highlightID" )->location, highlightID );
-
-				glUniform1i( tileShader.m_shader->uniformParameter( "idTexture" )->location, tileShader.m_idTextureUnit );
-
-				glUniform2f( tileShader.m_shader->uniformParameter( "wipePos" )->location, wipePos.x, wipePos.y );
-				glUniform2f( tileShader.m_shader->uniformParameter( "wipeDir" )->location, wipeDir.x, wipeDir.y );
-			}
-
-			~ScopedBinding()
-			{
-				glUseProgram( m_previousProgram );
-				glBlendFunc( m_prevBlendSrc, m_prevBlendDst );
-			}
-
-			void loadTile( IECoreGL::ConstTexturePtr idTexture )
-			{
-				glActiveTexture( GL_TEXTURE0 + m_tileShader.m_idTextureUnit );
-				idTexture->bind();
-			}
-
-			private :
-
-				const TileShaderSelectedIDs &m_tileShader;
-				GLint m_previousProgram;
-				GLint m_prevBlendSrc, m_prevBlendDst;
-		};
-
-	private :
-
-		IECoreGL::ShaderPtr m_shader;
-
-		GLuint m_idTextureUnit;
-		GLuint m_selectionTextureUnit;
-
-		static const char *vertexSource()
-		{
-			static const char *g_vertexSource = R"(
+	static const char *vertexSource()
+	{
+		static const char *g_vertexSource = R"(
 void main()
 {
 	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
@@ -781,12 +780,12 @@ void main()
 }
 			)";
 
-			return g_vertexSource;
-		}
+		return g_vertexSource;
+	}
 
-		static const std::string &fragmentSource()
-		{
-			static std::string g_fragmentSource = R"(
+	static const std::string &fragmentSource()
+	{
+		static std::string g_fragmentSource = R"(
 #version 330 compatibility
 
 // Assumes texture contains sorted values.
@@ -829,9 +828,8 @@ void main()
 	outColor = vec4( float( selected ), float( highlighted ), 0.0, 0.0 );
 }
 )";
-			return g_fragmentSource;
-		}
-
+		return g_fragmentSource;
+	}
 };
 
 const TileShaderSelectedIDs *tileShaderSelectedIDs()
@@ -849,17 +847,17 @@ const std::string g_idChannelInternalName( "__internal_ID_channel__" );
 //////////////////////////////////////////////////////////////////////////
 
 ImageGadget::ImageGadget()
-	:	Gadget( defaultName<ImageGadget>() ),
-		m_image( nullptr ),
-		m_soloChannel( -1 ),
-		m_labelsVisible( true ),
-		m_paused( false ),
-		m_wipeEnabled( false ),
-		m_dirtyFlags( AllDirty ),
-		m_renderRequestPending( false ),
-		m_blendMode( BlendMode::Over ),
-		m_highlightID( 0 ),
-		m_selectionRenderTexture( std::make_unique<RenderTexture>() )
+	: Gadget( defaultName<ImageGadget>() ),
+	  m_image( nullptr ),
+	  m_soloChannel( -1 ),
+	  m_labelsVisible( true ),
+	  m_paused( false ),
+	  m_wipeEnabled( false ),
+	  m_dirtyFlags( AllDirty ),
+	  m_renderRequestPending( false ),
+	  m_blendMode( BlendMode::Over ),
+	  m_highlightID( 0 ),
+	  m_selectionRenderTexture( std::make_unique<RenderTexture>() )
 {
 	m_rgbaChannels[0] = "R";
 	m_rgbaChannels[1] = "G";
@@ -912,9 +910,7 @@ void ImageGadget::setContext( Gaffer::ConstContextPtr context )
 	}
 
 	m_context = context;
-	m_contextChangedConnection = const_cast<Context *>( m_context.get() )->changedSignal().connect(
-		boost::bind( &ImageGadget::contextChanged, this, ::_2 )
-	);
+	m_contextChangedConnection = const_cast<Context *>( m_context.get() )->changedSignal().connect( boost::bind( &ImageGadget::contextChanged, this, ::_2 ) );
 
 	dirty( AllDirty );
 }
@@ -941,7 +937,7 @@ const ImageGadget::Channels &ImageGadget::getChannels() const
 	return m_rgbaChannels;
 }
 
-void ImageGadget::setIDChannel( const IECore::InternedString & idChannel )
+void ImageGadget::setIDChannel( const IECore::InternedString &idChannel )
 {
 	if( idChannel == m_idChannel )
 	{
@@ -1197,7 +1193,7 @@ void ImageGadget::contextChanged( const IECore::InternedString &name )
 
 void ImageGadget::dirty( unsigned flags )
 {
-	if( (flags & TilesDirty) && !(m_dirtyFlags & TilesDirty) )
+	if( ( flags & TilesDirty ) && !( m_dirtyFlags & TilesDirty ) )
 	{
 		m_tilesTask.reset();
 	}
@@ -1286,8 +1282,7 @@ IECoreGL::Texture *blackTexture()
 
 		const float black = 0;
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-		glTexImage2D( GL_TEXTURE_2D, 0, monochromeTextureFormat, /* width = */ 1, /* height = */ 1, 0, GL_RED,
-			GL_FLOAT, &black );
+		glTexImage2D( GL_TEXTURE_2D, 0, monochromeTextureFormat, /* width = */ 1, /* height = */ 1, 0, GL_RED, GL_FLOAT, &black );
 	}
 	return g_texture.get();
 }
@@ -1315,10 +1310,10 @@ IECoreGL::Texture *blackIntTexture()
 } // namespace
 
 ImageGadget::Tile::Tile( const Tile &other )
-	:	m_channelDataHash( other.m_channelDataHash ),
-		m_channelDataToConvert( other.m_channelDataToConvert ),
-		m_texture( other.m_texture ),
-		m_active( false )
+	: m_channelDataHash( other.m_channelDataHash ),
+	  m_channelDataToConvert( other.m_channelDataToConvert ),
+	  m_texture( other.m_texture ),
+	  m_active( false )
 {
 }
 
@@ -1423,7 +1418,6 @@ const IECoreGL::Texture *ImageGadget::Tile::texture( bool &active )
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-
 		}
 
 		Texture::ScopedBinding binding( *m_texture );
@@ -1452,7 +1446,7 @@ const IECoreGL::Texture *ImageGadget::Tile::texture( bool &active )
 
 void ImageGadget::updateTiles()
 {
-	if( !(m_dirtyFlags & TilesDirty) )
+	if( !( m_dirtyFlags & TilesDirty ) )
 	{
 		return;
 	}
@@ -1500,15 +1494,14 @@ void ImageGadget::updateTiles()
 	// Do the actual work of generating the tiles asynchronously,
 	// in the background.
 
-	auto tileFunctor = [this, channelsToCompute] ( const ImagePlug *image, const V2i &tileOrigin ) {
-
+	auto tileFunctor = [this, channelsToCompute]( const ImagePlug *image, const V2i &tileOrigin ) {
 		try
 		{
 			vector<Tile::Update> updates;
 			ImagePlug::ChannelDataScope channelScope( Context::current() );
 			for( auto &channelName : channelsToCompute )
 			{
-				Tile &tile = m_tiles[TileIndex(tileOrigin, channelName)];
+				Tile &tile = m_tiles[TileIndex( tileOrigin, channelName )];
 				if( channelName == g_idChannelInternalName )
 				{
 					channelScope.setChannelName( &m_idChannel.string() );
@@ -1542,11 +1535,10 @@ void ImageGadget::updateTiles()
 			// the active flag for each tile.
 			for( auto &channelName : channelsToCompute )
 			{
-				m_tiles[TileIndex(tileOrigin, channelName)].resetActive();
+				m_tiles[TileIndex( tileOrigin, channelName )].resetActive();
 			}
 			throw;
 		}
-
 	};
 
 	Context::Scope scopedContext( m_context.get() );
@@ -1555,8 +1547,7 @@ void ImageGadget::updateTiles()
 		m_image.get(),
 		// OK to capture `this` via raw pointer, because ~ImageGadget waits for
 		// the background process to complete.
-		[ this, channelsToCompute, dataWindow, tileFunctor ] {
-
+		[this, channelsToCompute, dataWindow, tileFunctor] {
 			try
 			{
 				ImageAlgo::parallelProcessTiles( m_image.get(), tileFunctor, dataWindow );
@@ -1583,10 +1574,8 @@ void ImageGadget::updateTiles()
 					}
 				);
 			}
-
 		}
 	);
-
 }
 
 void ImageGadget::removeOutOfBoundsTiles() const
@@ -1661,7 +1650,7 @@ void ImageGadget::renderTiles( bool ids ) const
 		else
 		{
 			// OpenGL doesn't allow bufferData to actually be zero length
-			static std::vector<uint32_t> g_emptyBuffer = { std::numeric_limits< uint32_t>::max() };
+			static std::vector<uint32_t> g_emptyBuffer = { std::numeric_limits<uint32_t>::max() };
 			m_selectedIDsBuffer->updateBuffer( g_emptyBuffer );
 		}
 
@@ -1672,7 +1661,6 @@ void ImageGadget::renderTiles( bool ids ) const
 			effectiveWipePos,
 			effectiveWipeDir
 		);
-
 	}
 
 	const float pixelAspect = this->format().getPixelAspect();
@@ -1734,24 +1722,23 @@ void ImageGadget::renderTiles( bool ids ) const
 
 			glBegin( GL_QUADS );
 
-				glTexCoord2f( uvBound.min.x, uvBound.min.y );
-				glMultiTexCoord2f( GL_TEXTURE1, validBound.min.x, validBound.min.y );
-				glVertex2f( validBound.min.x * pixelAspect, validBound.min.y );
+			glTexCoord2f( uvBound.min.x, uvBound.min.y );
+			glMultiTexCoord2f( GL_TEXTURE1, validBound.min.x, validBound.min.y );
+			glVertex2f( validBound.min.x * pixelAspect, validBound.min.y );
 
-				glTexCoord2f( uvBound.min.x, uvBound.max.y );
-				glMultiTexCoord2f( GL_TEXTURE1, validBound.min.x, validBound.max.y );
-				glVertex2f( validBound.min.x * pixelAspect, validBound.max.y );
+			glTexCoord2f( uvBound.min.x, uvBound.max.y );
+			glMultiTexCoord2f( GL_TEXTURE1, validBound.min.x, validBound.max.y );
+			glVertex2f( validBound.min.x * pixelAspect, validBound.max.y );
 
-				glTexCoord2f( uvBound.max.x, uvBound.max.y );
-				glMultiTexCoord2f( GL_TEXTURE1, validBound.max.x, validBound.max.y );
-				glVertex2f( validBound.max.x * pixelAspect, validBound.max.y );
+			glTexCoord2f( uvBound.max.x, uvBound.max.y );
+			glMultiTexCoord2f( GL_TEXTURE1, validBound.max.x, validBound.max.y );
+			glVertex2f( validBound.max.x * pixelAspect, validBound.max.y );
 
-				glTexCoord2f( uvBound.max.x, uvBound.min.y );
-				glMultiTexCoord2f( GL_TEXTURE1, validBound.max.x, validBound.min.y );
-				glVertex2f( validBound.max.x * pixelAspect, validBound.min.y );
+			glTexCoord2f( uvBound.max.x, uvBound.min.y );
+			glMultiTexCoord2f( GL_TEXTURE1, validBound.max.x, validBound.min.y );
+			glVertex2f( validBound.max.x * pixelAspect, validBound.min.y );
 
 			glEnd();
-
 		}
 	}
 }

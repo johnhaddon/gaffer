@@ -96,7 +96,7 @@ GAFFER_NODE_DEFINE_TYPE( Text );
 size_t Text::g_firstPlugIndex = 0;
 
 Text::Text( const std::string &name )
-	:	ObjectSource( name, "text" )
+	: ObjectSource( name, "text" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "text", Plug::In, "Hello World" ) );

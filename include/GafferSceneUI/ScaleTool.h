@@ -48,59 +48,57 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API ScaleTool : public TransformTool
 {
 
-	public :
+public:
 
-		explicit ScaleTool( SceneView *view, const std::string &name = defaultName<ScaleTool>() );
-		~ScaleTool() override;
+	explicit ScaleTool( SceneView *view, const std::string &name = defaultName<ScaleTool>() );
+	~ScaleTool() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::ScaleTool, ScaleToolTypeId, TransformTool );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::ScaleTool, ScaleToolTypeId, TransformTool );
 
-		/// Scales the current selection as if the handles
-		/// had been dragged interactively. Exists mainly for
-		/// use in the unit tests.
-		void scale( const Imath::V3f &scale );
+	/// Scales the current selection as if the handles
+	/// had been dragged interactively. Exists mainly for
+	/// use in the unit tests.
+	void scale( const Imath::V3f &scale );
 
-	protected :
+protected:
 
-		bool affectsHandles( const Gaffer::Plug *input ) const override;
-		void updateHandles( float rasterScale ) override;
+	bool affectsHandles( const Gaffer::Plug *input ) const override;
+	void updateHandles( float rasterScale ) override;
 
-	private :
+private:
 
-		// The guts of the scaling logic. This is factored out of the
-		// drag handling so it can be shared with the `scale()` public
-		// method.
-		struct Scale
-		{
+	// The guts of the scaling logic. This is factored out of the
+	// drag handling so it can be shared with the `scale()` public
+	// method.
+	struct Scale
+	{
 
-			Scale( const Selection &selection );
+		Scale( const Selection &selection );
 
-			bool canApply( const Imath::V3i &axisMask ) const;
-			void apply( const Imath::V3i &axisMask, const Imath::V3f &scale );
+		bool canApply( const Imath::V3i &axisMask ) const;
+		void apply( const Imath::V3i &axisMask, const Imath::V3f &scale );
 
-			private :
+	private:
 
-				// For the validity of this reference, we rely
-				// on `TransformTool::selection()` not changing
-				// during drags.
-				const Selection &m_selection;
+		// For the validity of this reference, we rely
+		// on `TransformTool::selection()` not changing
+		// during drags.
+		const Selection &m_selection;
 
-				// Initialised lazily when we first
-				// acquire the transform plug.
-				std::optional<Imath::V3f> m_originalScale;
+		// Initialised lazily when we first
+		// acquire the transform plug.
+		std::optional<Imath::V3f> m_originalScale;
+	};
 
-		};
+	// Drag handling.
 
-		// Drag handling.
+	IECore::RunTimeTypedPtr dragBegin( GafferUI::Style::Axes axes );
+	bool dragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool dragEnd();
 
-		IECore::RunTimeTypedPtr dragBegin( GafferUI::Style::Axes axes );
-		bool dragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool dragEnd();
+	std::vector<Scale> m_drag;
 
-		std::vector<Scale> m_drag;
-
-		static ToolDescription<ScaleTool, SceneView> g_toolDescription;
-
+	static ToolDescription<ScaleTool, SceneView> g_toolDescription;
 };
 
 } // namespace GafferSceneUI

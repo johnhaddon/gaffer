@@ -44,13 +44,12 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManDisplayFilter : public RenderManOutputFilter
 {
 
-	public :
+public:
 
-		explicit RenderManDisplayFilter( const std::string &name=defaultName<RenderManDisplayFilter>() );
-		~RenderManDisplayFilter() override;
+	explicit RenderManDisplayFilter( const std::string &name = defaultName<RenderManDisplayFilter>() );
+	~RenderManDisplayFilter() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManDisplayFilter, RenderManDisplayFilterTypeId, RenderManOutputFilter );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManDisplayFilter, RenderManDisplayFilterTypeId, RenderManOutputFilter );
 };
 
 IE_CORE_DECLAREPTR( RenderManDisplayFilter )

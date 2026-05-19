@@ -42,7 +42,7 @@ using namespace GafferScene;
 GAFFER_NODE_DEFINE_TYPE( DeleteOutputs );
 
 DeleteOutputs::DeleteOutputs( const std::string &name )
-	:	DeleteGlobals( name )
+	: DeleteGlobals( name )
 {
 }
 

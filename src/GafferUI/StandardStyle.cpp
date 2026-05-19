@@ -147,7 +147,7 @@ IECoreGL::MeshPrimitivePtr cylinder( bool forSelection )
 	const int numDivisions = 30;
 	for( int i = 0; i < numDivisions; ++i )
 	{
-		const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
+		const float angle = 2 * M_PI * (float)i / (float)( numDivisions - 1 );
 
 		p.push_back( V3f( radius * cos( angle ), 0, radius * sin( angle ) ) );
 		p.push_back( V3f( radius * cos( angle ), height, radius * sin( angle ) ) );
@@ -194,7 +194,7 @@ IECoreGL::MeshPrimitivePtr torus( bool forSelection )
 	const int numDivisionsJ = 15;
 	for( int i = 0; i < numDivisionsI; ++i )
 	{
-		const float iAngle = 2 * M_PI * (float)i/(float)(numDivisionsI-1);
+		const float iAngle = 2 * M_PI * (float)i / (float)( numDivisionsI - 1 );
 		const V3f v( cos( iAngle ), 0, sin( iAngle ) );
 		const V3f circleCenter = v * radiusI;
 
@@ -202,7 +202,7 @@ IECoreGL::MeshPrimitivePtr torus( bool forSelection )
 
 		for( int j = 0; j < numDivisionsJ; ++j )
 		{
-			const float jAngle = 2 * M_PI * (float)j/(float)(numDivisionsJ-1);
+			const float jAngle = 2 * M_PI * (float)j / (float)( numDivisionsJ - 1 );
 			p.push_back(
 				circleCenter + radiusJ * ( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) )
 			);
@@ -251,7 +251,7 @@ IECoreGL::MeshPrimitivePtr cone()
 	const int numDivisions = 30;
 	for( int i = 0; i < numDivisions; ++i )
 	{
-		const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
+		const float angle = 2 * M_PI * (float)i / (float)( numDivisions - 1 );
 		p.push_back( radius * V3f( cos( angle ), 0, sin( angle ) ) );
 		verticesPerFace.push_back( 3 );
 		vertexIds.push_back( 0 );
@@ -520,7 +520,7 @@ float luminance( const Color3f &c )
 IE_CORE_DEFINERUNTIMETYPED( StandardStyle );
 
 StandardStyle::StandardStyle()
-	:	m_highlightState( new IECoreGL::State( /* complete = */ false ) )
+	: m_highlightState( new IECoreGL::State( /* complete = */ false ) )
 {
 	setFont( LabelText, FontLoader::defaultFontLoader()->load( "VeraBd.ttf" ) );
 	setFontScale( LabelText, 1.0f );
@@ -567,7 +567,7 @@ void StandardStyle::bind( const Style *currentStyle ) const
 	glGetIntegerv( GL_VIEWPORT, viewport );
 	m_pixelSize = 2.0f * combinedInverse[0][0] / viewport[2];
 
-	if( currentStyle && currentStyle->typeId()==staticTypeId() )
+	if( currentStyle && currentStyle->typeId() == staticTypeId() )
 	{
 		// binding the shader is actually quite an expensive operation
 		// in GL terms, so it's best to avoid it if we know the previous
@@ -635,8 +635,8 @@ void StandardStyle::renderText( TextType textType, const std::string &text, Stat
 
 	glPushMatrix();
 
-		glScalef( m_fontScales[textType], m_fontScales[textType], m_fontScales[textType] );
-		m_fonts[textType]->renderSprites( text );
+	glScalef( m_fontScales[textType], m_fontScales[textType], m_fontScales[textType] );
+	m_fonts[textType]->renderSprites( text );
 
 	glPopMatrix();
 }
@@ -652,7 +652,7 @@ void StandardStyle::renderWrappedText( TextType textType, const std::string &tex
 
 	V2f cursor( bound.min.x, bound.max.y - coreFont->bound().size().y );
 
-	using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
+	using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
 	boost::char_separator<char> separator( "", " \n\t" );
 	Tokenizer tokenizer( text, separator );
 	Tokenizer::iterator it = tokenizer.begin();
@@ -669,7 +669,7 @@ void StandardStyle::renderWrappedText( TextType textType, const std::string &tex
 		}
 		else if( *it == "\t" )
 		{
-			cursor.x += spaceWidth	* 4;
+			cursor.x += spaceWidth * 4;
 		}
 		else
 		{
@@ -687,9 +687,9 @@ void StandardStyle::renderWrappedText( TextType textType, const std::string &tex
 			}
 
 			glPushMatrix();
-				glTranslatef( cursor.x, cursor.y, 0.0f );
-				renderText( textType, *it, state );
-				cursor.x += width;
+			glTranslatef( cursor.x, cursor.y, 0.0f );
+			renderText( textType, *it, state );
+			cursor.x += width;
 			glPopMatrix();
 		}
 
@@ -725,14 +725,14 @@ void StandardStyle::renderNodule( float radius, State state, const Imath::Color3
 
 	glBegin( GL_QUADS );
 
-		glTexCoord2f( 0, 0 );
-		glVertex2f( -radius, -radius );
-		glTexCoord2f( 0, 1 );
-		glVertex2f( radius, -radius );
-		glTexCoord2f( 1, 1 );
-		glVertex2f( radius, radius );
-		glTexCoord2f( 1, 0 );
-		glVertex2f( -radius, radius );
+	glTexCoord2f( 0, 0 );
+	glVertex2f( -radius, -radius );
+	glTexCoord2f( 0, 1 );
+	glVertex2f( radius, -radius );
+	glTexCoord2f( 1, 1 );
+	glVertex2f( radius, radius );
+	glTexCoord2f( 1, 0 );
+	glVertex2f( -radius, radius );
 
 	glEnd();
 }
@@ -799,7 +799,6 @@ void StandardStyle::renderAuxiliaryConnection( const Imath::Box2f &srcNodeFrame,
 	glUniform3fv( g_t1Parameter, 1, ( -rightDir ).getValue() );
 
 	glCallList( connectionDisplayList() );
-
 }
 
 void StandardStyle::renderAuxiliaryConnection( const Imath::V2f &srcPosition, const Imath::V2f &srcTangent, const Imath::V2f &dstPosition, const Imath::V2f &dstTangent, State state ) const
@@ -819,8 +818,8 @@ Imath::V3f StandardStyle::closestPointOnConnection( const Imath::V3f &p, const I
 {
 	V3f dir = ( dstPosition - srcPosition ).normalized();
 
-	V3f offsetCenter0 = srcPosition + ( srcTangent != V3f( 0 ) ? srcTangent :  dir ) * g_endPointSize;
-	V3f offsetCenter1 = dstPosition + ( dstTangent != V3f( 0 ) ? dstTangent :  -dir ) * g_endPointSize;
+	V3f offsetCenter0 = srcPosition + ( srcTangent != V3f( 0 ) ? srcTangent : dir ) * g_endPointSize;
+	V3f offsetCenter1 = dstPosition + ( dstTangent != V3f( 0 ) ? dstTangent : -dir ) * g_endPointSize;
 
 	float straightSegmentLength = ( offsetCenter0 - offsetCenter1 ).length();
 
@@ -843,7 +842,6 @@ Imath::V3f StandardStyle::closestPointOnConnection( const Imath::V3f &p, const I
 
 		return straightSegmentCenter + alongSegment * straightSegmentDir;
 	}
-
 }
 
 Imath::V2f StandardStyle::renderAnnotation( const Imath::V2f &origin, const std::string &text, State state, const Imath::Color3f *userColor ) const
@@ -862,21 +860,21 @@ Imath::V2f StandardStyle::renderAnnotation( const Imath::V2f &origin, const std:
 
 	glPushMatrix();
 
-		IECoreGL::glTranslate( origin + V2f( padding, -padding - characterBound.max.y ) );
+	IECoreGL::glTranslate( origin + V2f( padding, -padding - characterBound.max.y ) );
 
-		const Color4f darkGrey( 0.1, 0.1, 0.1, 1.0 );
-		const Color4f midGrey( 0.65, 0.65, 0.65, 1.0 );
+	const Color4f darkGrey( 0.1, 0.1, 0.1, 1.0 );
+	const Color4f midGrey( 0.65, 0.65, 0.65, 1.0 );
 
-		renderFrameInternal(
-			Box2f( V2f( 0, textBounds.min.y ), V2f( textBounds.max.x, characterBound.max.y ) ),
-			padding, borderWidth, colorForState( RaisedColor, state, userColor )
-		);
+	renderFrameInternal(
+		Box2f( V2f( 0, textBounds.min.y ), V2f( textBounds.max.x, characterBound.max.y ) ),
+		padding, borderWidth, colorForState( RaisedColor, state, userColor )
+	);
 
-		const Color3f &color = userColor ? *userColor : defaultColor;
-		renderText(
-			Style::BodyText, text, Style::NormalState,
-			luminance( color ) > 0.4 ? &darkGrey : &midGrey
-		);
+	const Color3f &color = userColor ? *userColor : defaultColor;
+	renderText(
+		Style::BodyText, text, Style::NormalState,
+		luminance( color ) > 0.4 ? &darkGrey : &midGrey
+	);
 
 	glPopMatrix();
 
@@ -892,10 +890,10 @@ void StandardStyle::renderSolidRectangle( const Imath::Box2f &box ) const
 
 	glBegin( GL_QUADS );
 
-		glVertex2f( box.min.x, box.min.y );
-		glVertex2f( box.min.x, box.max.y );
-		glVertex2f( box.max.x, box.max.y );
-		glVertex2f( box.max.x, box.min.y );
+	glVertex2f( box.min.x, box.min.y );
+	glVertex2f( box.min.x, box.max.y );
+	glVertex2f( box.max.x, box.max.y );
+	glVertex2f( box.max.x, box.min.y );
 
 	glEnd();
 }
@@ -909,15 +907,15 @@ void StandardStyle::renderRectangle( const Imath::Box2f &box ) const
 
 	glBegin( GL_LINE_LOOP );
 
-		glVertex2f( box.min.x, box.min.y );
-		glVertex2f( box.min.x, box.max.y );
-		glVertex2f( box.max.x, box.max.y );
-		glVertex2f( box.max.x, box.min.y );
+	glVertex2f( box.min.x, box.min.y );
+	glVertex2f( box.min.x, box.max.y );
+	glVertex2f( box.max.x, box.max.y );
+	glVertex2f( box.max.x, box.min.y );
 
 	glEnd();
 }
 
-void StandardStyle::renderAnimationCurve( const std::vector< Imath::V2f > &vertices, const bool inKeyRange, const State state, const Imath::Color3f *const userColor ) const
+void StandardStyle::renderAnimationCurve( const std::vector<Imath::V2f> &vertices, const bool inKeyRange, const State state, const Imath::Color3f *const userColor ) const
 {
 
 	bool const selectMode = ( IECoreGL::Selector::currentSelector() != nullptr );
@@ -931,7 +929,7 @@ void StandardStyle::renderAnimationCurve( const std::vector< Imath::V2f > &verti
 
 	// set colour
 
-	if( ! selectMode )
+	if( !selectMode )
 	{
 		glColor( colorForState( AnimationCurveColor, state, userColor ) );
 	}
@@ -939,7 +937,7 @@ void StandardStyle::renderAnimationCurve( const std::vector< Imath::V2f > &verti
 	// set line width
 
 	GLfloat lineWidth;
-	glGetFloatv( GL_LINE_WIDTH, & lineWidth );
+	glGetFloatv( GL_LINE_WIDTH, &lineWidth );
 	const bool lineSmooth = ( glIsEnabled( GL_LINE_SMOOTH ) == GL_TRUE );
 	if( selectMode )
 	{
@@ -957,10 +955,10 @@ void StandardStyle::renderAnimationCurve( const std::vector< Imath::V2f > &verti
 	GLint lineStippleRepeat = 0;
 	GLint lineStipplePattern = 0;
 	const bool lineStipple = ( glIsEnabled( GL_LINE_STIPPLE ) == GL_TRUE );
-	if( ! inKeyRange && ! selectMode )
+	if( !inKeyRange && !selectMode )
 	{
-		glGetIntegerv( GL_LINE_STIPPLE_REPEAT, & lineStippleRepeat );
-		glGetIntegerv( GL_LINE_STIPPLE_PATTERN, & lineStipplePattern );
+		glGetIntegerv( GL_LINE_STIPPLE_REPEAT, &lineStippleRepeat );
+		glGetIntegerv( GL_LINE_STIPPLE_PATTERN, &lineStipplePattern );
 		glLineStipple( 2, 0x5555 );
 		glEnable( GL_LINE_STIPPLE );
 	}
@@ -973,12 +971,13 @@ void StandardStyle::renderAnimationCurve( const std::vector< Imath::V2f > &verti
 
 	glBegin( GL_LINE_STRIP );
 
-		for( const Imath::V2f
-			*      it    = vertices.data(),
-			*const itEnd = vertices.data() + vertices.size(); it != itEnd; ++it )
-		{
-			glVertex2f( it->x, it->y );
-		}
+	for( const Imath::V2f
+			 *it = vertices.data(),
+			 *const itEnd = vertices.data() + vertices.size();
+		 it != itEnd; ++it )
+	{
+		glVertex2f( it->x, it->y );
+	}
 
 	glEnd();
 
@@ -986,18 +985,14 @@ void StandardStyle::renderAnimationCurve( const std::vector< Imath::V2f > &verti
 
 	glLineWidth( lineWidth );
 
-	( lineSmooth )
-		? glEnable( GL_LINE_SMOOTH )
-		: glDisable( GL_LINE_SMOOTH );
+	( lineSmooth ) ? glEnable( GL_LINE_SMOOTH ) : glDisable( GL_LINE_SMOOTH );
 
-	if( ! inKeyRange && ! selectMode )
+	if( !inKeyRange && !selectMode )
 	{
 		glLineStipple( lineStippleRepeat, lineStipplePattern );
 	}
 
-	( lineStipple )
-		? glEnable( GL_LINE_STIPPLE )
-		: glDisable( GL_LINE_STIPPLE );
+	( lineStipple ) ? glEnable( GL_LINE_STIPPLE ) : glDisable( GL_LINE_STIPPLE );
 }
 
 void StandardStyle::renderAnimationKey( const Imath::V2f &position, State state, float size, const Imath::Color3f *userColor ) const
@@ -1040,17 +1035,16 @@ void StandardStyle::renderSelectionBox( const Imath::Box2f &box ) const
 
 	glBegin( GL_QUADS );
 
-		glTexCoord2f( 0, 0 );
-		glVertex2f( box.min.x, box.min.y );
-		glTexCoord2f( 0, 1 );
-		glVertex2f( box.min.x, box.max.y );
-		glTexCoord2f( 1, 1 );
-		glVertex2f( box.max.x, box.max.y );
-		glTexCoord2f( 1, 0 );
-		glVertex2f( box.max.x, box.min.y );
+	glTexCoord2f( 0, 0 );
+	glVertex2f( box.min.x, box.min.y );
+	glTexCoord2f( 0, 1 );
+	glVertex2f( box.min.x, box.max.y );
+	glTexCoord2f( 1, 1 );
+	glVertex2f( box.max.x, box.max.y );
+	glTexCoord2f( 1, 0 );
+	glVertex2f( box.max.x, box.min.y );
 
 	glEnd();
-
 }
 
 void StandardStyle::renderHorizontalRule( const Imath::V2f &center, float length, State state ) const
@@ -1065,11 +1059,10 @@ void StandardStyle::renderHorizontalRule( const Imath::V2f &center, float length
 
 	glBegin( GL_LINES );
 
-		glVertex2f( center.x - length / 2.0f, center.y );
-		glVertex2f( center.x + length / 2.0f, center.y );
+	glVertex2f( center.x - length / 2.0f, center.y );
+	glVertex2f( center.x + length / 2.0f, center.y );
 
 	glEnd();
-
 }
 
 void StandardStyle::renderTranslateHandle( Axes axes, State state ) const
@@ -1139,14 +1132,14 @@ void StandardStyle::renderImage( const Imath::Box2f &box, const IECoreGL::Textur
 
 	glBegin( GL_QUADS );
 
-		glTexCoord2f( 1, 0 );
-		glVertex2f( box.max.x, box.min.y );
-		glTexCoord2f( 1, 1 );
-		glVertex2f( box.max.x, box.max.y );
-		glTexCoord2f( 0, 1 );
-		glVertex2f( box.min.x, box.max.y );
-		glTexCoord2f( 0, 0 );
-		glVertex2f( box.min.x, box.min.y );
+	glTexCoord2f( 1, 0 );
+	glVertex2f( box.max.x, box.min.y );
+	glTexCoord2f( 1, 1 );
+	glVertex2f( box.max.x, box.max.y );
+	glTexCoord2f( 0, 1 );
+	glVertex2f( box.min.x, box.max.y );
+	glTexCoord2f( 0, 0 );
+	glVertex2f( box.min.x, box.min.y );
 
 	glEnd();
 
@@ -1258,7 +1251,7 @@ void StandardStyle::renderConnectionInternal( const Imath::V3f &srcPosition, con
 
 	glUniform3fv( g_v0Parameter, 1, srcPosition.getValue() );
 	glUniform3fv( g_v1Parameter, 1, dstPosition.getValue() );
-	glUniform3fv( g_t0Parameter, 1, ( srcTangent != V3f( 0 ) ? srcTangent :  dir ).getValue() );
+	glUniform3fv( g_t0Parameter, 1, ( srcTangent != V3f( 0 ) ? srcTangent : dir ).getValue() );
 	glUniform3fv( g_t1Parameter, 1, ( dstTangent != V3f( 0 ) ? dstTangent : -dir ).getValue() );
 
 	glUniform1f( g_endPointSizeParameter, g_endPointSize );
@@ -1276,19 +1269,19 @@ unsigned int StandardStyle::connectionDisplayList()
 
 		glNewList( g_list, GL_COMPILE );
 
-			glBegin( GL_TRIANGLE_STRIP );
+		glBegin( GL_TRIANGLE_STRIP );
 
-				const int numSteps = 50;
-				for( int i=0; i<numSteps; i++ )
-				{
-					float t = i / (float)( numSteps - 1 );
-					glTexCoord2f( 0, t );
-					glVertex3f( 0, 0, 0 );
-					glTexCoord2f( 1, t );
-					glVertex3f( 0, 0, 0 );
-				}
+		const int numSteps = 50;
+		for( int i = 0; i < numSteps; i++ )
+		{
+			float t = i / (float)( numSteps - 1 );
+			glTexCoord2f( 0, t );
+			glVertex3f( 0, 0, 0 );
+			glTexCoord2f( 1, t );
+			glVertex3f( 0, 0, 0 );
+		}
 
-			glEnd();
+		glEnd();
 
 		glEndList();
 
@@ -1316,14 +1309,14 @@ void StandardStyle::renderFrameInternal( const Imath::Box2f &contents, float pad
 
 	glBegin( GL_QUADS );
 
-		glTexCoord2f( 0, 0 );
-		glVertex2f( b.min.x, b.min.y );
-		glTexCoord2f( 0, 1 );
-		glVertex2f( b.min.x, b.max.y );
-		glTexCoord2f( 1, 1 );
-		glVertex2f( b.max.x, b.max.y );
-		glTexCoord2f( 1, 0 );
-		glVertex2f( b.max.x, b.min.y );
+	glTexCoord2f( 0, 0 );
+	glVertex2f( b.min.x, b.min.y );
+	glTexCoord2f( 0, 1 );
+	glVertex2f( b.min.x, b.max.y );
+	glTexCoord2f( 1, 1 );
+	glVertex2f( b.max.x, b.max.y );
+	glTexCoord2f( 1, 0 );
+	glVertex2f( b.max.x, b.min.y );
 
 	glEnd();
 }
@@ -1384,20 +1377,20 @@ static const std::string &vertexSource()
 		"{"
 		"	if( isCurve )"
 		"	{"
-				// Compute the largest possible end point size that doesn't create overlapping endPointCircles
+		// Compute the largest possible end point size that doesn't create overlapping endPointCircles
 		"		float a = dot( t0 - t1, t0 - t1 ) - 4.0;"
 		"		float b = 2.0 *  dot( v0 - v1, t0 - t1 );"
 		"		float c = dot( v0 - v1, v0 - v1 );"
 		"		float maxEndPointSize = abs( a ) < 0.0001 ? abs( c / b ) : ( -b - sqrt( b * b - 4.0 * a * c ) ) / ( 2.0 * a );"
-				// If the end point size would create overlapping circles, clamp it
+		// If the end point size would create overlapping circles, clamp it
 		"		float effectiveEndPointSize = min( endPointSize, maxEndPointSize );"
 
 		"		vec3 offsetCenter0 = v0 + effectiveEndPointSize * t0;"
 		"		vec3 offsetCenter1 = v1 + effectiveEndPointSize * t1;"
 		"		vec3 straight = normalize( offsetCenter0 - offsetCenter1 );"
 
-				// The remainder of the math doesn't need to be done for both ends of the curve,
-				// only the end we're on.
+		// The remainder of the math doesn't need to be done for both ends of the curve,
+		// only the end we're on.
 		"		vec3 endPoint = gl_MultiTexCoord0.y > 0.5 ? v1 : v0;"
 		"		vec3 endTangent = gl_MultiTexCoord0.y > 0.5 ? t1 : t0;"
 		"		vec3 straightDir = gl_MultiTexCoord0.y > 0.5 ? straight : -straight;"
@@ -1409,8 +1402,8 @@ static const std::string &vertexSource()
 		"		float cosAngle = dot( endTangent, straightDir );"
 		"		float angle = acos( cosAngle );"
 
-				// Calculate the radius of a circle defined by the endPoint / endTangent and the location
-				// and tangent of the line between the offsetCenters
+		// Calculate the radius of a circle defined by the endPoint / endTangent and the location
+		// and tangent of the line between the offsetCenters
 		"		float radius = effectiveEndPointSize * ( 1.0 + cosAngle ) / sqrt( 1.0 - cosAngle * cosAngle );"
 		"		float bendDir = sign( dot( endTangentPerp, straightDir ) );"
 
@@ -1443,85 +1436,85 @@ static const std::string &fragmentSource()
 
 		g_fragmentSource =
 
-		"#include \"IECoreGL/FilterAlgo.h\"\n"
-		"#include \"IECoreGL/ColorAlgo.h\"\n"
+			"#include \"IECoreGL/FilterAlgo.h\"\n"
+			"#include \"IECoreGL/ColorAlgo.h\"\n"
 
-		"uniform bool border;"
-		"uniform vec2 borderRadius;"
-		"uniform float borderWidth;"
+			"uniform bool border;"
+			"uniform vec2 borderRadius;"
+			"uniform float borderWidth;"
 
-		"uniform bool edgeAntiAliasing;"
+			"uniform bool edgeAntiAliasing;"
 
-		"uniform int textureType;"
-		"uniform sampler2D texture;\n"
+			"uniform int textureType;"
+			"uniform sampler2D texture;\n"
 
-		"#if __VERSION__ >= 330\n"
+			"#if __VERSION__ >= 330\n"
 
-		"uniform uint ieCoreGLNameIn;\n"
-		"in vec3 geometryP;\n"
-		"layout( location=0 ) out vec4 outColor;\n"
-		"layout( location=1 ) out uint ieCoreGLNameOut;\n"
-		"layout( location=2 ) out vec4 ieCoreGLCameraDepth;\n"
-		"#define OUTCOLOR outColor\n"
+			"uniform uint ieCoreGLNameIn;\n"
+			"in vec3 geometryP;\n"
+			"layout( location=0 ) out vec4 outColor;\n"
+			"layout( location=1 ) out uint ieCoreGLNameOut;\n"
+			"layout( location=2 ) out vec4 ieCoreGLCameraDepth;\n"
+			"#define OUTCOLOR outColor\n"
 
-		"#else\n"
+			"#else\n"
 
-		"#define OUTCOLOR gl_FragColor\n"
+			"#define OUTCOLOR gl_FragColor\n"
 
-		"#endif\n"
+			"#endif\n"
 
-		"void main()"
-		"{"
-		"	OUTCOLOR = gl_Color;"
+			"void main()"
+			"{"
+			"	OUTCOLOR = gl_Color;"
 
-		"	if( border )"
-		"	{"
-		"		vec2 v = max( borderRadius - gl_TexCoord[0].xy, vec2( 0.0 ) ) + max( gl_TexCoord[0].xy - vec2( 1.0 ) + borderRadius, vec2( 0.0 ) );"
-		"		v /= borderRadius;"
-		"		float r = length( v );"
+			"	if( border )"
+			"	{"
+			"		vec2 v = max( borderRadius - gl_TexCoord[0].xy, vec2( 0.0 ) ) + max( gl_TexCoord[0].xy - vec2( 1.0 ) + borderRadius, vec2( 0.0 ) );"
+			"		v /= borderRadius;"
+			"		float r = length( v );"
 
-		"		if( borderWidth != 0.0 )"
-		"		{"
-		"			OUTCOLOR = mix( OUTCOLOR, vec4( 0.15, 0.15, 0.15, OUTCOLOR.a ), ieFilteredStep( 1.0 - borderWidth, r ) );"
-		"		}"
-		"		OUTCOLOR.a *= ( 1.0 - ieFilteredStep( 1.0, r ) );"
-		"	}"
+			"		if( borderWidth != 0.0 )"
+			"		{"
+			"			OUTCOLOR = mix( OUTCOLOR, vec4( 0.15, 0.15, 0.15, OUTCOLOR.a ), ieFilteredStep( 1.0 - borderWidth, r ) );"
+			"		}"
+			"		OUTCOLOR.a *= ( 1.0 - ieFilteredStep( 1.0, r ) );"
+			"	}"
 
-		"	if( edgeAntiAliasing )"
-		"	{"
-		"		OUTCOLOR.a *= ieFilteredPulse( 0.2, 0.8, gl_TexCoord[0].x );"
-		"	}"
+			"	if( edgeAntiAliasing )"
+			"	{"
+			"		OUTCOLOR.a *= ieFilteredPulse( 0.2, 0.8, gl_TexCoord[0].x );"
+			"	}"
 
-		/// \todo Deal with all colourspace nonsense outside of the shader. Ideally the shader would accept only linear"
-		/// textures and output only linear data."
+			/// \todo Deal with all colourspace nonsense outside of the shader. Ideally the shader would accept only linear"
+			/// textures and output only linear data."
 
-		"	if( textureType==1 )"
-		"	{"
-		"		OUTCOLOR = texture2D( texture, gl_TexCoord[0].xy );"
-		"		if( OUTCOLOR.a != 0.0 )"
-		"		{"
-		"			OUTCOLOR = vec4( OUTCOLOR.a * ieLinToSRGB( OUTCOLOR.r / OUTCOLOR.a ), OUTCOLOR.a * ieLinToSRGB( OUTCOLOR.g / OUTCOLOR.a ), OUTCOLOR.a * ieLinToSRGB( OUTCOLOR.b / OUTCOLOR.a ), OUTCOLOR.a );"
-		"		}"
-		"		else"
-		"		{"
-		"			OUTCOLOR = vec4( ieLinToSRGB( OUTCOLOR.r ), ieLinToSRGB( OUTCOLOR.g ), ieLinToSRGB( OUTCOLOR.b ), OUTCOLOR.a );"
-		"		}"
-		"	}"
-		"	else if( textureType==2 )"
-		"	{"
-		"		OUTCOLOR = vec4( OUTCOLOR.rgb, OUTCOLOR.a * texture2D( texture, gl_TexCoord[0].xy ).a );"
-		"	}\n"
+			"	if( textureType==1 )"
+			"	{"
+			"		OUTCOLOR = texture2D( texture, gl_TexCoord[0].xy );"
+			"		if( OUTCOLOR.a != 0.0 )"
+			"		{"
+			"			OUTCOLOR = vec4( OUTCOLOR.a * ieLinToSRGB( OUTCOLOR.r / OUTCOLOR.a ), OUTCOLOR.a * ieLinToSRGB( OUTCOLOR.g / OUTCOLOR.a ), OUTCOLOR.a * ieLinToSRGB( OUTCOLOR.b / OUTCOLOR.a ), OUTCOLOR.a );"
+			"		}"
+			"		else"
+			"		{"
+			"			OUTCOLOR = vec4( ieLinToSRGB( OUTCOLOR.r ), ieLinToSRGB( OUTCOLOR.g ), ieLinToSRGB( OUTCOLOR.b ), OUTCOLOR.a );"
+			"		}"
+			"	}"
+			"	else if( textureType==2 )"
+			"	{"
+			"		OUTCOLOR = vec4( OUTCOLOR.rgb, OUTCOLOR.a * texture2D( texture, gl_TexCoord[0].xy ).a );"
+			"	}\n"
 
-		"	if( OUTCOLOR.a == 0.0 )"
-		"	{"
-		"		discard;"
-		"	}\n"
+			"	if( OUTCOLOR.a == 0.0 )"
+			"	{"
+			"		discard;"
+			"	}\n"
 
-		"#if __VERSION__ >= 330\n"
-		"	ieCoreGLNameOut = ieCoreGLNameIn;\n"
-		"	ieCoreGLCameraDepth = vec4( -geometryP.z, -geometryP.z, -geometryP.z, 1 );\n"
-		"#endif\n"
-		"}";
+			"#if __VERSION__ >= 330\n"
+			"	ieCoreGLNameOut = ieCoreGLNameIn;\n"
+			"	ieCoreGLCameraDepth = vec4( -geometryP.z, -geometryP.z, -geometryP.z, 1 );\n"
+			"#endif\n"
+			"}";
 
 		if( glslVersion() >= 330 )
 		{

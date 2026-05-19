@@ -70,8 +70,7 @@ Message getItem( Messages &m, long index )
 		throw_error_already_set();
 	}
 
-	return m[ index ];
-
+	return m[index];
 }
 
 long hashMessage( const Message &m )
@@ -106,7 +105,7 @@ std::string reprMessagesData( const MessagesData *m )
 	return std::string( "Gaffer.Private.IECorePreview.MessagesData()" );
 }
 
-}
+} // namespace
 
 void GafferModule::bindMessages()
 {
@@ -130,12 +129,11 @@ void GafferModule::bindMessages()
 		.def( "hash", &Message::hash )
 		.def( self == self )
 		.def( self != self )
-		.def( "__hash__", &hashMessage )
-	;
+		.def( "__hash__", &hashMessage );
 
 	class_<Messages>( "Messages" )
 		.def( init<>() )
-		.def( init<const Messages &>( ( arg("other") ) ) )
+		.def( init<const Messages &>( ( arg( "other" ) ) ) )
 		.def( "size", &Messages::size )
 		.def( "count", &Messages::count )
 		.def( "clear", &Messages::clear )
@@ -146,16 +144,15 @@ void GafferModule::bindMessages()
 		.def( self != self )
 		.def( "__len__", &Messages::size )
 		.def( "__getitem__", &getItem )
-		.def( "__hash__", &hashMessages )
-	;
+		.def( "__hash__", &hashMessages );
 
 	IECorePython::RunTimeTypedClass<MessagesData>()
 		.def( init<>() )
 		.def( init<const IECorePreview::Messages &>() )
 		.add_property( "value", make_function( &MessagesData::writable, return_internal_reference<1>() ) )
-		.def( "hasBase", &MessagesData::hasBase ).staticmethod( "hasBase" )
-		.def( "__repr__", &reprMessagesData )
-	;
+		.def( "hasBase", &MessagesData::hasBase )
+		.staticmethod( "hasBase" )
+		.def( "__repr__", &reprMessagesData );
 
 	IECorePython::TypedDataFromType<MessagesData>();
 }

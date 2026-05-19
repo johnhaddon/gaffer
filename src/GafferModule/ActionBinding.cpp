@@ -53,6 +53,5 @@ void GafferModule::bindAction()
 		.value( "Invalid", Action::Invalid )
 		.value( "Do", Action::Do )
 		.value( "Undo", Action::Undo )
-		.value( "Redo", Action::Redo )
-	;
+		.value( "Redo", Action::Redo );
 }

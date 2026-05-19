@@ -46,29 +46,28 @@ namespace Gaffer
 class GAFFER_API OptionalValuePlug : public Gaffer::ValuePlug
 {
 
-	public :
+public:
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::OptionalValuePlug, OptionalValuePlugTypeId, Gaffer::ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::OptionalValuePlug, OptionalValuePlugTypeId, Gaffer::ValuePlug );
 
-		OptionalValuePlug(
-			IECore::InternedString name,
-			const Gaffer::ValuePlugPtr &valuePlug,
-			bool enabledPlugDefaultValue = false,
-			Direction direction = In,
-			unsigned flags = Default
-		);
+	OptionalValuePlug(
+		IECore::InternedString name,
+		const Gaffer::ValuePlugPtr &valuePlug,
+		bool enabledPlugDefaultValue = false,
+		Direction direction = In,
+		unsigned flags = Default
+	);
 
-		Gaffer::BoolPlug *enabledPlug();
-		const Gaffer::BoolPlug *enabledPlug() const;
+	Gaffer::BoolPlug *enabledPlug();
+	const Gaffer::BoolPlug *enabledPlug() const;
 
-		template<typename T = Gaffer::ValuePlug>
-		T *valuePlug();
-		template<typename T = Gaffer::ValuePlug>
-		const T *valuePlug() const;
+	template<typename T = Gaffer::ValuePlug>
+	T *valuePlug();
+	template<typename T = Gaffer::ValuePlug>
+	const T *valuePlug() const;
 
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
-
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 };
 
 IE_CORE_DECLAREPTR( OptionalValuePlug );

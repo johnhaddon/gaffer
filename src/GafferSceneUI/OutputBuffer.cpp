@@ -61,39 +61,38 @@ using namespace GafferSceneUI;
 // IECoreGL::Texture doesn't support buffer textures, so we roll our own.
 class OutputBuffer::BufferTexture
 {
-	public :
+public:
 
-		BufferTexture()
-		{
-			glGenTextures( 1, &m_texture );
-			glGenBuffers( 1, &m_buffer );
-		}
+	BufferTexture()
+	{
+		glGenTextures( 1, &m_texture );
+		glGenBuffers( 1, &m_buffer );
+	}
 
-		~BufferTexture()
-		{
-			glDeleteBuffers( 1, &m_buffer );
-			glDeleteTextures( 1, &m_texture );
-		}
+	~BufferTexture()
+	{
+		glDeleteBuffers( 1, &m_buffer );
+		glDeleteTextures( 1, &m_texture );
+	}
 
-		GLuint texture() const
-		{
-			return m_texture;
-		}
+	GLuint texture() const
+	{
+		return m_texture;
+	}
 
-		void updateBuffer( const vector<uint32_t> &data )
-		{
-			glBindBuffer( GL_TEXTURE_BUFFER, m_buffer );
-			glBufferData( GL_TEXTURE_BUFFER, sizeof( uint32_t ) * data.size(), data.data(), GL_STREAM_DRAW );
+	void updateBuffer( const vector<uint32_t> &data )
+	{
+		glBindBuffer( GL_TEXTURE_BUFFER, m_buffer );
+		glBufferData( GL_TEXTURE_BUFFER, sizeof( uint32_t ) * data.size(), data.data(), GL_STREAM_DRAW );
 
-			glBindTexture( GL_TEXTURE_BUFFER, m_texture );
-			glTexBuffer( GL_TEXTURE_BUFFER, GL_R32UI, m_buffer );
-		}
+		glBindTexture( GL_TEXTURE_BUFFER, m_texture );
+		glTexBuffer( GL_TEXTURE_BUFFER, GL_R32UI, m_buffer );
+	}
 
-	private :
+private:
 
-		GLuint m_texture;
-		GLuint m_buffer;
-
+	GLuint m_texture;
+	GLuint m_buffer;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -185,11 +184,11 @@ void main()
 //////////////////////////////////////////////////////////////////////////
 
 OutputBuffer::OutputBuffer( IECoreScenePreview::Renderer *renderer )
-	:	m_texturesDirty( false )
+	: m_texturesDirty( false )
 {
 	IECoreScene::OutputPtr outputTemplate = new IECoreScene::Output( "", "ieDisplay", "" );
 	outputTemplate->parameters()["driverType"] = new IECore::StringData( "OutputBuffer::DisplayDriver" );
-	outputTemplate->parameters()["buffer"] =  new IECore::StringData( std::to_string( (uintptr_t)this ) );
+	outputTemplate->parameters()["buffer"] = new IECore::StringData( std::to_string( (uintptr_t)this ) );
 	outputTemplate->parameters()["updateInteractively"] = new IECore::BoolData( true );
 
 	using OutputDefinition = std::tuple<const char *, const char *, const char *>;
@@ -206,8 +205,7 @@ OutputBuffer::OutputBuffer( IECoreScenePreview::Renderer *renderer )
 			// renderers have deficiencies in rendering integer AOVs. So we declare
 			// `id` as a float AOV, and pass type-punned integers through it.
 			OutputDefinition( "id", "float id", "closest" ),
-		}
-	)
+		} )
 	{
 		IECoreScene::OutputPtr output = outputTemplate->copy();
 		output->setName( name );
@@ -326,12 +324,12 @@ void OutputBuffer::renderInternal( bool renderSelection ) const
 
 	glPushAttrib( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT );
 
-		glEnable( GL_DEPTH_TEST );
-		glEnable( GL_BLEND );
-		glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-		glDepthFunc( renderSelection ? GL_LEQUAL : GL_LESS );
+	glEnable( GL_DEPTH_TEST );
+	glEnable( GL_BLEND );
+	glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+	glDepthFunc( renderSelection ? GL_LEQUAL : GL_LESS );
 
-		glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
+	glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
 
 	glPopAttrib();
 }
@@ -381,7 +379,7 @@ uint32_t OutputBuffer::idAt( const V2f &ndcPosition, float &depth ) const
 		return false;
 	}
 
-	const V2i pixelPosition = ndcPosition * (m_dataWindow.size() + V2i( 1 ));
+	const V2i pixelPosition = ndcPosition * ( m_dataWindow.size() + V2i( 1 ) );
 	if( !m_dataWindow.intersects( pixelPosition ) )
 	{
 		return false;
@@ -446,7 +444,7 @@ void OutputBuffer::imageFormat( const Imath::Box2i &displayWindow, const Imath::
 	std::unique_lock lock( m_bufferReallocationMutex );
 
 	m_dataWindow = dataWindow;
-	const size_t numPixels = (dataWindow.size().x + 1) * (dataWindow.size().y + 1);
+	const size_t numPixels = ( dataWindow.size().x + 1 ) * ( dataWindow.size().y + 1 );
 	m_rgbaBuffer.resize( numPixels * 4, 0 );
 	m_depthBuffer.resize( numPixels, 0 );
 	m_idBuffer.resize( numPixels, 0 );
@@ -465,7 +463,7 @@ void OutputBuffer::updateBuffer( const Imath::Box2i &box, const T *data, int num
 	const int fromStride = ( box.size().x + 1 ) * numChannels;
 	const int toStride = ( m_dataWindow.size().x + 1 ) * numChannels;
 	const T *from = data;
-	T *to = buffer.data() + (box.min.y - m_dataWindow.min.y) * toStride + (box.min.x - m_dataWindow.min.x) * numChannels;
+	T *to = buffer.data() + ( box.min.y - m_dataWindow.min.y ) * toStride + ( box.min.x - m_dataWindow.min.x ) * numChannels;
 	for( int y = box.min.y; y <= box.max.y; ++y )
 	{
 		std::copy( from, from + fromStride, to );
@@ -530,84 +528,83 @@ void OutputBuffer::snapshotToFile(
 class OutputBuffer::DisplayDriver : public IECoreImage::DisplayDriver
 {
 
-	public :
+public:
 
-		// Deliberately "borrowing" DisplayDriverTypeId as we don't need an ID for
-		// a non-public class.
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( OutputBuffer::DisplayDriver, IECoreImage::DisplayDriverTypeId, DisplayDriver );
+	// Deliberately "borrowing" DisplayDriverTypeId as we don't need an ID for
+	// a non-public class.
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( OutputBuffer::DisplayDriver, IECoreImage::DisplayDriverTypeId, DisplayDriver );
 
-		enum class Type
+	enum class Type
+	{
+		RGBA,
+		Depth,
+		ID
+	};
+
+	DisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
+		: IECoreImage::DisplayDriver( displayWindow, dataWindow, channelNames, parameters )
+	{
+		auto bufferData = parameters->member<StringData>( "buffer" );
+		assert( bufferData );
+		assert( channelNames.size() == 4 || channelNames.size() == 1 );
+		m_buffer = reinterpret_cast<OutputBuffer *>( boost::lexical_cast<uintptr_t>( bufferData->readable() ) );
+		m_buffer->imageFormat( displayWindow, dataWindow );
+		if( channelNames.size() == 1 )
 		{
-			RGBA,
-			Depth,
-			ID
-		};
-
-		DisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
-			:	IECoreImage::DisplayDriver( displayWindow, dataWindow, channelNames, parameters )
-		{
-			auto bufferData = parameters->member<StringData>( "buffer" );
-			assert( bufferData );
-			assert( channelNames.size() == 4 || channelNames.size() == 1 );
-			m_buffer = reinterpret_cast<OutputBuffer *>( boost::lexical_cast<uintptr_t>(bufferData->readable() ) );
-			m_buffer->imageFormat( displayWindow, dataWindow );
-			if( channelNames.size() == 1 )
+			if( channelNames[0] == "Z" )
 			{
-				if( channelNames[0] == "Z" )
-				{
-					m_type = Type::Depth;
-				}
-				else
-				{
-					assert( channelNames[0] == "id" );
-					m_type = Type::ID;
-				}
+				m_type = Type::Depth;
 			}
 			else
 			{
-				m_type = Type::RGBA;
+				assert( channelNames[0] == "id" );
+				m_type = Type::ID;
 			}
 		}
-
-		void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) override
+		else
 		{
-			switch( m_type )
-			{
-				case Type::RGBA :
-					m_buffer->updateBuffer( box, data, 4, m_buffer->m_rgbaBuffer );
-					break;
-				case Type::Depth :
-					m_buffer->updateBuffer( box, data, 1, m_buffer->m_depthBuffer );
-					break;
-				case Type::ID :
-					// Cortex DisplayDrivers technically only support floats, but we send `uint32_t` data through
-					// the API and just do pointer casts at either end.
-					m_buffer->updateBuffer( box, reinterpret_cast<const uint32_t *>( data ), 1, m_buffer->m_idBuffer );
-					break;
-			}
+			m_type = Type::RGBA;
 		}
+	}
 
-		void imageClose() override
+	void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) override
+	{
+		switch( m_type )
 		{
+			case Type::RGBA :
+				m_buffer->updateBuffer( box, data, 4, m_buffer->m_rgbaBuffer );
+				break;
+			case Type::Depth :
+				m_buffer->updateBuffer( box, data, 1, m_buffer->m_depthBuffer );
+				break;
+			case Type::ID :
+				// Cortex DisplayDrivers technically only support floats, but we send `uint32_t` data through
+				// the API and just do pointer casts at either end.
+				m_buffer->updateBuffer( box, reinterpret_cast<const uint32_t *>( data ), 1, m_buffer->m_idBuffer );
+				break;
 		}
+	}
 
-		bool scanLineOrderOnly() const override
-		{
-			return false;
-		}
+	void imageClose() override
+	{
+	}
 
-		bool acceptsRepeatedData() const override
-		{
-			return true;
-		}
+	bool scanLineOrderOnly() const override
+	{
+		return false;
+	}
 
-	private :
+	bool acceptsRepeatedData() const override
+	{
+		return true;
+	}
 
-		Type m_type;
+private:
 
-		OutputBuffer *m_buffer;
-		static DisplayDriverDescription<DisplayDriver> g_description;
+	Type m_type;
 
+	OutputBuffer *m_buffer;
+	static DisplayDriverDescription<DisplayDriver> g_description;
 };
 
 IECoreImage::DisplayDriver::DisplayDriverDescription<OutputBuffer::DisplayDriver> OutputBuffer::DisplayDriver::g_description;

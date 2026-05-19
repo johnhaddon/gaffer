@@ -79,10 +79,8 @@ bool CompoundObjectPlug::acceptsInput( const Plug *input ) const
 
 	if( input )
 	{
-		return
-			input->isInstanceOf( staticTypeId() ) ||
-			input->isInstanceOf( AtomicCompoundDataPlug::staticTypeId() )
-		;
+		return input->isInstanceOf( staticTypeId() ) ||
+			input->isInstanceOf( AtomicCompoundDataPlug::staticTypeId() );
 	}
 	return true;
 }
@@ -119,10 +117,8 @@ bool StringVectorDataPlug::acceptsInput( const Plug *input ) const
 
 	if( input )
 	{
-		return
-			input->isInstanceOf( staticTypeId() ) ||
-			input->isInstanceOf( StringPlug::staticTypeId() )
-		;
+		return input->isInstanceOf( staticTypeId() ) ||
+			input->isInstanceOf( StringPlug::staticTypeId() );
 	}
 	return true;
 }
@@ -130,11 +126,11 @@ bool StringVectorDataPlug::acceptsInput( const Plug *input ) const
 template<>
 void StringVectorDataPlug::setFrom( const ValuePlug *other )
 {
-	if( auto stringVectorPlug = IECore::runTimeCast<const StringVectorDataPlug >( other ) )
+	if( auto stringVectorPlug = IECore::runTimeCast<const StringVectorDataPlug>( other ) )
 	{
 		setValue( stringVectorPlug->getValue() );
 	}
-	else if( auto stringPlug = IECore::runTimeCast<const StringPlug >( other ) )
+	else if( auto stringPlug = IECore::runTimeCast<const StringPlug>( other ) )
 	{
 		IECore::StringVectorDataPtr value = new IECore::StringVectorData;
 		std::string s = stringPlug->getValue();

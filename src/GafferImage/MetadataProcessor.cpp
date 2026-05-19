@@ -45,7 +45,7 @@ namespace GafferImage
 GAFFER_NODE_DEFINE_TYPE( MetadataProcessor );
 
 MetadataProcessor::MetadataProcessor( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	// Direct pass-through for the things we don't ever change.
 	outPlug()->viewNamesPlug()->setInput( inPlug()->viewNamesPlug() );
@@ -65,7 +65,7 @@ void MetadataProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContain
 {
 	ImageProcessor::affects( input, outputs );
 
-	if ( input == inPlug()->metadataPlug() )
+	if( input == inPlug()->metadataPlug() )
 	{
 		outputs.push_back( outPlug()->metadataPlug() );
 	}

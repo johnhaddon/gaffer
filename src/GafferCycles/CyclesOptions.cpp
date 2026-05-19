@@ -41,7 +41,7 @@ using namespace GafferCycles;
 IE_CORE_DEFINERUNTIMETYPED( CyclesOptions );
 
 CyclesOptions::CyclesOptions( const std::string &name )
-	:	GafferScene::Options( name, "cycles" )
+	: GafferScene::Options( name, "cycles" )
 {
 }
 

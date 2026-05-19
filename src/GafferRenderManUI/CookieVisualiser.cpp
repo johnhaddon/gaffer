@@ -72,57 +72,55 @@ T parameterOrDefault( const IECore::CompoundData *parameters, const IECore::Inte
 
 const char *texturedFragSource()
 {
-	return
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"#include \"IECoreGL/ColorAlgo.h\"\n"
-		""
-		"in vec2 fragmentuv;"
-		""
-		"uniform sampler2D texture;"
-		"uniform vec3 tint;"
-		"uniform float saturation;"
-		"uniform float aspectRatio;"
-		"uniform int tileMode;"
-		""
-		"void main()"
-		"{"
-			"if( tileMode == 0 )"
-			"{"
-				"// No repeat\n"
-				"if( fragmentuv.x > 1.0 || fragmentuv.x < 0.0 || fragmentuv.y > 1.0 || fragmentuv.y < 0.0 )"
-				"{"
-					"discard;"
-				"}"
-			"}"
-			"else if ( tileMode == 1 )"
-			"{"
-				"// Edge extend\n"
-				"if( fragmentuv.x > 1.0 || fragmentuv.x < 0.0 || fragmentuv.y > 1.0 || fragmentuv.y < 0.0 )"
-				"{"
-					"gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );"
-					"return;"
-				"}"
-			"}"
-			"// `GL_TEXTURE_WRAP_*` is `GL_REPEAT`, so tiled is the default\n"
-			""
-			"vec2 uvMult = aspectRatio > 1.0 ? vec2( 1.0, aspectRatio ) : vec2( 1.0 / aspectRatio, 1.0 );"
-			"vec2 uvCenter = vec2( 0.5, 0.5 );"
-			"vec2 effectiveUV = ( mod( fragmentuv, 1.0 ) - uvCenter ) * uvMult + uvCenter;"
+	return "#if __VERSION__ <= 120\n"
+		   "#define in varying\n"
+		   "#endif\n"
+		   ""
+		   "#include \"IECoreGL/ColorAlgo.h\"\n"
+		   ""
+		   "in vec2 fragmentuv;"
+		   ""
+		   "uniform sampler2D texture;"
+		   "uniform vec3 tint;"
+		   "uniform float saturation;"
+		   "uniform float aspectRatio;"
+		   "uniform int tileMode;"
+		   ""
+		   "void main()"
+		   "{"
+		   "if( tileMode == 0 )"
+		   "{"
+		   "// No repeat\n"
+		   "if( fragmentuv.x > 1.0 || fragmentuv.x < 0.0 || fragmentuv.y > 1.0 || fragmentuv.y < 0.0 )"
+		   "{"
+		   "discard;"
+		   "}"
+		   "}"
+		   "else if ( tileMode == 1 )"
+		   "{"
+		   "// Edge extend\n"
+		   "if( fragmentuv.x > 1.0 || fragmentuv.x < 0.0 || fragmentuv.y > 1.0 || fragmentuv.y < 0.0 )"
+		   "{"
+		   "gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );"
+		   "return;"
+		   "}"
+		   "}"
+		   "// `GL_TEXTURE_WRAP_*` is `GL_REPEAT`, so tiled is the default\n"
+		   ""
+		   "vec2 uvMult = aspectRatio > 1.0 ? vec2( 1.0, aspectRatio ) : vec2( 1.0 / aspectRatio, 1.0 );"
+		   "vec2 uvCenter = vec2( 0.5, 0.5 );"
+		   "vec2 effectiveUV = ( mod( fragmentuv, 1.0 ) - uvCenter ) * uvMult + uvCenter;"
 
-			"vec3 c = vec3( 0.0, 0.0, 0.0 );"
-			"if( effectiveUV.x >= 0.0 && effectiveUV.x <= 1.0 && effectiveUV.y >= 0.0 && effectiveUV.y <= 1.0 )"
-			"{"
-				"c = texture2D( texture, effectiveUV ).xyz;"
-				"c = ieAdjustSaturation( c, saturation );"
-				"c *= tint;"
-			"}"
-			""
-			"gl_FragColor = vec4( c, 1.0 );"
-		"}"
-	;
+		   "vec3 c = vec3( 0.0, 0.0, 0.0 );"
+		   "if( effectiveUV.x >= 0.0 && effectiveUV.x <= 1.0 && effectiveUV.y >= 0.0 && effectiveUV.y <= 1.0 )"
+		   "{"
+		   "c = texture2D( texture, effectiveUV ).xyz;"
+		   "c = ieAdjustSaturation( c, saturation );"
+		   "c *= tint;"
+		   "}"
+		   ""
+		   "gl_FragColor = vec4( c, 1.0 );"
+		   "}";
 }
 
 void addWireframeCurveState( IECoreGL::Group *group )
@@ -137,31 +135,30 @@ void addWireframeCurveState( IECoreGL::Group *group )
 // Customized IECoreGL primitive supporting `uvOrientation`
 class UVOrientedQuadPrimitive : public IECoreGL::QuadPrimitive
 {
-	public :
-		UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation ) : IECoreGL::QuadPrimitive( width, height )
-		{
-			IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
+public:
 
-			std::vector<V2f> &uvVector = uvData->writable();
+	UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation ) : IECoreGL::QuadPrimitive( width, height )
+	{
+		IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
 
-			uvVector.push_back( V2f( -0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
-			uvVector.push_back( V2f( 0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
-			uvVector.push_back( V2f( 0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
-			uvVector.push_back( V2f( -0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		std::vector<V2f> &uvVector = uvData->writable();
 
-			addVertexAttribute( "uv", uvData );
-		}
+		uvVector.push_back( V2f( -0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		uvVector.push_back( V2f( 0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		uvVector.push_back( V2f( 0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		uvVector.push_back( V2f( -0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
 
-		~UVOrientedQuadPrimitive() override
-		{
+		addVertexAttribute( "uv", uvData );
+	}
 
-		}
+	~UVOrientedQuadPrimitive() override
+	{
+	}
 };
 
 using AspectRatioQueryCache = IECorePreview::LRUCache<std::string, float, IECorePreview::LRUCachePolicy::Parallel>;
 AspectRatioQueryCache g_aspectRatioQueryCache(
-	[]( const std::string &fileName, size_t &cost, const Canceller *canceller )
-	{
+	[]( const std::string &fileName, size_t &cost, const Canceller *canceller ) {
 		cost = 1;
 
 		OIIO::ImageInput::unique_ptr imageInput( OIIO::ImageInput::create( fileName ) );
@@ -187,19 +184,18 @@ AspectRatioQueryCache g_aspectRatioQueryCache(
 class CookieVisualiser final : public LightFilterVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( CookieVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( CookieVisualiser )
 
-		CookieVisualiser();
-		~CookieVisualiser() override;
+	CookieVisualiser();
+	~CookieVisualiser() override;
 
-		Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	protected :
+protected:
 
-		static LightFilterVisualiser::LightFilterVisualiserDescription<CookieVisualiser> g_visualiserDescription;
-
+	static LightFilterVisualiser::LightFilterVisualiserDescription<CookieVisualiser> g_visualiserDescription;
 };
 
 IE_CORE_DECLAREPTR( CookieVisualiser )
@@ -318,7 +314,7 @@ Visualisations CookieVisualiser::visualise( const InternedString &attributeName,
 			);
 		}
 
-		result->addChild(quadPrimitive );
+		result->addChild( quadPrimitive );
 	}
 
 	IECoreGL::GroupPtr outlineResult = new IECoreGL::Group();
@@ -331,4 +327,4 @@ Visualisations CookieVisualiser::visualise( const InternedString &attributeName,
 	};
 }
 
-}  // namespace
+} // namespace

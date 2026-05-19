@@ -74,11 +74,11 @@ struct ParticleList
 	using PosType = openvdb::Vec3R;
 
 	ParticleList( const Primitive *points, const std::string &width, float widthScale, const std::string &velocity, float velocityScale )
-		:	m_positionView( points->variableIndexedView<V3fVectorData>( "P", PrimitiveVariable::Vertex, /* throwIfInvalid = */ true ).value() ),
-			m_widthView( points->variableIndexedView<FloatVectorData>( width, PrimitiveVariable::Vertex ) ),
-			m_widthScale( 0.5f * widthScale ), // VDB wants radius, so divide by two
-			m_velocityView( points->variableIndexedView<V3fVectorData>( velocity, PrimitiveVariable::Vertex ) ),
-			m_velocityScale( velocityScale )
+		: m_positionView( points->variableIndexedView<V3fVectorData>( "P", PrimitiveVariable::Vertex, /* throwIfInvalid = */ true ).value() ),
+		  m_widthView( points->variableIndexedView<FloatVectorData>( width, PrimitiveVariable::Vertex ) ),
+		  m_widthScale( 0.5f * widthScale ), // VDB wants radius, so divide by two
+		  m_velocityView( points->variableIndexedView<V3fVectorData>( velocity, PrimitiveVariable::Vertex ) ),
+		  m_velocityScale( velocityScale )
 	{
 		if( auto d = points->variableData<FloatData>( width, PrimitiveVariable::Constant ) )
 		{
@@ -102,13 +102,13 @@ struct ParticleList
 	void getPosRad( size_t i, PosType &pos, openvdb::Real &rad ) const
 	{
 		getPos( i, pos );
-		rad = m_widthScale * ( m_widthView ? (*m_widthView)[i] : 1.0f );
+		rad = m_widthScale * ( m_widthView ? ( *m_widthView )[i] : 1.0f );
 	}
 
 	void getPosRadVel( size_t i, PosType &pos, openvdb::Real &rad, PosType &vel ) const
 	{
 		getPosRad( i, pos, rad );
-		const V3f v = m_velocityScale * ( m_velocityView ? (*m_velocityView)[i] : V3f( 0 ) );
+		const V3f v = m_velocityScale * ( m_velocityView ? ( *m_velocityView )[i] : V3f( 0 ) );
 		vel[0] = v[0];
 		vel[1] = v[1];
 		vel[2] = v[2];
@@ -119,17 +119,16 @@ struct ParticleList
 		return static_cast<bool>( m_velocityView );
 	}
 
-	private :
+private:
 
-		template<typename T>
-		using OptionalIndexedView = std::optional<PrimitiveVariable::IndexedView<T>>;
+	template<typename T>
+	using OptionalIndexedView = std::optional<PrimitiveVariable::IndexedView<T>>;
 
-		PrimitiveVariable::IndexedView<V3f> m_positionView;
-		OptionalIndexedView<float> m_widthView;
-		float m_widthScale;
-		OptionalIndexedView<V3f> m_velocityView;
-		float m_velocityScale;
-
+	PrimitiveVariable::IndexedView<V3f> m_positionView;
+	OptionalIndexedView<float> m_widthView;
+	float m_widthScale;
+	OptionalIndexedView<V3f> m_velocityView;
+	float m_velocityScale;
 };
 
 } // namespace
@@ -143,7 +142,7 @@ GAFFER_NODE_DEFINE_TYPE( PointsToLevelSet );
 size_t PointsToLevelSet::g_firstPlugIndex = 0;
 
 PointsToLevelSet::PointsToLevelSet( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "width", Plug::In, "width" ) );
@@ -151,7 +150,7 @@ PointsToLevelSet::PointsToLevelSet( const std::string &name )
 	addChild( new BoolPlug( "useVelocity", Plug::In, false ) );
 	addChild( new StringPlug( "velocity", Plug::In, "velocity" ) );
 	addChild( new FloatPlug( "velocityScale", Plug::In, 1.0f ) );
-	addChild( new StringPlug( "grid", Plug::In, "surface") );
+	addChild( new StringPlug( "grid", Plug::In, "surface" ) );
 	addChild( new FloatPlug( "voxelSize", Plug::In, 0.1f, 0.0001f ) );
 	addChild( new FloatPlug( "halfBandwidth", Plug::In, 3.0f, 0.0001f ) );
 }
@@ -242,8 +241,7 @@ const Gaffer::FloatPlug *PointsToLevelSet::halfBandwidthPlug() const
 
 bool PointsToLevelSet::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == widthPlug() ||
 		input == widthScalePlug() ||
 		input == useVelocityPlug() ||
@@ -251,8 +249,7 @@ bool PointsToLevelSet::affectsProcessedObject( const Gaffer::Plug *input ) const
 		input == velocityScalePlug() ||
 		input == gridPlug() ||
 		input == voxelSizePlug() ||
-		input == halfBandwidthPlug()
-	;
+		input == halfBandwidthPlug();
 }
 
 void PointsToLevelSet::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -267,7 +264,7 @@ void PointsToLevelSet::hashProcessedObject( const ScenePath &path, const Gaffer:
 	h.append( context->getFramesPerSecond() );
 	gridPlug()->hash( h );
 	voxelSizePlug()->hash( h );
-	halfBandwidthPlug()->hash ( h );
+	halfBandwidthPlug()->hash( h );
 }
 
 IECore::ConstObjectPtr PointsToLevelSet::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const

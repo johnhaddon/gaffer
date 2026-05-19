@@ -60,7 +60,7 @@ GAFFER_NODE_DEFINE_TYPE( OSLLight );
 size_t OSLLight::g_firstPlugIndex = 0;
 
 OSLLight::OSLLight( const std::string &name )
-	:	GafferScene::Light( name, new OSLShader() )
+	: GafferScene::Light( name, new OSLShader() )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -158,8 +158,7 @@ IECore::ConstObjectPtr OSLLight::computeSource( const Gaffer::Context *context )
 			return new DiskPrimitive( radiusPlug()->getValue() );
 		case Sphere :
 			return new SpherePrimitive( radiusPlug()->getValue() );
-		case Geometry :
-		{
+		case Geometry : {
 			CompoundDataPtr parameters = new CompoundData;
 			geometryParametersPlug()->fillCompoundData( parameters->writable() );
 			return new IECoreScenePreview::Geometry(

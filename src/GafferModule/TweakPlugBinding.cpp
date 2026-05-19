@@ -138,13 +138,11 @@ void GafferModule::bindTweakPlugs()
 			.value( "ListRemove", TweakPlug::ListRemove )
 			.value( "CreateIfMissing", TweakPlug::CreateIfMissing )
 			.value( "SetExpressionInclude", TweakPlug::SetExpressionInclude )
-			.value( "SetExpressionExclude", TweakPlug::SetExpressionExclude )
-		;
+			.value( "SetExpressionExclude", TweakPlug::SetExpressionExclude );
 
 		enum_<TweakPlug::MissingMode>( "MissingMode" )
 			.value( "Ignore", TweakPlug::MissingMode::Ignore )
-			.value( "Error", TweakPlug::MissingMode::Error )
-		;
+			.value( "Error", TweakPlug::MissingMode::Error );
 	}
 
 	tweakPlugClass
@@ -164,9 +162,9 @@ void GafferModule::bindTweakPlugs()
 			init<ValuePlug *, const char *, Plug::Direction, unsigned>(
 				(
 					boost::python::arg_( "valuePlug" ),
-					boost::python::arg_( "name" )=GraphComponent::defaultName<TweakPlug>(),
-					boost::python::arg_( "direction" )=Plug::In,
-					boost::python::arg_( "flags" )=Plug::Default
+					boost::python::arg_( "name" ) = GraphComponent::defaultName<TweakPlug>(),
+					boost::python::arg_( "direction" ) = Plug::In,
+					boost::python::arg_( "flags" ) = Plug::Default
 				)
 			)
 		)
@@ -179,7 +177,7 @@ void GafferModule::bindTweakPlugs()
 					boost::python::arg_( "tweakName" ),
 					boost::python::arg_( "valuePlug" ),
 					arg( "mode" ) = TweakPlug::Replace,
-					boost::python::arg_( "enabled" )=true
+					boost::python::arg_( "enabled" ) = true
 				)
 			)
 		)
@@ -189,12 +187,11 @@ void GafferModule::bindTweakPlugs()
 					boost::python::arg_( "tweakName" ),
 					boost::python::arg_( "value" ),
 					arg( "mode" ) = TweakPlug::Replace,
-					boost::python::arg_( "enabled" )=true
+					boost::python::arg_( "enabled" ) = true
 				)
 			)
 		)
-		.def( "applyTweak", &applyTweak, ( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error ) )
-	;
+		.def( "applyTweak", &applyTweak, ( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error ) );
 
 	Serialisation::registerSerialiser( TweakPlug::staticTypeId(), new TweakPlugSerialiser );
 
@@ -202,13 +199,11 @@ void GafferModule::bindTweakPlugs()
 		.def(
 			init<const std::string &, Plug::Direction, unsigned>(
 				(
-					boost::python::arg_( "name" )=GraphComponent::defaultName<TweaksPlug>(),
-					boost::python::arg_( "direction" )=Plug::In,
-					boost::python::arg_( "flags" )=Plug::Default
+					boost::python::arg_( "name" ) = GraphComponent::defaultName<TweaksPlug>(),
+					boost::python::arg_( "direction" ) = Plug::In,
+					boost::python::arg_( "flags" ) = Plug::Default
 				)
 			)
 		)
-		.def( "applyTweaks", &applyTweaksToParameters, ( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error ) )
-	;
-
+		.def( "applyTweaks", &applyTweaksToParameters, ( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error ) );
 }

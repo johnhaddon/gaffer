@@ -68,116 +68,112 @@ namespace GafferScene
 class GAFFERSCENE_API MergeObjects : public FilteredSceneProcessor
 {
 
-	public :
-		enum class SortKey
-		{
-			LocationName,
-			PrimitiveVariable
-		};
+public:
 
-		enum class SortOrder
-		{
-			Ascending,
-			Descending
-		};
+	enum class SortKey
+	{
+		LocationName,
+		PrimitiveVariable
+	};
 
-		~MergeObjects() override;
+	enum class SortOrder
+	{
+		Ascending,
+		Descending
+	};
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MergeObjects, MergeObjectsTypeId, FilteredSceneProcessor );
+	~MergeObjects() override;
 
-		GafferScene::ScenePlug *sourcePlug();
-		const GafferScene::ScenePlug *sourcePlug() const;
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MergeObjects, MergeObjectsTypeId, FilteredSceneProcessor );
 
-		Gaffer::StringPlug *destinationPlug();
-		const Gaffer::StringPlug *destinationPlug() const;
+	GafferScene::ScenePlug *sourcePlug();
+	const GafferScene::ScenePlug *sourcePlug() const;
 
-		Gaffer::IntPlug *sortKeyPlug();
-		const Gaffer::IntPlug *sortKeyPlug() const;
+	Gaffer::StringPlug *destinationPlug();
+	const Gaffer::StringPlug *destinationPlug() const;
 
-		Gaffer::StringPlug *sortPrimitiveVariablePlug();
-		const Gaffer::StringPlug *sortPrimitiveVariablePlug() const;
+	Gaffer::IntPlug *sortKeyPlug();
+	const Gaffer::IntPlug *sortKeyPlug() const;
 
-		Gaffer::IntPlug *sortOrderPlug();
-		const Gaffer::IntPlug *sortOrderPlug() const;
+	Gaffer::StringPlug *sortPrimitiveVariablePlug();
+	const Gaffer::StringPlug *sortPrimitiveVariablePlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	Gaffer::IntPlug *sortOrderPlug();
+	const Gaffer::IntPlug *sortOrderPlug() const;
 
-	protected :
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		MergeObjects( const std::string &name, const std::string &defaultDestination );
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	MergeObjects( const std::string &name, const std::string &defaultDestination );
 
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 
-		Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-
-		/// If there are any additional plugs that affect the merge, this should be implemented
-		/// to call the base class, and then return true for those extra plugs.
-		virtual bool affectsMergedObject( const Gaffer::Plug *input ) const;
-
-		/// If there are any additional plugs that affect the merge, this should be implemented
-		/// to call the base class, and then add those plugs to the hash.
-		virtual void hashMergedObject(
-			const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
-		) const;
-
-		/// Actual object merge function
-		/// This must be implemented by derived classes. It receives a vector of pairs of objects
-		/// and the transform that maps each object into the shared space of the output location.
-		///
-		virtual IECore::ConstObjectPtr computeMergedObject(
-			const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources,
-			const Gaffer::Context *context
-		) const = 0;
+	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
 
+	/// If there are any additional plugs that affect the merge, this should be implemented
+	/// to call the base class, and then return true for those extra plugs.
+	virtual bool affectsMergedObject( const Gaffer::Plug *input ) const;
+
+	/// If there are any additional plugs that affect the merge, this should be implemented
+	/// to call the base class, and then add those plugs to the hash.
+	virtual void hashMergedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+
+	/// Actual object merge function
+	/// This must be implemented by derived classes. It receives a vector of pairs of objects
+	/// and the transform that maps each object into the shared space of the output location.
+	///
+	virtual IECore::ConstObjectPtr computeMergedObject(
+		const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources,
+		const Gaffer::Context *context
+	) const = 0;
 
 
+	// \todo - should we offer alternate ways to merge bounds? Can we think of any use cases for this?
+	//virtual Imath::Box3f mergeBounds( const std::vector< ScenePath > &sourcePaths, const Gaffer::Context *context ) const;
 
+protected:
 
-		// \todo - should we offer alternate ways to merge bounds? Can we think of any use cases for this?
-		//virtual Imath::Box3f mergeBounds( const std::vector< ScenePath > &sourcePaths, const Gaffer::Context *context ) const;
+	/// The source plug currently being used for merge sources - will be `source` if connected, otherwise
+	/// `in`.
+	const GafferScene::ScenePlug *effectiveSourcePlug() const;
 
-	protected:
+private:
 
-		/// The source plug currently being used for merge sources - will be `source` if connected, otherwise
-		/// `in`.
-		const GafferScene::ScenePlug *effectiveSourcePlug() const;
+	/// The tree holds all destinations, with their corresponding sources.
+	Gaffer::ObjectPlug *treePlug();
+	const Gaffer::ObjectPlug *treePlug() const;
 
-	private :
+	/// The mergeLocation data gives the resulting child names for each location, together with which
+	/// sources are needed to evaluate the child locations.
+	Gaffer::ObjectPlug *mergeLocationPlug();
+	const Gaffer::ObjectPlug *mergeLocationPlug() const;
 
-		/// The tree holds all destinations, with their corresponding sources.
-		Gaffer::ObjectPlug *treePlug();
-		const Gaffer::ObjectPlug *treePlug() const;
+	/// We use a separate plug for actually computing the object so that we can use TaskCollaboration
+	/// for actual merges, but not for pass-throughs
+	Gaffer::ObjectPlug *processedObjectPlug();
+	const Gaffer::ObjectPlug *processedObjectPlug() const;
 
-		/// The mergeLocation data gives the resulting child names for each location, together with which
-		/// sources are needed to evaluate the child locations.
-		Gaffer::ObjectPlug *mergeLocationPlug();
-		const Gaffer::ObjectPlug *mergeLocationPlug() const;
-
-		/// We use a separate plug for actually computing the object so that we can use TaskCollaboration
-		/// for actual merges, but not for pass-throughs
-		Gaffer::ObjectPlug *processedObjectPlug();
-		const Gaffer::ObjectPlug *processedObjectPlug() const;
-
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MergeObjects )

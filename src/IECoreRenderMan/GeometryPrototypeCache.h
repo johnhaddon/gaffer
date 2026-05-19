@@ -55,29 +55,28 @@ IE_CORE_DECLAREPTR( GeometryPrototype )
 class GeometryPrototypeCache
 {
 
-	public :
+public:
 
-		GeometryPrototypeCache( Session *session );
+	GeometryPrototypeCache( Session *session );
 
-		// Can be called concurrently with other calls to `get()`.
-		GeometryPrototypePtr get( const IECore::Object *object, const Attributes *attributes, const std::string &messageContext );
-		GeometryPrototypePtr get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes, const std::string &messageContext );
+	// Can be called concurrently with other calls to `get()`.
+	GeometryPrototypePtr get( const IECore::Object *object, const Attributes *attributes, const std::string &messageContext );
+	GeometryPrototypePtr get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes, const std::string &messageContext );
 
-		// Must not be called concurrently with anything.
-		void clearUnused();
+	// Must not be called concurrently with anything.
+	void clearUnused();
 
-	private :
+private:
 
-		Session *m_session;
+	Session *m_session;
 
-		struct CacheEntry
-		{
-			std::once_flag onceFlag;
-			GeometryPrototypePtr prototype;
-		};
-		using Cache = tbb::concurrent_unordered_map<IECore::MurmurHash, CacheEntry>;
-		Cache m_cache;
-
+	struct CacheEntry
+	{
+		std::once_flag onceFlag;
+		GeometryPrototypePtr prototype;
+	};
+	using Cache = tbb::concurrent_unordered_map<IECore::MurmurHash, CacheEntry>;
+	Cache m_cache;
 };
 
 } // namespace IECoreRenderMan

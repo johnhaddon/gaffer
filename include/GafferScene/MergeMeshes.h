@@ -44,20 +44,20 @@ namespace GafferScene
 class GAFFERSCENE_API MergeMeshes : public MergeObjects
 {
 
-	public :
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MergeMeshes, MergeMeshesTypeId, MergeObjects );
+public:
 
-		explicit MergeMeshes( const std::string &name=defaultName<MergeMeshes>() );
-		~MergeMeshes() override;
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MergeMeshes, MergeMeshesTypeId, MergeObjects );
 
-	protected :
+	explicit MergeMeshes( const std::string &name = defaultName<MergeMeshes>() );
+	~MergeMeshes() override;
 
-		IECore::ConstObjectPtr computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const override;
+protected:
 
-	private :
+	IECore::ConstObjectPtr computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const override;
 
-		static size_t g_firstPlugIndex;
+private:
 
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MergeObjects )

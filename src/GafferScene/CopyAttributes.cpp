@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyAttributes );
 size_t CopyAttributes::g_firstPlugIndex = 0;
 
 CopyAttributes::CopyAttributes( const std::string &name )
-	:	FilteredSceneProcessor( name, PathMatcher::NoMatch )
+	: FilteredSceneProcessor( name, PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "source" ) );

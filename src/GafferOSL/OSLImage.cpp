@@ -67,7 +67,7 @@ GAFFER_NODE_DEFINE_TYPE( OSLImage );
 size_t OSLImage::g_firstPlugIndex = 0;
 
 OSLImage::OSLImage( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -224,7 +224,7 @@ void OSLImage::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outpu
 
 	if( input == shadingPlug() )
 	{
-		outputs.push_back( outPlug()->channelDataPlug()	);
+		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 
 	if(
@@ -269,7 +269,7 @@ void OSLImage::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *con
 		bool hasClosures = false;
 		for( NameValuePlug::Iterator inputPlug( channelsPlug() ); !inputPlug.done(); ++inputPlug )
 		{
-			BoolPlug* enabledPlug = (*inputPlug)->enabledPlug();
+			BoolPlug *enabledPlug = ( *inputPlug )->enabledPlug();
 			if( enabledPlug )
 			{
 				if( !enabledPlug->getValue() )
@@ -278,8 +278,8 @@ void OSLImage::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *con
 				}
 			}
 
-			(*inputPlug)->namePlug()->hash( h );
-			int valueType = (*inputPlug)->valuePlug()->typeId();
+			( *inputPlug )->namePlug()->hash( h );
+			int valueType = ( *inputPlug )->valuePlug()->typeId();
 			if( valueType == ClosurePlug::staticTypeId() )
 			{
 				hasClosures = true;
@@ -308,7 +308,7 @@ void OSLImage::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 		bool hasClosures = false;
 		for( NameValuePlug::Iterator inputPlug( channelsPlug() ); !inputPlug.done(); ++inputPlug )
 		{
-			BoolPlug* enabledPlug = (*inputPlug)->enabledPlug();
+			BoolPlug *enabledPlug = ( *inputPlug )->enabledPlug();
 			if( enabledPlug )
 			{
 				if( !enabledPlug->getValue() )
@@ -317,8 +317,8 @@ void OSLImage::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 				}
 			}
 
-			std::string name = (*inputPlug)->namePlug()->getValue();
-			int valueType = (*inputPlug)->valuePlug()->typeId();
+			std::string name = ( *inputPlug )->namePlug()->getValue();
+			int valueType = ( *inputPlug )->valuePlug()->typeId();
 			switch( valueType )
 			{
 				case ClosurePlugTypeId :
@@ -381,7 +381,7 @@ void OSLImage::hashChannelNames( const GafferImage::ImagePlug *output, const Gaf
 	ImageProcessor::hashChannelNames( output, context, h );
 	defaultedInPlug()->channelNamesPlug()->hash( h );
 
-	affectedChannelsPlug()->hash( h);
+	affectedChannelsPlug()->hash( h );
 }
 
 IECore::ConstStringVectorDataPtr OSLImage::computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
@@ -584,7 +584,7 @@ IECore::ConstCompoundDataPtr OSLImage::computeShading( const Gaffer::Context *co
 
 	const V2f uvStep = V2f( 1.0f ) / format.getDisplayWindow().size();
 	// UV value for the pixel at 0,0
-	const V2f uvOrigin = (V2f(0.5) - format.getDisplayWindow().min) * uvStep;
+	const V2f uvOrigin = ( V2f( 0.5 ) - format.getDisplayWindow().min ) * uvStep;
 	const V2i pMax = tileOrigin + V2i( ImagePlug::tileSize() );
 
 	if( !deep )
@@ -603,7 +603,7 @@ IECore::ConstCompoundDataPtr OSLImage::computeShading( const Gaffer::Context *co
 	}
 	else
 	{
-		const std::vector< int > &sampleOffsets = sampleOffsetsData->readable();
+		const std::vector<int> &sampleOffsets = sampleOffsetsData->readable();
 		int prevOffset = 0;
 		int index = 0;
 		V2i p;
@@ -633,9 +633,10 @@ IECore::ConstCompoundDataPtr OSLImage::computeShading( const Gaffer::Context *co
 	CompoundDataPtr result = shadingEngine->shade( shadingPoints.get() );
 
 	// remove results that aren't suitable to become channels
-	for( CompoundDataMap::iterator it = result->writable().begin(); it != result->writable().end();  )
+	for( CompoundDataMap::iterator it = result->writable().begin(); it != result->writable().end(); )
 	{
-		CompoundDataMap::iterator nextIt = it; nextIt++;
+		CompoundDataMap::iterator nextIt = it;
+		nextIt++;
 		if( !runTimeCast<FloatVectorData>( it->second ) )
 		{
 			result->writable().erase( it );
@@ -701,9 +702,10 @@ IECore::ConstCompoundDataPtr OSLImage::computeShadingWithoutChannelData( const G
 
 	// remove results that aren't suitable to become channels
 	// This is the main code that is copied with computeShading() - is it worth trying to share this?
-	for( CompoundDataMap::iterator it = result->writable().begin(); it != result->writable().end();  )
+	for( CompoundDataMap::iterator it = result->writable().begin(); it != result->writable().end(); )
 	{
-		CompoundDataMap::iterator nextIt = it; nextIt++;
+		CompoundDataMap::iterator nextIt = it;
+		nextIt++;
 		if( !runTimeCast<FloatVectorData>( it->second ) )
 		{
 			result->writable().erase( it );
@@ -734,7 +736,7 @@ void OSLImage::updateChannels()
 	for( NameValuePlug::Iterator inputPlug( channelsPlug() ); !inputPlug.done(); ++inputPlug )
 	{
 		std::string prefix = "";
-		BoolPlug* enabledPlug = (*inputPlug)->enabledPlug();
+		BoolPlug *enabledPlug = ( *inputPlug )->enabledPlug();
 		if( enabledPlug )
 		{
 			IntPlugPtr codeEnablePlug = new IntPlug( "enable" );
@@ -743,7 +745,7 @@ void OSLImage::updateChannels()
 			prefix = "if( " + codeEnablePlug->getName().string() + " ) ";
 		}
 
-		Plug *valuePlug = (*inputPlug)->valuePlug();
+		Plug *valuePlug = ( *inputPlug )->valuePlug();
 
 		if( valuePlug->typeId() == ClosurePlug::staticTypeId() )
 		{
@@ -776,19 +778,16 @@ void OSLImage::updateChannels()
 
 			StringPlugPtr codeNamePlug = new StringPlug( "name" );
 			oslCode()->parametersPlug()->addChild( codeNamePlug );
-			codeNamePlug->setInput( (*inputPlug)->namePlug() );
+			codeNamePlug->setInput( ( *inputPlug )->namePlug() );
 
 			oslCode()->parametersPlug()->addChild( codeValuePlug );
 			codeValuePlug->setInput( valuePlug );
 
-			code += prefix + "Ci += " + outFunction + "( " + codeNamePlug->getName().string() + ", "
-				+ codeValuePlug->getName().string() + ");\n";
+			code += prefix + "Ci += " + outFunction + "( " + codeNamePlug->getName().string() + ", " + codeValuePlug->getName().string() + ");\n";
 			continue;
 		}
 
-		IECore::msg( IECore::Msg::Warning, "OSLImage::updateChannels",
-			"Could not create channel from plug: " + (*inputPlug)->fullName()
-		);
+		IECore::msg( IECore::Msg::Warning, "OSLImage::updateChannels", "Could not create channel from plug: " + ( *inputPlug )->fullName() );
 	}
 
 	oslCode()->codePlug()->setValue( code );

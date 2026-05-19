@@ -52,55 +52,54 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API ThreadMonitor : public Monitor
 {
 
-	public :
+public:
 
-		ThreadMonitor( const std::vector<IECore::InternedString> &processMask = { "computeNode:compute" } );
-		~ThreadMonitor() override;
+	ThreadMonitor( const std::vector<IECore::InternedString> &processMask = { "computeNode:compute" } );
+	~ThreadMonitor() override;
 
-		IE_CORE_DECLAREMEMBERPTR( ThreadMonitor )
+	IE_CORE_DECLAREMEMBERPTR( ThreadMonitor )
 
-		/// Numeric identifier for a thread. Using our own identifier rather
-		/// than `std::thread::id` so that we can bind it to Python (and assign
-		/// human-readable contiguous values).
-		using ThreadId = int;
-		/// Returns the `ThreadId` for the calling thread.
-		static ThreadId thisThreadId();
-		/// Maps from `ThreadId` to the number of times a process has been
-		/// invoked on that thread.
-		using ProcessesPerThread = std::unordered_map<ThreadId, size_t>;
-		/// Stores per-thread process counts per-plug.
-		using PlugMap = std::unordered_map<ConstPlugPtr, ProcessesPerThread>;
+	/// Numeric identifier for a thread. Using our own identifier rather
+	/// than `std::thread::id` so that we can bind it to Python (and assign
+	/// human-readable contiguous values).
+	using ThreadId = int;
+	/// Returns the `ThreadId` for the calling thread.
+	static ThreadId thisThreadId();
+	/// Maps from `ThreadId` to the number of times a process has been
+	/// invoked on that thread.
+	using ProcessesPerThread = std::unordered_map<ThreadId, size_t>;
+	/// Stores per-thread process counts per-plug.
+	using PlugMap = std::unordered_map<ConstPlugPtr, ProcessesPerThread>;
 
-		/// Query functions. These are not thread-safe, and must be called
-		/// only when the Monitor is not active (as defined by `Monitor::Scope`).
-		const PlugMap &allStatistics() const;
-		const ProcessesPerThread &plugStatistics( const Plug *plug ) const;
-		const ProcessesPerThread &combinedStatistics() const;
+	/// Query functions. These are not thread-safe, and must be called
+	/// only when the Monitor is not active (as defined by `Monitor::Scope`).
+	const PlugMap &allStatistics() const;
+	const ProcessesPerThread &plugStatistics( const Plug *plug ) const;
+	const ProcessesPerThread &combinedStatistics() const;
 
-	protected :
+protected:
 
-		void processStarted( const Process *process ) override;
-		void processFinished( const Process *process ) override;
+	void processStarted( const Process *process ) override;
+	void processFinished( const Process *process ) override;
 
-	private :
+private:
 
-		const std::vector<IECore::InternedString> m_processMask;
+	const std::vector<IECore::InternedString> m_processMask;
 
-		// We collect statistics into a per-thread data structure to avoid contention.
-		struct ThreadData
-		{
-			ThreadData();
-			using ProcessesPerPlug = std::unordered_map<ConstPlugPtr, size_t>;
-			ThreadId id;
-			ProcessesPerPlug processesPerPlug;
-		};
-		mutable tbb::enumerable_thread_specific<ThreadData> m_threadData;
+	// We collect statistics into a per-thread data structure to avoid contention.
+	struct ThreadData
+	{
+		ThreadData();
+		using ProcessesPerPlug = std::unordered_map<ConstPlugPtr, size_t>;
+		ThreadId id;
+		ProcessesPerPlug processesPerPlug;
+	};
+	mutable tbb::enumerable_thread_specific<ThreadData> m_threadData;
 
-		// Then when we want to query it, we collate it into `m_statistics`.
-		void collate() const;
-		mutable PlugMap m_statistics;
-		mutable ProcessesPerThread m_combinedStatistics;
-
+	// Then when we want to query it, we collate it into `m_statistics`.
+	void collate() const;
+	mutable PlugMap m_statistics;
+	mutable ProcessesPerThread m_combinedStatistics;
 };
 
 IE_CORE_DECLAREPTR( ThreadMonitor )

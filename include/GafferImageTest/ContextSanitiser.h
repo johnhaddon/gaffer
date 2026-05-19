@@ -52,41 +52,40 @@ namespace GafferImageTest
 class GAFFERIMAGETEST_API ContextSanitiser : public Gaffer::Monitor
 {
 
-	public :
+public:
 
-		ContextSanitiser();
+	ContextSanitiser();
 
-		IE_CORE_DECLAREMEMBERPTR( ContextSanitiser )
+	IE_CORE_DECLAREMEMBERPTR( ContextSanitiser )
 
-	protected :
+protected:
 
-		void processStarted( const Gaffer::Process *process ) override;
-		void processFinished( const Gaffer::Process *process ) override;
+	void processStarted( const Gaffer::Process *process ) override;
+	void processFinished( const Gaffer::Process *process ) override;
 
-	private :
+private:
 
-		/// First is the upstream plug where the problem was detected. Second
-		/// is the plug from the parent process responsible for calling upstream.
-		using PlugPair = std::pair<Gaffer::ConstPlugPtr, Gaffer::ConstPlugPtr>;
-		using Warning = std::pair<PlugPair, IECore::InternedString>;
+	/// First is the upstream plug where the problem was detected. Second
+	/// is the plug from the parent process responsible for calling upstream.
+	using PlugPair = std::pair<Gaffer::ConstPlugPtr, Gaffer::ConstPlugPtr>;
+	using Warning = std::pair<PlugPair, IECore::InternedString>;
 
-		void warn( const Gaffer::Process &process, const IECore::InternedString &contextVariable );
+	void warn( const Gaffer::Process &process, const IECore::InternedString &contextVariable );
 
-		struct WarningHash
+	struct WarningHash
+	{
+		size_t operator () ( const Warning &warning ) const
 		{
-			size_t operator()( const Warning &warning ) const
-			{
-				size_t result = 0;
-				boost::hash_combine( result, warning.first.first );
-				boost::hash_combine( result, warning.first.second );
-				boost::hash_combine( result, warning.second.c_str() );
-				return result;
-			}
-		};
+			size_t result = 0;
+			boost::hash_combine( result, warning.first.first );
+			boost::hash_combine( result, warning.first.second );
+			boost::hash_combine( result, warning.second.c_str() );
+			return result;
+		}
+	};
 
-		using WarningSet = tbb::concurrent_unordered_set<Warning, WarningHash>;
-		WarningSet m_warningsEmitted;
-
+	using WarningSet = tbb::concurrent_unordered_set<Warning, WarningHash>;
+	WarningSet m_warningsEmitted;
 };
 
 IE_CORE_DECLAREPTR( ContextSanitiser )

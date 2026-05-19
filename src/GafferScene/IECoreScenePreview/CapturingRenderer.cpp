@@ -52,7 +52,7 @@ using namespace IECoreScenePreview;
 IECoreScenePreview::Renderer::TypeDescription<CapturingRenderer> CapturingRenderer::g_typeDescription( "Capturing" );
 
 CapturingRenderer::CapturingRenderer( RenderType type, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
-	:	m_messageHandler( messageHandler ), m_renderType( type ), m_rendering( false )
+	: m_messageHandler( messageHandler ), m_renderType( type ), m_rendering( false )
 {
 }
 
@@ -71,9 +71,9 @@ CapturingRenderer::~CapturingRenderer()
 	}
 }
 
-std::vector< std::string > CapturingRenderer::capturedObjectNames() const
+std::vector<std::string> CapturingRenderer::capturedObjectNames() const
 {
-	std::vector< std::string > result;
+	std::vector<std::string> result;
 	for( auto &i : m_capturedObjects )
 	{
 		result.push_back( i.first );
@@ -155,9 +155,7 @@ Renderer::ObjectInterfacePtr CapturingRenderer::object( const std::string &name,
 	ObjectMap::accessor a;
 	if( !m_capturedObjects.insert( a, name ) )
 	{
-		IECore::msg( IECore::Msg::Warning, "CapturingRenderer::object",
-			fmt::format( "Object named \"{}\" already exists", name )
-		);
+		IECore::msg( IECore::Msg::Warning, "CapturingRenderer::object", fmt::format( "Object named \"{}\" already exists", name ) );
 		return nullptr;
 	}
 
@@ -211,7 +209,7 @@ void CapturingRenderer::checkPaused() const
 //////////////////////////////////////////////////////////////////////////
 
 CapturingRenderer::CapturedAttributes::CapturedAttributes( const IECore::ConstCompoundObjectPtr &attributes )
-	:	m_attributes( attributes->copy() )
+	: m_attributes( attributes->copy() )
 {
 }
 
@@ -237,7 +235,7 @@ bool CapturingRenderer::CapturedAttributes::unrenderableAttributeValue( const Ca
 //////////////////////////////////////////////////////////////////////////
 
 CapturingRenderer::CapturedObject::CapturedObject( CapturingRenderer *renderer, const std::string &name, const ObjectSamples &samples, const SampleTimes &times )
-	:	m_renderer( renderer ), m_name( name ), m_capturedSamples( samples.begin(), samples.end() ), m_capturedSampleTimes( times ), m_numAttributeEdits( 0 ), m_id( 0 ), m_instanceID( 0 )
+	: m_renderer( renderer ), m_name( name ), m_capturedSamples( samples.begin(), samples.end() ), m_capturedSampleTimes( times ), m_numAttributeEdits( 0 ), m_id( 0 ), m_instanceID( 0 )
 {
 }
 

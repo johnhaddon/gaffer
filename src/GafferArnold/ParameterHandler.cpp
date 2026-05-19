@@ -86,7 +86,7 @@ Gaffer::Plug *setupNumericPlug( const AtNodeEntry *node, const AtParamEntry *par
 
 	AtString name = AiParamGetName( parameter );
 	bool defaultOverridden = false;
-	if( std::is_same< ValueType, float >::value )
+	if( std::is_same<ValueType, float>::value )
 	{
 		float metadataDefault;
 		if( AiMetaDataGetFlt( node, name, g_gafferDefaultArnoldString, &metadataDefault ) )
@@ -300,7 +300,7 @@ Gaffer::Plug *setupNodePlug( const AtNodeEntry *nodeEntry, const InternedString 
 	}
 }
 
-const string nodeName ( Gaffer::GraphComponent *plugParent )
+const string nodeName( Gaffer::GraphComponent *plugParent )
 {
 	const Gaffer::Node *node = IECore::runTimeCast<const Gaffer::Node>( plugParent );
 	if( !node )
@@ -375,7 +375,6 @@ Gaffer::Plug *ParameterHandler::setupPlug( const IECore::InternedString &paramet
 				)
 			);
 			return nullptr;
-
 	}
 }
 
@@ -437,19 +436,18 @@ Gaffer::Plug *ParameterHandler::setupPlug( const AtNodeEntry *node, const AtPara
 			plug = setupNumericPlug<FloatPlug>( node, parameter, plugParent, direction );
 			break;
 
-		case AI_TYPE_BOOLEAN :
-			{
-				bool defaultValue = AiParamGetDefault( parameter )->BOOL();
-				AiMetaDataGetBool( node, name, g_gafferDefaultArnoldString, &defaultValue );
-				plug = setupTypedPlug<BoolPlug>(
-					node,
-					parameter,
-					plugParent,
-					direction,
-					defaultValue
-				);
-			}
-			break;
+		case AI_TYPE_BOOLEAN : {
+			bool defaultValue = AiParamGetDefault( parameter )->BOOL();
+			AiMetaDataGetBool( node, name, g_gafferDefaultArnoldString, &defaultValue );
+			plug = setupTypedPlug<BoolPlug>(
+				node,
+				parameter,
+				plugParent,
+				direction,
+				defaultValue
+			);
+		}
+		break;
 
 		case AI_TYPE_RGB :
 
@@ -461,86 +459,84 @@ Gaffer::Plug *ParameterHandler::setupPlug( const AtNodeEntry *node, const AtPara
 			plug = setupColorPlug<Color4fPlug>( node, parameter, plugParent, direction );
 			break;
 
-		case AI_TYPE_VECTOR2 :
-			{
-				AtVector2 defaultValue = AiParamGetDefault( parameter )->VEC2();
-				AiMetaDataGetVec2( node, name, g_gafferDefaultArnoldString, &defaultValue );
+		case AI_TYPE_VECTOR2 : {
+			AtVector2 defaultValue = AiParamGetDefault( parameter )->VEC2();
+			AiMetaDataGetVec2( node, name, g_gafferDefaultArnoldString, &defaultValue );
 
-				plug = setupTypedPlug<V2fPlug>(
-					node,
-					parameter,
-					plugParent,
-					direction,
-					V2f( defaultValue.x, defaultValue.y )
-				);
-			}
-			break;
-		case AI_TYPE_VECTOR :
-			{
-				AtVector defaultValue = AiParamGetDefault( parameter )->VEC();
-				AiMetaDataGetVec( node, name, g_gafferDefaultArnoldString, &defaultValue );
+			plug = setupTypedPlug<V2fPlug>(
+				node,
+				parameter,
+				plugParent,
+				direction,
+				V2f( defaultValue.x, defaultValue.y )
+			);
+		}
+		break;
+		case AI_TYPE_VECTOR : {
+			AtVector defaultValue = AiParamGetDefault( parameter )->VEC();
+			AiMetaDataGetVec( node, name, g_gafferDefaultArnoldString, &defaultValue );
 
-				plug = setupTypedPlug<V3fPlug>(
-					node,
-					parameter,
-					plugParent,
-					direction,
-					V3f( defaultValue.x, defaultValue.y, defaultValue.z )
-				);
-			}
-			break;
+			plug = setupTypedPlug<V3fPlug>(
+				node,
+				parameter,
+				plugParent,
+				direction,
+				V3f( defaultValue.x, defaultValue.y, defaultValue.z )
+			);
+		}
+		break;
 		case AI_TYPE_ENUM :
 
+		{
+			AtEnum e = AiParamGetEnum( parameter );
+
+			std::string defaultValue;
+			AtString metadataDefault;
+			if( AiMetaDataGetStr( node, name, g_gafferDefaultArnoldString, &metadataDefault ) )
 			{
-				AtEnum e = AiParamGetEnum( parameter );
-
-				std::string defaultValue;
-				AtString metadataDefault;
-				if( AiMetaDataGetStr( node, name, g_gafferDefaultArnoldString, &metadataDefault ) )
-				{
-					defaultValue = metadataDefault.c_str();
-				}
-				else
-				{
-					defaultValue = AiEnumGetString( e, AiParamGetDefault( parameter )->INT() );
-				}
-
-				plug = setupTypedPlug<StringPlug>(
-					node,
-					parameter,
-					plugParent,
-					direction,
-					defaultValue
-				);
+				defaultValue = metadataDefault.c_str();
 			}
-			break;
+			else
+			{
+				defaultValue = AiEnumGetString( e, AiParamGetDefault( parameter )->INT() );
+			}
+
+			plug = setupTypedPlug<StringPlug>(
+				node,
+				parameter,
+				plugParent,
+				direction,
+				defaultValue
+			);
+		}
+		break;
 
 		case AI_TYPE_STRING :
 
+		{
+			AtString defaultValue;
+			if( AiParamGetType( parameter ) == AI_TYPE_STRING )
 			{
-				AtString defaultValue;
-				if( AiParamGetType( parameter ) == AI_TYPE_STRING )
-				{
-					defaultValue = AiParamGetDefault( parameter )->STR();
-				}
-				else
-				{
-					// We get here when `plugTypeOverride` causes us to treat a
-					// non-string parameter as a string. In this case, Arnold's
-					// default value won't be a valid `AtString` so we must
-					// ignore it.
-					defaultValue = g_emptyArnoldString;
-				}
-				AiMetaDataGetStr( node, name, g_gafferDefaultArnoldString, &defaultValue );
-				plug = setupTypedPlug<StringPlug>(
-					node,
-					parameter,
-					plugParent,
-					direction,
-					defaultValue.c_str()
-				);
+				defaultValue = AiParamGetDefault( parameter )->STR();
 			}
-			break;
+			else
+			{
+				// We get here when `plugTypeOverride` causes us to treat a
+				// non-string parameter as a string. In this case, Arnold's
+				// default value won't be a valid `AtString` so we must
+				// ignore it.
+				defaultValue = g_emptyArnoldString;
+			}
+			AiMetaDataGetStr( node, name, g_gafferDefaultArnoldString, &defaultValue );
+			plug = setupTypedPlug<StringPlug>(
+				node,
+				parameter,
+				plugParent,
+				direction,
+				defaultValue.c_str()
+			);
+		}
+		break;
 
 		case AI_TYPE_MATRIX :
 
@@ -571,7 +567,6 @@ Gaffer::Plug *ParameterHandler::setupPlug( const AtNodeEntry *node, const AtPara
 				direction
 			);
 			break;
-
 	}
 
 	if( !plug )

@@ -44,45 +44,44 @@ namespace GafferScene
 class GAFFERSCENE_API FreezeTransform : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		explicit FreezeTransform( const std::string &name=defaultName<FreezeTransform>() );
-		~FreezeTransform() override;
+	explicit FreezeTransform( const std::string &name = defaultName<FreezeTransform>() );
+	~FreezeTransform() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::FreezeTransform, FreezeTransformTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::FreezeTransform, FreezeTransformTypeId, FilteredSceneProcessor );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		// Used to compute the transform to freeze in at a given path.
-		Gaffer::M44fPlug *transformPlug();
-		const Gaffer::M44fPlug *transformPlug() const;
+	// Used to compute the transform to freeze in at a given path.
+	Gaffer::M44fPlug *transformPlug();
+	const Gaffer::M44fPlug *transformPlug() const;
 
-		/// We compute the processed object on this internal plug rather than on
-		/// `out.object` directly. This allows us to use the TaskCollaboration
-		/// task policy for processing objects without paying the overhead when
-		/// we're just passing them through (when the filter doesn't match).
-		Gaffer::ObjectPlug *processedObjectPlug();
-		const Gaffer::ObjectPlug *processedObjectPlug() const;
+	/// We compute the processed object on this internal plug rather than on
+	/// `out.object` directly. This allows us to use the TaskCollaboration
+	/// task policy for processing objects without paying the overhead when
+	/// we're just passing them through (when the filter doesn't match).
+	Gaffer::ObjectPlug *processedObjectPlug();
+	const Gaffer::ObjectPlug *processedObjectPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( FreezeTransform )

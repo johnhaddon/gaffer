@@ -75,20 +75,19 @@ struct ObjectSets
 	// CompoundObjectInterface.
 	static ObjectSets &instance();
 
-	private :
+private:
 
-		struct ObjectSetData
-		{
-			size_t useCount = 0;
-			ObjectSetArray objectSetArray;
-		};
+	struct ObjectSetData
+	{
+		size_t useCount = 0;
+		ObjectSetArray objectSetArray;
+	};
 
-		/// \todo Use `unordered_map` (or `concurrent_unordered_map`) when `std::owner_hash()`
-		/// becomes available (in C++26).
-		using ObjectSetDataMap = std::map<WeakObjectSetPtr, ObjectSetData, std::owner_less<WeakObjectSetPtr>>;
-		std::mutex m_mutex;
-		ObjectSetDataMap m_objectSetData;
-
+	/// \todo Use `unordered_map` (or `concurrent_unordered_map`) when `std::owner_hash()`
+	/// becomes available (in C++26).
+	using ObjectSetDataMap = std::map<WeakObjectSetPtr, ObjectSetData, std::owner_less<WeakObjectSetPtr>>;
+	std::mutex m_mutex;
+	ObjectSetDataMap m_objectSetData;
 };
 
 } // namespace
@@ -116,7 +115,6 @@ struct CompoundAttributesInterface : public IECoreScenePreview::Renderer::Attrib
 	/// check the number of renderers matches in the CompoundRenderer
 	/// constructor.
 	std::array<Renderer::AttributesInterfacePtr, 2> attributes;
-
 };
 
 struct CompoundObjectInterface : public IECoreScenePreview::Renderer::ObjectInterface
@@ -219,17 +217,15 @@ struct CompoundObjectInterface : public IECoreScenePreview::Renderer::ObjectInte
 	/// See comment for CompoundAttributesInterface::attributes.
 	std::array<IECoreScenePreview::Renderer::ObjectInterfacePtr, 2> objects;
 
-	private :
+private:
 
-		// We don't anticipate more than a couple of link types per object, so use
-		// a sorted static vector to store links without the overhead of allocations.
-		using LinkMap = boost::container::flat_map<
-			IECore::InternedString, Renderer::ConstObjectSetPtr, std::less<IECore::InternedString>,
-			boost::container::static_vector<std::pair<IECore::InternedString, Renderer::ConstObjectSetPtr>, 3>
-		>;
+	// We don't anticipate more than a couple of link types per object, so use
+	// a sorted static vector to store links without the overhead of allocations.
+	using LinkMap = boost::container::flat_map<
+		IECore::InternedString, Renderer::ConstObjectSetPtr, std::less<IECore::InternedString>,
+		boost::container::static_vector<std::pair<IECore::InternedString, Renderer::ConstObjectSetPtr>, 3>>;
 
-		LinkMap m_links;
-
+	LinkMap m_links;
 };
 
 IE_CORE_DECLAREPTR( CompoundObjectInterface )
@@ -268,7 +264,6 @@ ObjectSets::ObjectSetArray ObjectSets::registerObjectSet( const Renderer::ConstO
 					mutableSets[i]->insert( compoundObject->objects[i] );
 				}
 			}
-
 		}
 		// Transfer into immutable sets for storage.
 		std::copy( mutableSets.begin(), mutableSets.end(), data.objectSetArray.begin() );
@@ -303,7 +298,7 @@ ObjectSets &ObjectSets::instance()
 //////////////////////////////////////////////////////////////////////////
 
 CompoundRenderer::CompoundRenderer( const Renderers &renderers )
-	:	m_renderers( renderers )
+	: m_renderers( renderers )
 {
 	if( m_renderers.size() != 2 )
 	{

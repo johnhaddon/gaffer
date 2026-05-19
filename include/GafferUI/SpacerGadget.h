@@ -44,25 +44,24 @@ namespace GafferUI
 class GAFFERUI_API SpacerGadget : public Gadget
 {
 
-	public :
+public:
 
-		explicit SpacerGadget( const Imath::Box3f &size );
-		~SpacerGadget() override;
+	explicit SpacerGadget( const Imath::Box3f &size );
+	~SpacerGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::SpacerGadget, SpacerGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::SpacerGadget, SpacerGadgetTypeId, Gadget );
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-		const Imath::Box3f &getSize() const;
-		void setSize( const Imath::Box3f &size );
+	const Imath::Box3f &getSize() const;
+	void setSize( const Imath::Box3f &size );
 
-		/// Rejects all children.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	/// Rejects all children.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
 
-	private :
+private:
 
-		Imath::Box3f m_bound;
-
+	Imath::Box3f m_bound;
 };
 
 IE_CORE_DECLAREPTR( SpacerGadget )

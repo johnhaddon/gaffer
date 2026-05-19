@@ -55,40 +55,39 @@ namespace IECoreDelight
 class IECOREDELIGHT_API ParameterList
 {
 
-	public :
+public:
 
-		ParameterList();
-		ParameterList( std::initializer_list<NSIParam_t> parameters );
-		explicit ParameterList( const IECore::CompoundDataMap &values );
+	ParameterList();
+	ParameterList( std::initializer_list<NSIParam_t> parameters );
+	explicit ParameterList( const IECore::CompoundDataMap &values );
 
-		~ParameterList();
+	~ParameterList();
 
-		void add( const NSIParam_t &parameter );
-		void add( const char *name, const std::string &value );
-		// Prevent calls to `add()` with a temporary string, since that
-		// would cause a dangling pointer to be passed to 3Delight.
-		void add( const char *name, const std::string &&value ) = delete;
-		/// \deprecated Use the version below.
-		void add( const char *name, const IECore::Data *value );
-		void add( const char *name, const IECore::Data *value, bool isSingleArray );
-		void add( const char *name, const IECore::Data *value, const IECore::IntVectorData *indices );
+	void add( const NSIParam_t &parameter );
+	void add( const char *name, const std::string &value );
+	// Prevent calls to `add()` with a temporary string, since that
+	// would cause a dangling pointer to be passed to 3Delight.
+	void add( const char *name, const std::string &&value ) = delete;
+	/// \deprecated Use the version below.
+	void add( const char *name, const IECore::Data *value );
+	void add( const char *name, const IECore::Data *value, bool isSingleArray );
+	void add( const char *name, const IECore::Data *value, const IECore::IntVectorData *indices );
 
-		/// \deprecated Use the version below.
-		NSIParam_t parameter( const char *name, const IECore::Data *value );
-		NSIParam_t parameter( const char *name, const IECore::Data *value, bool isSingleArray );
-		const char *allocate( const std::string &s );
+	/// \deprecated Use the version below.
+	NSIParam_t parameter( const char *name, const IECore::Data *value );
+	NSIParam_t parameter( const char *name, const IECore::Data *value, bool isSingleArray );
+	const char *allocate( const std::string &s );
 
-		int size() const;
-		const NSIParam_t *data() const;
+	int size() const;
+	const NSIParam_t *data() const;
 
-	private :
+private:
 
-		template<typename T>
-		T *allocate();
+	template<typename T>
+	T *allocate();
 
-		std::vector<NSIParam_t> m_params;
-		std::vector<const void *> m_allocations;
-
+	std::vector<NSIParam_t> m_params;
+	std::vector<const void *> m_allocations;
 };
 
 } // namespace IECoreDelight

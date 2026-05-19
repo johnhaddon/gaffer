@@ -53,32 +53,31 @@ namespace Gaffer::Signals
 /// slot.
 class Connection
 {
-	public :
+public:
 
-		Connection() = default;
-		Connection( const Connection &other ) = default;
+	Connection() = default;
+	Connection( const Connection &other ) = default;
 
-		/// When a connection is blocked, the corresponding slot
-		/// will not be called when the signal is emitted.
-		void setBlocked( bool blocked );
-		bool getBlocked() const;
+	/// When a connection is blocked, the corresponding slot
+	/// will not be called when the signal is emitted.
+	void setBlocked( bool blocked );
+	bool getBlocked() const;
 
-		/// Removes the connection from the signal, and frees the slot.
-		void disconnect();
-		/// Returns true if the connection has not been disconnected yet.
-		bool connected() const;
+	/// Removes the connection from the signal, and frees the slot.
+	void disconnect();
+	/// Returns true if the connection has not been disconnected yet.
+	bool connected() const;
 
-		Connection &operator=( const Connection &rhs ) = default;
+	Connection &operator = ( const Connection &rhs ) = default;
 
-	private :
+private:
 
-		template<typename Signature, typename Combiner>
-		friend class Signal;
+	template<typename Signature, typename Combiner>
+	friend class Signal;
 
-		Connection( const Private::SlotBase::Ptr &slot );
+	Connection( const Private::SlotBase::Ptr &slot );
 
-		Private::SlotBase::Ptr m_slot;
-
+	Private::SlotBase::Ptr m_slot;
 };
 
 /// Calls all slots in order, returning the result from the last
@@ -108,74 +107,73 @@ template<typename Result, typename... Args, typename Combiner>
 class Signal<Result( Args... ), Combiner> : boost::noncopyable
 {
 
-	public :
+public:
 
-		Signal( const Combiner &combiner = Combiner() );
-		~Signal();
+	Signal( const Combiner &combiner = Combiner() );
+	~Signal();
 
-		/// Adds a slot that will be called when the signal
-		/// is emitted by `operator()`. Slots are called in
-		/// the order of connection, so this slot will be
-		/// called after all previously connected slots.
-		template<typename SlotFunctor>
-		Connection connect( const SlotFunctor &slot );
+	/// Adds a slot that will be called when the signal
+	/// is emitted by `operator()`. Slots are called in
+	/// the order of connection, so this slot will be
+	/// called after all previously connected slots.
+	template<typename SlotFunctor>
+	Connection connect( const SlotFunctor &slot );
 
-		/// As for `connect()`, but adding `slot` to the front
-		/// of the list of slots, so that it will be called
-		/// _before_ previously connected slots.
-		template<typename SlotFunctor>
-		Connection connectFront( const SlotFunctor &slot );
+	/// As for `connect()`, but adding `slot` to the front
+	/// of the list of slots, so that it will be called
+	/// _before_ previously connected slots.
+	template<typename SlotFunctor>
+	Connection connectFront( const SlotFunctor &slot );
 
-		/// Disconnects all connected slots. Not recommended, because
-		/// it allows the disconnection of slots belonging to others.
-		void disconnectAllSlots();
+	/// Disconnects all connected slots. Not recommended, because
+	/// it allows the disconnection of slots belonging to others.
+	void disconnectAllSlots();
 
-		/// Returns the number of currently connected slots.
-		/// Complexity : linear in the number of slots.
-		size_t numSlots() const;
-		/// Returns true if any slot is connected, false otherwise.
-		/// Complexity : constant.
-		bool empty() const;
+	/// Returns the number of currently connected slots.
+	/// Complexity : linear in the number of slots.
+	size_t numSlots() const;
+	/// Returns true if any slot is connected, false otherwise.
+	/// Complexity : constant.
+	bool empty() const;
 
-		/// Emits the signal. This calls the connected slots and returns their
-		/// combined result as defined by the Combiner template argument.
-		Result operator() ( Args... args ) const;
+	/// Emits the signal. This calls the connected slots and returns their
+	/// combined result as defined by the Combiner template argument.
+	Result operator () ( Args... args ) const;
 
-		/// Used to present the results of each slot to the Combiner. Dereferencing
-		/// the iterator calls the slot and returns the result. Only really public
-		/// to allow access from the Python bindings.
-		class SlotCallIterator;
+	/// Used to present the results of each slot to the Combiner. Dereferencing
+	/// the iterator calls the slot and returns the result. Only really public
+	/// to allow access from the Python bindings.
+	class SlotCallIterator;
 
-		/// Compatibility with `boost::bind`.
-		using result_type = Result;
+	/// Compatibility with `boost::bind`.
+	using result_type = Result;
 
-	private :
+private:
 
-		template<typename SlotFunctor>
-		Connection connectInternal( const SlotFunctor &slot, bool front );
+	template<typename SlotFunctor>
+	Connection connectInternal( const SlotFunctor &slot, bool front );
 
-		Private::SlotBase::Ptr &lastSlot();
-		const Private::SlotBase::Ptr &lastSlot() const;
-		const Combiner &combiner() const;
+	Private::SlotBase::Ptr &lastSlot();
+	const Private::SlotBase::Ptr &lastSlot() const;
+	const Combiner &combiner() const;
 
-		// Type derived from SlotBase, holding a FunctionType
-		// object to be called when the signal is emitted.
-		struct Slot;
-		// Value type obtained by dereferencing SlotCallIterator. `void` is not
-		// a valid `value_type` for an iterator, so we use a fake bool in this
-		// special case.
-		using SlotCallIteratorValueType = std::conditional_t<std::is_void_v<Result>, bool, Result>;
-		// Type used to pass arguments to SlotCallIterator.
-		using ArgsTuple = std::tuple<Args...>;
+	// Type derived from SlotBase, holding a FunctionType
+	// object to be called when the signal is emitted.
+	struct Slot;
+	// Value type obtained by dereferencing SlotCallIterator. `void` is not
+	// a valid `value_type` for an iterator, so we use a fake bool in this
+	// special case.
+	using SlotCallIteratorValueType = std::conditional_t<std::is_void_v<Result>, bool, Result>;
+	// Type used to pass arguments to SlotCallIterator.
+	using ArgsTuple = std::tuple<Args...>;
 
-		Private::SlotBase::Ptr m_firstSlot;
-		/// The combiner will often have no data members, and using
-		/// `compressed_pair` means that in this case it won't contribute
-		/// anything to `sizeof( Signal )`.
-		/// \todo In c++20 this can be simplified with `[[no_unique_address]]`
-		/// and we can remove the `lastSlot()` and `combiner()` accessors.
-		boost::compressed_pair<Private::SlotBase::Ptr, Combiner> m_lastSlotAndCombiner;
-
+	Private::SlotBase::Ptr m_firstSlot;
+	/// The combiner will often have no data members, and using
+	/// `compressed_pair` means that in this case it won't contribute
+	/// anything to `sizeof( Signal )`.
+	/// \todo In c++20 this can be simplified with `[[no_unique_address]]`
+	/// and we can remove the `lastSlot()` and `combiner()` accessors.
+	boost::compressed_pair<Private::SlotBase::Ptr, Combiner> m_lastSlotAndCombiner;
 };
 
 /// Provides RAII-style connection management. When the ScopedConnection class
@@ -183,22 +181,21 @@ class Signal<Result( Args... ), Combiner> : boost::noncopyable
 class ScopedConnection : public Connection
 {
 
-	public :
+public:
 
-		ScopedConnection() = default;
-		ScopedConnection( const Connection &connection );
-		/// Move constructor, which transfers ownership from an existing
-		/// ScopedConnection (which will subsequently be empty).
-		ScopedConnection( ScopedConnection &&scopedConnection );
-		/// Disconnects the slot.
-		~ScopedConnection();
-		/// Disconnects the current connection and assigns a new one.
-		ScopedConnection &operator=( const Connection &connection );
-		/// Disconnects the current connection and takes ownership of
-		/// the connection held by `scopedConnection` (which will
-		/// subsequently be empty).
-		ScopedConnection &operator=( ScopedConnection &&scopedConnection );
-
+	ScopedConnection() = default;
+	ScopedConnection( const Connection &connection );
+	/// Move constructor, which transfers ownership from an existing
+	/// ScopedConnection (which will subsequently be empty).
+	ScopedConnection( ScopedConnection &&scopedConnection );
+	/// Disconnects the slot.
+	~ScopedConnection();
+	/// Disconnects the current connection and assigns a new one.
+	ScopedConnection &operator = ( const Connection &connection );
+	/// Disconnects the current connection and takes ownership of
+	/// the connection held by `scopedConnection` (which will
+	/// subsequently be empty).
+	ScopedConnection &operator = ( ScopedConnection &&scopedConnection );
 };
 
 /// The BlockedConnection class allows connections to be blocked and unblocked
@@ -206,19 +203,18 @@ class ScopedConnection : public Connection
 class BlockedConnection : boost::noncopyable
 {
 
-	public :
+public:
 
-		/// Calls `connection.setBlocked( true )` if `block` is true, otherwise
-		/// does nothing.
-		BlockedConnection( Signals::Connection &connection, bool block = true );
-		/// Restores the connection's blocking to its previous state.
-		~BlockedConnection();
+	/// Calls `connection.setBlocked( true )` if `block` is true, otherwise
+	/// does nothing.
+	BlockedConnection( Signals::Connection &connection, bool block = true );
+	/// Restores the connection's blocking to its previous state.
+	~BlockedConnection();
 
-	private :
+private:
 
-		Signals::Connection *m_connection;
-		bool m_previouslyBlocked;
-
+	Signals::Connection *m_connection;
+	bool m_previouslyBlocked;
 };
 
 /// Equivalent to the DefaultCombiner, except that exceptions thrown from slots
@@ -244,32 +240,31 @@ struct CatchingCombiner;
 class Trackable : boost::noncopyable
 {
 
-	public :
+public:
 
-		virtual ~Trackable();
+	virtual ~Trackable();
 
-	protected :
+protected:
 
-		void disconnectTrackedConnections();
+	void disconnectTrackedConnections();
 
-	private :
+private:
 
-		friend void GafferModule::bindSignals();
+	friend void GafferModule::bindSignals();
 
-		template<typename Signature, typename Combiner>
-		friend class Signal;
+	template<typename Signature, typename Combiner>
+	friend class Signal;
 
-		template<typename SlotFunctor>
-		static void trackConnection( const SlotFunctor &slotFunctor, const Connection &connection );
+	template<typename SlotFunctor>
+	static void trackConnection( const SlotFunctor &slotFunctor, const Connection &connection );
 
-		struct TrackableVisitor;
+	struct TrackableVisitor;
 
-		// Connections are held by a `unique_ptr<vector>` and initialised on
-		// demand instead of storing `vector` directly. This reduces `sizeof(
-		// Trackable )` and is a win for the common case (for Node and Plug
-		// subclasses) where `m_connections` is never needed.
-		mutable std::unique_ptr<std::vector<Connection>> m_connections;
-
+	// Connections are held by a `unique_ptr<vector>` and initialised on
+	// demand instead of storing `vector` directly. This reduces `sizeof(
+	// Trackable )` and is a win for the common case (for Node and Plug
+	// subclasses) where `m_connections` is never needed.
+	mutable std::unique_ptr<std::vector<Connection>> m_connections;
 };
 
 } // namespace Gaffer::Signals

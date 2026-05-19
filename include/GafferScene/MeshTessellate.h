@@ -47,47 +47,46 @@ namespace GafferScene
 class GAFFERSCENE_API MeshTessellate : public ObjectProcessor
 {
 
-	public :
+public:
 
-		MeshTessellate( const std::string &name=defaultName<MeshTessellate>() );
-		~MeshTessellate() override;
+	MeshTessellate( const std::string &name = defaultName<MeshTessellate>() );
+	~MeshTessellate() override;
 
-		Gaffer::IntPlug *divisionsPlug();
-		const Gaffer::IntPlug *divisionsPlug() const;
+	Gaffer::IntPlug *divisionsPlug();
+	const Gaffer::IntPlug *divisionsPlug() const;
 
-		Gaffer::BoolPlug *calculateNormalsPlug();
-		const Gaffer::BoolPlug *calculateNormalsPlug() const;
+	Gaffer::BoolPlug *calculateNormalsPlug();
+	const Gaffer::BoolPlug *calculateNormalsPlug() const;
 
-		Gaffer::StringPlug *schemePlug();
-		const Gaffer::StringPlug *schemePlug() const;
+	Gaffer::StringPlug *schemePlug();
+	const Gaffer::StringPlug *schemePlug() const;
 
-		Gaffer::BoolPlug *tessellatePolygonsPlug();
-		const Gaffer::BoolPlug *tessellatePolygonsPlug() const;
+	Gaffer::BoolPlug *tessellatePolygonsPlug();
+	const Gaffer::BoolPlug *tessellatePolygonsPlug() const;
 
-		Gaffer::StringPlug *interpolateBoundaryPlug();
-		const Gaffer::StringPlug *interpolateBoundaryPlug() const;
+	Gaffer::StringPlug *interpolateBoundaryPlug();
+	const Gaffer::StringPlug *interpolateBoundaryPlug() const;
 
-		Gaffer::StringPlug *faceVaryingLinearInterpolationPlug();
-		const Gaffer::StringPlug *faceVaryingLinearInterpolationPlug() const;
+	Gaffer::StringPlug *faceVaryingLinearInterpolationPlug();
+	const Gaffer::StringPlug *faceVaryingLinearInterpolationPlug() const;
 
-		Gaffer::StringPlug *triangleSubdivisionRulePlug();
-		const Gaffer::StringPlug *triangleSubdivisionRulePlug() const;
+	Gaffer::StringPlug *triangleSubdivisionRulePlug();
+	const Gaffer::StringPlug *triangleSubdivisionRulePlug() const;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshTessellate, MeshTessellateTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshTessellate, MeshTessellateTypeId, ObjectProcessor );
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private:
+private:
 
-		Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
+	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
 
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshTessellate )

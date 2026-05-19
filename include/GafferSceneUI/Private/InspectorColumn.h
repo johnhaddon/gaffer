@@ -55,46 +55,45 @@ namespace Private
 class GAFFERSCENEUI_API InspectorColumn : public GafferUI::PathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( InspectorColumn )
+	IE_CORE_DECLAREMEMBERPTR( InspectorColumn )
 
-		InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const std::string &label, const std::string &toolTip = "", PathColumn::SizeMode sizeMode = Default );
-		InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode = Default );
-		/// Gets an inspector from the path on a per-cell basis using `path->property( inspectorProperty )`.
-		InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, IECore::InternedString contextProperty = "inspector:context", PathColumn::SizeMode sizeMode = Default );
+	InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const std::string &label, const std::string &toolTip = "", PathColumn::SizeMode sizeMode = Default );
+	InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode = Default );
+	/// Gets an inspector from the path on a per-cell basis using `path->property( inspectorProperty )`.
+	InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, IECore::InternedString contextProperty = "inspector:context", PathColumn::SizeMode sizeMode = Default );
 
-		GafferSceneUI::Private::ConstInspectorPtr inspector( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
-		GafferSceneUI::Private::Inspector::ResultPtr inspect( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
-		Gaffer::PathPtr historyPath( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
-		/// > Caution : The returned context does not have `canceller` applied. Be sure to apply it using `EditableScope`
-		/// > if cancellation is required.
-		Gaffer::ConstContextPtr inspectorContext( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
+	GafferSceneUI::Private::ConstInspectorPtr inspector( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
+	GafferSceneUI::Private::Inspector::ResultPtr inspect( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
+	Gaffer::PathPtr historyPath( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
+	/// > Caution : The returned context does not have `canceller` applied. Be sure to apply it using `EditableScope`
+	/// > if cancellation is required.
+	Gaffer::ConstContextPtr inspectorContext( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const;
 
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override;
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override;
 
-		/// Exposes the value-formatting part of `cellData()` so that it may
-		/// be reused by `_HistoryWindow`.
-		static CellData cellDataFromValue( const IECore::Object *value );
+	/// Exposes the value-formatting part of `cellData()` so that it may
+	/// be reused by `_HistoryWindow`.
+	static CellData cellDataFromValue( const IECore::Object *value );
 
-	protected :
+protected:
 
-		/// The internal implementation of `cellData()`. Available as a separate
-		/// function so that derived classes can override `cellData()` without
-		/// having to make their own separate call to `inspect()`.
-		CellData cellDataFromInspection( const GafferSceneUI::Private::Inspector::Result *inspection ) const;
+	/// The internal implementation of `cellData()`. Available as a separate
+	/// function so that derived classes can override `cellData()` without
+	/// having to make their own separate call to `inspect()`.
+	CellData cellDataFromInspection( const GafferSceneUI::Private::Inspector::Result *inspection ) const;
 
-	private :
+private:
 
-		void inspectorDirtied();
+	void inspectorDirtied();
 
-		static IECore::ConstStringDataPtr headerValue( const std::string &columnName );
+	static IECore::ConstStringDataPtr headerValue( const std::string &columnName );
 
-		const std::variant<Private::InspectorPtr, IECore::InternedString> m_inspector;
-		const CellData m_headerData;
-		const IECore::InternedString m_contextProperty;
-
+	const std::variant<Private::InspectorPtr, IECore::InternedString> m_inspector;
+	const CellData m_headerData;
+	const IECore::InternedString m_contextProperty;
 };
 
 IE_CORE_DECLAREPTR( InspectorColumn )

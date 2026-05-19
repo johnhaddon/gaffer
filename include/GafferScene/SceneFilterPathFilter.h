@@ -51,26 +51,25 @@ IE_CORE_FORWARDDECLARE( Filter )
 class GAFFERSCENE_API SceneFilterPathFilter : public Gaffer::PathFilter
 {
 
-	public :
+public:
 
-		explicit SceneFilterPathFilter( FilterPtr sceneFilter, IECore::CompoundDataPtr userData = nullptr );
-		~SceneFilterPathFilter() override;
+	explicit SceneFilterPathFilter( FilterPtr sceneFilter, IECore::CompoundDataPtr userData = nullptr );
+	~SceneFilterPathFilter() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::SceneFilterPathFilter, SceneFilterPathFilterTypeId, Gaffer::PathFilter );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::SceneFilterPathFilter, SceneFilterPathFilterTypeId, Gaffer::PathFilter );
 
-	protected :
+protected:
 
-		void doFilter( std::vector<Gaffer::PathPtr> &paths, const IECore::Canceller *canceller ) const override;
+	void doFilter( std::vector<Gaffer::PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-	private :
+private:
 
-		void plugDirtied( const Gaffer::Plug *plug );
+	void plugDirtied( const Gaffer::Plug *plug );
 
-		struct Remove;
+	struct Remove;
 
-		FilterPtr m_sceneFilter;
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
-
+	FilterPtr m_sceneFilter;
+	Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
 };
 
 IE_CORE_DECLAREPTR( SceneFilterPathFilter )

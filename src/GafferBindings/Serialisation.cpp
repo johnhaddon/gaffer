@@ -85,10 +85,8 @@ namespace
 /// to this behaviour. Perhaps this could just be driven by metadata?
 bool keyedByIndex( const GraphComponent *parent )
 {
-	return
-		runTimeCast<const Spreadsheet::RowsPlug>( parent ) ||
-		runTimeCast<const ArrayPlug>( parent )
-	;
+	return runTimeCast<const Spreadsheet::RowsPlug>( parent ) ||
+		runTimeCast<const ArrayPlug>( parent );
 }
 
 std::string modulePathInternal( const boost::python::object &o )
@@ -108,20 +106,21 @@ std::string modulePathInternal( const boost::python::object &o )
 		objectName = extract<std::string>( o.attr( "__class__" ).attr( "__name__" ) );
 	}
 
-	using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
+	using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
 	std::string sanitisedModulePath;
 	Tokenizer tokens( modulePath, boost::char_separator<char>( "." ) );
 
-	for( Tokenizer::iterator tIt=tokens.begin(); tIt!=tokens.end(); tIt++ )
+	for( Tokenizer::iterator tIt = tokens.begin(); tIt != tokens.end(); tIt++ )
 	{
-		if( tIt->compare( 0, 1, "_" )==0 )
+		if( tIt->compare( 0, 1, "_" ) == 0 )
 		{
 			// assume that module path components starting with _ are bogus, and are used only to bring
 			// binary components into a namespace.
 			continue;
 		}
-		Tokenizer::iterator next = tIt; next++;
-		if( next==tokens.end() && *tIt == objectName )
+		Tokenizer::iterator next = tIt;
+		next++;
+		if( next == tokens.end() && *tIt == objectName )
 		{
 			// if the last module name is the same as the class name then assume this is just the file the
 			// class has been implemented in.
@@ -144,8 +143,7 @@ std::string modulePathInternal( const boost::python::object &o )
 //////////////////////////////////////////////////////////////////////////
 
 Serialisation::Serialisation( const Gaffer::GraphComponent *parent, const std::string &parentName, const Gaffer::Set *filter )
-	:	m_parent( parent ), m_parentName( parentName ), m_filter( filter ),
-		m_protectParentNamespace( Context::current()->get<bool>( "serialiser:protectParentNamespace", true ) )
+	: m_parent( parent ), m_parentName( parentName ), m_filter( filter ), m_protectParentNamespace( Context::current()->get<bool>( "serialiser:protectParentNamespace", true ) )
 {
 	IECorePython::ScopedGILLock gilLock;
 	walk( parent, parentName, acquireSerialiser( parent ), Context::current()->canceller() );
@@ -171,7 +169,7 @@ const Gaffer::GraphComponent *Serialisation::parent() const
 std::string Serialisation::result() const
 {
 	std::string result;
-	for( std::set<std::string>::const_iterator it=m_modules.begin(); it!=m_modules.end(); it++ )
+	for( std::set<std::string>::const_iterator it = m_modules.begin(); it != m_modules.end(); it++ )
 	{
 		result += "import " + *it + "\n";
 	}
@@ -400,7 +398,7 @@ std::string Serialisation::childIdentifier( const std::string &parentIdentifier,
 		return "";
 	}
 
-	const GraphComponent *parent = (*child)->parent();
+	const GraphComponent *parent = ( *child )->parent();
 	std::string result = parentIdentifier;
 	if( keyedByIndex( parent ) )
 	{
@@ -411,7 +409,7 @@ std::string Serialisation::childIdentifier( const std::string &parentIdentifier,
 	else
 	{
 		result += "[\"";
-		result += (*child)->getName().string();
+		result += ( *child )->getName().string();
 		result += "\"]";
 	}
 	return result;

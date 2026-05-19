@@ -176,8 +176,7 @@ struct Globals::InteractiveRenderThread
 {
 
 	InteractiveRenderThread( Globals *globals )
-		:	m_globals( globals ), m_state( State::Stopped ),
-			m_thread( &InteractiveRenderThread::threadFunction, this )
+		: m_globals( globals ), m_state( State::Stopped ), m_thread( &InteractiveRenderThread::threadFunction, this )
 	{
 	}
 
@@ -216,57 +215,61 @@ struct Globals::InteractiveRenderThread
 		);
 	}
 
-	private :
+private:
 
-		void threadFunction()
+	void threadFunction()
+	{
+		{
+			unique_lock lock( m_stateMutex );
+			m_state = State::Waiting;
+		}
+
+		while( true )
 		{
 			{
 				unique_lock lock( m_stateMutex );
-				m_state = State::Waiting;
+				m_stateCondition.wait(
+					lock, [this] {
+						return m_requestedState.has_value();
+					}
+				);
+				m_state = m_requestedState.value();
+				m_requestedState.reset();
 			}
 
-			while( true )
+			if( m_state == State::Stopped )
 			{
+				return;
+			}
+			else if( m_state == State::Rendering )
+			{
+				m_globals->m_session->riley->Render( { 1, &m_globals->m_renderView }, m_globals->m_renderParameters );
 				{
 					unique_lock lock( m_stateMutex );
-					m_stateCondition.wait(
-						lock, [this] {
-							return m_requestedState.has_value();
-						}
-					);
-					m_state = m_requestedState.value();
-					m_requestedState.reset();
+					m_state = State::Waiting;
 				}
-
-				if( m_state == State::Stopped )
-				{
-					return;
-				}
-				else if( m_state == State::Rendering )
-				{
-					m_globals->m_session->riley->Render( { 1, &m_globals->m_renderView }, m_globals->m_renderParameters );
-					{
-						unique_lock lock( m_stateMutex );
-						m_state = State::Waiting;
-					}
-					m_stateCondition.notify_one();
-				}
+				m_stateCondition.notify_one();
 			}
 		}
+	}
 
-		Globals *m_globals;
-		// Protects `m_requestedState` and `m_state`.
-		std::mutex m_stateMutex;
-		// Signals changes to `m_requestedState` and `m_state`.
-		std::condition_variable m_stateCondition;
-		enum class State { Stopped, Waiting, Rendering };
-		// Set by main thread to request change of state
-		// on render thread.
-		std::optional<State> m_requestedState;
-		// Set by render thread to reflect change of state.
-		State m_state;
-		std::thread m_thread;
-
+	Globals *m_globals;
+	// Protects `m_requestedState` and `m_state`.
+	std::mutex m_stateMutex;
+	// Signals changes to `m_requestedState` and `m_state`.
+	std::condition_variable m_stateCondition;
+	enum class State
+	{
+		Stopped,
+		Waiting,
+		Rendering
+	};
+	// Set by main thread to request change of state
+	// on render thread.
+	std::optional<State> m_requestedState;
+	// Set by render thread to reflect change of state.
+	State m_state;
+	std::thread m_thread;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -274,10 +277,7 @@ struct Globals::InteractiveRenderThread
 //////////////////////////////////////////////////////////////////////////
 
 Globals::Globals( RtUString rileyVariant, IECoreScenePreview::Renderer::RenderType renderType, const IECore::MessageHandlerPtr &messageHandler )
-	:	m_rileyVariant( rileyVariant ), m_renderType( renderType ), m_messageHandler( messageHandler ),
-		m_pixelFilter( Loader::strings().k_gaussian ), m_pixelFilterSize( g_defaultPixelFilterSize ), m_pixelVariance( g_defaultPixelVariance ),
-		m_expectedSessionCreationThreadId( std::this_thread::get_id() ),
-		m_renderTargetExtent()
+	: m_rileyVariant( rileyVariant ), m_renderType( renderType ), m_messageHandler( messageHandler ), m_pixelFilter( Loader::strings().k_gaussian ), m_pixelFilterSize( g_defaultPixelFilterSize ), m_pixelVariance( g_defaultPixelVariance ), m_expectedSessionCreationThreadId( std::this_thread::get_id() ), m_renderTargetExtent()
 {
 	// Initialise `m_integratorToConvert`.
 	option( g_integratorOption, nullptr );
@@ -707,8 +707,7 @@ void Globals::updateRenderView()
 				/// \todo Projection?
 				{
 					riley::ShadingNode::Type::k_Projection, RtUString( "PxrCamera" ),
-					RtUString( "projection" ), RtParamList()
-				},
+					RtUString( "projection" ), RtParamList() },
 				StaticTransform( matrix ),
 				RtParamList()
 			);
@@ -716,7 +715,7 @@ void Globals::updateRenderView()
 		camera.id = m_defaultCamera;
 	}
 
-	if( std::any_of( m_outputs.begin(), m_outputs.end(), [] ( const auto &v ) { return v.second->getType() == "quicklyNoiseless"; } ) )
+	if( std::any_of( m_outputs.begin(), m_outputs.end(), []( const auto &v ) { return v.second->getType() == "quicklyNoiseless"; } ) )
 	{
 		// The `quicklyNoiseless` driver doesn't handle interactive edits to the
 		// crop window - it variously crashes, offsets the image, or fails to clear
@@ -793,7 +792,7 @@ void Globals::updateRenderView()
 	{
 		// Render outputs.
 
-		const vector<riley::RenderOutputId> &renderOutputs = acquireRenderOutputs( output.get());
+		const vector<riley::RenderOutputId> &renderOutputs = acquireRenderOutputs( output.get() );
 		if( renderOutputs.empty() )
 		{
 			IECore::msg( IECore::Msg::Warning, "RenderManRenderer", fmt::format( "Ignoring unsupported output {}", name.c_str() ) );
@@ -891,7 +890,6 @@ void Globals::updateRenderView()
 		idToList<riley::SampleFilterList>( m_sampleFilterId ),
 		RtParamList()
 	);
-
 }
 
 void Globals::deleteRenderView()

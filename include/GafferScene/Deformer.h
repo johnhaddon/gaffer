@@ -50,64 +50,63 @@ namespace GafferScene
 class GAFFERSCENE_API Deformer : public ObjectProcessor
 {
 
-	public :
+public:
 
-		~Deformer() override;
+	~Deformer() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Deformer, DeformerTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Deformer, DeformerTypeId, ObjectProcessor );
 
-		Gaffer::BoolPlug *adjustBoundsPlug();
-		const Gaffer::BoolPlug *adjustBoundsPlug() const;
+	Gaffer::BoolPlug *adjustBoundsPlug();
+	const Gaffer::BoolPlug *adjustBoundsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Constructs with a single input ScenePlug named "in". Use inPlug()
-		/// to access this plug.
-		explicit Deformer( const std::string &name );
-		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
-		/// convenience for accessing the first child in the array, and use
-		/// inPlugs() to access the array itself.
-		Deformer( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
+	/// Constructs with a single input ScenePlug named "in". Use inPlug()
+	/// to access this plug.
+	explicit Deformer( const std::string &name );
+	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
+	/// convenience for accessing the first child in the array, and use
+	/// inPlugs() to access the array itself.
+	Deformer( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
 
-		/// Used to determine whether adjusted bounds need to be propagated up to
-		/// all ancestor locations. Default implementation checks the value of `adjustBoundsPlug()`
-		/// so that users may turn off bounds updates if they want. Derived classes may override
-		/// to disable bounds propagation for configurations which do not create actual deformation.
-		/// > Note : It is assumed that `affectsProcessedObject()` will return true for any plugs
-		/// > accessed by `adjustBounds()`.
-		virtual bool adjustBounds() const;
+	/// Used to determine whether adjusted bounds need to be propagated up to
+	/// all ancestor locations. Default implementation checks the value of `adjustBoundsPlug()`
+	/// so that users may turn off bounds updates if they want. Derived classes may override
+	/// to disable bounds propagation for configurations which do not create actual deformation.
+	/// > Note : It is assumed that `affectsProcessedObject()` will return true for any plugs
+	/// > accessed by `adjustBounds()`.
+	virtual bool adjustBounds() const;
 
-		/// If `computeProcessedObjectBound()` is overridden, this must be overriden
-		/// to return true for any plugs it uses. Unlike other affects methods, overrides
-		/// should _not_ call the base class implementation.
-		virtual bool affectsProcessedObjectBound( const Gaffer::Plug *input ) const;
-		/// If `computeProcessedObjectBound()` is overridden, this must be
-		/// be overridden to match. Unlike other hash methods, overrides should
-		/// _not_ call the base class implementation.
-		virtual void hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		/// May be implemented by derived classes to return a bound for the
-		/// result of `computeProcessedObject()`. This will only be called if
-		/// `adjustBounds()` returns true. The default implementation uses
-		/// the brute force approach of actually processing the object, so
-		/// reimplementing to provide a cheaper approximate bound may improve
-		/// performance considerably.
-		/// > Note : Implementations are currently hampered by the fact that
-		/// > `in.bound` provides the bound for the input object _and_ its
-		/// > children. We could consider having separate `in.objectBound`
-		/// > and `in.childBound` plugs instead.
-		virtual Imath::Box3f computeProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context ) const;
+	/// If `computeProcessedObjectBound()` is overridden, this must be overriden
+	/// to return true for any plugs it uses. Unlike other affects methods, overrides
+	/// should _not_ call the base class implementation.
+	virtual bool affectsProcessedObjectBound( const Gaffer::Plug *input ) const;
+	/// If `computeProcessedObjectBound()` is overridden, this must be
+	/// be overridden to match. Unlike other hash methods, overrides should
+	/// _not_ call the base class implementation.
+	virtual void hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	/// May be implemented by derived classes to return a bound for the
+	/// result of `computeProcessedObject()`. This will only be called if
+	/// `adjustBounds()` returns true. The default implementation uses
+	/// the brute force approach of actually processing the object, so
+	/// reimplementing to provide a cheaper approximate bound may improve
+	/// performance considerably.
+	/// > Note : Implementations are currently hampered by the fact that
+	/// > `in.bound` provides the bound for the input object _and_ its
+	/// > children. We could consider having separate `in.objectBound`
+	/// > and `in.childBound` plugs instead.
+	virtual Imath::Box3f computeProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context ) const;
 
-	private :
+private:
 
-		void init();
+	void init();
 
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Deformer )

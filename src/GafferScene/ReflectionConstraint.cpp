@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( ReflectionConstraint );
 size_t ReflectionConstraint::g_firstPlugIndex = 0;
 
 ReflectionConstraint::ReflectionConstraint( const std::string &name )
-	:	Constraint( name )
+	: Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "camera" ) );
@@ -141,8 +141,7 @@ const Gaffer::FloatPlug *ReflectionConstraint::twistPlug() const
 
 bool ReflectionConstraint::affectsConstraint( const Gaffer::Plug *input ) const
 {
-	return
-		input == cameraPlug() ||
+	return input == cameraPlug() ||
 		input == inPlug()->existsPlug() ||
 		input == inPlug()->transformPlug() ||
 		input == distanceModePlug() ||
@@ -150,8 +149,7 @@ bool ReflectionConstraint::affectsConstraint( const Gaffer::Plug *input ) const
 		input == aimEnabledPlug() ||
 		input->parent() == aimPlug() ||
 		input->parent() == upPlug() ||
-		input == twistPlug()
-	;
+		input == twistPlug();
 }
 
 void ReflectionConstraint::hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const

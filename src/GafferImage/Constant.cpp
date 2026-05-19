@@ -56,7 +56,7 @@ GAFFER_NODE_DEFINE_TYPE( Constant );
 size_t Constant::g_firstPlugIndex = 0;
 
 Constant::Constant( const std::string &name )
-	:	FlatImageSource( name )
+	: FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -80,12 +80,12 @@ const GafferImage::FormatPlug *Constant::formatPlug() const
 
 Gaffer::Color4fPlug *Constant::colorPlug()
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+1 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::Color4fPlug *Constant::colorPlug() const
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+1 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::StringPlug *Constant::layerPlug()

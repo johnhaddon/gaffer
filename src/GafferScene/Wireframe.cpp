@@ -66,126 +66,125 @@ namespace
 struct MakeWireframe
 {
 
-	CurvesPrimitivePtr operator() ( const V2fVectorData *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	CurvesPrimitivePtr operator () ( const V2fVectorData *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
 	{
 		return makeWireframe<V2fVectorData>( data, mesh, name, primitiveVariable, canceller );
 	}
 
-	CurvesPrimitivePtr operator() ( const V3fVectorData *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	CurvesPrimitivePtr operator () ( const V3fVectorData *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
 	{
 		return makeWireframe<V3fVectorData>( data, mesh, name, primitiveVariable, canceller );
 	}
 
-	CurvesPrimitivePtr operator() ( const Data *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	CurvesPrimitivePtr operator () ( const Data *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
 	{
 		throw IECore::Exception(
 			fmt::format( "PrimitiveVariable \"{}\" has unsupported type \"{}\"", name, data->typeName() )
 		);
 	}
 
-	private :
+private:
 
-		template<typename T>
-		CurvesPrimitivePtr makeWireframe( const T *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	template<typename T>
+	CurvesPrimitivePtr makeWireframe( const T *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	{
+		using Vec = typename T::ValueType::value_type;
+		using DataView = PrimitiveVariable::IndexedView<Vec>;
+
+		DataView dataView;
+		const vector<int> *vertexIds = nullptr;
+		switch( primitiveVariable.interpolation )
 		{
-			using Vec = typename T::ValueType::value_type;
-			using DataView = PrimitiveVariable::IndexedView<Vec>;
+			case PrimitiveVariable::Vertex :
+			case PrimitiveVariable::Varying :
+				vertexIds = &mesh->vertexIds()->readable();
+				dataView = DataView( primitiveVariable );
+				break;
+			case PrimitiveVariable::FaceVarying :
+				vertexIds = primitiveVariable.indices ? &primitiveVariable.indices->readable() : nullptr;
+				dataView = DataView( data->readable(), nullptr );
+				break;
+			default :
+				throw IECore::Exception(
+					fmt::format( "Primitive variable \"{}\" must have Vertex, Varying or FaceVarying interpolation", name )
+				);
+		}
 
-			DataView dataView;
-			const vector<int> *vertexIds = nullptr;
-			switch( primitiveVariable.interpolation )
+
+		using Edge = std::pair<int, int>;
+
+		std::vector<Edge> edges;
+
+		// We don't know upfront how many edges we will generate.
+		// `mesh->variableSize( PrimitiveVariable::FaceVarying )` gives us
+		// an upper bound, but edges can be shared by faces in which case
+		// we only add the edge once. For a fully closed mesh without border
+		// edges, we will only generate half of the edges from this upper bound.
+		// (For non-manifold meshes we could generate even fewer, but we assume
+		// we will not be given those).
+		edges.reserve( mesh->variableSize( PrimitiveVariable::FaceVarying ) );
+
+		int vertexIdsIndex = 0;
+		for( int numVertices : mesh->verticesPerFace()->readable() )
+		{
+			for( int i = 0; i < numVertices; ++i )
 			{
-				case PrimitiveVariable::Vertex :
-				case PrimitiveVariable::Varying :
-					vertexIds = &mesh->vertexIds()->readable();
-					dataView = DataView( primitiveVariable );
-					break;
-				case PrimitiveVariable::FaceVarying :
-					vertexIds = primitiveVariable.indices ? &primitiveVariable.indices->readable() : nullptr;
-					dataView = DataView( data->readable(), nullptr );
-					break;
-				default :
-					throw IECore::Exception(
-						fmt::format( "Primitive variable \"{}\" must have Vertex, Varying or FaceVarying interpolation", name )
-					);
-			}
-
-
-			using Edge = std::pair<int, int>;
-
-			std::vector<Edge> edges;
-
-			// We don't know upfront how many edges we will generate.
-			// `mesh->variableSize( PrimitiveVariable::FaceVarying )` gives us
-			// an upper bound, but edges can be shared by faces in which case
-			// we only add the edge once. For a fully closed mesh without border
-			// edges, we will only generate half of the edges from this upper bound.
-			// (For non-manifold meshes we could generate even fewer, but we assume
-			// we will not be given those).
-			edges.reserve( mesh->variableSize( PrimitiveVariable::FaceVarying ) );
-
-			int vertexIdsIndex = 0;
-			for( int numVertices : mesh->verticesPerFace()->readable() )
-			{
-				for( int i = 0; i < numVertices; ++i )
+				int index0 = vertexIdsIndex + i;
+				int index1 = vertexIdsIndex + ( i + 1 ) % numVertices;
+				if( vertexIds )
 				{
-					int index0 = vertexIdsIndex + i;
-					int index1 = vertexIdsIndex + (i + 1) % numVertices;
-					if( vertexIds )
-					{
-						index0 = (*vertexIds)[index0];
-						index1 = (*vertexIds)[index1];
-					}
-
-					if( index0 < index1 )
-					{
-						edges.emplace_back( index0, index1 );
-					}
-					else
-					{
-						edges.emplace_back( index1, index0 );
-					}
+					index0 = ( *vertexIds )[index0];
+					index1 = ( *vertexIds )[index1];
 				}
-				Canceller::check( canceller );
-				vertexIdsIndex += numVertices;
-			}
 
-			// We only want to output each edge once, so sort and discard duplicates
-			std::sort( edges.begin(), edges.end() );
+				if( index0 < index1 )
+				{
+					edges.emplace_back( index0, index1 );
+				}
+				else
+				{
+					edges.emplace_back( index1, index0 );
+				}
+			}
 			Canceller::check( canceller );
-			edges.erase( std::unique( edges.begin(), edges.end() ), edges.end() );
-
-			IECore::V3fVectorDataPtr pData = new V3fVectorData;
-			pData->setInterpretation( GeometricData::Point );
-			vector<V3f> &p = pData->writable();
-			// Each edge we add will add 2 points to `p`.
-			p.reserve( edges.size() * 2 );
-
-			for( const Edge &e : edges )
-			{
-				p.push_back( v3f( dataView[e.first] ) );
-				p.push_back( v3f( dataView[e.second] ) );
-				Canceller::check( canceller );
-			}
-
-			IECore::IntVectorDataPtr vertsPerCurveData = new IntVectorData;
-			vertsPerCurveData->writable().resize( p.size() / 2, 2 );
-
-			CurvesPrimitivePtr result = new CurvesPrimitive( vertsPerCurveData );
-			result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
-			return result;
+			vertexIdsIndex += numVertices;
 		}
 
-		V3f v3f( const Imath::V3f &v )
+		// We only want to output each edge once, so sort and discard duplicates
+		std::sort( edges.begin(), edges.end() );
+		Canceller::check( canceller );
+		edges.erase( std::unique( edges.begin(), edges.end() ), edges.end() );
+
+		IECore::V3fVectorDataPtr pData = new V3fVectorData;
+		pData->setInterpretation( GeometricData::Point );
+		vector<V3f> &p = pData->writable();
+		// Each edge we add will add 2 points to `p`.
+		p.reserve( edges.size() * 2 );
+
+		for( const Edge &e : edges )
 		{
-			return v;
+			p.push_back( v3f( dataView[e.first] ) );
+			p.push_back( v3f( dataView[e.second] ) );
+			Canceller::check( canceller );
 		}
 
-		V3f v3f( const Imath::V2f &v )
-		{
-			return V3f( v.x, v.y, 0.0f );
-		}
+		IECore::IntVectorDataPtr vertsPerCurveData = new IntVectorData;
+		vertsPerCurveData->writable().resize( p.size() / 2, 2 );
 
+		CurvesPrimitivePtr result = new CurvesPrimitive( vertsPerCurveData );
+		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
+		return result;
+	}
+
+	V3f v3f( const Imath::V3f &v )
+	{
+		return v;
+	}
+
+	V3f v3f( const Imath::V2f &v )
+	{
+		return V3f( v.x, v.y, 0.0f );
+	}
 };
 
 /// \todo Perhaps this could go in IECoreScene::MeshAlgo
@@ -212,7 +211,7 @@ GAFFER_NODE_DEFINE_TYPE( Wireframe );
 size_t Wireframe::g_firstPlugIndex = 0;
 
 Wireframe::Wireframe( const std::string &name )
-	:	Deformer( name )
+	: Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "position", Plug::In, "P" ) );
@@ -247,8 +246,7 @@ bool Wireframe::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
 	return Deformer::affectsProcessedObject( input ) ||
 		input == positionPlug() ||
-		input == widthPlug()
-	;
+		input == widthPlug();
 }
 
 void Wireframe::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

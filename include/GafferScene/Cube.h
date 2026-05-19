@@ -46,30 +46,29 @@ namespace GafferScene
 class GAFFERSCENE_API Cube : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Cube, CubeTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Cube, CubeTypeId, ObjectSource );
 
-		explicit Cube( const std::string &name=defaultName<Cube>() );
-		~Cube() override;
+	explicit Cube( const std::string &name = defaultName<Cube>() );
+	~Cube() override;
 
-		Gaffer::V3fPlug *dimensionsPlug();
-		const Gaffer::V3fPlug *dimensionsPlug() const;
+	Gaffer::V3fPlug *dimensionsPlug();
+	const Gaffer::V3fPlug *dimensionsPlug() const;
 
-		Gaffer::V3iPlug *divisionsPlug();
-		const Gaffer::V3iPlug *divisionsPlug() const;
+	Gaffer::V3iPlug *divisionsPlug();
+	const Gaffer::V3iPlug *divisionsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Cube )

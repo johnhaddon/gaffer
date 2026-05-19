@@ -52,88 +52,87 @@ namespace GafferOSL
 class GAFFEROSL_API OSLImage : public GafferImage::ImageProcessor
 {
 
-	public :
+public:
 
-		explicit OSLImage( const std::string &name=defaultName<OSLImage>() );
-		~OSLImage() override;
+	explicit OSLImage( const std::string &name = defaultName<OSLImage>() );
+	~OSLImage() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLImage, OSLImageTypeId, GafferImage::ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLImage, OSLImageTypeId, GafferImage::ImageProcessor );
 
-		GafferImage::FormatPlug *defaultFormatPlug();
-		const GafferImage::FormatPlug *defaultFormatPlug() const;
+	GafferImage::FormatPlug *defaultFormatPlug();
+	const GafferImage::FormatPlug *defaultFormatPlug() const;
 
-		Gaffer::Plug *channelsPlug();
-		const Gaffer::Plug *channelsPlug() const;
+	Gaffer::Plug *channelsPlug();
+	const Gaffer::Plug *channelsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		bool enabled() const override;
+	bool enabled() const override;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
-		GafferImage::Format computeFormat( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	GafferImage::Format computeFormat( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		GafferScene::ShaderPlug *shaderPlug();
-		const GafferScene::ShaderPlug *shaderPlug() const;
+	GafferScene::ShaderPlug *shaderPlug();
+	const GafferScene::ShaderPlug *shaderPlug() const;
 
-		// computeChannelData() is called for individual channels at a time, but when we run a
-		// shader we get all the outputs at once. we therefore use this plug to compute (and
-		// automatically cache) the shading and then access it from computeChannelData(), which
-		// simply extracts the right part of the data.
-		/// \todo Investigate turning off caching for the channelData plug, since we're currently
-		/// caching once there and once in the shadingPlug.
-		Gaffer::ObjectPlug *shadingPlug();
-		const Gaffer::ObjectPlug *shadingPlug() const;
+	// computeChannelData() is called for individual channels at a time, but when we run a
+	// shader we get all the outputs at once. we therefore use this plug to compute (and
+	// automatically cache) the shading and then access it from computeChannelData(), which
+	// simply extracts the right part of the data.
+	/// \todo Investigate turning off caching for the channelData plug, since we're currently
+	/// caching once there and once in the shadingPlug.
+	Gaffer::ObjectPlug *shadingPlug();
+	const Gaffer::ObjectPlug *shadingPlug() const;
 
-		// Sorted list of affected channels, used to calculate outPlug()->channelNames(), and
-		// bypass computeChannelData for channels which we don't affect.  This can usually be
-		// evaluated without evaluating the shading, but if closure plugs are present, evaluating
-		// this will also evaluate shadingPlug()
-		Gaffer::StringVectorDataPlug *affectedChannelsPlug();
-		const Gaffer::StringVectorDataPlug *affectedChannelsPlug() const;
+	// Sorted list of affected channels, used to calculate outPlug()->channelNames(), and
+	// bypass computeChannelData for channels which we don't affect.  This can usually be
+	// evaluated without evaluating the shading, but if closure plugs are present, evaluating
+	// this will also evaluate shadingPlug()
+	Gaffer::StringVectorDataPlug *affectedChannelsPlug();
+	const Gaffer::StringVectorDataPlug *affectedChannelsPlug() const;
 
-		void hashShading( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstCompoundDataPtr computeShading( const Gaffer::Context *context ) const;
+	void hashShading( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstCompoundDataPtr computeShading( const Gaffer::Context *context ) const;
 
-		// When computing the channel names, we do a special shading evaluation of a single pixel
-		// with no actual channel data. This allows a shader using a closure connection to create
-		// output channel names based on the input channels, but the channel names shouldn't depend
-		// on the actual pixel data.
-		void hashShadingWithoutChannelData( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstCompoundDataPtr computeShadingWithoutChannelData( const Gaffer::Context *context ) const;
+	// When computing the channel names, we do a special shading evaluation of a single pixel
+	// with no actual channel data. This allows a shader using a closure connection to create
+	// output channel names based on the input channels, but the channel names shouldn't depend
+	// on the actual pixel data.
+	void hashShadingWithoutChannelData( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstCompoundDataPtr computeShadingWithoutChannelData( const Gaffer::Context *context ) const;
 
-		GafferOSL::OSLCode *oslCode();
-		const GafferOSL::OSLCode *oslCode() const;
+	GafferOSL::OSLCode *oslCode();
+	const GafferOSL::OSLCode *oslCode() const;
 
-		GafferImage::Constant *defaultConstant();
-		const GafferImage::Constant *defaultConstant() const;
+	GafferImage::Constant *defaultConstant();
+	const GafferImage::Constant *defaultConstant() const;
 
-		GafferImage::ImagePlug *defaultInPlug();
-		const GafferImage::ImagePlug *defaultInPlug() const;
+	GafferImage::ImagePlug *defaultInPlug();
+	const GafferImage::ImagePlug *defaultInPlug() const;
 
-		// The in plug, set to the default if left unconnected
-		const GafferImage::ImagePlug *defaultedInPlug() const;
+	// The in plug, set to the default if left unconnected
+	const GafferImage::ImagePlug *defaultedInPlug() const;
 
-		void channelsAdded( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
-		void channelsRemoved( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
+	void channelsAdded( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
+	void channelsRemoved( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
 
-		void updateChannels();
+	void updateChannels();
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( OSLImage )

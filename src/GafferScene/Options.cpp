@@ -60,7 +60,7 @@ GAFFER_NODE_DEFINE_TYPE( Options );
 size_t Options::g_firstPlugIndex = 0;
 
 Options::Options( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "options" ) );
@@ -68,7 +68,7 @@ Options::Options( const std::string &name )
 }
 
 Options::Options( const std::string &name, const std::string &rendererPrefix )
-	:	Options( name )
+	: Options( name )
 {
 	const string targetPattern = fmt::format( "option:{}:*", rendererPrefix );
 	for( const auto &target : Metadata::targetsWithMetadata( targetPattern, g_defaultValue ) )

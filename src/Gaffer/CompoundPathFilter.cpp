@@ -45,7 +45,7 @@ using namespace Gaffer;
 IE_CORE_DEFINERUNTIMETYPED( CompoundPathFilter );
 
 CompoundPathFilter::CompoundPathFilter( IECore::CompoundDataPtr userData )
-	:	PathFilter( userData )
+	: PathFilter( userData )
 {
 }
 

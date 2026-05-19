@@ -45,20 +45,19 @@ namespace GafferScene
 class GAFFERSCENE_API UnionFilter : public FilterProcessor
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::UnionFilter, UnionFilterTypeId, FilterProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::UnionFilter, UnionFilterTypeId, FilterProcessor );
 
-		explicit UnionFilter( const std::string &name=defaultName<UnionFilter>() );
-		~UnionFilter() override;
+	explicit UnionFilter( const std::string &name = defaultName<UnionFilter>() );
+	~UnionFilter() override;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const override;
-
+	void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const override;
 };
 
 IE_CORE_DECLAREPTR( UnionFilter )

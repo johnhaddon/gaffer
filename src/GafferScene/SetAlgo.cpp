@@ -100,10 +100,8 @@ bool affectsSetExpression( const Plug *scenePlugChild )
 {
 	if( auto parent = scenePlugChild->parent<ScenePlug>() )
 	{
-		return
-			scenePlugChild == parent->setPlug() ||
-			scenePlugChild == parent->setNamesPlug()
-		;
+		return scenePlugChild == parent->setPlug() ||
+			scenePlugChild == parent->setNamesPlug();
 	}
 	return false;
 }

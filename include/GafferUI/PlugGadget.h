@@ -56,39 +56,38 @@ namespace GafferUI
 class GAFFERUI_API PlugGadget : public ContainerGadget
 {
 
-	public :
+public:
 
-		explicit PlugGadget( Gaffer::PlugPtr plug );
-		~PlugGadget() override;
+	explicit PlugGadget( Gaffer::PlugPtr plug );
+	~PlugGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::PlugGadget, PlugGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::PlugGadget, PlugGadgetTypeId, Gadget );
 
-		void setPlug( Gaffer::PlugPtr plug );
-		template<typename T=Gaffer::Plug>
-		T *getPlug();
+	void setPlug( Gaffer::PlugPtr plug );
+	template<typename T = Gaffer::Plug>
+	T *getPlug();
 
-		void setContext( Gaffer::ContextPtr context );
-		Gaffer::Context *getContext();
+	void setContext( Gaffer::ContextPtr context );
+	Gaffer::Context *getContext();
 
-	protected :
+protected:
 
-		/// Must be implemented by derived classes - will be called whenever
-		/// the ui needs to be updated to reflect a change in the plug.
-		virtual void updateFromPlug();
+	/// Must be implemented by derived classes - will be called whenever
+	/// the ui needs to be updated to reflect a change in the plug.
+	virtual void updateFromPlug();
 
-	private :
+private:
 
-		void plugDirtied( Gaffer::Plug *plug );
-		void plugInputChanged( Gaffer::Plug *plug );
-		void contextChanged( const Gaffer::Context *context, const IECore::InternedString &name );
-		void updateContextConnection();
+	void plugDirtied( Gaffer::Plug *plug );
+	void plugInputChanged( Gaffer::Plug *plug );
+	void contextChanged( const Gaffer::Context *context, const IECore::InternedString &name );
+	void updateContextConnection();
 
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
-		Gaffer::Signals::ScopedConnection m_plugInputChangedConnection;
-		Gaffer::Signals::ScopedConnection m_contextChangedConnection;
-		Gaffer::PlugPtr m_plug;
-		Gaffer::ContextPtr m_context;
-
+	Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
+	Gaffer::Signals::ScopedConnection m_plugInputChangedConnection;
+	Gaffer::Signals::ScopedConnection m_contextChangedConnection;
+	Gaffer::PlugPtr m_plug;
+	Gaffer::ContextPtr m_context;
 };
 
 IE_CORE_DECLAREPTR( PlugGadget )

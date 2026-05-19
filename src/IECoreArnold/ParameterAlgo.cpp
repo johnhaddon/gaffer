@@ -54,7 +54,7 @@ using namespace IECoreArnold;
 namespace
 {
 
-using ArrayPtr = std::unique_ptr<AtArray, void (*)( AtArray *)>;
+using ArrayPtr = std::unique_ptr<AtArray, void ( * )( AtArray * )>;
 
 template<typename T>
 inline const T *dataCast( const char *name, const IECore::Data *data, const std::string &messageContext )
@@ -254,8 +254,7 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 					}
 				}
 				[[fallthrough]];
-			default :
-			{
+			default : {
 				std::string nodeStr = AiNodeGetName( node );
 				if( nodeStr == "" )
 				{
@@ -272,12 +271,12 @@ template<typename T, typename F>
 IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
 {
 	using VectorType = vector<T>;
-	using DataType = IECore::TypedData<vector<T> >;
+	using DataType = IECore::TypedData<vector<T>>;
 	typename DataType::Ptr data = new DataType;
 	VectorType &v = data->writable();
 
-	v.reserve( AiArrayGetNumElements(array) );
-	for( size_t i = 0; i < AiArrayGetNumElements(array); ++i )
+	v.reserve( AiArrayGetNumElements( array ) );
+	for( size_t i = 0; i < AiArrayGetNumElements( array ); ++i )
 	{
 		v.push_back( f( array, i ) );
 	}
@@ -285,7 +284,7 @@ IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
 	return data;
 }
 
-const char* getStrWrapper( const AtArray* a, uint32_t i )
+const char *getStrWrapper( const AtArray *a, uint32_t i )
 {
 	return AiArrayGetStr( a, i ).c_str();
 }
@@ -331,20 +330,17 @@ IECore::DataPtr getParameterInternal( AtNode *node, const AtString name, int par
 			return new FloatData( AiNodeGetFlt( node, name ) );
 		case AI_TYPE_STRING :
 			return new StringData( AiNodeGetStr( node, name ).c_str() );
-		case AI_TYPE_RGB :
-		{
+		case AI_TYPE_RGB : {
 			AtRGB rgb = AiNodeGetRGB( node, name );
 			return new Color3fData( Imath::Color3f( rgb.r, rgb.g, rgb.b ) );
 		}
-		case AI_TYPE_RGBA :
-		{
+		case AI_TYPE_RGBA : {
 			AtRGBA rgba = AiNodeGetRGBA( node, name );
 			return new Color4fData( Imath::Color4f( rgba.r, rgba.g, rgba.b, rgba.a ) );
 		}
-		case AI_TYPE_VECTOR :
-		{
+		case AI_TYPE_VECTOR : {
 			AtVector vector = AiNodeGetVec( node, name );
-			return new V3fData( Imath::V3f( vector.x, vector.y, vector.z ));
+			return new V3fData( Imath::V3f( vector.x, vector.y, vector.z ) );
 		}
 		case AI_TYPE_ARRAY :
 			return arrayToData( AiNodeGetArray( node, name ) );
@@ -413,14 +409,14 @@ void setParameter( AtNode *node, AtString name, const IECore::Data *value, const
 	}
 }
 
-void setParameter( AtNode *node, const char* name, const IECore::Data *value, const std::string &messageContext )
+void setParameter( AtNode *node, const char *name, const IECore::Data *value, const std::string &messageContext )
 {
 	setParameter( node, AtString( name ), value, messageContext );
 }
 
 void setParameters( AtNode *node, const IECore::CompoundDataMap &values, const std::string &messageContext )
 {
-	for( CompoundDataMap::const_iterator it=values.begin(); it!=values.end(); it++ )
+	for( CompoundDataMap::const_iterator it = values.begin(); it != values.end(); it++ )
 	{
 		setParameter( node, it->first.value().c_str(), it->second.get(), messageContext );
 	}
@@ -491,7 +487,7 @@ int parameterType( IECore::TypeId dataType, bool &array )
 {
 	switch( dataType )
 	{
-		// non-array types
+			// non-array types
 
 		case IntDataTypeId :
 		case Int64DataTypeId :
@@ -531,7 +527,7 @@ int parameterType( IECore::TypeId dataType, bool &array )
 			array = false;
 			return AI_TYPE_MATRIX;
 
-		// array types
+			// array types
 
 		case IntVectorDataTypeId :
 			array = true;
@@ -595,9 +591,10 @@ AtArray *dataToArray( const IECore::Data *data, int aiType )
 		// convert to an AtArray here.
 		const vector<bool> &booleans = static_cast<const BoolVectorData *>( data )->readable();
 		vector<bool>::size_type booleansSize = booleans.size();
-		AtArray* array = AiArrayAllocate( booleansSize, 1, AI_TYPE_BOOLEAN );
-		for(vector<bool>::size_type i = 0; i < booleansSize; ++i){
-			AiArraySetBool(array, i, booleans[i]);
+		AtArray *array = AiArrayAllocate( booleansSize, 1, AI_TYPE_BOOLEAN );
+		for( vector<bool>::size_type i = 0; i < booleansSize; ++i )
+		{
+			AiArraySetBool( array, i, booleans[i] );
 		}
 		return array;
 	}
@@ -636,7 +633,7 @@ AtArray *dataToArray( const DataSamples &samples, int aiType )
 
 	for( auto it = samples.begin(); it != samples.end(); ++it )
 	{
-		if( (*it)->typeId() != samples.front()->typeId() )
+		if( ( *it )->typeId() != samples.front()->typeId() )
 		{
 			throw IECore::Exception( "ParameterAlgo::dataToArray() : Mismatched sample types." );
 		}

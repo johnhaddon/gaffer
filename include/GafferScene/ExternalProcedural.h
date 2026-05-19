@@ -46,33 +46,32 @@ namespace GafferScene
 class GAFFERSCENE_API ExternalProcedural : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ExternalProcedural, ExternalProceduralTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ExternalProcedural, ExternalProceduralTypeId, ObjectSource );
 
-		explicit ExternalProcedural( const std::string &name=defaultName<ExternalProcedural>() );
-		~ExternalProcedural() override;
+	explicit ExternalProcedural( const std::string &name = defaultName<ExternalProcedural>() );
+	~ExternalProcedural() override;
 
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		Gaffer::Box3fPlug *boundPlug();
-		const Gaffer::Box3fPlug *boundPlug() const;
+	Gaffer::Box3fPlug *boundPlug();
+	const Gaffer::Box3fPlug *boundPlug() const;
 
-		Gaffer::CompoundDataPlug *parametersPlug();
-		const Gaffer::CompoundDataPlug *parametersPlug() const;
+	Gaffer::CompoundDataPlug *parametersPlug();
+	const Gaffer::CompoundDataPlug *parametersPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ExternalProcedural )

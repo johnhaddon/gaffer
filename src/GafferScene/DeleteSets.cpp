@@ -70,10 +70,10 @@ bool keep( InternedString set, const std::string &names, bool invert )
 
 GAFFER_NODE_DEFINE_TYPE( DeleteSets );
 
-size_t DeleteSets::g_firstPlugIndex(0);
+size_t DeleteSets::g_firstPlugIndex( 0 );
 
 DeleteSets::DeleteSets( const std::string &name )
-	:	SceneProcessor( name )
+	: SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );

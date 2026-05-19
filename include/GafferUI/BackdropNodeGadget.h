@@ -47,66 +47,65 @@ namespace GafferUI
 class GAFFERUI_API BackdropNodeGadget : public NodeGadget
 {
 
-	public :
+public:
 
-		explicit BackdropNodeGadget( Gaffer::NodePtr node );
-		~BackdropNodeGadget() override;
+	explicit BackdropNodeGadget( Gaffer::NodePtr node );
+	~BackdropNodeGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::BackdropNodeGadget, BackdropNodeGadgetTypeId, NodeGadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::BackdropNodeGadget, BackdropNodeGadgetTypeId, NodeGadget );
 
-		std::string getToolTip( const IECore::LineSegment3f &line ) const override;
+	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-		void setBound( const Imath::Box2f &bound );
-		Imath::Box2f getBound() const;
+	void setBound( const Imath::Box2f &bound );
+	Imath::Box2f getBound() const;
 
-		/// Resizes the backdrop to frame the specified nodes.
-		/// \undoable
-		void frame( const std::vector<Gaffer::Node *> &nodes );
-		/// Fills nodes with all the nodes currently enclosed by the backdrop.
-		void framed( std::vector<Gaffer::Node *> &nodes ) const;
+	/// Resizes the backdrop to frame the specified nodes.
+	/// \undoable
+	void frame( const std::vector<Gaffer::Node *> &nodes );
+	/// Fills nodes with all the nodes currently enclosed by the backdrop.
+	void framed( std::vector<Gaffer::Node *> &nodes ) const;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		void contextChanged();
-		void plugDirtied( const Gaffer::Plug *plug );
+	void contextChanged();
+	void plugDirtied( const Gaffer::Plug *plug );
 
-		bool mouseMove( Gadget *gadget, const ButtonEvent &event );
-		bool buttonPress( Gadget *gadget, const ButtonEvent &event );
-		IECore::RunTimeTypedPtr dragBegin( Gadget *gadget, const DragDropEvent &event );
-		bool dragEnter( Gadget *gadget, const DragDropEvent &event );
-		bool dragMove( Gadget *gadget, const DragDropEvent &event );
-		bool dragEnd( Gadget *gadget, const DragDropEvent &event );
-		void leave( Gadget *gadget, const ButtonEvent &event );
+	bool mouseMove( Gadget *gadget, const ButtonEvent &event );
+	bool buttonPress( Gadget *gadget, const ButtonEvent &event );
+	IECore::RunTimeTypedPtr dragBegin( Gadget *gadget, const DragDropEvent &event );
+	bool dragEnter( Gadget *gadget, const DragDropEvent &event );
+	bool dragMove( Gadget *gadget, const DragDropEvent &event );
+	bool dragEnd( Gadget *gadget, const DragDropEvent &event );
+	void leave( Gadget *gadget, const ButtonEvent &event );
 
-		// The width in gadget coordinates that can be hovered and then dragged at the edge of frame.
-		float hoverWidth() const;
-		// -1 means the min in that direction, +1 means the max in that direction, 0
-		// means not hovered in that direction.
-		void hoveredEdges( const ButtonEvent &event, int &horizontal, int &vertical ) const;
+	// The width in gadget coordinates that can be hovered and then dragged at the edge of frame.
+	float hoverWidth() const;
+	// -1 means the min in that direction, +1 means the max in that direction, 0
+	// means not hovered in that direction.
+	void hoveredEdges( const ButtonEvent &event, int &horizontal, int &vertical ) const;
 
-		void nodeMetadataChanged( IECore::InternedString key );
+	void nodeMetadataChanged( IECore::InternedString key );
 
-		bool updateUserColor();
+	bool updateUserColor();
 
-		Gaffer::Box2fPlug *acquireBoundPlug( bool createIfMissing = true );
+	Gaffer::Box2fPlug *acquireBoundPlug( bool createIfMissing = true );
 
-		bool m_hovered;
-		int m_horizontalDragEdge;
-		int m_verticalDragEdge;
-		int m_mergeGroupId;
+	bool m_hovered;
+	int m_horizontalDragEdge;
+	int m_verticalDragEdge;
+	int m_mergeGroupId;
 
-		std::optional<Imath::Color3f> m_userColor;
+	std::optional<Imath::Color3f> m_userColor;
 
-		static NodeGadgetTypeDescription<BackdropNodeGadget> g_nodeGadgetTypeDescription;
-
+	static NodeGadgetTypeDescription<BackdropNodeGadget> g_nodeGadgetTypeDescription;
 };
 
 IE_CORE_DECLAREPTR( BackdropNodeGadget );

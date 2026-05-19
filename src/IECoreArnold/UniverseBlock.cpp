@@ -64,12 +64,12 @@ void loadMetadata( const std::string &pluginPaths )
 	const int flags = AiMsgGetConsoleFlags( nullptr );
 	AiMsgSetConsoleFlags( nullptr, AI_LOG_ERRORS );
 
-	using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
-	#ifdef _WIN32
-		const char *separator = ";";
-	#else
-		const char *separator = ":";
-	#endif
+	using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
+#ifdef _WIN32
+	const char *separator = ";";
+#else
+	const char *separator = ":";
+#endif
 	Tokenizer t( pluginPaths, boost::char_separator<char>( separator ) );
 	for( const auto &pluginPath : t )
 	{
@@ -114,56 +114,56 @@ void begin()
 
 class ArnoldAPIScope
 {
-	public :
+public:
 
-		~ArnoldAPIScope()
+	~ArnoldAPIScope()
+	{
+		if( m_sharedUniverse )
 		{
-			if( m_sharedUniverse )
-			{
-				AiUniverseDestroy( m_sharedUniverse );
-			}
-			AiEnd();
+			AiUniverseDestroy( m_sharedUniverse );
 		}
+		AiEnd();
+	}
 
-		/// \todo This can probably be removed in future. Non-writable
-		/// UniverseBlock users really just want `AiBegin()` to have been called
-		/// so they can query plugins, and they don't need an actual universe at
-		/// all. We just make one so we can implement the original UniverseBlock
-		/// semantics.
-		AtUniverse *sharedUniverse()
+	/// \todo This can probably be removed in future. Non-writable
+	/// UniverseBlock users really just want `AiBegin()` to have been called
+	/// so they can query plugins, and they don't need an actual universe at
+	/// all. We just make one so we can implement the original UniverseBlock
+	/// semantics.
+	AtUniverse *sharedUniverse()
+	{
+		if( !m_sharedUniverse )
 		{
-			if( !m_sharedUniverse )
-			{
-				m_sharedUniverse = AiUniverse();
-			}
-			return m_sharedUniverse;
+			m_sharedUniverse = AiUniverse();
 		}
+		return m_sharedUniverse;
+	}
 
-		// Called to initalise the Arnold API on first use.
-		// We then keep the API alive until shutdown, as
-		// starting and stopping it has overhead we want to
-		// avoid.
-		static ArnoldAPIScope &acquire()
-		{
-			static ArnoldAPIScope g_apiScope;
-			return g_apiScope;
-		}
+	// Called to initalise the Arnold API on first use.
+	// We then keep the API alive until shutdown, as
+	// starting and stopping it has overhead we want to
+	// avoid.
+	static ArnoldAPIScope &acquire()
+	{
+		static ArnoldAPIScope g_apiScope;
+		return g_apiScope;
+	}
 
-	private :
+private:
 
-		ArnoldAPIScope()
-			:	m_sharedUniverse( nullptr )
-		{
-			begin();
-		}
+	ArnoldAPIScope()
+		: m_sharedUniverse( nullptr )
+	{
+		begin();
+	}
 
-		AtUniverse *m_sharedUniverse;
+	AtUniverse *m_sharedUniverse;
 };
 
 } // namespace
 
 UniverseBlock::UniverseBlock( bool writable )
-	:	m_writable( writable )
+	: m_writable( writable )
 {
 	ArnoldAPIScope &apiScope = ArnoldAPIScope::acquire();
 	m_universe = m_writable ? AiUniverse() : apiScope.sharedUniverse();

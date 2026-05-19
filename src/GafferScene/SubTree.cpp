@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( SubTree );
 size_t SubTree::g_firstPlugIndex = 0;
 
 SubTree::SubTree( const std::string &name )
-	:	SceneProcessor( name )
+	: SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "root", Plug::In, "" ) );
@@ -297,7 +297,7 @@ void SubTree::hashChildNames( const ScenePath &path, const Gaffer::Context *cont
 			break;
 		case CreateRoot :
 			SceneProcessor::hashChildNames( path, context, parent, h );
-			h.append( *(source.rbegin()) );
+			h.append( *( source.rbegin() ) );
 			break;
 		case EmptyRoot :
 			h = inPlug()->childNamesPlug()->defaultValue()->Object::hash();
@@ -315,7 +315,7 @@ IECore::ConstInternedStringVectorDataPtr SubTree::computeChildNames( const Scene
 			return inPlug()->childNames( source );
 		case CreateRoot : {
 			IECore::InternedStringVectorDataPtr result = new IECore::InternedStringVectorData;
-			result->writable().push_back( *(source.rbegin()) );
+			result->writable().push_back( *( source.rbegin() ) );
 			return result;
 		}
 		default : // EmptyRoot

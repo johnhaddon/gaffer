@@ -57,8 +57,8 @@ using namespace IECoreArnold;
 namespace
 {
 
-const AtString g_driverTypeArnoldString("driverType");
-const AtString g_pixelAspectRatioArnoldString("pixel_aspect_ratio");
+const AtString g_driverTypeArnoldString( "driverType" );
+const AtString g_pixelAspectRatioArnoldString( "pixel_aspect_ratio" );
 
 // Stores a Cortex DisplayDriver and the parameters
 // used to create it. This forms the private data
@@ -67,7 +67,7 @@ struct LocalData
 {
 
 	LocalData()
-		:	numOutputs( 0 )
+		: numOutputs( 0 )
 	{
 	}
 
@@ -94,7 +94,6 @@ struct LocalData
 			}
 		}
 	}
-
 };
 
 void driverParameters( AtList *params, AtNodeEntry *nentry )
@@ -129,7 +128,7 @@ bool driverSupportsPixelType( const AtNode *node, uint8_t pixelType )
 			// only deals in floats, but we just cast the pointers and rely on
 			// the display driver knowing to cast back.
 			return true;
-		default:
+		default :
 			return false;
 	}
 }
@@ -302,8 +301,8 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 
 			for( int c = 0; c < numChannels; c++ )
 			{
-				float *in = (float *)(bucketData) + c;
-				float *out = &(interleavedData[0]) + outChannelOffset;
+				float *in = (float *)( bucketData ) + c;
+				float *out = &( interleavedData[0] ) + outChannelOffset;
 				for( int j = 0; j < sy; j++ )
 				{
 					for( int i = 0; i < sx; i++ )
@@ -361,7 +360,7 @@ void driverFinish( AtNode *node )
 
 AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
 {
-	if( i==0 )
+	if( i == 0 )
 	{
 		static AtCommonMethods commonMethods = {
 			nullptr, // Whole plugin init

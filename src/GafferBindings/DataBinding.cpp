@@ -51,25 +51,24 @@ struct DataToPython
 {
 
 	DataToPython( bool copy )
-		:	m_copy( copy )
+		: m_copy( copy )
 	{
 	}
 
 	template<typename T>
-	object operator()( const T *data, typename std::enable_if<TypeTraits::IsSimpleTypedData<T>::value>::type *enabler = nullptr )
+	object operator () ( const T *data, typename std::enable_if<TypeTraits::IsSimpleTypedData<T>::value>::type *enabler = nullptr )
 	{
 		return object( data->readable() );
 	}
 
-	object operator()( Data *data )
+	object operator () ( Data *data )
 	{
 		return object( m_copy ? data->copy() : DataPtr( data ) );
 	}
 
-	private :
+private:
 
-		bool m_copy;
-
+	bool m_copy;
 };
 
 boost::python::object dataToPythonInternal( IECore::Data *data, bool copy, boost::python::object nullValue )

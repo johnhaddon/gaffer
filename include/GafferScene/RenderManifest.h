@@ -56,80 +56,75 @@ namespace GafferScene
 class GAFFERSCENE_API RenderManifest : boost::noncopyable
 {
 
-	public :
+public:
 
-		RenderManifest();
+	RenderManifest();
 
-		// Return the id for the path if it is found in the manifest, otherwise insert
-		// it and return the freshly created id.
-		uint32_t acquireID( const ScenePlug::ScenePath &path );
+	// Return the id for the path if it is found in the manifest, otherwise insert
+	// it and return the freshly created id.
+	uint32_t acquireID( const ScenePlug::ScenePath &path );
 
-		// Return the id for the path if it is found in the manifest, otherwise return 0.
-		uint32_t idForPath( const ScenePlug::ScenePath &path ) const;
+	// Return the id for the path if it is found in the manifest, otherwise return 0.
+	uint32_t idForPath( const ScenePlug::ScenePath &path ) const;
 
-		// Return the path for the id, if it is found in the manifest.
-		std::optional<ScenePlug::ScenePath> pathForID( uint32_t id ) const;
+	// Return the path for the id, if it is found in the manifest.
+	std::optional<ScenePlug::ScenePath> pathForID( uint32_t id ) const;
 
-		// The same functionality as above, except operating on multiple items at once.
-		// More efficient than calling the above functions in a loop.
-		std::vector<uint32_t> acquireIDs( const IECore::PathMatcher &paths );
-		std::vector<uint32_t> idsForPaths( const IECore::PathMatcher &paths ) const;
-		IECore::PathMatcher pathsForIDs( const std::vector<uint32_t> &ids ) const;
+	// The same functionality as above, except operating on multiple items at once.
+	// More efficient than calling the above functions in a loop.
+	std::vector<uint32_t> acquireIDs( const IECore::PathMatcher &paths );
+	std::vector<uint32_t> idsForPaths( const IECore::PathMatcher &paths ) const;
+	IECore::PathMatcher pathsForIDs( const std::vector<uint32_t> &ids ) const;
 
-		// Reset the manifest.
-		void clear();
+	// Reset the manifest.
+	void clear();
 
-		// Return the number of id/path pairs in the manifest.
-		size_t size() const;
+	// Return the number of id/path pairs in the manifest.
+	size_t size() const;
 
-		// Find a RenderManifest stored in image metadata, according to either a
-		// Gaffer convention ( gaffer:renderManifestFilePath pointing to a sidecar exr file
-		// containing an exr manifest ), or a Cryptomatte convention ( a cryptomatte
-		// metadata entry matching `cryptomatteLayerName`, with JSON text stored
-		// directly in the image metadata, or in a sidecar JSON file ).
-		//
-		// If called repeatedly, will attempt to avoid reloading the manifest if relevant
-		// metadata has not changed.
-		//
-		// In order to get this behaviour, you must not release the shared pointer to the previous manifest you
-		// loaded until after calling this method again ( releasing it to soon would cause it to be evicted from
-		// the cache, and unnecessarily reloaded ).
-		static std::shared_ptr< const RenderManifest > loadFromImageMetadata( const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName );
+	// Find a RenderManifest stored in image metadata, according to either a
+	// Gaffer convention ( gaffer:renderManifestFilePath pointing to a sidecar exr file
+	// containing an exr manifest ), or a Cryptomatte convention ( a cryptomatte
+	// metadata entry matching `cryptomatteLayerName`, with JSON text stored
+	// directly in the image metadata, or in a sidecar JSON file ).
+	//
+	// If called repeatedly, will attempt to avoid reloading the manifest if relevant
+	// metadata has not changed.
+	//
+	// In order to get this behaviour, you must not release the shared pointer to the previous manifest you
+	// loaded until after calling this method again ( releasing it to soon would cause it to be evicted from
+	// the cache, and unnecessarily reloaded ).
+	static std::shared_ptr<const RenderManifest> loadFromImageMetadata( const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName );
 
-		// Write the current maninfest to a sidecar EXR file. This file will not contain any image data,
-		// but uses the EXR id manifest format to store this manifest in the header.
-		void writeEXRManifest( const std::filesystem::path &filePath ) const;
+	// Write the current maninfest to a sidecar EXR file. This file will not contain any image data,
+	// but uses the EXR id manifest format to store this manifest in the header.
+	void writeEXRManifest( const std::filesystem::path &filePath ) const;
 
-	private :
+private:
 
-		using PathAndID = std::pair<ScenePlug::ScenePath, uint32_t>;
-		using Map = boost::multi_index::multi_index_container<
-			PathAndID,
-			boost::multi_index::indexed_by<
-				boost::multi_index::ordered_unique<
-					boost::multi_index::key<&PathAndID::first>
-				>,
-				boost::multi_index::ordered_unique<
-					boost::multi_index::key<&PathAndID::second>
-				>
-			>
-		>;
+	using PathAndID = std::pair<ScenePlug::ScenePath, uint32_t>;
+	using Map = boost::multi_index::multi_index_container<
+		PathAndID,
+		boost::multi_index::indexed_by<
+			boost::multi_index::ordered_unique<
+				boost::multi_index::key<&PathAndID::first>>,
+			boost::multi_index::ordered_unique<
+				boost::multi_index::key<&PathAndID::second>>>>;
 
-		void loadEXRManifest( const std::filesystem::path &filePath );
-		void loadCryptomatteJSON( std::istream &in );
+	void loadEXRManifest( const std::filesystem::path &filePath );
+	void loadCryptomatteJSON( std::istream &in );
 
-		// Note: a very rough test indicates that when rendering many cheap locations, resulting in
-		// high contention on this class, using a spin mutex to limit access here is much slower
-		// than giving each thread its own accumulator and then combining them afterwards. The
-		// measured overhead is about 0.4 seconds per million entries, vs 0.1 seconds per million
-		// entries with per thread accumulators. There isn't really a simple way to expose per-thread
-		// accumulators though ... the current thought is that it's worth the 0.3s of overhead to keep
-		// the API simple.
-		using Mutex = tbb::spin_rw_mutex;
+	// Note: a very rough test indicates that when rendering many cheap locations, resulting in
+	// high contention on this class, using a spin mutex to limit access here is much slower
+	// than giving each thread its own accumulator and then combining them afterwards. The
+	// measured overhead is about 0.4 seconds per million entries, vs 0.1 seconds per million
+	// entries with per thread accumulators. There isn't really a simple way to expose per-thread
+	// accumulators though ... the current thought is that it's worth the 0.3s of overhead to keep
+	// the API simple.
+	using Mutex = tbb::spin_rw_mutex;
 
-		Map m_map;
-		mutable Mutex m_mutex;
-
+	Map m_map;
+	mutable Mutex m_mutex;
 };
 
 } // namespace GafferScene

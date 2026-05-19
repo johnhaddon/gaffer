@@ -212,7 +212,6 @@ class DataToTensorSerialiser : public NodeSerialiser
 
 		return result;
 	}
-
 };
 
 void loadModelWrapper( Inference &inference )
@@ -228,14 +227,13 @@ BOOST_PYTHON_MODULE( _GafferML )
 
 	{
 		scope s = IECorePython::RunTimeTypedClass<GafferML::Tensor>()
-			.def( init<>() )
-			.def( "__init__", make_constructor( tensorConstructorWrapper, default_call_policies(), ( arg( "data" ), arg( "shape" ) = object() ) ) )
-			.def( "asData", (IECore::DataPtr (Tensor::*)())&Tensor::asData )
-			.def( "shape", &tensorShapeWrapper )
-			.def( "__repr__", &tensorRepr )
-			.def( "__getitem__", &tensorGetItem1D )
-			.def( "__getitem__", &tensorGetItemND )
-		;
+					  .def( init<>() )
+					  .def( "__init__", make_constructor( tensorConstructorWrapper, default_call_policies(), ( arg( "data" ), arg( "shape" ) = object() ) ) )
+					  .def( "asData", (IECore::DataPtr ( Tensor::* )())&Tensor::asData )
+					  .def( "shape", &tensorShapeWrapper )
+					  .def( "__repr__", &tensorRepr )
+					  .def( "__getitem__", &tensorGetItem1D )
+					  .def( "__getitem__", &tensorGetItemND );
 		enum_<Tensor::ElementType>( "ElementType" )
 			.value( "Undefined", Tensor::ElementType::Undefined )
 			.value( "Float", Tensor::ElementType::Float )
@@ -249,31 +247,26 @@ BOOST_PYTHON_MODULE( _GafferML )
 			.value( "Int32", Tensor::ElementType::Int32 )
 			.value( "UInt64", Tensor::ElementType::UInt64 )
 			.value( "Int64", Tensor::ElementType::Int64 )
-			.value( "String", Tensor::ElementType::String )
-		;
+			.value( "String", Tensor::ElementType::String );
 	}
 
 	GafferBindings::TypedObjectPlugClass<GafferML::TensorPlug>();
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<DataToTensor>()
-			.def( "canSetup", &DataToTensor::canSetup, ( arg( "prototypeDataPlug" ) ) )
-			.def( "setup", &dataToTensorSetupWrapper, ( arg( "prototypeDataPlug" ) ) )
-		;
+					  .def( "canSetup", &DataToTensor::canSetup, ( arg( "prototypeDataPlug" ) ) )
+					  .def( "setup", &dataToTensorSetupWrapper, ( arg( "prototypeDataPlug" ) ) );
 
 		enum_<DataToTensor::ShapeMode>( "ShapeMode" )
 			.value( "Automatic", DataToTensor::ShapeMode::Automatic )
-			.value( "Custom", DataToTensor::ShapeMode::Custom )
-		;
+			.value( "Custom", DataToTensor::ShapeMode::Custom );
 		Serialisation::registerSerialiser( DataToTensor::staticTypeId(), new DataToTensorSerialiser );
 	}
 
 	GafferBindings::DependencyNodeClass<Inference>()
-		.def( "loadModel", &loadModelWrapper )
-	;
+		.def( "loadModel", &loadModelWrapper );
 	GafferBindings::DependencyNodeClass<TensorToMesh>();
 
 	GafferBindings::DependencyNodeClass<ImageToTensor>();
 	GafferBindings::DependencyNodeClass<TensorToImage>();
-
 }

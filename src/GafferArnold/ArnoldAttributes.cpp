@@ -46,7 +46,7 @@ using namespace GafferArnold;
 GAFFER_NODE_DEFINE_TYPE( ArnoldAttributes );
 
 ArnoldAttributes::ArnoldAttributes( const std::string &name )
-	:	GafferScene::Attributes( name, "ai" )
+	: GafferScene::Attributes( name, "ai" )
 {
 }
 

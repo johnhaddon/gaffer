@@ -126,7 +126,7 @@ void filteredNodesWalk( Plug *filterPlug, std::unordered_set<FilteredSceneProces
 struct ThreadablePathAccumulator
 {
 
-	bool operator()( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
+	bool operator () ( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
 	{
 		m_threadResults.local().addPath( path );
 		return true;
@@ -135,7 +135,7 @@ struct ThreadablePathAccumulator
 	IECore::PathMatcher result()
 	{
 		return m_threadResults.combine(
-			[] ( const PathMatcher &a, const PathMatcher &b ) {
+			[]( const PathMatcher &a, const PathMatcher &b ) {
 				PathMatcher c = a;
 				c.addPaths( b );
 				return c;
@@ -143,17 +143,16 @@ struct ThreadablePathAccumulator
 		);
 	}
 
-	private :
+private:
 
-		tbb::enumerable_thread_specific<PathMatcher> m_threadResults;
-
+	tbb::enumerable_thread_specific<PathMatcher> m_threadResults;
 };
 
 struct ThreadablePathHashAccumulator
 {
-	ThreadablePathHashAccumulator(): m_h1Accum( 0 ), m_h2Accum( 0 ){}
+	ThreadablePathHashAccumulator() : m_h1Accum( 0 ), m_h2Accum( 0 ) {}
 
-	bool operator()( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
+	bool operator () ( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
 	{
 		// The hash should depend on all the paths visited, but doesn't depend on the order we visit them
 		// - in fact it must be consistent even when parallel traversal visits in a non-deterministic order.
@@ -252,7 +251,7 @@ IECore::PathMatcher GafferScene::SceneAlgo::findAllWithAttribute( const ScenePlu
 {
 	return findAll(
 		scene,
-		[&] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
+		[&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
 			ConstCompoundObjectPtr attributes = scene->attributesPlug()->getValue();
 			if( const Object *attribute = attributes->member<Object>( name ) )
 			{
@@ -310,7 +309,7 @@ Imath::V2f GafferScene::SceneAlgo::shutter( const IECore::CompoundObject *global
 			ScenePlug::stringToPath( cameraOption->readable(), cameraPath );
 			if( scene->exists( cameraPath ) )
 			{
-				camera = runTimeCast< const Camera>( scene->object( cameraPath ).get() );
+				camera = runTimeCast<const Camera>( scene->object( cameraPath ).get() );
 			}
 		}
 
@@ -360,14 +359,12 @@ IECore::ConstCompoundDataPtr GafferScene::SceneAlgo::sets( const ScenePlug *scen
 		tbb::blocked_range<size_t>( 0, setsVector.size() ),
 
 		[scene, &setNames, &threadState, &setsVector]( const tbb::blocked_range<size_t> &r ) {
-
 			ScenePlug::SetScope setScope( threadState );
-			for( size_t i=r.begin(); i!=r.end(); ++i )
+			for( size_t i = r.begin(); i != r.end(); ++i )
 			{
 				setScope.setSetName( &setNames[i] );
 				setsVector[i] = scene->setPlug()->getValue();
 			}
-
 		},
 
 		taskGroupContext // Prevents outer tasks silently cancelling our tasks
@@ -405,7 +402,6 @@ struct CapturedProcess
 	ContextPtr context;
 
 	PtrVector children;
-
 };
 
 const InternedString g_processedObjectPlugName( "__processedObject" );
@@ -417,136 +413,133 @@ const InternedString g_processedObjectPlugName( "__processedObject" );
 class CapturingMonitor : public Monitor
 {
 
-	public :
+public:
 
-		CapturingMonitor( IECore::InternedString scenePlugChildName ) : m_scenePlugChildName( scenePlugChildName )
+	CapturingMonitor( IECore::InternedString scenePlugChildName ) : m_scenePlugChildName( scenePlugChildName )
+	{
+	}
+
+	~CapturingMonitor() override
+	{
+	}
+
+	IE_CORE_DECLAREMEMBERPTR( CapturingMonitor )
+
+	const CapturedProcess::PtrVector &rootProcesses()
+	{
+		return m_rootProcesses;
+	}
+
+protected:
+
+	void processStarted( const Process *process ) override
+	{
+		const Plug *p = process->plug();
+
+		if( !shouldCapture( p ) )
 		{
-		}
-
-		~CapturingMonitor() override
-		{
-		}
-
-		IE_CORE_DECLAREMEMBERPTR( CapturingMonitor )
-
-		const CapturedProcess::PtrVector &rootProcesses()
-		{
-			return m_rootProcesses;
-		}
-
-	protected :
-
-		void processStarted( const Process *process ) override
-		{
-			const Plug *p = process->plug();
-
-			if( !shouldCapture( p ) )
-			{
-				// Parents may spawn other processes in support of the requested plug. This is one
-				// of these other plugs that isn't directly the requested plug.  Instead of creating
-				// a CapturedProcess record, we instead create a Monitor::Scope that turns off this
-				// monitor, so that the child computations that we don't need to monitor can go faster.
-				//
-				// It's crucial that this Scope gets destructed while leaving this process, so that the
-				// order of the stack is preserved - if this happens out of order, the stack will be
-				// corrupted, and weird crashes will happen.  But as long as it is created in
-				// processStarted, and released in processFinished, everything should line up.
-				Mutex::scoped_lock lock( m_mutex );
-				m_processMap[process] = std::make_unique<Monitor::Scope>( this, false );
-				return;
-			}
-
-			// Capture this process.
-
-			CapturedProcess::Ptr capturedProcess = std::make_unique<CapturedProcess>();
-			capturedProcess->type = process->type();
-			capturedProcess->plug = p;
-			capturedProcess->destinationPlug = process->destinationPlug();
-			capturedProcess->context = new Context( *process->context(), /* omitCanceller = */ true );
-
+			// Parents may spawn other processes in support of the requested plug. This is one
+			// of these other plugs that isn't directly the requested plug.  Instead of creating
+			// a CapturedProcess record, we instead create a Monitor::Scope that turns off this
+			// monitor, so that the child computations that we don't need to monitor can go faster.
+			//
+			// It's crucial that this Scope gets destructed while leaving this process, so that the
+			// order of the stack is preserved - if this happens out of order, the stack will be
+			// corrupted, and weird crashes will happen.  But as long as it is created in
+			// processStarted, and released in processFinished, everything should line up.
 			Mutex::scoped_lock lock( m_mutex );
-			m_processMap[process] = capturedProcess.get();
+			m_processMap[process] = std::make_unique<Monitor::Scope>( this, false );
+			return;
+		}
 
-			ProcessMap::const_iterator it = m_processMap.find( process->parent() );
-			if( it != m_processMap.end() )
+		// Capture this process.
+
+		CapturedProcess::Ptr capturedProcess = std::make_unique<CapturedProcess>();
+		capturedProcess->type = process->type();
+		capturedProcess->plug = p;
+		capturedProcess->destinationPlug = process->destinationPlug();
+		capturedProcess->context = new Context( *process->context(), /* omitCanceller = */ true );
+
+		Mutex::scoped_lock lock( m_mutex );
+		m_processMap[process] = capturedProcess.get();
+
+		ProcessMap::const_iterator it = m_processMap.find( process->parent() );
+		if( it != m_processMap.end() )
+		{
+			CapturedProcess *const *parent = std::get_if<CapturedProcess *>( &it->second );
+			if( parent && *parent )
 			{
-				CapturedProcess * const * parent = std::get_if<CapturedProcess *>( &it->second );
-				if( parent && *parent )
-				{
-					(*parent)->children.push_back( std::move( capturedProcess ) );
-				}
+				( *parent )->children.push_back( std::move( capturedProcess ) );
 			}
-			else
-			{
-				// Either `process->parent()` was null, or was started
-				// before we were made active via `Monitor::Scope`.
-				m_rootProcesses.push_back( std::move( capturedProcess ) );
-			}
-
-			// Remember that we've monitored this process so that we dont force
-			// its monitoring again.
-
-			IECore::MurmurHash h = process->context()->hash();
-			h.append( reinterpret_cast<intptr_t>( p ) );
-			m_monitoredSet.insert( h );
 		}
-
-		void processFinished( const Process *process ) override
+		else
 		{
-			Mutex::scoped_lock lock( m_mutex );
-			m_processMap.erase( process );
+			// Either `process->parent()` was null, or was started
+			// before we were made active via `Monitor::Scope`.
+			m_rootProcesses.push_back( std::move( capturedProcess ) );
 		}
 
-		bool mightForceMonitoring() override
+		// Remember that we've monitored this process so that we dont force
+		// its monitoring again.
+
+		IECore::MurmurHash h = process->context()->hash();
+		h.append( reinterpret_cast<intptr_t>( p ) );
+		m_monitoredSet.insert( h );
+	}
+
+	void processFinished( const Process *process ) override
+	{
+		Mutex::scoped_lock lock( m_mutex );
+		m_processMap.erase( process );
+	}
+
+	bool mightForceMonitoring() override
+	{
+		return true;
+	}
+
+	bool forceMonitoring( const Plug *plug, const IECore::InternedString &processType ) override
+	{
+		if( processType != g_hashProcessType || !shouldCapture( plug ) )
 		{
-			return true;
+			return false;
 		}
 
-		bool forceMonitoring( const Plug *plug, const IECore::InternedString &processType ) override
-		{
-			if( processType != g_hashProcessType || !shouldCapture( plug ) )
-			{
-				return false;
-			}
+		// Don't force the monitoring of a process we've monitored already. This does
+		// mean we throw away diamond dependencies in the process graph, but it is essential
+		// for performance in some cases - see `testHistoryDiamondPerformance()` for example.
+		/// \todo Potentially we could use the hash to find the previously captured process,
+		/// and instance that into our process graph. This would require clients of `History`
+		/// to be updated to handle such topologies efficiently by tracking previously visited
+		/// items. It may also be of fairly low value, since typically our goal is to find the
+		/// first relevant path through the graph to present to the user.
+		IECore::MurmurHash h = Context::current()->hash();
+		h.append( reinterpret_cast<intptr_t>( plug ) );
+		return !m_monitoredSet.count( h );
+	}
 
-			// Don't force the monitoring of a process we've monitored already. This does
-			// mean we throw away diamond dependencies in the process graph, but it is essential
-			// for performance in some cases - see `testHistoryDiamondPerformance()` for example.
-			/// \todo Potentially we could use the hash to find the previously captured process,
-			/// and instance that into our process graph. This would require clients of `History`
-			/// to be updated to handle such topologies efficiently by tracking previously visited
-			/// items. It may also be of fairly low value, since typically our goal is to find the
-			/// first relevant path through the graph to present to the user.
-			IECore::MurmurHash h = Context::current()->hash();
-			h.append( reinterpret_cast<intptr_t>( plug ) );
-			return !m_monitoredSet.count( h );
-		}
+private:
 
-	private :
+	bool shouldCapture( const Plug *plug ) const
+	{
+		return ( plug->parent<ScenePlug>() && plug->getName() == m_scenePlugChildName ) ||
+			( (Gaffer::TypeId)plug->typeId() == Gaffer::TypeId::ObjectPlugTypeId && plug->getName() == g_processedObjectPlugName ) ||
+			runTimeCast<const Expression>( plug->node() );
+	}
 
-		bool shouldCapture( const Plug *plug ) const
-		{
-			return
-				( plug->parent<ScenePlug>() && plug->getName() == m_scenePlugChildName ) ||
-				( (Gaffer::TypeId)plug->typeId() == Gaffer::TypeId::ObjectPlugTypeId && plug->getName() == g_processedObjectPlugName ) ||
-				runTimeCast<const Expression>( plug->node() )
-			;
-		}
+	using Mutex = tbb::spin_mutex;
+	using ProcessOrScope = std::variant<CapturedProcess *, std::unique_ptr<Monitor::Scope>>;
+	using ProcessMap = boost::unordered_map<const Process *, ProcessOrScope>;
 
-		using Mutex = tbb::spin_mutex;
-		using ProcessOrScope = std::variant<CapturedProcess *, std::unique_ptr<Monitor::Scope>>;
-		using ProcessMap = boost::unordered_map<const Process *, ProcessOrScope>;
+	const IECore::InternedString m_scenePlugChildName;
 
-		const IECore::InternedString m_scenePlugChildName;
+	// Protects `m_processMap` and `m_rootProcesses`.
+	/// \todo Perhaps they should be concurrent containers instead?
+	Mutex m_mutex;
+	ProcessMap m_processMap;
+	CapturedProcess::PtrVector m_rootProcesses;
 
-		// Protects `m_processMap` and `m_rootProcesses`.
-		/// \todo Perhaps they should be concurrent containers instead?
-		Mutex m_mutex;
-		ProcessMap m_processMap;
-		CapturedProcess::PtrVector m_rootProcesses;
-
-		tbb::concurrent_unordered_set<IECore::MurmurHash> m_monitoredSet;
-
+	tbb::concurrent_unordered_set<IECore::MurmurHash> m_monitoredSet;
 };
 
 IE_CORE_DECLAREPTR( CapturingMonitor )
@@ -630,7 +623,8 @@ void addCopyAttributesPredecessors( const CopyAttributes *copyAttributes, const 
 		}
 		else
 		{
-			ScenePlug::ScenePath sourcePath; ScenePlug::stringToPath( sourceLocation, sourcePath );
+			ScenePlug::ScenePath sourcePath;
+			ScenePlug::stringToPath( sourceLocation, sourcePath );
 			if( copyAttributes->sourcePlug()->exists( sourcePath ) )
 			{
 				sourceAttributes = copyAttributes->sourcePlug()->attributes( sourcePath );
@@ -863,14 +857,15 @@ void addCopyPrimitiveVariablesPredecessors( const CopyPrimitiveVariables *copyPr
 		}
 		else
 		{
-			ScenePlug::ScenePath sourcePath; ScenePlug::stringToPath( sourceLocation, sourcePath );
+			ScenePlug::ScenePath sourcePath;
+			ScenePlug::stringToPath( sourceLocation, sourcePath );
 			if( copyPrimitiveVariables->sourcePlug()->exists( sourcePath ) )
 			{
 				sourceObject = copyPrimitiveVariables->sourcePlug()->object( sourcePath );
 			}
 		}
 
-		const Primitive *sourcePrimitive = IECore::runTimeCast< const Primitive >( sourceObject.get() );
+		const Primitive *sourcePrimitive = IECore::runTimeCast<const Primitive>( sourceObject.get() );
 
 		if( sourcePrimitive && sourcePrimitive->variables.count( destination->primitiveVariableName ) )
 		{
@@ -1166,8 +1161,7 @@ SceneAlgo::PrimitiveVariableHistory::Ptr SceneAlgo::primitiveVariableHistory( co
 		{
 			addCopyPrimitiveVariablesPredecessors( copyPrimitiveVariables, objectHistory->predecessors, result.get() );
 		}
-		else
-		if( auto shufflePrimitiveVariables = runTimeCast<const ShufflePrimitiveVariables>( node ) )
+		else if( auto shufflePrimitiveVariables = runTimeCast<const ShufflePrimitiveVariables>( node ) )
 		{
 			addShufflePrimitiveVariablesPredecessors( shufflePrimitiveVariables, objectHistory->predecessors, result.get() );
 		}
@@ -1294,11 +1288,11 @@ struct AttributesFinder
 {
 
 	AttributesFinder( const AttributesPredicate &predicate, tbb::spin_mutex &resultMutex, IECore::PathMatcher &result )
-		:	m_predicate( predicate ), m_resultMutex( resultMutex ), m_result( result )
+		: m_predicate( predicate ), m_resultMutex( resultMutex ), m_result( result )
 	{
 	}
 
-	bool operator()( const ScenePlug *scene, const ScenePlug::ScenePath &path )
+	bool operator () ( const ScenePlug *scene, const ScenePlug::ScenePath &path )
 	{
 		bool inheritPredicateResult = false;
 		ConstCompoundObjectPtr attributes = scene->attributesPlug()->getValue();
@@ -1346,16 +1340,15 @@ struct AttributesFinder
 		return true;
 	}
 
-	private :
+private:
 
-		const AttributesPredicate &m_predicate;
+	const AttributesPredicate &m_predicate;
 
-		ConstCompoundObjectPtr m_fullAttributes;
-		bool m_predicateResult;
+	ConstCompoundObjectPtr m_fullAttributes;
+	bool m_predicateResult;
 
-		tbb::spin_mutex &m_resultMutex;
-		IECore::PathMatcher &m_result;
-
+	tbb::spin_mutex &m_resultMutex;
+	IECore::PathMatcher &m_result;
 };
 
 /// \todo Perhaps this is worthy of inclusion in the public API?
@@ -1386,8 +1379,7 @@ GAFFERSCENE_API IECore::PathMatcher GafferScene::SceneAlgo::linkedObjects( const
 	using QueryCache = IECorePreview::LRUCache<std::string, bool, IECorePreview::LRUCachePolicy::TaskParallel>;
 	const Context *context = Context::current();
 	QueryCache queryCache(
-		[&lights, scene, context]( const std::string &setExpression, size_t &cost, const IECore::Canceller *canceller )
-		{
+		[&lights, scene, context]( const std::string &setExpression, size_t &cost, const IECore::Canceller *canceller ) {
 			cost = 1;
 			Context::Scope scopedContext( context );
 			const IECore::PathMatcher linkedLights = SetAlgo::evaluateSetExpression( setExpression, scene );
@@ -1405,7 +1397,7 @@ GAFFERSCENE_API IECore::PathMatcher GafferScene::SceneAlgo::linkedObjects( const
 
 	IECore::PathMatcher result = findAttributes(
 		scene,
-		[&queryCache] ( const CompoundObject *fullAttributes ) {
+		[&queryCache]( const CompoundObject *fullAttributes ) {
 			auto *linkedLights = fullAttributes->member<StringData>( g_linkedLights );
 			return queryCache.get( linkedLights ? linkedLights->readable() : "defaultLights" );
 		}
@@ -1430,7 +1422,7 @@ IECore::PathMatcher GafferScene::SceneAlgo::linkedLights( const ScenePlug *scene
 	IECore::PathMatcher result;
 	tbb::concurrent_unordered_set<std::string> processed;
 
-	auto functor = [&resultMutex, &result, &processed] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
+	auto functor = [&resultMutex, &result, &processed]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
 		IECore::ConstCompoundObjectPtr attributes = scene->fullAttributes( path );
 		auto *linkedLightsAttribute = attributes->member<StringData>( g_linkedLights );
 		const string linkedLights = linkedLightsAttribute ? linkedLightsAttribute->readable() : "defaultLights";
@@ -1457,8 +1449,7 @@ IECore::MurmurHash GafferScene::SceneAlgo::hierarchyHash( const ScenePlug *scene
 	return GafferScene::SceneAlgo::parallelReduceLocations(
 		scene,
 		IECore::MurmurHash(),
-		[&] ( const ScenePlug *scene, const ScenePlug::ScenePath &path )
-		{
+		[&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
 			IECore::MurmurHash h;
 			if( path.size() > root.size() )
 			{
@@ -1478,15 +1469,13 @@ IECore::MurmurHash GafferScene::SceneAlgo::hierarchyHash( const ScenePlug *scene
 
 			return h;
 		},
-		[]( IECore::MurmurHash &result, const IECore::MurmurHash &childrenResult )
-		{
+		[]( IECore::MurmurHash &result, const IECore::MurmurHash &childrenResult ) {
 			// By doing an actual append with the child results, we ensure that their hash is properly
 			// mixed with the path leaf name hashed in above, so we won't get incorrect matches if the same
 			// children were assigned to different locations.
 			result.append( childrenResult );
 		},
-		[]( IECore::MurmurHash &result, const IECore::MurmurHash &sibling )
-		{
+		[]( IECore::MurmurHash &result, const IECore::MurmurHash &sibling ) {
 			// We want our resulting hash to be deterministic, despite the order things are visited in not
 			// being deterministic. We achieve this by doing a simple commutative add here instead of hashing.
 			// Because the inputs are proper hashes with their bits evenly distributed, and they include their
@@ -1515,7 +1504,8 @@ bool GafferScene::SceneAlgo::visible( const ScenePlug *scene, const ScenePlug::S
 {
 	ScenePlug::PathScope pathScope( Context::current() );
 
-	ScenePlug::ScenePath p; p.reserve( path.size() );
+	ScenePlug::ScenePath p;
+	p.reserve( path.size() );
 	for( ScenePlug::ScenePath::const_iterator it = path.begin(), eIt = path.end(); it != eIt; ++it )
 	{
 		p.push_back( *it );

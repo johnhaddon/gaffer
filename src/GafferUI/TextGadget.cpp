@@ -48,7 +48,7 @@ using namespace boost;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TextGadget );
 
 TextGadget::TextGadget( const std::string &text )
-	:	Gadget( defaultName<TextGadget>() ), m_dimmed( false )
+	: Gadget( defaultName<TextGadget>() ), m_dimmed( false )
 {
 	setText( text );
 }
@@ -64,7 +64,7 @@ const std::string &TextGadget::getText() const
 
 void TextGadget::setText( const std::string &text )
 {
-	if( text!=m_text )
+	if( text != m_text )
 	{
 		m_text = text;
 		m_bound = style()->textBound( Style::LabelText, m_text );

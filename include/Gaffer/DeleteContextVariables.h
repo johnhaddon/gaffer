@@ -45,25 +45,24 @@ namespace Gaffer
 class GAFFER_API DeleteContextVariables : public ContextProcessor
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::DeleteContextVariables, DeleteContextVariablesTypeId, ContextProcessor );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::DeleteContextVariables, DeleteContextVariablesTypeId, ContextProcessor );
 
-		explicit DeleteContextVariables( const std::string &name=GraphComponent::defaultName<DeleteContextVariables>() );
-		~DeleteContextVariables() override;
+	explicit DeleteContextVariables( const std::string &name = GraphComponent::defaultName<DeleteContextVariables>() );
+	~DeleteContextVariables() override;
 
-		StringPlug *variablesPlug();
-		const StringPlug *variablesPlug() const;
+	StringPlug *variablesPlug();
+	const StringPlug *variablesPlug() const;
 
-	protected :
+protected:
 
-		bool affectsContext( const Plug *input ) const override;
-		void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
+	bool affectsContext( const Plug *input ) const override;
+	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteContextVariables );

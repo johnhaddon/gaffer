@@ -53,92 +53,90 @@ namespace
 class BoundVisualiser : public ObjectVisualiser
 {
 
-	public :
+public:
 
-		BoundVisualiser()
+	BoundVisualiser()
+	{
+	}
+
+	~BoundVisualiser() override
+	{
+	}
+
+	Visualisations visualise( const IECore::Object *object ) const override
+	{
+		const IECoreScene::VisibleRenderable *renderable = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object );
+
+		IECoreGL::GroupPtr group = new IECoreGL::Group();
+		group->getState()->add( new IECoreGL::Primitive::DrawWireframe( true ) );
+		group->getState()->add( new IECoreGL::Primitive::DrawSolid( false ) );
+		group->getState()->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
+
+		if( const IECoreScenePreview::Placeholder *placeholder = IECore::runTimeCast<const IECoreScenePreview::Placeholder>( object ) )
 		{
-		}
-
-		~BoundVisualiser() override
-		{
-		}
-
-		Visualisations visualise( const IECore::Object *object ) const override
-		{
-			const IECoreScene::VisibleRenderable *renderable = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object );
-
-			IECoreGL::GroupPtr group = new IECoreGL::Group();
-			group->getState()->add( new IECoreGL::Primitive::DrawWireframe( true ) );
-			group->getState()->add( new IECoreGL::Primitive::DrawSolid( false ) );
-			group->getState()->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
-
-			if( const IECoreScenePreview::Placeholder *placeholder = IECore::runTimeCast<const IECoreScenePreview::Placeholder>( object ) )
+			if( placeholder->getMode() == IECoreScenePreview::Placeholder::Mode::Excluded )
 			{
-				if( placeholder->getMode() == IECoreScenePreview::Placeholder::Mode::Excluded )
-				{
-					group->getState()->add( new IECoreGL::WireframeColorStateComponent( Color4f( 0.3, 0.18, 0.18, 1 ) ) );
-				}
+				group->getState()->add( new IECoreGL::WireframeColorStateComponent( Color4f( 0.3, 0.18, 0.18, 1 ) ) );
 			}
-
-			IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
-			IECore::IntVectorDataPtr vertsPerCurveData = new IECore::IntVectorData;
-			vector<V3f> &p = pData->writable();
-			vector<int> &vertsPerCurve = vertsPerCurveData->writable();
-
-			// box representing the location of the renderable
-
-			const Box3f b = renderable->bound();
-
-			vertsPerCurve.push_back( 5 );
-			p.push_back( b.min );
-			p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
-			p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
-			p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
-			p.push_back( b.min );
-
-			vertsPerCurve.push_back( 5 );
-			p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
-			p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
-			p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
-			p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
-			p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
-
-			vertsPerCurve.push_back( 2 );
-			p.push_back( b.min );
-			p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
-
-			vertsPerCurve.push_back( 2 );
-			p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
-			p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
-
-			vertsPerCurve.push_back( 2 );
-			p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
-			p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
-
-			vertsPerCurve.push_back( 2 );
-			p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
-			p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
-
-			IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
-			curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-			group->addChild( curves );
-
-			return { Visualisation::createGeometry( group ) };
 		}
 
+		IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+		IECore::IntVectorDataPtr vertsPerCurveData = new IECore::IntVectorData;
+		vector<V3f> &p = pData->writable();
+		vector<int> &vertsPerCurve = vertsPerCurveData->writable();
+
+		// box representing the location of the renderable
+
+		const Box3f b = renderable->bound();
+
+		vertsPerCurve.push_back( 5 );
+		p.push_back( b.min );
+		p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
+		p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
+		p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
+		p.push_back( b.min );
+
+		vertsPerCurve.push_back( 5 );
+		p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
+		p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
+		p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
+		p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
+		p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
+
+		vertsPerCurve.push_back( 2 );
+		p.push_back( b.min );
+		p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
+
+		vertsPerCurve.push_back( 2 );
+		p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
+		p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
+
+		vertsPerCurve.push_back( 2 );
+		p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
+		p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
+
+		vertsPerCurve.push_back( 2 );
+		p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
+		p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
+
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
+		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		group->addChild( curves );
+
+		return { Visualisation::createGeometry( group ) };
+	}
 };
 
 class ProceduralVisualiser : public BoundVisualiser
 {
 
-	public :
+public:
 
-		using ObjectType = IECoreScenePreview::Procedural;
+	using ObjectType = IECoreScenePreview::Procedural;
 
-	protected :
+protected:
 
-		static ObjectVisualiserDescription<ProceduralVisualiser> g_visualiserDescription;
-
+	static ObjectVisualiserDescription<ProceduralVisualiser> g_visualiserDescription;
 };
 
 ObjectVisualiser::ObjectVisualiserDescription<ProceduralVisualiser> ProceduralVisualiser::g_visualiserDescription;
@@ -146,14 +144,13 @@ ObjectVisualiser::ObjectVisualiserDescription<ProceduralVisualiser> ProceduralVi
 class ExternalProceduralVisualiser : public BoundVisualiser
 {
 
-	public :
+public:
 
-		using ObjectType = IECoreScene::ExternalProcedural;
+	using ObjectType = IECoreScene::ExternalProcedural;
 
-	protected :
+protected:
 
-		static ObjectVisualiserDescription<ExternalProceduralVisualiser> g_visualiserDescription;
-
+	static ObjectVisualiserDescription<ExternalProceduralVisualiser> g_visualiserDescription;
 };
 
 ObjectVisualiser::ObjectVisualiserDescription<ExternalProceduralVisualiser> ExternalProceduralVisualiser::g_visualiserDescription;
@@ -161,14 +158,13 @@ ObjectVisualiser::ObjectVisualiserDescription<ExternalProceduralVisualiser> Exte
 class PlaceholderVisualiser : public BoundVisualiser
 {
 
-	public :
+public:
 
-		using ObjectType = IECoreScenePreview::Placeholder;
+	using ObjectType = IECoreScenePreview::Placeholder;
 
-	protected :
+protected:
 
-		static ObjectVisualiserDescription<PlaceholderVisualiser> g_visualiserDescription;
-
+	static ObjectVisualiserDescription<PlaceholderVisualiser> g_visualiserDescription;
 };
 
 ObjectVisualiser::ObjectVisualiserDescription<PlaceholderVisualiser> PlaceholderVisualiser::g_visualiserDescription;

@@ -60,7 +60,7 @@ using NodeSet = boost::unordered_set<NodePtr>;
 template<typename Visitor>
 void visitInputs( Plug *plug, Visitor &&visitor )
 {
-	while( (plug = plug->getInput()) )
+	while( ( plug = plug->getInput() ) )
 	{
 		visitor( plug );
 	}
@@ -83,7 +83,7 @@ void visitBreadthFirst( Node *node, Visitor &visitor, Plug::Direction plugDirect
 	std::deque<NodePtr> toVisit;
 	toVisit.push_back( node );
 
-	auto plugVisitor = [&toVisit] ( Plug *plug ) {
+	auto plugVisitor = [&toVisit]( Plug *plug ) {
 		if( auto n = plug->node() )
 		{
 			toVisit.push_back( n );
@@ -93,7 +93,8 @@ void visitBreadthFirst( Node *node, Visitor &visitor, Plug::Direction plugDirect
 	while( !toVisit.empty() )
 	{
 		NodePtr n;
-		n = toVisit.front(); toVisit.pop_front();
+		n = toVisit.front();
+		toVisit.pop_front();
 		if( !visited.insert( n ).second )
 		{
 			continue;
@@ -141,7 +142,7 @@ void visitDepthFirst( Node *node, Visitor &visitor, Plug::Direction plugDirectio
 		}
 	}
 
-	auto plugVisitor = [&] ( Plug *plug ) {
+	auto plugVisitor = [&]( Plug *plug ) {
 		if( auto n = plug->node() )
 		{
 			visitDepthFirst( n, visitor, plugDirection, visited, depth + 1 );
@@ -170,11 +171,11 @@ struct FindVisitor
 {
 
 	FindVisitor( Predicate &predicate )
-		:	m_predicate( predicate )
+		: m_predicate( predicate )
 	{
 	}
 
-	bool operator()( Node *node )
+	bool operator () ( Node *node )
 	{
 		if( result )
 		{
@@ -194,10 +195,9 @@ struct FindVisitor
 
 	Node *result = nullptr;
 
-	private :
+private:
 
-		Predicate &m_predicate;
-
+	Predicate &m_predicate;
 };
 
 template<typename Predicate>
@@ -205,11 +205,11 @@ struct FindAllVisitor
 {
 
 	FindAllVisitor( Predicate &predicate )
-		:	m_predicate( predicate )
+		: m_predicate( predicate )
 	{
 	}
 
-	bool operator()( Node *node )
+	bool operator () ( Node *node )
 	{
 		if( m_predicate( const_cast<const Node *>( node ) ) )
 		{
@@ -220,17 +220,16 @@ struct FindAllVisitor
 
 	std::vector<Node *> result;
 
-	private :
+private:
 
-		Predicate &m_predicate;
-
+	Predicate &m_predicate;
 };
 
 template<typename T>
 struct FindByTypeVisitor
 {
 
-	bool operator()( Node *node )
+	bool operator () ( Node *node )
 	{
 		if( auto n = IECore::runTimeCast<T>( node ) )
 		{
@@ -240,7 +239,6 @@ struct FindByTypeVisitor
 	}
 
 	std::vector<T *> result;
-
 };
 
 } // namespace Private

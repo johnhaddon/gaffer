@@ -116,12 +116,11 @@ struct BatchContextPool
 		return it->second;
 	}
 
-	private :
+private:
 
-		std::unordered_map<IECore::MurmurHash, ConstContextPtr> m_contexts;
-		// Scratch space to avoid allocations every time we query names.
-		std::vector<InternedString> m_names;
-
+	std::unordered_map<IECore::MurmurHash, ConstContextPtr> m_contexts;
+	// Scratch space to avoid allocations every time we query names.
+	std::vector<InternedString> m_names;
 };
 
 ValuePlug *acquireCellValuePlug( Spreadsheet *spreadsheet, const InternedString columnName, const float frame )
@@ -144,12 +143,10 @@ ValuePlug *acquireCellValuePlug( Spreadsheet *spreadsheet, const InternedString 
 /// \todo Move these to `PlugAlgo`
 bool canSetValueFromObject( const ValuePlug *plug, const Object *value = nullptr )
 {
-	return
-		PlugAlgo::canSetValueFromData( plug ) ||
+	return PlugAlgo::canSetValueFromData( plug ) ||
 		plug->typeId() == CompoundObjectPlug::staticTypeId() ||
 		plug->typeId() == ObjectPlug::staticTypeId() ||
-		plug->typeId() == ObjectVectorPlug::staticTypeId()
-	;
+		plug->typeId() == ObjectVectorPlug::staticTypeId();
 }
 
 ObjectPtr getValueAsObject( const ValuePlug *plug )
@@ -527,12 +524,12 @@ FrameListPtr Dispatcher::frameRange() const
 	const Context *context = Context::current();
 
 	FramesMode mode = (FramesMode)framesModePlug()->getValue();
-	if ( mode == CurrentFrame )
+	if( mode == CurrentFrame )
 	{
 		FrameList::Frame frame = (FrameList::Frame)context->getFrame();
 		return new FrameRange( frame, frame );
 	}
-	else if ( mode == FullRange )
+	else if( mode == FullRange )
 	{
 		const int start = context->get<int>( g_frameRangeStart, 1 );
 		const int end = context->get<int>( g_frameRangeEnd, 100 );
@@ -545,7 +542,7 @@ FrameListPtr Dispatcher::frameRange() const
 	{
 		return FrameList::parse( context->substitute( frameRangePlug()->getValue() ) );
 	}
-	catch ( IECore::Exception & )
+	catch( IECore::Exception & )
 	{
 		throw IECore::Exception( "Dispatcher: Custom Frame Range is not a valid IECore::FrameList" );
 	}
@@ -561,127 +558,126 @@ FrameListPtr Dispatcher::frameRange() const
 class Dispatcher::TaskBatch::Namer
 {
 
-	public :
+public:
 
-		Namer( const Context &baseContext )
-			:	m_baseContext( baseContext )
+	Namer( const Context &baseContext )
+		: m_baseContext( baseContext )
+	{
+	}
+
+	string name( const TaskBatch *batch )
+	{
+		if( !batch->plug() )
 		{
+			return "";
 		}
 
-		string name( const TaskBatch *batch )
+		string result = nodeLabel( batch->node() );
+		if( !batch->frames().empty() )
 		{
-			if( !batch->plug() )
-			{
-				return "";
-			}
+			result += fmt::format( " {}", framesLabel( batch->frames() ) );
+		}
 
-			string result = nodeLabel( batch->node() );
-			if( !batch->frames().empty() )
-			{
-				result += fmt::format( " {}", framesLabel( batch->frames() ) );
-			}
+		const string c = contextLabel( batch->context() );
+		if( !c.empty() )
+		{
+			result += fmt::format( " ({})", c );
+		}
 
-			const string c = contextLabel( batch->context() );
-			if( !c.empty() )
-			{
-				result += fmt::format( " ({})", c );
-			}
+		return result;
+	}
 
+private:
+
+	const string &nodeLabel( const Node *node )
+	{
+		string &result = m_nodeLabels[node];
+		if( !result.empty() )
+		{
 			return result;
 		}
 
-	private :
+		result = node->relativeName( node->scriptNode() );
+		return result;
+	}
 
-		const string &nodeLabel( const Node *node )
+	string framesLabel( const std::vector<float> &frames )
+	{
+		if( frames.size() == 1 )
 		{
-			string &result = m_nodeLabels[node];
-			if( !result.empty() )
-			{
-				return result;
-			}
+			// Fast path for common case.
+			return fmt::format( "{}", frames[0] );
+		}
 
-			result = node->relativeName( node->scriptNode() );
+		vector<FrameList::Frame> intFrames( frames.begin(), frames.end() );
+		ConstFrameListPtr frameList = IECore::frameListFromList( intFrames );
+		return frameList->asString();
+	}
+
+	const string &contextLabel( const Context *context )
+	{
+		// Because the contexts we work will all have been uniquefied by
+		// ContextPool, their address is sufficient as our cache key.
+		string &result = m_contextLabels[context];
+		if( !result.empty() )
+		{
 			return result;
 		}
 
-		string framesLabel( const std::vector<float> &frames )
+		vector<InternedString> names;
+		context->names( names );
+		std::sort(
+			names.begin(), names.end(),
+			[]( InternedString a, InternedString b ) {
+				return a.string() < b.string();
+			}
+		);
+
+		for( const auto &name : names )
 		{
-			if( frames.size() == 1 )
+			if( name == g_scriptFileNameContextEntry )
 			{
-				// Fast path for common case.
-				return fmt::format( "{}", frames[0] );
+				// When we isolate batches, we give them a new script filename,
+				// but that information would only clutter up the batch names,
+				// so we omit it here.
+				/// \todo A smarter method of naming might be to include only
+				/// context variables that differ between batches for the same
+				/// node. That would automatically take care of this omission
+				/// too.
+				continue;
+			}
+			if( context->variableHash( name ) == m_baseContext.variableHash( name ) )
+			{
+				continue;
 			}
 
-			vector<FrameList::Frame> intFrames( frames.begin(), frames.end() );
-			ConstFrameListPtr frameList = IECore::frameListFromList( intFrames );
-			return frameList->asString();
-		}
-
-		const string &contextLabel( const Context *context )
-		{
-			// Because the contexts we work will all have been uniquefied by
-			// ContextPool, their address is sufficient as our cache key.
-			string &result = m_contextLabels[context];
-			if( !result.empty() )
-			{
-				return result;
-			}
-
-			vector<InternedString> names;
-			context->names( names );
-			std::sort(
-				names.begin(), names.end(),
-				[] ( InternedString a, InternedString b ) {
-					return a.string() < b.string();
+			DataPtr data = context->getAsData( name );
+			IECore::dispatch(
+				data.get(),
+				[&]( const auto *data ) -> void {
+					using DataType = remove_pointer_t<decltype( data )>;
+					using ValueType = typename DataType::ValueType;
+					if constexpr( fmt::is_formattable<ValueType>::value )
+					{
+						if( result.size() )
+						{
+							result += ", ";
+						}
+						result += fmt::format( "{}={}", name.string(), data->readable() );
+					}
+					/// \todo Register formatters for Imath types, and anything
+					/// else that might end up in a context variable.
 				}
 			);
-
-			for( const auto &name : names )
-			{
-				if( name == g_scriptFileNameContextEntry )
-				{
-					// When we isolate batches, we give them a new script filename,
-					// but that information would only clutter up the batch names,
-					// so we omit it here.
-					/// \todo A smarter method of naming might be to include only
-					/// context variables that differ between batches for the same
-					/// node. That would automatically take care of this omission
-					/// too.
-					continue;
-				}
-				if( context->variableHash( name ) == m_baseContext.variableHash( name ) )
-				{
-					continue;
-				}
-
-				DataPtr data = context->getAsData( name );
-				IECore::dispatch(
-					data.get(),
-					[&] ( const auto *data ) -> void {
-						using DataType = remove_pointer_t<decltype( data )>;
-						using ValueType = typename DataType::ValueType;
-						if constexpr( fmt::is_formattable<ValueType>::value )
-						{
-							if( result.size() )
-							{
-								result += ", ";
-							}
-							result += fmt::format( "{}={}", name.string(), data->readable() );
-						}
-						/// \todo Register formatters for Imath types, and anything
-						/// else that might end up in a context variable.
-					}
-				);
-			}
-
-			return result;
 		}
 
-		const Context &m_baseContext;
+		return result;
+	}
 
-		unordered_map<const Node *, string> m_nodeLabels;
-		unordered_map<const Context *, string> m_contextLabels;
+	const Context &m_baseContext;
 
+	unordered_map<const Node *, string> m_nodeLabels;
+	unordered_map<const Context *, string> m_contextLabels;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -689,19 +685,18 @@ class Dispatcher::TaskBatch::Namer
 //////////////////////////////////////////////////////////////////////////
 
 Dispatcher::TaskBatch::TaskBatch()
-	:	TaskBatch( nullptr, nullptr )
+	: TaskBatch( nullptr, nullptr )
 {
 }
 
 Dispatcher::TaskBatch::TaskBatch( TaskNode::ConstTaskPlugPtr plug, Gaffer::ConstContextPtr context )
-	:	m_plug( plug ), m_context( context ), m_blindData( new CompoundData ),
-		m_size( 0 ), m_postTaskIndex( 0 ), m_immediate( false ), m_visited( false ), m_executed( false )
+	: m_plug( plug ), m_context( context ), m_blindData( new CompoundData ), m_size( 0 ), m_postTaskIndex( 0 ), m_immediate( false ), m_visited( false ), m_executed( false )
 {
 }
 
 void Dispatcher::TaskBatch::execute() const
 {
-	if ( m_frames.empty() )
+	if( m_frames.empty() )
 	{
 		return;
 	}
@@ -862,13 +857,12 @@ void Dispatcher::TaskBatch::preprocess( bool omitEmpty, Namer &namer, bool immed
 	blindData()->writable()[g_nameBlindDataKey] = new StringData( namer.name( this ) );
 
 	m_visited = true;
-
 }
 
 void Dispatcher::TaskBatch::isolate()
 {
 	auto sourceNode = runTimeCast<const TaskNode>( m_plug->node() );
-	const ScriptNode *sourceScript = sourceNode->scriptNode();  // `execute()` has already checked that this will be valid
+	const ScriptNode *sourceScript = sourceNode->scriptNode(); // `execute()` has already checked that this will be valid
 
 	std::filesystem::path scriptPath( m_context->get<std::string>( g_scriptFileNameContextEntry ) );
 	const std::string sourceNodeRelativeName = sourceNode->relativeName( sourceScript );
@@ -881,8 +875,7 @@ void Dispatcher::TaskBatch::isolate()
 		sourceNodeRelativeName /
 		m_context->hash().toString() /
 		batchFrames->asString() /
-		( scriptPath.stem().string() + ".gfr" )
-	;
+		( scriptPath.stem().string() + ".gfr" );
 
 	ContextPtr isolatedContext = new Context( *m_context );
 	isolatedContext->set( g_scriptFileNameContextEntry, isolatedPath.generic_string() );
@@ -922,7 +915,7 @@ void Dispatcher::TaskBatch::isolate()
 
 	auto parentNode = sourceNode->parent<Node>();
 	StandardSetPtr sourceSet = new StandardSet();
-	sourceSet->add( const_cast<TaskNode*>( sourceNode ) );
+	sourceSet->add( const_cast<TaskNode *>( sourceNode ) );
 	const std::string serialisation = sourceScript->serialise( parentNode, sourceSet.get() );
 	destinationScript->execute( serialisation, lowestContainer );
 
@@ -931,7 +924,7 @@ void Dispatcher::TaskBatch::isolate()
 
 	for( ValuePlug::RecursiveInputIterator it( sourceNode ); !it.done(); ++it )
 	{
-		auto destinationPlug = destinationNode->descendant<ValuePlug>( (*it)->relativeName( sourceNode ) );
+		auto destinationPlug = destinationNode->descendant<ValuePlug>( ( *it )->relativeName( sourceNode ) );
 		assert( destinationPlug != nullptr );
 
 		if( destinationPlug->getInput() )
@@ -942,9 +935,9 @@ void Dispatcher::TaskBatch::isolate()
 			continue;
 		}
 
-		if( (*it)->getInput() )
+		if( ( *it )->getInput() )
 		{
-			bakePlugValue( destinationPlug, (*it).get(), m_frames );
+			bakePlugValue( destinationPlug, ( *it ).get(), m_frames );
 			it.prune();
 		}
 	}
@@ -952,7 +945,6 @@ void Dispatcher::TaskBatch::isolate()
 	destinationScript->fileNamePlug()->setValue( isolatedPath.generic_string() );
 	std::filesystem::create_directories( isolatedPath.parent_path() );
 	destinationScript->serialiseToFile( isolatedPath );
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -964,239 +956,235 @@ void Dispatcher::TaskBatch::isolate()
 class Dispatcher::Batcher
 {
 
-	public :
+public:
 
-		Batcher()
-			:	m_rootBatch( new TaskBatch() )
+	Batcher()
+		: m_rootBatch( new TaskBatch() )
+	{
+	}
+
+	void addTask( const TaskNode::Task &task )
+	{
+		if( auto batch = batchTasksWalk( task ) )
 		{
+			m_rootBatch->addPreTask( batch );
 		}
+	}
 
-		void addTask( const TaskNode::Task &task )
+	TaskBatch *rootBatch()
+	{
+		return m_rootBatch.get();
+	}
+
+	// Returns a hash representing all the tasks that will be
+	// executed, but _not_ the dependencies between them. This
+	// is used by `Dispatcher::hash()`.
+	IECore::MurmurHash hash() const
+	{
+		IECore::MurmurHash h;
+		for( const auto &[taskHash, taskBatch] : m_tasksToBatches )
 		{
-			if( auto batch = batchTasksWalk( task ) )
+			// `unordered_map` doesn't guarantee deterministic order, so
+			// we use the "sum of hashes" trick to get a stable hash.
+			h = MurmurHash( h.h1() + taskHash.h1(), h.h2() + taskHash.h2() );
+		}
+		return h;
+	}
+
+private:
+
+	TaskBatchPtr batchTasksWalk( TaskNode::Task task, const std::set<const TaskBatch *> &ancestors = std::set<const TaskBatch *>() )
+	{
+		// Find source task, taking into account
+		// Switches and ContextProcessors.
+		{
+			Context::Scope scopedTaskContext( task.context() );
+			auto [sourcePlug, sourceContext] = PlugAlgo::contextSensitiveSource( task.plug() );
+			if( auto sourceTaskPlug = runTimeCast<const TaskNode::TaskPlug>( sourcePlug ) )
 			{
-				m_rootBatch->addPreTask( batch );
+				task = TaskNode::Task( sourceTaskPlug, sourceContext ? sourceContext.get() : task.context() );
 			}
-		}
-
-		TaskBatch *rootBatch()
-		{
-			return m_rootBatch.get();
-		}
-
-		// Returns a hash representing all the tasks that will be
-		// executed, but _not_ the dependencies between them. This
-		// is used by `Dispatcher::hash()`.
-		IECore::MurmurHash hash() const
-		{
-			IECore::MurmurHash h;
-			for( const auto &[taskHash, taskBatch] : m_tasksToBatches )
-			{
-				// `unordered_map` doesn't guarantee deterministic order, so
-				// we use the "sum of hashes" trick to get a stable hash.
-				h = MurmurHash( h.h1() + taskHash.h1(), h.h2() + taskHash.h2() );
-			}
-			return h;
-		}
-
-	private :
-
-		TaskBatchPtr batchTasksWalk( TaskNode::Task task, const std::set<const TaskBatch *> &ancestors = std::set<const TaskBatch *>() )
-		{
-			// Find source task, taking into account
-			// Switches and ContextProcessors.
-			{
-				Context::Scope scopedTaskContext( task.context() );
-				auto [sourcePlug, sourceContext] = PlugAlgo::contextSensitiveSource( task.plug() );
-				if( auto sourceTaskPlug = runTimeCast<const TaskNode::TaskPlug>( sourcePlug ) )
-				{
-					task = TaskNode::Task( sourceTaskPlug, sourceContext ? sourceContext.get() : task.context() );
-				}
-				else
-				{
-					return nullptr;
-				}
-			}
-
-			if( task.plug()->direction() != Plug::Out )
+			else
 			{
 				return nullptr;
 			}
-
-			// Acquire a batch with this task placed in it,
-			// and check that we haven't discovered a cyclic
-			// dependency.
-			TaskBatchPtr batch = acquireBatch( task );
-			if( ancestors.find( batch.get() ) != ancestors.end() )
-			{
-				throw IECore::Exception( fmt::format(
-					"Dispatched tasks cannot have cyclic dependencies but {} is involved in a cycle.",
-					batch->plug()->relativeName( batch->plug()->ancestor<ScriptNode>() )
-				) );
-			}
-
-			// Ask the task what preTasks and postTasks it would like.
-			TaskNode::Tasks preTasks;
-			TaskNode::Tasks postTasks;
-			{
-				Context::Scope scopedTaskContext( task.context() );
-				task.plug()->preTasks( preTasks );
-				task.plug()->postTasks( postTasks );
-			}
-
-			// Collect all the batches the postTasks belong in.
-			// We grab these first because they need to be included
-			// in the ancestors for cycle detection when getting
-			// the preTask batches.
-			TaskBatches postBatches;
-			for( const auto &postTask : postTasks )
-			{
-				if( auto postBatch = batchTasksWalk( postTask ) )
-				{
-					postBatches.push_back( postBatch );
-				}
-			}
-
-			// Collect all the batches the preTasks belong in,
-			// and add them as preTasks for our batch.
-
-			std::set<const TaskBatch *> preTaskAncestors( ancestors );
-			preTaskAncestors.insert( batch.get() );
-			for( const auto &postBatch : postBatches )
-			{
-				preTaskAncestors.insert( postBatch.get() );
-			}
-
-			for( const auto &preTask : preTasks )
-			{
-				if( auto preBatch = batchTasksWalk( preTask, preTaskAncestors ) )
-				{
-					batch->addPreTask( preBatch );
-				}
-			}
-
-			// As far as TaskBatch and doDispatch() are concerned, there
-			// is no such thing as a postTask, so we emulate them by making
-			// this batch a preTask of each of the postTask batches. We also
-			// add the postTask batches as preTasks for the root, so that they
-			// are reachable from doDispatch().
-			for( const auto &postBatch : postBatches )
-			{
-				postBatch->addPreTask( batch, /* forPostTask =  */ true );
-				m_rootBatch->addPreTask( postBatch );
-			}
-
-			return batch;
 		}
 
-		TaskBatchPtr acquireBatch( const TaskNode::Task &task )
+		if( task.plug()->direction() != Plug::Out )
 		{
-			// Several plugs will be evaluated that may vary by context,
-			// so we need to be in the correct context for this task
-			// \todo should we be removing `frame` from the context?
+			return nullptr;
+		}
+
+		// Acquire a batch with this task placed in it,
+		// and check that we haven't discovered a cyclic
+		// dependency.
+		TaskBatchPtr batch = acquireBatch( task );
+		if( ancestors.find( batch.get() ) != ancestors.end() )
+		{
+			throw IECore::Exception( fmt::format( "Dispatched tasks cannot have cyclic dependencies but {} is involved in a cycle.", batch->plug()->relativeName( batch->plug()->ancestor<ScriptNode>() ) ) );
+		}
+
+		// Ask the task what preTasks and postTasks it would like.
+		TaskNode::Tasks preTasks;
+		TaskNode::Tasks postTasks;
+		{
 			Context::Scope scopedTaskContext( task.context() );
-
-			// See if we've previously visited this task, and therefore
-			// have placed it in a batch already, which we can return
-			// unchanged. The `taskHash` is used as the unique identity of
-			// the task.
-			MurmurHash taskHash = task.plug()->hash();
-			const bool taskIsNoOp = taskHash == IECore::MurmurHash();
-			if( taskIsNoOp )
-			{
-				// Prevent no-ops from coalescing into a single batch, as this
-				// would break parallelism - see `DispatcherTest.testNoOpDoesntBreakFrameParallelism()`
-				taskHash.append( task.context()->hash() );
-			}
-			// Prevent identical tasks from different nodes from being
-			// coalesced.
-			taskHash.append( (uint64_t)task.plug() );
-
-			TaskBatchPtr &batchForTask = m_tasksToBatches[taskHash];
-			if( batchForTask )
-			{
-				return batchForTask;
-			}
-
-			// We haven't seen this task before, so we need to find
-			// an appropriate batch to put it in. This may be one of
-			// our current batches, or we may need to make a new one
-			// entirely if the current batch is full.
-
-			const bool requiresSequenceExecution = task.plug()->requiresSequenceExecution();
-
-			ConstContextPtr batchContext = m_batchContextPool.acquireUnique( task.context() );
-			MurmurHash batchMapHash = batchContext->hash();
-			batchMapHash.append( (uint64_t)task.plug() );
-
-			TaskBatchPtr &batch = m_currentBatches[batchMapHash];
-			if( batch && !requiresSequenceExecution )
-			{
-				const IntPlug *batchSizePlug = dispatcherPlug( task )->getChild<const IntPlug>( g_batchSize );
-				const int batchSizeLimit = ( batchSizePlug ) ? batchSizePlug->getValue() : 1;
-				if( batch->m_size >= (size_t)batchSizeLimit )
-				{
-					// The current batch is full, so we'll need to make a new one.
-					batch = nullptr;
-				}
-			}
-
-			if( !batch )
-			{
-				batch = new TaskBatch( task.plug(), batchContext );
-			}
-
-			// Now we have an appropriate batch, update it to include
-			// the frame for our task, and any other relevant information.
-
-			if( !taskIsNoOp )
-			{
-				float frame = task.context()->getFrame();
-				std::vector<float> &frames = batch->m_frames;
-				if( requiresSequenceExecution )
-				{
-					frames.insert( std::lower_bound( frames.begin(), frames.end(), frame ), frame );
-				}
-				else
-				{
-					frames.push_back( frame );
-				}
-			}
-
-			batch->m_size++;
-
-			const BoolPlug *immediatePlug = dispatcherPlug( task )->getChild<const BoolPlug>( g_immediatePlugName );
-			if( immediatePlug && immediatePlug->getValue() )
-			{
-				batch->m_immediate = true;
-			}
-
-			const BoolPlug *isolatePlug = dispatcherPlug( task )->getChild<const BoolPlug>( g_isolatedPlugName );
-			if( isolatePlug && isolatePlug->getValue() )
-			{
-				batch->blindData()->writable()[g_isolatedBlindDataKey] = g_trueData;
-			}
-
-			// Remember which batch we stored this task in, for
-			// the next time someone asks for it.
-			batchForTask = batch;
-
-			return batch;
+			task.plug()->preTasks( preTasks );
+			task.plug()->postTasks( postTasks );
 		}
 
-		const Gaffer::Plug *dispatcherPlug( const TaskNode::Task &task )
+		// Collect all the batches the postTasks belong in.
+		// We grab these first because they need to be included
+		// in the ancestors for cycle detection when getting
+		// the preTask batches.
+		TaskBatches postBatches;
+		for( const auto &postTask : postTasks )
 		{
-			return static_cast<const TaskNode *>( task.plug()->node() )->dispatcherPlug();
+			if( auto postBatch = batchTasksWalk( postTask ) )
+			{
+				postBatches.push_back( postBatch );
+			}
 		}
 
-		using BatchMap = std::unordered_map<IECore::MurmurHash, TaskBatchPtr>;
-		using TaskToBatchMap = std::unordered_map<IECore::MurmurHash, TaskBatchPtr>;
+		// Collect all the batches the preTasks belong in,
+		// and add them as preTasks for our batch.
 
-		TaskBatchPtr m_rootBatch;
-		BatchMap m_currentBatches;
-		TaskToBatchMap m_tasksToBatches;
-		BatchContextPool m_batchContextPool;
+		std::set<const TaskBatch *> preTaskAncestors( ancestors );
+		preTaskAncestors.insert( batch.get() );
+		for( const auto &postBatch : postBatches )
+		{
+			preTaskAncestors.insert( postBatch.get() );
+		}
 
+		for( const auto &preTask : preTasks )
+		{
+			if( auto preBatch = batchTasksWalk( preTask, preTaskAncestors ) )
+			{
+				batch->addPreTask( preBatch );
+			}
+		}
+
+		// As far as TaskBatch and doDispatch() are concerned, there
+		// is no such thing as a postTask, so we emulate them by making
+		// this batch a preTask of each of the postTask batches. We also
+		// add the postTask batches as preTasks for the root, so that they
+		// are reachable from doDispatch().
+		for( const auto &postBatch : postBatches )
+		{
+			postBatch->addPreTask( batch, /* forPostTask =  */ true );
+			m_rootBatch->addPreTask( postBatch );
+		}
+
+		return batch;
+	}
+
+	TaskBatchPtr acquireBatch( const TaskNode::Task &task )
+	{
+		// Several plugs will be evaluated that may vary by context,
+		// so we need to be in the correct context for this task
+		// \todo should we be removing `frame` from the context?
+		Context::Scope scopedTaskContext( task.context() );
+
+		// See if we've previously visited this task, and therefore
+		// have placed it in a batch already, which we can return
+		// unchanged. The `taskHash` is used as the unique identity of
+		// the task.
+		MurmurHash taskHash = task.plug()->hash();
+		const bool taskIsNoOp = taskHash == IECore::MurmurHash();
+		if( taskIsNoOp )
+		{
+			// Prevent no-ops from coalescing into a single batch, as this
+			// would break parallelism - see `DispatcherTest.testNoOpDoesntBreakFrameParallelism()`
+			taskHash.append( task.context()->hash() );
+		}
+		// Prevent identical tasks from different nodes from being
+		// coalesced.
+		taskHash.append( (uint64_t)task.plug() );
+
+		TaskBatchPtr &batchForTask = m_tasksToBatches[taskHash];
+		if( batchForTask )
+		{
+			return batchForTask;
+		}
+
+		// We haven't seen this task before, so we need to find
+		// an appropriate batch to put it in. This may be one of
+		// our current batches, or we may need to make a new one
+		// entirely if the current batch is full.
+
+		const bool requiresSequenceExecution = task.plug()->requiresSequenceExecution();
+
+		ConstContextPtr batchContext = m_batchContextPool.acquireUnique( task.context() );
+		MurmurHash batchMapHash = batchContext->hash();
+		batchMapHash.append( (uint64_t)task.plug() );
+
+		TaskBatchPtr &batch = m_currentBatches[batchMapHash];
+		if( batch && !requiresSequenceExecution )
+		{
+			const IntPlug *batchSizePlug = dispatcherPlug( task )->getChild<const IntPlug>( g_batchSize );
+			const int batchSizeLimit = ( batchSizePlug ) ? batchSizePlug->getValue() : 1;
+			if( batch->m_size >= (size_t)batchSizeLimit )
+			{
+				// The current batch is full, so we'll need to make a new one.
+				batch = nullptr;
+			}
+		}
+
+		if( !batch )
+		{
+			batch = new TaskBatch( task.plug(), batchContext );
+		}
+
+		// Now we have an appropriate batch, update it to include
+		// the frame for our task, and any other relevant information.
+
+		if( !taskIsNoOp )
+		{
+			float frame = task.context()->getFrame();
+			std::vector<float> &frames = batch->m_frames;
+			if( requiresSequenceExecution )
+			{
+				frames.insert( std::lower_bound( frames.begin(), frames.end(), frame ), frame );
+			}
+			else
+			{
+				frames.push_back( frame );
+			}
+		}
+
+		batch->m_size++;
+
+		const BoolPlug *immediatePlug = dispatcherPlug( task )->getChild<const BoolPlug>( g_immediatePlugName );
+		if( immediatePlug && immediatePlug->getValue() )
+		{
+			batch->m_immediate = true;
+		}
+
+		const BoolPlug *isolatePlug = dispatcherPlug( task )->getChild<const BoolPlug>( g_isolatedPlugName );
+		if( isolatePlug && isolatePlug->getValue() )
+		{
+			batch->blindData()->writable()[g_isolatedBlindDataKey] = g_trueData;
+		}
+
+		// Remember which batch we stored this task in, for
+		// the next time someone asks for it.
+		batchForTask = batch;
+
+		return batch;
+	}
+
+	const Gaffer::Plug *dispatcherPlug( const TaskNode::Task &task )
+	{
+		return static_cast<const TaskNode *>( task.plug()->node() )->dispatcherPlug();
+	}
+
+	using BatchMap = std::unordered_map<IECore::MurmurHash, TaskBatchPtr>;
+	using TaskToBatchMap = std::unordered_map<IECore::MurmurHash, TaskBatchPtr>;
+
+	TaskBatchPtr m_rootBatch;
+	BatchMap m_currentBatches;
+	TaskToBatchMap m_tasksToBatches;
+	BatchContextPool m_batchContextPool;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -1210,55 +1198,54 @@ namespace
 class DispatcherSignalGuard
 {
 
-	public:
+public:
 
-		DispatcherSignalGuard( const Dispatcher *dispatcher ) : m_cancelledByPreDispatch( false ), m_dispatcher( dispatcher )
+	DispatcherSignalGuard( const Dispatcher *dispatcher ) : m_cancelledByPreDispatch( false ), m_dispatcher( dispatcher )
+	{
+		if( Context::current()->getIfExists<string>( g_jobDirectoryContextEntry ) )
 		{
-			if( Context::current()->getIfExists<string>( g_jobDirectoryContextEntry ) )
-			{
-				// We're in a nested dispatch. We don't want to emit any signals
-				// in this case because we believe that most handlers that exist
-				// in the wild are not expecting it, having been written before
-				// nested dispatch was supported. It also seems that some such
-				// handlers are modifying the graph before dispatch, which was
-				// bad before, but would be even more likely to cause problems
-				// were it to be done repeatedly for nested dispatchers inside
-				// an outer dispatch.
-				m_dispatcher = nullptr;
-			}
-
-			if( m_dispatcher )
-			{
-				m_cancelledByPreDispatch = Dispatcher::preDispatchSignal()( m_dispatcher );
-			}
+			// We're in a nested dispatch. We don't want to emit any signals
+			// in this case because we believe that most handlers that exist
+			// in the wild are not expecting it, having been written before
+			// nested dispatch was supported. It also seems that some such
+			// handlers are modifying the graph before dispatch, which was
+			// bad before, but would be even more likely to cause problems
+			// were it to be done repeatedly for nested dispatchers inside
+			// an outer dispatch.
+			m_dispatcher = nullptr;
 		}
 
-		~DispatcherSignalGuard()
+		if( m_dispatcher )
 		{
-			if( m_dispatcher )
-			{
-				Dispatcher::postDispatchSignal()( m_dispatcher, !std::uncaught_exceptions() && !m_cancelledByPreDispatch );
-			}
+			m_cancelledByPreDispatch = Dispatcher::preDispatchSignal()( m_dispatcher );
 		}
+	}
 
-		bool cancelledByPreDispatch()
+	~DispatcherSignalGuard()
+	{
+		if( m_dispatcher )
 		{
-			return m_cancelledByPreDispatch;
+			Dispatcher::postDispatchSignal()( m_dispatcher, !std::uncaught_exceptions() && !m_cancelledByPreDispatch );
 		}
+	}
 
-		void emitDispatchSignal()
+	bool cancelledByPreDispatch()
+	{
+		return m_cancelledByPreDispatch;
+	}
+
+	void emitDispatchSignal()
+	{
+		if( m_dispatcher )
 		{
-			if( m_dispatcher )
-			{
-				Dispatcher::dispatchSignal()( m_dispatcher );
-			}
+			Dispatcher::dispatchSignal()( m_dispatcher );
 		}
+	}
 
-	private:
+private:
 
-		bool m_cancelledByPreDispatch;
-		const Dispatcher *m_dispatcher;
-
+	bool m_cancelledByPreDispatch;
+	const Dispatcher *m_dispatcher;
 };
 
 } // namespace
@@ -1362,7 +1349,7 @@ void Dispatcher::execute() const
 	// in its destructor, thereby guaranteeing that we always call this->postDispatchSignal().
 
 	DispatcherSignalGuard signalGuard( this );
-	if ( signalGuard.cancelledByPreDispatch() )
+	if( signalGuard.cancelledByPreDispatch() )
 	{
 		return;
 	}

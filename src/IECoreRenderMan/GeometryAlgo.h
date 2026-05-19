@@ -57,7 +57,7 @@ namespace IECoreRenderMan::GeometryAlgo
 RtUString convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext = "GeometryAlgo::convert" );
 
 /// Signature of a function which implements `convert()` for a particular type.
-using Converter = std::function<RtUString ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )>;
+using Converter = std::function<RtUString( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )>;
 
 /// Registers a converter for a specific type. Use the ConverterDescription
 /// utility class in preference to this, since it provides additional type
@@ -70,23 +70,21 @@ template<typename T>
 class ConverterDescription
 {
 
-	public :
+public:
 
-		/// Type-specific conversion functions.
-		using TypedObjectSamples = IECoreScenePreview::Renderer::Samples<const T *>;
-		using TypedConverter = RtUString (*)( const TypedObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext );
+	/// Type-specific conversion functions.
+	using TypedObjectSamples = IECoreScenePreview::Renderer::Samples<const T *>;
+	using TypedConverter = RtUString ( * )( const TypedObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext );
 
-		ConverterDescription( TypedConverter converter )
-		{
-			registerConverter(
-				T::staticTypeId(),
-				[converter] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
-				{
-					return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), sampleTimes, primVars, messageContext );
-				}
-			);
-		}
-
+	ConverterDescription( TypedConverter converter )
+	{
+		registerConverter(
+			T::staticTypeId(),
+			[converter]( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext ) {
+				return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), sampleTimes, primVars, messageContext );
+			}
+		);
+	}
 };
 
 /// Primitive conversion helpers

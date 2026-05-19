@@ -61,73 +61,71 @@ IE_CORE_FORWARDDECLARE( Context )
 class GAFFER_API ContextMonitor : public Monitor
 {
 
-	public :
+public:
 
-		/// Statistics are only collected for the root and its
-		/// descendants.
-		explicit ContextMonitor( const GraphComponent *root = nullptr );
-		~ContextMonitor() override;
+	/// Statistics are only collected for the root and its
+	/// descendants.
+	explicit ContextMonitor( const GraphComponent *root = nullptr );
+	~ContextMonitor() override;
 
-		IE_CORE_DECLAREMEMBERPTR( ContextMonitor )
+	IE_CORE_DECLAREMEMBERPTR( ContextMonitor )
 
-		struct GAFFER_API Statistics
-		{
+	struct GAFFER_API Statistics
+	{
 
-			using CountingMap = boost::unordered_map<IECore::MurmurHash, size_t>;
+		using CountingMap = boost::unordered_map<IECore::MurmurHash, size_t>;
 
-			size_t numUniqueContexts() const;
-			std::vector<IECore::InternedString> variableNames() const;
-			size_t numUniqueValues( IECore::InternedString variableName ) const;
-			/// Maps from the `Context::variableHash()` for each unique value to
-			/// the number of times that value appeared.
-			const CountingMap &variableHashes( IECore::InternedString variableName ) const;
+		size_t numUniqueContexts() const;
+		std::vector<IECore::InternedString> variableNames() const;
+		size_t numUniqueValues( IECore::InternedString variableName ) const;
+		/// Maps from the `Context::variableHash()` for each unique value to
+		/// the number of times that value appeared.
+		const CountingMap &variableHashes( IECore::InternedString variableName ) const;
 
-			Statistics & operator += ( const Context *rhs );
-			Statistics & operator += ( const Statistics &rhs );
+		Statistics &operator += ( const Context *rhs );
+		Statistics &operator += ( const Statistics &rhs );
 
-			bool operator == ( const Statistics &rhs );
-			bool operator != ( const Statistics &rhs );
+		bool operator == ( const Statistics &rhs );
+		bool operator != ( const Statistics &rhs );
 
-			private :
+	private:
 
-				using ContextSet = boost::unordered_set<IECore::MurmurHash>;
-				using VariableMap = std::map<IECore::InternedString, CountingMap>;
+		using ContextSet = boost::unordered_set<IECore::MurmurHash>;
+		using VariableMap = std::map<IECore::InternedString, CountingMap>;
 
-				ContextSet m_contexts;
-				VariableMap m_variables;
+		ContextSet m_contexts;
+		VariableMap m_variables;
+	};
 
-		};
+	using StatisticsMap = boost::unordered_map<ConstPlugPtr, Statistics>;
 
-		using StatisticsMap = boost::unordered_map<ConstPlugPtr, Statistics>;
+	const StatisticsMap &allStatistics() const;
+	const Statistics &plugStatistics( const Plug *plug ) const;
+	const Statistics &combinedStatistics() const;
 
-		const StatisticsMap &allStatistics() const;
-		const Statistics &plugStatistics( const Plug *plug ) const;
-		const Statistics &combinedStatistics() const;
+protected:
 
-	protected :
+	void processStarted( const Process *process ) override;
+	void processFinished( const Process *process ) override;
 
-		void processStarted( const Process *process ) override;
-		void processFinished( const Process *process ) override;
+private:
 
-	private :
+	const GraphComponent *m_root;
 
-		const GraphComponent *m_root;
+	// For performance reasons we accumulate our statistics into
+	// thread local storage while computations are running.
+	struct ThreadData
+	{
+		// Stores the per-plug statistics captured by this thread.
+		StatisticsMap statistics;
+	};
 
-		// For performance reasons we accumulate our statistics into
-		// thread local storage while computations are running.
-		struct ThreadData
-		{
-			// Stores the per-plug statistics captured by this thread.
-			StatisticsMap statistics;
-		};
+	tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance> m_threadData;
 
-		tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance> m_threadData;
-
-		// Then when we want to query it, we collate it into m_statistics.
-		void collate() const;
-		mutable StatisticsMap m_statistics;
-		mutable Statistics m_combinedStatistics;
-
+	// Then when we want to query it, we collate it into m_statistics.
+	void collate() const;
+	mutable StatisticsMap m_statistics;
+	mutable Statistics m_combinedStatistics;
 };
 
 IE_CORE_DECLAREPTR( ContextMonitor )

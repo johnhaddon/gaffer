@@ -164,7 +164,7 @@ struct GAFFER_API Annotation
 	operator bool() const { return textData.get(); }
 
 	bool operator == ( const Annotation &rhs );
-	bool operator != ( const Annotation &rhs ) { return !(*this == rhs); };
+	bool operator != ( const Annotation &rhs ) { return !( *this == rhs ); };
 
 	IECore::ConstStringDataPtr textData;
 	IECore::ConstColor3fDataPtr colorData;
@@ -172,17 +172,16 @@ struct GAFFER_API Annotation
 	const std::string &text() const { return textData ? textData->readable() : g_defaultText; }
 	const Imath::Color3f &color() const { return colorData ? colorData->readable() : g_defaultColor; }
 
-	private :
+private:
 
-		static std::string g_defaultText;
-		static Imath::Color3f g_defaultColor;
-
+	static std::string g_defaultText;
+	static Imath::Color3f g_defaultColor;
 };
 
 GAFFER_API void addAnnotation( Node *node, const std::string &name, const Annotation &annotation, bool persistent = true );
 GAFFER_API Annotation getAnnotation( const Node *node, const std::string &name, bool inheritTemplate = false );
 GAFFER_API void removeAnnotation( Node *node, const std::string &name );
-[[deprecated( "Use alternative form with `RegistrationTypes` instead")]]
+[[deprecated( "Use alternative form with `RegistrationTypes` instead" )]]
 GAFFER_API void annotations( const Node *node, std::vector<std::string> &names );
 GAFFER_API std::vector<std::string> annotations( const Node *node, Metadata::RegistrationTypes types = Metadata::RegistrationTypes::All );
 
@@ -257,9 +256,9 @@ GAFFER_API ValuePlugPtr createPlugFromMetadata( const std::string &name, Plug::D
 /// Returns the first T that is considered user viewable, starting from graphComponent before
 /// testing all ancestors. Nodes can mark their children as viewable by registering "ui:childNodesAreViewable"
 /// metadata.
-template<typename T=GraphComponent>
+template<typename T = GraphComponent>
 T *firstViewableAncestor( GraphComponent *graphComponent );
-template<typename T=GraphComponent>
+template<typename T = GraphComponent>
 const T *firstViewableAncestor( const GraphComponent *graphComponent );
 /// As above, but taking a TypeId to specify type - this is mainly provided for the binding.
 GAFFER_API GraphComponent *firstViewableAncestor( GraphComponent *graphComponent, IECore::TypeId ancestorType );

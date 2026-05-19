@@ -63,159 +63,156 @@ IECore::InternedString g_noduleTypeKey( "nodule:type" );
 class TweakPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		TweakPlugAdder( PlugPtr plugsParent )
-			:	m_plugsParent( plugsParent )
+	TweakPlugAdder( PlugPtr plugsParent )
+		: m_plugsParent( plugsParent )
+	{
+		plugsParent->node()->plugSetSignal().connect( boost::bind( &TweakPlugAdder::plugSet, this, ::_1 ) );
+		plugsParent->node()->plugInputChangedSignal().connect( boost::bind( &TweakPlugAdder::plugInputChanged, this, ::_1 ) );
+		plugsParent->childAddedSignal().connect( boost::bind( &TweakPlugAdder::childAdded, this ) );
+		plugsParent->childRemovedSignal().connect( boost::bind( &TweakPlugAdder::childRemoved, this ) );
+		Metadata::plugValueChangedSignal( plugsParent->node() ).connect( boost::bind( &TweakPlugAdder::plugMetadataChanged, this, ::_1, ::_2 ) );
+		buttonReleaseSignal().connect( boost::bind( &TweakPlugAdder::buttonRelease, this, ::_2 ) );
+
+		updateVisibility();
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		vector<Plug *> plugs = showablePlugs( endpoint );
+		return !plugs.empty();
+	}
+
+	void createConnection( Plug *endpoint ) override
+	{
+		vector<Plug *> plugs = showablePlugs( endpoint );
+		Plug *plug = plugMenuSignal()( "Connect To", plugs );
+		if( !plug )
 		{
-			plugsParent->node()->plugSetSignal().connect( boost::bind( &TweakPlugAdder::plugSet, this, ::_1 ) );
-			plugsParent->node()->plugInputChangedSignal().connect( boost::bind( &TweakPlugAdder::plugInputChanged, this, ::_1 ) );
-			plugsParent->childAddedSignal().connect( boost::bind( &TweakPlugAdder::childAdded, this ) );
-			plugsParent->childRemovedSignal().connect( boost::bind( &TweakPlugAdder::childRemoved, this ) );
-			Metadata::plugValueChangedSignal( plugsParent->node() ).connect(
-				boost::bind( &TweakPlugAdder::plugMetadataChanged, this, ::_1, ::_2 )
-			);
-			buttonReleaseSignal().connect( boost::bind( &TweakPlugAdder::buttonRelease, this, ::_2 ) );
-
-			updateVisibility();
+			return;
 		}
 
-	protected :
+		Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
+		static_cast<TweakPlug *>( plug )->valuePlug()->setInput( endpoint );
+	}
 
-		bool canCreateConnection( const Plug *endpoint ) const override
+private:
+
+	bool buttonRelease( const ButtonEvent &event )
+	{
+		vector<Plug *> plugs = showablePlugs();
+		Plug *plug = plugMenuSignal()( "Show Parameter", plugs );
+		if( !plug )
 		{
-			vector<Plug *> plugs = showablePlugs( endpoint );
-			return !plugs.empty();
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		UndoScope undoScope( m_plugsParent->ancestor<ScriptNode>() );
+		Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
+		return true;
+	}
+
+	vector<Plug *> showablePlugs( const Plug *input = nullptr ) const
+	{
+		vector<Plug *> result;
+
+		for( TweakPlug::Iterator it( m_plugsParent.get() ); !it.done(); ++it )
 		{
-			vector<Plug *> plugs = showablePlugs( endpoint );
-			Plug *plug = plugMenuSignal()( "Connect To", plugs );
-			if( !plug )
+			TweakPlug *tweakPlug = it->get();
+			if( input )
 			{
-				return;
-			}
-
-			Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
-			static_cast<TweakPlug *>( plug )->valuePlug()->setInput( endpoint );
-		}
-
-	private :
-
-		bool buttonRelease( const ButtonEvent &event )
-		{
-			vector<Plug *> plugs = showablePlugs();
-			Plug *plug = plugMenuSignal()( "Show Parameter", plugs );
-			if( !plug )
-			{
-				return false;
-			}
-
-			UndoScope undoScope( m_plugsParent->ancestor<ScriptNode>() );
-			Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
-			return true;
-		}
-
-		vector<Plug *> showablePlugs( const Plug *input = nullptr ) const
-		{
-			vector<Plug *> result;
-
-			for( TweakPlug::Iterator it( m_plugsParent.get() ); !it.done(); ++it )
-			{
-				TweakPlug *tweakPlug = it->get();
-				if( input )
-				{
-					if( input->direction() != Plug::Out || !tweakPlug->valuePlug()->acceptsInput( input ) )
-					{
-						continue;
-					}
-				}
-				IECore::ConstBoolDataPtr visible = Metadata::value<IECore::BoolData>( tweakPlug, g_visibleKey );
-				if( !visible || visible->readable() )
+				if( input->direction() != Plug::Out || !tweakPlug->valuePlug()->acceptsInput( input ) )
 				{
 					continue;
 				}
+			}
+			IECore::ConstBoolDataPtr visible = Metadata::value<IECore::BoolData>( tweakPlug, g_visibleKey );
+			if( !visible || visible->readable() )
+			{
+				continue;
+			}
 
-				ValuePlug *valuePlug = tweakPlug->valuePlug();
-				if( !valuePlug )
+			ValuePlug *valuePlug = tweakPlug->valuePlug();
+			if( !valuePlug )
+			{
+				// It's possible that the TweakPlug is in an invalid state
+				// when we're getting called here. Ignore the plug if that's
+				// the case.
+				continue;
+			}
+
+			if( MetadataAlgo::readOnly( valuePlug ) )
+			{
+				continue;
+			}
+
+			if( !PlugAlgo::dependsOnCompute( tweakPlug->modePlug() ) )
+			{
+				const auto mode = static_cast<TweakPlug::Mode>( tweakPlug->modePlug()->getValue() );
+				if( mode != TweakPlug::Mode::Replace && mode != TweakPlug::Mode::Create )
 				{
-					// It's possible that the TweakPlug is in an invalid state
-					// when we're getting called here. Ignore the plug if that's
-					// the case.
 					continue;
 				}
-
-				if( MetadataAlgo::readOnly( valuePlug ) )
-				{
-					continue;
-				}
-
-				if( !PlugAlgo::dependsOnCompute( tweakPlug->modePlug() ) )
-				{
-					const auto mode = static_cast<TweakPlug::Mode>( tweakPlug->modePlug()->getValue() );
-					if( mode != TweakPlug::Mode::Replace && mode != TweakPlug::Mode::Create )
-					{
-						continue;
-					}
-				}
-
-				result.push_back( tweakPlug );
 			}
 
-			return result;
+			result.push_back( tweakPlug );
 		}
 
-		void updateVisibility()
-		{
-			setVisible( !showablePlugs().empty() );
-		}
+		return result;
+	}
 
-		void plugSet( const Gaffer::Plug *plug )
+	void updateVisibility()
+	{
+		setVisible( !showablePlugs().empty() );
+	}
+
+	void plugSet( const Gaffer::Plug *plug )
+	{
+		if( auto tweakPlug = plug->parent<TweakPlug>() )
 		{
-			if( auto tweakPlug = plug->parent<TweakPlug>() )
+			if( plug == tweakPlug->modePlug() )
 			{
-				if( plug == tweakPlug->modePlug() )
-				{
-					updateVisibility();
-				}
+				updateVisibility();
 			}
 		}
+	}
 
-		void plugInputChanged( const Gaffer::Plug *plug )
+	void plugInputChanged( const Gaffer::Plug *plug )
+	{
+		if( auto tweakPlug = plug->parent<TweakPlug>() )
 		{
-			if( auto tweakPlug = plug->parent<TweakPlug>() )
+			if( plug == tweakPlug->modePlug() )
 			{
-				if( plug == tweakPlug->modePlug() )
-				{
-					updateVisibility();
-				}
+				updateVisibility();
 			}
 		}
+	}
 
-		void childAdded()
-		{
-			updateVisibility();
-		}
+	void childAdded()
+	{
+		updateVisibility();
+	}
 
-		void childRemoved()
-		{
-			updateVisibility();
-		}
+	void childRemoved()
+	{
+		updateVisibility();
+	}
 
-		void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key )
+	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key )
+	{
+		if( plug->parent() == m_plugsParent )
 		{
-			if( plug->parent() == m_plugsParent )
+			if( key == g_visibleKey || key == g_noduleTypeKey )
 			{
-				if( key == g_visibleKey || key == g_noduleTypeKey )
-				{
-					updateVisibility();
-				}
+				updateVisibility();
 			}
 		}
+	}
 
-		GraphComponentPtr m_plugsParent;
-
+	GraphComponentPtr m_plugsParent;
 };
 
 struct Registration
@@ -226,13 +223,12 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferSceneUI.ShaderTweaksUI.PlugAdder", &create );
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
-		{
-			return new TweakPlugAdder( boost::static_pointer_cast<Plug>( parent ) );
-		}
-
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		return new TweakPlugAdder( boost::static_pointer_cast<Plug>( parent ) );
+	}
 };
 
 Registration g_registration;

@@ -48,50 +48,49 @@ namespace GafferUI
 class GAFFERUI_API RotateHandle : public Handle
 {
 
-	public :
+public:
 
-		explicit RotateHandle( Style::Axes axes );
-		~RotateHandle() override;
+	explicit RotateHandle( Style::Axes axes );
+	~RotateHandle() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::RotateHandle, RotateHandleTypeId, Handle );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::RotateHandle, RotateHandleTypeId, Handle );
 
-		void setAxes( Style::Axes axes );
-		Style::Axes getAxes() const;
+	void setAxes( Style::Axes axes );
+	Style::Axes getAxes() const;
 
-		// Returns a vector where each component is 0 or 1,
-		// indicating whether or not the handle will produce
-		// rotation in that axis.
-		Imath::V3i axisMask() const;
+	// Returns a vector where each component is 0 or 1,
+	// indicating whether or not the handle will produce
+	// rotation in that axis.
+	Imath::V3i axisMask() const;
 
-		// Measured in radians
-		Imath::Eulerf rotation( const DragDropEvent &event );
+	// Measured in radians
+	Imath::Eulerf rotation( const DragDropEvent &event );
 
-	protected :
+protected:
 
-		void renderHandle( const Style *style, Style::State state ) const override;
-		void dragBegin( const DragDropEvent &event ) override;
+	void renderHandle( const Style *style, Style::State state ) const override;
+	void dragBegin( const DragDropEvent &event ) override;
 
-	private :
+private:
 
-		bool dragMove( const DragDropEvent &event );
-		bool mouseMove( const ButtonEvent &event );
-		Imath::V3f pointOnSphere( const IECore::LineSegment3f &line ) const;
+	bool dragMove( const DragDropEvent &event );
+	bool mouseMove( const ButtonEvent &event );
+	Imath::V3f pointOnSphere( const IECore::LineSegment3f &line ) const;
 
-		void updatePreciseMotionState( const DragDropEvent &event );
-		IECore::LineSegment3f updatedLineFromEvent( const DragDropEvent &event ) const;
+	void updatePreciseMotionState( const DragDropEvent &event );
+	IECore::LineSegment3f updatedLineFromEvent( const DragDropEvent &event ) const;
 
-		Style::Axes m_axes;
-		// For X, Y and Z handles.
-		AngularDrag m_drag;
-		float m_rotation;
-		// For free rotation handle.
-		Imath::M44f m_dragBeginWorldTransform;
-		Imath::V3f m_dragBeginPointOnSphere;
-		Imath::V3f m_highlightVector;
+	Style::Axes m_axes;
+	// For X, Y and Z handles.
+	AngularDrag m_drag;
+	float m_rotation;
+	// For free rotation handle.
+	Imath::M44f m_dragBeginWorldTransform;
+	Imath::V3f m_dragBeginPointOnSphere;
+	Imath::V3f m_highlightVector;
 
-		bool m_preciseMotionEnabled;
-		IECore::LineSegment3f m_preciseMotionOriginLine;
-
+	bool m_preciseMotionEnabled;
+	IECore::LineSegment3f m_preciseMotionOriginLine;
 };
 
 IE_CORE_DECLAREPTR( RotateHandle )

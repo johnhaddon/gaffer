@@ -47,36 +47,35 @@ namespace GafferScene
 class GAFFERSCENE_API Outputs : public GlobalsProcessor
 {
 
-	public :
+public:
 
-		explicit Outputs( const std::string &name=defaultName<Outputs>() );
-		~Outputs() override;
+	explicit Outputs( const std::string &name = defaultName<Outputs>() );
+	~Outputs() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Outputs, OutputsTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Outputs, OutputsTypeId, GlobalsProcessor );
 
-		Gaffer::ValuePlug *outputsPlug();
-		const Gaffer::ValuePlug *outputsPlug() const;
+	Gaffer::ValuePlug *outputsPlug();
+	const Gaffer::ValuePlug *outputsPlug() const;
 
-		/// Add an output previously registered with registerOutput().
-		Gaffer::ValuePlug *addOutput( const std::string &name );
-		Gaffer::ValuePlug *addOutput( const std::string &name, const IECoreScene::Output *output );
+	/// Add an output previously registered with registerOutput().
+	Gaffer::ValuePlug *addOutput( const std::string &name );
+	Gaffer::ValuePlug *addOutput( const std::string &name, const IECoreScene::Output *output );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		static void registerOutput( const std::string &name, const IECoreScene::Output *output );
-		static void deregisterOutput( const std::string &name );
+	static void registerOutput( const std::string &name, const IECoreScene::Output *output );
+	static void deregisterOutput( const std::string &name );
 
-		static void registeredOutputs( std::vector<std::string> &names );
+	static void registeredOutputs( std::vector<std::string> &names );
 
-	protected :
+protected:
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Outputs )

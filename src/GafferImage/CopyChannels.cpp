@@ -86,7 +86,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyChannels );
 size_t CopyChannels::g_firstPlugIndex = 0;
 
 CopyChannels::CopyChannels( const std::string &name )
-	:	FlatImageProcessor( name, /* minInputs = */ 2 )
+	: FlatImageProcessor( name, /* minInputs = */ 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -174,11 +174,11 @@ void CopyChannels::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 	{
 		for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 		{
-			if( !(*it)->getInput() || !ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+			if( !( *it )->getInput() || !ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 			{
 				continue;
 			}
-			(*it)->channelNamesPlug()->hash( h );
+			( *it )->channelNamesPlug()->hash( h );
 		}
 		channelsPlug()->hash( h );
 	}
@@ -201,11 +201,11 @@ void CopyChannels::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 			/// has a default channelNames value of [ "R", "G", "B" ],
 			/// when it should have an empty default instead. Fix
 			/// the ImagePlug constructor and remove the check.
-			if( !(*it)->getInput() || !ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+			if( !( *it )->getInput() || !ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 			{
 				continue;
 			}
-			ConstStringVectorDataPtr inputChannelNamesData = (*it)->channelNamesPlug()->getValue();
+			ConstStringVectorDataPtr inputChannelNamesData = ( *it )->channelNamesPlug()->getValue();
 			const vector<string> &inputChannelNames = inputChannelNamesData->readable();
 			for( vector<string>::const_iterator cIt = inputChannelNames.begin(), ceIt = inputChannelNames.end(); cIt != ceIt; ++cIt )
 			{
@@ -234,9 +234,9 @@ void CopyChannels::hashDataWindow( const GafferImage::ImagePlug *output, const G
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			(*it)->dataWindowPlug()->hash( h );
+			( *it )->dataWindowPlug()->hash( h );
 		}
 	}
 }
@@ -246,9 +246,9 @@ Imath::Box2i CopyChannels::computeDataWindow( const Gaffer::Context *context, co
 	Imath::Box2i dataWindow;
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			dataWindow.extendBy( (*it)->dataWindowPlug()->getValue() );
+			dataWindow.extendBy( ( *it )->dataWindowPlug()->getValue() );
 		}
 	}
 

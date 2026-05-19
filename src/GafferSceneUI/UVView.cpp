@@ -93,290 +93,289 @@ static const boost::regex g_attrRegex( "<attr:([^>]+)>" );
 class UVView::UVScene : public SceneProcessor
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::UVView::UVScene, UVSceneTypeId, SceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::UVView::UVScene, UVSceneTypeId, SceneProcessor );
 
-		UVScene( const std::string &name = defaultName<UVScene>() )
-			:	SceneProcessor( name )
+	UVScene( const std::string &name = defaultName<UVScene>() )
+		: SceneProcessor( name )
+	{
+		storeIndexOfNextChild( g_firstPlugIndex );
+
+		addChild( new StringVectorDataPlug( "visiblePaths", Plug::In, new StringVectorData ) );
+		addChild( new StringPlug( "uvSet", Plug::In, "uv" ) );
+		addChild( new StringPlug( "textureFileName", Plug::In, "" ) );
+		addChild( new CompoundObjectPlug( "textures", Plug::Out, new CompoundObject ) );
+
+		addChild( new StringVectorDataPlug( "__udimQueryPaths", Plug::Out, new StringVectorData ) );
+		addChild( new StringPlug( "__udimQueryAttributes", Plug::Out ) );
+		addChild( new CompoundObjectPlug( "__udimQuery", Plug::In, new CompoundObject ) );
+		addChild( new StringVectorDataPlug( "__isolatePaths", Plug::Out, new StringVectorData ) );
+
+		PathFilterPtr udimQueryFilter = new PathFilter( "__udimQueryFilter" );
+		udimQueryFilter->pathsPlug()->setInput( udimQueryPathsPlug() );
+		addChild( udimQueryFilter );
+
+		UDIMQueryPtr udimQuery = new UDIMQuery( "__udimQuery" );
+		udimQuery->inPlug()->setInput( inPlug() );
+		udimQuery->filterPlug()->setInput( udimQueryFilter->outPlug() );
+		udimQuery->uvSetPlug()->setInput( uvSetPlug() );
+		udimQuery->attributesPlug()->setInput( udimQueryAttributesPlug() );
+		udimQueryPlug()->setInput( udimQuery->outPlug() );
+		addChild( udimQuery );
+
+		PathFilterPtr isolateFilter = new PathFilter( "__isolateFilter" );
+		isolateFilter->pathsPlug()->setInput( isolatePathsPlug() );
+		addChild( isolateFilter );
+
+		IsolatePtr isolate = new Isolate( "__isolate" );
+		isolate->inPlug()->setInput( inPlug() );
+		isolate->filterPlug()->setInput( isolateFilter->outPlug() );
+		addChild( isolate );
+
+		PathFilterPtr wireframeFilter = new PathFilter( "__wireframeFilter" );
+		wireframeFilter->pathsPlug()->setValue( new IECore::StringVectorData( { "/..." } ) );
+		addChild( wireframeFilter );
+
+		WireframePtr wireframe = new Wireframe( "__wireframe" );
+		wireframe->inPlug()->setInput( isolate->outPlug() );
+		wireframe->filterPlug()->setInput( wireframeFilter->outPlug() );
+		wireframe->positionPlug()->setInput( uvSetPlug() );
+		addChild( wireframe );
+
+		TransformPtr transform = new Transform( "__transform" );
+		transform->inPlug()->setInput( wireframe->outPlug() );
+		transform->filterPlug()->setInput( wireframeFilter->outPlug() );
+		transform->spacePlug()->setValue( Transform::ResetLocal );
+		addChild( transform );
+
+		outPlug()->setInput( transform->outPlug() );
+	}
+
+	StringVectorDataPlug *visiblePathsPlug()
+	{
+		return getChild<StringVectorDataPlug>( g_firstPlugIndex );
+	}
+
+	const StringVectorDataPlug *visiblePathsPlug() const
+	{
+		return getChild<StringVectorDataPlug>( g_firstPlugIndex );
+	}
+
+	StringPlug *uvSetPlug()
+	{
+		return getChild<StringPlug>( g_firstPlugIndex + 1 );
+	}
+
+	const StringPlug *uvSetPlug() const
+	{
+		return getChild<StringPlug>( g_firstPlugIndex + 1 );
+	}
+
+	StringPlug *textureFileNamePlug()
+	{
+		return getChild<StringPlug>( g_firstPlugIndex + 2 );
+	}
+
+	const StringPlug *textureFileNamePlug() const
+	{
+		return getChild<StringPlug>( g_firstPlugIndex + 2 );
+	}
+
+	CompoundObjectPlug *texturesPlug()
+	{
+		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 );
+	}
+
+	const CompoundObjectPlug *texturesPlug() const
+	{
+		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 );
+	}
+
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override
+	{
+		ComputeNode::affects( input, outputs );
+
+		if( input == visiblePathsPlug() )
 		{
-			storeIndexOfNextChild( g_firstPlugIndex );
-
-			addChild( new StringVectorDataPlug( "visiblePaths", Plug::In, new StringVectorData ) );
-			addChild( new StringPlug( "uvSet", Plug::In, "uv" ) );
-			addChild( new StringPlug( "textureFileName", Plug::In, "" ) );
-			addChild( new CompoundObjectPlug( "textures", Plug::Out, new CompoundObject ) );
-
-			addChild( new StringVectorDataPlug( "__udimQueryPaths", Plug::Out, new StringVectorData ) );
-			addChild( new StringPlug( "__udimQueryAttributes", Plug::Out ) );
-			addChild( new CompoundObjectPlug( "__udimQuery", Plug::In, new CompoundObject ) );
-			addChild( new StringVectorDataPlug( "__isolatePaths", Plug::Out, new StringVectorData ) );
-
-			PathFilterPtr udimQueryFilter = new PathFilter( "__udimQueryFilter" );
-			udimQueryFilter->pathsPlug()->setInput( udimQueryPathsPlug() );
-			addChild( udimQueryFilter );
-
-			UDIMQueryPtr udimQuery = new UDIMQuery( "__udimQuery" );
-			udimQuery->inPlug()->setInput( inPlug() );
-			udimQuery->filterPlug()->setInput( udimQueryFilter->outPlug() );
-			udimQuery->uvSetPlug()->setInput( uvSetPlug() );
-			udimQuery->attributesPlug()->setInput( udimQueryAttributesPlug() );
-			udimQueryPlug()->setInput( udimQuery->outPlug() );
-			addChild( udimQuery );
-
-			PathFilterPtr isolateFilter = new PathFilter( "__isolateFilter" );
-			isolateFilter->pathsPlug()->setInput( isolatePathsPlug() );
-			addChild( isolateFilter );
-
-			IsolatePtr isolate = new Isolate( "__isolate" );
-			isolate->inPlug()->setInput( inPlug() );
-			isolate->filterPlug()->setInput( isolateFilter->outPlug() );
-			addChild( isolate );
-
-			PathFilterPtr wireframeFilter = new PathFilter( "__wireframeFilter" );
-			wireframeFilter->pathsPlug()->setValue( new IECore::StringVectorData( { "/..." } ) );
-			addChild( wireframeFilter );
-
-			WireframePtr wireframe = new Wireframe( "__wireframe" );
-			wireframe->inPlug()->setInput( isolate->outPlug() );
-			wireframe->filterPlug()->setInput( wireframeFilter->outPlug() );
-			wireframe->positionPlug()->setInput( uvSetPlug() );
-			addChild( wireframe );
-
-			TransformPtr transform = new Transform( "__transform" );
-			transform->inPlug()->setInput( wireframe->outPlug() );
-			transform->filterPlug()->setInput( wireframeFilter->outPlug() );
-			transform->spacePlug()->setValue( Transform::ResetLocal );
-			addChild( transform );
-
-			outPlug()->setInput( transform->outPlug() );
+			outputs.push_back( udimQueryPathsPlug() );
 		}
 
-		StringVectorDataPlug *visiblePathsPlug()
+		if( input == textureFileNamePlug() )
 		{
-			return getChild<StringVectorDataPlug>( g_firstPlugIndex );
+			outputs.push_back( udimQueryAttributesPlug() );
 		}
 
-		const StringVectorDataPlug *visiblePathsPlug() const
+		if( input == udimQueryPlug() )
 		{
-			return getChild<StringVectorDataPlug>( g_firstPlugIndex );
+			outputs.push_back( isolatePathsPlug() );
+			outputs.push_back( texturesPlug() );
 		}
+	}
 
-		StringPlug *uvSetPlug()
+protected:
+
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override
+	{
+		SceneProcessor::hash( output, context, h );
+
+		if( output == udimQueryPathsPlug() )
 		{
-			return getChild<StringPlug>( g_firstPlugIndex + 1 );
+			visiblePathsPlug()->hash( h );
 		}
-
-		const StringPlug *uvSetPlug() const
+		else if( output == udimQueryAttributesPlug() )
 		{
-			return getChild<StringPlug>( g_firstPlugIndex + 1 );
+			textureFileNamePlug()->hash( h );
 		}
-
-		StringPlug *textureFileNamePlug()
+		else if( output == isolatePathsPlug() )
 		{
-			return getChild<StringPlug>( g_firstPlugIndex + 2 );
+			udimQueryPlug()->hash( h );
 		}
-
-		const StringPlug *textureFileNamePlug() const
+		else if( output == texturesPlug() )
 		{
-			return getChild<StringPlug>( g_firstPlugIndex + 2 );
+			textureFileNamePlug()->hash( h );
+			udimQueryPlug()->hash( h );
 		}
+	}
 
-		CompoundObjectPlug *texturesPlug()
+	void compute( ValuePlug *output, const Context *context ) const override
+	{
+		if( output == udimQueryPathsPlug() )
 		{
-			return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 );
-		}
+			ConstStringVectorDataPtr visiblePathsData = visiblePathsPlug()->getValue();
+			const vector<string> &visiblePaths = visiblePathsData->readable();
 
-		const CompoundObjectPlug *texturesPlug() const
-		{
-			return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 );
-		}
+			StringVectorDataPtr resultData = new StringVectorData;
+			vector<string> &result = resultData->writable();
+			result.reserve( visiblePaths.size() * 2 );
 
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override
-		{
-			ComputeNode::affects( input, outputs );
-
-			if( input == visiblePathsPlug() )
+			for( const auto &path : visiblePaths )
 			{
-				outputs.push_back( udimQueryPathsPlug() );
+				result.push_back( path );
+				result.push_back( path + "/..." );
 			}
 
-			if( input == textureFileNamePlug() )
-			{
-				outputs.push_back( udimQueryAttributesPlug() );
-			}
-
-			if( input == udimQueryPlug() )
-			{
-				outputs.push_back( isolatePathsPlug() );
-				outputs.push_back( texturesPlug() );
-			}
+			static_cast<StringVectorDataPlug *>( output )->setValue( resultData );
 		}
-
-	protected :
-
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override
+		else if( output == udimQueryAttributesPlug() )
 		{
-			SceneProcessor::hash( output, context, h );
+			const string fileName = textureFileNamePlug()->getValue();
 
-			if( output == udimQueryPathsPlug() )
+			string result;
+			boost::sregex_iterator it( fileName.begin(), fileName.end(), g_attrRegex );
+			while( it != boost::sregex_iterator() )
 			{
-				visiblePathsPlug()->hash( h );
-			}
-			else if( output == udimQueryAttributesPlug() )
-			{
-				textureFileNamePlug()->hash( h );
-			}
-			else if( output == isolatePathsPlug() )
-			{
-				udimQueryPlug()->hash( h );
-			}
-			else if( output == texturesPlug() )
-			{
-				textureFileNamePlug()->hash( h );
-				udimQueryPlug()->hash( h );
-			}
-		}
-
-		void compute( ValuePlug *output, const Context *context ) const override
-		{
-			if( output == udimQueryPathsPlug() )
-			{
-				ConstStringVectorDataPtr visiblePathsData = visiblePathsPlug()->getValue();
-				const vector<string> &visiblePaths = visiblePathsData->readable();
-
-				StringVectorDataPtr resultData = new StringVectorData;
-				vector<string> &result = resultData->writable();
-				result.reserve( visiblePaths.size() * 2 );
-
-				for( const auto &path : visiblePaths )
+				if( result.size() )
 				{
-					result.push_back( path );
-					result.push_back( path + "/..." );
+					result += " ";
 				}
-
-				static_cast<StringVectorDataPlug *>( output )->setValue( resultData );
+				result += it->str( 1 );
+				++it;
 			}
-			else if( output == udimQueryAttributesPlug() )
-			{
-				const string fileName = textureFileNamePlug()->getValue();
+			static_cast<StringPlug *>( output )->setValue( result );
+		}
+		else if( output == isolatePathsPlug() )
+		{
+			unordered_set<string> pathsSet;
 
-				string result;
-				boost::sregex_iterator it( fileName.begin(), fileName.end(), g_attrRegex );
-				while( it != boost::sregex_iterator() )
+			ConstCompoundObjectPtr udimQuery = udimQueryPlug()->getValue();
+			for( const auto &udim : udimQuery->members() )
+			{
+				for( const auto &mesh : static_cast<const CompoundObject *>( udim.second.get() )->members() )
 				{
-					if( result.size() )
+					pathsSet.insert( mesh.first );
+				}
+			}
+
+			static_cast<StringVectorDataPlug *>( output )->setValue(
+				new StringVectorData( vector<string>( pathsSet.begin(), pathsSet.end() ) )
+			);
+		}
+		else if( output == texturesPlug() )
+		{
+			ConstCompoundObjectPtr udimQuery = udimQueryPlug()->getValue();
+			const string textureFileName = textureFileNamePlug()->getValue();
+
+			CompoundObjectPtr result = new CompoundObject;
+			for( const auto &udim : udimQuery->members() )
+			{
+				set<string> udimFileNames;
+				const CompoundObject *objects = static_cast<const CompoundObject *>( udim.second.get() );
+				for( const auto &object : objects->members() )
+				{
+					string substitutedFileName = textureFileName;
+					const auto *attributes = static_cast<const CompoundObject *>( object.second.get() );
+					boost::sregex_iterator it( textureFileName.begin(), textureFileName.end(), g_attrRegex );
+					while( it != boost::sregex_iterator() )
 					{
-						result += " ";
+						string attribute;
+						if( auto *s = attributes->member<StringData>( it->str( 1 ) ) )
+						{
+							attribute = s->readable();
+						}
+						boost::replace_all( substitutedFileName, it->str( 0 ), attribute );
+						++it;
 					}
-					result += it->str( 1 );
-					++it;
-				}
-				static_cast<StringPlug *>( output )->setValue( result );
-			}
-			else if( output == isolatePathsPlug() )
-			{
-				unordered_set<string> pathsSet;
 
-				ConstCompoundObjectPtr udimQuery = udimQueryPlug()->getValue();
-				for( const auto &udim : udimQuery->members() )
-				{
-					for( const auto &mesh : static_cast<const CompoundObject *>( udim.second.get() )->members() )
-					{
-						pathsSet.insert( mesh.first );
-					}
+					boost::replace_all( substitutedFileName, "<UDIM>", udim.first.string() );
+					udimFileNames.insert( substitutedFileName );
 				}
 
-				static_cast<StringVectorDataPlug *>( output )->setValue(
-					new StringVectorData( vector<string>( pathsSet.begin(), pathsSet.end() ) )
+				result->members()[udim.first] = new StringVectorData(
+					vector<string>( udimFileNames.begin(), udimFileNames.end() )
 				);
 			}
-			else if( output == texturesPlug() )
-			{
-				ConstCompoundObjectPtr udimQuery = udimQueryPlug()->getValue();
-				const string textureFileName = textureFileNamePlug()->getValue();
-
-				CompoundObjectPtr result = new CompoundObject;
-				for( const auto &udim : udimQuery->members() )
-				{
-					set<string> udimFileNames;
-					const CompoundObject *objects = static_cast<const CompoundObject *>( udim.second.get() );
-					for( const auto &object : objects->members() )
-					{
-						string substitutedFileName = textureFileName;
-						const auto *attributes = static_cast<const CompoundObject *>( object.second.get() );
-						boost::sregex_iterator it( textureFileName.begin(), textureFileName.end(), g_attrRegex );
-						while( it != boost::sregex_iterator() )
-						{
-							string attribute;
-							if( auto *s = attributes->member<StringData>( it->str( 1 ) ) )
-							{
-								attribute = s->readable();
-							}
-							boost::replace_all( substitutedFileName, it->str( 0 ), attribute );
-							++it;
-						}
-
-						boost::replace_all( substitutedFileName, "<UDIM>", udim.first.string() );
-						udimFileNames.insert( substitutedFileName );
-					}
-
-					result->members()[udim.first] = new StringVectorData(
-						vector<string>( udimFileNames.begin(), udimFileNames.end() )
-					);
-				}
-				static_cast<CompoundObjectPlug *>( output )->setValue( result );
-			}
-			else
-			{
-				SceneProcessor::compute( output, context );
-			}
+			static_cast<CompoundObjectPlug *>( output )->setValue( result );
 		}
-
-	private :
-
-		StringVectorDataPlug *udimQueryPathsPlug()
+		else
 		{
-			return getChild<StringVectorDataPlug>( g_firstPlugIndex + 4 );
+			SceneProcessor::compute( output, context );
 		}
+	}
 
-		const StringVectorDataPlug *udimQueryPathsPlug() const
-		{
-			return getChild<StringVectorDataPlug>( g_firstPlugIndex + 4 );
-		}
+private:
 
-		StringPlug *udimQueryAttributesPlug()
-		{
-			return getChild<StringPlug>( g_firstPlugIndex + 5 );
-		}
+	StringVectorDataPlug *udimQueryPathsPlug()
+	{
+		return getChild<StringVectorDataPlug>( g_firstPlugIndex + 4 );
+	}
 
-		const StringPlug *udimQueryAttributesPlug() const
-		{
-			return getChild<StringPlug>( g_firstPlugIndex + 5 );
-		}
+	const StringVectorDataPlug *udimQueryPathsPlug() const
+	{
+		return getChild<StringVectorDataPlug>( g_firstPlugIndex + 4 );
+	}
 
-		CompoundObjectPlug *udimQueryPlug()
-		{
-			return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 );
-		}
+	StringPlug *udimQueryAttributesPlug()
+	{
+		return getChild<StringPlug>( g_firstPlugIndex + 5 );
+	}
 
-		const CompoundObjectPlug *udimQueryPlug() const
-		{
-			return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 );
-		}
+	const StringPlug *udimQueryAttributesPlug() const
+	{
+		return getChild<StringPlug>( g_firstPlugIndex + 5 );
+	}
 
-		StringVectorDataPlug *isolatePathsPlug()
-		{
-			return getChild<StringVectorDataPlug>( g_firstPlugIndex + 7 );
-		}
+	CompoundObjectPlug *udimQueryPlug()
+	{
+		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 );
+	}
 
-		const StringVectorDataPlug *isolatePathsPlug() const
-		{
-			return getChild<StringVectorDataPlug>( g_firstPlugIndex + 7 );
-		}
+	const CompoundObjectPlug *udimQueryPlug() const
+	{
+		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 );
+	}
 
-		static size_t g_firstPlugIndex;
+	StringVectorDataPlug *isolatePathsPlug()
+	{
+		return getChild<StringVectorDataPlug>( g_firstPlugIndex + 7 );
+	}
 
+	const StringVectorDataPlug *isolatePathsPlug() const
+	{
+		return getChild<StringVectorDataPlug>( g_firstPlugIndex + 7 );
+	}
+
+	static size_t g_firstPlugIndex;
 };
 
 GAFFER_NODE_DEFINE_TYPE( UVView::UVScene );
@@ -392,96 +391,89 @@ namespace
 class GridGadget : public GafferUI::Gadget
 {
 
-	public :
+public:
 
-		GridGadget()
+	GridGadget()
+	{
+	}
+
+protected:
+
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+	{
+		assert( layer == Layer::MidBack || layer == Layer::MidFront );
+
+		const ViewportGadget *viewport = ancestor<ViewportGadget>();
+		Box3f bound;
+		bound.extendBy( viewport->rasterToGadgetSpace( V2f( 0 ), this ).p0 );
+		bound.extendBy( viewport->rasterToGadgetSpace( viewport->getViewport(), this ).p0 );
+
+		// Grid
+
+		const int divisions = layer == Layer::MidBack ? 10 : 1;
+		const float divisionDensity = bound.size().x * (float)divisions / (float)viewport->getViewport().x;
+		const float alpha = 1.0f - IECore::smoothstep( 0.1f, 0.4f, divisionDensity );
+
+		if( alpha > 0.0f )
 		{
-		}
+			const float lineWidth = ( layer == Layer::Main ? 2.0f : 1.0f ) * bound.size().x / viewport->getViewport().x;
+			const Color4f lineColor( 0.23, 0.23, 0.23, alpha );
 
-	protected :
-
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
-		{
-			assert( layer == Layer::MidBack || layer == Layer::MidFront );
-
-			const ViewportGadget *viewport = ancestor<ViewportGadget>();
-			Box3f bound;
-			bound.extendBy( viewport->rasterToGadgetSpace( V2f( 0 ), this ).p0 );
-			bound.extendBy( viewport->rasterToGadgetSpace( viewport->getViewport(), this ).p0 );
-
-			// Grid
-
-			const int divisions = layer == Layer::MidBack ? 10 : 1;
-			const float divisionDensity = bound.size().x * (float)divisions / (float)viewport->getViewport().x;
-			const float alpha = 1.0f - IECore::smoothstep( 0.1f, 0.4f, divisionDensity );
-
-			if( alpha > 0.0f )
+			for( float x = floor( bound.min.x ); x <= bound.max.x; x += 1.0f / (float)divisions )
 			{
-				const float lineWidth = (layer == Layer::Main ? 2.0f : 1.0f) * bound.size().x / viewport->getViewport().x;
-				const Color4f lineColor( 0.23, 0.23, 0.23, alpha );
-
-				for( float x = floor( bound.min.x ); x <= bound.max.x; x += 1.0f / (float)divisions )
-				{
-					style->renderLine( IECore::LineSegment3f(
-						V3f( x, bound.min.y, bound.min.z ), V3f( x, bound.max.y, bound.min.z ) ),
-						lineWidth, &lineColor
-					);
-				}
-
-				for( float y = floor( bound.min.y ); y <= bound.max.y; y += 1.0f / (float)divisions )
-				{
-					style->renderLine( IECore::LineSegment3f(
-						V3f( bound.min.x, y, bound.min.z ), V3f( bound.max.x, y, bound.min.z ) ),
-						lineWidth, &lineColor
-					);
-				}
+				style->renderLine( IECore::LineSegment3f( V3f( x, bound.min.y, bound.min.z ), V3f( x, bound.max.y, bound.min.z ) ), lineWidth, &lineColor );
 			}
 
-			if( layer == Layer::MidFront )
+			for( float y = floor( bound.min.y ); y <= bound.max.y; y += 1.0f / (float)divisions )
 			{
-				// UDIM label layer
+				style->renderLine( IECore::LineSegment3f( V3f( bound.min.x, y, bound.min.z ), V3f( bound.max.x, y, bound.min.z ) ), lineWidth, &lineColor );
+			}
+		}
 
-				const float alpha = 1.0f - IECore::smoothstep( 0.005f, 0.01f, divisionDensity );
-				if( alpha <= 0.0f )
+		if( layer == Layer::MidFront )
+		{
+			// UDIM label layer
+
+			const float alpha = 1.0f - IECore::smoothstep( 0.005f, 0.01f, divisionDensity );
+			if( alpha <= 0.0f )
+			{
+				return;
+			}
+
+			const Color4f textColor( 1, 1, 1, alpha * 0.5 );
+
+			ViewportGadget::RasterScope rasterScope( viewport );
+			for( int u = floor( bound.min.x ); u <= bound.max.x; ++u )
+			{
+				for( int v = floor( bound.min.y ); v <= bound.max.y; ++v )
 				{
-					return;
-				}
-
-				const Color4f textColor( 1, 1, 1, alpha * 0.5 );
-
-				ViewportGadget::RasterScope rasterScope( viewport );
-				for( int u = floor( bound.min.x ); u <= bound.max.x; ++u )
-				{
-					for( int v = floor( bound.min.y ); v <= bound.max.y; ++v )
+					string label = std::to_string( u ) + ", " + std::to_string( v );
+					if( u >= 0 && u < 10 && v >= 0 )
 					{
-						string label = std::to_string( u ) + ", " + std::to_string( v );
-						if( u >= 0 && u < 10 && v >= 0 )
-						{
-							label += " (" + std::to_string( 1001 + v * 10 + u ) + ")";
-						}
-						const V2f rasterPosition = viewport->gadgetToRasterSpace( V3f( u + 0.02, v + 0.02, 0.0f ), this );
-						glPushMatrix();
-						glTranslate( rasterPosition );
-						glScalef( 10, -10, 10 );
-						style->renderText( Style::LabelText, label, Style::NormalState, &textColor );
-						glPopMatrix();
+						label += " (" + std::to_string( 1001 + v * 10 + u ) + ")";
 					}
+					const V2f rasterPosition = viewport->gadgetToRasterSpace( V3f( u + 0.02, v + 0.02, 0.0f ), this );
+					glPushMatrix();
+					glTranslate( rasterPosition );
+					glScalef( 10, -10, 10 );
+					style->renderText( Style::LabelText, label, Style::NormalState, &textColor );
+					glPopMatrix();
 				}
 			}
 		}
+	}
 
-		Box3f renderBound() const override
-		{
-			Box3f b;
-			b.makeInfinite();
-			return b;
-		}
+	Box3f renderBound() const override
+	{
+		Box3f b;
+		b.makeInfinite();
+		return b;
+	}
 
-		unsigned layerMask() const override
-		{
-			return Layer::MidBack | Layer::MidFront;
-		}
-
+	unsigned layerMask() const override
+	{
+		return Layer::MidBack | Layer::MidFront;
+	}
 };
 
 } // namespace
@@ -498,70 +490,69 @@ InternedString g_imageGadgetName( "imageGadget" );
 class TextureGadget : public GafferUI::Gadget
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( TextureGadget )
+	IE_CORE_DECLAREMEMBERPTR( TextureGadget )
 
-		TextureGadget()
-			:	m_imageReader( new ImageReader ), m_resize( new Resize )
+	TextureGadget()
+		: m_imageReader( new ImageReader ), m_resize( new Resize )
+	{
+		m_resize->inPlug()->setInput( m_imageReader->outPlug() );
+		m_resize->formatPlug()->setValue( Format( 256, 256 ) );
+		m_resize->fitModePlug()->setValue( Resize::Distort );
+
+		setChild( g_imageGadgetName, new ImageGadget );
+		imageGadget()->setLabelsVisible( false );
+		imageGadget()->setImage( m_resize->outPlug() );
+	}
+
+	ImageGadget *imageGadget()
+	{
+		return getChild<ImageGadget>( g_imageGadgetName );
+	}
+
+	void setFileName( const std::string &fileName )
+	{
+		if( fileName == getFileName() )
 		{
-			m_resize->inPlug()->setInput( m_imageReader->outPlug() );
-			m_resize->formatPlug()->setValue( Format( 256, 256 ) );
-			m_resize->fitModePlug()->setValue( Resize::Distort );
-
-			setChild( g_imageGadgetName, new ImageGadget );
-			imageGadget()->setLabelsVisible( false );
-			imageGadget()->setImage( m_resize->outPlug() );
+			return;
 		}
 
-		ImageGadget *imageGadget()
+		m_imageReader->fileNamePlug()->setValue( fileName );
+
+		// Transform ImageGadget into 0-1 space.
+		const Box3f b = imageGadget()->bound();
+		M44f m;
+		m.translate( -b.min );
+		m.scale( V3f( 1 / b.size().x, 1 / b.size().y, 1 ) );
+		imageGadget()->setTransform( m );
+	}
+
+	string getFileName() const
+	{
+		return m_imageReader->fileNamePlug()->getValue();
+	}
+
+	std::string getToolTip( const IECore::LineSegment3f &position ) const override
+	{
+		const std::string t = Gadget::getToolTip( position );
+		if( t.size() )
 		{
-			return getChild<ImageGadget>( g_imageGadgetName );
+			return t;
 		}
 
-		void setFileName( const std::string &fileName )
-		{
-			if( fileName == getFileName() )
-			{
-				return;
-			}
+		return getFileName();
+	}
 
-			m_imageReader->fileNamePlug()->setValue( fileName );
+private:
 
-			// Transform ImageGadget into 0-1 space.
-			const Box3f b = imageGadget()->bound();
-			M44f m;
-			m.translate( -b.min );
-			m.scale( V3f( 1 / b.size().x, 1 / b.size().y, 1 ) );
-			imageGadget()->setTransform( m );
-		}
-
-		string getFileName() const
-		{
-			return m_imageReader->fileNamePlug()->getValue();
-		}
-
-		std::string getToolTip( const IECore::LineSegment3f &position ) const override
-		{
-			const std::string t = Gadget::getToolTip( position );
-			if( t.size() )
-			{
-				return t;
-			}
-
-			return getFileName();
-		}
-
-	private :
-
-		ImageReaderPtr m_imageReader;
-		ResizePtr m_resize;
-
+	ImageReaderPtr m_imageReader;
+	ResizePtr m_resize;
 };
 
 IE_CORE_DECLAREPTR( TextureGadget )
 
-using TextureGadgetIterator = FilteredChildIterator<TypePredicate<TextureGadget> >;
+using TextureGadgetIterator = FilteredChildIterator<TypePredicate<TextureGadget>>;
 
 } // namespace
 
@@ -576,7 +567,7 @@ static InternedString g_gridGadgetName( "gridGadget" );
 GAFFER_NODE_DEFINE_TYPE( UVView )
 
 UVView::UVView( Gaffer::ScriptNodePtr scriptNode )
-	:	View( defaultName<UVView>(), scriptNode, new ScenePlug ), m_textureGadgetsDirty( true ), m_framed( false )
+	: View( defaultName<UVView>(), scriptNode, new ScenePlug ), m_textureGadgetsDirty( true ), m_framed( false )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -681,7 +672,7 @@ void UVView::setPaused( bool paused )
 	sceneGadget()->setPaused( paused );
 	for( TextureGadgetIterator it( textureGadgets() ); !it.done(); ++it )
 	{
-		(*it)->imageGadget()->setPaused( paused );
+		( *it )->imageGadget()->setPaused( paused );
 	}
 
 	stateChangedSignal()( this );
@@ -732,7 +723,7 @@ void UVView::contextChanged()
 	sceneGadget()->setContext( context() );
 	for( TextureGadgetIterator it( textureGadgets() ); !it.done(); ++it )
 	{
-		(*it)->imageGadget()->setContext( context() );
+		( *it )->imageGadget()->setContext( context() );
 	}
 }
 
@@ -845,9 +836,9 @@ void UVView::updateTextureGadgets( const IECore::ConstCompoundObjectPtr &texture
 
 	for( Gadget::Iterator it( textureGadgets() ); !it.done(); ++it )
 	{
-		if( !textures->member<Data>( (*it)->getName().c_str() + gadgetNamePrefix.size() ) )
+		if( !textures->member<Data>( ( *it )->getName().c_str() + gadgetNamePrefix.size() ) )
 		{
-			(*it)->setVisible( false );
+			( *it )->setVisible( false );
 		}
 	}
 

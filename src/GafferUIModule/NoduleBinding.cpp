@@ -63,21 +63,20 @@ namespace
 struct NoduleCreator
 {
 	NoduleCreator( object fn )
-		:	m_fn( fn )
+		: m_fn( fn )
 	{
 	}
 
-	NodulePtr operator()( Gaffer::PlugPtr plug )
+	NodulePtr operator () ( Gaffer::PlugPtr plug )
 	{
 		IECorePython::ScopedGILLock gilLock;
 		NodulePtr result = extract<NodulePtr>( m_fn( plug ) );
 		return result;
 	}
 
-	private :
+private:
 
-		object m_fn;
-
+	object m_fn;
 };
 
 void registerNodule( const std::string &noduleTypeName, object creator, IECore::TypeId plugType )
@@ -92,11 +91,11 @@ void registerCustomGadget( const std::string &gadgetName, object creator )
 		// Deliberately "leaking" `creator` since it will be stored in a
 		// static map that will be destroyed _after_ Python has shut down,
 		// and deleting the PyObject at that point could cause a crash.
-		[creator = new object( creator )] ( Gaffer::GraphComponentPtr parent ) -> GadgetPtr {
+		[creator = new object( creator )]( Gaffer::GraphComponentPtr parent ) -> GadgetPtr {
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
-				return extract<GadgetPtr>( (*creator)( parent ) );
+				return extract<GadgetPtr>( ( *creator )( parent ) );
 			}
 			catch( const error_already_set & )
 			{
@@ -112,40 +111,34 @@ void GafferUIModule::bindNodule()
 {
 
 	ConnectionCreatorClass<ConnectionCreator, ConnectionCreatorWrapper<ConnectionCreator>>( "ConnectionCreator" )
-		.def( init<>() )
-	;
+		.def( init<>() );
 
 	ConnectionCreatorClass<Nodule>()
 		.def(
 			"plug",
-			(Gaffer::Plug *(Nodule::*)())&Nodule::plug,
+			( Gaffer::Plug * (Nodule::*)() ) & Nodule::plug,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
 		)
-		.def( "create", &Nodule::create ).staticmethod( "create" )
+		.def( "create", &Nodule::create )
+		.staticmethod( "create" )
 		.def( "registerNodule", &registerNodule, ( arg( "noduleTypeName" ), arg( "creator" ), arg( "plugType" ) = IECore::InvalidTypeId ) )
-		.staticmethod( "registerNodule" )
-	;
+		.staticmethod( "registerNodule" );
 
 	ConnectionCreatorClass<StandardNodule>()
 		.def( init<Gaffer::PlugPtr>() )
 		.def( "setLabelVisible", &StandardNodule::setLabelVisible )
-		.def( "getLabelVisible", &StandardNodule::getLabelVisible )
-	;
+		.def( "getLabelVisible", &StandardNodule::getLabelVisible );
 
 	ConnectionCreatorClass<CompoundNodule>()
-		.def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) )
-	;
+		.def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) );
 
 	ConnectionCreatorClass<CompoundNumericNodule>()
-		.def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) )
-	;
+		.def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) );
 
 	GadgetClass<NoduleLayout>()
 		.def( init<GraphComponentPtr, IECore::InternedString>() )
-		.def( "nodule", (Nodule * (NoduleLayout::*)( const Plug *))&NoduleLayout::nodule, return_value_policy<CastToIntrusivePtr>() )
-		.def( "customGadget", (Gadget * (NoduleLayout::*)( const std::string & ))&NoduleLayout::customGadget, return_value_policy<CastToIntrusivePtr>() )
+		.def( "nodule", ( Nodule * (NoduleLayout::*)(const Plug *)) & NoduleLayout::nodule, return_value_policy<CastToIntrusivePtr>() )
+		.def( "customGadget", ( Gadget * (NoduleLayout::*)(const std::string &)) & NoduleLayout::customGadget, return_value_policy<CastToIntrusivePtr>() )
 		.def( "registerCustomGadget", &registerCustomGadget )
-		.staticmethod( "registerCustomGadget" )
-	;
-
+		.staticmethod( "registerCustomGadget" );
 }

@@ -46,25 +46,24 @@ namespace GafferUI
 class GAFFERUI_API Frame : public IndividualContainer
 {
 
-	public :
+public:
 
-		explicit Frame( GadgetPtr child );
-		~Frame() override;
+	explicit Frame( GadgetPtr child );
+	~Frame() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Frame, FrameTypeId, IndividualContainer );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Frame, FrameTypeId, IndividualContainer );
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		float m_border;
-
+	float m_border;
 };
 
 IE_CORE_DECLAREPTR( Frame );

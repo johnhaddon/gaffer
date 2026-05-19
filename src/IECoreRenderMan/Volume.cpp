@@ -51,7 +51,7 @@ std::mutex g_geometryPrototypeMutex;
 } // namespace
 
 Volume::Volume( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session, const IECoreVDB::VDBObject *vdbObject )
-	:	Object( name, geometryPrototype, attributes, lightLinker, session )
+	: Object( name, geometryPrototype, attributes, lightLinker, session )
 {
 	// Store the same information that GeometryPrototypeCache will have used
 	// to make the prototype, for use later in `fixupTransformEdit()`.

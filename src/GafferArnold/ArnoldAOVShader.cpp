@@ -46,7 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldAOVShader );
 size_t ArnoldAOVShader::g_firstPlugIndex = 0;
 
 ArnoldAOVShader::ArnoldAOVShader( const std::string &name )
-	:	GlobalShader( name )
+	: GlobalShader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "optionSuffix", Gaffer::Plug::In, "custom" ) );

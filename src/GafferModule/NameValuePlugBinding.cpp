@@ -55,43 +55,42 @@ namespace
 class NameValuePlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		// The children will be created by the constructor output by repr
+		return false;
+	}
+
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		return repr( static_cast<const NameValuePlug *>( graphComponent ), &serialisation );
+	}
+
+	static std::string repr( const Gaffer::NameValuePlug *plug, Serialisation *serialisation )
+	{
+		if( !plug->namePlug() || !plug->valuePlug() )
 		{
-			// The children will be created by the constructor output by repr
-			return false;
+			throw IECore::Exception( "Cannot serialize: " + plug->fullName() + " - NameValuePlug must have name and value." );
 		}
 
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+		std::string result = "Gaffer.NameValuePlug( ";
+		result += "\"" + plug->namePlug()->defaultValue() + "\", ";
+
+		result += Serialisation::acquireSerialiser( plug->valuePlug() )->constructor( plug->valuePlug(), *serialisation ) + ", ";
+
+		if( plug->enabledPlug() )
 		{
-			return repr( static_cast<const NameValuePlug *>( graphComponent ), &serialisation );
+			result += std::string( plug->enabledPlug()->defaultValue() ? "True" : "False" ) + ", ";
 		}
 
-		static std::string repr( const Gaffer::NameValuePlug *plug, Serialisation *serialisation )
-		{
-			if( !plug->namePlug() || !plug->valuePlug() )
-			{
-				throw IECore::Exception( "Cannot serialize: " + plug->fullName() + " - NameValuePlug must have name and value." );
-			}
+		result += "\"" + plug->getName().string() + "\", ";
 
-			std::string result = "Gaffer.NameValuePlug( ";
-			result += "\"" + plug->namePlug()->defaultValue() + "\", ";
+		result += flagsRepr( plug->getFlags() ) + " )";
 
-			result += Serialisation::acquireSerialiser( plug->valuePlug() )->constructor( plug->valuePlug(), *serialisation ) + ", ";
-
-			if( plug->enabledPlug() )
-			{
-				result += std::string( plug->enabledPlug()->defaultValue() ? "True" : "False" ) + ", ";
-			}
-
-			result += "\"" + plug->getName().string() + "\", ";
-
-			result += flagsRepr( plug->getFlags() ) + " )";
-
-			return result;
-		}
-
+		return result;
+	}
 };
 
 std::string repr( const NameValuePlug *plug )
@@ -140,57 +139,12 @@ void GafferModule::bindNameValuePlug()
 {
 
 	PlugClass<NameValuePlug>()
-		.def( init<const char *, Plug::Direction, unsigned>(
-				(
-					boost::python::arg_( "name" )=GraphComponent::defaultName<NameValuePlug>(),
-					boost::python::arg_( "direction" )=Plug::In,
-					boost::python::arg_( "flags" )=Plug::Default
-				)
-			)
-		)
-		.def( "__init__", make_constructor( nameValuePlugConstructor1, default_call_policies(),
-				(
-					arg( "nameDefault" ),
-					arg( "valueDefault" ),
-					arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
-			)
-		)
-		.def( "__init__", make_constructor( nameValuePlugConstructor2, default_call_policies(),
-				(
-					arg( "nameDefault" ),
-					arg( "valuePlug" ),
-					arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(),
-					arg( "flags" ) = object()
-				)
-			)
-		)
-		.def( "__init__", make_constructor( nameValuePlugConstructor3, default_call_policies(),
-				(
-					arg( "nameDefault" ),
-					arg( "valueDefault" ),
-					arg( "defaultEnabled" ),
-					arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
-			)
-		)
-		.def( "__init__", make_constructor( nameValuePlugConstructor4, default_call_policies(),
-				(
-					arg( "nameDefault" ),
-					arg( "valuePlug" ),
-					arg( "defaultEnabled" ),
-					arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(),
-					arg( "flags" ) = object()
-				)
-			)
-		)
-		.def( "__repr__", &repr )
-	;
+		.def( init<const char *, Plug::Direction, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<NameValuePlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default ) ) )
+		.def( "__init__", make_constructor( nameValuePlugConstructor1, default_call_policies(), ( arg( "nameDefault" ), arg( "valueDefault" ), arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) )
+		.def( "__init__", make_constructor( nameValuePlugConstructor2, default_call_policies(), ( arg( "nameDefault" ), arg( "valuePlug" ), arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(), arg( "flags" ) = object() ) ) )
+		.def( "__init__", make_constructor( nameValuePlugConstructor3, default_call_policies(), ( arg( "nameDefault" ), arg( "valueDefault" ), arg( "defaultEnabled" ), arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) )
+		.def( "__init__", make_constructor( nameValuePlugConstructor4, default_call_policies(), ( arg( "nameDefault" ), arg( "valuePlug" ), arg( "defaultEnabled" ), arg( "name" ) = GraphComponent::defaultName<NameValuePlug>(), arg( "flags" ) = object() ) ) )
+		.def( "__repr__", &repr );
 
 	Serialisation::registerSerialiser( Gaffer::NameValuePlug::staticTypeId(), new NameValuePlugSerialiser );
-
 }

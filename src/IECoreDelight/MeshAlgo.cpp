@@ -57,14 +57,7 @@ void staticParameters( const IECoreScene::MeshPrimitive *mesh, ParameterList &pa
 
 	if( mesh->interpolation() == "catmullClark" )
 	{
-		parameters.add( {
-			"subdivision.scheme",
-			&g_catmullClark,
-			NSITypeString,
-			0,
-			1,
-			0
-		} );
+		parameters.add( { "subdivision.scheme", &g_catmullClark, NSITypeString, 0, 1, 0 } );
 	}
 }
 
@@ -78,7 +71,7 @@ void convertCornersAndCreases( const IECoreScene::MeshPrimitive *mesh, NSIContex
 		parameters.add( "subdivision.cornersharpness", mesh->cornerSharpnesses() );
 	}
 
-	IntVectorDataPtr delightIndicesData;       // Must remain alive until we call
+	IntVectorDataPtr delightIndicesData; // Must remain alive until we call
 	FloatVectorDataPtr delightSharpnessesData; // NSISetAttribute.
 	if( mesh->creaseLengths()->readable().size() )
 	{

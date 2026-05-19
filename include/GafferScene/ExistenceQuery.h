@@ -51,30 +51,30 @@ namespace GafferScene
 
 struct GAFFERSCENE_API ExistenceQuery : Gaffer::ComputeNode
 {
-	explicit ExistenceQuery( const std::string& name = defaultName< ExistenceQuery >() );
+	explicit ExistenceQuery( const std::string &name = defaultName<ExistenceQuery>() );
 	~ExistenceQuery() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::ExistenceQuery, ExistenceQueryTypeId, Gaffer::ComputeNode );
 
-	ScenePlug* scenePlug();
-	const ScenePlug* scenePlug() const;
-	Gaffer::StringPlug* locationPlug();
-	const Gaffer::StringPlug* locationPlug() const;
-	Gaffer::BoolPlug* existsPlug();
-	const Gaffer::BoolPlug* existsPlug() const;
-	Gaffer::StringPlug* closestAncestorPlug();
-	const Gaffer::StringPlug* closestAncestorPlug() const;
+	ScenePlug *scenePlug();
+	const ScenePlug *scenePlug() const;
+	Gaffer::StringPlug *locationPlug();
+	const Gaffer::StringPlug *locationPlug() const;
+	Gaffer::BoolPlug *existsPlug();
+	const Gaffer::BoolPlug *existsPlug() const;
+	Gaffer::StringPlug *closestAncestorPlug();
+	const Gaffer::StringPlug *closestAncestorPlug() const;
 
-	void affects( const Gaffer::Plug* input, AffectedPlugsContainer& outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
 protected:
 
-	void hash( const Gaffer::ValuePlug* output, const Gaffer::Context* context, IECore::MurmurHash& h ) const override;
-	void compute( Gaffer::ValuePlug* output, const Gaffer::Context* context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
 private:
 
 	static size_t g_firstPlugIndex;
 };
 
-} // GafferScene
+} // namespace GafferScene

@@ -47,7 +47,6 @@
 #include "boost/dynamic_bitset.hpp"
 
 
-
 namespace Gaffer
 {
 
@@ -57,140 +56,138 @@ namespace Gaffer
 class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 {
 
-	public :
+public:
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweakPlug, TweakPlugTypeId, Gaffer::ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweakPlug, TweakPlugTypeId, Gaffer::ValuePlug );
 
-		enum Mode
-		{
-			Replace,
-			Add,
-			Subtract,
-			Multiply,
-			Remove,
-			Create,
-			Min,
-			Max,
-			ListAppend,
-			ListPrepend,
-			ListRemove,
-			CreateIfMissing,
-			SetExpressionInclude,
-			SetExpressionExclude,
+	enum Mode
+	{
+		Replace,
+		Add,
+		Subtract,
+		Multiply,
+		Remove,
+		Create,
+		Min,
+		Max,
+		ListAppend,
+		ListPrepend,
+		ListRemove,
+		CreateIfMissing,
+		SetExpressionInclude,
+		SetExpressionExclude,
 
-			First = Replace,
-			Last = SetExpressionExclude,
-		};
+		First = Replace,
+		Last = SetExpressionExclude,
+	};
 
-		/// Complete constructor, able to specify all relevant properties of the child plugs.
-		/// The `Direction` is taken from `valuePlug`.
-		TweakPlug( const std::string &name, const std::string &nameDefault, bool enabledDefault, Mode modeDefault, Gaffer::ValuePlugPtr valuePlug, unsigned flags );
-		/// Convenience constructors. These don't specify the default values for the
-		/// child plugs - they set their values instead.
-		///
-		/// > Caution : These are unsuitable for use in node constructors, because
-		/// > a node's plugs must be constructed with their values set to default.
-		///
-		/// \todo Perhaps the API would be clearer if these weren't constructors, but
-		/// instead were convenience functions. `TweaksPlug::addTweak()` perhaps?
-		/// Or `TweakPlug::createWithValues()`? Note that a worse situation exists for
-		/// NameValuePlug, which has no less than seven overloaded constructors.
-		TweakPlug( const std::string &tweakName, Gaffer::ValuePlugPtr valuePlug, Mode mode = Replace, bool enabled = true );
-		TweakPlug( const std::string &tweakName, const IECore::Data *value, Mode mode = Replace, bool enabled = true );
-		/// Legacy constructor used for compatibility with old serialisations. Do not use.
-		explicit TweakPlug( Gaffer::ValuePlugPtr valuePlug, const std::string &name=defaultName<TweakPlug>(), Direction direction=In, unsigned flags=Default );
+	/// Complete constructor, able to specify all relevant properties of the child plugs.
+	/// The `Direction` is taken from `valuePlug`.
+	TweakPlug( const std::string &name, const std::string &nameDefault, bool enabledDefault, Mode modeDefault, Gaffer::ValuePlugPtr valuePlug, unsigned flags );
+	/// Convenience constructors. These don't specify the default values for the
+	/// child plugs - they set their values instead.
+	///
+	/// > Caution : These are unsuitable for use in node constructors, because
+	/// > a node's plugs must be constructed with their values set to default.
+	///
+	/// \todo Perhaps the API would be clearer if these weren't constructors, but
+	/// instead were convenience functions. `TweaksPlug::addTweak()` perhaps?
+	/// Or `TweakPlug::createWithValues()`? Note that a worse situation exists for
+	/// NameValuePlug, which has no less than seven overloaded constructors.
+	TweakPlug( const std::string &tweakName, Gaffer::ValuePlugPtr valuePlug, Mode mode = Replace, bool enabled = true );
+	TweakPlug( const std::string &tweakName, const IECore::Data *value, Mode mode = Replace, bool enabled = true );
+	/// Legacy constructor used for compatibility with old serialisations. Do not use.
+	explicit TweakPlug( Gaffer::ValuePlugPtr valuePlug, const std::string &name = defaultName<TweakPlug>(), Direction direction = In, unsigned flags = Default );
 
-		Gaffer::StringPlug *namePlug();
-		const Gaffer::StringPlug *namePlug() const;
+	Gaffer::StringPlug *namePlug();
+	const Gaffer::StringPlug *namePlug() const;
 
-		Gaffer::BoolPlug *enabledPlug();
-		const Gaffer::BoolPlug *enabledPlug() const;
+	Gaffer::BoolPlug *enabledPlug();
+	const Gaffer::BoolPlug *enabledPlug() const;
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		template<typename T=Gaffer::ValuePlug>
-		T *valuePlug();
-		template<typename T=Gaffer::ValuePlug>
-		const T *valuePlug() const;
+	template<typename T = Gaffer::ValuePlug>
+	T *valuePlug();
+	template<typename T = Gaffer::ValuePlug>
+	const T *valuePlug() const;
 
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		/// Controls behaviour when the parameter to be
-		/// tweaked cannot be found.
-		enum class MissingMode
-		{
-			Ignore,
-			Error
-		};
+	/// Controls behaviour when the parameter to be
+	/// tweaked cannot be found.
+	enum class MissingMode
+	{
+		Ignore,
+		Error
+	};
 
-		/// \deprecated. Use `TweaksPlug::applyTweaks()` instead.
-		bool applyTweak( IECore::CompoundData *parameters, MissingMode missingMode = MissingMode::Error ) const;
+	/// \deprecated. Use `TweaksPlug::applyTweaks()` instead.
+	bool applyTweak( IECore::CompoundData *parameters, MissingMode missingMode = MissingMode::Error ) const;
 
-		/// Applies the tweak using functors to get and set the data.
-		/// \returns true if any tweaks were applied
-		template<class GetDataFunctor, class SetDataFunctor>
-		bool applyTweak(
-			/// Signature : const IECore::Data *functor( const std::string &valueName, const bool withFallback ).
-			/// Passing `withFallback=False` specifies that no fallback value should be returned in place of missing data.
-			/// \returns `nullptr` if `valueName` is invalid.
-			GetDataFunctor &&getDataFunctor,
-			/// Signature : bool functor( const std::string &valueName, IECore::DataPtr newData).
-			/// Passing `nullptr` in `newData` removes the entry for `valueName`.
-			/// \returns true if the value was set or erased, false if erasure failed.
-			SetDataFunctor &&setDataFunctor,
-			MissingMode missingMode = MissingMode::Error
-		) const;
-
-
-		struct DataAndIndices{
-			IECore::DataPtr data;
-			IECore::IntVectorDataPtr indices;
-		};
+	/// Applies the tweak using functors to get and set the data.
+	/// \returns true if any tweaks were applied
+	template<class GetDataFunctor, class SetDataFunctor>
+	bool applyTweak(
+		/// Signature : const IECore::Data *functor( const std::string &valueName, const bool withFallback ).
+		/// Passing `withFallback=False` specifies that no fallback value should be returned in place of missing data.
+		/// \returns `nullptr` if `valueName` is invalid.
+		GetDataFunctor &&getDataFunctor,
+		/// Signature : bool functor( const std::string &valueName, IECore::DataPtr newData).
+		/// Passing `nullptr` in `newData` removes the entry for `valueName`.
+		/// \returns true if the value was set or erased, false if erasure failed.
+		SetDataFunctor &&setDataFunctor,
+		MissingMode missingMode = MissingMode::Error
+	) const;
 
 
-
-		/// As above, but applying the tweak to individual elements of VectorTypedData,
-		/// as specified by `mask`.
-		template<class GetDataFunctor, class SetDataFunctor>
-		bool applyElementwiseTweak(
-			/// Signature : const DataAndIndices functor( const std::string &valueName, const bool withFallback ).
-			/// Passing `withFallback=False` specifies that no fallback value should be returned in place of missing data.
-			/// \returns DataAndIndices with members set to `nullptr` if `valueName` is invalid.
-			GetDataFunctor &&getDataFunctor,
-
-			/// Signature : bool functor( const std::string &valueName, DataAndIndices &newData ).
-			/// Passing `nullptr` in `newData.data` removes the entry for `valueName`.
-			/// If the getDataFunctor ever returns indices set to non-null, then setDataFunctor needs
-			/// to deal with receiving modified indices.
-			/// \returns true if the value was set or erased, false if erasure failed.
-			SetDataFunctor &&setDataFunctor,
-
-			// Size of array to make for `Create` mode.
-			size_t createSize,
-
-			// If specified, this bitset must have the same size as the data. Only elements of the data
-			// corresponding to where the mask is true will be tweaked.
-			const boost::dynamic_bitset<> *mask = nullptr,
-
-			MissingMode missingMode = MissingMode::Error
-		) const;
-
-		static const char *modeToString( Gaffer::TweakPlug::Mode mode );
-
-	private :
-
-		Gaffer::ValuePlug *valuePlugInternal();
-		const Gaffer::ValuePlug *valuePlugInternal() const;
-
-		static void applyTweakInternal( IECore::Data *data, const IECore::Data *tweakData, TweakPlug::Mode mode, const std::string &name );
-
-		static IECore::DataPtr createVectorDataFromElement( const IECore::Data *elementData, size_t size, bool useElementValueAsDefault, const std::string &name );
-
-		static void applyVectorElementTweak( IECore::Data *vectorData, const IECore::Data *tweakData, IECore::IntVectorData *indicesData, TweakPlug::Mode mode, const std::string &name, const boost::dynamic_bitset<> *mask );
+	struct DataAndIndices
+	{
+		IECore::DataPtr data;
+		IECore::IntVectorDataPtr indices;
+	};
 
 
+	/// As above, but applying the tweak to individual elements of VectorTypedData,
+	/// as specified by `mask`.
+	template<class GetDataFunctor, class SetDataFunctor>
+	bool applyElementwiseTweak(
+		/// Signature : const DataAndIndices functor( const std::string &valueName, const bool withFallback ).
+		/// Passing `withFallback=False` specifies that no fallback value should be returned in place of missing data.
+		/// \returns DataAndIndices with members set to `nullptr` if `valueName` is invalid.
+		GetDataFunctor &&getDataFunctor,
+
+		/// Signature : bool functor( const std::string &valueName, DataAndIndices &newData ).
+		/// Passing `nullptr` in `newData.data` removes the entry for `valueName`.
+		/// If the getDataFunctor ever returns indices set to non-null, then setDataFunctor needs
+		/// to deal with receiving modified indices.
+		/// \returns true if the value was set or erased, false if erasure failed.
+		SetDataFunctor &&setDataFunctor,
+
+		// Size of array to make for `Create` mode.
+		size_t createSize,
+
+		// If specified, this bitset must have the same size as the data. Only elements of the data
+		// corresponding to where the mask is true will be tweaked.
+		const boost::dynamic_bitset<> *mask = nullptr,
+
+		MissingMode missingMode = MissingMode::Error
+	) const;
+
+	static const char *modeToString( Gaffer::TweakPlug::Mode mode );
+
+private:
+
+	Gaffer::ValuePlug *valuePlugInternal();
+	const Gaffer::ValuePlug *valuePlugInternal() const;
+
+	static void applyTweakInternal( IECore::Data *data, const IECore::Data *tweakData, TweakPlug::Mode mode, const std::string &name );
+
+	static IECore::DataPtr createVectorDataFromElement( const IECore::Data *elementData, size_t size, bool useElementValueAsDefault, const std::string &name );
+
+	static void applyVectorElementTweak( IECore::Data *vectorData, const IECore::Data *tweakData, IECore::IntVectorData *indicesData, TweakPlug::Mode mode, const std::string &name, const boost::dynamic_bitset<> *mask );
 };
 
 IE_CORE_DECLAREPTR( TweakPlug )
@@ -202,35 +199,35 @@ IE_CORE_DECLAREPTR( TweakPlug )
 class GAFFER_API TweaksPlug : public Gaffer::ValuePlug
 {
 
-	public :
+public:
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweaksPlug, TweaksPlugTypeId, Gaffer::ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweaksPlug, TweaksPlugTypeId, Gaffer::ValuePlug );
 
-		TweaksPlug( const std::string &name=defaultName<TweaksPlug>(), Direction direction=In, unsigned flags=Default );
+	TweaksPlug( const std::string &name = defaultName<TweaksPlug>(), Direction direction = In, unsigned flags = Default );
 
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		bool acceptsInput( const Plug *input ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	bool acceptsInput( const Plug *input ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		/// Tweak application
-		/// =================
-		/// Functions return true if any tweaks were applied.
+	/// Tweak application
+	/// =================
+	/// Functions return true if any tweaks were applied.
 
-		bool applyTweaks( IECore::CompoundData *parameters, TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error ) const;
+	bool applyTweaks( IECore::CompoundData *parameters, TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error ) const;
 
-		/// Applies the tweak using functors to get and set the data.
-		/// \returns true if any tweaks were applied
-		template<class GetDataFunctor, class SetDataFunctor>
-		bool applyTweaks(
-			/// Signature : const IECore::Data *functor( const std::string &valueName ).
-			/// \returns `nullptr` if `valueName` is invalid.
-			GetDataFunctor &&getDataFunctor,
-			/// Signature : bool functor( const std::string &valueName, IECore::DataPtr newData ).
-			/// Passing `nullptr` in `newData` removes the entry for `valueName`.
-			/// \returns true if the value was set or erased, false if erasure failed.
-			SetDataFunctor &&setDataFunctor,
-			TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error
-		) const;
+	/// Applies the tweak using functors to get and set the data.
+	/// \returns true if any tweaks were applied
+	template<class GetDataFunctor, class SetDataFunctor>
+	bool applyTweaks(
+		/// Signature : const IECore::Data *functor( const std::string &valueName ).
+		/// \returns `nullptr` if `valueName` is invalid.
+		GetDataFunctor &&getDataFunctor,
+		/// Signature : bool functor( const std::string &valueName, IECore::DataPtr newData ).
+		/// Passing `nullptr` in `newData` removes the entry for `valueName`.
+		/// \returns true if the value was set or erased, false if erasure failed.
+		SetDataFunctor &&setDataFunctor,
+		TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error
+	) const;
 };
 
 } // namespace Gaffer

@@ -146,7 +146,7 @@ IECore::CompoundDataPtr nodeData()
 	IECore::CompoundDataPtr result = new IECore::CompoundData();
 	IECore::CompoundDataMap &nodes = result->writable();
 
-	for( const auto& nodeType : ccl::NodeType::type_names() )
+	for( const auto &nodeType : ccl::NodeType::type_names() )
 	{
 		const ccl::NodeType *cNodeType = ccl::NodeType::find( nodeType );
 		if( cNodeType )
@@ -174,7 +174,7 @@ IECore::CompoundDataPtr shaderData()
 	IECore::CompoundDataPtr result = new IECore::CompoundData();
 	IECore::CompoundDataMap &shaders = result->writable();
 
-	for( const auto& nodeType : ccl::NodeType::type_names() )
+	for( const auto &nodeType : ccl::NodeType::type_names() )
 	{
 		// Skip over the "output" ShaderNode, as this is a part of the main
 		// "shader" node.
@@ -258,55 +258,22 @@ IECore::CompoundDataPtr shaderData()
 					s["type"] = new IECore::StringData( "emission" );
 					s["category"] = new IECore::StringData( "Input" );
 				}
-				else if( ( boost::equals( type, "ambient_occlusion" ) )
-					|| ( boost::equals( type, "attribute" ) )
-					|| ( boost::equals( type, "bevel" ) )
-					|| ( boost::equals( type, "camera" ) )
-					|| ( boost::equals( type, "fresnel" ) )
-					|| ( boost::equals( type, "geometry" ) )
-					|| ( boost::equals( type, "layer_weight" ) )
-					|| ( boost::equals( type, "light_path" ) )
-					|| ( boost::equals( type, "rgb" ) )
-					|| ( boost::equals( type, "tangent" ) )
-					|| ( boost::equals( type, "texture_coordinate" ) )
-					|| ( boost::equals( type, "uvmap" ) )
-					|| ( boost::equals( type, "value" ) )
-					|| ( boost::equals( type, "wireframe" ) )
-				)
+				else if( ( boost::equals( type, "ambient_occlusion" ) ) || ( boost::equals( type, "attribute" ) ) || ( boost::equals( type, "bevel" ) ) || ( boost::equals( type, "camera" ) ) || ( boost::equals( type, "fresnel" ) ) || ( boost::equals( type, "geometry" ) ) || ( boost::equals( type, "layer_weight" ) ) || ( boost::equals( type, "light_path" ) ) || ( boost::equals( type, "rgb" ) ) || ( boost::equals( type, "tangent" ) ) || ( boost::equals( type, "texture_coordinate" ) ) || ( boost::equals( type, "uvmap" ) ) || ( boost::equals( type, "value" ) ) || ( boost::equals( type, "wireframe" ) ) )
 				{
 					s["type"] = new IECore::StringData( "emission" );
 					s["category"] = new IECore::StringData( "Input" );
 				}
-				else if( ( boost::equals( type, "brightness_contrast" ) )
-					|| ( boost::equals( type, "gamma" ) )
-					|| ( boost::equals( type, "hsv" ) )
-					|| ( boost::equals( type, "invert" ) )
-					|| ( boost::equals( type, "light_falloff" ) )
-					|| ( boost::equals( type, "mix" ) )
-					|| ( boost::equals( type, "rgb_curves" ) )
-				)
+				else if( ( boost::equals( type, "brightness_contrast" ) ) || ( boost::equals( type, "gamma" ) ) || ( boost::equals( type, "hsv" ) ) || ( boost::equals( type, "invert" ) ) || ( boost::equals( type, "light_falloff" ) ) || ( boost::equals( type, "mix" ) ) || ( boost::equals( type, "rgb_curves" ) ) )
 				{
 					s["type"] = new IECore::StringData( "emission" );
 					s["category"] = new IECore::StringData( "Color" );
 				}
-				else if( ( boost::equals( type, "bump" ) )
-					|| ( boost::equals( type, "mapping" ) )
-					|| ( boost::equals( type, "normal" ) )
-					|| ( boost::equals( type, "normal_map" ) )
-					|| ( boost::equals( type, "vector_curves" ) )
-					|| ( boost::equals( type, "vector_transform" ) )
-				)
+				else if( ( boost::equals( type, "bump" ) ) || ( boost::equals( type, "mapping" ) ) || ( boost::equals( type, "normal" ) ) || ( boost::equals( type, "normal_map" ) ) || ( boost::equals( type, "vector_curves" ) ) || ( boost::equals( type, "vector_transform" ) ) )
 				{
 					s["type"] = new IECore::StringData( "emission" );
 					s["category"] = new IECore::StringData( "Vector" );
 				}
-				else if( ( boost::equals( type, "blackbody" ) )
-					|| ( boost::equals( type, "rgb_ramp" ) )
-					|| ( boost::equals( type, "math" ) )
-					|| ( boost::equals( type, "rgb_to_bw" ) )
-					|| ( boost::equals( type, "vector_math" ) )
-					|| ( boost::equals( type, "wavelength" ) )
-				)
+				else if( ( boost::equals( type, "blackbody" ) ) || ( boost::equals( type, "rgb_ramp" ) ) || ( boost::equals( type, "math" ) ) || ( boost::equals( type, "rgb_to_bw" ) ) || ( boost::equals( type, "vector_math" ) ) || ( boost::equals( type, "wavelength" ) ) )
 				{
 					s["type"] = new IECore::StringData( "emission" );
 					s["category"] = new IECore::StringData( "Converter" );
@@ -549,4 +516,4 @@ bool optixDenoiseSupported()
 	return false;
 }
 
-}
+} // namespace IECoreCycles

@@ -46,35 +46,34 @@ class StringPlug;
 class GAFFER_API NameSwitch : public Switch
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::NameSwitch, NameSwitchTypeId, Switch );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::NameSwitch, NameSwitchTypeId, Switch );
 
-		explicit NameSwitch( const std::string &name=GraphComponent::defaultName<NameSwitch>() );
-		~NameSwitch() override;
+	explicit NameSwitch( const std::string &name = GraphComponent::defaultName<NameSwitch>() );
+	~NameSwitch() override;
 
-		void setup( const Plug *plug );
+	void setup( const Plug *plug );
 
-		StringPlug *selectorPlug();
-		const StringPlug *selectorPlug() const;
+	StringPlug *selectorPlug();
+	const StringPlug *selectorPlug() const;
 
-		StringVectorDataPlug *enabledNamesPlug();
-		const StringVectorDataPlug *enabledNamesPlug() const;
+	StringVectorDataPlug *enabledNamesPlug();
+	const StringVectorDataPlug *enabledNamesPlug() const;
 
-		void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-	private :
+private:
 
-		IntPlug *outIndexPlug();
-		const IntPlug *outIndexPlug() const;
+	IntPlug *outIndexPlug();
+	const IntPlug *outIndexPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( NameSwitch );

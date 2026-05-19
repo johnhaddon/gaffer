@@ -47,15 +47,14 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldLight : public GafferScene::Light
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldLight, ArnoldLightTypeId, GafferScene::Light );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldLight, ArnoldLightTypeId, GafferScene::Light );
 
-		explicit ArnoldLight( const std::string &name=defaultName<ArnoldLight>() );
-		~ArnoldLight() override;
+	explicit ArnoldLight( const std::string &name = defaultName<ArnoldLight>() );
+	~ArnoldLight() override;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ArnoldLight )

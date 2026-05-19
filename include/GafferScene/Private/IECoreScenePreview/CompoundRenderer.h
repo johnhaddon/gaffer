@@ -43,34 +43,33 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API CompoundRenderer final : public IECoreScenePreview::Renderer
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( CompoundRenderer )
+	IE_CORE_DECLAREMEMBERPTR( CompoundRenderer )
 
-		using Renderers = std::vector<RendererPtr>;
+	using Renderers = std::vector<RendererPtr>;
 
-		/// CompoundRenderer is constructed directly rather than via
-		/// `Renderer::create()`, so that the renderers can be provided to it.
-		/// > Note : Currently, `renderers.size()` is required to be 2.
-		CompoundRenderer( const Renderers &renderers );
-		~CompoundRenderer() override;
+	/// CompoundRenderer is constructed directly rather than via
+	/// `Renderer::create()`, so that the renderers can be provided to it.
+	/// > Note : Currently, `renderers.size()` is required to be 2.
+	CompoundRenderer( const Renderers &renderers );
+	~CompoundRenderer() override;
 
-		IECore::InternedString name() const override;
-		void option( const IECore::InternedString &name, const IECore::Object *value ) override;
-		void output( const IECore::InternedString &name, const IECoreScene::Output *output ) override;
-		Renderer::AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override;
-		ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		ObjectInterfacePtr light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		ObjectInterfacePtr object( const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		void render() override;
-		void pause() override;
-		IECore::DataPtr command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters ) override;
+	IECore::InternedString name() const override;
+	void option( const IECore::InternedString &name, const IECore::Object *value ) override;
+	void output( const IECore::InternedString &name, const IECoreScene::Output *output ) override;
+	Renderer::AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override;
+	ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr object( const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	void render() override;
+	void pause() override;
+	IECore::DataPtr command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters ) override;
 
-	private :
+private:
 
-		Renderers m_renderers;
-
+	Renderers m_renderers;
 };
 
 IE_CORE_DECLAREPTR( CompoundRenderer )

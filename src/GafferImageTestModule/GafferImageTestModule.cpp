@@ -62,7 +62,7 @@ namespace
 
 struct TilesEvaluateFunctor
 {
-	bool operator()( const GafferImage::ImagePlug *imagePlug, const std::string &channelName, const Imath::V2i &tileOrigin )
+	bool operator () ( const GafferImage::ImagePlug *imagePlug, const std::string &channelName, const Imath::V2i &tileOrigin )
 	{
 		imagePlug->channelDataPlug()->getValue();
 		return true;
@@ -125,36 +125,24 @@ void validateVisitPixels( GafferImage::Sampler &sampler, const Imath::Box2i &reg
 {
 	int i = 0;
 	int sizeX = region.size().x;
-	sampler.visitPixels( region,
-		[&region, &sampler, &i, sizeX ] ( float value, int x, int y )
+	sampler.visitPixels( region, [&region, &sampler, &i, sizeX]( float value, int x, int y ) {
+		int expectedX = ( i % sizeX ) + region.min.x;
+		int expectedY = ( i / sizeX ) + region.min.y;
+		if( x != expectedX || y != expectedY )
 		{
-			int expectedX = ( i % sizeX ) + region.min.x;
-			int expectedY = ( i / sizeX ) + region.min.y;
-			if( x != expectedX || y != expectedY )
-			{
-				throw IECore::Exception( fmt::format (
-					"visitPixels passed incorrect coordinate - expected {},{}, received {},{}",
-					expectedX, expectedY, x, y
-				) );
-			}
-
-			float expectedValue = sampler.sample( x, y );
-			if( value != expectedValue )
-			{
-				throw IECore::Exception( fmt::format(
-					"visitPixels passed incorrect value for pixel {},{} - expected {} received {}",
-					x, y, expectedValue, value
-				) );
-			}
-			i++;
+			throw IECore::Exception( fmt::format( "visitPixels passed incorrect coordinate - expected {},{}, received {},{}", expectedX, expectedY, x, y ) );
 		}
-	);
+
+		float expectedValue = sampler.sample( x, y );
+		if( value != expectedValue )
+		{
+			throw IECore::Exception( fmt::format( "visitPixels passed incorrect value for pixel {},{} - expected {} received {}", x, y, expectedValue, value ) );
+		}
+		i++;
+	} );
 	if( i != region.size().x * region.size().y )
 	{
-		throw IECore::Exception( fmt::format(
-			"visitPixels processed wrong number of pixels: visited {} in region of size {},{}",
-			i, region.size().x, region.size().y
-		) );
+		throw IECore::Exception( fmt::format( "visitPixels processed wrong number of pixels: visited {} in region of size {},{}", i, region.size().x, region.size().y ) );
 	}
 }
 
@@ -163,8 +151,7 @@ void validateVisitPixels( GafferImage::Sampler &sampler, const Imath::Box2i &reg
 BOOST_PYTHON_MODULE( _GafferImageTest )
 {
 	IECorePython::RefCountedClass<ContextSanitiser, Gaffer::Monitor>( "ContextSanitiser" )
-		.def( init<>() )
-	;
+		.def( init<>() );
 
 	def( "processTiles", &processTilesWrapper );
 	def( "connectProcessTilesToPlugDirtiedSignal", &connectProcessTilesToPlugDirtiedSignal );

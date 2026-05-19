@@ -45,7 +45,7 @@ GAFFER_NODE_DEFINE_TYPE( ShuffleAttributes );
 size_t ShuffleAttributes::g_firstPlugIndex = 0;
 
 ShuffleAttributes::ShuffleAttributes( const std::string &name )
-	:	AttributeProcessor( name )
+	: AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );

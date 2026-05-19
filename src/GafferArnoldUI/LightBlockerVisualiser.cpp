@@ -96,10 +96,10 @@ void addQuad( const V3f &center, float size, vector<int> &vertsPerCurve, vector<
 {
 	float halfSize = size * 0.5;
 
-	p.push_back( center + V3f( -halfSize, -halfSize, 0  ) );
-	p.push_back( center + V3f(  halfSize, -halfSize, 0  ) );
-	p.push_back( center + V3f(  halfSize,  halfSize, 0  ) );
-	p.push_back( center + V3f( -halfSize,  halfSize, 0  ) );
+	p.push_back( center + V3f( -halfSize, -halfSize, 0 ) );
+	p.push_back( center + V3f( halfSize, -halfSize, 0 ) );
+	p.push_back( center + V3f( halfSize, halfSize, 0 ) );
+	p.push_back( center + V3f( -halfSize, halfSize, 0 ) );
 
 	vertsPerCurve.push_back( 4 );
 }
@@ -109,7 +109,7 @@ void addCircle( const V3f &center, float radius, vector<int> &vertsPerCurve, vec
 	const int numDivisions = 100;
 	for( int i = 0; i < numDivisions; ++i )
 	{
-		const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
+		const float angle = 2 * M_PI * (float)i / (float)( numDivisions - 1 );
 		p.push_back( center + radius * V3f( cos( angle ), sin( angle ), 0 ) );
 	}
 	vertsPerCurve.push_back( numDivisions );
@@ -127,32 +127,32 @@ void addCube( const V3f &origin, float size, vector<int> &vertsPerCurve, vector<
 	float halfSize = size * 0.5;
 
 	vertsPerCurve.push_back( 4 );
-	p.push_back( V3f( -halfSize, -halfSize,  halfSize ) );
-	p.push_back( V3f(  halfSize, -halfSize,  halfSize ) );
-	p.push_back( V3f(  halfSize,  halfSize,  halfSize ) );
-	p.push_back( V3f( -halfSize,  halfSize,  halfSize ) );
+	p.push_back( V3f( -halfSize, -halfSize, halfSize ) );
+	p.push_back( V3f( halfSize, -halfSize, halfSize ) );
+	p.push_back( V3f( halfSize, halfSize, halfSize ) );
+	p.push_back( V3f( -halfSize, halfSize, halfSize ) );
 
 	vertsPerCurve.push_back( 4 );
 	p.push_back( V3f( -halfSize, -halfSize, -halfSize ) );
-	p.push_back( V3f(  halfSize, -halfSize, -halfSize ) );
-	p.push_back( V3f(  halfSize,  halfSize, -halfSize ) );
-	p.push_back( V3f( -halfSize,  halfSize, -halfSize ) );
+	p.push_back( V3f( halfSize, -halfSize, -halfSize ) );
+	p.push_back( V3f( halfSize, halfSize, -halfSize ) );
+	p.push_back( V3f( -halfSize, halfSize, -halfSize ) );
 
 	vertsPerCurve.push_back( 2 );
-	p.push_back( V3f( -halfSize, -halfSize,  halfSize ) );
+	p.push_back( V3f( -halfSize, -halfSize, halfSize ) );
 	p.push_back( V3f( -halfSize, -halfSize, -halfSize ) );
 
 	vertsPerCurve.push_back( 2 );
-	p.push_back( V3f(  halfSize, -halfSize,  halfSize ) );
-	p.push_back( V3f(  halfSize, -halfSize, -halfSize ) );
+	p.push_back( V3f( halfSize, -halfSize, halfSize ) );
+	p.push_back( V3f( halfSize, -halfSize, -halfSize ) );
 
 	vertsPerCurve.push_back( 2 );
-	p.push_back( V3f(  halfSize,  halfSize,  halfSize ) );
-	p.push_back( V3f(  halfSize,  halfSize, -halfSize ) );
+	p.push_back( V3f( halfSize, halfSize, halfSize ) );
+	p.push_back( V3f( halfSize, halfSize, -halfSize ) );
 
 	vertsPerCurve.push_back( 2 );
-	p.push_back( V3f( -halfSize,  halfSize,  halfSize ) );
-	p.push_back( V3f( -halfSize,  halfSize, -halfSize ) );
+	p.push_back( V3f( -halfSize, halfSize, halfSize ) );
+	p.push_back( V3f( -halfSize, halfSize, -halfSize ) );
 }
 
 void setFalloffGroupSettings( IECoreGL::Group *group, const IECore::CompoundData *shaderParameters )
@@ -176,26 +176,26 @@ void setFalloffGroupSettings( IECoreGL::Group *group, const IECore::CompoundData
 class LightBlockerVisualiser : public LightFilterVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( LightBlockerVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( LightBlockerVisualiser )
 
-		LightBlockerVisualiser();
-		~LightBlockerVisualiser() override;
+	LightBlockerVisualiser();
+	~LightBlockerVisualiser() override;
 
-		Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	protected :
+protected:
 
-		static LightFilterVisualiser::LightFilterVisualiserDescription<LightBlockerVisualiser> g_visualiserDescription;
+	static LightFilterVisualiser::LightFilterVisualiserDescription<LightBlockerVisualiser> g_visualiserDescription;
 
-	private :
+private:
 
-		/// \todo: can this be consolidated with the StandardLightVisualiser?
-		static IECoreGL::ConstRenderablePtr boxShape( const IECore::CompoundData *shaderParameters );
-		static IECoreGL::ConstRenderablePtr sphereShape( const IECore::CompoundData *shaderParameters );
-		static IECoreGL::ConstRenderablePtr cylinderShape( const IECore::CompoundData *shaderParameters );
-		static IECoreGL::ConstRenderablePtr planeShape( const IECore::CompoundData *shaderParameters );
+	/// \todo: can this be consolidated with the StandardLightVisualiser?
+	static IECoreGL::ConstRenderablePtr boxShape( const IECore::CompoundData *shaderParameters );
+	static IECoreGL::ConstRenderablePtr sphereShape( const IECore::CompoundData *shaderParameters );
+	static IECoreGL::ConstRenderablePtr cylinderShape( const IECore::CompoundData *shaderParameters );
+	static IECoreGL::ConstRenderablePtr planeShape( const IECore::CompoundData *shaderParameters );
 };
 
 IE_CORE_DECLAREPTR( LightBlockerVisualiser )
@@ -378,9 +378,9 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::cylinderShape( const IECore
 	float radius = 0.5;
 
 	addCircle( V3f( 0, 0, -radius ), radius, vertsPerCurve, p );
-	addCircle( V3f( 0, 0,  radius ), radius, vertsPerCurve, p );
+	addCircle( V3f( 0, 0, radius ), radius, vertsPerCurve, p );
 
-	addLine( { 0,  radius, -radius }, { 0,  radius, radius }, vertsPerCurve, p );
+	addLine( { 0, radius, -radius }, { 0, radius, radius }, vertsPerCurve, p );
 	addLine( { 0, -radius, -radius }, { 0, -radius, radius }, vertsPerCurve, p );
 
 	IECoreGL::CurvesPrimitivePtr cylinder = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );

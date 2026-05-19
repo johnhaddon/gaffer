@@ -57,60 +57,61 @@ namespace GafferImageUI
 class GAFFERIMAGEUI_API ColorInspectorTool : public GafferUI::Tool
 {
 
-	public :
+public:
 
-		explicit ColorInspectorTool( GafferUI::View *view, const std::string &name = defaultName<ColorInspectorTool>() );
+	explicit ColorInspectorTool( GafferUI::View *view, const std::string &name = defaultName<ColorInspectorTool>() );
 
-		~ColorInspectorTool() override;
+	~ColorInspectorTool() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImageUI::ColorInspectorTool, ColorInspectorToolTypeId, GafferUI::Tool );
+	GAFFER_NODE_DECLARE_TYPE( GafferImageUI::ColorInspectorTool, ColorInspectorToolTypeId, GafferUI::Tool );
 
-		class GAFFERIMAGEUI_API ColorInspectorPlug : public Gaffer::ValuePlug
+	class GAFFERIMAGEUI_API ColorInspectorPlug : public Gaffer::ValuePlug
+	{
+	public:
+
+		enum class GAFFERIMAGEUI_API Mode
 		{
-			public :
-				enum class GAFFERIMAGEUI_API Mode
-				{
-					Cursor,
-					Pixel,
-					Area
-				};
-
-				GAFFER_PLUG_DECLARE_TYPE( ColorInspectorPlug, ColorInspectorPlugTypeId, Gaffer::ValuePlug );
-				ColorInspectorPlug( const std::string &name = defaultName<ColorInspectorPlug>(), Direction direction=In, unsigned flags=Default );
-
-				Gaffer::IntPlug *modePlug();
-				const Gaffer::IntPlug *modePlug() const;
-
-				Gaffer::V2iPlug *pixelPlug();
-				const Gaffer::V2iPlug *pixelPlug() const;
-
-				Gaffer::Box2iPlug *areaPlug();
-				const Gaffer::Box2iPlug *areaPlug() const;
-
-				bool acceptsChild( const GraphComponent *potentialChild ) const override;
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Plug::Direction direction ) const override;
+			Cursor,
+			Pixel,
+			Area
 		};
 
-		Gaffer::ArrayPlug *inspectorsPlug();
-		const Gaffer::ArrayPlug *inspectorsPlug() const;
+		GAFFER_PLUG_DECLARE_TYPE( ColorInspectorPlug, ColorInspectorPlugTypeId, Gaffer::ValuePlug );
+		ColorInspectorPlug( const std::string &name = defaultName<ColorInspectorPlug>(), Direction direction = In, unsigned flags = Default );
 
-	private :
+		Gaffer::IntPlug *modePlug();
+		const Gaffer::IntPlug *modePlug() const;
 
-		void plugSet( Gaffer::Plug *plug );
-		void colorInspectorAdded( GraphComponent *colorInspector );
-		void colorInspectorRemoved( GraphComponent *colorInspector );
-		void deleteClicked( Gaffer::Plug *plug );
-		void channelsChanged();
+		Gaffer::V2iPlug *pixelPlug();
+		const Gaffer::V2iPlug *pixelPlug() const;
 
-		static size_t g_firstPlugIndex;
-		static ToolDescription<ColorInspectorTool, GafferImageUI::ImageView> g_imageToolDescription;
+		Gaffer::Box2iPlug *areaPlug();
+		const Gaffer::Box2iPlug *areaPlug() const;
 
-		Gaffer::ContextQueryPtr m_contextQuery;
-		Gaffer::DeleteContextVariablesPtr m_deleteContextVariables;
-		GafferImage::ImageSamplerPtr m_sampler;
-		GafferImage::ImageStatsPtr m_areaSampler;
+		bool acceptsChild( const GraphComponent *potentialChild ) const override;
+		Gaffer::PlugPtr createCounterpart( const std::string &name, Plug::Direction direction ) const override;
+	};
 
-		GafferUI::ContainerGadgetPtr m_gadgets;
+	Gaffer::ArrayPlug *inspectorsPlug();
+	const Gaffer::ArrayPlug *inspectorsPlug() const;
+
+private:
+
+	void plugSet( Gaffer::Plug *plug );
+	void colorInspectorAdded( GraphComponent *colorInspector );
+	void colorInspectorRemoved( GraphComponent *colorInspector );
+	void deleteClicked( Gaffer::Plug *plug );
+	void channelsChanged();
+
+	static size_t g_firstPlugIndex;
+	static ToolDescription<ColorInspectorTool, GafferImageUI::ImageView> g_imageToolDescription;
+
+	Gaffer::ContextQueryPtr m_contextQuery;
+	Gaffer::DeleteContextVariablesPtr m_deleteContextVariables;
+	GafferImage::ImageSamplerPtr m_sampler;
+	GafferImage::ImageStatsPtr m_areaSampler;
+
+	GafferUI::ContainerGadgetPtr m_gadgets;
 };
 
 IE_CORE_DECLAREPTR( ColorInspectorTool )

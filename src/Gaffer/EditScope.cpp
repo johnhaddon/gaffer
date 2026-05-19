@@ -73,7 +73,7 @@ std::vector<std::string> &processorNames()
 GAFFER_NODE_DEFINE_TYPE( EditScope );
 
 EditScope::EditScope( const std::string &name )
-	:	Box( name )
+	: Box( name )
 {
 }
 

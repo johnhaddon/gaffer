@@ -79,17 +79,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
 	{
 	}
 
-	bool operator==( const HistoryCacheKey &rhs ) const
+	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return
-			plug == rhs.plug &&
+		return plug == rhs.plug &&
 			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount
-		;
+			dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -110,7 +108,7 @@ using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History
 
 HistoryCache g_historyCache(
 	// Getter
-	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		return SceneAlgo::history(
@@ -120,13 +118,13 @@ HistoryCache g_historyCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// Histories contain PlugPtrs, which could potentially be the sole
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -136,13 +134,13 @@ struct AttributeHistoryCacheKey : public HistoryCacheKey
 {
 	AttributeHistoryCacheKey() {};
 	AttributeHistoryCacheKey( const ScenePlug *plug, IECore::InternedString attribute )
-		:	HistoryCacheKey( plug->attributesPlug() ), attribute( attribute )
+		: HistoryCacheKey( plug->attributesPlug() ), attribute( attribute )
 	{
 	}
 
-	bool operator==( const AttributeHistoryCacheKey &rhs ) const
+	bool operator == ( const AttributeHistoryCacheKey &rhs ) const
 	{
-		return HistoryCacheKey::operator==( rhs ) && attribute == rhs.attribute;
+		return HistoryCacheKey::operator == ( rhs ) && attribute == rhs.attribute;
 	}
 
 	IECore::InternedString attribute;
@@ -160,7 +158,7 @@ using AttributeHistoryCache = IECorePreview::LRUCache<AttributeHistoryCacheKey, 
 
 AttributeHistoryCache g_attributeHistoryCache(
 	// Getter
-	[] ( const AttributeHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
+	[]( const AttributeHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		SceneAlgo::History::ConstPtr attributesHistory = g_historyCache.get( key, canceller );
@@ -169,10 +167,10 @@ AttributeHistoryCache g_attributeHistoryCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const AttributeHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const AttributeHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// See comment in g_historyCache
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -182,7 +180,7 @@ Gaffer::ValuePlugPtr attributePlug( const Gaffer::CompoundDataPlug *parentPlug, 
 {
 	for( const auto &plug : Gaffer::NameValuePlug::Range( *parentPlug ) )
 	{
-		if(plug->namePlug()->getValue() == attributeName )
+		if( plug->namePlug()->getValue() == attributeName )
 		{
 			return plug;
 		}
@@ -197,7 +195,7 @@ Gaffer::ValuePlugPtr attributePlug( const Gaffer::CompoundDataPlug *parentPlug, 
 //////////////////////////////////////////////////////////////////////////
 
 static InternedString g_lightMuteAttributeName( "light:mute" );
-static InternedString g_filteredLightsAttributeName( "filteredLights");
+static InternedString g_filteredLightsAttributeName( "filteredLights" );
 
 IE_CORE_DEFINERUNTIMETYPED( AttributeInspector )
 
@@ -208,8 +206,9 @@ AttributeInspector::AttributeInspector(
 	const std::string &name,
 	const std::string &type
 )
-	:	Inspector( { scene->attributesPlug(), scene->globalsPlug() }, type, name == "" ? attribute.string() : name, editScope ),
-		m_scene( scene ), m_attribute( attribute )
+	: Inspector( { scene->attributesPlug(), scene->globalsPlug() }, type, name == "" ? attribute.string() : name, editScope ),
+	  m_scene( scene ),
+	  m_attribute( attribute )
 {
 }
 
@@ -394,11 +393,9 @@ Inspector::AcquireEditFunctionOrFailure AttributeInspector::acquireEditFunction(
 	}
 	else
 	{
-		return [
-			editScope = EditScopePtr( editScope ),
-			attributeName,
-			context = history->context
-		] ( bool createIfNecessary ) {
+		return [editScope = EditScopePtr( editScope ),
+				attributeName,
+				context = history->context]( bool createIfNecessary ) {
 			Context::Scope scope( context.get() );
 			return EditScopeAlgo::acquireAttributeEdit(
 				editScope.get(),
@@ -439,7 +436,7 @@ bool AttributeInspector::attributeExists( const bool inheritAttributes ) const
 	// don't allow attributes to be created at the root of the scene.
 	if( currentPath.size() > 1 )
 	{
-		currentPath.pop_back();  // We tested the original path above, start at the parent.
+		currentPath.pop_back(); // We tested the original path above, start at the parent.
 		while( currentPath.size() )
 		{
 			pathScope.setPath( &currentPath );

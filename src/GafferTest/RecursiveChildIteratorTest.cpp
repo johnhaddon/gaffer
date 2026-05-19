@@ -136,5 +136,4 @@ void GafferTest::testRecursiveChildIterator()
 	GAFFERTEST_ASSERT( visited[0] == b );
 	GAFFERTEST_ASSERT( visited[1] == c );
 	GAFFERTEST_ASSERT( visited[2] == d );
-
 }

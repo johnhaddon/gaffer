@@ -45,12 +45,13 @@
 using namespace boost::python;
 using namespace GafferImageUI;
 
-namespace {
+namespace
+{
 
-IECoreGL::Shader::SetupPtr displayTransformToFramebufferShaderWrapper( PyObject* pyProcessor )
+IECoreGL::Shader::SetupPtr displayTransformToFramebufferShaderWrapper( PyObject *pyProcessor )
 {
 	pybind11::handle bindHandle( pyProcessor );
-	OCIO_NAMESPACE::Processor* processor = bindHandle.cast< OCIO_NAMESPACE::Processor* >();
+	OCIO_NAMESPACE::Processor *processor = bindHandle.cast<OCIO_NAMESPACE::Processor *>();
 	if( !processor )
 	{
 		throw IECore::Exception( "Argument is not an OCIO::Processor" );

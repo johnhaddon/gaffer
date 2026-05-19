@@ -55,7 +55,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteCurves );
 size_t DeleteCurves::g_firstPlugIndex = 0;
 
 DeleteCurves::DeleteCurves( const std::string &name )
-	:	Deformer( name )
+	: Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -80,12 +80,12 @@ const Gaffer::StringPlug *DeleteCurves::curvesPlug() const
 
 Gaffer::BoolPlug *DeleteCurves::invertPlug()
 {
-	return getChild<BoolPlug>( g_firstPlugIndex + 1);
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::BoolPlug *DeleteCurves::invertPlug() const
 {
-	return getChild<BoolPlug>( g_firstPlugIndex + 1);
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::BoolPlug *DeleteCurves::ignoreMissingVariablePlug()
@@ -100,12 +100,10 @@ const Gaffer::BoolPlug *DeleteCurves::ignoreMissingVariablePlug() const
 
 bool DeleteCurves::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		Deformer::affectsProcessedObject( input ) ||
+	return Deformer::affectsProcessedObject( input ) ||
 		input == curvesPlug() ||
 		input == invertPlug() ||
-		input == ignoreMissingVariablePlug()
-	;
+		input == ignoreMissingVariablePlug();
 }
 
 
@@ -133,7 +131,7 @@ IECore::ConstObjectPtr DeleteCurves::computeProcessedObject( const ScenePath &pa
 	}
 
 	PrimitiveVariableMap::const_iterator it = curves->variables.find( deletePrimVarName );
-	if (it == curves->variables.end())
+	if( it == curves->variables.end() )
 	{
 		if( ignoreMissingVariablePlug()->getValue() )
 		{
@@ -143,5 +141,5 @@ IECore::ConstObjectPtr DeleteCurves::computeProcessedObject( const ScenePath &pa
 		throw InvalidArgumentException( fmt::format( "DeleteCurves : No primitive variable \"{}\" found", deletePrimVarName ) );
 	}
 
-	return CurvesAlgo::deleteCurves(curves, it->second, invertPlug()->getValue());
+	return CurvesAlgo::deleteCurves( curves, it->second, invertPlug()->getValue() );
 }

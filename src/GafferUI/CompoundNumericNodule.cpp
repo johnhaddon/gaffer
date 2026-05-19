@@ -153,7 +153,7 @@ TypeDescription g_typeDescription;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CompoundNumericNodule );
 
 CompoundNumericNodule::CompoundNumericNodule( Gaffer::PlugPtr plug )
-	:	StandardNodule( plug )
+	: StandardNodule( plug )
 {
 	Metadata::plugValueChangedSignal( plug->node() ).connect( boost::bind( &CompoundNumericNodule::plugMetadataChanged, this, ::_1, ::_2 ) );
 	updateChildNoduleVisibility();
@@ -242,7 +242,7 @@ void CompoundNumericNodule::createConnection( Gaffer::Plug *endpoint )
 		if( canConnect( endpoint, it->get() ) )
 		{
 			plugs.push_back( it->get() );
-			allName += (*it)->getName();
+			allName += ( *it )->getName();
 		}
 	}
 

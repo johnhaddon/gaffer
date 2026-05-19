@@ -52,29 +52,28 @@ namespace GafferImage
 class GAFFERIMAGE_API ColorSpace : public OpenColorIOTransform
 {
 
-	public :
+public:
 
-		explicit ColorSpace( const std::string &name=defaultName<ColorSpace>() );
-		~ColorSpace() override;
+	explicit ColorSpace( const std::string &name = defaultName<ColorSpace>() );
+	~ColorSpace() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ColorSpace, ColorSpaceTypeId, OpenColorIOTransform );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ColorSpace, ColorSpaceTypeId, OpenColorIOTransform );
 
-		Gaffer::StringPlug *inputSpacePlug();
-		const Gaffer::StringPlug *inputSpacePlug() const;
+	Gaffer::StringPlug *inputSpacePlug();
+	const Gaffer::StringPlug *inputSpacePlug() const;
 
-		Gaffer::StringPlug *outputSpacePlug();
-		const Gaffer::StringPlug *outputSpacePlug() const;
+	Gaffer::StringPlug *outputSpacePlug();
+	const Gaffer::StringPlug *outputSpacePlug() const;
 
-	protected :
+protected:
 
-		bool affectsTransform( const Gaffer::Plug *input ) const override;
-		void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
+	bool affectsTransform( const Gaffer::Plug *input ) const override;
+	void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ColorSpace )

@@ -44,30 +44,29 @@ namespace GafferScene
 class GAFFERSCENE_API Text : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Text, TextTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Text, TextTypeId, ObjectSource );
 
-		explicit Text( const std::string &name=defaultName<Text>() );
-		~Text() override;
+	explicit Text( const std::string &name = defaultName<Text>() );
+	~Text() override;
 
-		Gaffer::StringPlug *textPlug();
-		const Gaffer::StringPlug *textPlug() const;
+	Gaffer::StringPlug *textPlug();
+	const Gaffer::StringPlug *textPlug() const;
 
-		Gaffer::StringPlug *fontPlug();
-		const Gaffer::StringPlug *fontPlug() const;
+	Gaffer::StringPlug *fontPlug();
+	const Gaffer::StringPlug *fontPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Text )

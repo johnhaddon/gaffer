@@ -65,8 +65,7 @@ using namespace GafferUI;
 namespace
 {
 
-void titleAndDescriptionFromPlugs( const StringPlug *titlePlug, const StringPlug *descriptionPlug,
-	std::string &title, std::string &description )
+void titleAndDescriptionFromPlugs( const StringPlug *titlePlug, const StringPlug *descriptionPlug, std::string &title, std::string &description )
 {
 	const auto script = titlePlug->ancestor<ScriptNode>();
 	const Context *context = script ? script->context() : nullptr;
@@ -101,7 +100,7 @@ float remap( float x, float m, float q, float outMin, float outMax )
 	}
 	else
 	{
-		return outMax - ( outMax - outMin ) * ( 1.0 - 2.0 * q + q * q ) / ( 1.0 - 2.0 * q + q * (x / m) );
+		return outMax - ( outMax - outMin ) * ( 1.0 - 2.0 * q + q * q ) / ( 1.0 - 2.0 * q + q * ( x / m ) );
 	}
 }
 
@@ -150,7 +149,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( BackdropNodeGadget );
 BackdropNodeGadget::NodeGadgetTypeDescription<BackdropNodeGadget> BackdropNodeGadget::g_nodeGadgetTypeDescription( Gaffer::Backdrop::staticTypeId() );
 
 BackdropNodeGadget::BackdropNodeGadget( Gaffer::NodePtr node )
-	:	NodeGadget( node ), m_hovered( false ), m_horizontalDragEdge( 0 ), m_verticalDragEdge( 0 ), m_mergeGroupId( 0 )
+	: NodeGadget( node ), m_hovered( false ), m_horizontalDragEdge( 0 ), m_verticalDragEdge( 0 ), m_mergeGroupId( 0 )
 {
 	if( !runTimeCast<Backdrop>( node ) )
 	{
@@ -377,23 +376,23 @@ void BackdropNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 		{
 			Box3f titleBound = style->textBound( Style::HeadingText, title );
 			glPushMatrix();
-				glTranslatef( bound.center().x - titleBound.size().x / 2.0f, titleBaseline, 0.0f );
-				style->renderText( Style::HeadingText, title );
+			glTranslatef( bound.center().x - titleBound.size().x / 2.0f, titleBaseline, 0.0f );
+			style->renderText( Style::HeadingText, title );
 			glPopMatrix();
 		}
 
 		/// \todo Add `Style::renderBackdropTitleBar()` method so that
 		/// we don't have to hardcode the drawing here.
 		glPushAttrib( GL_CURRENT_BIT );
-			if( m_hovered )
-			{
-				glColor4f( 0.466, 0.612, 0.741, 1.0f );
-			}
-			else
-			{
-				glColor4f( 1.0, 1.0, 1.0, 0.15f );
-			}
-			style->renderSolidRectangle( titleBar );
+		if( m_hovered )
+		{
+			glColor4f( 0.466, 0.612, 0.741, 1.0f );
+		}
+		else
+		{
+			glColor4f( 1.0, 1.0, 1.0, 0.15f );
+		}
+		style->renderSolidRectangle( titleBar );
 		glPopAttrib();
 
 		Box2f textBound = bound;
@@ -478,7 +477,7 @@ bool BackdropNodeGadget::mouseMove( Gadget *gadget, const ButtonEvent &event )
 		Pointer::setCurrent( "" );
 	}
 
-	bool newHovered = !(h || v);
+	bool newHovered = !( h || v );
 	if( newHovered != m_hovered )
 	{
 		m_hovered = newHovered;
@@ -536,14 +535,14 @@ bool BackdropNodeGadget::dragMove( Gadget *gadget, const DragDropEvent &event )
 
 	if( m_verticalDragEdge == -1 )
 	{
-		b.min.y = std::min( event.line.p0.y, b.max.y - g_margin * 4.0f);
+		b.min.y = std::min( event.line.p0.y, b.max.y - g_margin * 4.0f );
 	}
 	else if( m_verticalDragEdge == 1 )
 	{
-		b.max.y = std::max( event.line.p0.y, b.min.y + g_margin * 4.0f);
+		b.max.y = std::max( event.line.p0.y, b.min.y + g_margin * 4.0f );
 	}
 
-	const std::string mergeGroup = fmt::format( "BackdropNodeGadget{}{}", (void*)this, m_mergeGroupId );
+	const std::string mergeGroup = fmt::format( "BackdropNodeGadget{}{}", (void *)this, m_mergeGroupId );
 	UndoScope undoScope( node()->scriptNode(), UndoScope::Enabled, mergeGroup );
 	setBound( b );
 	return true;

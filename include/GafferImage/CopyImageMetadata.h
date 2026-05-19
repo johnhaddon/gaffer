@@ -46,33 +46,32 @@ namespace GafferImage
 class GAFFERIMAGE_API CopyImageMetadata : public MetadataProcessor
 {
 
-	public :
+public:
 
-		explicit CopyImageMetadata( const std::string &name=defaultName<CopyImageMetadata>() );
-		~CopyImageMetadata() override;
+	explicit CopyImageMetadata( const std::string &name = defaultName<CopyImageMetadata>() );
+	~CopyImageMetadata() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::CopyImageMetadata, CopyImageMetadataTypeId, MetadataProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::CopyImageMetadata, CopyImageMetadataTypeId, MetadataProcessor );
 
-		ImagePlug *copyFromPlug();
-		const ImagePlug *copyFromPlug() const;
+	ImagePlug *copyFromPlug();
+	const ImagePlug *copyFromPlug() const;
 
-		Gaffer::StringPlug *namesPlug();
-		const Gaffer::StringPlug *namesPlug() const;
+	Gaffer::StringPlug *namesPlug();
+	const Gaffer::StringPlug *namesPlug() const;
 
-		Gaffer::BoolPlug *invertNamesPlug();
-		const Gaffer::BoolPlug *invertNamesPlug() const;
+	Gaffer::BoolPlug *invertNamesPlug();
+	const Gaffer::BoolPlug *invertNamesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
+	void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CopyImageMetadata );

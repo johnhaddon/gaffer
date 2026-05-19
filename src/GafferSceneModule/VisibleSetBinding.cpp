@@ -80,41 +80,30 @@ void GafferSceneModule::bindVisibleSet()
 		.def( init<>() )
 		.def( init<const VisibleSet &>() )
 		.add_property( "value", make_function( &VisibleSetData::writable, return_internal_reference<1>() ) )
-		.def( "hasBase", &VisibleSetData::hasBase ).staticmethod( "hasBase" )
-	;
+		.def( "hasBase", &VisibleSetData::hasBase )
+		.staticmethod( "hasBase" );
 
 	IECorePython::TypedDataFromType<VisibleSetData>();
 
 	scope s = class_<VisibleSet>( "VisibleSet" )
-		.def( "__init__", make_constructor( constructor, default_call_policies(),
-				(
-					arg( "expansions" ) = PathMatcher(),
-					arg( "inclusions" ) = PathMatcher(),
-					arg( "exclusions" ) = PathMatcher()
-				)
-			)
-		)
-		.def( init<const VisibleSet &>() )
-		.def( "visibility", (VisibleSet::Visibility (VisibleSet ::*)( const std::vector<InternedString> &, const size_t ) const)&VisibleSet::visibility, arg( "minimumExpansionDepth" ) = 0 )
-		.def_readwrite( "expansions", &VisibleSet::expansions )
-		.def_readwrite( "inclusions", &VisibleSet::inclusions )
-		.def_readwrite( "exclusions", &VisibleSet::exclusions )
-		.def( "__eq__", &VisibleSet::operator== )
-	;
+				  .def( "__init__", make_constructor( constructor, default_call_policies(), ( arg( "expansions" ) = PathMatcher(), arg( "inclusions" ) = PathMatcher(), arg( "exclusions" ) = PathMatcher() ) ) )
+				  .def( init<const VisibleSet &>() )
+				  .def( "visibility", ( VisibleSet::Visibility ( VisibleSet ::* )( const std::vector<InternedString> &, const size_t ) const ) & VisibleSet::visibility, arg( "minimumExpansionDepth" ) = 0 )
+				  .def_readwrite( "expansions", &VisibleSet::expansions )
+				  .def_readwrite( "inclusions", &VisibleSet::inclusions )
+				  .def_readwrite( "exclusions", &VisibleSet::exclusions )
+				  .def( "__eq__", &VisibleSet::operator == );
 
 	scope r = class_<VisibleSet::Visibility>( "Visibility" )
-		.def( init<>() )
-		.def( init<VisibleSet::Visibility::DrawMode, bool>() )
-		.def_readwrite( "descendantsVisible", &VisibleSet::Visibility::descendantsVisible )
-		.def_readwrite( "drawMode", &VisibleSet::Visibility::drawMode )
-		.def( self == self )
-		.def( "__repr__", &visibilityRepr )
-	;
+				  .def( init<>() )
+				  .def( init<VisibleSet::Visibility::DrawMode, bool>() )
+				  .def_readwrite( "descendantsVisible", &VisibleSet::Visibility::descendantsVisible )
+				  .def_readwrite( "drawMode", &VisibleSet::Visibility::drawMode )
+				  .def( self == self )
+				  .def( "__repr__", &visibilityRepr );
 
 	enum_<VisibleSet::Visibility::DrawMode>( "DrawMode" )
 		.value( "None_", VisibleSet::Visibility::DrawMode::None )
 		.value( "Visible", VisibleSet::Visibility::DrawMode::Visible )
-		.value( "ExcludedBounds", VisibleSet::Visibility::DrawMode::ExcludedBounds )
-	;
-
+		.value( "ExcludedBounds", VisibleSet::Visibility::DrawMode::ExcludedBounds );
 }

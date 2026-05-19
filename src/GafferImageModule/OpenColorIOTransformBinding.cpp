@@ -92,8 +92,7 @@ void GafferImageModule::bindOpenColorIOTransform()
 
 		enum_<OpenColorIOTransform::Direction>( "Direction" )
 			.value( "Forward", OpenColorIOTransform::Forward )
-			.value( "Inverse", OpenColorIOTransform::Inverse )
-		;
+			.value( "Inverse", OpenColorIOTransform::Inverse );
 	}
 
 	GafferBindings::DependencyNodeClass<ColorSpace>();
@@ -101,15 +100,14 @@ void GafferImageModule::bindOpenColorIOTransform()
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<LUT>()
-			.def( "supportedExtensions", &supportedExtensions ).staticmethod( "supportedExtensions" )
-		;
+					  .def( "supportedExtensions", &supportedExtensions )
+					  .staticmethod( "supportedExtensions" );
 
 		enum_<LUT::Interpolation>( "Interpolation" )
 			.value( "Best", LUT::Best )
 			.value( "Nearest", LUT::Nearest )
 			.value( "Linear", LUT::Linear )
-			.value( "Tetrahedral", LUT::Tetrahedral )
-		;
+			.value( "Tetrahedral", LUT::Tetrahedral );
 	}
 
 	GafferBindings::DependencyNodeClass<CDL>();
@@ -130,6 +128,5 @@ void GafferImageModule::bindOpenColorIOTransform()
 			"acquireDefaultConfigPlug", &acquireDefaultConfigPlugWrapper,
 			( arg( "scriptNode" ), arg( "createIfNecessary" ) = true )
 		)
-		.staticmethod( "acquireDefaultConfigPlug" )
-	;
+		.staticmethod( "acquireDefaultConfigPlug" );
 }

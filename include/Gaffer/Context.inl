@@ -63,52 +63,47 @@ struct DataTraits
 {
 
 	using DataType = IECore::TypedData<T>;
-
 };
 
 template<typename T>
-struct DataTraits<Imath::Vec2<T> >
+struct DataTraits<Imath::Vec2<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Imath::Vec2<T>>;
-
 };
 
 template<typename T>
-struct DataTraits<Imath::Vec3<T> >
+struct DataTraits<Imath::Vec3<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Imath::Vec3<T>>;
-
 };
 
 template<typename T>
-struct DataTraits<std::vector<Imath::Vec2<T> > >
+struct DataTraits<std::vector<Imath::Vec2<T>>>
 {
 
 	using DataType = IECore::GeometricTypedData<std::vector<Imath::Vec2<T>>>;
-
 };
 
 template<typename T>
-struct DataTraits<std::vector<Imath::Vec3<T> > >
+struct DataTraits<std::vector<Imath::Vec3<T>>>
 {
 
 	using DataType = IECore::GeometricTypedData<std::vector<Imath::Vec3<T>>>;
-
 };
 
 } // namespace Detail
 
 inline Context::Value::Value()
-	:	m_typeId( IECore::InvalidTypeId ), m_value( nullptr )
+	: m_typeId( IECore::InvalidTypeId ), m_value( nullptr )
 {
 }
 
 template<typename T>
 Context::Value::Value( const IECore::InternedString &name, const T *value )
-	:	m_typeId( Detail::DataTraits<T>::DataType::staticTypeId() ),
-		m_value( value )
+	: m_typeId( Detail::DataTraits<T>::DataType::staticTypeId() ),
+	  m_value( value )
 {
 	const std::string &nameStr = name.string();
 	if( nameStr.size() > 2 && nameStr[0] == 'u' && nameStr[1] == 'i' && nameStr[2] == ':' )
@@ -151,17 +146,17 @@ void Context::Value::registerType()
 		}
 		return result;
 	};
-	functions.isEqual = [] ( const Value &a, const Value &b ) {
+	functions.isEqual = []( const Value &a, const Value &b ) {
 		// Type of both `a` and `b` has been checked already in `operator ==`.
-		return (*static_cast<const ValueType *>( a.rawValue() )) == (*static_cast<const ValueType *>( b.rawValue() ));
+		return ( *static_cast<const ValueType *>( a.rawValue() ) ) == ( *static_cast<const ValueType *>( b.rawValue() ) );
 	};
-	functions.constructor = [] ( const IECore::InternedString &name, const IECore::Data *data ) {
+	functions.constructor = []( const IECore::InternedString &name, const IECore::Data *data ) {
 		return Value( name, &static_cast<const T *>( data )->readable() );
 	};
-	functions.valueFromData = [] ( const IECore::Data *data ) -> const void * {
+	functions.valueFromData = []( const IECore::Data *data ) -> const void * {
 		return &static_cast<const T *>( data )->readable();
 	};
-	functions.validate = [] ( const IECore::InternedString &name, const Value &v ) {
+	functions.validate = []( const IECore::InternedString &name, const Value &v ) {
 		const Value rehashed( name, static_cast<const ValueType *>( v.rawValue() ) );
 		if( v.hash() != rehashed.hash() )
 		{
@@ -179,7 +174,6 @@ void Context::set( const IECore::InternedString &name, const T &value )
 	typename DataType::ConstPtr d = new DataType( value );
 	const Value v( name, &d->readable() );
 	internalSetWithOwner( name, v, std::move( d ) );
-
 }
 
 inline void Context::internalSet( const IECore::InternedString &name, const Value &value )
@@ -205,7 +199,7 @@ inline void Context::internalSet( const IECore::InternedString &name, const Valu
 			// actually changed. We want to avoid expensive re-evaluations
 			// that might otherwise be triggered in the UI.
 			m_hashValid = false;
-			(*m_changedSignal)( this, name );
+			( *m_changedSignal )( this, name );
 		}
 	}
 }
@@ -303,21 +297,20 @@ inline const IECore::Canceller *Context::canceller() const
 class Context::SubstitutionProvider : public IECore::StringAlgo::VariableProvider
 {
 
-	public :
+public:
 
-		SubstitutionProvider( const Context *context );
+	SubstitutionProvider( const Context *context );
 
-		int frame() const override;
-		const std::string &variable( const boost::string_view &name, bool &recurse ) const override;
+	int frame() const override;
+	const std::string &variable( const boost::string_view &name, bool &recurse ) const override;
 
-	private :
+private:
 
-		const Context *m_context;
-		mutable std::string m_formattedString;
-
+	const Context *m_context;
+	mutable std::string m_formattedString;
 };
 
-template< typename T >
+template<typename T>
 Context::TypeDescription<T>::TypeDescription()
 {
 	Context::Value::registerType<T>();

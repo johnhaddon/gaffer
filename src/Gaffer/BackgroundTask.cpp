@@ -136,13 +136,9 @@ using ActiveTasks = boost::multi_index::multi_index_container<
 	ActiveTask,
 	boost::multi_index::indexed_by<
 		boost::multi_index::hashed_unique<
-			boost::multi_index::key<&ActiveTask::task>
-		>,
+			boost::multi_index::key<&ActiveTask::task>>,
 		boost::multi_index::hashed_non_unique<
-			boost::multi_index::key<&ActiveTask::subject>
-		>
-	>
->;
+			boost::multi_index::key<&ActiveTask::subject>>>>;
 
 ActiveTasks &activeTasks()
 {
@@ -159,7 +155,7 @@ ActiveTasks &activeTasks()
 struct BackgroundTask::TaskData : public boost::noncopyable
 {
 	TaskData( Function *function )
-		:	function( function ), canceller( new Canceller ), status( Pending )
+		: function( function ), canceller( new Canceller ), status( Pending )
 	{
 	}
 
@@ -172,7 +168,7 @@ struct BackgroundTask::TaskData : public boost::noncopyable
 };
 
 BackgroundTask::BackgroundTask( const Plug *subject, const Function &function )
-	:	m_function( function ), m_taskData( std::make_shared<TaskData>( &m_function ) )
+	: m_function( function ), m_taskData( std::make_shared<TaskData>( &m_function ) )
 {
 	const ScriptNode *s = scriptNode( subject );
 	if( subject && !s )
@@ -183,64 +179,61 @@ BackgroundTask::BackgroundTask( const Plug *subject, const Function &function )
 	activeTasks().insert( ActiveTask{ this, s } );
 
 	// Enqueue task into current arena.
-	tbb::task_arena( tbb::task_arena::attach() ).enqueue(
-		[taskData = m_taskData] {
-
-			// Early out if we were cancelled before the task
-			// even started.
-			std::unique_lock<std::mutex> lock( taskData->mutex );
-			if( taskData->status == Cancelled )
-			{
-				return;
-			}
-
-			// Otherwise do the work.
-
-			taskData->status = Running;
-			taskData->threadId = std::this_thread::get_id();
-			lock.unlock();
-
-			// Reset thread state rather then inherit the random
-			// one that TBB task-stealing might present us with.
-			const ThreadState defaultThreadState;
-			ThreadState::Scope threadStateScope( defaultThreadState );
-
-			Status status;
-			try
-			{
-				(*taskData->function)( *taskData->canceller );
-				status = Completed;
-			}
-			catch( const std::exception &e )
-			{
-				IECore::msg(
-					IECore::Msg::Error,
-					"BackgroundTask",
-					e.what()
-				);
-				status = Errored;
-			}
-			catch( const IECore::Cancelled & )
-			{
-				// No need to do anything
-				status = Cancelled;
-			}
-			catch( ... )
-			{
-				IECore::msg(
-					IECore::Msg::Error,
-					"BackgroundTask",
-					"Unknown error"
-				);
-				status = Errored;
-			}
-
-			lock.lock();
-			taskData->status = status;
-			taskData->threadId = std::thread::id();
-			taskData->conditionVariable.notify_one();
+	tbb::task_arena( tbb::task_arena::attach() ).enqueue( [taskData = m_taskData] {
+		// Early out if we were cancelled before the task
+		// even started.
+		std::unique_lock<std::mutex> lock( taskData->mutex );
+		if( taskData->status == Cancelled )
+		{
+			return;
 		}
-	);
+
+		// Otherwise do the work.
+
+		taskData->status = Running;
+		taskData->threadId = std::this_thread::get_id();
+		lock.unlock();
+
+		// Reset thread state rather then inherit the random
+		// one that TBB task-stealing might present us with.
+		const ThreadState defaultThreadState;
+		ThreadState::Scope threadStateScope( defaultThreadState );
+
+		Status status;
+		try
+		{
+			( *taskData->function )( *taskData->canceller );
+			status = Completed;
+		}
+		catch( const std::exception &e )
+		{
+			IECore::msg(
+				IECore::Msg::Error,
+				"BackgroundTask",
+				e.what()
+			);
+			status = Errored;
+		}
+		catch( const IECore::Cancelled & )
+		{
+			// No need to do anything
+			status = Cancelled;
+		}
+		catch( ... )
+		{
+			IECore::msg(
+				IECore::Msg::Error,
+				"BackgroundTask",
+				"Unknown error"
+			);
+			status = Errored;
+		}
+
+		lock.lock();
+		taskData->status = status;
+		taskData->threadId = std::thread::id();
+		taskData->conditionVariable.notify_one();
+	} );
 }
 
 BackgroundTask::~BackgroundTask()
@@ -268,7 +261,7 @@ void BackgroundTask::wait()
 
 	m_taskData->conditionVariable.wait(
 		lock,
-		[this]{
+		[this] {
 			switch( this->m_taskData->status )
 			{
 				case Completed :
@@ -295,7 +288,7 @@ bool BackgroundTask::waitFor( float seconds )
 	const bool completed = m_taskData->conditionVariable.wait_for(
 		lock,
 		timeoutDuration,
-		[this]{
+		[this] {
 			switch( this->m_taskData->status )
 			{
 				case Completed :

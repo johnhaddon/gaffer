@@ -56,14 +56,13 @@ struct DefaultSlotCaller;
 /// from python and call the signal. The SlotCaller template parameter is
 /// a functor type which is used to call the python objects which are connected
 /// to the signal as slots.
-template<typename Signal, typename SignalCaller=DefaultSignalCaller<Signal>, typename SlotCaller=DefaultSlotCaller<Signal> >
+template<typename Signal, typename SignalCaller = DefaultSignalCaller<Signal>, typename SlotCaller = DefaultSlotCaller<Signal>>
 class SignalClass : public boost::python::class_<Signal, boost::noncopyable>
 {
 
-	public :
+public:
 
-		SignalClass( const char *className, const char *docString = nullptr );
-
+	SignalClass( const char *className, const char *docString = nullptr );
 };
 
 } // namespace GafferBindings

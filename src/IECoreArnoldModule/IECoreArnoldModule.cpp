@@ -187,8 +187,7 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 	// This is bound with a preceding _ and then turned into a context
 	// manager for the "with" statement in IECoreArnold/UniverseBlock.py
 	class_<UniverseBlock, boost::noncopyable>( "_UniverseBlock", init<bool>( ( arg( "writable" ) ) ) )
-		.def( "universe", &universeWrapper )
-	;
+		.def( "universe", &universeWrapper );
 
 	{
 		object nodeAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreArnold.NodeAlgo" ) ) ) );
@@ -217,5 +216,4 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 		def( "update", &shaderNetworkAlgoUpdate );
 		def( "convertUSDShaders", &ShaderNetworkAlgo::convertUSDShaders );
 	}
-
 }

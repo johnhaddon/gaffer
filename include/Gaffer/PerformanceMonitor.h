@@ -57,71 +57,69 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API PerformanceMonitor : public Monitor
 {
 
-	public :
+public:
 
-		PerformanceMonitor();
-		~PerformanceMonitor() override;
+	PerformanceMonitor();
+	~PerformanceMonitor() override;
 
-		IE_CORE_DECLAREMEMBERPTR( PerformanceMonitor )
+	IE_CORE_DECLAREMEMBERPTR( PerformanceMonitor )
 
-		struct GAFFER_API Statistics
-		{
+	struct GAFFER_API Statistics
+	{
 
-			Statistics(
-				size_t hashCount = 0,
-				size_t computeCount = 0,
-				boost::chrono::nanoseconds hashDuration = boost::chrono::nanoseconds( 0 ),
-				boost::chrono::nanoseconds computeDuration = boost::chrono::nanoseconds( 0 )
-			);
+		Statistics(
+			size_t hashCount = 0,
+			size_t computeCount = 0,
+			boost::chrono::nanoseconds hashDuration = boost::chrono::nanoseconds( 0 ),
+			boost::chrono::nanoseconds computeDuration = boost::chrono::nanoseconds( 0 )
+		);
 
-			size_t hashCount;
-			size_t computeCount;
-			boost::chrono::nanoseconds hashDuration;
-			boost::chrono::nanoseconds computeDuration;
+		size_t hashCount;
+		size_t computeCount;
+		boost::chrono::nanoseconds hashDuration;
+		boost::chrono::nanoseconds computeDuration;
 
-			Statistics & operator += ( const Statistics &rhs );
+		Statistics &operator += ( const Statistics &rhs );
 
-			bool operator == ( const Statistics &rhs );
-			bool operator != ( const Statistics &rhs );
+		bool operator == ( const Statistics &rhs );
+		bool operator != ( const Statistics &rhs );
+	};
 
-		};
+	using StatisticsMap = boost::unordered_map<ConstPlugPtr, Statistics>;
 
-		using StatisticsMap = boost::unordered_map<ConstPlugPtr, Statistics>;
-
-		const StatisticsMap &allStatistics() const;
-		const Statistics &plugStatistics( const Plug *plug ) const;
-		const Statistics &combinedStatistics() const;
+	const StatisticsMap &allStatistics() const;
+	const Statistics &plugStatistics( const Plug *plug ) const;
+	const Statistics &combinedStatistics() const;
 
 
-	protected :
+protected:
 
-		void processStarted( const Process *process ) override;
-		void processFinished( const Process *process ) override;
+	void processStarted( const Process *process ) override;
+	void processFinished( const Process *process ) override;
 
-	private :
+private:
 
-		// For performance reasons we accumulate our statistics into
-		// thread local storage while computations are running.
-		struct ThreadData
-		{
-			// Stores the per-plug statistics captured by this thread.
-			StatisticsMap statistics;
-			// Stack of durations pointing into the statistics map.
-			// The top of the stack is the duration we're billing the
-			// current chunk of time to.
-			using DurationStack = std::stack<boost::chrono::nanoseconds *>;
-			DurationStack durationStack;
-			// The last time measurement we made.
-			boost::chrono::high_resolution_clock::time_point then;
-		};
+	// For performance reasons we accumulate our statistics into
+	// thread local storage while computations are running.
+	struct ThreadData
+	{
+		// Stores the per-plug statistics captured by this thread.
+		StatisticsMap statistics;
+		// Stack of durations pointing into the statistics map.
+		// The top of the stack is the duration we're billing the
+		// current chunk of time to.
+		using DurationStack = std::stack<boost::chrono::nanoseconds *>;
+		DurationStack durationStack;
+		// The last time measurement we made.
+		boost::chrono::high_resolution_clock::time_point then;
+	};
 
-		tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance> m_threadData;
+	tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance> m_threadData;
 
-		// Then when we want to query it, we collate it into m_statistics.
-		void collate() const;
-		mutable StatisticsMap m_statistics;
-		mutable Statistics m_combinedStatistics;
-
+	// Then when we want to query it, we collate it into m_statistics.
+	void collate() const;
+	mutable StatisticsMap m_statistics;
+	mutable Statistics m_combinedStatistics;
 };
 
 IE_CORE_DECLAREPTR( PerformanceMonitor )

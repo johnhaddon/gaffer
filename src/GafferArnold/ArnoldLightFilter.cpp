@@ -45,7 +45,7 @@ using namespace GafferArnold;
 GAFFER_NODE_DEFINE_TYPE( ArnoldLightFilter );
 
 ArnoldLightFilter::ArnoldLightFilter( const std::string &name )
-	:	GafferScene::LightFilter( new ArnoldShader(), name )
+	: GafferScene::LightFilter( new ArnoldShader(), name )
 {
 }
 

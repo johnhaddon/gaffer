@@ -78,5 +78,4 @@ BOOST_PYTHON_MODULE( _GafferImage )
 	bindFilterAlgo();
 	bindMultiView();
 	bindOpenColorIOAlgo();
-
 }

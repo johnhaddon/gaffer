@@ -130,55 +130,50 @@ struct Session
 	/// portal lights and the associated dome light.
 	void updatePortals();
 
-	private :
+private:
 
-		RixRiCtl *m_riCtl;
+	RixRiCtl *m_riCtl;
 
-		struct ExceptionHandler;
-		std::unique_ptr<ExceptionHandler> m_exceptionHandler;
+	struct ExceptionHandler;
+	std::unique_ptr<ExceptionHandler> m_exceptionHandler;
 
-		// Map for tracking cameras. We need to index this with both CameraId and name,
-		// so use `multi_index_container`. We don't anticipate many cameras being created
-		// concurrently so are content to use a mutex to provide thread safety.
-		mutable std::mutex m_camerasMutex;
-		using CameraMap = boost::multi_index::multi_index_container<
-			CameraInfo,
-			boost::multi_index::indexed_by<
-				boost::multi_index::ordered_unique<
-					boost::multi_index::key<&CameraInfo::id>
-				>,
-				boost::multi_index::ordered_unique<
-					boost::multi_index::key<&CameraInfo::name>
-				>
-			>
-		>;
-		CameraMap m_cameras;
+	// Map for tracking cameras. We need to index this with both CameraId and name,
+	// so use `multi_index_container`. We don't anticipate many cameras being created
+	// concurrently so are content to use a mutex to provide thread safety.
+	mutable std::mutex m_camerasMutex;
+	using CameraMap = boost::multi_index::multi_index_container<
+		CameraInfo,
+		boost::multi_index::indexed_by<
+			boost::multi_index::ordered_unique<
+				boost::multi_index::key<&CameraInfo::id>>,
+			boost::multi_index::ordered_unique<
+				boost::multi_index::key<&CameraInfo::name>>>>;
+	CameraMap m_cameras;
 
-		struct LightShaderInfo
-		{
-			std::vector<riley::ShadingNode> shaders;
-			std::vector<riley::ShadingNode> lightFilterShaders;
-		};
+	struct LightShaderInfo
+	{
+		std::vector<riley::ShadingNode> shaders;
+		std::vector<riley::ShadingNode> lightFilterShaders;
+	};
 
-		// Keys are `riley::LightShaderId`. The `concurrent_unordered_map` gives
-		// us thread-safety for the map data structure itself, but not for the
-		// values within. This is exactly what we need, as we may be editing shaders
-		// from many threads, but any particular shader will only be modified by
-		// a single thread at a time.
-		using LightShaderMap = tbb::concurrent_unordered_map<uint32_t, LightShaderInfo>;
-		LightShaderMap m_domeAndPortalShaders;
+	// Keys are `riley::LightShaderId`. The `concurrent_unordered_map` gives
+	// us thread-safety for the map data structure itself, but not for the
+	// values within. This is exactly what we need, as we may be editing shaders
+	// from many threads, but any particular shader will only be modified by
+	// a single thread at a time.
+	using LightShaderMap = tbb::concurrent_unordered_map<uint32_t, LightShaderInfo>;
+	LightShaderMap m_domeAndPortalShaders;
 
-		struct LightInfo
-		{
-			riley::LightShaderId lightShader;
-			RtMatrix4x4 transform;
-			RtParamList attributes;
-		};
-		// Keys are `riley::LightInstanceId`.
-		using LightInstanceMap = tbb::concurrent_unordered_map<uint32_t, LightInfo>;
-		LightInstanceMap m_domeAndPortalLights;
-		std::atomic_bool m_portalsDirty;
-
+	struct LightInfo
+	{
+		riley::LightShaderId lightShader;
+		RtMatrix4x4 transform;
+		RtParamList attributes;
+	};
+	// Keys are `riley::LightInstanceId`.
+	using LightInstanceMap = tbb::concurrent_unordered_map<uint32_t, LightInfo>;
+	LightInstanceMap m_domeAndPortalLights;
+	std::atomic_bool m_portalsDirty;
 };
 
 IE_CORE_DECLAREPTR( Session );

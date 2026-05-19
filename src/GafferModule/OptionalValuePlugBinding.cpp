@@ -56,31 +56,30 @@ namespace
 class OptionalValuePlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
-		{
-			// The children will be created by the constructor
-			return false;
-		}
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		// The children will be created by the constructor
+		return false;
+	}
 
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
-		{
-			return repr( static_cast<const OptionalValuePlug *>( graphComponent ), &serialisation );
-		}
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		return repr( static_cast<const OptionalValuePlug *>( graphComponent ), &serialisation );
+	}
 
-		static std::string repr( const Gaffer::OptionalValuePlug *plug, Serialisation *serialisation )
-		{
-			return fmt::format(
-				"Gaffer.OptionalValuePlug( \"{}\", {}, {}, {}, {} )",
-				plug->getName().string(),
-				Serialisation::acquireSerialiser( plug->valuePlug() )->constructor( plug->valuePlug(), *serialisation ),
-				plug->enabledPlug()->defaultValue() ? "True" : "False",
-				directionRepr( plug->direction() ),
-				flagsRepr( plug->getFlags() )
-			);
-		}
-
+	static std::string repr( const Gaffer::OptionalValuePlug *plug, Serialisation *serialisation )
+	{
+		return fmt::format(
+			"Gaffer.OptionalValuePlug( \"{}\", {}, {}, {}, {} )",
+			plug->getName().string(),
+			Serialisation::acquireSerialiser( plug->valuePlug() )->constructor( plug->valuePlug(), *serialisation ),
+			plug->enabledPlug()->defaultValue() ? "True" : "False",
+			directionRepr( plug->direction() ),
+			flagsRepr( plug->getFlags() )
+		);
+	}
 };
 
 std::string repr( const OptionalValuePlug *plug )
@@ -95,19 +94,8 @@ void GafferModule::bindOptionalValuePlug()
 {
 
 	PlugClass<OptionalValuePlug>()
-		.def( init<IECore::InternedString, const Gaffer::ValuePlugPtr &, bool, Plug::Direction, unsigned>(
-				(
-					arg( "name" ) = GraphComponent::defaultName<OptionalValuePlug>(),
-					arg( "valuePlug"),
-					arg( "enabledPlugDefaultValue" ) = false,
-					arg( "direction" ) = Plug::In,
-					arg( "flags" ) = Plug::Default
-				)
-			)
-		)
-		.def( "__repr__", &repr )
-	;
+		.def( init<IECore::InternedString, const Gaffer::ValuePlugPtr &, bool, Plug::Direction, unsigned>( ( arg( "name" ) = GraphComponent::defaultName<OptionalValuePlug>(), arg( "valuePlug" ), arg( "enabledPlugDefaultValue" ) = false, arg( "direction" ) = Plug::In, arg( "flags" ) = Plug::Default ) ) )
+		.def( "__repr__", &repr );
 
 	Serialisation::registerSerialiser( Gaffer::OptionalValuePlug::staticTypeId(), new OptionalValuePlugSerialiser );
-
 }

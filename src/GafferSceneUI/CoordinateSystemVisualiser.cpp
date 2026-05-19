@@ -51,54 +51,53 @@ namespace
 class CoordinateSystemVisualiser : public ObjectVisualiser
 {
 
-	public :
+public:
 
-		using ObjectType = IECoreScene::CoordinateSystem;
+	using ObjectType = IECoreScene::CoordinateSystem;
 
-		CoordinateSystemVisualiser()
-		{
-			IECoreGL::GroupPtr group = new IECoreGL::Group();
-			m_visualisations.push_back( Visualisation::createGeometry( group ) );
+	CoordinateSystemVisualiser()
+	{
+		IECoreGL::GroupPtr group = new IECoreGL::Group();
+		m_visualisations.push_back( Visualisation::createGeometry( group ) );
 
-			group->getState()->add( new IECoreGL::Primitive::DrawWireframe( true ) );
-			group->getState()->add( new IECoreGL::Primitive::DrawSolid( false ) );
-			group->getState()->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
-			group->getState()->add( new IECoreGL::WireframeColorStateComponent( Color4f( 0.06, 0.2, 0.56, 1 ) ) );
-			group->getState()->add( new IECoreGL::CurvesPrimitive::GLLineWidth( 2.0f ) );
+		group->getState()->add( new IECoreGL::Primitive::DrawWireframe( true ) );
+		group->getState()->add( new IECoreGL::Primitive::DrawSolid( false ) );
+		group->getState()->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
+		group->getState()->add( new IECoreGL::WireframeColorStateComponent( Color4f( 0.06, 0.2, 0.56, 1 ) ) );
+		group->getState()->add( new IECoreGL::CurvesPrimitive::GLLineWidth( 2.0f ) );
 
-			IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
-			vector<V3f> &p = pData->writable();
-			p.reserve( 6 );
-			p.push_back( V3f( 0 ) );
-			p.push_back( V3f( 1, 0, 0 ) );
-			p.push_back( V3f( 0 ) );
-			p.push_back( V3f( 0, 1, 0 ) );
-			p.push_back( V3f( 0 ) );
-			p.push_back( V3f( 0, 0, 1 ) );
+		IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+		vector<V3f> &p = pData->writable();
+		p.reserve( 6 );
+		p.push_back( V3f( 0 ) );
+		p.push_back( V3f( 1, 0, 0 ) );
+		p.push_back( V3f( 0 ) );
+		p.push_back( V3f( 0, 1, 0 ) );
+		p.push_back( V3f( 0 ) );
+		p.push_back( V3f( 0, 0, 1 ) );
 
-			IECore::IntVectorDataPtr vertsPerCurve = new IECore::IntVectorData;
-			vertsPerCurve->writable().resize( 3, 2 );
+		IECore::IntVectorDataPtr vertsPerCurve = new IECore::IntVectorData;
+		vertsPerCurve->writable().resize( 3, 2 );
 
-			IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
-			curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-			group->addChild( curves );
-		}
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
+		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		group->addChild( curves );
+	}
 
-		~CoordinateSystemVisualiser() override
-		{
-		}
+	~CoordinateSystemVisualiser() override
+	{
+	}
 
-		Visualisations visualise( const IECore::Object *object ) const override
-		{
-			return m_visualisations;
-		}
+	Visualisations visualise( const IECore::Object *object ) const override
+	{
+		return m_visualisations;
+	}
 
-	protected :
+protected:
 
-		static ObjectVisualiserDescription<CoordinateSystemVisualiser> g_visualiserDescription;
+	static ObjectVisualiserDescription<CoordinateSystemVisualiser> g_visualiserDescription;
 
-		Visualisations m_visualisations;
-
+	Visualisations m_visualisations;
 };
 
 ObjectVisualiser::ObjectVisualiserDescription<CoordinateSystemVisualiser> CoordinateSystemVisualiser::g_visualiserDescription;

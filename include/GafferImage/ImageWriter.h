@@ -49,9 +49,9 @@
 
 namespace Gaffer
 {
-	IE_CORE_FORWARDDECLARE( ValuePlug )
-	IE_CORE_FORWARDDECLARE( StringPlug )
-	IE_CORE_FORWARDDECLARE( ContextQuery )
+IE_CORE_FORWARDDECLARE( ValuePlug )
+IE_CORE_FORWARDDECLARE( StringPlug )
+IE_CORE_FORWARDDECLARE( ContextQuery )
 } // namespace Gaffer
 
 namespace GafferImage
@@ -63,75 +63,74 @@ IE_CORE_FORWARDDECLARE( ImagePlug )
 class GAFFERIMAGE_API ImageWriter : public GafferDispatch::TaskNode
 {
 
-	public :
+public:
 
-		enum Mode
-		{
-			Scanline = 0,
-			Tile = 1
-		};
+	enum Mode
+	{
+		Scanline = 0,
+		Tile = 1
+	};
 
-		explicit ImageWriter( const std::string &name=defaultName<ImageWriter>() );
-		~ImageWriter() override;
+	explicit ImageWriter( const std::string &name = defaultName<ImageWriter>() );
+	~ImageWriter() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageWriter, ImageWriterTypeId, TaskNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageWriter, ImageWriterTypeId, TaskNode );
 
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		GafferImage::ImagePlug *inPlug();
-		const GafferImage::ImagePlug *inPlug() const;
+	GafferImage::ImagePlug *inPlug();
+	const GafferImage::ImagePlug *inPlug() const;
 
-		Gaffer::StringPlug *channelsPlug();
-		const Gaffer::StringPlug *channelsPlug() const;
+	Gaffer::StringPlug *channelsPlug();
+	const Gaffer::StringPlug *channelsPlug() const;
 
-		GafferImage::ImagePlug *outPlug();
-		const GafferImage::ImagePlug *outPlug() const;
+	GafferImage::ImagePlug *outPlug();
+	const GafferImage::ImagePlug *outPlug() const;
 
-		Gaffer::StringPlug *colorSpacePlug();
-		const Gaffer::StringPlug *colorSpacePlug() const;
+	Gaffer::StringPlug *colorSpacePlug();
+	const Gaffer::StringPlug *colorSpacePlug() const;
 
-		Gaffer::StringPlug *layoutPartNamePlug();
-		const Gaffer::StringPlug *layoutPartNamePlug() const;
+	Gaffer::StringPlug *layoutPartNamePlug();
+	const Gaffer::StringPlug *layoutPartNamePlug() const;
 
-		Gaffer::StringPlug *layoutChannelNamePlug();
-		const Gaffer::StringPlug *layoutChannelNamePlug() const;
+	Gaffer::StringPlug *layoutChannelNamePlug();
+	const Gaffer::StringPlug *layoutChannelNamePlug() const;
 
-		Gaffer::BoolPlug *matchDataWindowsPlug();
-		const Gaffer::BoolPlug *matchDataWindowsPlug() const;
+	Gaffer::BoolPlug *matchDataWindowsPlug();
+	const Gaffer::BoolPlug *matchDataWindowsPlug() const;
 
-		Gaffer::ValuePlug *fileFormatSettingsPlug( const std::string &fileFormat );
-		const Gaffer::ValuePlug *fileFormatSettingsPlug( const std::string &fileFormat ) const;
+	Gaffer::ValuePlug *fileFormatSettingsPlug( const std::string &fileFormat );
+	const Gaffer::ValuePlug *fileFormatSettingsPlug( const std::string &fileFormat ) const;
 
-		const std::string currentFileFormat() const;
+	const std::string currentFileFormat() const;
 
-		/// Note that this is intentionally identical to the ImageReader's DefaultColorSpaceFunction
-		/// definition, so that the same function can be used with both nodes.
-		using DefaultColorSpaceFunction = std::function<const std::string ( const std::string &fileName, const std::string &fileFormat, const std::string &dataType, const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config )>;
-		static void setDefaultColorSpaceFunction( DefaultColorSpaceFunction f );
-		static DefaultColorSpaceFunction getDefaultColorSpaceFunction();
+	/// Note that this is intentionally identical to the ImageReader's DefaultColorSpaceFunction
+	/// definition, so that the same function can be used with both nodes.
+	using DefaultColorSpaceFunction = std::function<const std::string( const std::string &fileName, const std::string &fileFormat, const std::string &dataType, const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config )>;
+	static void setDefaultColorSpaceFunction( DefaultColorSpaceFunction f );
+	static DefaultColorSpaceFunction getDefaultColorSpaceFunction();
 
-	protected :
+protected:
 
-		IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
-		void execute() const override;
+	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
+	void execute() const override;
 
-	private :
+private:
 
-		std::string colorSpace( const std::string &dataType ) const;
+	std::string colorSpace( const std::string &dataType ) const;
 
-		ColorSpace *colorSpaceNode();
-		const ColorSpace *colorSpaceNode() const;
+	ColorSpace *colorSpaceNode();
+	const ColorSpace *colorSpaceNode() const;
 
-		void createFileFormatOptionsPlugs();
+	void createFileFormatOptionsPlugs();
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 
-		static DefaultColorSpaceFunction &defaultColorSpaceFunction();
+	static DefaultColorSpaceFunction &defaultColorSpaceFunction();
 
-		// Friendship for the bindings
-		friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
-
+	// Friendship for the bindings
+	friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
 };
 
 IE_CORE_DECLAREPTR( ImageWriter )

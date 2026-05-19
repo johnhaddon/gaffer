@@ -49,7 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( CurvesInterpolation );
 size_t CurvesInterpolation::g_firstPlugIndex = 0;
 
 CurvesInterpolation::CurvesInterpolation( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	using Basis = IECore::StandardCubicBasis;
@@ -95,12 +95,10 @@ const Gaffer::BoolPlug *CurvesInterpolation::expandPinnedPlug() const
 
 bool CurvesInterpolation::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input->parent() == basisPlug() ||
 		input->parent() == wrapPlug() ||
-		input == expandPinnedPlug()
-	;
+		input == expandPinnedPlug();
 }
 
 void CurvesInterpolation::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

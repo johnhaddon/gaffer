@@ -50,35 +50,34 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API Geometry : public IECoreScene::VisibleRenderable
 {
 
-	public:
+public:
 
-		Geometry( const std::string &type = "", const Imath::Box3f &bound = Imath::Box3f(), const IECore::CompoundDataPtr &parameters = nullptr );
+	Geometry( const std::string &type = "", const Imath::Box3f &bound = Imath::Box3f(), const IECore::CompoundDataPtr &parameters = nullptr );
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( IECoreScenePreview::Geometry, IECoreScenePreview::PreviewGeometryTypeId, IECoreScene::VisibleRenderable );
+	IE_CORE_DECLAREEXTENSIONOBJECT( IECoreScenePreview::Geometry, IECoreScenePreview::PreviewGeometryTypeId, IECoreScene::VisibleRenderable );
 
-		void setType( const std::string &type );
-		const std::string &getType() const;
+	void setType( const std::string &type );
+	const std::string &getType() const;
 
-		void setBound( const Imath::Box3f &bound );
-		const Imath::Box3f &getBound() const;
+	void setBound( const Imath::Box3f &bound );
+	const Imath::Box3f &getBound() const;
 
-		IECore::CompoundData *parameters();
-		const IECore::CompoundData *parameters() const;
+	IECore::CompoundData *parameters();
+	const IECore::CompoundData *parameters() const;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
 #if CORTEX_COMPATIBILITY_VERSION < MAKE_CORTEX_COMPATIBILITY_VERSION( 10, 6 )
-		void render( IECoreScene::Renderer *renderer ) const override {};
+	void render( IECoreScene::Renderer *renderer ) const override {};
 #endif
 
-	private:
+private:
 
-		static const unsigned int m_ioVersion;
+	static const unsigned int m_ioVersion;
 
-		std::string m_type;
-		Imath::Box3f m_bound;
-		IECore::CompoundDataPtr m_parameters;
-
+	std::string m_type;
+	Imath::Box3f m_bound;
+	IECore::CompoundDataPtr m_parameters;
 };
 
 IE_CORE_DECLAREPTR( Geometry );

@@ -51,68 +51,67 @@ namespace GafferScene
 class GAFFERSCENE_API FramingConstraint : public SceneElementProcessor
 {
 
-	public :
+public:
 
-		explicit FramingConstraint( const std::string &name=defaultName<FramingConstraint>() );
-		~FramingConstraint() override;
+	explicit FramingConstraint( const std::string &name = defaultName<FramingConstraint>() );
+	~FramingConstraint() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::FramingConstraint, FramingConstraintTypeId, SceneElementProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::FramingConstraint, FramingConstraintTypeId, SceneElementProcessor );
 
-		ScenePlug *targetScenePlug();
-		const ScenePlug *targetScenePlug() const;
+	ScenePlug *targetScenePlug();
+	const ScenePlug *targetScenePlug() const;
 
-		Gaffer::StringPlug *targetPlug();
-		const Gaffer::StringPlug *targetPlug() const;
+	Gaffer::StringPlug *targetPlug();
+	const Gaffer::StringPlug *targetPlug() const;
 
-		Gaffer::BoolPlug *ignoreMissingTargetPlug();
-		const Gaffer::BoolPlug *ignoreMissingTargetPlug() const;
+	Gaffer::BoolPlug *ignoreMissingTargetPlug();
+	const Gaffer::BoolPlug *ignoreMissingTargetPlug() const;
 
-		Gaffer::StringPlug *boundModePlug();
-		const Gaffer::StringPlug *boundModePlug() const;
+	Gaffer::StringPlug *boundModePlug();
+	const Gaffer::StringPlug *boundModePlug() const;
 
-		Gaffer::FloatPlug *paddingPlug();
-		const Gaffer::FloatPlug *paddingPlug() const;
+	Gaffer::FloatPlug *paddingPlug();
+	const Gaffer::FloatPlug *paddingPlug() const;
 
-		Gaffer::BoolPlug *extendFarClipPlug();
-		const Gaffer::BoolPlug *extendFarClipPlug() const;
+	Gaffer::BoolPlug *extendFarClipPlug();
+	const Gaffer::BoolPlug *extendFarClipPlug() const;
 
-		Gaffer::BoolPlug *useTargetFramePlug();
-		const Gaffer::BoolPlug *useTargetFramePlug() const;
+	Gaffer::BoolPlug *useTargetFramePlug();
+	const Gaffer::BoolPlug *useTargetFramePlug() const;
 
-		Gaffer::FloatPlug *targetFramePlug();
-		const Gaffer::FloatPlug *targetFramePlug() const;
+	Gaffer::FloatPlug *targetFramePlug();
+	const Gaffer::FloatPlug *targetFramePlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		Gaffer::ObjectVectorPlug *transformAndObjectPlug();
-		const Gaffer::ObjectVectorPlug *transformAndObjectPlug() const;
+	Gaffer::ObjectVectorPlug *transformAndObjectPlug();
+	const Gaffer::ObjectVectorPlug *transformAndObjectPlug() const;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		bool processesTransform() const override;
-		void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const override;
+	bool processesTransform() const override;
+	void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const override;
 
-		bool processesObject() const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const override;
+	bool processesObject() const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const override;
 
-		struct Target
-		{
-			ScenePath path;
-			const ScenePlug *scene;
-		};
+	struct Target
+	{
+		ScenePath path;
+		const ScenePlug *scene;
+	};
 
-		bool affectsTarget( const Gaffer::Plug *input ) const;
-		std::optional<Target> target() const;
+	bool affectsTarget( const Gaffer::Plug *input ) const;
+	std::optional<Target> target() const;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( FramingConstraint )

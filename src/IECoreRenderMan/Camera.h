@@ -43,25 +43,24 @@
 namespace IECoreRenderMan
 {
 
-class Camera :  public IECoreScenePreview::Renderer::ObjectInterface
+class Camera : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public :
+public:
 
-		Camera( const std::string &name, const IECoreScene::Camera *camera, Session *session );
-		~Camera() override;
+	Camera( const std::string &name, const IECoreScene::Camera *camera, Session *session );
+	~Camera() override;
 
-		void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
-		bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
-		void assignID( uint32_t id ) override;
-		void assignInstanceID( uint32_t id ) override;
+	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
+	bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
+	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
+	void assignID( uint32_t id ) override;
+	void assignInstanceID( uint32_t id ) override;
 
-	private :
+private:
 
-		Session *m_session;
-		riley::CameraId m_cameraId;
-
+	Session *m_session;
+	riley::CameraId m_cameraId;
 };
 
 IE_CORE_DECLAREPTR( Camera );

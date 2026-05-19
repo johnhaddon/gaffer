@@ -44,7 +44,8 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
-namespace {
+namespace
+{
 
 // addCorner, add[XYZ}Edge and add[XYZ]Face all output the vertex positions of a feature, and
 // store the indices of the new vertices in the appropriate perFaceIndices.
@@ -53,29 +54,20 @@ namespace {
 
 void addCorner(
 	const V3i &cornerID, const V3i &vertsPer,
-	std::vector< V3f > &pos, std::vector< std::vector< int > > &perFaceIndices
+	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	int vertIndex = pos.size();
 	pos.push_back( V3f( cornerID ) );
 
-	perFaceIndices[ 4 + !cornerID.x ][
-		cornerID.y * ( vertsPer.y - 1 ) +
-		cornerID.z * ( vertsPer.z - 1 ) * vertsPer.y
-	] = vertIndex;
-	perFaceIndices[ 2 + !cornerID.y ][
-		cornerID.x * ( vertsPer.x - 1 ) +
-		cornerID.z * ( vertsPer.z - 1 ) * vertsPer.x
-	] = vertIndex;
-	perFaceIndices[ 0 + !cornerID.z ][
-		cornerID.x * ( vertsPer.x - 1 ) +
-		cornerID.y * ( vertsPer.y - 1 ) * vertsPer.x
-	] = vertIndex;
+	perFaceIndices[4 + !cornerID.x][cornerID.y * ( vertsPer.y - 1 ) + cornerID.z * ( vertsPer.z - 1 ) * vertsPer.y] = vertIndex;
+	perFaceIndices[2 + !cornerID.y][cornerID.x * ( vertsPer.x - 1 ) + cornerID.z * ( vertsPer.z - 1 ) * vertsPer.x] = vertIndex;
+	perFaceIndices[0 + !cornerID.z][cornerID.x * ( vertsPer.x - 1 ) + cornerID.y * ( vertsPer.y - 1 ) * vertsPer.x] = vertIndex;
 }
 
 void addXEdge(
 	const V2i &edgeID, const V3i &vertsPer,
-	std::vector< V3f > &pos, std::vector< std::vector< int > > &perFaceIndices
+	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int i = 1; i < vertsPer.x - 1; i++ )
@@ -83,14 +75,14 @@ void addXEdge(
 		int vertIndex = pos.size();
 		pos.push_back( V3f( i / float( vertsPer.x - 1 ), edgeID.x, edgeID.y ) );
 
-		perFaceIndices[ 2 + !edgeID.x ][ i              + edgeID.y * ( vertsPer.z - 1 ) * vertsPer.x ] = vertIndex;
-		perFaceIndices[ 0 + !edgeID.y ][ i              + edgeID.x * ( vertsPer.y - 1 ) * vertsPer.x ] = vertIndex;
+		perFaceIndices[2 + !edgeID.x][i + edgeID.y * ( vertsPer.z - 1 ) * vertsPer.x] = vertIndex;
+		perFaceIndices[0 + !edgeID.y][i + edgeID.x * ( vertsPer.y - 1 ) * vertsPer.x] = vertIndex;
 	}
 }
 
 void addYEdge(
 	const V2i &edgeID, const V3i &vertsPer,
-	std::vector< V3f > &pos, std::vector< std::vector< int > > &perFaceIndices
+	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int i = 1; i < vertsPer.y - 1; i++ )
@@ -98,14 +90,14 @@ void addYEdge(
 		int vertIndex = pos.size();
 		pos.push_back( V3f( edgeID.x, i / float( vertsPer.y - 1 ), edgeID.y ) );
 
-		perFaceIndices[ 4 + !edgeID.x ][ i              + edgeID.y * ( vertsPer.z - 1 ) * vertsPer.y ] = vertIndex;
-		perFaceIndices[ 0 + !edgeID.y ][ i * vertsPer.x + edgeID.x * ( vertsPer.x - 1 ) ] = vertIndex;
+		perFaceIndices[4 + !edgeID.x][i + edgeID.y * ( vertsPer.z - 1 ) * vertsPer.y] = vertIndex;
+		perFaceIndices[0 + !edgeID.y][i * vertsPer.x + edgeID.x * ( vertsPer.x - 1 )] = vertIndex;
 	}
 }
 
 void addZEdge(
 	const V2i &edgeID, const V3i &vertsPer,
-	std::vector< V3f > &pos, std::vector< std::vector< int > > &perFaceIndices
+	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int i = 1; i < vertsPer.z - 1; i++ )
@@ -113,21 +105,21 @@ void addZEdge(
 		int vertIndex = pos.size();
 		pos.push_back( V3f( edgeID.x, edgeID.y, i / float( vertsPer.z - 1 ) ) );
 
-		perFaceIndices[ 4 + !edgeID.x ][ i * vertsPer.y + edgeID.y * ( vertsPer.y - 1 ) ] = vertIndex;
-		perFaceIndices[ 2 + !edgeID.y ][ i * vertsPer.x + edgeID.x * ( vertsPer.x - 1 ) ] = vertIndex;
+		perFaceIndices[4 + !edgeID.x][i * vertsPer.y + edgeID.y * ( vertsPer.y - 1 )] = vertIndex;
+		perFaceIndices[2 + !edgeID.y][i * vertsPer.x + edgeID.x * ( vertsPer.x - 1 )] = vertIndex;
 	}
 }
 
 void addXFace(
 	int faceID, const V3i &vertsPer,
-	std::vector< V3f > &pos, std::vector< std::vector< int > > &perFaceIndices
+	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int j = 1; j < vertsPer.z - 1; j++ )
 	{
 		for( int i = 1; i < vertsPer.y - 1; i++ )
 		{
-			perFaceIndices[ 4 + !faceID ][ i + j * vertsPer.y ] = pos.size();
+			perFaceIndices[4 + !faceID][i + j * vertsPer.y] = pos.size();
 			pos.push_back( V3f( faceID, i / float( vertsPer.y - 1 ), j / float( vertsPer.z - 1 ) ) );
 		}
 	}
@@ -135,14 +127,14 @@ void addXFace(
 
 void addYFace(
 	int faceID, const V3i &vertsPer,
-	std::vector< V3f > &pos, std::vector< std::vector< int > > &perFaceIndices
+	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int j = 1; j < vertsPer.z - 1; j++ )
 	{
 		for( int i = 1; i < vertsPer.x - 1; i++ )
 		{
-			perFaceIndices[ 2 + !faceID ][ i + j * vertsPer.x ] = pos.size();
+			perFaceIndices[2 + !faceID][i + j * vertsPer.x] = pos.size();
 			pos.push_back( V3f( i / float( vertsPer.x - 1 ), faceID, j / float( vertsPer.z - 1 ) ) );
 		}
 	}
@@ -150,14 +142,14 @@ void addYFace(
 
 void addZFace(
 	int faceID, const V3i &vertsPer,
-	std::vector< V3f > &pos, std::vector< std::vector< int > > &perFaceIndices
+	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int j = 1; j < vertsPer.y - 1; j++ )
 	{
 		for( int i = 1; i < vertsPer.x - 1; i++ )
 		{
-			perFaceIndices[ 0 + !faceID ][ i + j * vertsPer.x ] = pos.size();
+			perFaceIndices[0 + !faceID][i + j * vertsPer.x] = pos.size();
 			pos.push_back( V3f( i / float( vertsPer.x - 1 ), j / float( vertsPer.y - 1 ), faceID ) );
 		}
 	}
@@ -181,22 +173,26 @@ void outputVertexIDsForFace(
 				// solely for backwards compatibility )
 				int pick = ( ( flipOrder ? 3 - j : j ) + rotate ) % 4;
 
-				if(      pick == 0 ) vertexIds.push_back( indices[y * size.x + x] );
-				else if( pick == 1 ) vertexIds.push_back( indices[y * size.x + x + 1] );
-				else if( pick == 2 ) vertexIds.push_back( indices[( y + 1 ) * size.x + x + 1] );
-				else if( pick == 3 ) vertexIds.push_back( indices[( y + 1 ) * size.x + x] );
+				if( pick == 0 )
+					vertexIds.push_back( indices[y * size.x + x] );
+				else if( pick == 1 )
+					vertexIds.push_back( indices[y * size.x + x + 1] );
+				else if( pick == 2 )
+					vertexIds.push_back( indices[( y + 1 ) * size.x + x + 1] );
+				else if( pick == 3 )
+					vertexIds.push_back( indices[( y + 1 ) * size.x + x] );
 			}
 		}
 	}
 }
 
 // Output all uvs. Store some indices where faces start, which will be useful for writing UV indices.
-void outputUVs( const V3i &vertsPer, std::vector<V2f>& uvs, int uvFaceIndices[5] )
+void outputUVs( const V3i &vertsPer, std::vector<V2f> &uvs, int uvFaceIndices[5] )
 {
 	int uvSize = 2 * ( vertsPer.x * vertsPer.y + vertsPer.y * vertsPer.z + vertsPer.z * vertsPer.x ) - vertsPer.x * 3 - vertsPer.y * 2;
 	uvs.reserve( uvSize );
 
-	auto centralUVScanline = [&uvs, &vertsPer]( float v ){
+	auto centralUVScanline = [&uvs, &vertsPer]( float v ) {
 		for( int i = 0; i < vertsPer[0]; i++ )
 		{
 			uvs.push_back( Imath::V2f( 0.375f + 0.25f * i / float( vertsPer[0] - 1 ), v ) );
@@ -257,10 +253,14 @@ void outputUVIndices( std::vector<int> &uvIndices, int faceIndex, int sizeU, int
 			{
 				int pick = ( j + rotate ) % 4;
 
-				if(      pick == 0 ) uvIndices.push_back( faceIndex + v * sizeU + u );
-				else if( pick == 1 ) uvIndices.push_back( faceIndex + v * sizeU + u + 1 );
-				else if( pick == 2 ) uvIndices.push_back( faceIndex + ( v + 1 ) * sizeU + u + 1 );
-				else if( pick == 3 ) uvIndices.push_back( faceIndex + ( v + 1 ) * sizeU + u );
+				if( pick == 0 )
+					uvIndices.push_back( faceIndex + v * sizeU + u );
+				else if( pick == 1 )
+					uvIndices.push_back( faceIndex + v * sizeU + u + 1 );
+				else if( pick == 2 )
+					uvIndices.push_back( faceIndex + ( v + 1 ) * sizeU + u + 1 );
+				else if( pick == 3 )
+					uvIndices.push_back( faceIndex + ( v + 1 ) * sizeU + u );
 			}
 		}
 	}
@@ -274,7 +274,7 @@ void outputSplicedUVIndices(
 	int faceIndex, int spliceColumn, int spliceSource, bool flipU
 )
 {
-	auto faceVertex = [&uvIndices, faceIndex, spliceColumn, spliceSource, vertsPer]( int u, int v ){
+	auto faceVertex = [&uvIndices, faceIndex, spliceColumn, spliceSource, vertsPer]( int u, int v ) {
 		if( u == spliceColumn )
 		{
 			uvIndices.push_back( spliceSource + v * vertsPer.x );
@@ -301,7 +301,7 @@ void outputSplicedUVIndices(
 MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 {
 	// How many vertices we need on each axis
-	V3i vertsPer = divisions + V3i(1);
+	V3i vertsPer = divisions + V3i( 1 );
 
 	// perFaceIndices and faceSizes store intermediate data for each face
 	// The 6 six faces are stored in this order:
@@ -315,7 +315,7 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	// for different overlaps when scanning through every face-vertex outputting
 	// vertex ids ).
 
-	std::vector< Imath::V2i > faceSizes;
+	std::vector<Imath::V2i> faceSizes;
 	faceSizes.push_back( Imath::V2i( vertsPer[0], vertsPer[1] ) );
 	faceSizes.push_back( Imath::V2i( vertsPer[0], vertsPer[1] ) );
 	faceSizes.push_back( Imath::V2i( vertsPer[0], vertsPer[2] ) );
@@ -323,7 +323,7 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	faceSizes.push_back( Imath::V2i( vertsPer[1], vertsPer[2] ) );
 	faceSizes.push_back( Imath::V2i( vertsPer[1], vertsPer[2] ) );
 
-	std::vector< std::vector< int > > perFaceIndices;
+	std::vector<std::vector<int>> perFaceIndices;
 
 	perFaceIndices.resize( 6 );
 	size_t numFaces = 0;
@@ -334,9 +334,8 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	}
 
 	int posSize =
-		2 * ( vertsPer.x * vertsPer.y + vertsPer.y * vertsPer.z + vertsPer.z * vertsPer.x )
-		- vertsPer.x * 4 - vertsPer.y * 4 - vertsPer.z * 4 + 8;
-	std::vector< V3f > pos;
+		2 * ( vertsPer.x * vertsPer.y + vertsPer.y * vertsPer.z + vertsPer.z * vertsPer.x ) - vertsPer.x * 4 - vertsPer.y * 4 - vertsPer.z * 4 + 8;
+	std::vector<V3f> pos;
 	pos.reserve( posSize );
 
 	// The add* functions that add vertex positions to `pos` also put their indices in
@@ -387,7 +386,7 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	// and only scale it to the requested size/location here.
 	for( V3f &p : pos )
 	{
-		p = b.min + b.size() * p ;
+		p = b.min + b.size() * p;
 	}
 
 	std::vector<int> verticesPerFace( numFaces, 4 );
@@ -434,26 +433,22 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	// * edge sharing on the "wings" on the left and right, where one edge is shared
 	//   with the central column ( uses outputSplicedUVIndices )
 	outputUVIndices( uvIndices, uvFaceIndices[2], vertsPer[0], vertsPer[1], true, 0 );
-	outputSplicedUVIndices( uvIndices, vertsPer,
-		uvFaceIndices[4] + vertsPer[2] - 1, vertsPer[2] - 1, vertsPer[0] - 1, false
-	);
+	outputSplicedUVIndices( uvIndices, vertsPer, uvFaceIndices[4] + vertsPer[2] - 1, vertsPer[2] - 1, vertsPer[0] - 1, false );
 	outputUVIndices( uvIndices, uvFaceIndices[0], vertsPer[0], vertsPer[1], false, 1 );
-	outputSplicedUVIndices( uvIndices, vertsPer,
-		uvFaceIndices[4] - 1, 0, 0, true
-	);
+	outputSplicedUVIndices( uvIndices, vertsPer, uvFaceIndices[4] - 1, 0, 0, true );
 	outputUVIndices( uvIndices, uvFaceIndices[1], vertsPer[0], vertsPer[2], true, 2 );
 	outputUVIndices( uvIndices, uvFaceIndices[3], vertsPer[0], vertsPer[2], false, 0 );
 
 	result->variables["uv"] = PrimitiveVariable(
 		PrimitiveVariable::FaceVarying,
 		new V2fVectorData( std::move( uvs ), GeometricData::UV ),
-		new IntVectorData ( std::move( uvIndices ) )
+		new IntVectorData( std::move( uvIndices ) )
 	);
 
 	// Normals are by far the simplest primvar to generate - we just output one value for each face,
 	// and then output the appropriate number of repeated indices for each face.
 
-	std::vector<Imath::V3f> normals {
+	std::vector<Imath::V3f> normals{
 		Imath::V3f( 0, 0, 1 ),
 		Imath::V3f( 0, 0, -1 ),
 		Imath::V3f( 0, 1, 0 ),
@@ -478,7 +473,7 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	result->variables["N"] = PrimitiveVariable(
 		PrimitiveVariable::FaceVarying,
 		new V3fVectorData( std::move( normals ), GeometricData::Normal ),
-		new IntVectorData ( std::move( nIndices ) )
+		new IntVectorData( std::move( nIndices ) )
 	);
 
 	return result;
@@ -491,7 +486,7 @@ GAFFER_NODE_DEFINE_TYPE( Cube );
 size_t Cube::g_firstPlugIndex = 0;
 
 Cube::Cube( const std::string &name )
-	:	ObjectSource( name, "cube" )
+	: ObjectSource( name, "cube" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V3fPlug( "dimensions", Plug::In, V3f( 1.0f ), V3f( 0.0f ) ) );

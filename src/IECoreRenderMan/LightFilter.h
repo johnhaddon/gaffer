@@ -50,49 +50,48 @@ namespace IECoreRenderMan
 class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public :
+public:
 
-		LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker );
-		~LightFilter() override;
+	LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker );
+	~LightFilter() override;
 
-		// ObjectInterface overrides
-		// =========================
+	// ObjectInterface overrides
+	// =========================
 
-		void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
-		bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
-		void assignID( uint32_t id ) override;
-		void assignInstanceID( uint32_t id ) override;
+	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
+	bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
+	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
+	void assignID( uint32_t id ) override;
+	void assignInstanceID( uint32_t id ) override;
 
-		// Interface used by Light and LightLinker
-		// =======================================
-		//
-		// Light filters aren't first class objects in RenderMan. Instead they
-		// are just bits of state on light shaders and light instances. The
-		// methods here allow Light and LightLinker to update lights to reflect
-		// changes to the filters linked to them.
+	// Interface used by Light and LightLinker
+	// =======================================
+	//
+	// Light filters aren't first class objects in RenderMan. Instead they
+	// are just bits of state on light shaders and light instances. The
+	// methods here allow Light and LightLinker to update lights to reflect
+	// changes to the filters linked to them.
 
-		riley::CoordinateSystemId coordinateSystem() const { return m_coordinateSystem; }
-		const IECoreScene::ShaderNetwork *shader() const { return m_shader.get(); }
+	riley::CoordinateSystemId coordinateSystem() const { return m_coordinateSystem; }
+	const IECoreScene::ShaderNetwork *shader() const { return m_shader.get(); }
 
-		using WeakObjectSetPtr = std::weak_ptr<const IECoreScenePreview::Renderer::ObjectSet>;
-		/// \todo Use `unordered_map` (or `concurrent_unordered_map`) when `std::owner_hash()`
-		/// becomes available (C++26).
-		using SetMemberships = std::set<WeakObjectSetPtr, std::owner_less<WeakObjectSetPtr>>;
-		SetMemberships &setMemberships() { return m_setMemberships; }
-		const SetMemberships &setMemberships() const { return m_setMemberships; }
+	using WeakObjectSetPtr = std::weak_ptr<const IECoreScenePreview::Renderer::ObjectSet>;
+	/// \todo Use `unordered_map` (or `concurrent_unordered_map`) when `std::owner_hash()`
+	/// becomes available (C++26).
+	using SetMemberships = std::set<WeakObjectSetPtr, std::owner_less<WeakObjectSetPtr>>;
+	SetMemberships &setMemberships() { return m_setMemberships; }
+	const SetMemberships &setMemberships() const { return m_setMemberships; }
 
-	private :
+private:
 
-		Session *m_session;
+	Session *m_session;
 
-		RtUString m_coordinateSystemName;
-		riley::CoordinateSystemId m_coordinateSystem;
-		IECore::MurmurHash m_shaderHash;
-		IECoreScene::ConstShaderNetworkPtr m_shader;
-		LightLinker *m_lightLinker;
-		SetMemberships m_setMemberships;
-
+	RtUString m_coordinateSystemName;
+	riley::CoordinateSystemId m_coordinateSystem;
+	IECore::MurmurHash m_shaderHash;
+	IECoreScene::ConstShaderNetworkPtr m_shader;
+	LightLinker *m_lightLinker;
+	SetMemberships m_setMemberships;
 };
 
 } // namespace IECoreRenderMan

@@ -51,14 +51,13 @@ GAFFER_NODE_DEFINE_TYPE( TensorToMesh );
 size_t TensorToMesh::g_firstPlugIndex = 0;
 
 TensorToMesh::TensorToMesh( const std::string &name )
-	:	ObjectSource( name, "tensorMesh" )
+	: ObjectSource( name, "tensorMesh" )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new TensorPlug( "position" ) );
 	addChild( new TensorPlug( "vertexIds" ) );
-
 }
 
 TensorToMesh::~TensorToMesh()
@@ -88,11 +87,10 @@ const TensorPlug *TensorToMesh::vertexIdsTensorPlug() const
 void TensorToMesh::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ObjectSource::affects( input, outputs );
-	if ( input == positionTensorPlug() || input == vertexIdsTensorPlug() )
+	if( input == positionTensorPlug() || input == vertexIdsTensorPlug() )
 	{
-		outputs.push_back(sourcePlug());
+		outputs.push_back( sourcePlug() );
 	}
-
 }
 
 void TensorToMesh::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -111,17 +109,17 @@ IECore::ConstObjectPtr TensorToMesh::computeSource( const Context *context ) con
 	}
 
 	auto positionShape = positionTensorData->shape();
-	if ( positionShape.size() != 3 )
+	if( positionShape.size() != 3 )
 	{
 		throw IECore::Exception( "Invalid position tensor number of dimensions, should have 3 dimensions" );
 	}
 
-	if ( positionShape[2] % 3 != 0 )
+	if( positionShape[2] % 3 != 0 )
 	{
 		throw IECore::Exception( "Invalid position dimensions, only 3d coordinates are supported" );
 	}
 
-	if ( positionTensorData->value().GetTensorTypeAndShapeInfo().GetElementType() != ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT )
+	if( positionTensorData->value().GetTensorTypeAndShapeInfo().GetElementType() != ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT )
 	{
 		throw IECore::Exception( "Invalid data type input for position tensor, only float is currently supported" );
 	}
@@ -136,7 +134,7 @@ IECore::ConstObjectPtr TensorToMesh::computeSource( const Context *context ) con
 		throw IECore::Exception( "Empty VertexIds tensor" );
 	}
 
-	if ( vertexIdsTensorData->value().GetTensorTypeAndShapeInfo().GetElementType() != ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64 )
+	if( vertexIdsTensorData->value().GetTensorTypeAndShapeInfo().GetElementType() != ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64 )
 	{
 		throw IECore::Exception( "Invalid data type input for vertexIds tensor, only int64 is currently supported" );
 	}
@@ -166,8 +164,8 @@ IECore::ConstObjectPtr TensorToMesh::computeSource( const Context *context ) con
 	int vertexPerFace = vertexIdsTensorData->value().GetTensorTypeAndShapeInfo().GetShape()[1];
 	for( int i = 0; i < vertexIdsTensorData->value().GetTensorTypeAndShapeInfo().GetShape()[0]; i++ )
 	{
-		verticesPerFace.push_back(vertexPerFace);
-		for ( int j = 0; j < vertexPerFace; j++ )
+		verticesPerFace.push_back( vertexPerFace );
+		for( int j = 0; j < vertexPerFace; j++ )
 		{
 			vertexIds.push_back( *( sourceVertexIdsData + i * vertexPerFace + j ) );
 		}

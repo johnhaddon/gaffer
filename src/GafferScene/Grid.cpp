@@ -56,7 +56,7 @@ static InternedString g_centerLinesName( "centerLines" );
 static InternedString g_borderLinesName( "borderLines" );
 
 Grid::Grid( const std::string &name )
-	:	SceneNode( name )
+	: SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -479,7 +479,6 @@ IECore::ConstCompoundObjectPtr Grid::computeGlobals( const Gaffer::Context *cont
 void Grid::hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
 	h = outPlug()->setNamesPlug()->defaultValue()->Object::hash();
-
 }
 
 IECore::ConstInternedStringVectorDataPtr Grid::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const

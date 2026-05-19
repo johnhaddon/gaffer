@@ -47,29 +47,29 @@ namespace GafferCycles
 class GAFFERCYCLES_API CyclesShader : public GafferScene::Shader
 {
 
-	public :
+public:
 
-		explicit CyclesShader( const std::string &name=defaultName<CyclesShader>() );
-		~CyclesShader() override;
+	explicit CyclesShader( const std::string &name = defaultName<CyclesShader>() );
+	~CyclesShader() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferCycles::CyclesShader, CyclesShaderTypeId, GafferScene::Shader );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferCycles::CyclesShader, CyclesShaderTypeId, GafferScene::Shader );
 
-		void loadShader( const std::string &shaderName, bool keepExistingValues=false ) override;
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-	protected :
+protected:
 
-		/// Overrides attributes for when an AOV is assigned and we need to set the name of
-		/// the AOV name eg. cycles:aov:customName
-		IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
+	/// Overrides attributes for when an AOV is assigned and we need to set the name of
+	/// the AOV name eg. cycles:aov:customName
+	IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
 
-	private :
+private:
 
-		// Shader metadata is stored in a "shader" member of the result and
-		// parameter metadata is stored indexed by name inside a
-		// "parameter" member of the result.
-		const IECore::CompoundData *metadata() const;
+	// Shader metadata is stored in a "shader" member of the result and
+	// parameter metadata is stored indexed by name inside a
+	// "parameter" member of the result.
+	const IECore::CompoundData *metadata() const;
 
-		mutable IECore::ConstCompoundDataPtr m_metadata;
+	mutable IECore::ConstCompoundDataPtr m_metadata;
 };
 
 IE_CORE_DECLAREPTR( CyclesShader )

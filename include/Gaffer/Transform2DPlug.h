@@ -44,38 +44,38 @@ namespace Gaffer
 class GAFFER_API Transform2DPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		explicit Transform2DPlug(
-			const std::string &name = defaultName<Transform2DPlug>(),
-			Direction direction=In,
-			const Imath::V2f &defaultTranslate = Imath::V2f( 0 ),
-			float defaultRotate = 0,
-			const Imath::V2f &defaultScale = Imath::V2f( 1 ),
-			const Imath::V2f &defaultPivot = Imath::V2f( 0 ),
-			unsigned flags = Default
-		);
-		~Transform2DPlug() override;
+	explicit Transform2DPlug(
+		const std::string &name = defaultName<Transform2DPlug>(),
+		Direction direction = In,
+		const Imath::V2f &defaultTranslate = Imath::V2f( 0 ),
+		float defaultRotate = 0,
+		const Imath::V2f &defaultScale = Imath::V2f( 1 ),
+		const Imath::V2f &defaultPivot = Imath::V2f( 0 ),
+		unsigned flags = Default
+	);
+	~Transform2DPlug() override;
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Transform2DPlug, Transform2DPlugTypeId, ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::Transform2DPlug, Transform2DPlugTypeId, ValuePlug );
 
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		V2fPlug *translatePlug();
-		const V2fPlug *translatePlug() const;
-		FloatPlug *rotatePlug();
-		const FloatPlug *rotatePlug() const;
-		V2fPlug *scalePlug();
-		const V2fPlug *scalePlug() const;
-		V2fPlug *pivotPlug();
-		const V2fPlug *pivotPlug() const;
+	V2fPlug *translatePlug();
+	const V2fPlug *translatePlug() const;
+	FloatPlug *rotatePlug();
+	const FloatPlug *rotatePlug() const;
+	V2fPlug *scalePlug();
+	const V2fPlug *scalePlug() const;
+	V2fPlug *pivotPlug();
+	const V2fPlug *pivotPlug() const;
 
-		Imath::M33f matrix() const;
+	Imath::M33f matrix() const;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Transform2DPlug );

@@ -47,30 +47,29 @@ namespace GafferScene
 class GAFFERSCENE_API CopyOptions : public GafferScene::GlobalsProcessor
 {
 
-	public :
+public:
 
-		explicit CopyOptions( const std::string &name=defaultName<CopyOptions>() );
-		~CopyOptions() override;
+	explicit CopyOptions( const std::string &name = defaultName<CopyOptions>() );
+	~CopyOptions() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CopyOptions, CopyOptionsTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CopyOptions, CopyOptionsTypeId, GlobalsProcessor );
 
-		GafferScene::ScenePlug *sourcePlug();
-		const GafferScene::ScenePlug *sourcePlug() const;
+	GafferScene::ScenePlug *sourcePlug();
+	const GafferScene::ScenePlug *sourcePlug() const;
 
-		Gaffer::StringPlug *optionsPlug();
-		const Gaffer::StringPlug *optionsPlug() const;
+	Gaffer::StringPlug *optionsPlug();
+	const Gaffer::StringPlug *optionsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CopyOptions )

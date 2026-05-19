@@ -54,43 +54,42 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldDisplacement : public GafferScene::Shader
 {
 
-	public :
+public:
 
-		explicit ArnoldDisplacement( const std::string &name=defaultName<ArnoldDisplacement>() );
-		~ArnoldDisplacement() override;
+	explicit ArnoldDisplacement( const std::string &name = defaultName<ArnoldDisplacement>() );
+	~ArnoldDisplacement() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldDisplacement, ArnoldDisplacementTypeId, GafferScene::Shader );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldDisplacement, ArnoldDisplacementTypeId, GafferScene::Shader );
 
-		GafferScene::ShaderPlug *mapPlug();
-		const GafferScene::ShaderPlug *mapPlug() const;
+	GafferScene::ShaderPlug *mapPlug();
+	const GafferScene::ShaderPlug *mapPlug() const;
 
-		Gaffer::FloatPlug *heightPlug();
-		const Gaffer::FloatPlug *heightPlug() const;
+	Gaffer::FloatPlug *heightPlug();
+	const Gaffer::FloatPlug *heightPlug() const;
 
-		Gaffer::FloatPlug *paddingPlug();
-		const Gaffer::FloatPlug *paddingPlug() const;
+	Gaffer::FloatPlug *paddingPlug();
+	const Gaffer::FloatPlug *paddingPlug() const;
 
-		Gaffer::FloatPlug *zeroValuePlug();
-		const Gaffer::FloatPlug *zeroValuePlug() const;
+	Gaffer::FloatPlug *zeroValuePlug();
+	const Gaffer::FloatPlug *zeroValuePlug() const;
 
-		Gaffer::BoolPlug *autoBumpPlug();
-		const Gaffer::BoolPlug *autoBumpPlug() const;
+	Gaffer::BoolPlug *autoBumpPlug();
+	const Gaffer::BoolPlug *autoBumpPlug() const;
 
-		Gaffer::Plug *outPlug();
-		const Gaffer::Plug *outPlug() const;
+	Gaffer::Plug *outPlug();
+	const Gaffer::Plug *outPlug() const;
 
-	protected :
+protected:
 
-		bool affectsAttributes( const Gaffer::Plug *input ) const override;
-		void attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
+	bool affectsAttributes( const Gaffer::Plug *input ) const override;
+	void attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
 
-		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ArnoldDisplacement )

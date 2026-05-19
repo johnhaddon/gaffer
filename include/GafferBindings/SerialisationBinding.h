@@ -48,185 +48,183 @@
 namespace GafferBindings
 {
 
-template<typename T, typename Base, typename TWrapper=T>
+template<typename T, typename Base, typename TWrapper = T>
 class SerialiserClass : public IECorePython::RefCountedClass<T, Base, TWrapper>
 {
-	public :
+public:
 
-		SerialiserClass( const char *name );
-
+	SerialiserClass( const char *name );
 };
 
 template<typename WrappedType>
 class SerialiserWrapper : public IECorePython::RefCountedWrapper<WrappedType>
 {
 
-	public :
+public:
 
-		SerialiserWrapper( PyObject *self )
-			:	IECorePython::RefCountedWrapper<WrappedType>( self )
-		{
-		}
+	SerialiserWrapper( PyObject *self )
+		: IECorePython::RefCountedWrapper<WrappedType>( self )
+	{
+	}
 
-		void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
+	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
+	{
+		if( this->isSubclassed() )
 		{
-			if( this->isSubclassed() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				boost::python::object f = this->methodOverride( "moduleDependencies" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "moduleDependencies" );
-					if( f )
-					{
-						boost::python::object mo = f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), boost::ref( serialisation ) );
-						std::vector<std::string> mv;
-						boost::python::container_utils::extend_container( mv, mo );
-						modules.insert( mv.begin(), mv.end() );
-						return;
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					boost::python::object mo = f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), boost::ref( serialisation ) );
+					std::vector<std::string> mv;
+					boost::python::container_utils::extend_container( mv, mo );
+					modules.insert( mv.begin(), mv.end() );
+					return;
 				}
 			}
-			WrappedType::moduleDependencies( graphComponent, modules, serialisation );
-		}
-
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		WrappedType::moduleDependencies( graphComponent, modules, serialisation );
+	}
+
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "constructor" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "constructor" );
-					if( f )
-					{
-						return boost::python::extract<std::string>(
-							f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), boost::ref( serialisation ) )
-						);
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<std::string>(
+						f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), boost::ref( serialisation ) )
+					);
 				}
 			}
-			return WrappedType::constructor( graphComponent, serialisation );
-		}
-
-		std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::constructor( graphComponent, serialisation );
+	}
+
+	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "postConstructor" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "postConstructor" );
-					if( f )
-					{
-						return boost::python::extract<std::string>(
-							f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), identifier, boost::ref( serialisation ) )
-						);
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<std::string>(
+						f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), identifier, boost::ref( serialisation ) )
+					);
 				}
 			}
-			return WrappedType::postConstructor( graphComponent, identifier, serialisation );
-		}
-
-		std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::postConstructor( graphComponent, identifier, serialisation );
+	}
+
+	std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "postHierarchy" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "postHierarchy" );
-					if( f )
-					{
-						return boost::python::extract<std::string>(
-							f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), identifier, boost::ref( serialisation ) )
-						);
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<std::string>(
+						f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), identifier, boost::ref( serialisation ) )
+					);
 				}
 			}
-			return WrappedType::postHierarchy( graphComponent, identifier, serialisation );
-		}
-
-		std::string postScript( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::postHierarchy( graphComponent, identifier, serialisation );
+	}
+
+	std::string postScript( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "postScript" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "postScript" );
-					if( f )
-					{
-						return boost::python::extract<std::string>(
-							f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), identifier, boost::ref( serialisation ) )
-						);
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<std::string>(
+						f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( graphComponent ) ), identifier, boost::ref( serialisation ) )
+					);
 				}
 			}
-			return WrappedType::postScript( graphComponent, identifier, serialisation );
-		}
-
-		bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::postScript( graphComponent, identifier, serialisation );
+	}
+
+	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "childNeedsSerialisation" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "childNeedsSerialisation" );
-					if( f )
-					{
-						return f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( child ) ), boost::ref( serialisation ) );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( child ) ), boost::ref( serialisation ) );
 				}
 			}
-			return WrappedType::childNeedsSerialisation( child, serialisation );
-		}
-
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::childNeedsSerialisation( child, serialisation );
+	}
+
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "childNeedsConstruction" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "childNeedsConstruction" );
-					if( f )
-					{
-						return f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( child ) ), boost::ref( serialisation ) );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return f( Gaffer::GraphComponentPtr( const_cast<Gaffer::GraphComponent *>( child ) ), boost::ref( serialisation ) );
 				}
 			}
-			return WrappedType::childNeedsConstruction( child, serialisation );
+			catch( const boost::python::error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
-
+		return WrappedType::childNeedsConstruction( child, serialisation );
+	}
 };
 
 } // namespace GafferBindings

@@ -76,62 +76,61 @@ IE_CORE_FORWARDDECLARE( Nodule )
 class GAFFERUI_API NoduleLayout : public Gadget
 {
 
-	public :
+public:
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NoduleLayout, NoduleLayoutTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NoduleLayout, NoduleLayoutTypeId, Gadget );
 
-		explicit NoduleLayout( Gaffer::GraphComponentPtr parent, IECore::InternedString section = IECore::InternedString() );
-		~NoduleLayout() override;
+	explicit NoduleLayout( Gaffer::GraphComponentPtr parent, IECore::InternedString section = IECore::InternedString() );
+	~NoduleLayout() override;
 
-		/// \todo These do not need to be virtual, since this is
-		/// not intended to be used as a base class.
-		virtual Nodule *nodule( const Gaffer::Plug *plug );
-		virtual const Nodule *nodule( const Gaffer::Plug *plug ) const;
+	/// \todo These do not need to be virtual, since this is
+	/// not intended to be used as a base class.
+	virtual Nodule *nodule( const Gaffer::Plug *plug );
+	virtual const Nodule *nodule( const Gaffer::Plug *plug ) const;
 
-		Gadget *customGadget( const std::string &name );
-		const Gadget *customGadget( const std::string &name ) const;
+	Gadget *customGadget( const std::string &name );
+	const Gadget *customGadget( const std::string &name ) const;
 
-		using CustomGadgetCreator = std::function<GadgetPtr ( Gaffer::GraphComponentPtr )>;
-		/// Registers a custom gadget type that can be added to the layout using
-		/// "noduleLayout:customGadget:*"" metadata entries.
-		static void registerCustomGadget( const std::string &gadgetType, CustomGadgetCreator creator );
+	using CustomGadgetCreator = std::function<GadgetPtr( Gaffer::GraphComponentPtr )>;
+	/// Registers a custom gadget type that can be added to the layout using
+	/// "noduleLayout:customGadget:*"" metadata entries.
+	static void registerCustomGadget( const std::string &gadgetType, CustomGadgetCreator creator );
 
-	private :
+private:
 
-		LinearContainer *noduleContainer();
-		const LinearContainer *noduleContainer() const;
+	LinearContainer *noduleContainer();
+	const LinearContainer *noduleContainer() const;
 
-		struct TypeAndGadget
-		{
-			TypeAndGadget() {}
-			TypeAndGadget( IECore::InternedString type, GadgetPtr gadget ) : type( type ), gadget( gadget ) {}
-			// Nodule type or custom gadget type
-			IECore::InternedString type;
-			// Nodule or custom gadget
-			GadgetPtr gadget;
-		};
-		// Either a plug or the name of a custom widget
-		using GadgetKey = std::variant<const Gaffer::Plug *, IECore::InternedString>;
-		// Map from plugs and custom gadget names to the gadgets
-		// that represent them.
-		using GadgetMap = std::map<GadgetKey, TypeAndGadget>;
-		GadgetMap m_gadgets;
+	struct TypeAndGadget
+	{
+		TypeAndGadget() {}
+		TypeAndGadget( IECore::InternedString type, GadgetPtr gadget ) : type( type ), gadget( gadget ) {}
+		// Nodule type or custom gadget type
+		IECore::InternedString type;
+		// Nodule or custom gadget
+		GadgetPtr gadget;
+	};
+	// Either a plug or the name of a custom widget
+	using GadgetKey = std::variant<const Gaffer::Plug *, IECore::InternedString>;
+	// Map from plugs and custom gadget names to the gadgets
+	// that represent them.
+	using GadgetMap = std::map<GadgetKey, TypeAndGadget>;
+	GadgetMap m_gadgets;
 
-		void childAdded( Gaffer::GraphComponent *child );
-		void childRemoved( Gaffer::GraphComponent *child );
+	void childAdded( Gaffer::GraphComponent *child );
+	void childRemoved( Gaffer::GraphComponent *child );
 
-		void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key );
-		void nodeMetadataChanged( const Gaffer::Node *node, IECore::InternedString key );
+	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key );
+	void nodeMetadataChanged( const Gaffer::Node *node, IECore::InternedString key );
 
-		std::vector<GadgetKey> layoutOrder();
-		void updateNoduleLayout();
-		void updateSpacing();
-		void updateDirection();
-		void updateOrientation();
+	std::vector<GadgetKey> layoutOrder();
+	void updateNoduleLayout();
+	void updateSpacing();
+	void updateDirection();
+	void updateOrientation();
 
-		Gaffer::GraphComponentPtr m_parent;
-		const IECore::InternedString m_section;
-
+	Gaffer::GraphComponentPtr m_parent;
+	const IECore::InternedString m_section;
 };
 
 IE_CORE_DECLAREPTR( NoduleLayout )

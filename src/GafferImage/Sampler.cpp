@@ -45,8 +45,8 @@ using namespace GafferImage;
 
 Sampler::Sampler( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, BoundingMode boundingMode )
 	: m_plug( plug ),
-	m_channelName( channelName ),
-	m_boundingMode( boundingMode )
+	  m_channelName( channelName ),
+	  m_boundingMode( boundingMode )
 {
 	{
 		ImagePlug::GlobalScope c( Context::current() );
@@ -119,7 +119,7 @@ void Sampler::populate()
 {
 	ImageAlgo::parallelProcessTiles(
 		m_plug,
-		[&] ( const ImagePlug *imagePlug, const V2i &tileOrigin ) {
+		[&]( const ImagePlug *imagePlug, const V2i &tileOrigin ) {
 			const float *tileData;
 			int tilePixelIndex;
 			cachedData( tileOrigin, tileData, tilePixelIndex );
@@ -131,9 +131,9 @@ void Sampler::populate()
 
 void Sampler::hash( IECore::MurmurHash &h ) const
 {
-	for ( int x = m_cacheWindow.min.x; x < m_cacheWindow.max.x; x += GafferImage::ImagePlug::tileSize() )
+	for( int x = m_cacheWindow.min.x; x < m_cacheWindow.max.x; x += GafferImage::ImagePlug::tileSize() )
 	{
-		for ( int y = m_cacheWindow.min.y; y < m_cacheWindow.max.y; y += GafferImage::ImagePlug::tileSize() )
+		for( int y = m_cacheWindow.min.y; y < m_cacheWindow.max.y; y += GafferImage::ImagePlug::tileSize() )
 		{
 			h.append( m_plug->channelDataHash( m_channelName, Imath::V2i( x, y ) ) );
 		}

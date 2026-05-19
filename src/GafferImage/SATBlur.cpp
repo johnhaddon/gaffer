@@ -49,7 +49,8 @@ using namespace IECore;
 using namespace Gaffer;
 using namespace GafferImage;
 
-namespace {
+namespace
+{
 
 // Should we allow choosing the alpha channel for occlusion?
 const std::string g_alphaChannelName = "A";
@@ -71,20 +72,19 @@ inline float satReconstructPixel( const Imath::V2i &p, const std::vector<float> 
 		else if( p.y == 0 )
 		{
 			// Bottom edge, recover value via horizontal diff
-			return sat[index] - sat[ index - 1 ];
+			return sat[index] - sat[index - 1];
 		}
 		else // p.x == 0
 		{
 			// Left edge, recover value via horizontal diff
-			return sat[index] - sat[ index - ImagePlug::tileSize() ];
+			return sat[index] - sat[index - ImagePlug::tileSize()];
 		}
 	}
 	else
 	{
 		// Not on an edge, recover value by a SAT rect lookup on the
 		// 4 corners of the pixel
-		return sat[index] + sat[ index - ImagePlug::tileSize() - 1 ]
-			- sat[ index - ImagePlug::tileSize() ] - sat[ index - 1 ];
+		return sat[index] + sat[index - ImagePlug::tileSize() - 1] - sat[index - ImagePlug::tileSize()] - sat[index - 1];
 	}
 }
 
@@ -113,9 +113,8 @@ inline float satBilinear( float x, float y, const std::vector<float> &sat )
 	{
 		// Not on an edge, regular bilinear interpolation
 		int baseIndex = ( intY << ImagePlug::tileSizeLog2() ) + intX;
-		return
-			( sat[ baseIndex ] * ( 1.0f - xFrac ) + sat[ baseIndex + 1 ] * xFrac ) * ( 1.0f - yFrac ) +
-			( sat[ baseIndex + ImagePlug::tileSize() ] * ( 1.0f - xFrac ) + sat[ baseIndex + ImagePlug::tileSize() + 1 ] * xFrac ) * yFrac;
+		return ( sat[baseIndex] * ( 1.0f - xFrac ) + sat[baseIndex + 1] * xFrac ) * ( 1.0f - yFrac ) +
+			( sat[baseIndex + ImagePlug::tileSize()] * ( 1.0f - xFrac ) + sat[baseIndex + ImagePlug::tileSize() + 1] * xFrac ) * yFrac;
 	}
 	else if( intX < -1 || intY < -1 )
 	{
@@ -125,7 +124,7 @@ inline float satBilinear( float x, float y, const std::vector<float> &sat )
 	else if( intX >= ImagePlug::tileSize() - 1 && intY >= ImagePlug::tileSize() - 1 )
 	{
 		// Outside the tile in the upper right - the entire tile is included in the sum
-		return sat[ ImagePlug::tilePixels() - 1 ];
+		return sat[ImagePlug::tilePixels() - 1];
 	}
 	else if( intX == -1 && intY == -1 )
 	{
@@ -136,37 +135,35 @@ inline float satBilinear( float x, float y, const std::vector<float> &sat )
 	{
 		// Within the left edge, but above it. Interpolate the top left pixel with black, this
 		// value extends out to infinity
-		return sat[ ( ImagePlug::tileSize() - 1 ) << ImagePlug::tileSizeLog2() ] * xFrac;
+		return sat[( ImagePlug::tileSize() - 1 ) << ImagePlug::tileSizeLog2()] * xFrac;
 	}
 	else if( intY == -1 && intX >= ImagePlug::tileSize() - 1 )
 	{
 		// Within the bottom edge, but to the right of it. Interpolate the bottom right pixel with black, this
 		// value extends out to infinity
-		return sat[ ImagePlug::tileSize() - 1 ] * yFrac;
+		return sat[ImagePlug::tileSize() - 1] * yFrac;
 	}
 	else if( intX == -1 )
 	{
 		// Within the left edge. Two pixels bilinearly interpolated with 2 zero pixels
-		return ( sat[ intY << ImagePlug::tileSizeLog2() ] * ( 1.0f - yFrac ) + sat[ ( intY + 1 ) << ImagePlug::tileSizeLog2() ] * yFrac ) * xFrac;
+		return ( sat[intY << ImagePlug::tileSizeLog2()] * ( 1.0f - yFrac ) + sat[( intY + 1 ) << ImagePlug::tileSizeLog2()] * yFrac ) * xFrac;
 	}
 	else if( intY == -1 )
 	{
 		// Within the bottom edge. Two pixels bilinearly interpolated with 2 zero pixels
-		return ( sat[ intX ] * ( 1.0f - xFrac ) + sat[ intX + 1 ] * xFrac ) * yFrac;
+		return ( sat[intX] * ( 1.0f - xFrac ) + sat[intX + 1] * xFrac ) * yFrac;
 	}
 	else if( intX >= ImagePlug::tileSize() - 1 )
 	{
 		// Within the correct height, but right of the tile - we blend the two rightmost pixels at this height
-		return
-			sat[ ( intY << ImagePlug::tileSizeLog2() ) + ImagePlug::tileSize() - 1 ] * ( 1.0f - yFrac ) +
-			sat[ ( ( intY + 1 ) << ImagePlug::tileSizeLog2() ) + ImagePlug::tileSize() - 1 ] * yFrac;
+		return sat[( intY << ImagePlug::tileSizeLog2() ) + ImagePlug::tileSize() - 1] * ( 1.0f - yFrac ) +
+			sat[( ( intY + 1 ) << ImagePlug::tileSizeLog2() ) + ImagePlug::tileSize() - 1] * yFrac;
 	}
 	else // Remaining case is intY >= ImagePlug::tileSize() - 1 )
 	{
 		// Within the correct width, but above the tile - we blend the two top pixels at this x value
-		return
-			sat[ ( ( ImagePlug::tileSize() - 1 ) << ImagePlug::tileSizeLog2() ) + intX ] * ( 1.0f - xFrac ) +
-			sat[ ( ( ImagePlug::tileSize() - 1 ) << ImagePlug::tileSizeLog2() ) + intX + 1 ] * xFrac;
+		return sat[( ( ImagePlug::tileSize() - 1 ) << ImagePlug::tileSizeLog2() ) + intX] * ( 1.0f - xFrac ) +
+			sat[( ( ImagePlug::tileSize() - 1 ) << ImagePlug::tileSizeLog2() ) + intX + 1] * xFrac;
 	}
 }
 
@@ -246,8 +243,8 @@ std::vector<Box2f> diskApproximationRects( int n )
 	for( int i = 1; i < octantSteps; i++ )
 	{
 		float q = 1.0f - i * stepScale;
-		rects.push_back( Box2f( V2f( -q, stepHalfWidths[ i - 1 ] ), V2f( q, stepHalfWidths[i] ) ) );
-		rects.push_back( Box2f( V2f( -q, -stepHalfWidths[i] ), V2f( q, -stepHalfWidths[ i - 1 ] ) ) );
+		rects.push_back( Box2f( V2f( -q, stepHalfWidths[i - 1] ), V2f( q, stepHalfWidths[i] ) ) );
+		rects.push_back( Box2f( V2f( -q, -stepHalfWidths[i] ), V2f( q, -stepHalfWidths[i - 1] ) ) );
 	}
 
 	// The very middle rectangle always has a half width of 1, and the height is the one we computed
@@ -256,7 +253,7 @@ std::vector<Box2f> diskApproximationRects( int n )
 
 	// It's easier to generate these rects out of order, but we require them in order. This is currently
 	// called rarely, so it's fine to just sort them, and we know their Y coords are unique.
-	std::sort( rects.begin(), rects.end(), []( const Box2f &a, const Box2f &b ){ return a.min.y < b.min.y; } );
+	std::sort( rects.begin(), rects.end(), []( const Box2f &a, const Box2f &b ) { return a.min.y < b.min.y; } );
 	return rects;
 }
 
@@ -273,10 +270,10 @@ GAFFER_NODE_DEFINE_TYPE( SATBlur );
 size_t SATBlur::g_firstPlugIndex = 0;
 
 SATBlur::SATBlur( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild( new V2fPlug( "radius", Plug::In, V2f(0.0f), V2f(0.0f) ) );
+	addChild( new V2fPlug( "radius", Plug::In, V2f( 0.0f ), V2f( 0.0f ) ) );
 	addChild( new StringPlug( "radiusChannel" ) );
 	addChild( new FloatPlug( "maxRadius", Plug::In, 512, 1 ) );
 	addChild( new IntPlug( "boundingMode", Plug::In, (int)SATBlur::BoundingMode::Black ) );
@@ -443,7 +440,7 @@ void SATBlur::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *cont
 	ImageProcessor::hash( output, context, h );
 	if( output == satPlug() )
 	{
-		const float *layerBoundary = context->getIfExists< float >( g_layerBoundaryName );
+		const float *layerBoundary = context->getIfExists<float>( g_layerBoundaryName );
 
 		Context::EditableScope scope( context );
 		if( layerBoundary )
@@ -506,7 +503,7 @@ void SATBlur::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context
 		// is that if a layerBoundary is specified in the context, we treat any pixels nearer than that
 		// as zero.
 
-		const float *layerBoundary = context->getIfExists< float >( g_layerBoundaryName );
+		const float *layerBoundary = context->getIfExists<float>( g_layerBoundaryName );
 		Context::EditableScope scope( context );
 		if( layerBoundary )
 		{
@@ -577,14 +574,14 @@ void SATBlur::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context
 				if( !depth )
 				{
 					// Convert pixels to running horizontal sum
-					accum += source[ index ];
+					accum += source[index];
 				}
 				else
 				{
 					// If we have a depth to check, check it, then convert pixels to running horizontal sum
-					if( (*depth)[ index ] > *layerBoundary )
+					if( ( *depth )[index] > *layerBoundary )
 					{
-						accum += source[ index ];
+						accum += source[index];
 					}
 				}
 				result.push_back( accum );
@@ -599,8 +596,8 @@ void SATBlur::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context
 			int index = ImagePlug::pixelIndex( p, Imath::V2i( 0 ) );
 			for( ; p.y < ImagePlug::tileSize(); p.y++ )
 			{
-				accum += result[ index ];
-				result[ index ] = accum;
+				accum += result[index];
+				result[index] = accum;
 				index += ImagePlug::tileSize();
 			}
 		}
@@ -724,15 +721,16 @@ void SATBlur::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffe
 	h.append( possibleTileBound.max - tileOrigin );
 }
 
-namespace {
+namespace
+{
 
 // Helper function with logic from computeChannelData that needs to be called multiple times
 float readSat(
 	const V2i &tileOrigin, const V2i &outPixel, float floatX, float floatY, const V2f &inputRad,
 	const Box2i &possibleTileBound, const Box2i &inputTileBound, const V2i &visitOrderPermutate,
 	const FloatVectorDataPlug *satPlug, ImagePlug::ChannelDataScope &tileScope,
-	ConstFloatVectorDataPtr* satData, const std::vector<float>** satDataReadable,
-	const std::vector< Box2f > &rects
+	ConstFloatVectorDataPtr *satData, const std::vector<float> **satDataReadable,
+	const std::vector<Box2f> &rects
 )
 {
 	const int possibleTileBoundWidth = possibleTileBound.size().x;
@@ -742,7 +740,7 @@ float readSat(
 		V2i tile2DIndex = ImagePlug::tileIndex( tileOrigin ) - possibleTileBound.min;
 		int tileIndex = tile2DIndex.y * possibleTileBoundWidth + tile2DIndex.x;
 
-		if( !satDataReadable[ tileIndex ] )
+		if( !satDataReadable[tileIndex] )
 		{
 			tileScope.setTileOrigin( &tileOrigin );
 			satData[tileIndex] = satPlug->getValue();
@@ -766,7 +764,7 @@ float readSat(
 			int tileIndex = tile2DIndex.y * possibleTileBoundWidth + tile2DIndex.x;
 
 			V2i spTileOrigin = sp * ImagePlug::tileSize();
-			if( !satDataReadable[ tileIndex ] )
+			if( !satDataReadable[tileIndex] )
 			{
 				tileScope.setTileOrigin( &spTileOrigin );
 				satData[tileIndex] = satPlug->getValue();
@@ -786,7 +784,7 @@ float readSat(
 			if( maxRect > 1 )
 			{
 				float radRelativeBoundMin = ( -floatYLocal - 1 ) / inputRad.y;
-				float radRelativeBoundMax = ( float(ImagePlug::tileSize() - 1) - floatYLocal ) / inputRad.y;
+				float radRelativeBoundMax = ( float( ImagePlug::tileSize() - 1 ) - floatYLocal ) / inputRad.y;
 				while( rects[minRect].max.y < radRelativeBoundMin && minRect <= maxRect )
 				{
 					minRect++;
@@ -885,10 +883,10 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 	// input tile could be used by every output pixel ).
 
 	// We need to store the ConstFloatVectorDataPtr in order to keep alive the tiles we're using
-	std::vector< ConstFloatVectorDataPtr > satData;
+	std::vector<ConstFloatVectorDataPtr> satData;
 	// Storing the readable() result instead of recalling readable() is an easy minor performance improvement
 	// ( about 5% when accessing a lot of tiles )
-	std::vector< const std::vector<float>* > satDataReadable;
+	std::vector<const std::vector<float> *> satDataReadable;
 
 	const int layerTiles = possibleTileBound.size().x * possibleTileBound.size().y;
 	satData.resize( layerTiles * ( layerBoundaries.size() + 1 ) );
@@ -937,7 +935,7 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 			V2f curRadius = radius;
 			if( radiuses )
 			{
-				curRadius *= (*radiuses)[ ImagePlug::pixelIndex( outPixel, Imath::V2i( 0 ) ) ];
+				curRadius *= ( *radiuses )[ImagePlug::pixelIndex( outPixel, Imath::V2i( 0 ) )];
 			}
 
 			// Skip actual blurring for radiuses that are within a reasonable tolerance of zero.
@@ -945,10 +943,7 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 
 			// The total input radius we actually use includes this half pixel offset because the user
 			// specified radius doesn't include the pixel itself.
-			const V2f inputRad = noBlur ? V2f( 0.0f ) : V2f(
-				0.5f + std::min( maxRadius, fabs( curRadius.x ) ),
-				0.5f + std::min( maxRadius, fabs( curRadius.y ) )
-			);
+			const V2f inputRad = noBlur ? V2f( 0.0f ) : V2f( 0.5f + std::min( maxRadius, fabs( curRadius.x ) ), 0.5f + std::min( maxRadius, fabs( curRadius.y ) ) );
 
 			if( boundingMode == BoundingMode::Normalize && !noBlur )
 			{
@@ -963,13 +958,7 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 				for( const Box2f &r : rects )
 				{
 					// Compute the area of the part of this rectangle inside the dataWindow.
-					totalArea += std::max( 0.0f,
-						std::min( r.max.x, relativeDataWindow.max.x ) -
-						std::max( r.min.x, relativeDataWindow.min.x )
-					) * std::max( 0.0f,
-						std::min( r.max.y, relativeDataWindow.max.y ) -
-						std::max( r.min.y, relativeDataWindow.min.y )
-					);
+					totalArea += std::max( 0.0f, std::min( r.max.x, relativeDataWindow.max.x ) - std::max( r.min.x, relativeDataWindow.min.x ) ) * std::max( 0.0f, std::min( r.max.y, relativeDataWindow.max.y ) - std::max( r.min.y, relativeDataWindow.min.y ) );
 				}
 				normalization = 4.0f / totalArea;
 			}
@@ -981,7 +970,7 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 			// and the lerp value we're using to blend between them.
 			if( layerBoundaries.size() && depthLookups )
 			{
-				float depthLookup = (*depthLookups)[ ImagePlug::pixelIndex( outPixel, Imath::V2i( 0 ) ) ];
+				float depthLookup = ( *depthLookups )[ImagePlug::pixelIndex( outPixel, Imath::V2i( 0 ) )];
 				layerIndex = -1 + ( std::lower_bound( layerBoundaries.begin(), layerBoundaries.end(), depthLookup ) - layerBoundaries.begin() );
 
 				layerIndex = std::max( 0, std::min( (int)layerBoundaries.size() - 2, layerIndex ) );
@@ -1075,20 +1064,14 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 
 					if( planeIndex > 0 )
 					{
-						tileScope.set<float>( g_layerBoundaryName, &layerBoundaries[planeIndex ] );
+						tileScope.set<float>( g_layerBoundaryName, &layerBoundaries[planeIndex] );
 					}
 					else
 					{
 						tileScope.remove( g_layerBoundaryName );
 					}
 
-					val += curWeight * readSat(
-						tileOrigin, outPixel, floatX, floatY, inputRad,
-						possibleTileBound, inputTileBound, visitOrderPermutate,
-						satPlug(),
-						tileScope, &satData[layerTiles * planeIndex], &satDataReadable[layerTiles * planeIndex],
-						rects
-					);
+					val += curWeight * readSat( tileOrigin, outPixel, floatX, floatY, inputRad, possibleTileBound, inputTileBound, visitOrderPermutate, satPlug(), tileScope, &satData[layerTiles * planeIndex], &satDataReadable[layerTiles * planeIndex], rects );
 				}
 			}
 

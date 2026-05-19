@@ -59,7 +59,7 @@ GAFFER_NODE_DEFINE_TYPE( SceneNode );
 size_t SceneNode::g_firstPlugIndex = 0;
 
 SceneNode::SceneNode( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "out", Gaffer::Plug::Out ) );
@@ -100,7 +100,7 @@ void SceneNode::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 	{
 		for( ValuePlug::Iterator it( outPlug() ); !it.done(); ++it )
 		{
-			if( (*it)->getInput() )
+			if( ( *it )->getInput() )
 			{
 				// If the output has been connected as a pass-through,
 				// then it clearly can't be affected by the enabled plug,
@@ -597,8 +597,7 @@ void SceneNode::hashChildBounds( const Gaffer::Context *context, const ScenePlug
 	const IECore::MurmurHash reduction = parallel_deterministic_reduce(
 		SizeRange( 0, childNames.size() ),
 		IECore::MurmurHash(),
-		[&] ( const SizeRange &range, const MurmurHash &hash ) {
-
+		[&]( const SizeRange &range, const MurmurHash &hash ) {
 			ScenePlug::PathScope pathScope( threadState );
 			auto childPath = context->get<ScenePath>( ScenePlug::scenePathContextName );
 			childPath.push_back( InternedString() ); // room for the child name
@@ -612,10 +611,8 @@ void SceneNode::hashChildBounds( const Gaffer::Context *context, const ScenePlug
 				parent->transformPlug()->hash( result );
 			}
 			return result;
-
 		},
-		[] ( const MurmurHash &x, const MurmurHash &y ) {
-
+		[]( const MurmurHash &x, const MurmurHash &y ) {
 			MurmurHash result = x;
 			result.append( y );
 			return result;
@@ -643,8 +640,7 @@ Imath::Box3f SceneNode::computeChildBounds( const Gaffer::Context *context, cons
 	return tbb::parallel_reduce(
 		sizeRange( 0, childNames.size() ),
 		Box3f(),
-		[&] ( const sizeRange &range, const Box3f &bound ) {
-
+		[&]( const sizeRange &range, const Box3f &bound ) {
 			ScenePlug::PathScope pathScope( threadState );
 			auto childPath = context->get<ScenePath>( ScenePlug::scenePathContextName );
 			childPath.push_back( InternedString() ); // room for the child name
@@ -659,14 +655,11 @@ Imath::Box3f SceneNode::computeChildBounds( const Gaffer::Context *context, cons
 				result.extendBy( childBound );
 			}
 			return result;
-
 		},
-		[] ( const Box3f &x, const Box3f &y ) {
-
+		[]( const Box3f &x, const Box3f &y ) {
 			Box3f result = x;
 			result.extendBy( y );
 			return result;
-
 		},
 		tbb::auto_partitioner(),
 		taskGroupContext

@@ -47,27 +47,27 @@ namespace IECoreCycles
 
 class IEDisplayOutputDriver : public ccl::OutputDriver
 {
-	public:
+public:
 
-		IEDisplayOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers );
-		~IEDisplayOutputDriver() override;
+	IEDisplayOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers );
+	~IEDisplayOutputDriver() override;
 
-		void write_render_tile( const Tile &tile ) override;
-		bool update_render_tile( const Tile &tile ) override;
+	void write_render_tile( const Tile &tile ) override;
+	bool update_render_tile( const Tile &tile ) override;
 
-	protected:
+protected:
 
-		Imath::Box2i m_dataWindow;
+	Imath::Box2i m_dataWindow;
 
-		struct Layer
-		{
-			std::string name;
-			int numChannels;
-			IECoreImage::DisplayDriverPtr displayDriver;
-		};
+	struct Layer
+	{
+		std::string name;
+		int numChannels;
+		IECoreImage::DisplayDriverPtr displayDriver;
+	};
 
-		using Layers = std::vector<Layer>;
-		Layers m_layers;
+	using Layers = std::vector<Layer>;
+	Layers m_layers;
 };
 
-} // namespace
+} // namespace IECoreCycles

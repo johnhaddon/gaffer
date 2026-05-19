@@ -44,13 +44,12 @@ namespace GafferImage
 class GAFFERIMAGE_API Erode : public RankFilter
 {
 
-	public :
+public:
 
-		explicit Erode( const std::string &name=defaultName<Erode>() );
-		~Erode() override;
+	explicit Erode( const std::string &name = defaultName<Erode>() );
+	~Erode() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Erode, ErodeTypeId, RankFilter );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Erode, ErodeTypeId, RankFilter );
 };
 
 IE_CORE_DECLAREPTR( Erode );

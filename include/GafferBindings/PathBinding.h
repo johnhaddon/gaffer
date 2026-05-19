@@ -41,14 +41,13 @@
 namespace GafferBindings
 {
 
-template<typename T, typename TWrapper=T>
+template<typename T, typename TWrapper = T>
 class PathClass : public IECorePython::RunTimeTypedClass<T, TWrapper>
 {
 
-	public :
+public:
 
-		PathClass( const char *docString = nullptr );
-
+	PathClass( const char *docString = nullptr );
 };
 
 } // namespace GafferBindings

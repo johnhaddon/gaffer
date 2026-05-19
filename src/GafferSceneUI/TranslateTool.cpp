@@ -67,7 +67,7 @@ TranslateTool::ToolDescription<TranslateTool, SceneView> TranslateTool::g_toolDe
 size_t TranslateTool::g_firstPlugIndex = 0;
 
 TranslateTool::TranslateTool( SceneView *view, const std::string &name )
-	:	TransformTool( view, name )
+	: TransformTool( view, name )
 {
 
 	static Style::Axes axes[] = { Style::X, Style::Y, Style::Z, Style::XY, Style::XZ, Style::YZ, Style::XYZ };
@@ -123,8 +123,7 @@ bool TranslateTool::affectsHandles( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return
-		input == orientationPlug() ||
+	return input == orientationPlug() ||
 		input == scenePlug()->transformPlug();
 }
 
@@ -146,14 +145,14 @@ void TranslateTool::updateHandles( float rasterScale )
 		bool enabled = true;
 		for( const auto &s : selection() )
 		{
-			if( !Translation( s, orientation ).canApply( (*it)->axisMask() ) )
+			if( !Translation( s, orientation ).canApply( ( *it )->axisMask() ) )
 			{
 				enabled = false;
 				break;
 			}
 		}
-		(*it)->setEnabled( enabled );
-		(*it)->setRasterScale( rasterScale );
+		( *it )->setEnabled( enabled );
+		( *it )->setRasterScale( rasterScale );
 	}
 }
 
@@ -188,7 +187,7 @@ bool TranslateTool::keyRelease( const GafferUI::KeyEvent &event )
 	return false;
 }
 
-void TranslateTool::sceneGadgetLeave( const GafferUI::ButtonEvent & event )
+void TranslateTool::sceneGadgetLeave( const GafferUI::ButtonEvent &event )
 {
 	if( getTargetedMode() )
 	{
@@ -286,7 +285,7 @@ bool TranslateTool::buttonPress( const GafferUI::ButtonEvent &event )
 
 	const SceneView *sv = static_cast<const SceneView *>( view() );
 	const Gadget *g = sv->viewportGadget()->getPrimaryChild();
-	const SceneGadget* sg = static_cast<const SceneGadget *>( g );
+	const SceneGadget *sg = static_cast<const SceneGadget *>( g );
 	if( !sg->objectAt( event.line, _, targetPos ) )
 	{
 		return true;
@@ -317,7 +316,7 @@ bool TranslateTool::buttonPress( const GafferUI::ButtonEvent &event )
 //////////////////////////////////////////////////////////////////////////
 
 TranslateTool::Translation::Translation( const Selection &selection, Orientation orientation )
-	:	m_selection( selection )
+	: m_selection( selection )
 {
 	const M44f handlesTransform = selection.orientedTransform( orientation );
 	m_gadgetToTransform = handlesTransform * selection.sceneToTransformSpace();
@@ -369,7 +368,7 @@ void TranslateTool::Translation::apply( const Imath::V3f &offset )
 			setValueOrAddKey(
 				plug,
 				m_selection.context()->getTime(),
-				(*m_origin)[i] + offsetInTransformSpace[i]
+				( *m_origin )[i] + offsetInTransformSpace[i]
 			);
 		}
 	}

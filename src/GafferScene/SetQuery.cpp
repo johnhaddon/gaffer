@@ -56,11 +56,15 @@ namespace
 
 struct MatchesData : public IECore::Data
 {
-	struct DescendantMatch { InternedString setName; bool inherited; };
+	struct DescendantMatch
+	{
+		InternedString setName;
+		bool inherited;
+	};
 	using DescendantMatches = vector<DescendantMatch>;
 
 	MatchesData( const ConstStringVectorDataPtr &matches, DescendantMatches &&descendantMatches, bool inherit )
-		:	matches( matches ), descendantMatches( descendantMatches ), inherit( inherit )
+		: matches( matches ), descendantMatches( descendantMatches ), inherit( inherit )
 	{
 	}
 
@@ -85,7 +89,7 @@ const ConstMatchesDataPtr g_emptyMatches = new MatchesData( g_emptyStringVectorD
 struct ParentScope : public Context::EditableScope
 {
 	ParentScope( const Context *context, const ScenePlug::ScenePath &path )
-		:	Context::EditableScope( context )
+		: Context::EditableScope( context )
 	{
 		if( path.size() )
 		{
@@ -98,10 +102,9 @@ struct ParentScope : public Context::EditableScope
 		}
 	}
 
-	private :
+private:
 
-		ScenePlug::ScenePath m_parentPath;
-
+	ScenePlug::ScenePath m_parentPath;
 };
 
 vector<InternedString> matchingSetNames( const ScenePlug *scene, const std::string &sets )
@@ -142,7 +145,7 @@ vector<InternedString> matchingSetNames( const ScenePlug *scene, const std::stri
 			}
 			std::sort(
 				result.begin() + firstAdded, result.end(),
-				[] ( const InternedString &a, const InternedString &b ) {
+				[]( const InternedString &a, const InternedString &b ) {
 					return a.string() < b.string();
 				}
 			);
@@ -163,7 +166,7 @@ size_t SetQuery::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( SetQuery )
 
 SetQuery::SetQuery( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
@@ -365,12 +368,10 @@ Gaffer::ValuePlug::CachePolicy SetQuery::computeCachePolicy( const ValuePlug *ou
 
 bool SetQuery::affectsMatchesInternal( const Gaffer::Plug *input ) const
 {
-	return
-		input == scenePlug()->setNamesPlug() ||
+	return input == scenePlug()->setNamesPlug() ||
 		input == setsPlug() ||
 		input == scenePlug()->setPlug() ||
-		input == inheritPlug()
-	;
+		input == inheritPlug();
 }
 
 void SetQuery::hashMatchesInternal( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -469,7 +470,7 @@ IECore::ConstObjectPtr SetQuery::computeMatchesInternal( const Gaffer::Context *
 			}
 		}
 
-		if( std::all_of( descendantMatches.begin(), descendantMatches.end(), [] ( const auto &m ) { return m.inherited; } ) )
+		if( std::all_of( descendantMatches.begin(), descendantMatches.end(), []( const auto &m ) { return m.inherited; } ) )
 		{
 			// All descendant matches are inherited. Clear them to trigger
 			// optimisation where this MatchesData is reused for children.

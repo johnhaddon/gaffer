@@ -49,13 +49,12 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API TestLight : public GafferScene::Light
 {
 
-	public :
+public:
 
-		TestLight( const std::string &name=defaultName<TestLight>() );
-		~TestLight() override;
+	TestLight( const std::string &name = defaultName<TestLight>() );
+	~TestLight() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneTest::TestLight, TestLightTypeId, GafferScene::Light );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneTest::TestLight, TestLightTypeId, GafferScene::Light );
 };
 
 } // namespace GafferSceneTest

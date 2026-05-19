@@ -52,37 +52,37 @@ namespace GafferImage
 class GAFFERIMAGE_API OpenColorIOConfigPlug final : public Gaffer::ValuePlug
 {
 
-	public :
+public:
 
-		GAFFER_PLUG_DECLARE_TYPE( GafferImage::OpenColorIOConfigPlug, OpenColorIOConfigPlugTypeId, Gaffer::ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( GafferImage::OpenColorIOConfigPlug, OpenColorIOConfigPlugTypeId, Gaffer::ValuePlug );
 
-		explicit OpenColorIOConfigPlug( const std::string &name = defaultName<OpenColorIOConfigPlug>(), Direction direction = In, unsigned flags = Default );
+	explicit OpenColorIOConfigPlug( const std::string &name = defaultName<OpenColorIOConfigPlug>(), Direction direction = In, unsigned flags = Default );
 
-		Gaffer::StringPlug *configPlug();
-		const Gaffer::StringPlug *configPlug() const;
+	Gaffer::StringPlug *configPlug();
+	const Gaffer::StringPlug *configPlug() const;
 
-		Gaffer::StringPlug *workingSpacePlug();
-		const Gaffer::StringPlug *workingSpacePlug() const;
+	Gaffer::StringPlug *workingSpacePlug();
+	const Gaffer::StringPlug *workingSpacePlug() const;
 
-		Gaffer::ValuePlug *variablesPlug();
-		const Gaffer::ValuePlug *variablesPlug() const;
+	Gaffer::ValuePlug *variablesPlug();
+	const Gaffer::ValuePlug *variablesPlug() const;
 
-		Gaffer::StringPlug *displayTransformPlug();
-		const Gaffer::ValuePlug *displayTransformPlug() const;
+	Gaffer::StringPlug *displayTransformPlug();
+	const Gaffer::ValuePlug *displayTransformPlug() const;
 
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		static OpenColorIOConfigPlug *acquireDefaultConfigPlug( Gaffer::ScriptNode *scriptNode, bool createIfNecessary = true );
+	static OpenColorIOConfigPlug *acquireDefaultConfigPlug( Gaffer::ScriptNode *scriptNode, bool createIfNecessary = true );
 
-	protected :
+protected:
 
-		void parentChanged( Gaffer::GraphComponent *oldParent ) override;
+	void parentChanged( Gaffer::GraphComponent *oldParent ) override;
 
-	private :
+private:
 
-		void plugSet( Gaffer::Plug *plug );
-		Gaffer::Signals::ScopedConnection m_plugSetConnection;
+	void plugSet( Gaffer::Plug *plug );
+	Gaffer::Signals::ScopedConnection m_plugSetConnection;
 };
 
 IE_CORE_DECLAREPTR( OpenColorIOConfigPlug );

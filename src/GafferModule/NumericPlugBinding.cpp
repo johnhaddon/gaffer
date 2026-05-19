@@ -80,25 +80,14 @@ void bind()
 	using V = typename T::ValueType;
 
 	scope s = PlugClass<T>()
-		.def( init<const char *, Plug::Direction, typename T::ValueType, typename T::ValueType, typename T::ValueType, unsigned>(
-				(
-					boost::python::arg_( "name" )=GraphComponent::defaultName<T>(),
-					boost::python::arg_( "direction" )=Plug::In,
-					boost::python::arg_( "defaultValue" )=V(),
-					boost::python::arg_( "minValue" )=std::numeric_limits<V>::lowest(),
-					boost::python::arg_( "maxValue" )=std::numeric_limits<V>::max(),
-					boost::python::arg_( "flags" )=Plug::Default
-				)
-			)
-		)
-		.def( "defaultValue", &T::defaultValue )
-		.def( "hasMinValue", &T::hasMinValue )
-		.def( "hasMaxValue", &T::hasMaxValue )
-		.def( "minValue", &T::minValue )
-		.def( "maxValue", &T::maxValue )
-		.def( "setValue", setValue<T> )
-		.def( "getValue", &getValue<T>, ( boost::python::arg( "_precomputedHash" ) = boost::python::object() ) )
-	;
+				  .def( init<const char *, Plug::Direction, typename T::ValueType, typename T::ValueType, typename T::ValueType, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V(), boost::python::arg_( "minValue" ) = std::numeric_limits<V>::lowest(), boost::python::arg_( "maxValue" ) = std::numeric_limits<V>::max(), boost::python::arg_( "flags" ) = Plug::Default ) ) )
+				  .def( "defaultValue", &T::defaultValue )
+				  .def( "hasMinValue", &T::hasMinValue )
+				  .def( "hasMaxValue", &T::hasMaxValue )
+				  .def( "minValue", &T::minValue )
+				  .def( "maxValue", &T::maxValue )
+				  .def( "setValue", setValue<T> )
+				  .def( "getValue", &getValue<T>, ( boost::python::arg( "_precomputedHash" ) = boost::python::object() ) );
 
 	const PyTypeObject *valueType = boost::python::to_python_value<const V &>().get_pytype();
 	s.attr( "ValueType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( valueType ) ) ) );

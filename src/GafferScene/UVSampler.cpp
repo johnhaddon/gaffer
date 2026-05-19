@@ -47,7 +47,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( UVSampler );
 size_t UVSampler::g_firstPlugIndex = 0;
 
 UVSampler::UVSampler( const std::string &name )
-	:	PrimitiveSampler( name )
+	: PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -96,7 +96,7 @@ PrimitiveSampler::SamplingFunction UVSampler::computeSamplingFunction( const IEC
 	interpolation = it->second.interpolation;
 	PrimitiveVariable::IndexedView<V2f> uvView( it->second );
 
-	return [uvView] ( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
+	return [uvView]( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
 		return evaluator.pointAtUV( uvView[index], &result );
 	};
 }

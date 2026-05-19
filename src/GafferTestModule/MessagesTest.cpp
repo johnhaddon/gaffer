@@ -78,7 +78,7 @@ void testValueReuse()
 
 	Messages m;
 
-	for( size_t i = 0; i < numMessages; ++ i )
+	for( size_t i = 0; i < numMessages; ++i )
 	{
 		m.add( Message( IECore::MessageHandler::Level( i % 5 ), "testValueReuse", std::to_string( i ) ) );
 	}
@@ -86,7 +86,7 @@ void testValueReuse()
 	Messages c = m;
 
 	// Messages should be shared once in the const buckets
-	for( size_t i = 0; i < bucketSize; ++ i )
+	for( size_t i = 0; i < bucketSize; ++i )
 	{
 		GAFFERTEST_ASSERT( &c[i] == &m[i] );
 	}
@@ -109,8 +109,8 @@ void testConstness()
 	for( size_t i = 1; i < numMessages; ++i )
 	{
 		GAFFERTEST_ASSERT( c[i].size() == i );
-		GAFFERTEST_ASSERT( c[i][i-1].message == std::to_string( i ) );
-		GAFFERTEST_ASSERT( c.back()[i-1].message == std::to_string( i ) );
+		GAFFERTEST_ASSERT( c[i][i - 1].message == std::to_string( i ) );
+		GAFFERTEST_ASSERT( c.back()[i - 1].message == std::to_string( i ) );
 	}
 
 	m.clear();
@@ -118,8 +118,8 @@ void testConstness()
 	for( size_t i = 1; i < numMessages; ++i )
 	{
 		GAFFERTEST_ASSERT( c[i].size() == i );
-		GAFFERTEST_ASSERT( c[i][i-1].message == std::to_string( i ) );
-		GAFFERTEST_ASSERT( c.back()[i-1].message == std::to_string( i ) );
+		GAFFERTEST_ASSERT( c[i][i - 1].message == std::to_string( i ) );
+		GAFFERTEST_ASSERT( c.back()[i - 1].message == std::to_string( i ) );
 	}
 }
 

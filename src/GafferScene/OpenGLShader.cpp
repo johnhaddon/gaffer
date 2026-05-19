@@ -78,7 +78,7 @@ IECore::InternedString g_glNamespacedFragmentSource( "gl:fragmentSource" );
 } // namespace
 
 OpenGLShader::OpenGLShader( const std::string &name )
-	:	GafferScene::Shader( name )
+	: GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Plug::Out ) );
 }
@@ -234,15 +234,13 @@ IECore::ConstCompoundObjectPtr OpenGLShader::attributes( const Gaffer::Plug *out
 
 	IECoreScene::ShaderNetworkPtr updatedNetwork = nullptr;
 
-	auto swapParameter = [network, &updatedNetwork]
-	(
-		const IECoreScene::Shader *oldShader,
-		IECoreScene::ShaderPtr &newShader,
-		const InternedString &oldParameterName,
-		const DataPtr oldParameterValue,
-		const InternedString &newParameterName
-	)
-	{
+	auto swapParameter = [network, &updatedNetwork](
+							 const IECoreScene::Shader *oldShader,
+							 IECoreScene::ShaderPtr &newShader,
+							 const InternedString &oldParameterName,
+							 const DataPtr oldParameterValue,
+							 const InternedString &newParameterName
+						 ) {
 		if( !updatedNetwork )
 		{
 			updatedNetwork = network->copy();

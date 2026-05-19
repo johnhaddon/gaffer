@@ -46,33 +46,32 @@ namespace GafferScene
 class GAFFERSCENE_API CurvesInterpolation : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit CurvesInterpolation( const std::string &name=defaultName<CurvesInterpolation>() );
-		~CurvesInterpolation() override;
+	explicit CurvesInterpolation( const std::string &name = defaultName<CurvesInterpolation>() );
+	~CurvesInterpolation() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CurvesInterpolation, CurvesInterpolationTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CurvesInterpolation, CurvesInterpolationTypeId, ObjectProcessor );
 
-		/// Values are from `IECore::StandardCubicBasis`.
-		Gaffer::OptionalValuePlug *basisPlug();
-		const Gaffer::OptionalValuePlug *basisPlug() const;
+	/// Values are from `IECore::StandardCubicBasis`.
+	Gaffer::OptionalValuePlug *basisPlug();
+	const Gaffer::OptionalValuePlug *basisPlug() const;
 
-		Gaffer::OptionalValuePlug *wrapPlug();
-		const Gaffer::OptionalValuePlug *wrapPlug() const;
+	Gaffer::OptionalValuePlug *wrapPlug();
+	const Gaffer::OptionalValuePlug *wrapPlug() const;
 
-		Gaffer::BoolPlug *expandPinnedPlug();
-		const Gaffer::BoolPlug *expandPinnedPlug() const;
+	Gaffer::BoolPlug *expandPinnedPlug();
+	const Gaffer::BoolPlug *expandPinnedPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CurvesInterpolation )

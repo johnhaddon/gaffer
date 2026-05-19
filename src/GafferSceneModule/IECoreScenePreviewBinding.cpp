@@ -84,8 +84,8 @@ struct CompoundDataMapFromDict
 
 	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
 	{
-		void *storage = ( (converter::rvalue_from_python_storage<IECore::CompoundDataMap>*) data )->storage.bytes;
-		IECore::CompoundDataMap *map = new( storage ) IECore::CompoundDataMap();
+		void *storage = ( (converter::rvalue_from_python_storage<IECore::CompoundDataMap> *)data )->storage.bytes;
+		IECore::CompoundDataMap *map = new ( storage ) IECore::CompoundDataMap();
 		data->convertible = storage;
 
 		dict d( borrowed( obj ) );
@@ -93,10 +93,9 @@ struct CompoundDataMapFromDict
 		for( unsigned i = 0, e = boost::python::len( items ); i < e; ++i )
 		{
 			IECore::InternedString k = extract<IECore::InternedString>( items[i][0] );
-			(*map)[k] = extract<IECore::DataPtr>( items[i][1] );
+			( *map )[k] = extract<IECore::DataPtr>( items[i][1] );
 		}
 	}
-
 };
 
 void registerTypeWrapper( const std::string &name, object creator )
@@ -114,9 +113,9 @@ void registerTypeWrapper( const std::string &name, object creator )
 
 	Renderer::registerType(
 		name,
-		[creatorPtr] ( Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler ) -> Renderer::Ptr {
+		[creatorPtr]( Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler ) -> Renderer::Ptr {
 			IECorePython::ScopedGILLock gilLock;
-			object o = (*creatorPtr)( renderType, fileName, messageHandler );
+			object o = ( *creatorPtr )( renderType, fileName, messageHandler );
 			return extract<Renderer::Ptr>( o );
 		}
 	);
@@ -254,52 +253,51 @@ RendererPtr compoundRendererConstructor( object pythonRenderers )
 class ProceduralWrapper : public IECorePython::RunTimeTypedWrapper<IECoreScenePreview::Procedural>
 {
 
-	public :
+public:
 
-		ProceduralWrapper( PyObject *self )
-			:	IECorePython::RunTimeTypedWrapper<IECoreScenePreview::Procedural>( self )
+	ProceduralWrapper( PyObject *self )
+		: IECorePython::RunTimeTypedWrapper<IECoreScenePreview::Procedural>( self )
+	{
+	}
+
+	Imath::Box3f bound() const final
+	{
+		IECorePython::ScopedGILLock gilLock;
+		try
 		{
+			boost::python::object f = this->methodOverride( "bound" );
+			if( f )
+			{
+				return extract<Imath::Box3f>( f() );
+			}
+		}
+		catch( const boost::python::error_already_set & )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
 		}
 
-		Imath::Box3f bound() const final
-		{
-			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				boost::python::object f = this->methodOverride( "bound" );
-				if( f )
-				{
-					return extract<Imath::Box3f>( f() );
-				}
-			}
-			catch( const boost::python::error_already_set & )
-			{
-				IECorePython::ExceptionAlgo::translatePythonException();
-			}
+		throw IECore::Exception( "No bound method defined" );
+	}
 
-			throw IECore::Exception( "No bound method defined" );
+	void render( IECoreScenePreview::Renderer *renderer ) const final
+	{
+		IECorePython::ScopedGILLock gilLock;
+		try
+		{
+			boost::python::object f = this->methodOverride( "render" );
+			if( f )
+			{
+				f( IECoreScenePreview::RendererPtr( renderer ) );
+				return;
+			}
+		}
+		catch( const boost::python::error_already_set & )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
 		}
 
-		void render( IECoreScenePreview::Renderer *renderer ) const final
-		{
-			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				boost::python::object f = this->methodOverride( "render" );
-				if( f )
-				{
-					f( IECoreScenePreview::RendererPtr( renderer ) );
-					return;
-				}
-			}
-			catch( const boost::python::error_already_set & )
-			{
-				IECorePython::ExceptionAlgo::translatePythonException();
-			}
-
-			throw IECore::Exception( "No render method defined" );
-		}
-
+		throw IECore::Exception( "No render method defined" );
+	}
 };
 
 IECore::CompoundObjectPtr capturedAttributesAttributes( const CapturingRenderer::CapturedAttributes &a )
@@ -410,16 +408,16 @@ void transformPrimitiveWrapper( IECoreScene::Primitive &primitive, Imath::M44f m
 
 IECoreScene::PrimitivePtr mergePrimitivesWrapper( object primitives, const IECore::Canceller *canceller = nullptr )
 {
-	std::vector< std::pair< const IECoreScene::Primitive*, Imath::M44f > > typedPrimitives;
-	for (int i = 0; i < primitives.attr("__len__")(); i++)
+	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> typedPrimitives;
+	for( int i = 0; i < primitives.attr( "__len__" )(); i++ )
 	{
-		object pair(primitives[i]);
+		object pair( primitives[i] );
 
 
 		typedPrimitives.push_back(
 			std::make_pair(
-				extract<const IECoreScene::Primitive*>(pair[0])(),
-				extract<Imath::M44f>(pair[1])()
+				extract<const IECoreScene::Primitive *>( pair[0] )(),
+				extract<Imath::M44f>( pair[1] )()
 			)
 		);
 	}
@@ -448,8 +446,7 @@ void GafferSceneModule::bindIECoreScenePreview()
 		enum_<Renderer::RenderType>( "RenderType" )
 			.value( "Batch", Renderer::Batch )
 			.value( "SceneDescription", Renderer::SceneDescription )
-			.value( "Interactive", Renderer::Interactive )
-		;
+			.value( "Interactive", Renderer::Interactive );
 
 		IECorePython::RefCountedClass<Renderer::AttributesInterface, IECore::RefCounted>( "AttributesInterface" );
 
@@ -459,8 +456,7 @@ void GafferSceneModule::bindIECoreScenePreview()
 			.def( "attributes", &Renderer::ObjectInterface::attributes )
 			.def( "link", &objectInterfaceLink )
 			.def( "assignID", &Renderer::ObjectInterface::assignID )
-			.def( "assignInstanceID", &Renderer::ObjectInterface::assignInstanceID )
-		;
+			.def( "assignInstanceID", &Renderer::ObjectInterface::assignInstanceID );
 	}
 
 	renderer
@@ -493,18 +489,16 @@ void GafferSceneModule::bindIECoreScenePreview()
 		.def( "pause", &Renderer::pause )
 		.def( "command", &rendererCommand )
 
-	;
+		;
 
 	CompoundDataMapFromDict();
 
 	IECorePython::RefCountedClass<CompoundRenderer, Renderer>( "CompoundRenderer" )
-		.def( "__init__", make_constructor( compoundRendererConstructor, default_call_policies(), arg( "renderers" ) ) )
-	;
+		.def( "__init__", make_constructor( compoundRendererConstructor, default_call_policies(), arg( "renderers" ) ) );
 
 	IECorePython::RunTimeTypedClass<IECoreScenePreview::Procedural, ProceduralWrapper>()
 		.def( init<>() )
-		.def( "render", (void (Procedural::*)( IECoreScenePreview::Renderer *)const)&Procedural::render )
-	;
+		.def( "render", ( void ( Procedural::* )( IECoreScenePreview::Renderer * ) const ) & Procedural::render );
 
 	IECorePython::RunTimeTypedClass<Geometry>()
 		.def(
@@ -520,8 +514,7 @@ void GafferSceneModule::bindIECoreScenePreview()
 		.def( "getType", &Geometry::getType, return_value_policy<copy_const_reference>() )
 		.def( "setBound", &Geometry::setBound )
 		.def( "getBound", &Geometry::getBound, return_value_policy<copy_const_reference>() )
-		.def( "parameters", (IECore::CompoundData *(Geometry::*)())&Geometry::parameters, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-	;
+		.def( "parameters", ( IECore::CompoundData * (Geometry::*)() ) & Geometry::parameters, return_value_policy<IECorePython::CastToIntrusivePtr>() );
 
 	IECorePython::RunTimeTypedClass<Placeholder> placeholderClass( "Placeholder" );
 	{
@@ -529,17 +522,14 @@ void GafferSceneModule::bindIECoreScenePreview()
 
 		enum_<Placeholder::Mode>( "Mode" )
 			.value( "Default", Placeholder::Default )
-			.value( "Excluded", Placeholder::Excluded )
-		;
+			.value( "Excluded", Placeholder::Excluded );
 
 		placeholderClass
 			.def( init<const Imath::Box3f &, const Placeholder::Mode>( ( arg( "bound" ) = Imath::Box3f(), arg( "mode" ) = Placeholder::Mode::Default ) ) )
 			.def( "setMode", &Placeholder::setMode )
 			.def( "getMode", &Placeholder::getMode )
 			.def( "setBound", &Placeholder::setBound )
-			.def( "getBound", &Placeholder::getBound, return_value_policy<copy_const_reference>() )
-		;
-
+			.def( "getBound", &Placeholder::getBound, return_value_policy<copy_const_reference>() );
 	}
 
 	{
@@ -549,26 +539,23 @@ void GafferSceneModule::bindIECoreScenePreview()
 		scope meshAlgoScope( meshAlgoModule );
 
 		def( "tessellateMesh", MeshAlgo::tessellateMesh,
-			(
-				arg( "mesh" ), arg( "divisions" ),
-				arg( "calculateNormals" ) = false, arg( "scheme" ) = "",
-				arg( "interpolateBoundary" ) = "",
-				arg( "faceVaryingLinearInterpolation" ) = "",
-				arg( "triangleSubdivisionRule" ) = "",
-				arg( "canceller" ) = object()
-			)
-		);
+			 (
+				 arg( "mesh" ), arg( "divisions" ),
+				 arg( "calculateNormals" ) = false, arg( "scheme" ) = "",
+				 arg( "interpolateBoundary" ) = "",
+				 arg( "faceVaryingLinearInterpolation" ) = "",
+				 arg( "triangleSubdivisionRule" ) = "",
+				 arg( "canceller" ) = object()
+			 ) );
 	}
 
 	scope capturingRendererScope = IECorePython::RefCountedClass<CapturingRenderer, Renderer>( "CapturingRenderer" )
-		.def( init<Renderer::RenderType, const std::string &, const IECore::MessageHandlerPtr &>( ( arg( "renderType" ) = Renderer::RenderType::Interactive, arg( "fileName" ) = "", arg( "messageHandler") = IECore::MessageHandlerPtr() ) ) )
-		.def( "capturedObjectNames", &capturingRendererCapturedObjectNames )
-		.def( "capturedObject", &capturingRendererCapturedObject )
-	;
+									   .def( init<Renderer::RenderType, const std::string &, const IECore::MessageHandlerPtr &>( ( arg( "renderType" ) = Renderer::RenderType::Interactive, arg( "fileName" ) = "", arg( "messageHandler" ) = IECore::MessageHandlerPtr() ) ) )
+									   .def( "capturedObjectNames", &capturingRendererCapturedObjectNames )
+									   .def( "capturedObject", &capturingRendererCapturedObject );
 
 	IECorePython::RefCountedClass<CapturingRenderer::CapturedAttributes, Renderer::AttributesInterface>( "CapturedAttributes" )
-		.def( "attributes", &capturedAttributesAttributes )
-	;
+		.def( "attributes", &capturedAttributesAttributes );
 
 	IECorePython::RefCountedClass<CapturingRenderer::CapturedObject, Renderer::ObjectInterface>( "CapturedObject" )
 		.def( "capturedName", &capturedObjectCapturedName )
@@ -582,8 +569,7 @@ void GafferSceneModule::bindIECoreScenePreview()
 		.def( "numAttributeEdits", &CapturingRenderer::CapturedObject::numAttributeEdits )
 		.def( "numLinkEdits", &CapturingRenderer::CapturedObject::numLinkEdits )
 		.def( "id", &CapturingRenderer::CapturedObject::id )
-		.def( "instanceID", &CapturingRenderer::CapturedObject::instanceID )
-	;
+		.def( "instanceID", &CapturingRenderer::CapturedObject::instanceID );
 
 	{
 		object primitiveAlgoModule( borrowed( PyImport_AddModule( "GafferScene.Private.IECoreScenePreview.PrimitiveAlgo" ) ) );
@@ -592,17 +578,15 @@ void GafferSceneModule::bindIECoreScenePreview()
 		scope primitiveAlgoScope( primitiveAlgoModule );
 
 		def( "transformPrimitive", transformPrimitiveWrapper,
-			(
-				arg( "primitive" ), arg( "matrix" ),
-				arg( "canceller" ) = object()
-			)
-		);
+			 (
+				 arg( "primitive" ), arg( "matrix" ),
+				 arg( "canceller" ) = object()
+			 ) );
 
 		def( "mergePrimitives", mergePrimitivesWrapper,
-			(
-				arg( "primitives" ),
-				arg( "canceller" ) = object()
-			)
-		);
+			 (
+				 arg( "primitives" ),
+				 arg( "canceller" ) = object()
+			 ) );
 	}
 }

@@ -50,7 +50,7 @@ using namespace IECoreRenderMan;
 namespace
 {
 
-int interpolateBoundary( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext  )
+int interpolateBoundary( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext )
 {
 	const InternedString s = mesh->getInterpolateBoundary();
 	if( s == IECoreScene::MeshPrimitive::interpolateBoundaryNone )
@@ -72,7 +72,7 @@ int interpolateBoundary( const IECoreScene::MeshPrimitive *mesh, const std::stri
 	}
 }
 
-int faceVaryingInterpolateBoundary( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext  )
+int faceVaryingInterpolateBoundary( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext )
 {
 	const InternedString s = mesh->getFaceVaryingLinearInterpolation();
 	if( s == IECoreScene::MeshPrimitive::faceVaryingLinearInterpolationNone )
@@ -102,7 +102,7 @@ int faceVaryingInterpolateBoundary( const IECoreScene::MeshPrimitive *mesh, cons
 	}
 }
 
-int smoothTriangles( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext  )
+int smoothTriangles( const IECoreScene::MeshPrimitive *mesh, const std::string &messageContext )
 {
 	const InternedString s = mesh->getTriangleSubdivisionRule();
 	if( s == IECoreScene::MeshPrimitive::triangleSubdivisionRuleCatmullClark )
@@ -120,7 +120,7 @@ int smoothTriangles( const IECoreScene::MeshPrimitive *mesh, const std::string &
 	}
 }
 
-RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars, const std::string &messageContext  )
+RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars, const std::string &messageContext )
 {
 	primVars.SetIntegerDetail( Loader::strings().k_Ri_nvertices, mesh->verticesPerFace()->readable().data(), RtDetailType::k_uniform );
 	primVars.SetIntegerDetail( Loader::strings().k_Ri_vertices, mesh->vertexIds()->readable().data(), RtDetailType::k_facevarying );

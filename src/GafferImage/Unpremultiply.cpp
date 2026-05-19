@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( Unpremultiply );
 size_t Unpremultiply::g_firstPlugIndex = 0;
 
 Unpremultiply::Unpremultiply( const std::string &name )
-	:	ChannelDataProcessor( name )
+	: ChannelDataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "alphaChannel", Gaffer::Plug::In, "A" ) );
@@ -115,7 +115,7 @@ void Unpremultiply::hashChannelData( const GafferImage::ImagePlug *output, const
 	}
 
 	const std::vector<std::string> &inChannelNames = inChannelNamesPtr->readable();
-	if ( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
+	if( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
 	{
 		if( ignoreMissingAlpha )
 		{
@@ -149,13 +149,13 @@ void Unpremultiply::processChannelData( const Gaffer::Context *context, const Im
 		ignoreMissingAlpha = ignoreMissingAlphaPlug()->getValue();
 	}
 
-	if ( channel == alphaChannel )
+	if( channel == alphaChannel )
 	{
 		return;
 	}
 
 	const std::vector<std::string> &inChannelNames = inChannelNamesPtr->readable();
-	if ( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
+	if( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
 	{
 		if( ignoreMissingAlpha )
 		{
@@ -175,9 +175,9 @@ void Unpremultiply::processChannelData( const Gaffer::Context *context, const Im
 	std::vector<float> &out = outData->writable();
 
 	std::vector<float>::const_iterator aIt = a.begin();
-	for ( std::vector<float>::iterator outIt = out.begin(), outItEnd = out.end(); outIt != outItEnd; ++outIt, ++aIt )
+	for( std::vector<float>::iterator outIt = out.begin(), outItEnd = out.end(); outIt != outItEnd; ++outIt, ++aIt )
 	{
-		if ( *aIt != 0.0f )
+		if( *aIt != 0.0f )
 		{
 			*outIt /= *aIt;
 		}

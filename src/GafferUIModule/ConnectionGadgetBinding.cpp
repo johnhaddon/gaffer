@@ -69,21 +69,20 @@ NodulePtr dstNodule( ConnectionGadget &c )
 struct ConnectionGadgetCreator
 {
 	ConnectionGadgetCreator( object fn )
-		:	m_fn( fn )
+		: m_fn( fn )
 	{
 	}
 
-	ConnectionGadgetPtr operator()( NodulePtr srcNodule, NodulePtr dstNodule )
+	ConnectionGadgetPtr operator () ( NodulePtr srcNodule, NodulePtr dstNodule )
 	{
 		IECorePython::ScopedGILLock gilLock;
 		ConnectionGadgetPtr result = extract<ConnectionGadgetPtr>( m_fn( srcNodule, dstNodule ) );
 		return result;
 	}
 
-	private :
+private:
 
-		object m_fn;
-
+	object m_fn;
 };
 
 void registerConnectionGadget1( IECore::TypeId dstPlugType, object creator )
@@ -110,10 +109,8 @@ void GafferUIModule::bindConnectionGadget()
 		.staticmethod( "create" )
 		.def( "registerConnectionGadget", &registerConnectionGadget1 )
 		.def( "registerConnectionGadget", &registerConnectionGadget2 )
-		.staticmethod( "registerConnectionGadget" )
-	;
+		.staticmethod( "registerConnectionGadget" );
 
 	ConnectionCreatorClass<StandardConnectionGadget>()
-		.def( init<NodulePtr, NodulePtr>() )
-	;
+		.def( init<NodulePtr, NodulePtr>() );
 }

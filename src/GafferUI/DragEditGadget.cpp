@@ -75,9 +75,9 @@ namespace
 const float g_cutLineRadius = 4.0f;
 const Color4f g_cutLineColor = Color4f( 0.7f, 0.2f, 0.1f, 0.375f );
 
-std::vector<ConnectionGadget*> editableConnectionGadgetsAtLine( const ViewportGadget *viewportGadget, const LineSegment2f &line, const float radius, const bool includeEndpoint )
+std::vector<ConnectionGadget *> editableConnectionGadgetsAtLine( const ViewportGadget *viewportGadget, const LineSegment2f &line, const float radius, const bool includeEndpoint )
 {
-	std::unordered_set<Gadget*> gadgets;
+	std::unordered_set<Gadget *> gadgets;
 
 	int samples = 1;
 	float step = 0.0f;
@@ -96,11 +96,11 @@ std::vector<ConnectionGadget*> editableConnectionGadgetsAtLine( const ViewportGa
 	for( int i = 0; i < samples; ++i )
 	{
 		const V2f p = line( i * step );
-		const std::vector<Gadget*> gadgetsAtBox = viewportGadget->gadgetsAt( Box2f( p - padding, p + padding ), GraphLayer::Connections );
+		const std::vector<Gadget *> gadgetsAtBox = viewportGadget->gadgetsAt( Box2f( p - padding, p + padding ), GraphLayer::Connections );
 		gadgets.insert( gadgetsAtBox.begin(), gadgetsAtBox.end() );
 	}
 
-	std::vector<ConnectionGadget*> connectionGadgets;
+	std::vector<ConnectionGadget *> connectionGadgets;
 	for( const auto &gadget : gadgets )
 	{
 		ConnectionGadget *connectionGadget = runTimeCast<ConnectionGadget>( gadget );
@@ -122,23 +122,21 @@ std::vector<ConnectionGadget*> editableConnectionGadgetsAtLine( const ViewportGa
 
 const char *translucentConstantFragSource()
 {
-	return
-		"#version 120\n"
-		""
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"in vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-		"	gl_FragColor = vec4( fragmentCs, 0.375 );"
-		"}"
-	;
+	return "#version 120\n"
+		   ""
+		   "#if __VERSION__ <= 120\n"
+		   "#define in varying\n"
+		   "#endif\n"
+		   ""
+		   "in vec3 fragmentCs;"
+		   ""
+		   "void main()"
+		   "{"
+		   "	gl_FragColor = vec4( fragmentCs, 0.375 );"
+		   "}";
 }
 
-}
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // DragEditGadget
@@ -147,7 +145,7 @@ const char *translucentConstantFragSource()
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DragEditGadget );
 
 DragEditGadget::DragEditGadget()
-	:	Gadget( "DragEditGadget" ), m_mode( None ), m_editable( false ), m_dragPositions( new V3fVectorData )
+	: Gadget( "DragEditGadget" ), m_mode( None ), m_editable( false ), m_dragPositions( new V3fVectorData )
 {
 	buttonPressSignal().connect( boost::bind( &DragEditGadget::buttonPress, this, ::_1, ::_2 ) );
 	buttonReleaseSignal().connect( boost::bind( &DragEditGadget::buttonRelease, this, ::_1, ::_2 ) );
@@ -387,7 +385,7 @@ void DragEditGadget::leave()
 
 std::string DragEditGadget::undoMergeGroup() const
 {
-	return fmt::format( "DragEditGadget{}{}", (void*)this, m_mergeGroupId );
+	return fmt::format( "DragEditGadget{}{}", (void *)this, m_mergeGroupId );
 }
 
 void DragEditGadget::disconnectConnectionGadgets()
@@ -413,7 +411,7 @@ void DragEditGadget::disconnectConnectionGadgets()
 	// exhaustively test and remove until no more are found.
 	while( true )
 	{
-		std::unordered_set<ConnectionGadget*> connectionsToDisconnect;
+		std::unordered_set<ConnectionGadget *> connectionsToDisconnect;
 		for( const auto &line : rasterLines )
 		{
 			const auto connectionsAtLine = editableConnectionGadgetsAtLine( viewportGadget, line, g_cutLineRadius, /* includeEndpoint = */ &line == &rasterLines.back() );

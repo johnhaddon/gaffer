@@ -57,7 +57,7 @@ using namespace GafferScene;
 namespace
 {
 
-template< typename Indexer >
+template<typename Indexer>
 bool convexPolygon( const Indexer vertices, const int n )
 {
 	assert( n >= 3 );
@@ -67,12 +67,12 @@ bool convexPolygon( const Indexer vertices, const int n )
 		return true;
 	}
 
-	int c[ 2 ] = { 0, 0 };
+	int c[2] = { 0, 0 };
 
 	for( int i = 0; i < n; ++i )
 	{
 		const int ip = ( i + n - 1 ) % n;
-		const int in = ( i     + 1 ) % n;
+		const int in = ( i + 1 ) % n;
 
 		const Imath::V2f vi = vertices( i );
 
@@ -82,21 +82,20 @@ bool convexPolygon( const Indexer vertices, const int n )
 
 		if( Av == 0.f )
 		{
-			c[ 0 ] += 1;
-			c[ 1 ] += 1;
+			c[0] += 1;
+			c[1] += 1;
 		}
 		else
 		{
-			c[ std::signbit( Av ) ? 0 : 1 ] += 1;
+			c[std::signbit( Av ) ? 0 : 1] += 1;
 		}
 	}
 
-	return
-		( c[ 0 ] == n ) ||
-		( c[ 1 ] == n );
+	return ( c[0] == n ) ||
+		( c[1] == n );
 }
 
-template< typename Indexer >
+template<typename Indexer>
 bool ptInPolygon( const Indexer vertices, const Imath::V2f v, const int n )
 {
 	bool result = false;
@@ -114,7 +113,8 @@ bool ptInPolygon( const Indexer vertices, const Imath::V2f v, const int n )
 		}
 		else if(
 			( ( v0.y == v1.y ) && ( v.y == v0.y ) && ( ( v0.x >= v.x ) != ( v1.x >= v.x ) ) ) ||
-			( ( v0.x == v1.x ) && ( v.x == v0.x ) && ( ( v0.y >= v.y ) != ( v1.y >= v.y ) ) ) )
+			( ( v0.x == v1.x ) && ( v.x == v0.x ) && ( ( v0.y >= v.y ) != ( v1.y >= v.y ) ) )
+		)
 		{
 			return true; // NOTE : axis aligned edge
 		}
@@ -145,7 +145,7 @@ bool ptInPolygon( const Indexer vertices, const Imath::V2f v, const int n )
 	return result;
 }
 
-template< typename PIndexer, typename UVIndexer >
+template<typename PIndexer, typename UVIndexer>
 Imath::V3f interpolateConvexPolygon( const PIndexer points, const UVIndexer uvs, const Imath::V2f uv, const int n )
 {
 	// NOTE : compute vertex and edge triangle areas
@@ -153,8 +153,8 @@ Imath::V3f interpolateConvexPolygon( const PIndexer points, const UVIndexer uvs,
 	//        Av[ i ] is 2 * area of the triangle formed by the vertices v(i-1), v(i) and v(i+1)
 	//        Ae[ i ] is 2 * area of the triangle formed by the vertices v(i), v(i+1) and uv
 
-	std::unique_ptr< float[] > Av( new float[ n ] );
-	std::unique_ptr< float[] > Ae( new float[ n ] );
+	std::unique_ptr<float[]> Av( new float[n] );
+	std::unique_ptr<float[]> Ae( new float[n] );
 
 	for( int i = 0; i < n; ++i )
 	{
@@ -173,7 +173,8 @@ Imath::V3f interpolateConvexPolygon( const PIndexer points, const UVIndexer uvs,
 		for( int j = 1; j < n; ++j )
 		{
 			vp = uvs( ( i + n - j ) % n );
-			if( vp != vi ) break;
+			if( vp != vi )
+				break;
 			c += 1.f;
 		}
 
@@ -181,41 +182,41 @@ Imath::V3f interpolateConvexPolygon( const PIndexer points, const UVIndexer uvs,
 		for( int j = 1; j < n; ++j )
 		{
 			vn = uvs( ( i + j ) % n );
-			if( vn != vi ) break;
+			if( vn != vi )
+				break;
 			c += 1.f;
 		}
 
-		Av[ i ] = ( vi - vp ) % ( vn - vi );
-		Ae[ i ] = ( vn - vi ) % ( uv - vn );
+		Av[i] = ( vi - vp ) % ( vn - vi );
+		Ae[i] = ( vn - vi ) % ( uv - vn );
 
 		// NOTE : sign of vertex area depends on winding.
 
-		if( std::signbit( Av[ i ] ) )
+		if( std::signbit( Av[i] ) )
 		{
-			Av[ i ] = -( Av[ i ] );
-			Ae[ i ] = -( Ae[ i ] );
+			Av[i] = -( Av[i] );
+			Ae[i] = -( Ae[i] );
 		}
 
 		// NOTE : clamp edge area to minimum of zero to prevent negative weights
 
-		Ae[ i ] = std::max( Ae[ i ], 0.f );
+		Ae[i] = std::max( Ae[i], 0.f );
 
 		// NOTE : this clamp is done in two steps to prevent underflow to zero
 
-		Av[ i ] = std::max( Av[ i ], c * std::numeric_limits< float >::min() );
-		Av[ i ] /= c;
+		Av[i] = std::max( Av[i], c * std::numeric_limits<float>::min() );
+		Av[i] /= c;
 
 		// NOTE : uv is considered on an edge when the edge area is below threshold in which
 		//        case lerp between average of all positions corresponding to end vertices
 
 		if(
-			( Ae[ i ] < std::sqrt( std::numeric_limits< float >::min() ) ) &&
-			( ( ( uv - vi ) ^ ( uv - vn ) ) < std::numeric_limits< float >::min() ) )
+			( Ae[i] < std::sqrt( std::numeric_limits<float>::min() ) ) &&
+			( ( ( uv - vi ) ^ ( uv - vn ) ) < std::numeric_limits<float>::min() )
+		)
 		{
 			const float l2 = ( vn - vi ).length2();
-			const float t = std::min( std::max(
-				( l2 > ( 2.f * std::numeric_limits< float >::min() ) )
-					? std::sqrt( ( uv - vn ).length2() / l2 ) : 0.f, 0.f ), 1.f );
+			const float t = std::min( std::max( ( l2 > ( 2.f * std::numeric_limits<float>::min() ) ) ? std::sqrt( ( uv - vn ).length2() / l2 ) : 0.f, 0.f ), 1.f );
 
 			Imath::V3f pv( 0.f );
 			Imath::V3f pn( 0.f );
@@ -240,8 +241,7 @@ Imath::V3f interpolateConvexPolygon( const PIndexer points, const UVIndexer uvs,
 			assert( pvc != 0.f );
 			assert( pnc != 0.f );
 
-			return
-				( pv / pvc ) * (       t ) +
+			return ( pv / pvc ) * ( t ) +
 				( pn / pnc ) * ( 1.0 - t );
 		}
 	}
@@ -264,11 +264,11 @@ Imath::V3f interpolateConvexPolygon( const PIndexer points, const UVIndexer uvs,
 				break;
 		}
 
-		const float Ad = Ae[ ip ] * Ae[ i ];
+		const float Ad = Ae[ip] * Ae[i];
 
 		if( Ad != 0.f )
 		{
-			const float w = Av[ i ] / Ad;
+			const float w = Av[i] / Ad;
 			p += points( i ) * w;
 			ws += w;
 		}
@@ -282,7 +282,7 @@ Imath::V3f interpolateConvexPolygon( const PIndexer points, const UVIndexer uvs,
 	return p;
 }
 
-template< typename PIndexer, typename UVIndexer >
+template<typename PIndexer, typename UVIndexer>
 Imath::V3f interpolateNonConvexPolygon( const PIndexer points, const UVIndexer uvs, const Imath::V2f uv, const int n )
 {
 	// NOTE : a simple triangle fan from any vertex will cover the non convex polygon
@@ -292,53 +292,50 @@ Imath::V3f interpolateNonConvexPolygon( const PIndexer points, const UVIndexer u
 
 	for( int i = 2; i < n; ++i )
 	{
-		const Imath::V2f tuv[ 3 ] =
-		{
+		const Imath::V2f tuv[3] = {
 			uvs( 0 ),
 			uvs( i - 1 ),
 			uvs( i )
 		};
 
-		if( ptInPolygon( [ & tuv ]( const int ii ){ return tuv[ ii ]; }, uv, 3 ) )
+		if( ptInPolygon( [&tuv]( const int ii ) { return tuv[ii]; }, uv, 3 ) )
 		{
-			const float w = ( tuv[ 2 ] - tuv[ 0 ] ) % ( tuv[ 1 ] - tuv[ 0 ] );
+			const float w = ( tuv[2] - tuv[0] ) % ( tuv[1] - tuv[0] );
 
 			if( w == 0.f )
 			{
 				// NOTE : uv triangle numerically has zero area so is effectively a line or point.
 				//        position in 3d space is ambiguous unless the triangle in 3d space is a point.
 
-				const Imath::V3f& vp = points( i - 1 );
+				const Imath::V3f &vp = points( i - 1 );
 
 				if(
-					( ( points( 0 ) - vp ).length2() <= ( 2.f * std::numeric_limits< float >::min() ) ) &&
-					( ( points( i ) - vp ).length2() <= ( 2.f * std::numeric_limits< float >::min() ) ) )
+					( ( points( 0 ) - vp ).length2() <= ( 2.f * std::numeric_limits<float>::min() ) ) &&
+					( ( points( i ) - vp ).length2() <= ( 2.f * std::numeric_limits<float>::min() ) )
+				)
 				{
 					p = vp;
 
 					break;
 				}
 
-				throw IECore::InvalidArgumentException( fmt::format(
-					"Gaffer::Constraint : UV coordinates \"{}, {}\" map to ambiguous point(s) in 3d space.",
-					uv.x, uv.y
-				) );
+				throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : UV coordinates \"{}, {}\" map to ambiguous point(s) in 3d space.", uv.x, uv.y ) );
 			}
 
 			// NOTE : ensure that the positive barycentric coordinates sum to a maximum of one.
 
-			const float b0 = std::max( 0.f, ( ( tuv[ 1 ] - tuv[ 2 ] ) % ( uv - tuv[ 1 ] ) ) / w );
-			const float b1 = std::max( 0.f, ( ( tuv[ 2 ] - tuv[ 0 ] ) % ( uv - tuv[ 2 ] ) ) / w );
-			const float b2 = std::max( 0.f, ( ( tuv[ 0 ] - tuv[ 1 ] ) % ( uv - tuv[ 0 ] ) ) / w );
+			const float b0 = std::max( 0.f, ( ( tuv[1] - tuv[2] ) % ( uv - tuv[1] ) ) / w );
+			const float b1 = std::max( 0.f, ( ( tuv[2] - tuv[0] ) % ( uv - tuv[2] ) ) / w );
+			const float b2 = std::max( 0.f, ( ( tuv[0] - tuv[1] ) % ( uv - tuv[0] ) ) / w );
 
 			const float bs = b0 + b1 + b2;
 
 			if( bs != 0.f )
 			{
 				p =
-					points(     0 ) * ( b0 / bs ) +
+					points( 0 ) * ( b0 / bs ) +
 					points( i - 1 ) * ( b1 / bs ) +
-					points( i     ) * ( b2 / bs );
+					points( i ) * ( b2 / bs );
 
 				break;
 			}
@@ -348,30 +345,30 @@ Imath::V3f interpolateNonConvexPolygon( const PIndexer points, const UVIndexer u
 	return p;
 }
 
-void constructMatrix( Imath::M44f& m, const Imath::V3f& p, const Imath::V3f& x, const Imath::V3f& y, const Imath::V3f& z )
+void constructMatrix( Imath::M44f &m, const Imath::V3f &p, const Imath::V3f &x, const Imath::V3f &y, const Imath::V3f &z )
 {
-	m[ 0 ][ 0 ] = x[ 0 ];
-	m[ 0 ][ 1 ] = x[ 1 ];
-	m[ 0 ][ 2 ] = x[ 2 ];
-	m[ 0 ][ 3 ] = 0.f;
+	m[0][0] = x[0];
+	m[0][1] = x[1];
+	m[0][2] = x[2];
+	m[0][3] = 0.f;
 
-	m[ 1 ][ 0 ] = y[ 0 ];
-	m[ 1 ][ 1 ] = y[ 1 ];
-	m[ 1 ][ 2 ] = y[ 2 ];
-	m[ 1 ][ 3 ] = 0.f;
+	m[1][0] = y[0];
+	m[1][1] = y[1];
+	m[1][2] = y[2];
+	m[1][3] = 0.f;
 
-	m[ 2 ][ 0 ] = z[ 0 ];
-	m[ 2 ][ 1 ] = z[ 1 ];
-	m[ 2 ][ 2 ] = z[ 2 ];
-	m[ 2 ][ 3 ] = 0.f;
+	m[2][0] = z[0];
+	m[2][1] = z[1];
+	m[2][2] = z[2];
+	m[2][3] = 0.f;
 
-	m[ 3 ][ 0 ] = p[ 0 ];
-	m[ 3 ][ 1 ] = p[ 1 ];
-	m[ 3 ][ 2 ] = p[ 2 ];
-	m[ 3 ][ 3 ] = 1.f;
+	m[3][0] = p[0];
+	m[3][1] = p[1];
+	m[3][2] = p[2];
+	m[3][3] = 1.f;
 }
 
-void constructLocalFrame( Imath::M44f& m, const Imath::V3f& p, const Imath::V3f& t, const Imath::V3f& b, const Imath::V3f& n )
+void constructLocalFrame( Imath::M44f &m, const Imath::V3f &p, const Imath::V3f &t, const Imath::V3f &b, const Imath::V3f &n )
 {
 	// NOTE : use tangent and bitangent when both have non zero length and are not colinear
 	//        and either the normal has zero length or both the tangent and bitangent are
@@ -387,9 +384,10 @@ void constructLocalFrame( Imath::M44f& m, const Imath::V3f& p, const Imath::V3f&
 	const Imath::V3f nxb = nn % nb;
 
 	if(
-		( bxt.length2() > ( 2.f * std::numeric_limits< float >::min() ) ) &&
-		( ( n.length2() < ( 2.f * std::numeric_limits< float >::min() ) ) ||
-			( ( std::fabs( nt ^ nn ) < 0.999f ) && ( std::fabs( nb ^ nn ) < 0.999f ) ) ) )
+		( bxt.length2() > ( 2.f * std::numeric_limits<float>::min() ) ) &&
+		( ( n.length2() < ( 2.f * std::numeric_limits<float>::min() ) ) ||
+		  ( ( std::fabs( nt ^ nn ) < 0.999f ) && ( std::fabs( nb ^ nn ) < 0.999f ) ) )
+	)
 	{
 		Imath::V3f y = bxt.normalized();
 
@@ -402,12 +400,12 @@ void constructLocalFrame( Imath::M44f& m, const Imath::V3f& p, const Imath::V3f&
 
 		constructMatrix( m, p, nt, y, ( nt % y ).normalized() );
 	}
-	else if( txn.length2() > ( 2.f * std::numeric_limits< float >::min() ) )
+	else if( txn.length2() > ( 2.f * std::numeric_limits<float>::min() ) )
 	{
 		const Imath::V3f z = txn.normalized();
 		constructMatrix( m, p, nt, ( z % nt ).normalized(), z );
 	}
-	else if( nxb.length2() > ( 2.f * std::numeric_limits< float >::min() ) )
+	else if( nxb.length2() > ( 2.f * std::numeric_limits<float>::min() ) )
 	{
 		const Imath::V3f x = nxb.normalized();
 		constructMatrix( m, p, x, ( nb % x ).normalized(), nb );
@@ -420,22 +418,19 @@ void constructLocalFrame( Imath::M44f& m, const Imath::V3f& p, const Imath::V3f&
 
 struct UVIndexer
 {
-	UVIndexer( const IECoreScene::MeshPrimitive& primitive, const std::string& uvSet, const bool throwOnError )
-	: m_indices( nullptr )
-	, m_view()
+	UVIndexer( const IECoreScene::MeshPrimitive &primitive, const std::string &uvSet, const bool throwOnError )
+		: m_indices( nullptr ), m_view()
 	{
 		const IECoreScene::PrimitiveVariableMap::const_iterator it = primitive.variables.find( uvSet );
 
 		if(
 			( it == primitive.variables.end() ) ||
-			( ( *it ).second.data->typeId() != IECore::V2fVectorDataTypeId ) )
+			( ( *it ).second.data->typeId() != IECore::V2fVectorDataTypeId )
+		)
 		{
 			if( throwOnError )
 			{
-				throw IECore::InvalidArgumentException( fmt::format(
-					"Gaffer::Constraint : MeshPrimitive has no V2fVectorData primitive variable named \"{}\".",
-					uvSet
-				) );
+				throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : MeshPrimitive has no V2fVectorData primitive variable named \"{}\".", uvSet ) );
 			}
 			else
 			{
@@ -447,7 +442,8 @@ struct UVIndexer
 
 		if(
 			( ( *it ).second.interpolation == IECoreScene::PrimitiveVariable::Vertex ) ||
-			( ( *it ).second.interpolation == IECoreScene::PrimitiveVariable::Varying ) )
+			( ( *it ).second.interpolation == IECoreScene::PrimitiveVariable::Varying )
+		)
 		{
 			m_indices = &( primitive.vertexIds()->readable() );
 		}
@@ -455,10 +451,7 @@ struct UVIndexer
 		{
 			if( throwOnError )
 			{
-				throw IECore::InvalidArgumentException( fmt::format(
-					"Gaffer::Constraint : Primitive variable named \"{}\" has incorrect interpolation, must be either Vertex, Varying or FaceVarying",
-					uvSet
-				) );
+				throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : Primitive variable named \"{}\" has incorrect interpolation, must be either Vertex, Varying or FaceVarying", uvSet ) );
 			}
 			else
 			{
@@ -466,30 +459,30 @@ struct UVIndexer
 			}
 		}
 
-		m_view = IECoreScene::PrimitiveVariable::IndexedView< Imath::V2f >( ( *it ).second );
+		m_view = IECoreScene::PrimitiveVariable::IndexedView<Imath::V2f>( ( *it ).second );
 	}
 
 	bool valid() const
 	{
-		return static_cast< bool >( m_view );
+		return static_cast<bool>( m_view );
 	}
 
-	const Imath::V2f& operator[]( const int i ) const
+	const Imath::V2f &operator [] ( const int i ) const
 	{
 		assert( valid() );
-		const int index = ( m_indices != nullptr ) ? ( ( *m_indices )[ i ] ) : i;
-		return ( *m_view )[ index ];
+		const int index = ( m_indices != nullptr ) ? ( ( *m_indices )[i] ) : i;
+		return ( *m_view )[index];
 	}
 
 private:
 
-	const std::vector< int >* m_indices;
+	const std::vector<int> *m_indices;
 	std::optional<IECoreScene::PrimitiveVariable::IndexedView<Imath::V2f>> m_view;
 };
 
-void computePrimitiveVertexLocalFrame( const IECoreScene::Primitive& primitive, Imath::M44f& m, const int vertexId, const bool throwOnError )
+void computePrimitiveVertexLocalFrame( const IECoreScene::Primitive &primitive, Imath::M44f &m, const int vertexId, const bool throwOnError )
 {
-	const IECore::V3fVectorData* const pdata = primitive.variableData< IECore::V3fVectorData >( "P" );
+	const IECore::V3fVectorData *const pdata = primitive.variableData<IECore::V3fVectorData>( "P" );
 	if( pdata == nullptr )
 	{
 		if( throwOnError )
@@ -501,16 +494,13 @@ void computePrimitiveVertexLocalFrame( const IECoreScene::Primitive& primitive, 
 			return;
 		}
 	}
-	const IECore::V3fVectorData::ValueType& points = pdata->readable();
+	const IECore::V3fVectorData::ValueType &points = pdata->readable();
 
-	if( ( vertexId < 0 ) || ( vertexId >= static_cast< int >( points.size() ) ) )
+	if( ( vertexId < 0 ) || ( vertexId >= static_cast<int>( points.size() ) ) )
 	{
 		if( throwOnError )
 		{
-			throw IECore::InvalidArgumentException( fmt::format(
-				"Gaffer::Constraint : Vertex id \"{}\" is out of range.",
-				vertexId
-			) );
+			throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : Vertex id \"{}\" is out of range.", vertexId ) );
 		}
 		else
 		{
@@ -518,12 +508,12 @@ void computePrimitiveVertexLocalFrame( const IECoreScene::Primitive& primitive, 
 		}
 	}
 
-	m.translate( points[ vertexId ] );
+	m.translate( points[vertexId] );
 }
 
-void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, Imath::M44f& m, const int vertexId, const std::string& uvSet, const bool throwOnError, const IECore::Canceller* const canceller )
+void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive &primitive, Imath::M44f &m, const int vertexId, const std::string &uvSet, const bool throwOnError, const IECore::Canceller *const canceller )
 {
-	const IECore::V3fVectorData* const pdata = primitive.variableData< IECore::V3fVectorData >( "P" );
+	const IECore::V3fVectorData *const pdata = primitive.variableData<IECore::V3fVectorData>( "P" );
 
 	if( pdata == nullptr )
 	{
@@ -537,16 +527,13 @@ void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, I
 		}
 	}
 
-	const IECore::V3fVectorData::ValueType& points = pdata->readable();
+	const IECore::V3fVectorData::ValueType &points = pdata->readable();
 
-	if( ( vertexId < 0 ) || ( vertexId >= static_cast< int >( points.size() ) ) )
+	if( ( vertexId < 0 ) || ( vertexId >= static_cast<int>( points.size() ) ) )
 	{
 		if( throwOnError )
 		{
-			throw IECore::InvalidArgumentException( fmt::format(
-				"Gaffer::Constraint : Vertex id \"{}\" is out of range.",
-				vertexId
-			) );
+			throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : Vertex id \"{}\" is out of range.", vertexId ) );
 		}
 		else
 		{
@@ -554,8 +541,8 @@ void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, I
 		}
 	}
 
-	const IECore::IntVectorData::ValueType& indices = primitive.vertexIds()->readable();
-	const IECore::IntVectorData::ValueType& faces = primitive.verticesPerFace()->readable();
+	const IECore::IntVectorData::ValueType &indices = primitive.vertexIds()->readable();
+	const IECore::IntVectorData::ValueType &faces = primitive.verticesPerFace()->readable();
 
 	const UVIndexer uvs( primitive, uvSet, throwOnError );
 
@@ -566,9 +553,9 @@ void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, I
 	if( uvs.valid() )
 	{
 		int js = 0;
-		for( int i = 0; i < static_cast< int >( faces.size() ); ++i )
+		for( int i = 0; i < static_cast<int>( faces.size() ); ++i )
 		{
-			const int ni = faces[ i ];
+			const int ni = faces[i];
 
 			// canceller support
 
@@ -582,7 +569,7 @@ void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, I
 			int jm = 0;
 			for( ; jm < ni; ++jm )
 			{
-				if( indices[ js + jm ] == vertexId )
+				if( indices[js + jm] == vertexId )
 				{
 					break;
 				}
@@ -602,15 +589,15 @@ void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, I
 				{
 					const int iv = js + j;
 					const int ip = js + ( ( j + ni - 1 ) % ni );
-					const int in = js + ( ( j      + 1 ) % ni );
+					const int in = js + ( ( j + 1 ) % ni );
 
-					const Imath::V3f pv = points[ indices[ iv ] ];
-					const Imath::V3f v0 = points[ indices[ ip ] ] - pv;
-					const Imath::V3f v2 = points[ indices[ in ] ] - pv;
+					const Imath::V3f pv = points[indices[iv]];
+					const Imath::V3f v0 = points[indices[ip]] - pv;
+					const Imath::V3f v2 = points[indices[in]] - pv;
 
-					const Imath::V2f uv = uvs[ iv ];
-					const Imath::V2f e0 = uvs[ ip ] - uv;
-					const Imath::V2f e2 = uvs[ in ] - uv;
+					const Imath::V2f uv = uvs[iv];
+					const Imath::V2f e0 = uvs[ip] - uv;
+					const Imath::V2f e2 = uvs[in] - uv;
 
 					ft += ( v0 * -e2.y + v2 * e0.y ).normalized();
 					fb += ( v0 * -e2.x + v2 * e0.x ).normalized();
@@ -620,7 +607,7 @@ void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, I
 					{
 						const float lv2 = v0.length2() * v2.length2();
 
-						if( lv2 > ( 2.f * std::numeric_limits< float >::min() ) )
+						if( lv2 > ( 2.f * std::numeric_limits<float>::min() ) )
 						{
 							const float lv = std::sqrt( lv2 );
 
@@ -643,35 +630,32 @@ void computeMeshVertexLocalFrame( const IECoreScene::MeshPrimitive& primitive, I
 		}
 	}
 
-	constructLocalFrame( m, points[ vertexId ], t, b, n );
+	constructLocalFrame( m, points[vertexId], t, b, n );
 }
 
-void computeVertexLocalFrame( const IECore::Object& object, Imath::M44f& m, const int vertexId, const std::string& uvSet, const bool throwOnError, const IECore::Canceller* const canceller )
+void computeVertexLocalFrame( const IECore::Object &object, Imath::M44f &m, const int vertexId, const std::string &uvSet, const bool throwOnError, const IECore::Canceller *const canceller )
 {
-	switch( static_cast< IECoreScene::TypeId >( object.typeId() ) )
+	switch( static_cast<IECoreScene::TypeId>( object.typeId() ) )
 	{
-		case IECoreScene::CurvesPrimitiveTypeId:
-		case IECoreScene::PointsPrimitiveTypeId:
-			computePrimitiveVertexLocalFrame( static_cast< const IECoreScene::Primitive& >( object ), m, vertexId, throwOnError );
+		case IECoreScene::CurvesPrimitiveTypeId :
+		case IECoreScene::PointsPrimitiveTypeId :
+			computePrimitiveVertexLocalFrame( static_cast<const IECoreScene::Primitive &>( object ), m, vertexId, throwOnError );
 			break;
-		case IECoreScene::MeshPrimitiveTypeId:
-			computeMeshVertexLocalFrame( static_cast< const IECoreScene::MeshPrimitive& >( object ), m, vertexId, uvSet, throwOnError, canceller );
+		case IECoreScene::MeshPrimitiveTypeId :
+			computeMeshVertexLocalFrame( static_cast<const IECoreScene::MeshPrimitive &>( object ), m, vertexId, uvSet, throwOnError, canceller );
 			break;
-		default:
+		default :
 			if( throwOnError )
 			{
-				throw IECore::InvalidArgumentException( fmt::format(
-					"Gaffer::Constraint : Target primitive of type \"{}\" is not supported in Vertex target mode.",
-					object.typeName()
-				) );
+				throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : Target primitive of type \"{}\" is not supported in Vertex target mode.", object.typeName() ) );
 			}
 			break;
 	}
 }
 
-void computeMeshUVLocalFrame( const IECoreScene::MeshPrimitive& primitive, Imath::M44f& m, const Imath::V2f& uv, const std::string& uvSet, const bool throwOnError, const IECore::Canceller* const canceller )
+void computeMeshUVLocalFrame( const IECoreScene::MeshPrimitive &primitive, Imath::M44f &m, const Imath::V2f &uv, const std::string &uvSet, const bool throwOnError, const IECore::Canceller *const canceller )
 {
-	const IECore::V3fVectorData* const pdata = primitive.variableData< IECore::V3fVectorData >( "P" );
+	const IECore::V3fVectorData *const pdata = primitive.variableData<IECore::V3fVectorData>( "P" );
 
 	if( pdata == nullptr )
 	{
@@ -685,20 +669,20 @@ void computeMeshUVLocalFrame( const IECoreScene::MeshPrimitive& primitive, Imath
 		}
 	}
 
-	const IECore::V3fVectorData::ValueType& points = pdata->readable();
-	const IECore::IntVectorData::ValueType& indices = primitive.vertexIds()->readable();
-	const IECore::IntVectorData::ValueType& faces = primitive.verticesPerFace()->readable();
+	const IECore::V3fVectorData::ValueType &points = pdata->readable();
+	const IECore::IntVectorData::ValueType &indices = primitive.vertexIds()->readable();
+	const IECore::IntVectorData::ValueType &faces = primitive.verticesPerFace()->readable();
 
 	const UVIndexer uvs( primitive, uvSet, throwOnError );
-	if( ! uvs.valid() )
+	if( !uvs.valid() )
 	{
 		return;
 	}
 
 	int js = 0;
-	for( int i = 0; i < static_cast< int >( faces.size() ); ++i )
+	for( int i = 0; i < static_cast<int>( faces.size() ); ++i )
 	{
-		const int ni = faces[ i ];
+		const int ni = faces[i];
 
 		// canceller support
 
@@ -709,14 +693,12 @@ void computeMeshUVLocalFrame( const IECoreScene::MeshPrimitive& primitive, Imath
 
 		// points and uv indexers
 
-		const auto pIndexer = [ & points, & indices, js ]( const int ii )
-		{
-			return points[ indices[ js + ii ] ];
+		const auto pIndexer = [&points, &indices, js]( const int ii ) {
+			return points[indices[js + ii]];
 		};
 
-		const auto uvIndexer = [ & uvs, js ]( const int ii )
-		{
-			return uvs[ js + ii ];
+		const auto uvIndexer = [&uvs, js]( const int ii ) {
+			return uvs[js + ii];
 		};
 
 		// determine if uv coordinate is inside face
@@ -730,9 +712,7 @@ void computeMeshUVLocalFrame( const IECoreScene::MeshPrimitive& primitive, Imath
 
 			try
 			{
-				fp = ( convexPolygon( uvIndexer, ni ) )
-					? interpolateConvexPolygon( pIndexer, uvIndexer, uv, ni )
-					: interpolateNonConvexPolygon( pIndexer, uvIndexer, uv, ni );
+				fp = ( convexPolygon( uvIndexer, ni ) ) ? interpolateConvexPolygon( pIndexer, uvIndexer, uv, ni ) : interpolateNonConvexPolygon( pIndexer, uvIndexer, uv, ni );
 
 				// compute face tangent and bitangent
 
@@ -740,15 +720,15 @@ void computeMeshUVLocalFrame( const IECoreScene::MeshPrimitive& primitive, Imath
 				{
 					const int iv = js + j;
 					const int ip = js + ( ( j + ni - 1 ) % ni );
-					const int in = js + ( ( j      + 1 ) % ni );
+					const int in = js + ( ( j + 1 ) % ni );
 
-					const Imath::V3f pv = points[ indices[ iv ] ];
-					const Imath::V3f v0 = points[ indices[ ip ] ] - pv;
-					const Imath::V3f v2 = points[ indices[ in ] ] - pv;
+					const Imath::V3f pv = points[indices[iv]];
+					const Imath::V3f v0 = points[indices[ip]] - pv;
+					const Imath::V3f v2 = points[indices[in]] - pv;
 
-					const Imath::V2f uvv = uvs[ iv ];
-					const Imath::V2f e0 = uvs[ ip ] - uvv;
-					const Imath::V2f e2 = uvs[ in ] - uvv;
+					const Imath::V2f uvv = uvs[iv];
+					const Imath::V2f e0 = uvs[ip] - uvv;
+					const Imath::V2f e2 = uvs[in] - uvv;
 
 					ft += ( v0 * -e2.y + v2 * e0.y ).normalized();
 					fb += ( v0 * -e2.x + v2 * e0.x ).normalized();
@@ -773,27 +753,21 @@ void computeMeshUVLocalFrame( const IECoreScene::MeshPrimitive& primitive, Imath
 
 	if( throwOnError )
 	{
-		throw IECore::InvalidArgumentException( fmt::format(
-			"Gaffer::Constraint : UV coordinates \"{}, {}\" are out of range.",
-			uv.x, uv.y
-		) );
+		throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : UV coordinates \"{}, {}\" are out of range.", uv.x, uv.y ) );
 	}
 }
 
-void computeUVLocalFrame( const IECore::Object& object, Imath::M44f& m, const Imath::V2f& uv, const std::string& uvSet, const bool throwOnError, const IECore::Canceller* const canceller )
+void computeUVLocalFrame( const IECore::Object &object, Imath::M44f &m, const Imath::V2f &uv, const std::string &uvSet, const bool throwOnError, const IECore::Canceller *const canceller )
 {
-	switch( static_cast< IECoreScene::TypeId >( object.typeId() ) )
+	switch( static_cast<IECoreScene::TypeId>( object.typeId() ) )
 	{
-		case IECoreScene::MeshPrimitiveTypeId:
-			computeMeshUVLocalFrame( static_cast< const IECoreScene::MeshPrimitive& >( object ), m, uv, uvSet, throwOnError, canceller );
+		case IECoreScene::MeshPrimitiveTypeId :
+			computeMeshUVLocalFrame( static_cast<const IECoreScene::MeshPrimitive &>( object ), m, uv, uvSet, throwOnError, canceller );
 			break;
-		default:
+		default :
 			if( throwOnError )
 			{
-				throw IECore::InvalidArgumentException( fmt::format(
-					"Gaffer::Constraint : Target primitive of type \"{}\" is not supported in UV target mode.",
-					object.typeName()
-				) );
+				throw IECore::InvalidArgumentException( fmt::format( "Gaffer::Constraint : Target primitive of type \"{}\" is not supported in UV target mode.", object.typeName() ) );
 			}
 			break;
 	}
@@ -810,13 +784,9 @@ struct ReferenceFrameScope : public Context::EditableScope
 		if( !constraint->inPlug()->existsPlug()->getValue() )
 		{
 			const ScenePlug::ScenePath &path = context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
-			throw IECore::Exception( fmt::format(
-				"Constrained object \"{}\" does not exist at reference frame {}",
-				ScenePlug::pathToString( path ), frame
-			) );
+			throw IECore::Exception( fmt::format( "Constrained object \"{}\" does not exist at reference frame {}", ScenePlug::pathToString( path ), frame ) );
 		}
 	}
-
 };
 
 } // namespace
@@ -826,7 +796,7 @@ GAFFER_NODE_DEFINE_TYPE( Constraint );
 size_t Constraint::g_firstPlugIndex = 0;
 
 Constraint::Constraint( const std::string &name )
-	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
+	: SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "targetScene" ) );
@@ -1015,14 +985,13 @@ void Constraint::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 	}
 	else
 	{
-		SceneElementProcessor::compute( output, context);
+		SceneElementProcessor::compute( output, context );
 	}
 }
 
 bool Constraint::affectsTargetModeMatrix( const Gaffer::Plug *input ) const
 {
-	return
-		input == targetModePlug() ||
+	return input == targetModePlug() ||
 		affectsTarget( input ) ||
 		input == inPlug()->boundPlug() ||
 		input == targetScenePlug()->boundPlug() ||
@@ -1030,8 +999,7 @@ bool Constraint::affectsTargetModeMatrix( const Gaffer::Plug *input ) const
 		input == targetScenePlug()->objectPlug() ||
 		input == ignoreMissingTargetPlug() ||
 		input->parent() == targetUVPlug() ||
-		input == targetVertexPlug()
-	;
+		input == targetVertexPlug();
 }
 
 void Constraint::hashTargetModeMatrix( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -1050,22 +1018,22 @@ void Constraint::hashTargetModeMatrix( const Gaffer::Context *context, IECore::M
 
 	switch( targetMode )
 	{
-		case Constraint::BoundMin:
-		case Constraint::BoundMax:
-		case Constraint::BoundCenter:
+		case Constraint::BoundMin :
+		case Constraint::BoundMax :
+		case Constraint::BoundCenter :
 			h.append( target.scene->boundHash( target.path ) );
 			break;
-		case Constraint::UV:
+		case Constraint::UV :
 			h.append( target.scene->objectHash( target.path ) );
 			ignoreMissingTargetPlug()->hash( h );
 			targetUVPlug()->hash( h );
 			break;
-		case Constraint::Vertex:
+		case Constraint::Vertex :
 			h.append( target.scene->objectHash( target.path ) );
 			ignoreMissingTargetPlug()->hash( h );
 			targetVertexPlug()->hash( h );
 			break;
-		default:
+		default :
 			break;
 	}
 }
@@ -1083,25 +1051,27 @@ Imath::M44f Constraint::computeTargetModeMatrix( const Gaffer::Context *context 
 	const Target target = this->target().value();
 	switch( targetMode )
 	{
-		case Constraint::BoundMin:
-		case Constraint::BoundMax:
-		case Constraint::BoundCenter:
-		{
+		case Constraint::BoundMin :
+		case Constraint::BoundMax :
+		case Constraint::BoundCenter : {
 			const Box3f targetBound = target.scene->bound( target.path );
 			if( !targetBound.isEmpty() )
 			{
 				switch( targetMode )
 				{
-					case Constraint::BoundMin : return M44f().translate( targetBound.min );
-					case Constraint::BoundMax : return M44f().translate( targetBound.max );
-					case Constraint::BoundCenter : return M44f().translate( targetBound.center() );
-					default : break;
+					case Constraint::BoundMin :
+						return M44f().translate( targetBound.min );
+					case Constraint::BoundMax :
+						return M44f().translate( targetBound.max );
+					case Constraint::BoundCenter :
+						return M44f().translate( targetBound.center() );
+					default :
+						break;
 				}
 			}
 			return M44f();
 		}
-		case Constraint::UV:
-		{
+		case Constraint::UV : {
 			const IECore::ConstObjectPtr object = target.scene->object( target.path );
 			const Imath::V2f uv = targetUVPlug()->getValue();
 			const bool throwOnError = !( ignoreMissingTargetPlug()->getValue() );
@@ -1109,8 +1079,7 @@ Imath::M44f Constraint::computeTargetModeMatrix( const Gaffer::Context *context 
 			computeUVLocalFrame( *object, result, uv, "uv", throwOnError, context->canceller() );
 			return result;
 		}
-		case Constraint::Vertex:
-		{
+		case Constraint::Vertex : {
 			const IECore::ConstObjectPtr object = target.scene->object( target.path );
 			const int vertexId = targetVertexPlug()->getValue();
 			const bool throwOnError = !( ignoreMissingTargetPlug()->getValue() );
@@ -1118,15 +1087,14 @@ Imath::M44f Constraint::computeTargetModeMatrix( const Gaffer::Context *context 
 			computeVertexLocalFrame( *object, result, vertexId, "uv", throwOnError, context->canceller() );
 			return result;
 		}
-		default:
+		default :
 			return M44f();
 	}
 }
 
 bool Constraint::affectsConstrainedTransform( const Gaffer::Plug *input ) const
 {
-	return
-		input == inPlug()->transformPlug() ||
+	return input == inPlug()->transformPlug() ||
 		input == targetPlug() ||
 		input == ignoreMissingTargetPlug() ||
 		input == targetScenePlug()->existsPlug() ||
@@ -1134,8 +1102,7 @@ bool Constraint::affectsConstrainedTransform( const Gaffer::Plug *input ) const
 		input == targetScenePlug()->transformPlug() ||
 		input == targetModeMatrixPlug() ||
 		input->parent() == targetOffsetPlug() ||
-		affectsConstraint( input )
-	;
+		affectsConstraint( input );
 }
 
 void Constraint::hashConstrainedTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -1228,12 +1195,10 @@ Imath::M44f Constraint::computeProcessedTransform( const ScenePath &path, const 
 
 bool Constraint::affectsTarget( const Gaffer::Plug *input ) const
 {
-	return
-		input == targetPlug() ||
+	return input == targetPlug() ||
 		input == targetScenePlug()->existsPlug() ||
 		input == inPlug()->existsPlug() ||
-		input == ignoreMissingTargetPlug()
-	;
+		input == ignoreMissingTargetPlug();
 }
 
 std::optional<Constraint::Target> Constraint::target() const
@@ -1263,10 +1228,7 @@ std::optional<Constraint::Target> Constraint::target() const
 		}
 		else
 		{
-			throw IECore::Exception( fmt::format(
-				"Constraint target does not exist: \"{}\". Use 'ignoreMissingTarget' option if you want to just skip this constraint",
-				targetPathAsString
-			) );
+			throw IECore::Exception( fmt::format( "Constraint target does not exist: \"{}\". Use 'ignoreMissingTarget' option if you want to just skip this constraint", targetPathAsString ) );
 		}
 	}
 

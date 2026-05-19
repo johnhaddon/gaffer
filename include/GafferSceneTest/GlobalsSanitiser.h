@@ -56,32 +56,31 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API GlobalsSanitiser : public Gaffer::Monitor
 {
 
-	public :
+public:
 
-		GlobalsSanitiser();
+	GlobalsSanitiser();
 
-		IE_CORE_DECLAREMEMBERPTR( GlobalsSanitiser )
+	IE_CORE_DECLAREMEMBERPTR( GlobalsSanitiser )
 
-	protected :
+protected:
 
-		void processStarted( const Gaffer::Process *process ) override;
-		void processFinished( const Gaffer::Process *process ) override;
+	void processStarted( const Gaffer::Process *process ) override;
+	void processFinished( const Gaffer::Process *process ) override;
 
-	private :
+private:
 
-		// Maps from a process to the closest `ScenePlug.globals` that depends on it.
-		using DependentGlobalsMap = tbb::concurrent_unordered_map<const Gaffer::Process *, const Gaffer::CompoundObjectPlug *>;
-		DependentGlobalsMap m_dependentGlobalsMap;
+	// Maps from a process to the closest `ScenePlug.globals` that depends on it.
+	using DependentGlobalsMap = tbb::concurrent_unordered_map<const Gaffer::Process *, const Gaffer::CompoundObjectPlug *>;
+	DependentGlobalsMap m_dependentGlobalsMap;
 
-		// First is the upstream plug where the problem was detected. Second
-		// is the downstream globals plug which depended on it.
-		using Warning = std::pair<Gaffer::ConstPlugPtr, Gaffer::ConstCompoundObjectPlugPtr>;
-		using WarningSet = tbb::concurrent_unordered_set<Warning, boost::hash<Warning>>;
-		// Used to avoid outputting duplicate warnings.
-		WarningSet m_warningsEmitted;
+	// First is the upstream plug where the problem was detected. Second
+	// is the downstream globals plug which depended on it.
+	using Warning = std::pair<Gaffer::ConstPlugPtr, Gaffer::ConstCompoundObjectPlugPtr>;
+	using WarningSet = tbb::concurrent_unordered_set<Warning, boost::hash<Warning>>;
+	// Used to avoid outputting duplicate warnings.
+	WarningSet m_warningsEmitted;
 
-		void warn( const Gaffer::Process &process, const Gaffer::CompoundObjectPlug *dependentGlobals );
-
+	void warn( const Gaffer::Process &process, const Gaffer::CompoundObjectPlug *dependentGlobals );
 };
 
 IE_CORE_DECLAREPTR( GlobalsSanitiser )

@@ -49,40 +49,41 @@ namespace GafferImage
 
 class GAFFERIMAGE_API DataWindowQuery : public Gaffer::ComputeNode
 {
-	public :
-		explicit DataWindowQuery( const std::string &name = defaultName<DataWindowQuery>() );
-		~DataWindowQuery() override;
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DataWindowQuery, DataWindowQueryTypeId, Gaffer::ComputeNode );
+	explicit DataWindowQuery( const std::string &name = defaultName<DataWindowQuery>() );
+	~DataWindowQuery() override;
 
-		ImagePlug *inPlug();
-		const ImagePlug *inPlug() const;
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DataWindowQuery, DataWindowQueryTypeId, Gaffer::ComputeNode );
 
-		Gaffer::StringPlug *viewPlug();
-		const Gaffer::StringPlug *viewPlug() const;
+	ImagePlug *inPlug();
+	const ImagePlug *inPlug() const;
 
-		Gaffer::Box2iPlug *dataWindowPlug();
-		const Gaffer::Box2iPlug *dataWindowPlug() const;
+	Gaffer::StringPlug *viewPlug();
+	const Gaffer::StringPlug *viewPlug() const;
 
-		Gaffer::V2fPlug *centerPlug();
-		const Gaffer::V2fPlug *centerPlug() const;
+	Gaffer::Box2iPlug *dataWindowPlug();
+	const Gaffer::Box2iPlug *dataWindowPlug() const;
 
-		Gaffer::V2iPlug *sizePlug();
-		const Gaffer::V2iPlug *sizePlug() const;
+	Gaffer::V2fPlug *centerPlug();
+	const Gaffer::V2fPlug *centerPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	Gaffer::V2iPlug *sizePlug();
+	const Gaffer::V2iPlug *sizePlug() const;
 
-	protected :
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &hash ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+protected:
 
-	private :
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &hash ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		static size_t g_firstPlugIndex;
+private:
 
-};  // DataWindowQuery
+	static size_t g_firstPlugIndex;
+
+}; // DataWindowQuery
 
 IE_CORE_DECLAREPTR( DataWindowQuery );
 
-}  // namespace GafferImage
+} // namespace GafferImage

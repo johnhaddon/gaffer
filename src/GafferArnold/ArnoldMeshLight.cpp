@@ -49,7 +49,6 @@ namespace
 {
 
 const ConstCompoundObjectPtr g_hiddenVisibilityAttributes = [] {
-
 	const std::vector<std::string> names = {
 		"ai:visibility:shadow",
 		"ai:visibility:diffuse_reflect", "ai:visibility:specular_reflect",
@@ -63,18 +62,17 @@ const ConstCompoundObjectPtr g_hiddenVisibilityAttributes = [] {
 		result->members()[name] = new BoolData( false );
 	}
 	return result;
-
-} ();
+}();
 
 } // namespace
 
 GAFFER_NODE_DEFINE_TYPE( ArnoldMeshLight );
 
 ArnoldMeshLight::ArnoldMeshLight( const std::string &name )
-	:	GafferScene::MeshLight(
-			name,
-			[] { ArnoldShaderPtr shader = new ArnoldShader; shader->loadShader( "mesh_light" ); return shader; } ()
-		)
+	: GafferScene::MeshLight(
+		  name,
+		  [] { ArnoldShaderPtr shader = new ArnoldShader; shader->loadShader( "mesh_light" ); return shader; }()
+	  )
 {
 
 	// Hide the object from the majority of ray types, since we don't want to

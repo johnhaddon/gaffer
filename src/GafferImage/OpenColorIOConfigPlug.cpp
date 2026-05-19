@@ -61,7 +61,7 @@ const IECore::InternedString g_defaultConfigPlugName( "openColorIO" );
 GAFFER_PLUG_DEFINE_TYPE( OpenColorIOConfigPlug );
 
 OpenColorIOConfigPlug::OpenColorIOConfigPlug( const std::string &name, Direction direction, unsigned flags )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
 	addChild( new StringPlug( "config", direction, "", childFlags ) );
@@ -112,10 +112,8 @@ const Gaffer::ValuePlug *OpenColorIOConfigPlug::displayTransformPlug() const
 
 bool OpenColorIOConfigPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
-	return
-		ValuePlug::acceptsChild( potentialChild ) &&
-		children().size() < 4
-	;
+	return ValuePlug::acceptsChild( potentialChild ) &&
+		children().size() < 4;
 }
 
 Gaffer::PlugPtr OpenColorIOConfigPlug::createCounterpart( const std::string &name, Direction direction ) const

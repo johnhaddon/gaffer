@@ -44,13 +44,12 @@ namespace GafferScene
 class GAFFERSCENE_API StandardAttributes : public Attributes
 {
 
-	public :
+public:
 
-		explicit StandardAttributes( const std::string &name=defaultName<StandardAttributes>() );
-		~StandardAttributes() override;
+	explicit StandardAttributes( const std::string &name = defaultName<StandardAttributes>() );
+	~StandardAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::StandardAttributes, StandardAttributesTypeId, Attributes );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::StandardAttributes, StandardAttributesTypeId, Attributes );
 };
 
 IE_CORE_DECLAREPTR( StandardAttributes )

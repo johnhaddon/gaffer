@@ -60,7 +60,7 @@ namespace
 
 struct UnaryPlugSlotCaller
 {
-	void operator()( boost::python::object slot, PlugPtr p )
+	void operator () ( boost::python::object slot, PlugPtr p )
 	{
 		try
 		{
@@ -76,7 +76,7 @@ struct UnaryPlugSlotCaller
 struct BinaryPlugSlotCaller
 {
 
-	void operator()( boost::python::object slot, PlugPtr p1, PlugPtr p2 )
+	void operator () ( boost::python::object slot, PlugPtr p1, PlugPtr p2 )
 	{
 		try
 		{
@@ -91,7 +91,7 @@ struct BinaryPlugSlotCaller
 
 struct ErrorSlotCaller
 {
-	void operator()( boost::python::object slot, const Plug *plug, const Plug *source, const std::string &error )
+	void operator () ( boost::python::object slot, const Plug *plug, const Plug *source, const std::string &error )
 	{
 		try
 		{
@@ -112,16 +112,15 @@ void GafferModule::bindNode()
 
 	{
 		scope s = NodeClass<Node, NodeWrapper>()
-			.def( "scriptNode", (ScriptNode *(Node::*)())&Node::scriptNode, return_value_policy<CastToIntrusivePtr>() )
-			.def( "plugSetSignal", &Node::plugSetSignal, return_internal_reference<1>() )
-			.def( "plugInputChangedSignal", &Node::plugInputChangedSignal, return_internal_reference<1>() )
-			.def( "plugDirtiedSignal", &Node::plugDirtiedSignal, return_internal_reference<1>() )
-			.def( "errorSignal", (Node::ErrorSignal &(Node::*)())&Node::errorSignal, return_internal_reference<1>() )
-		;
+					  .def( "scriptNode", ( ScriptNode * (Node::*)() ) & Node::scriptNode, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "plugSetSignal", &Node::plugSetSignal, return_internal_reference<1>() )
+					  .def( "plugInputChangedSignal", &Node::plugInputChangedSignal, return_internal_reference<1>() )
+					  .def( "plugDirtiedSignal", &Node::plugDirtiedSignal, return_internal_reference<1>() )
+					  .def( "errorSignal", ( Node::ErrorSignal & (Node::*)() ) & Node::errorSignal, return_internal_reference<1>() );
 
-		SignalClass<Node::UnaryPlugSignal, DefaultSignalCaller<Node::UnaryPlugSignal>, UnaryPlugSlotCaller >( "UnaryPlugSignal" );
-		SignalClass<Node::BinaryPlugSignal, DefaultSignalCaller<Node::BinaryPlugSignal>, BinaryPlugSlotCaller >( "BinaryPlugSignal" );
-		SignalClass<Node::ErrorSignal, DefaultSignalCaller<Node::ErrorSignal>, ErrorSlotCaller >( "ErrorSignal" );
+		SignalClass<Node::UnaryPlugSignal, DefaultSignalCaller<Node::UnaryPlugSignal>, UnaryPlugSlotCaller>( "UnaryPlugSignal" );
+		SignalClass<Node::BinaryPlugSignal, DefaultSignalCaller<Node::BinaryPlugSignal>, BinaryPlugSlotCaller>( "BinaryPlugSignal" );
+		SignalClass<Node::ErrorSignal, DefaultSignalCaller<Node::ErrorSignal>, ErrorSlotCaller>( "ErrorSignal" );
 	}
 
 	Serialisation::registerSerialiser( Node::staticTypeId(), new NodeSerialiser() );
@@ -134,5 +133,4 @@ void GafferModule::bindNode()
 
 	using ComputeNodeWrapper = ComputeNodeWrapper<ComputeNode>;
 	DependencyNodeClass<ComputeNode, ComputeNodeWrapper>();
-
 }

@@ -51,163 +51,162 @@ namespace GafferScene
 class GAFFERSCENE_API Orientation : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit Orientation( const std::string &name=defaultName<Orientation>() );
-		~Orientation() override;
+	explicit Orientation( const std::string &name = defaultName<Orientation>() );
+	~Orientation() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Orientation, OrientationTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Orientation, OrientationTypeId, ObjectProcessor );
 
-		enum class Mode
-		{
-			Euler,
-			Quaternion,
-			AxisAngle,
-			Aim,
-			Matrix,
-			// Used to fix incorrect Alembic export from Houdini
-			// (SideFX bug #92479).
-			QuaternionXYZW,
-		};
+	enum class Mode
+	{
+		Euler,
+		Quaternion,
+		AxisAngle,
+		Aim,
+		Matrix,
+		// Used to fix incorrect Alembic export from Houdini
+		// (SideFX bug #92479).
+		QuaternionXYZW,
+	};
 
-		/// Input
-		/// =====
+	/// Input
+	/// =====
 
-		Gaffer::IntPlug *inModePlug();
-		const Gaffer::IntPlug *inModePlug() const;
+	Gaffer::IntPlug *inModePlug();
+	const Gaffer::IntPlug *inModePlug() const;
 
-		Gaffer::BoolPlug *deleteInputsPlug();
-		const Gaffer::BoolPlug *deleteInputsPlug() const;
+	Gaffer::BoolPlug *deleteInputsPlug();
+	const Gaffer::BoolPlug *deleteInputsPlug() const;
 
-		// Euler
-		// -----
+	// Euler
+	// -----
 
-		Gaffer::StringPlug *inEulerPlug();
-		const Gaffer::StringPlug *inEulerPlug() const;
+	Gaffer::StringPlug *inEulerPlug();
+	const Gaffer::StringPlug *inEulerPlug() const;
 
-		Gaffer::IntPlug *inOrderPlug(); /// Values are Imath::Euler::Order
-		const Gaffer::IntPlug *inOrderPlug() const;
+	Gaffer::IntPlug *inOrderPlug(); /// Values are Imath::Euler::Order
+	const Gaffer::IntPlug *inOrderPlug() const;
 
-		// Quaternion
-		// ----------
+	// Quaternion
+	// ----------
 
-		Gaffer::StringPlug *inQuaternionPlug();
-		const Gaffer::StringPlug *inQuaternionPlug() const;
+	Gaffer::StringPlug *inQuaternionPlug();
+	const Gaffer::StringPlug *inQuaternionPlug() const;
 
-		// Axis Angle
-		// ----------
+	// Axis Angle
+	// ----------
 
-		Gaffer::StringPlug *inAxisPlug();
-		const Gaffer::StringPlug *inAxisPlug() const;
+	Gaffer::StringPlug *inAxisPlug();
+	const Gaffer::StringPlug *inAxisPlug() const;
 
-		Gaffer::StringPlug *inAnglePlug();
-		const Gaffer::StringPlug *inAnglePlug() const;
+	Gaffer::StringPlug *inAnglePlug();
+	const Gaffer::StringPlug *inAnglePlug() const;
 
-		// Basis vectors
-		// -------------
+	// Basis vectors
+	// -------------
 
-		Gaffer::StringPlug *inXAxisPlug();
-		const Gaffer::StringPlug *inXAxisPlug() const;
+	Gaffer::StringPlug *inXAxisPlug();
+	const Gaffer::StringPlug *inXAxisPlug() const;
 
-		Gaffer::StringPlug *inYAxisPlug();
-		const Gaffer::StringPlug *inYAxisPlug() const;
+	Gaffer::StringPlug *inYAxisPlug();
+	const Gaffer::StringPlug *inYAxisPlug() const;
 
-		Gaffer::StringPlug *inZAxisPlug();
-		const Gaffer::StringPlug *inZAxisPlug() const;
+	Gaffer::StringPlug *inZAxisPlug();
+	const Gaffer::StringPlug *inZAxisPlug() const;
 
-		// Matrix
-		// ------
+	// Matrix
+	// ------
 
-		Gaffer::StringPlug *inMatrixPlug();
-		const Gaffer::StringPlug *inMatrixPlug() const;
+	Gaffer::StringPlug *inMatrixPlug();
+	const Gaffer::StringPlug *inMatrixPlug() const;
 
-		/// Randomisation
-		/// =============
+	/// Randomisation
+	/// =============
 
-		Gaffer::BoolPlug *randomEnabledPlug();
-		const Gaffer::BoolPlug *randomEnabledPlug() const;
+	Gaffer::BoolPlug *randomEnabledPlug();
+	const Gaffer::BoolPlug *randomEnabledPlug() const;
 
-		Gaffer::V3fPlug *randomAxisPlug();
-		const Gaffer::V3fPlug *randomAxisPlug() const;
+	Gaffer::V3fPlug *randomAxisPlug();
+	const Gaffer::V3fPlug *randomAxisPlug() const;
 
-		Gaffer::FloatPlug *randomSpreadPlug();
-		const Gaffer::FloatPlug *randomSpreadPlug() const;
+	Gaffer::FloatPlug *randomSpreadPlug();
+	const Gaffer::FloatPlug *randomSpreadPlug() const;
 
-		Gaffer::FloatPlug *randomTwistPlug();
-		const Gaffer::FloatPlug *randomTwistPlug() const;
+	Gaffer::FloatPlug *randomTwistPlug();
+	const Gaffer::FloatPlug *randomTwistPlug() const;
 
-		enum class Space
-		{
-			Local,
-			Parent
-		};
+	enum class Space
+	{
+		Local,
+		Parent
+	};
 
-		Gaffer::IntPlug *randomSpacePlug();
-		const Gaffer::IntPlug *randomSpacePlug() const;
+	Gaffer::IntPlug *randomSpacePlug();
+	const Gaffer::IntPlug *randomSpacePlug() const;
 
-		/// Output
-		/// ======
+	/// Output
+	/// ======
 
-		Gaffer::IntPlug *outModePlug();
-		const Gaffer::IntPlug *outModePlug() const;
+	Gaffer::IntPlug *outModePlug();
+	const Gaffer::IntPlug *outModePlug() const;
 
-		// Euler
-		// -----
+	// Euler
+	// -----
 
-		Gaffer::StringPlug *outEulerPlug();
-		const Gaffer::StringPlug *outEulerPlug() const;
+	Gaffer::StringPlug *outEulerPlug();
+	const Gaffer::StringPlug *outEulerPlug() const;
 
-		Gaffer::IntPlug *outOrderPlug(); /// Values are Imath::Euler::Order
-		const Gaffer::IntPlug *outOrderPlug() const;
+	Gaffer::IntPlug *outOrderPlug(); /// Values are Imath::Euler::Order
+	const Gaffer::IntPlug *outOrderPlug() const;
 
-		// Quaternion
-		// ----------
+	// Quaternion
+	// ----------
 
-		Gaffer::StringPlug *outQuaternionPlug();
-		const Gaffer::StringPlug *outQuaternionPlug() const;
+	Gaffer::StringPlug *outQuaternionPlug();
+	const Gaffer::StringPlug *outQuaternionPlug() const;
 
-		// Axis Angle
-		// ----------
+	// Axis Angle
+	// ----------
 
-		Gaffer::StringPlug *outAxisPlug();
-		const Gaffer::StringPlug *outAxisPlug() const;
+	Gaffer::StringPlug *outAxisPlug();
+	const Gaffer::StringPlug *outAxisPlug() const;
 
-		Gaffer::StringPlug *outAnglePlug();
-		const Gaffer::StringPlug *outAnglePlug() const;
+	Gaffer::StringPlug *outAnglePlug();
+	const Gaffer::StringPlug *outAnglePlug() const;
 
-		// Basis vectors
-		// -------------
+	// Basis vectors
+	// -------------
 
-		Gaffer::StringPlug *outXAxisPlug();
-		const Gaffer::StringPlug *outXAxisPlug() const;
+	Gaffer::StringPlug *outXAxisPlug();
+	const Gaffer::StringPlug *outXAxisPlug() const;
 
-		Gaffer::StringPlug *outYAxisPlug();
-		const Gaffer::StringPlug *outYAxisPlug() const;
+	Gaffer::StringPlug *outYAxisPlug();
+	const Gaffer::StringPlug *outYAxisPlug() const;
 
-		Gaffer::StringPlug *outZAxisPlug();
-		const Gaffer::StringPlug *outZAxisPlug() const;
+	Gaffer::StringPlug *outZAxisPlug();
+	const Gaffer::StringPlug *outZAxisPlug() const;
 
-		// Matrix
-		// ------
+	// Matrix
+	// ------
 
-		Gaffer::StringPlug *outMatrixPlug();
-		const Gaffer::StringPlug *outMatrixPlug() const;
+	Gaffer::StringPlug *outMatrixPlug();
+	const Gaffer::StringPlug *outMatrixPlug() const;
 
-		// Normalize a quaternion if it is not already normalized. Values within tolerance of being
-		// normalized are passed through unmodified. The tolerance is calibrated so that any quaternion
-		// produced by Imath::Quatf::normalized() should be unmodified.
-		static inline Imath::Quatf normalizedIfNeeded( const Imath::Quatf &q );
+	// Normalize a quaternion if it is not already normalized. Values within tolerance of being
+	// normalized are passed through unmodified. The tolerance is calibrated so that any quaternion
+	// produced by Imath::Quatf::normalized() should be unmodified.
+	static inline Imath::Quatf normalizedIfNeeded( const Imath::Quatf &q );
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Orientation )

@@ -202,14 +202,13 @@ ccl::Attribute *convertTypedPrimitiveVariable( const std::string &name, const Pr
 // otherwise-protected `precision` member.
 class VolumeLoader : public ccl::VDBImageLoader
 {
-	public :
+public:
 
-		VolumeLoader( openvdb::GridBase::ConstPtr grid, const string &gridName, int precision_, float clipping )
-			:	VDBImageLoader( grid, gridName, clipping )
-		{
-			precision = precision_;
-		}
-
+	VolumeLoader( openvdb::GridBase::ConstPtr grid, const string &gridName, int precision_, float clipping )
+		: VDBImageLoader( grid, gridName, clipping )
+	{
+		precision = precision_;
+	}
 };
 
 } // namespace
@@ -250,7 +249,7 @@ ccl::Geometry *convert( const IECoreScenePreview::Renderer::ObjectSamples &sampl
 	// Cycles expects the middle sample (rounding down for even numbers of
 	// samples) to be specified as the main sample, and the other samples to
 	// be provided via ATTR_STD_MOTION_VERTEX_POSITION.
-	return it->second( samples, times, (samples.size() - 1) / 2, scene );
+	return it->second( samples, times, ( samples.size() - 1 ) / 2, scene );
 }
 
 void registerConverter( IECore::TypeId fromType, Converter converter )
@@ -263,7 +262,7 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 	ccl::Attribute *attr = nullptr;
 	switch( primitiveVariable.data->typeId() )
 	{
-		// Simple int-based data. Cycles doesn't support int attributes, so we promote to the equivalent float types.
+			// Simple int-based data. Cycles doesn't support int attributes, so we promote to the equivalent float types.
 
 		case IntDataTypeId :
 			attr = convertTypedPrimitiveVariable<IntData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
@@ -281,7 +280,7 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			);
 			break;
 
-		// Vectors of int-based data. Cycles doesn't support int attributes, so we promote to the equivalent float types.
+			// Vectors of int-based data. Cycles doesn't support int attributes, so we promote to the equivalent float types.
 
 		case IntVectorDataTypeId :
 			attr = convertTypedPrimitiveVariable<IntVectorData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
@@ -299,7 +298,7 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			);
 			break;
 
-		// Simple float-based data.
+			// Simple float-based data.
 
 		case FloatDataTypeId :
 			attr = convertTypedPrimitiveVariable<FloatData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
@@ -320,7 +319,7 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			attr = convertTypedPrimitiveVariable<Color3fData>( name, primitiveVariable, attributes, ccl::TypeColor, attributeElement );
 			break;
 
-		// Vectors of float-based data.
+			// Vectors of float-based data.
 
 		case FloatVectorDataTypeId :
 			attr = convertTypedPrimitiveVariable<FloatVectorData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
@@ -428,7 +427,7 @@ void convertMotion( const IECoreScenePreview::Renderer::Samples<const IECoreScen
 
 void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, ccl::Volume *volume, ccl::Scene *scene, int precision, float clipping )
 {
-	for( const std::string& gridName : vdbObject->gridNames() )
+	for( const std::string &gridName : vdbObject->gridNames() )
 	{
 		openvdb::GridBase::ConstPtr grid = vdbObject->findGrid( gridName );
 		ccl::AttributeStandard std = ccl::ATTR_STD_NONE;
@@ -521,8 +520,7 @@ void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, ccl::Volume *volu
 
 		ccl::Attribute *attr = ( std != ccl::ATTR_STD_NONE ) ?
 			volume->attributes.add( std ) :
-			volume->attributes.add( ccl::ustring( gridName.c_str() ), ctype, ccl::ATTR_ELEMENT_VOXEL )
-		;
+			volume->attributes.add( ccl::ustring( gridName.c_str() ), ctype, ccl::ATTR_ELEMENT_VOXEL );
 
 		auto loader = std::make_unique<VolumeLoader>( grid, gridName, precision, clipping );
 		ccl::ImageParams params;

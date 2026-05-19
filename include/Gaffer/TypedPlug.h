@@ -48,48 +48,47 @@ template<typename T>
 class IECORE_EXPORT TypedPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = T;
+	using ValueType = T;
 
-		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( TypedPlug<T>, ValuePlug );
+	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( TypedPlug<T>, ValuePlug );
 
-		explicit TypedPlug(
-			const std::string &name = defaultName<TypedPlug>(),
-			Direction direction=In,
-			const T &defaultValue = T(),
-			unsigned flags = Default
-		);
-		~TypedPlug() override;
+	explicit TypedPlug(
+		const std::string &name = defaultName<TypedPlug>(),
+		Direction direction = In,
+		const T &defaultValue = T(),
+		unsigned flags = Default
+	);
+	~TypedPlug() override;
 
-		/// Accepts only instances of TypedPlug<T> or derived classes.
-		/// In addition, BoolPlug accepts inputs from NumericPlug.
-		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Accepts only instances of TypedPlug<T> or derived classes.
+	/// In addition, BoolPlug accepts inputs from NumericPlug.
+	bool acceptsInput( const Plug *input ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		const T &defaultValue() const;
+	const T &defaultValue() const;
 
-		/// \undoable
-		void setValue( const T &value );
-		/// Returns the value. See comments in TypedObjectPlug::getValue()
-		/// for details of the optional precomputedHash argument - and use
-		/// with care!
-		T getValue( const IECore::MurmurHash *precomputedHash = nullptr ) const;
+	/// \undoable
+	void setValue( const T &value );
+	/// Returns the value. See comments in TypedObjectPlug::getValue()
+	/// for details of the optional precomputedHash argument - and use
+	/// with care!
+	T getValue( const IECore::MurmurHash *precomputedHash = nullptr ) const;
 
-		void setFrom( const ValuePlug *other ) override;
+	void setFrom( const ValuePlug *other ) override;
 
-		/// Implemented to just return ValuePlug::hash(),
-		/// but may be specialised in particular instantiations.
-		IECore::MurmurHash hash() const override;
-		/// Ensures the method above doesn't mask
-		/// ValuePlug::hash( h )
-		using ValuePlug::hash;
+	/// Implemented to just return ValuePlug::hash(),
+	/// but may be specialised in particular instantiations.
+	IECore::MurmurHash hash() const override;
+	/// Ensures the method above doesn't mask
+	/// ValuePlug::hash( h )
+	using ValuePlug::hash;
 
-	private :
+private:
 
-		using DataType = IECore::TypedData<T>;
-		using DataTypePtr = typename DataType::Ptr;
-
+	using DataType = IECore::TypedData<T>;
+	using DataTypePtr = typename DataType::Ptr;
 };
 
 using BoolPlug = TypedPlug<bool>;

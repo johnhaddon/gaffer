@@ -57,5 +57,4 @@ void GafferImageModule::bindWarp()
 			.value( "Pixels", VectorWarp::Pixels )
 			.value( "Screen", VectorWarp::Screen );
 	}
-
 }

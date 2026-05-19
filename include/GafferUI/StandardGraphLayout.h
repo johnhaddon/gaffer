@@ -55,52 +55,51 @@ IE_CORE_FORWARDDECLARE( ConnectionGadget )
 class GAFFERUI_API StandardGraphLayout : public GraphLayout
 {
 
-	public :
+public:
 
-		StandardGraphLayout();
-		~StandardGraphLayout() override;
+	StandardGraphLayout();
+	~StandardGraphLayout() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferUI::StandardGraphLayout, StandardGraphLayoutTypeId, GraphLayout );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferUI::StandardGraphLayout, StandardGraphLayoutTypeId, GraphLayout );
 
-		bool connectNode( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs ) const override;
-		bool connectNodes( GraphGadget *graph, Gaffer::Set *nodes, Gaffer::Set *potentialInputs ) const override;
+	bool connectNode( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs ) const override;
+	bool connectNodes( GraphGadget *graph, Gaffer::Set *nodes, Gaffer::Set *potentialInputs ) const override;
 
-		void positionNode( GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const override;
-		void positionNodes( GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const override;
+	void positionNode( GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const override;
+	void positionNodes( GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const override;
 
-		void layoutNodes( GraphGadget *graph, Gaffer::Set *nodes ) const override;
+	void layoutNodes( GraphGadget *graph, Gaffer::Set *nodes ) const override;
 
-		/// @name Layout algorithm parameters
-		////////////////////////////////////////////////////////////////////
-		//@{
-		/// A multiplier on the preferred connection length.
-		void setConnectionScale( float scale );
-		float getConnectionScale() const;
-		/// A multiplier on the preferred separation between
-		/// adjacent nodes.
-		void setNodeSeparationScale( float scale );
-		float getNodeSeparationScale() const;
-		//@}
+	/// @name Layout algorithm parameters
+	////////////////////////////////////////////////////////////////////
+	//@{
+	/// A multiplier on the preferred connection length.
+	void setConnectionScale( float scale );
+	float getConnectionScale() const;
+	/// A multiplier on the preferred separation between
+	/// adjacent nodes.
+	void setNodeSeparationScale( float scale );
+	float getNodeSeparationScale() const;
+	//@}
 
-	private :
+private:
 
-		bool connectNodeInternal( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs, bool insertIfPossible ) const;
+	bool connectNodeInternal( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs, bool insertIfPossible ) const;
 
-		struct Endpoint
-		{
-			Gaffer::Plug *plug;
-			Imath::V3f position;
-			Imath::V3f tangent;
-		};
+	struct Endpoint
+	{
+		Gaffer::Plug *plug;
+		Imath::V3f position;
+		Imath::V3f tangent;
+	};
 
-		size_t outputs( NodeGadget *nodeGadget, std::vector<Endpoint> &endpoints ) const;
-		size_t outputs( GraphGadget *graph, Gaffer::Set *nodes, std::vector<Endpoint> &endpoints ) const;
-		Gaffer::Plug *correspondingOutput( const Gaffer::Plug *input ) const;
-		size_t unconnectedInputs( NodeGadget *nodeGadget, std::vector<Endpoint> &endpoints ) const;
+	size_t outputs( NodeGadget *nodeGadget, std::vector<Endpoint> &endpoints ) const;
+	size_t outputs( GraphGadget *graph, Gaffer::Set *nodes, std::vector<Endpoint> &endpoints ) const;
+	Gaffer::Plug *correspondingOutput( const Gaffer::Plug *input ) const;
+	size_t unconnectedInputs( NodeGadget *nodeGadget, std::vector<Endpoint> &endpoints ) const;
 
-		float m_connectionScale;
-		float m_nodeSeparationScale;
-
+	float m_connectionScale;
+	float m_nodeSeparationScale;
 };
 
 IE_CORE_DECLAREPTR( StandardGraphLayout );

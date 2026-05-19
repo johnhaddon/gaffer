@@ -62,92 +62,91 @@ ScenePlug::ScenePath concatScenePath( const ScenePlug::ScenePath &a, const Scene
 
 class CapsuleScope : boost::noncopyable
 {
-	private :
-		// Base constructor used by the two public constructors
-		CapsuleScope(
-			const Gaffer::Context *context, const ScenePlug *inPlug, const ScenePlug::ScenePath &sourcePath
-		)
+private:
+
+	// Base constructor used by the two public constructors
+	CapsuleScope(
+		const Gaffer::Context *context, const ScenePlug *inPlug, const ScenePlug::ScenePath &sourcePath
+	)
+	{
+		m_object = inPlug->object( sourcePath );
+		m_capsule = IECore::runTimeCast<const Capsule>( m_object.get() );
+	}
+
+public:
+
+	CapsuleScope(
+		const Gaffer::Context *context, const ScenePlug *inPlug,
+		const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath
+	) : CapsuleScope( context, inPlug, sourcePath )
+	{
+		if( m_capsule )
 		{
-			m_object = inPlug->object( sourcePath );
-			m_capsule = IECore::runTimeCast< const Capsule >( m_object.get() );
+			m_scope.emplace( m_capsule->context() );
+			m_scope->setCanceller( context->canceller() );
+			m_capsulePath = concatScenePath( m_capsule->root(), branchPath );
+			m_scope->set( ScenePlug::scenePathContextName, &m_capsulePath );
 		}
+	}
 
-	public :
-
-		CapsuleScope(
-			const Gaffer::Context *context, const ScenePlug *inPlug,
-			const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath
-		) : CapsuleScope( context, inPlug, sourcePath )
+	CapsuleScope(
+		const Gaffer::Context *context, const ScenePlug *inPlug,
+		const ScenePlug::ScenePath &sourcePath, const InternedString *setName
+	) : CapsuleScope( context, inPlug, sourcePath )
+	{
+		if( m_capsule )
 		{
-			if( m_capsule )
+			m_scope.emplace( m_capsule->context() );
+			m_scope->setCanceller( context->canceller() );
+			m_scope->set( ScenePlug::setNameContextName, setName );
+		}
+	}
+
+	const IECore::Object *object() const
+	{
+		return m_object.get();
+	}
+
+	const ScenePlug *scene( bool throwIfNoCapsule ) const
+	{
+		if( !m_capsule )
+		{
+			if( throwIfNoCapsule )
 			{
-				m_scope.emplace( m_capsule->context() );
-				m_scope->setCanceller( context->canceller() );
-				m_capsulePath = concatScenePath( m_capsule->root(), branchPath );
-				m_scope->set( ScenePlug::scenePathContextName, &m_capsulePath );
+				throw IECore::Exception( "Accessing capsule scene, but capsule not found." );
 			}
+			return nullptr;
 		}
+		return m_capsule->scene();
+	}
 
-		CapsuleScope(
-			const Gaffer::Context *context, const ScenePlug *inPlug,
-			const ScenePlug::ScenePath &sourcePath, const InternedString *setName
-		) : CapsuleScope( context, inPlug, sourcePath )
+	const ScenePlug::ScenePath &root() const
+	{
+		if( !m_capsule )
 		{
-			if( m_capsule )
-			{
-				m_scope.emplace( m_capsule->context() );
-				m_scope->setCanceller( context->canceller() );
-				m_scope->set( ScenePlug::setNameContextName, setName );
-			}
+			throw IECore::Exception( "Coding error, only read root() when a capsule is found." );
 		}
+		return m_capsule->root();
+	}
 
-		const IECore::Object* object() const
-		{
-			return m_object.get();
-		}
+private:
 
-		const ScenePlug* scene( bool throwIfNoCapsule ) const
-		{
-			if( !m_capsule )
-			{
-				if( throwIfNoCapsule )
-				{
-					throw IECore::Exception( "Accessing capsule scene, but capsule not found." );
-
-				}
-				return nullptr;
-			}
-			return m_capsule->scene();
-		}
-
-		const ScenePlug::ScenePath &root() const
-		{
-			if( !m_capsule )
-			{
-				throw IECore::Exception( "Coding error, only read root() when a capsule is found." );
-			}
-			return m_capsule->root();
-		}
-
-	private :
-
-		// We use `optional` here to avoid the expense of constructing
-		// an EditableScope when we don't need one.
-		std::optional<Context::EditableScope> m_scope;
-		IECore::ConstObjectPtr m_object;
-		const Capsule* m_capsule;
-		ScenePlug::ScenePath m_capsulePath;
-
+	// We use `optional` here to avoid the expense of constructing
+	// an EditableScope when we don't need one.
+	std::optional<Context::EditableScope> m_scope;
+	IECore::ConstObjectPtr m_object;
+	const Capsule *m_capsule;
+	ScenePlug::ScenePath m_capsulePath;
 };
 
-}
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( Unencapsulate );
 
 size_t Unencapsulate::g_firstPlugIndex = 0;
 
 Unencapsulate::Unencapsulate( const std::string &name )
-	:	BranchCreator( name )
+	: BranchCreator( name )
 {
 	// Hide `destination` plug until we resolve issues surrounding `processesRootObject()`.
 	// See `BranchCreator::computeObject()`. Or perhaps we would never want to allow a

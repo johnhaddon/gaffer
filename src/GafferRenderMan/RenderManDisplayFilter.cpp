@@ -41,7 +41,7 @@ using namespace GafferRenderMan;
 GAFFER_NODE_DEFINE_TYPE( RenderManDisplayFilter );
 
 RenderManDisplayFilter::RenderManDisplayFilter( const std::string &name )
-	:	RenderManOutputFilter( name, FilterType::Display )
+	: RenderManOutputFilter( name, FilterType::Display )
 {
 }
 

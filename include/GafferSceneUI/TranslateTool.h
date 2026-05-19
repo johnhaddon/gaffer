@@ -49,81 +49,79 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API TranslateTool : public TransformTool
 {
 
-	public :
+public:
 
-		explicit TranslateTool( SceneView *view, const std::string &name = defaultName<TranslateTool>() );
-		~TranslateTool() override;
+	explicit TranslateTool( SceneView *view, const std::string &name = defaultName<TranslateTool>() );
+	~TranslateTool() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::TranslateTool, TranslateToolTypeId, TransformTool );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::TranslateTool, TranslateToolTypeId, TransformTool );
 
-		Gaffer::IntPlug *orientationPlug();
-		const Gaffer::IntPlug *orientationPlug() const;
+	Gaffer::IntPlug *orientationPlug();
+	const Gaffer::IntPlug *orientationPlug() const;
 
-		/// Translates by the world space offset in the directions
-		/// specified by the current orientation,
-		/// as if the user had dragged the handles interactively.
-		/// This is primarily of use in the unit tests.
-		void translate( const Imath::V3f &offset );
+	/// Translates by the world space offset in the directions
+	/// specified by the current orientation,
+	/// as if the user had dragged the handles interactively.
+	/// This is primarily of use in the unit tests.
+	void translate( const Imath::V3f &offset );
 
-	protected :
+protected:
 
-		bool affectsHandles( const Gaffer::Plug *input ) const override;
-		void updateHandles( float rasterScale ) override;
+	bool affectsHandles( const Gaffer::Plug *input ) const override;
+	void updateHandles( float rasterScale ) override;
 
-	private :
+private:
 
-		Imath::M44f handlesTransform() const;
+	Imath::M44f handlesTransform() const;
 
-		// The guts of the translation logic. This is factored out of the
-		// drag handling so it can be shared with the `translate()` public
-		// method.
-		struct Translation
-		{
+	// The guts of the translation logic. This is factored out of the
+	// drag handling so it can be shared with the `translate()` public
+	// method.
+	struct Translation
+	{
 
-			Translation( const Selection &selection, Orientation orientation );
+		Translation( const Selection &selection, Orientation orientation );
 
-			bool canApply( const Imath::V3f &offset ) const;
-			void apply( const Imath::V3f &offset );
+		bool canApply( const Imath::V3f &offset ) const;
+		void apply( const Imath::V3f &offset );
 
-			private :
+	private:
 
-				// For the validity of this reference, we rely
-				// on `TransformTool::selection()` not changing
-				// during drags.
-				const Selection &m_selection;
-				Imath::M44f m_gadgetToTransform;
+		// For the validity of this reference, we rely
+		// on `TransformTool::selection()` not changing
+		// during drags.
+		const Selection &m_selection;
+		Imath::M44f m_gadgetToTransform;
 
-				// Initialised lazily when we first
-				// acquire the transform plug.
-				std::optional<Imath::V3f> m_origin;
+		// Initialised lazily when we first
+		// acquire the transform plug.
+		std::optional<Imath::V3f> m_origin;
+	};
 
-		};
+	// Handle drag handling.
 
-		// Handle drag handling.
+	IECore::RunTimeTypedPtr handleDragBegin();
+	bool handleDragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool handleDragEnd();
 
-		IECore::RunTimeTypedPtr handleDragBegin();
-		bool handleDragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool handleDragEnd();
+	// Targeted mode handling
 
-		// Targeted mode handling
+	bool keyPress( const GafferUI::KeyEvent &event );
+	bool keyRelease( const GafferUI::KeyEvent &event );
+	void sceneGadgetLeave( const GafferUI::ButtonEvent &event );
+	void visibilityChanged( GafferUI::Gadget *gadget );
+	void plugSet( Gaffer::Plug *plug );
 
-		bool keyPress( const GafferUI::KeyEvent &event );
-		bool keyRelease( const GafferUI::KeyEvent &event );
-		void sceneGadgetLeave( const GafferUI::ButtonEvent &event );
-		void visibilityChanged( GafferUI::Gadget *gadget );
-		void plugSet( Gaffer::Plug *plug );
+	bool buttonPress( const GafferUI::ButtonEvent &event );
 
-		bool buttonPress( const GafferUI::ButtonEvent &event );
+	void setTargetedMode( bool targeted );
+	bool getTargetedMode() const { return m_targetedMode; }
+	bool m_targetedMode;
 
-		void setTargetedMode( bool targeted );
-		bool getTargetedMode() const { return m_targetedMode; }
-		bool m_targetedMode;
+	std::vector<Translation> m_drag;
 
-		std::vector<Translation> m_drag;
-
-		static ToolDescription<TranslateTool, SceneView> g_toolDescription;
-		static size_t g_firstPlugIndex;
-
+	static ToolDescription<TranslateTool, SceneView> g_toolDescription;
+	static size_t g_firstPlugIndex;
 };
 
 } // namespace GafferSceneUI

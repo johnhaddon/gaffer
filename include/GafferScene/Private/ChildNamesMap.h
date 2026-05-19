@@ -58,46 +58,43 @@ namespace Private
 class ChildNamesMap : public IECore::Data
 {
 
-	public :
+public:
 
-		ChildNamesMap( const std::vector<IECore::ConstInternedStringVectorDataPtr> &inputChildNames );
+	ChildNamesMap( const std::vector<IECore::ConstInternedStringVectorDataPtr> &inputChildNames );
 
-		struct Input
-		{
-			IECore::InternedString name;
-			size_t index;
-			bool operator == ( const Input &rhs ) const { return name == rhs.name && index == rhs.index; }
-		};
+	struct Input
+	{
+		IECore::InternedString name;
+		size_t index;
+		bool operator == ( const Input &rhs ) const { return name == rhs.name && index == rhs.index; }
+	};
 
-		/// Returns the merged child names.
-		const IECore::InternedStringVectorData *outputChildNames() const;
-		/// Returns the input which is mapped to `outputName`.
-		const Input &input( IECore::InternedString outputName ) const;
-		/// Combines multiple input sets, accounting for the name remapping.
-		IECore::PathMatcher set( const std::vector<IECore::ConstPathMatcherDataPtr> &inputSets ) const;
+	/// Returns the merged child names.
+	const IECore::InternedStringVectorData *outputChildNames() const;
+	/// Returns the input which is mapped to `outputName`.
+	const Input &input( IECore::InternedString outputName ) const;
+	/// Combines multiple input sets, accounting for the name remapping.
+	IECore::PathMatcher set( const std::vector<IECore::ConstPathMatcherDataPtr> &inputSets ) const;
 
-		static IECore::InternedString uniqueName( IECore::InternedString name, const std::unordered_set<IECore::InternedString> &existingNames );
+	static IECore::InternedString uniqueName( IECore::InternedString name, const std::unordered_set<IECore::InternedString> &existingNames );
 
-	private :
+private:
 
-		const IECore::InternedStringVectorDataPtr m_childNames;
+	const IECore::InternedStringVectorDataPtr m_childNames;
 
-		struct Child
-		{
-			const Input input;
-			const IECore::InternedString output;
-		};
+	struct Child
+	{
+		const Input input;
+		const IECore::InternedString output;
+	};
 
-		using Map = boost::multi_index::multi_index_container<
-			Child,
-			boost::multi_index::indexed_by<
-				boost::multi_index::hashed_unique<boost::multi_index::key<&Child::output>>,
-				boost::multi_index::hashed_unique<boost::multi_index::key<&Child::input>>
-			>
-		>;
+	using Map = boost::multi_index::multi_index_container<
+		Child,
+		boost::multi_index::indexed_by<
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Child::output>>,
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Child::input>>>>;
 
-		Map m_map;
-
+	Map m_map;
 };
 
 IE_CORE_DECLAREPTR( ChildNamesMap )

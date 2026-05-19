@@ -47,7 +47,7 @@ namespace Gaffer
 GAFFER_NODE_DEFINE_TYPE( Loop );
 
 Loop::Loop( const std::string &name )
-	:	ComputeNode( name ), m_inPlugIndex( 0 ), m_outPlugIndex( 0 ), m_firstPlugIndex( 0 )
+	: ComputeNode( name ), m_inPlugIndex( 0 ), m_outPlugIndex( 0 ), m_firstPlugIndex( 0 )
 {
 	// Connect to `childAddedSignal()` so we can set ourselves up later when the
 	// appropriate plugs are added manually.
@@ -71,12 +71,12 @@ void Loop::setup( const ValuePlug *plug )
 	}
 
 	PlugPtr in = plug->createCounterpart( "in", Plug::In );
-	MetadataAlgo::copyColors( plug , in.get() , /* overwrite = */ false  );
+	MetadataAlgo::copyColors( plug, in.get(), /* overwrite = */ false );
 	in->setFlags( Plug::Serialisable, true );
 	addChild( in );
 
 	PlugPtr out = plug->createCounterpart( "out", Plug::Out );
-	MetadataAlgo::copyColors( plug , out.get() , /* overwrite = */ false  );
+	MetadataAlgo::copyColors( plug, out.get(), /* overwrite = */ false );
 	addChild( out );
 }
 
@@ -301,8 +301,8 @@ bool Loop::setupPlugs()
 	/// just remove this entirely. Note that the same applies for the Dot,
 	/// ContextProcessor, ArrayPlug and Switch nodes. See
 	/// https://github.com/GafferHQ/gaffer/pull/2953 for further discussion.
-	MetadataAlgo::copyColors( inPlug(), nextPlug() , /* overwrite = */ false  );
-	MetadataAlgo::copyColors( inPlug(), previousPlug() , /* overwrite = */ false  );
+	MetadataAlgo::copyColors( inPlug(), nextPlug(), /* overwrite = */ false );
+	MetadataAlgo::copyColors( inPlug(), previousPlug(), /* overwrite = */ false );
 
 	// Because we're a loop, our affects() implementation specifies a cycle
 	// between nextPlug() and previousPlug(), so we must ask nicely for leniency
@@ -312,7 +312,7 @@ bool Loop::setupPlugs()
 	previousPlug()->setFlags( Plug::AcceptsDependencyCycles, true );
 	for( Gaffer::Plug::RecursiveIterator it( previousPlug() ); !it.done(); ++it )
 	{
-		(*it)->setFlags( Plug::AcceptsDependencyCycles, true );
+		( *it )->setFlags( Plug::AcceptsDependencyCycles, true );
 	}
 
 	return true;
@@ -324,7 +324,7 @@ void Loop::addAffectedPlug( const ValuePlug *output, DependencyNode::AffectedPlu
 	{
 		for( Plug::RecursiveOutputIterator it( output ); !it.done(); ++it )
 		{
-			if( !(*it)->children().size() )
+			if( !( *it )->children().size() )
 			{
 				outputs.push_back( it->get() );
 			}

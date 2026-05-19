@@ -50,13 +50,13 @@ namespace Detail
 // node constructor bindings
 
 template<typename T, typename TWrapper>
-void defNodeConstructor( NodeClass<T, TWrapper> &cls, typename boost::enable_if<boost::mpl::not_< boost::is_abstract<TWrapper> > >::type *enabler = nullptr )
+void defNodeConstructor( NodeClass<T, TWrapper> &cls, typename boost::enable_if<boost::mpl::not_<boost::is_abstract<TWrapper>>>::type *enabler = nullptr )
 {
-	cls.def( boost::python::init< const std::string & >( boost::python::arg( "name" ) = Gaffer::GraphComponent::defaultName<T>() ) );
+	cls.def( boost::python::init<const std::string &>( boost::python::arg( "name" ) = Gaffer::GraphComponent::defaultName<T>() ) );
 }
 
 template<typename T, typename TWrapper>
-void defNodeConstructor( NodeClass<T, TWrapper> &cls, typename boost::enable_if<boost::is_abstract<TWrapper> >::type *enabler = nullptr )
+void defNodeConstructor( NodeClass<T, TWrapper> &cls, typename boost::enable_if<boost::is_abstract<TWrapper>>::type *enabler = nullptr )
 {
 	// nothing to bind for abstract classes
 }
@@ -65,14 +65,14 @@ void defNodeConstructor( NodeClass<T, TWrapper> &cls, typename boost::enable_if<
 
 template<typename T, typename TWrapper>
 NodeClass<T, TWrapper>::NodeClass( const char *docString )
-	:	GraphComponentClass<T, TWrapper>( docString )
+	: GraphComponentClass<T, TWrapper>( docString )
 {
 	Detail::defNodeConstructor( *this );
 }
 
 template<typename T, typename TWrapper>
 NodeClass<T, TWrapper>::NodeClass( const char *docString, boost::python::no_init_t )
-	:	GraphComponentClass<T, TWrapper>( docString )
+	: GraphComponentClass<T, TWrapper>( docString )
 {
 }
 

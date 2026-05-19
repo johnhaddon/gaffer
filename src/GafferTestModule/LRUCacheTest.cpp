@@ -59,7 +59,7 @@ struct DispatchTest
 {
 
 	template<typename... Args>
-	void operator()( const std::string &policy, Args&&... args )
+	void operator () ( const std::string &policy, Args &&...args )
 	{
 		if( policy == "serial" )
 		{
@@ -68,23 +68,24 @@ struct DispatchTest
 			// thread, since Serial policy is not threadsafe.
 			tbb::task_arena arena( 1 );
 			arena.execute(
-				[&f]{ f(); }
+				[&f] { f(); }
 			);
 		}
 		else if( policy == "parallel" )
 		{
-			F<LRUCachePolicy::Parallel> f( std::forward<Args>( args )... ); f();
+			F<LRUCachePolicy::Parallel> f( std::forward<Args>( args )... );
+			f();
 		}
 		else if( policy == "taskParallel" )
 		{
-			F<LRUCachePolicy::TaskParallel> f( std::forward<Args>( args )... ); f();
+			F<LRUCachePolicy::TaskParallel> f( std::forward<Args>( args )... );
+			f();
 		}
 		else
 		{
 			GAFFERTEST_ASSERT( false );
 		}
 	}
-
 };
 
 template<template<typename> class Policy>
@@ -92,11 +93,11 @@ struct TestLRUCache
 {
 
 	TestLRUCache( int numIterations, int numValues, int maxCost, int clearFrequency )
-		:	m_numIterations( numIterations ), m_numValues( numValues ), m_maxCost( maxCost ), m_clearFrequency( clearFrequency )
+		: m_numIterations( numIterations ), m_numValues( numValues ), m_maxCost( maxCost ), m_clearFrequency( clearFrequency )
 	{
 	}
 
-	void operator()()
+	void operator () ()
 	{
 		using Cache = LRUCache<int, int, Policy>;
 		Cache cache(
@@ -107,13 +108,13 @@ struct TestLRUCache
 		tbb::parallel_for(
 			tbb::blocked_range<size_t>( 0, m_numIterations ),
 			[&]( const tbb::blocked_range<size_t> &r ) {
-				for( size_t i=r.begin(); i!=r.end(); ++i )
+				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
 					const int k = i % m_numValues;
 					const int v = cache.get( k );
 					GAFFERTEST_ASSERTEQUAL( v, k );
 
-					if( m_clearFrequency && (i % m_clearFrequency == 0) )
+					if( m_clearFrequency && ( i % m_clearFrequency == 0 ) )
 					{
 						cache.clear();
 					}
@@ -122,13 +123,12 @@ struct TestLRUCache
 		);
 	}
 
-	private :
+private:
 
-		const int m_numIterations;
-		const int m_numValues;
-		const int m_maxCost;
-		const int m_clearFrequency;
-
+	const int m_numIterations;
+	const int m_numValues;
+	const int m_maxCost;
+	const int m_clearFrequency;
 };
 
 void testLRUCache( const std::string &policy, int numIterations, int numValues, int maxCost, int clearFrequency )
@@ -140,7 +140,7 @@ template<template<typename> class Policy>
 struct TestLRUCacheRemovalCallback
 {
 
-	void operator()()
+	void operator () ()
 	{
 		std::vector<std::pair<int, int>> removed;
 
@@ -148,7 +148,8 @@ struct TestLRUCacheRemovalCallback
 		Cache cache(
 			// Getter
 			[]( int key, size_t &cost, const IECore::Canceller *canceller ) {
-				cost = 1; return key * 2;
+				cost = 1;
+				return key * 2;
 			},
 			/* maxCost = */ 5,
 			// Removal callback
@@ -195,7 +196,6 @@ struct TestLRUCacheRemovalCallback
 			);
 		}
 	}
-
 };
 
 void testLRUCacheRemovalCallback( const std::string &policy )
@@ -208,11 +208,11 @@ struct TestLRUCacheContentionForOneItem
 {
 
 	TestLRUCacheContentionForOneItem( bool withCanceller )
-		:	m_withCanceller( withCanceller )
+		: m_withCanceller( withCanceller )
 	{
 	}
 
-	void operator()()
+	void operator () ()
 	{
 		using Cache = LRUCache<int, int, Policy>;
 		Cache cache(
@@ -233,10 +233,9 @@ struct TestLRUCacheContentionForOneItem
 		);
 	}
 
-	private :
+private:
 
-		bool m_withCanceller;
-
+	bool m_withCanceller;
 };
 
 void testLRUCacheContentionForOneItem( const std::string &policy, bool withCanceller )
@@ -249,11 +248,11 @@ struct TestLRUCacheRecursion
 {
 
 	TestLRUCacheRecursion( int numIterations, int numValues, int maxCost )
-		:	m_numIterations( numIterations ), m_numValues( numValues ), m_maxCost( maxCost )
+		: m_numIterations( numIterations ), m_numValues( numValues ), m_maxCost( maxCost )
 	{
 	}
 
-	void operator()()
+	void operator () ()
 	{
 		using Cache = LRUCache<int, int, Policy>;
 		using CachePtr = std::unique_ptr<Cache>;
@@ -291,15 +290,13 @@ struct TestLRUCacheRecursion
 				}
 			}
 		);
-
 	}
 
-	private :
+private:
 
-		const int m_numIterations;
-		const int m_numValues;
-		const int m_maxCost;
-
+	const int m_numIterations;
+	const int m_numValues;
+	const int m_maxCost;
 };
 
 void testLRUCacheRecursion( const std::string &policy, int numIterations, size_t numValues, int maxCost )
@@ -311,7 +308,7 @@ template<template<typename> class Policy>
 struct TestLRUCacheClearFromGet
 {
 
-	void operator()()
+	void operator () ()
 	{
 		using Cache = IECorePreview::LRUCache<int, int, Policy>;
 		using CachePtr = std::unique_ptr<Cache>;
@@ -330,7 +327,6 @@ struct TestLRUCacheClearFromGet
 
 		GAFFERTEST_ASSERTEQUAL( cache->get( 0 ), 0 );
 	}
-
 };
 
 void testLRUCacheClearFromGet( const std::string &policy )
@@ -342,7 +338,7 @@ template<template<typename> class Policy>
 struct TestLRUCacheExceptions
 {
 
-	void operator()()
+	void operator () ()
 	{
 		std::vector<int> calls;
 
@@ -488,7 +484,6 @@ struct TestLRUCacheExceptions
 		GAFFERTEST_ASSERT( caughtException );
 		GAFFERTEST_ASSERTEQUAL( calls.size(), 2 );
 	}
-
 };
 
 void testLRUCacheExceptions( const std::string &policy )
@@ -500,7 +495,7 @@ template<template<typename> class Policy>
 struct TestLRUCacheCancellation
 {
 
-	void operator()()
+	void operator () ()
 	{
 		std::vector<int> calls;
 
@@ -557,9 +552,7 @@ struct TestLRUCacheCancellation
 		GAFFERTEST_ASSERTEQUAL( val, 3 );
 		GAFFERTEST_ASSERTEQUAL( calls.size(), 4 );
 		GAFFERTEST_ASSERTEQUAL( calls.back(), 3 );
-
 	}
-
 };
 
 void testLRUCacheCancellation( const std::string &policy )
@@ -571,12 +564,13 @@ template<template<typename> class Policy>
 struct TestLRUCacheCancellationOfSecondGet
 {
 
-	void operator()()
+	void operator () ()
 	{
 
 		// Make a cache with a getter that will never return unless cancelled.
 
-		std::atomic_int getterCount; getterCount = 0;
+		std::atomic_int getterCount;
+		getterCount = 0;
 
 		using Cache = IECorePreview::LRUCache<int, int, Policy>;
 		Cache cache(
@@ -644,7 +638,6 @@ struct TestLRUCacheCancellationOfSecondGet
 		GAFFERTEST_ASSERT( firstCancelled );
 		GAFFERTEST_ASSERTEQUAL( getterCount.load(), 1 );
 	}
-
 };
 
 void testLRUCacheCancellationOfSecondGet( const std::string &policy )
@@ -664,7 +657,7 @@ template<template<typename> class Policy>
 struct TestLRUCacheUncacheableItem
 {
 
-	void operator()()
+	void operator () ()
 	{
 		using Cache = IECorePreview::LRUCache<int, int, Policy>;
 		using CachePtr = std::unique_ptr<Cache>;
@@ -705,7 +698,6 @@ struct TestLRUCacheUncacheableItem
 			);
 		}
 	}
-
 };
 
 void testLRUCacheUncacheableItem( const std::string &policy )
@@ -717,7 +709,7 @@ template<template<typename> class Policy>
 struct TestLRUCacheGetIfCached
 {
 
-	void operator()()
+	void operator () ()
 	{
 		using Cache = IECorePreview::LRUCache<int, int, Policy>;
 
@@ -742,9 +734,7 @@ struct TestLRUCacheGetIfCached
 		cache.erase( 0 );
 		GAFFERTEST_ASSERT( !cache.getIfCached( 0 ) );
 		GAFFERTEST_ASSERTEQUAL( *cache.getIfCached( 1 ), 1 );
-
 	}
-
 };
 
 void testLRUCacheGetIfCached( const std::string &policy )
@@ -756,7 +746,7 @@ template<template<typename> class Policy>
 struct TestLRUCacheSetIfUncached
 {
 
-	void operator()()
+	void operator () ()
 	{
 		using Cache = IECorePreview::LRUCache<int, int, Policy>;
 
@@ -769,7 +759,7 @@ struct TestLRUCacheSetIfUncached
 		);
 
 		size_t numCostFunctionCalls = 0;
-		auto costFunction = [&] ( int value ) {
+		auto costFunction = [&]( int value ) {
 			++numCostFunctionCalls;
 			return 1;
 		};
@@ -789,9 +779,7 @@ struct TestLRUCacheSetIfUncached
 		cache.setIfUncached( 2, 2, costFunction );
 		GAFFERTEST_ASSERTEQUAL( *cache.getIfCached( 2 ), 2 );
 		GAFFERTEST_ASSERTEQUAL( numCostFunctionCalls, 1 );
-
 	}
-
 };
 
 void testLRUCacheSetIfUncached( const std::string &policy )

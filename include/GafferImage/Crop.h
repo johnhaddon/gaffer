@@ -48,83 +48,83 @@ IE_CORE_FORWARDDECLARE( FormatPlug );
 
 class GAFFERIMAGE_API Crop : public ImageProcessor
 {
-	public :
+public:
 
-		explicit Crop( const std::string &name=defaultName<Crop>() );
-		~Crop() override;
+	explicit Crop( const std::string &name = defaultName<Crop>() );
+	~Crop() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Crop, CropTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Crop, CropTypeId, ImageProcessor );
 
-		enum AreaSource
-		{
-			Area = 0,
-			DataWindow = 1,
-			DisplayWindow = 2,
-			Format = 3,
-			Auto = 4
-		};
+	enum AreaSource
+	{
+		Area = 0,
+		DataWindow = 1,
+		DisplayWindow = 2,
+		Format = 3,
+		Auto = 4
+	};
 
-		Gaffer::IntPlug *areaSourcePlug();
-		const Gaffer::IntPlug *areaSourcePlug() const;
+	Gaffer::IntPlug *areaSourcePlug();
+	const Gaffer::IntPlug *areaSourcePlug() const;
 
-		Gaffer::Box2iPlug *areaPlug();
-		const Gaffer::Box2iPlug *areaPlug() const;
+	Gaffer::Box2iPlug *areaPlug();
+	const Gaffer::Box2iPlug *areaPlug() const;
 
-		GafferImage::FormatPlug *formatPlug();
-		const GafferImage::FormatPlug *formatPlug() const;
+	GafferImage::FormatPlug *formatPlug();
+	const GafferImage::FormatPlug *formatPlug() const;
 
-		Gaffer::BoolPlug *formatCenterPlug();
-		const Gaffer::BoolPlug *formatCenterPlug() const;
+	Gaffer::BoolPlug *formatCenterPlug();
+	const Gaffer::BoolPlug *formatCenterPlug() const;
 
-		Gaffer::BoolPlug *affectDataWindowPlug();
-		const Gaffer::BoolPlug *affectDataWindowPlug() const;
+	Gaffer::BoolPlug *affectDataWindowPlug();
+	const Gaffer::BoolPlug *affectDataWindowPlug() const;
 
-		Gaffer::BoolPlug *affectDisplayWindowPlug();
-		const Gaffer::BoolPlug *affectDisplayWindowPlug() const;
+	Gaffer::BoolPlug *affectDisplayWindowPlug();
+	const Gaffer::BoolPlug *affectDisplayWindowPlug() const;
 
-		Gaffer::BoolPlug *resetOriginPlug();
-		const Gaffer::BoolPlug *resetOriginPlug() const;
+	Gaffer::BoolPlug *resetOriginPlug();
+	const Gaffer::BoolPlug *resetOriginPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
-		Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		Gaffer::AtomicBox2iPlug *cropWindowPlug();
-		const Gaffer::AtomicBox2iPlug *cropWindowPlug() const;
+	Gaffer::AtomicBox2iPlug *cropWindowPlug();
+	const Gaffer::AtomicBox2iPlug *cropWindowPlug() const;
 
-		Gaffer::AtomicBox2iPlug *cropDataWindowPlug();
-		const Gaffer::AtomicBox2iPlug *cropDataWindowPlug() const;
+	Gaffer::AtomicBox2iPlug *cropDataWindowPlug();
+	const Gaffer::AtomicBox2iPlug *cropDataWindowPlug() const;
 
-		Gaffer::V2iPlug *offsetPlug();
-		const Gaffer::V2iPlug *offsetPlug() const;
+	Gaffer::V2iPlug *offsetPlug();
+	const Gaffer::V2iPlug *offsetPlug() const;
 
-		Gaffer::AtomicBox2iPlug *tileAutoAreaPlug();
-		const Gaffer::AtomicBox2iPlug *tileAutoAreaPlug() const;
+	Gaffer::AtomicBox2iPlug *tileAutoAreaPlug();
+	const Gaffer::AtomicBox2iPlug *tileAutoAreaPlug() const;
 
-		Gaffer::AtomicBox2iPlug *autoAreaPlug();
-		const Gaffer::AtomicBox2iPlug *autoAreaPlug() const;
+	Gaffer::AtomicBox2iPlug *autoAreaPlug();
+	const Gaffer::AtomicBox2iPlug *autoAreaPlug() const;
 
-		bool affectsTileAutoArea( const Gaffer::Plug *input ) const;
-		void hashTileAutoArea( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		Imath::Box2i computeTileAutoArea( const Gaffer::Context *context ) const;
+	bool affectsTileAutoArea( const Gaffer::Plug *input ) const;
+	void hashTileAutoArea( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	Imath::Box2i computeTileAutoArea( const Gaffer::Context *context ) const;
 
-		bool affectsAutoArea( const Gaffer::Plug *input ) const;
-		void hashAutoArea( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		Imath::Box2i computeAutoArea( const Gaffer::Context *context ) const;
+	bool affectsAutoArea( const Gaffer::Plug *input ) const;
+	void hashAutoArea( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	Imath::Box2i computeAutoArea( const Gaffer::Context *context ) const;
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Crop )

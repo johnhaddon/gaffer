@@ -80,7 +80,7 @@ ShaderTweakProxy::ShaderLoaderDescription<ArnoldShader> g_arnoldShaderTweakProxy
 GAFFER_NODE_DEFINE_TYPE( ArnoldShader );
 
 ArnoldShader::ArnoldShader( const std::string &name )
-	:	GafferScene::Shader( name )
+	: GafferScene::Shader( name )
 {
 }
 
@@ -109,7 +109,7 @@ const Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output
 		return nullptr;
 	}
 
-	const StringData *primaryInput = static_cast<const StringData*>( metadata->member<IECore::CompoundData>( "shader" )->member<IECore::Data>( "primaryInput" ) );
+	const StringData *primaryInput = static_cast<const StringData *>( metadata->member<IECore::CompoundData>( "shader" )->member<IECore::Data>( "primaryInput" ) );
 	if( !primaryInput )
 	{
 		return nullptr;
@@ -225,11 +225,9 @@ bool ArnoldShader::acceptsInput( const Plug *plug, const Plug *inputPlug ) const
 	{
 		// Imager connections are limited to chaining via the `input`
 		// parameter. Everything else is disallowed.
-		return
-			sourceShader != this &&
+		return sourceShader != this &&
 			plug == parametersPlug()->getChild( g_inputParameterName ) &&
-			sourceShader->typePlug()->getValue() == "ai:imager"
-		;
+			sourceShader->typePlug()->getValue() == "ai:imager";
 	}
 	else
 	{
@@ -243,11 +241,12 @@ bool ArnoldShader::acceptsInput( const Plug *plug, const Plug *inputPlug ) const
 // Metadata loading code
 //////////////////////////////////////////////////////////////////////////
 
-namespace {
-	const AtString g_nullArnoldString( nullptr );
-	const AtString g_primaryInputArnoldString( "primaryInput" );
-	const AtString g_shaderTypeArnoldString( "shaderType" );
-}
+namespace
+{
+const AtString g_nullArnoldString( nullptr );
+const AtString g_primaryInputArnoldString( "primaryInput" );
+const AtString g_shaderTypeArnoldString( "shaderType" );
+} // namespace
 
 static IECore::ConstCompoundDataPtr metadataGetter( const std::string &key, size_t &cost, const IECore::Canceller *canceller )
 {
@@ -271,13 +270,13 @@ static IECore::ConstCompoundDataPtr metadataGetter( const std::string &key, size
 	metadata->writable()["parameter"] = parameterMetadata;
 
 	AtString value;
-	if( AiMetaDataGetStr( shader, /* look up metadata on node, not on parameter */ g_nullArnoldString , g_primaryInputArnoldString, &value ) )
+	if( AiMetaDataGetStr( shader, /* look up metadata on node, not on parameter */ g_nullArnoldString, g_primaryInputArnoldString, &value ) )
 	{
 		shaderMetadata->writable()["primaryInput"] = new StringData( value.c_str() );
 	}
 
 	AtString shaderType;
-	if( AiMetaDataGetStr( shader, /* look up metadata on node, not on parameter */ g_nullArnoldString , g_shaderTypeArnoldString, &shaderType ) )
+	if( AiMetaDataGetStr( shader, /* look up metadata on node, not on parameter */ g_nullArnoldString, g_shaderTypeArnoldString, &shaderType ) )
 	{
 		shaderMetadata->writable()["shaderType"] = new StringData( shaderType.c_str() );
 	}

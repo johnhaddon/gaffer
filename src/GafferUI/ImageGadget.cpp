@@ -90,7 +90,7 @@ Box3f boundGetter( const std::string &fileName, size_t &cost, const IECore::Canc
 	cost = 1;
 	const V2i pixelSize( imageBuf.spec().full_width, imageBuf.spec().full_height );
 	V3f size( pixelSize.x, pixelSize.y, 0.0f );
-	return Box3f( -size/2.0f, size/2.0f );
+	return Box3f( -size / 2.0f, size / 2.0f );
 }
 
 void applyTextureParameters( IECoreGL::Texture *texture, const ImageGadget::TextureParameters &parameters )
@@ -107,16 +107,14 @@ struct TextureCacheKey
 {
 	std::string fileName;
 	ImageGadget::TextureParameters parameters;
-	bool operator==( const TextureCacheKey &other ) const
+	bool operator == ( const TextureCacheKey &other ) const
 	{
-		return
-			fileName == other.fileName &&
+		return fileName == other.fileName &&
 			parameters.minFilter == other.parameters.minFilter &&
 			parameters.magFilter == other.parameters.magFilter &&
 			parameters.lodBias == other.parameters.lodBias &&
 			parameters.wrapS == other.parameters.wrapS &&
-			parameters.wrapT == other.parameters.wrapT
-		;
+			parameters.wrapT == other.parameters.wrapT;
 	}
 };
 
@@ -228,7 +226,7 @@ const IECoreGL::Texture *loadTexture( IECore::ConstRunTimeTypedPtr &imageOrTextu
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageGadget );
 
 ImageGadget::ImageGadget( const std::string &fileName )
-	:	Gadget( defaultName<ImageGadget>() )
+	: Gadget( defaultName<ImageGadget>() )
 {
 
 	// we'll load the actual texture later when we're sure a GL context exists,
@@ -242,11 +240,11 @@ ImageGadget::ImageGadget( const std::string &fileName )
 }
 
 ImageGadget::ImageGadget( IECoreImage::ConstImagePrimitivePtr image )
-	:	Gadget( defaultName<ImageGadget>() ), m_imageOrTextureOrFileName( image->copy() )
+	: Gadget( defaultName<ImageGadget>() ), m_imageOrTextureOrFileName( image->copy() )
 {
 	const V2i pixelSize = image->getDisplayWindow().size() + V2i( 1 );
 	const V3f size( pixelSize.x, pixelSize.y, 0.0f );
-	m_bound = Box3f( -size/2.0f, size/2.0f );
+	m_bound = Box3f( -size / 2.0f, size / 2.0f );
 }
 
 ImageGadget::~ImageGadget()

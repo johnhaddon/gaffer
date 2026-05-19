@@ -47,65 +47,64 @@ namespace Gaffer
 class GAFFER_API RandomChoice : public ComputeNode
 {
 
-	public :
+public:
 
-		explicit RandomChoice( const std::string &name=defaultName<RandomChoice>() );
-		~RandomChoice() override;
+	explicit RandomChoice( const std::string &name = defaultName<RandomChoice>() );
+	~RandomChoice() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::RandomChoice, RandomChoiceTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::RandomChoice, RandomChoiceTypeId, ComputeNode );
 
-		/// Sets up the node to output the specified plug type. The passed plug
-		/// is used as a template, but will not be parented to the node
-		/// itself - typically you will pass a plug which you will connect to
-		/// the node after calling `setup()`.
-		/// \undoable
-		void setup( const ValuePlug *plug );
-		/// Returns true if `plug` is suitable for passing to `setup()`. Not
-		/// all plug types are supported.
-		static bool canSetup( const ValuePlug *plug );
+	/// Sets up the node to output the specified plug type. The passed plug
+	/// is used as a template, but will not be parented to the node
+	/// itself - typically you will pass a plug which you will connect to
+	/// the node after calling `setup()`.
+	/// \undoable
+	void setup( const ValuePlug *plug );
+	/// Returns true if `plug` is suitable for passing to `setup()`. Not
+	/// all plug types are supported.
+	static bool canSetup( const ValuePlug *plug );
 
-		IntPlug *seedPlug();
-		const IntPlug *seedPlug() const;
+	IntPlug *seedPlug();
+	const IntPlug *seedPlug() const;
 
-		StringPlug *seedVariablePlug();
-		const StringPlug *seedVariablePlug() const;
+	StringPlug *seedVariablePlug();
+	const StringPlug *seedVariablePlug() const;
 
-		/// Compound plug that groups the `choices.values` and `choices.weights`
-		/// plugs.
-		ValuePlug *choicesPlug();
-		const ValuePlug *choicesPlug() const;
+	/// Compound plug that groups the `choices.values` and `choices.weights`
+	/// plugs.
+	ValuePlug *choicesPlug();
+	const ValuePlug *choicesPlug() const;
 
-		/// The type of the `choices.values` plug is dictated by the type of
-		/// `outPlug`. For example, `choices.values` is a StringVectorDataPlug when
-		/// `out` is a StringPlug.
-		template<typename T=ValuePlug>
-		T *choicesValuesPlug();
-		template<typename T=ValuePlug>
-		const T *choicesValuesPlug() const;
+	/// The type of the `choices.values` plug is dictated by the type of
+	/// `outPlug`. For example, `choices.values` is a StringVectorDataPlug when
+	/// `out` is a StringPlug.
+	template<typename T = ValuePlug>
+	T *choicesValuesPlug();
+	template<typename T = ValuePlug>
+	const T *choicesValuesPlug() const;
 
-		FloatVectorDataPlug *choicesWeightsPlug();
-		const FloatVectorDataPlug *choicesWeightsPlug() const;
+	FloatVectorDataPlug *choicesWeightsPlug();
+	const FloatVectorDataPlug *choicesWeightsPlug() const;
 
-		/// The type of the `out` plug matches the type passed to `setup()`.
-		template<typename T=ValuePlug>
-		T *outPlug();
-		template<typename T=ValuePlug>
-		const T *outPlug() const;
+	/// The type of the `out` plug matches the type passed to `setup()`.
+	template<typename T = ValuePlug>
+	T *outPlug();
+	template<typename T = ValuePlug>
+	const T *outPlug() const;
 
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-	private :
+private:
 
-		ValuePlug *outPlugInternal();
-		const ValuePlug *outPlugInternal() const;
+	ValuePlug *outPlugInternal();
+	const ValuePlug *outPlugInternal() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( RandomChoice )

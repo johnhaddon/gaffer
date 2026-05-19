@@ -52,10 +52,10 @@ const boost::container::flat_map<IECore::InternedString, IECore::ConstDataPtr> g
 	{ "usd:kind", new IECore::StringData( "assembly" ) },
 };
 
-}
+} // namespace
 
 USDAttributes::USDAttributes( const std::string &name )
-	:	GafferScene::Attributes( name, "usd" )
+	: GafferScene::Attributes( name, "usd" )
 {
 
 	for( auto &p : NameValuePlug::Range( *attributesPlug() ) )
@@ -67,7 +67,6 @@ USDAttributes::USDAttributes( const std::string &name )
 			p->valuePlug<ValuePlug>()->resetDefault();
 		}
 	}
-
 }
 
 USDAttributes::~USDAttributes()

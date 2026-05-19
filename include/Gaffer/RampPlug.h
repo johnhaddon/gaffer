@@ -59,61 +59,61 @@ template<typename T>
 class GAFFER_API RampPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = T;
-		using XPlugType = typename PlugType<typename T::XType>::Type;
-		using YPlugType = typename PlugType<typename T::YType>::Type;
+	using ValueType = T;
+	using XPlugType = typename PlugType<typename T::XType>::Type;
+	using YPlugType = typename PlugType<typename T::YType>::Type;
 
-		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( RampPlug<T>, ValuePlug );
+	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( RampPlug<T>, ValuePlug );
 
-		explicit RampPlug(
-			const std::string &name = defaultName<RampPlug>(),
-			Direction direction=In,
-			const T &defaultValue = T(),
-			unsigned flags = Default
-		);
-		~RampPlug() override;
+	explicit RampPlug(
+		const std::string &name = defaultName<RampPlug>(),
+		Direction direction = In,
+		const T &defaultValue = T(),
+		unsigned flags = Default
+	);
+	~RampPlug() override;
 
-		/// Implemented to only accept children which are suitable for use as points
-		/// in the ramp.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Implemented to only accept children which are suitable for use as points
+	/// in the ramp.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		const T &defaultValue() const;
-		void setToDefault() override;
-		bool isSetToDefault() const override;
-		void resetDefault() override;
-		IECore::MurmurHash defaultHash() const override;
+	const T &defaultValue() const;
+	void setToDefault() override;
+	bool isSetToDefault() const override;
+	void resetDefault() override;
+	IECore::MurmurHash defaultHash() const override;
 
-		/// Sets the value of the points and interpolation child plugs
-		/// \undoable
-		void setValue( const T &value );
-		/// Matching to setValue
-		T getValue() const;
+	/// Sets the value of the points and interpolation child plugs
+	/// \undoable
+	void setValue( const T &value );
+	/// Matching to setValue
+	T getValue() const;
 
-		IntPlug *interpolationPlug();
-		const IntPlug *interpolationPlug() const;
+	IntPlug *interpolationPlug();
+	const IntPlug *interpolationPlug() const;
 
-		/// Returns the number of point plugs
-		unsigned numPoints() const;
-		/// \undoable
-		unsigned addPoint();
-		/// \undoable
-		void removePoint( unsigned pointIndex );
-		/// \undoable
-		void clearPoints();
+	/// Returns the number of point plugs
+	unsigned numPoints() const;
+	/// \undoable
+	unsigned addPoint();
+	/// \undoable
+	void removePoint( unsigned pointIndex );
+	/// \undoable
+	void clearPoints();
 
-		ValuePlug *pointPlug( unsigned pointIndex );
-		const ValuePlug *pointPlug( unsigned pointIndex ) const;
-		XPlugType *pointXPlug( unsigned pointIndex );
-		const XPlugType *pointXPlug( unsigned pointIndex ) const;
-		YPlugType *pointYPlug( unsigned pointIndex );
-		const YPlugType *pointYPlug( unsigned pointIndex ) const;
+	ValuePlug *pointPlug( unsigned pointIndex );
+	const ValuePlug *pointPlug( unsigned pointIndex ) const;
+	XPlugType *pointXPlug( unsigned pointIndex );
+	const XPlugType *pointXPlug( unsigned pointIndex ) const;
+	YPlugType *pointYPlug( unsigned pointIndex );
+	const YPlugType *pointYPlug( unsigned pointIndex ) const;
 
-	private :
+private:
 
-		T m_defaultValue;
+	T m_defaultValue;
 };
 
 using RampffPlug = RampPlug<IECore::Rampff>;

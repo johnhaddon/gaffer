@@ -53,5 +53,4 @@ BOOST_PYTHON_MODULE( _GafferUSD )
 	GafferBindings::DependencyNodeClass<USDShader>();
 	GafferDispatchBindings::TaskNodeClass<USDLayerWriter>();
 	GafferBindings::DependencyNodeClass<USDLight>();
-
 }

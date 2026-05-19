@@ -97,15 +97,13 @@ void GafferSceneModule::bindObjectProcessor()
 	{
 		scope s = GafferBindings::DependencyNodeClass<GafferScene::MergeObjects>();
 
-		boost::python::enum_< GafferScene::MergeObjects::SortKey >( "SortKey" )
+		boost::python::enum_<GafferScene::MergeObjects::SortKey>( "SortKey" )
 			.value( "LocationName", GafferScene::MergeObjects::SortKey::LocationName )
-			.value( "PrimitiveVariable", GafferScene::MergeObjects::SortKey::PrimitiveVariable )
-		;
+			.value( "PrimitiveVariable", GafferScene::MergeObjects::SortKey::PrimitiveVariable );
 
-		boost::python::enum_< GafferScene::MergeObjects::SortOrder >( "SortOrder" )
+		boost::python::enum_<GafferScene::MergeObjects::SortOrder>( "SortOrder" )
 			.value( "Ascending", GafferScene::MergeObjects::SortOrder::Ascending )
-			.value( "Descending", GafferScene::MergeObjects::SortOrder::Descending )
-		;
+			.value( "Descending", GafferScene::MergeObjects::SortOrder::Descending );
 	}
 
 	GafferBindings::DependencyNodeClass<MergeMeshes>();
@@ -119,8 +117,7 @@ void GafferSceneModule::bindObjectProcessor()
 		enum_<GafferScene::DeletePoints::SelectionMode>( "SelectionMode" )
 			.value( "VertexPrimitiveVariable", GafferScene::DeletePoints::SelectionMode::VertexPrimitiveVariable )
 			.value( "IdListPrimitiveVariable", GafferScene::DeletePoints::SelectionMode::IdListPrimitiveVariable )
-			.value( "IdList", GafferScene::DeletePoints::SelectionMode::IdList )
-		;
+			.value( "IdList", GafferScene::DeletePoints::SelectionMode::IdList );
 	}
 
 	{
@@ -130,15 +127,13 @@ void GafferSceneModule::bindObjectProcessor()
 			.value( "UV", GafferScene::MeshTangents::Mode::UV )
 			.value( "FirstEdge", GafferScene::MeshTangents::Mode::FirstEdge )
 			.value( "TwoEdges", GafferScene::MeshTangents::Mode::TwoEdges )
-			.value( "PrimitiveCentroid", GafferScene::MeshTangents::Mode::PrimitiveCentroid )
-		;
+			.value( "PrimitiveCentroid", GafferScene::MeshTangents::Mode::PrimitiveCentroid );
 	}
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<Orientation>()
-			.def( "normalizedIfNeeded", &Orientation::normalizedIfNeeded )
-			.staticmethod( "normalizedIfNeeded" )
-		;
+					  .def( "normalizedIfNeeded", &Orientation::normalizedIfNeeded )
+					  .staticmethod( "normalizedIfNeeded" );
 
 		enum_<GafferScene::Orientation::Mode>( "Mode" )
 			.value( "Euler", GafferScene::Orientation::Mode::Euler )
@@ -146,13 +141,10 @@ void GafferSceneModule::bindObjectProcessor()
 			.value( "AxisAngle", GafferScene::Orientation::Mode::AxisAngle )
 			.value( "Aim", GafferScene::Orientation::Mode::Aim )
 			.value( "Matrix", GafferScene::Orientation::Mode::Matrix )
-			.value( "QuaternionXYZW", GafferScene::Orientation::Mode::QuaternionXYZW )
-		;
+			.value( "QuaternionXYZW", GafferScene::Orientation::Mode::QuaternionXYZW );
 
 		enum_<GafferScene::Orientation::Space>( "Space" )
 			.value( "Local", GafferScene::Orientation::Space::Local )
-			.value( "Parent", GafferScene::Orientation::Space::Parent )
-		;
+			.value( "Parent", GafferScene::Orientation::Space::Parent );
 	}
-
 }

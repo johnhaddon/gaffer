@@ -58,7 +58,7 @@ void registerTool( const std::string &toolName, IECore::TypeId viewType, object 
 	Tool::registerTool(
 		toolName,
 		viewType,
-		[toolCreator] ( View *view ) -> ToolPtr {
+		[toolCreator]( View *view ) -> ToolPtr {
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
@@ -77,7 +77,7 @@ boost::python::list registeredTools( IECore::TypeId viewType )
 	vector<string> tools;
 	Tool::registeredTools( viewType, tools );
 	boost::python::list result;
-	for( vector<string>::const_iterator it = tools.begin(), eIt = tools.end(); it!=eIt; ++it )
+	for( vector<string>::const_iterator it = tools.begin(), eIt = tools.end(); it != eIt; ++it )
 	{
 		result.append( *it );
 	}
@@ -98,14 +98,13 @@ void GafferUIModule::bindTool()
 
 	GafferBindings::NodeClass<Tool, ToolWrapper>( nullptr, no_init )
 		.def( init<View *, const std::string &>() )
-		.def( "view", (View *(Tool::*)())&Tool::view, return_value_policy<CastToIntrusivePtr>() )
+		.def( "view", ( View * (Tool::*)() ) & Tool::view, return_value_policy<CastToIntrusivePtr>() )
 		.def( "create", &createWrapper )
 		.staticmethod( "create" )
 		.def( "registerTool", &registerTool )
 		.staticmethod( "registerTool" )
 		.def( "registeredTools", &registeredTools )
-		.staticmethod( "registeredTools" )
-	;
+		.staticmethod( "registeredTools" );
 
 	GafferBindings::NodeClass<ToolContainer>();
 }

@@ -113,7 +113,6 @@ class SwitchSerialiser : public NodeSerialiser
 
 		return result;
 	}
-
 };
 
 } // namespace
@@ -122,12 +121,10 @@ void GafferModule::bindSwitch()
 {
 	DependencyNodeClass<Switch>()
 		.def( "setup", &setup<Switch> )
-		.def( "activeInPlug", &activeInPlug, ( arg( "plug") = object() ) )
-	;
+		.def( "activeInPlug", &activeInPlug, ( arg( "plug" ) = object() ) );
 
 	DependencyNodeClass<NameSwitch>()
-		.def( "setup", &setup<NameSwitch> )
-	;
+		.def( "setup", &setup<NameSwitch> );
 
 	Serialisation::registerSerialiser( Switch::staticTypeId(), new SwitchSerialiser );
 }

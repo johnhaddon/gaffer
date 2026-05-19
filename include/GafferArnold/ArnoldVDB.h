@@ -47,42 +47,41 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldVDB : public GafferScene::ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldVDB, ArnoldVDBTypeId, GafferScene::ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldVDB, ArnoldVDBTypeId, GafferScene::ObjectSource );
 
-		explicit ArnoldVDB( const std::string &name=defaultName<ArnoldVDB>() );
-		~ArnoldVDB() override;
+	explicit ArnoldVDB( const std::string &name = defaultName<ArnoldVDB>() );
+	~ArnoldVDB() override;
 
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		Gaffer::StringPlug *gridsPlug();
-		const Gaffer::StringPlug *gridsPlug() const;
+	Gaffer::StringPlug *gridsPlug();
+	const Gaffer::StringPlug *gridsPlug() const;
 
-		Gaffer::StringPlug *velocityGridsPlug();
-		const Gaffer::StringPlug *velocityGridsPlug() const;
+	Gaffer::StringPlug *velocityGridsPlug();
+	const Gaffer::StringPlug *velocityGridsPlug() const;
 
-		Gaffer::FloatPlug *velocityScalePlug();
-		const Gaffer::FloatPlug *velocityScalePlug() const;
+	Gaffer::FloatPlug *velocityScalePlug();
+	const Gaffer::FloatPlug *velocityScalePlug() const;
 
-		Gaffer::FloatPlug *stepSizePlug();
-		const Gaffer::FloatPlug *stepSizePlug() const;
+	Gaffer::FloatPlug *stepSizePlug();
+	const Gaffer::FloatPlug *stepSizePlug() const;
 
-		Gaffer::FloatPlug *stepScalePlug();
-		const Gaffer::FloatPlug *stepScalePlug() const;
+	Gaffer::FloatPlug *stepScalePlug();
+	const Gaffer::FloatPlug *stepScalePlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ArnoldVDB )

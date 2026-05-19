@@ -56,53 +56,51 @@ namespace
 class Transform2DPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		// The children will be created by the constructor
+		return false;
+	}
+
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		return repr( static_cast<const Transform2DPlug *>( graphComponent ), &serialisation );
+	}
+
+	static std::string repr( const Transform2DPlug *plug, const Serialisation *serialisation )
+	{
+		std::string result = "Gaffer.Transform2DPlug( \"" + plug->getName().string() + "\", ";
+
+		if( plug->direction() != Plug::In )
 		{
-			// The children will be created by the constructor
-			return false;
+			result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
 		}
 
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+		auto appendDefault = [&result]( const V2f &d, const V2f &defaultD, const char *name ) {
+			if( d != defaultD )
+			{
+				result += fmt::format( "{} = imath.V2f( {}, {} ), ", name, d.x, d.y );
+			}
+		};
+		appendDefault( plug->translatePlug()->defaultValue(), V2f( 0 ), "defaultTranslate" );
+		if( plug->rotatePlug()->defaultValue() != 0.0f )
 		{
-			return repr( static_cast<const Transform2DPlug *>( graphComponent ), &serialisation );
+			result += "defaultRotate = " + std::to_string( plug->rotatePlug()->defaultValue() ) + ", ";
+		}
+		appendDefault( plug->scalePlug()->defaultValue(), V2f( 1 ), "defaultScale" );
+		appendDefault( plug->pivotPlug()->defaultValue(), V2f( 0 ), "defaultPivot" );
+
+		const unsigned flags = plug->getFlags();
+		if( flags != Plug::Default )
+		{
+			result += "flags = " + PlugSerialiser::flagsRepr( flags ) + ", ";
 		}
 
-		static std::string repr( const Transform2DPlug *plug, const Serialisation *serialisation )
-		{
-			std::string result = "Gaffer.Transform2DPlug( \"" + plug->getName().string() + "\", ";
-
-			if( plug->direction() != Plug::In )
-			{
-				result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
-			}
-
-			auto appendDefault = [&result]( const V2f &d, const V2f &defaultD, const char *name )
-			{
-				if( d != defaultD )
-				{
-					result += fmt::format( "{} = imath.V2f( {}, {} ), ", name, d.x, d.y );
-				}
-			};
-			appendDefault( plug->translatePlug()->defaultValue(), V2f( 0 ), "defaultTranslate" );
-			if( plug->rotatePlug()->defaultValue() != 0.0f )
-			{
-				result += "defaultRotate = " + std::to_string( plug->rotatePlug()->defaultValue() ) + ", ";
-			}
-			appendDefault( plug->scalePlug()->defaultValue(), V2f( 1 ), "defaultScale" );
-			appendDefault( plug->pivotPlug()->defaultValue(), V2f( 0 ), "defaultPivot" );
-
-			const unsigned flags = plug->getFlags();
-			if( flags != Plug::Default )
-			{
-				result += "flags = " + PlugSerialiser::flagsRepr( flags ) + ", ";
-			}
-
-			result += ")";
-			return result;
-		}
-
+		result += ")";
+		return result;
+	}
 };
 
 std::string repr( const Transform2DPlug *plug )
@@ -117,8 +115,7 @@ void GafferModule::bindTransform2DPlug()
 {
 	PlugClass<Transform2DPlug>()
 		.def(
-			init<const std::string &, Gaffer::Plug::Direction, const V2f &, float, const V2f &, const V2f &, unsigned >
-			(
+			init<const std::string &, Gaffer::Plug::Direction, const V2f &, float, const V2f &, const V2f &, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<Transform2DPlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,
@@ -131,8 +128,7 @@ void GafferModule::bindTransform2DPlug()
 			)
 		)
 		.def( "matrix", &Transform2DPlug::matrix )
-		.def( "repr", &repr )
-	;
+		.def( "repr", &repr );
 
 	Serialisation::registerSerialiser( Gaffer::Transform2DPlug::staticTypeId(), new Transform2DPlugSerialiser );
 }

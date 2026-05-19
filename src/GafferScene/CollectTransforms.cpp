@@ -49,20 +49,21 @@ using namespace IECore;
 using namespace Gaffer;
 using namespace GafferScene;
 
-namespace {
+namespace
+{
 
 const IECore::ConstCompoundObjectPtr g_emptyCompound = new IECore::CompoundObject();
 const IECore::MurmurHash g_emptyCompoundHash = g_emptyCompound->Object::hash();
 const ScenePlug::ScenePath g_emptyScenePath;
 
-}
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( CollectTransforms );
 
 size_t CollectTransforms::g_firstPlugIndex = 0;
 
 CollectTransforms::CollectTransforms( const std::string &name )
-	:	AttributeProcessor( name )
+	: AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -177,7 +178,7 @@ void CollectTransforms::hash( const Gaffer::ValuePlug *output, const Gaffer::Con
 		h.append( requireVariationPlug()->hash() );
 
 		ConstStringVectorDataPtr namesData = attributesPlug()->getValue();
-		const vector<string>& names = namesData->readable();
+		const vector<string> &names = namesData->readable();
 
 		bool requireVariation = requireVariationPlug()->getValue();
 		bool hasVariation = false;
@@ -215,9 +216,7 @@ void CollectTransforms::hash( const Gaffer::ValuePlug *output, const Gaffer::Con
 		{
 			h.append( inHash );
 		}
-
 	}
-
 }
 
 void CollectTransforms::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const
@@ -249,7 +248,7 @@ void CollectTransforms::compute( Gaffer::ValuePlug *output, const Gaffer::Contex
 		IECore::CompoundObjectPtr result = new IECore::CompoundObject();
 
 		ConstStringVectorDataPtr namesData = attributesPlug()->getValue();
-		const vector<string>& names = namesData->readable();
+		const vector<string> &names = namesData->readable();
 
 		bool requireVariation = requireVariationPlug()->getValue();
 
@@ -267,7 +266,7 @@ void CollectTransforms::compute( Gaffer::ValuePlug *output, const Gaffer::Contex
 					M44f collectedTransform = inPlug()->fullTransform( scenePath );
 					if( collectedTransform != inTransform )
 					{
-						result->members()[ name ] = new M44fData( collectedTransform );
+						result->members()[name] = new M44fData( collectedTransform );
 					}
 				}
 			}
@@ -279,11 +278,10 @@ void CollectTransforms::compute( Gaffer::ValuePlug *output, const Gaffer::Contex
 					M44f collectedTransform = inPlug()->transformPlug()->getValue( &collectedTransformHash );
 					if( collectedTransform != inTransform )
 					{
-						result->members()[ name ] = new M44fData( collectedTransform );
+						result->members()[name] = new M44fData( collectedTransform );
 					}
 				}
 			}
-
 		}
 
 		if( requireVariation && result->members().size() == 0 )
@@ -297,7 +295,7 @@ void CollectTransforms::compute( Gaffer::ValuePlug *output, const Gaffer::Contex
 		for( const std::string &name : names )
 		{
 			result->members().insert(
-				std::pair<IECore::InternedString,IECore::ObjectPtr>( name, new M44fData( inTransform ) )
+				std::pair<IECore::InternedString, IECore::ObjectPtr>( name, new M44fData( inTransform ) )
 			);
 		}
 
@@ -344,7 +342,7 @@ IECore::ConstCompoundObjectPtr CollectTransforms::computeProcessedAttributes( co
 
 	for( auto nameTransform : collectedTransforms->members() )
 	{
-		result->members()[ nameTransform.first ] = nameTransform.second;
+		result->members()[nameTransform.first] = nameTransform.second;
 	}
 
 	return result;

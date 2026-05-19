@@ -64,11 +64,8 @@ using OutputMap = multi_index::multi_index_container<
 	NamedOutput,
 	multi_index::indexed_by<
 		multi_index::ordered_unique<
-			multi_index::key<&NamedOutput::first>
-		>,
-		multi_index::sequenced<>
-	>
->;
+			multi_index::key<&NamedOutput::first>>,
+		multi_index::sequenced<>>>;
 
 OutputMap &outputMap()
 {
@@ -87,7 +84,7 @@ GAFFER_NODE_DEFINE_TYPE( Outputs );
 size_t Outputs::g_firstPlugIndex = 0;
 
 Outputs::Outputs( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ValuePlug( "outputs" ) );
@@ -237,7 +234,7 @@ void Outputs::deregisterOutput( const std::string &name )
 void Outputs::registeredOutputs( std::vector<std::string> &names )
 {
 	const OutputMap::nth_index<1>::type &index = outputMap().get<1>();
-	for( OutputMap::nth_index<1>::type::const_iterator it=index.begin(); it!=index.end(); it++ )
+	for( OutputMap::nth_index<1>::type::const_iterator it = index.begin(); it != index.end(); it++ )
 	{
 		names.push_back( it->first );
 	}

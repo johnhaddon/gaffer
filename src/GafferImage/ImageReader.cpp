@@ -64,44 +64,43 @@ namespace
 class FrameMaskScope : public Context::EditableScope
 {
 
-	public :
+public:
 
-		FrameMaskScope( const Context *context, const ImageReader *reader, bool clampBlack = false )
-			:	EditableScope( context ), m_mode( ImageReader::None )
+	FrameMaskScope( const Context *context, const ImageReader *reader, bool clampBlack = false )
+		: EditableScope( context ), m_mode( ImageReader::None )
+	{
+		const int startFrame = reader->startFramePlug()->getValue();
+		const int endFrame = reader->endFramePlug()->getValue();
+		const int frame = (int)context->getFrame();
+
+		if( frame < startFrame )
 		{
-				const int startFrame = reader->startFramePlug()->getValue();
-				const int endFrame = reader->endFramePlug()->getValue();
-				const int frame = (int)context->getFrame();
-
-				if( frame < startFrame )
-				{
-					m_mode = (ImageReader::FrameMaskMode)reader->startModePlug()->getValue();
-				}
-				else if( frame > endFrame )
-				{
-					m_mode = (ImageReader::FrameMaskMode)reader->endModePlug()->getValue();
-				}
-
-				if( m_mode == ImageReader::BlackOutside && clampBlack )
-				{
-					m_mode = ImageReader::ClampToFrame;
-				}
-
-				if( m_mode == ImageReader::ClampToFrame )
-				{
-					setFrame( Imath::clamp( frame, startFrame, endFrame ) );
-				}
+			m_mode = (ImageReader::FrameMaskMode)reader->startModePlug()->getValue();
+		}
+		else if( frame > endFrame )
+		{
+			m_mode = (ImageReader::FrameMaskMode)reader->endModePlug()->getValue();
 		}
 
-		ImageReader::FrameMaskMode mode()
+		if( m_mode == ImageReader::BlackOutside && clampBlack )
 		{
-			return m_mode;
+			m_mode = ImageReader::ClampToFrame;
 		}
 
-	private :
+		if( m_mode == ImageReader::ClampToFrame )
+		{
+			setFrame( Imath::clamp( frame, startFrame, endFrame ) );
+		}
+	}
 
-		ImageReader::FrameMaskMode m_mode;
+	ImageReader::FrameMaskMode mode()
+	{
+		return m_mode;
+	}
 
+private:
+
+	ImageReader::FrameMaskMode m_mode;
 };
 
 } // namespace
@@ -115,7 +114,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageReader );
 size_t ImageReader::g_firstChildIndex = 0;
 
 ImageReader::ImageReader( const std::string &name )
-	:	ImageNode( name )
+	: ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstChildIndex );
 	addChild(
@@ -387,7 +386,7 @@ void ImageReader::affects( const Plug *input, AffectedPlugsContainer &outputs ) 
 	{
 		outputs.push_back( outPlug()->getChild<ValuePlug>( input->getName() ) );
 	}
-	else if (
+	else if(
 		input == startFramePlug() ||
 		input == startModePlug() ||
 		input == endFramePlug() ||
@@ -413,7 +412,7 @@ void ImageReader::hash( const ValuePlug *output, const Context *context, IECore:
 		fileNamePlug()->hash( h );
 		h.append( OpenColorIOAlgo::currentConfigHash() );
 	}
-	else if ( output == fileValidPlug() )
+	else if( output == fileValidPlug() )
 	{
 		FrameMaskScope scope( context, this, /* clampBlack = */ true );
 		oiioReader()->fileValidPlug()->hash( h );
@@ -442,7 +441,7 @@ void ImageReader::compute( ValuePlug *output, const Context *context ) const
 		}
 		static_cast<StringPlug *>( output )->setValue( colorSpace );
 	}
-	else if ( output == fileValidPlug() )
+	else if( output == fileValidPlug() )
 	{
 		FrameMaskScope scope( context, this, /* clampBlack = */ true );
 		static_cast<BoolPlug *>( output )->setValue( oiioReader()->fileValidPlug()->getValue() );
@@ -566,7 +565,6 @@ IECore::ConstIntVectorDataPtr ImageReader::computeSampleOffsets( const Imath::V2
 		return intermediateImagePlug()->sampleOffsetsPlug()->getValue();
 	}
 }
-
 
 
 void ImageReader::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const

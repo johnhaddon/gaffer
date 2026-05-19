@@ -54,55 +54,36 @@ void GafferSceneModule::bindIECoreGLPreview()
 
 	IECorePython::RefCountedClass<ObjectVisualiser, IECore::RefCounted>( "ObjectVisualiser" )
 		.def( "registerVisualiser", &ObjectVisualiser::registerVisualiser )
-		.staticmethod( "registerVisualiser" )
-	;
+		.staticmethod( "registerVisualiser" );
 
 	IECorePython::RefCountedClass<AttributeVisualiser, IECore::RefCounted>( "AttributeVisualiser" )
 		.def( "registerVisualiser", &AttributeVisualiser::registerVisualiser )
 		.staticmethod( "registerVisualiser" )
 		.def( "allVisualisations", &AttributeVisualiser::allVisualisations )
-		.staticmethod( "allVisualisations" )
-	;
+		.staticmethod( "allVisualisations" );
 
 	IECorePython::RefCountedClass<LightVisualiser, IECore::RefCounted>( "LightVisualiser" )
 		.def( "registerLightVisualiser", &LightVisualiser::registerLightVisualiser )
-		.staticmethod( "registerLightVisualiser" )
-	;
+		.staticmethod( "registerLightVisualiser" );
 
 	auto v = class_<Visualisation>( "Visualisation", no_init );
 	{
 		scope visualisationScope( v );
 
-		enum_<Visualisation::Scale>("Scale")
+		enum_<Visualisation::Scale>( "Scale" )
 			.value( "None", Visualisation::Scale::None )
 			.value( "None_", Visualisation::Scale::None )
 			.value( "Local", Visualisation::Scale::Local )
 			.value( "Visualiser", Visualisation::Scale::Visualiser )
-			.value( "LocalAndVisualiser", Visualisation::Scale::LocalAndVisualiser )
-		;
-		enum_<Visualisation::Category>("Category")
+			.value( "LocalAndVisualiser", Visualisation::Scale::LocalAndVisualiser );
+		enum_<Visualisation::Category>( "Category" )
 			.value( "Generic", Visualisation::Category::Generic )
-			.value( "Frustum", Visualisation::Category::Frustum )
-		;
+			.value( "Frustum", Visualisation::Category::Frustum );
 		enum_<Visualisation::ColorSpace>( "ColorSpace" )
 			.value( "Scene", Visualisation::ColorSpace::Scene )
-			.value( "Display", Visualisation::ColorSpace::Display )
-		;
+			.value( "Display", Visualisation::ColorSpace::Display );
 	}
-	v.def( init<
-				IECoreGL::ConstRenderablePtr,
-				Visualisation::Scale,
-				Visualisation::Category,
-				bool
-			>(
-				(
-					arg( "renderable" ),
-					arg( "scale" ) = Visualisation::Scale::Local,
-					arg( "category" ) = Visualisation::Category::Generic,
-					arg( "affectsFramingBound" ) = true
-				)
-			)
-		)
+	v.def( init<IECoreGL::ConstRenderablePtr, Visualisation::Scale, Visualisation::Category, bool>( ( arg( "renderable" ), arg( "scale" ) = Visualisation::Scale::Local, arg( "category" ) = Visualisation::Category::Generic, arg( "affectsFramingBound" ) = true ) ) )
 		.def_readwrite( "renderable", &Visualisation::renderable )
 		.def_readwrite( "scale", &Visualisation::scale )
 		.def_readwrite( "category", &Visualisation::category )
@@ -122,6 +103,5 @@ void GafferSceneModule::bindIECoreGLPreview()
 			"createFrustum", &Visualisation::createFrustum,
 			( arg( "renderable" ), arg( "scale" ), arg( "colorSpace" ) = Visualisation::ColorSpace::Display )
 		)
-		.staticmethod( "createFrustum" )
-	;
+		.staticmethod( "createFrustum" );
 }

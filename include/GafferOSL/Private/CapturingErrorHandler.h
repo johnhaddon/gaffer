@@ -47,18 +47,17 @@ namespace Private
 class CapturingErrorHandler : public OIIO::ErrorHandler
 {
 
-	public :
+public:
 
-		CapturingErrorHandler();
+	CapturingErrorHandler();
 
-		void operator()( int errorCode, const std::string &message ) override;
+	void operator () ( int errorCode, const std::string &message ) override;
 
-		const std::string &errors();
+	const std::string &errors();
 
-	private :
+private:
 
-		std::string m_errors;
-
+	std::string m_errors;
 };
 
 } // namespace Private

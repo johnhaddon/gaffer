@@ -67,7 +67,7 @@ static Gaffer::PlugPtr createCounterpart( T &p, const std::string &name, Gaffer:
 
 template<typename T, typename TWrapper>
 PlugClass<T, TWrapper>::PlugClass( const char *docString )
-	:	GraphComponentClass<T, TWrapper>( docString )
+	: GraphComponentClass<T, TWrapper>( docString )
 {
 	this->def( "acceptsInput", &Detail::acceptsInput<T> );
 	this->def( "setInput", &Detail::setInput<T> );

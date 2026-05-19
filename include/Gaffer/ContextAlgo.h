@@ -56,20 +56,19 @@ namespace ContextAlgo
 class GAFFER_API GlobalScope : boost::noncopyable
 {
 
-	public :
+public:
 
-		GlobalScope( const Context *context, const Plug *plug );
-		~GlobalScope();
+	GlobalScope( const Context *context, const Plug *plug );
+	~GlobalScope();
 
-		struct GAFFER_API Registration
-		{
-			Registration( IECore::TypeId plugTypeId, const std::initializer_list<IECore::InternedString> &variablesToRemove );
-		};
+	struct GAFFER_API Registration
+	{
+		Registration( IECore::TypeId plugTypeId, const std::initializer_list<IECore::InternedString> &variablesToRemove );
+	};
 
-	private :
+private:
 
-		std::optional<Context::EditableScope> m_scope;
-
+	std::optional<Context::EditableScope> m_scope;
 };
 
 } // namespace ContextAlgo

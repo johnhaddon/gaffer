@@ -45,9 +45,9 @@
 using namespace Gaffer;
 
 UndoScope::UndoScope( ScriptNodePtr script, State state, const std::string &mergeGroup )
-	:	m_script( script )
+	: m_script( script )
 {
-	if( state==Invalid )
+	if( state == Invalid )
 	{
 		throw IECore::Exception( "Cannot construct UndoScope with Invalid state." );
 	}

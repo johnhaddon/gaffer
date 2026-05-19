@@ -67,7 +67,5 @@ void GafferUIModule::bindPlugGadget()
 		.def( "setPlug", &PlugGadget::setPlug )
 		.def( "getPlug", &getPlug )
 		.def( "setContext", &PlugGadget::setContext )
-		.def( "getContext", &getContext )
-	;
-
+		.def( "getContext", &getContext );
 }

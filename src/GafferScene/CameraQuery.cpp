@@ -112,7 +112,7 @@ GAFFER_NODE_DEFINE_TYPE( CameraQuery )
 size_t CameraQuery::g_firstPlugIndex = 0;
 
 CameraQuery::CameraQuery( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -220,8 +220,7 @@ void CameraQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		( input == locationPlug() && !cameraModePlug()->isSetToDefault() ) ||
 		input == scenePlug()->existsPlug() ||
 		input == scenePlug()->objectPlug() ||
-		input == scenePlug()->globalsPlug()
-	)
+		input == scenePlug()->globalsPlug() )
 	{
 		outputs.push_back( internalParametersPlug() );
 	}
@@ -336,10 +335,7 @@ void CameraQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 							continue;
 						}
 
-						parameters->writable()[p.first] = new CompoundData( {
-							{ g_source, camera->parameters().count( p.first ) ? g_sourceCamera : g_sourceGlobals },
-							{ g_value, p.second }
-						} );
+						parameters->writable()[p.first] = new CompoundData( { { g_source, camera->parameters().count( p.first ) ? g_sourceCamera : g_sourceGlobals }, { g_value, p.second } } );
 					}
 
 					// SceneAlgo::applyCameraGlobals outputs an absolute shutter value that is dependent on
@@ -362,10 +358,7 @@ void CameraQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 						shutterSource = g_sourceFallback;
 						shutterValue = new V2fData( camera->getShutter() );
 					}
-					parameters->writable()[g_shutter] = new CompoundData( {
-						{ g_source, shutterSource },
-						{ g_value, shutterValue }
-					} );
+					parameters->writable()[g_shutter] = new CompoundData( { { g_source, shutterSource }, { g_value, shutterValue } } );
 
 					// Fall back to default values for all other registered camera parameters.
 					for( const auto &target : Metadata::targetsWithMetadata( "camera:parameter:*", g_defaultValue ) )
@@ -373,28 +366,16 @@ void CameraQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 						const std::string name = target.string().substr( 17 );
 						if( !parameters->readable().count( name ) )
 						{
-							parameters->writable()[name] = new CompoundData( {
-								{ g_source, g_sourceFallback },
-								{ g_value, Metadata::value( target, g_defaultValue )->copy() }
-							} );
+							parameters->writable()[name] = new CompoundData( { { g_source, g_sourceFallback }, { g_value, Metadata::value( target, g_defaultValue )->copy() } } );
 						}
 					}
 
 					// Create virtual parameters, for convenience these are pre-computed
 					// from the camera so they can be later accessed like a regular parameter.
 					const Imath::V2f aperture = cameraWithGlobals->getAperture();
-					parameters->writable()["apertureAspectRatio"] = new CompoundData( {
-						{ g_source, g_sourceCamera },
-						{ g_value, new FloatData( aperture[0] / aperture[1] ) }
-					} );
-					parameters->writable()["fieldOfView"] = new CompoundData( {
-						{ g_source, g_sourceCamera },
-						{ g_value, new FloatData( cameraWithGlobals->calculateFieldOfView()[0] ) }
-					} );
-					parameters->writable()["frustum"] = new CompoundData( {
-						{ g_source, g_sourceCamera },
-						{ g_value, new Box2fData( cameraWithGlobals->frustum() ) }
-					} );
+					parameters->writable()["apertureAspectRatio"] = new CompoundData( { { g_source, g_sourceCamera }, { g_value, new FloatData( aperture[0] / aperture[1] ) } } );
+					parameters->writable()["fieldOfView"] = new CompoundData( { { g_source, g_sourceCamera }, { g_value, new FloatData( cameraWithGlobals->calculateFieldOfView()[0] ) } } );
+					parameters->writable()["frustum"] = new CompoundData( { { g_source, g_sourceCamera }, { g_value, new Box2fData( cameraWithGlobals->frustum() ) } } );
 				}
 			}
 		}

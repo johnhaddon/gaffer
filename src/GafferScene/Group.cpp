@@ -67,7 +67,7 @@ GAFFER_NODE_DEFINE_TYPE( Group );
 size_t Group::g_firstPlugIndex = 0;
 
 Group::Group( const std::string &name )
-	:	SceneProcessor( name, 1 )
+	: SceneProcessor( name, 1 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -176,7 +176,6 @@ void Group::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 		outputs.push_back( outPlug()->setNamesPlug() );
 		outputs.push_back( outPlug()->setPlug() );
 	}
-
 }
 
 void Group::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -197,7 +196,8 @@ void Group::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context )
 {
 	if( output == mappingPlug() )
 	{
-		vector<ConstInternedStringVectorDataPtr> inputChildNames; inputChildNames.reserve( inPlugs()->children().size() );
+		vector<ConstInternedStringVectorDataPtr> inputChildNames;
+		inputChildNames.reserve( inPlugs()->children().size() );
 		ScenePlug::PathScope scope( context, &g_root );
 		for( const auto &p : ScenePlug::Range( *inPlugs() ) )
 		{
@@ -217,7 +217,7 @@ void Group::hashBound( const ScenePath &path, const Gaffer::Context *context, co
 		SceneProcessor::hashBound( path, context, parent, h );
 		for( ScenePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 		{
-			(*it)->boundPlug()->hash( h );
+			( *it )->boundPlug()->hash( h );
 		}
 		transformPlug()->hash( h );
 	}
@@ -227,7 +227,7 @@ void Group::hashBound( const ScenePath &path, const Gaffer::Context *context, co
 		ScenePlug::PathScope scope( context, &g_root );
 		for( ScenePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 		{
-			(*it)->boundPlug()->hash( h );
+			( *it )->boundPlug()->hash( h );
 		}
 	}
 	else // "/group/..."
@@ -249,7 +249,7 @@ Imath::Box3f Group::computeBound( const ScenePath &path, const Gaffer::Context *
 		{
 			// we don't need to transform these bounds, because the SceneNode
 			// guarantees that the transform for root nodes is always identity.
-			Box3f bound = (*it)->bound( ScenePath() );
+			Box3f bound = ( *it )->bound( ScenePath() );
 			combinedBound.extendBy( bound );
 		}
 		if( path.size() == 0 )
@@ -412,7 +412,7 @@ void Group::hashSetNames( const Gaffer::Context *context, const ScenePlug *paren
 	SceneProcessor::hashSetNames( context, parent, h );
 	for( ScenePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		(*it)->setNamesPlug()->hash( h );
+		( *it )->setNamesPlug()->hash( h );
 	}
 	setsPlug()->hash( h );
 }
@@ -426,7 +426,7 @@ IECore::ConstInternedStringVectorDataPtr Group::computeSetNames( const Gaffer::C
 		// This naive approach to merging set names preserves the order of the incoming names,
 		// but at the expense of using linear search. We assume that the number of sets is small
 		// enough and the InternedString comparison fast enough that this is OK.
-		ConstInternedStringVectorDataPtr inputSetNamesData = (*it)->setNamesPlug()->getValue();
+		ConstInternedStringVectorDataPtr inputSetNamesData = ( *it )->setNamesPlug()->getValue();
 		const vector<InternedString> &inputSetNames = inputSetNamesData->readable();
 		for( vector<InternedString>::const_iterator it = inputSetNames.begin(), eIt = inputSetNames.end(); it != eIt; ++it )
 		{
@@ -467,7 +467,8 @@ void Group::hashSet( const IECore::InternedString &setName, const Gaffer::Contex
 
 IECore::ConstPathMatcherDataPtr Group::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
 {
-	vector<ConstPathMatcherDataPtr> inputSets; inputSets.reserve( inPlugs()->children().size() );
+	vector<ConstPathMatcherDataPtr> inputSets;
+	inputSets.reserve( inPlugs()->children().size() );
 	for( const auto &p : ScenePlug::Range( *inPlugs() ) )
 	{
 		inputSets.push_back( p->setPlug()->getValue() );

@@ -50,52 +50,51 @@ namespace GafferVDB
 class GAFFERVDB_API SphereLevelSet : public GafferScene::ObjectSource
 {
 
-	public :
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferVDB::SphereLevelSet, GafferVDB::SphereLevelSetTypeId, ObjectSource );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferVDB::SphereLevelSet, GafferVDB::SphereLevelSetTypeId, ObjectSource );
 
-		explicit SphereLevelSet( const std::string &name=defaultName<SphereLevelSet>() );
-		~SphereLevelSet() override;
+	explicit SphereLevelSet( const std::string &name = defaultName<SphereLevelSet>() );
+	~SphereLevelSet() override;
 
-		Gaffer::StringPlug *gridPlug();
-		const Gaffer::StringPlug *gridPlug() const;
+	Gaffer::StringPlug *gridPlug();
+	const Gaffer::StringPlug *gridPlug() const;
 
-		Gaffer::FloatPlug *radiusPlug();
-		const Gaffer::FloatPlug *radiusPlug() const;
+	Gaffer::FloatPlug *radiusPlug();
+	const Gaffer::FloatPlug *radiusPlug() const;
 
-		Gaffer::V3fPlug *centerPlug();
-		const Gaffer::V3fPlug *centerPlug() const;
+	Gaffer::V3fPlug *centerPlug();
+	const Gaffer::V3fPlug *centerPlug() const;
 
-		Gaffer::FloatPlug *voxelSizePlug();
-		const Gaffer::FloatPlug *voxelSizePlug() const;
+	Gaffer::FloatPlug *voxelSizePlug();
+	const Gaffer::FloatPlug *voxelSizePlug() const;
 
-		Gaffer::FloatPlug *halfWidthPlug();
-		const Gaffer::FloatPlug *halfWidthPlug() const;
+	Gaffer::FloatPlug *halfWidthPlug();
+	const Gaffer::FloatPlug *halfWidthPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		// The ObjectSource base class does implement these bound methods for
-		// us, but only by computing the source object and taking its bound.
-		// Since that can be expensive for a high resolution voxel grid, we
-		// reimplement to provide an efficient version.
-		/// \todo Should the base class provide some facility for making this
-		/// easier, so we don't need to account for the transform?
-		void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent ) const override;
+	// The ObjectSource base class does implement these bound methods for
+	// us, but only by computing the source object and taking its bound.
+	// Since that can be expensive for a high resolution voxel grid, we
+	// reimplement to provide an efficient version.
+	/// \todo Should the base class provide some facility for making this
+	/// easier, so we don't need to account for the transform?
+	void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent ) const override;
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
-	IE_CORE_DECLAREPTR( SphereLevelSet )
+IE_CORE_DECLAREPTR( SphereLevelSet )
 
 } // namespace GafferVDB

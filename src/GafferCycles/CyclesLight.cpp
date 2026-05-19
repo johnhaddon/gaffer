@@ -58,7 +58,7 @@ IE_CORE_DEFINERUNTIMETYPED( CyclesLight );
 
 
 CyclesLight::CyclesLight( const std::string &name )
-	:	GafferScene::Light( name, new CyclesShader() )
+	: GafferScene::Light( name, new CyclesShader() )
 {
 }
 

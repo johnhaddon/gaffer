@@ -59,19 +59,19 @@ using namespace IECoreArnold;
 namespace
 {
 
-const AtString g_pointsArnoldString("points");
-const AtString g_basisArnoldString("basis");
-const AtString g_bezierArnoldString("bezier");
-const AtString g_bSplineArnoldString("b-spline");
-const AtString g_catmullRomArnoldString("catmull-rom");
-const AtString g_curvesArnoldString("curves");
-const AtString g_linearArnoldString("linear");
-const AtString g_modeArnoldString("mode");
-const AtString g_motionStartArnoldString("motion_start");
-const AtString g_motionEndArnoldString("motion_end");
-const AtString g_numPointsArnoldString("num_points");
-const AtString g_orientationsArnoldString("orientations");
-const AtString g_orientedArnoldString("oriented");
+const AtString g_pointsArnoldString( "points" );
+const AtString g_basisArnoldString( "basis" );
+const AtString g_bezierArnoldString( "bezier" );
+const AtString g_bSplineArnoldString( "b-spline" );
+const AtString g_catmullRomArnoldString( "catmull-rom" );
+const AtString g_curvesArnoldString( "curves" );
+const AtString g_linearArnoldString( "linear" );
+const AtString g_modeArnoldString( "mode" );
+const AtString g_motionStartArnoldString( "motion_start" );
+const AtString g_motionEndArnoldString( "motion_end" );
+const AtString g_numPointsArnoldString( "num_points" );
+const AtString g_orientationsArnoldString( "orientations" );
+const AtString g_orientedArnoldString( "oriented" );
 const AtString g_uvsArnoldString( "uvs" );
 const AtString g_wrapModeArnoldString( "wrap_mode" );
 const AtString g_pinnedArnoldString( "pinned" );
@@ -212,7 +212,6 @@ AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, AtUniverse *u
 	ShapeAlgo::convertPrimitiveVariables( curves, result, ignore, messageContext );
 
 	return result;
-
 }
 
 AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )

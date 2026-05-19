@@ -92,7 +92,7 @@ void ResamplePrimitiveVariables::hashProcessedObject( const ScenePath &path, con
 
 void ResamplePrimitiveVariables::processPrimitiveVariable( const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry, IECoreScene::PrimitiveVariable &variable ) const
 {
-	PrimitiveVariable::Interpolation interpolation = static_cast<PrimitiveVariable::Interpolation> ( interpolationPlug()->getValue() );
+	PrimitiveVariable::Interpolation interpolation = static_cast<PrimitiveVariable::Interpolation>( interpolationPlug()->getValue() );
 
 	if( const MeshPrimitive *meshPrimitive = IECore::runTimeCast<const MeshPrimitive>( inputGeometry.get() ) )
 	{

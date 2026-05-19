@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageMetadata );
 size_t ImageMetadata::g_firstPlugIndex = 0;
 
 ImageMetadata::ImageMetadata( const std::string &name )
-	:	MetadataProcessor( name )
+	: MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "metadata" ) );
@@ -101,7 +101,7 @@ IECore::ConstCompoundDataPtr ImageMetadata::computeProcessedMetadata( const Gaff
 {
 	const CompoundDataPlug *p = metadataPlug();
 	IECore::ConstCompoundDataPtr extraMetadata = extraMetadataPlug()->getValue();
-	if ( !p->children().size() && !extraMetadata->readable().size() )
+	if( !p->children().size() && !extraMetadata->readable().size() )
 	{
 		return inputMetadata;
 	}
@@ -117,7 +117,7 @@ IECore::ConstCompoundDataPtr ImageMetadata::computeProcessedMetadata( const Gaff
 	for( NameValuePlug::Iterator it( p ); !it.done(); ++it )
 	{
 		IECore::DataPtr d = p->memberDataAndName( it->get(), name );
-		if ( d )
+		if( d )
 		{
 			result->writable()[name] = d;
 		}

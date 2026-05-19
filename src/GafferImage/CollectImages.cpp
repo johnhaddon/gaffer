@@ -84,69 +84,68 @@ void copyRegion( const float *fromBuffer, const Box2i &fromWindow, const Box2i &
 class MappingData : public IECore::Data
 {
 
-	public :
+public:
 
-		MappingData( bool addLayerPrefix )
-			:	m_addLayerPrefix( addLayerPrefix ), m_outputChannelNames( new StringVectorData )
-		{
-		}
+	MappingData( bool addLayerPrefix )
+		: m_addLayerPrefix( addLayerPrefix ), m_outputChannelNames( new StringVectorData )
+	{
+	}
 
-		void addLayer( const string &layerName, const vector<string> &channelNames )
+	void addLayer( const string &layerName, const vector<string> &channelNames )
+	{
+		for( const auto &channelName : channelNames )
 		{
-			for( const auto &channelName : channelNames )
+			const string outputChannelName = m_addLayerPrefix ? ImageAlgo::channelName( layerName, channelName ) : channelName;
+			const Input input = { layerName, channelName };
+			if( m_mapping.try_emplace( outputChannelName, input ).second )
 			{
-				const string outputChannelName = m_addLayerPrefix ? ImageAlgo::channelName( layerName, channelName ) : channelName;
-				const Input input = { layerName, channelName };
-				if( m_mapping.try_emplace( outputChannelName, input ).second )
-				{
-					m_outputChannelNames->writable().push_back( outputChannelName );
-				}
-				else
-				{
-					// Duplicate channel names could arise for several reasons :
-					//
-					// - The user entered the same layer name twice.
-					// - Names overlap due to complex hierachical naming, such as a layer named `A` with
-					//   a channel named `B.R` and a layer named `A.B` with a channel named `R`.
-					// - `addLayerPrefix` is off, but the input channels do not have a suitable
-					//   prefix of their own.
-					//
-					// In all cases we take the first channel and ignore the duplicate, but we
-					// also emit a warning so the user can fix the setup.
-					msg(
-						Msg::Warning, "CollectImages",
-						fmt::format( "Ignoring duplicate channel \"{}\" from layer \"{}\"", outputChannelName, layerName )
-					);
-				}
+				m_outputChannelNames->writable().push_back( outputChannelName );
+			}
+			else
+			{
+				// Duplicate channel names could arise for several reasons :
+				//
+				// - The user entered the same layer name twice.
+				// - Names overlap due to complex hierachical naming, such as a layer named `A` with
+				//   a channel named `B.R` and a layer named `A.B` with a channel named `R`.
+				// - `addLayerPrefix` is off, but the input channels do not have a suitable
+				//   prefix of their own.
+				//
+				// In all cases we take the first channel and ignore the duplicate, but we
+				// also emit a warning so the user can fix the setup.
+				msg(
+					Msg::Warning, "CollectImages",
+					fmt::format( "Ignoring duplicate channel \"{}\" from layer \"{}\"", outputChannelName, layerName )
+				);
 			}
 		}
+	}
 
-		const StringVectorData *outputChannelNames() const { return m_outputChannelNames.get(); }
+	const StringVectorData *outputChannelNames() const { return m_outputChannelNames.get(); }
 
-		struct Input
+	struct Input
+	{
+		const string layerName;
+		const string channelName;
+	};
+
+	const Input &input( const string &outputChannelName ) const
+	{
+		auto it = m_mapping.find( outputChannelName );
+		if( it == m_mapping.end() )
 		{
-			const string layerName;
-			const string channelName;
-		};
-
-		const Input &input( const string &outputChannelName ) const
-		{
-			auto it = m_mapping.find( outputChannelName );
-			if( it == m_mapping.end() )
-			{
-				throw IECore::Exception( fmt::format( "Invalid output channel {}", outputChannelName ) );
-			}
-			return it->second;
+			throw IECore::Exception( fmt::format( "Invalid output channel {}", outputChannelName ) );
 		}
+		return it->second;
+	}
 
-	private :
+private:
 
-		const bool m_addLayerPrefix;
-		StringVectorDataPtr m_outputChannelNames;
+	const bool m_addLayerPrefix;
+	StringVectorDataPtr m_outputChannelNames;
 
-		using Map = unordered_map<string, Input>;
-		Map m_mapping;
-
+	using Map = unordered_map<string, Input>;
+	Map m_mapping;
 };
 
 IE_CORE_DECLAREPTR( MappingData )
@@ -162,7 +161,7 @@ GAFFER_NODE_DEFINE_TYPE( CollectImages );
 size_t CollectImages::g_firstPlugIndex = 0;
 
 CollectImages::CollectImages( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -299,7 +298,6 @@ void CollectImages::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 	{
 		outputs.push_back( outPlug()->metadataPlug() );
 	}
-
 }
 
 void CollectImages::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -532,9 +530,7 @@ IECore::ConstIntVectorDataPtr CollectImages::computeSampleOffsets( const Imath::
 		}
 		else
 		{
-			ImageAlgo::throwIfSampleOffsetsMismatch( outSampleOffsetsData.get(), curSampleOffsetsData.get(), tileOrigin,
-				"SampleOffsets on input to CollectImages must match."
-			);
+			ImageAlgo::throwIfSampleOffsetsMismatch( outSampleOffsetsData.get(), curSampleOffsetsData.get(), tileOrigin, "SampleOffsets on input to CollectImages must match." );
 		}
 	}
 	return outSampleOffsetsData;
@@ -606,7 +602,6 @@ IECore::ConstCompoundDataPtr CollectImages::computeMetadata( const Gaffer::Conte
 		return outPlug()->metadataPlug()->defaultValue();
 	}
 }
-
 
 
 void CollectImages::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

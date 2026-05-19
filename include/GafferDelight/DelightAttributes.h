@@ -47,13 +47,12 @@ namespace GafferDelight
 class GAFFERDELIGHT_API DelightAttributes : public GafferScene::Attributes
 {
 
-	public :
+public:
 
-		explicit DelightAttributes( const std::string &name=defaultName<DelightAttributes>() );
-		~DelightAttributes() override;
+	explicit DelightAttributes( const std::string &name = defaultName<DelightAttributes>() );
+	~DelightAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferDelight::DelightAttributes, DelightAttributesTypeId, GafferScene::Attributes );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferDelight::DelightAttributes, DelightAttributesTypeId, GafferScene::Attributes );
 };
 
 IE_CORE_DECLAREPTR( DelightAttributes )

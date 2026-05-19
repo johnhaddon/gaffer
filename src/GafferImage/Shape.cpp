@@ -58,7 +58,7 @@ size_t Shape::g_firstPlugIndex = 0;
 static std::string g_shapeChannelName( "__shape" );
 
 Shape::Shape( const std::string &name )
-	:	FlatImageProcessor( name )
+	: FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -224,7 +224,6 @@ void Shape::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	{
 		outputs.push_back( shadowShapePlug()->channelDataPlug() );
 	}
-
 }
 
 void Shape::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -274,7 +273,7 @@ IECore::ConstStringVectorDataPtr Shape::computeChannelNames( const Gaffer::Conte
 
 void Shape::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
 {
-	assert( parent == shapePlug() || parent == shadowShapePlug()  );
+	assert( parent == shapePlug() || parent == shadowShapePlug() );
 	const std::string &channelName = context->get<std::string>( ImagePlug::channelNameContextName );
 	if( channelName == g_shapeChannelName )
 	{
@@ -300,7 +299,7 @@ void Shape::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer:
 
 IECore::ConstFloatVectorDataPtr Shape::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	assert( parent == shapePlug() || parent == shadowShapePlug()  );
+	assert( parent == shapePlug() || parent == shadowShapePlug() );
 	if( channelName == g_shapeChannelName )
 	{
 		// Private channel we use for caching the shape but don't advertise via channelNames.

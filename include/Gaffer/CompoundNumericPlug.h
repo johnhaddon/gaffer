@@ -54,76 +54,75 @@ template<typename T>
 class GAFFER_API CompoundNumericPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = T;
-		using ChildType = NumericPlug<typename T::BaseType>;
+	using ValueType = T;
+	using ChildType = NumericPlug<typename T::BaseType>;
 
-		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( CompoundNumericPlug<T>, ValuePlug );
+	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( CompoundNumericPlug<T>, ValuePlug );
 
-		explicit CompoundNumericPlug(
-			const std::string &name = defaultName<CompoundNumericPlug>(),
-			Direction direction=In,
-			T defaultValue = T( 0 ),
-			T minValue = T( std::numeric_limits<typename T::BaseType>::lowest() ),
-			T maxValue = T( std::numeric_limits<typename T::BaseType>::max() ),
-			unsigned flags = Default,
-			IECore::GeometricData::Interpretation interpretation = IECore::GeometricData::None
-		);
-		~CompoundNumericPlug() override;
-		/// Accepts no children following construction.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	explicit CompoundNumericPlug(
+		const std::string &name = defaultName<CompoundNumericPlug>(),
+		Direction direction = In,
+		T defaultValue = T( 0 ),
+		T minValue = T( std::numeric_limits<typename T::BaseType>::lowest() ),
+		T maxValue = T( std::numeric_limits<typename T::BaseType>::max() ),
+		unsigned flags = Default,
+		IECore::GeometricData::Interpretation interpretation = IECore::GeometricData::None
+	);
+	~CompoundNumericPlug() override;
+	/// Accepts no children following construction.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		using GraphComponent::getChild;
-		ChildType *getChild( size_t index );
-		const ChildType *getChild( size_t index ) const;
+	using GraphComponent::getChild;
+	ChildType *getChild( size_t index );
+	const ChildType *getChild( size_t index ) const;
 
-		T defaultValue() const;
+	T defaultValue() const;
 
-		bool hasMinValue() const;
-		bool hasMaxValue() const;
+	bool hasMinValue() const;
+	bool hasMaxValue() const;
 
-		T minValue() const;
-		T maxValue() const;
+	T minValue() const;
+	T maxValue() const;
 
-		/// Calls setValue for each of the child plugs, passing the components
-		/// of value.
-		/// \undoable
-		void setValue( const T &value );
-		/// Returns the value, calling getValue() on each child plug to compute a component
-		/// of the result.
-		T getValue() const;
+	/// Calls setValue for each of the child plugs, passing the components
+	/// of value.
+	/// \undoable
+	void setValue( const T &value );
+	/// Returns the value, calling getValue() on each child plug to compute a component
+	/// of the result.
+	T getValue() const;
 
-		/// Returns a hash to represent the value of this plug
-		/// in the current context.
-		IECore::MurmurHash hash() const override;
-		/// Convenience function to append the hash to h.
-		void hash( IECore::MurmurHash &h ) const;
+	/// Returns a hash to represent the value of this plug
+	/// in the current context.
+	IECore::MurmurHash hash() const override;
+	/// Convenience function to append the hash to h.
+	void hash( IECore::MurmurHash &h ) const;
 
-		/// Returns the interpretation of the vector
-		IECore::GeometricData::Interpretation interpretation() const;
+	/// Returns the interpretation of the vector
+	IECore::GeometricData::Interpretation interpretation() const;
 
-		/// @name Ganging
-		/// CompoundNumericPlugs may be ganged by connecting the child plugs
-		/// together so their values are driven by the first child. These
-		/// methods allow the children to be ganged and unganged, and for their
-		/// ganging status to be queried.
-		////////////////////////////////////////////////////////////////////
-		//@{
-		bool canGang() const;
-		/// \undoable
-		void gang();
-		bool isGanged() const;
-		/// \undoable
-		void ungang();
-		//@}
+	/// @name Ganging
+	/// CompoundNumericPlugs may be ganged by connecting the child plugs
+	/// together so their values are driven by the first child. These
+	/// methods allow the children to be ganged and unganged, and for their
+	/// ganging status to be queried.
+	////////////////////////////////////////////////////////////////////
+	//@{
+	bool canGang() const;
+	/// \undoable
+	void gang();
+	bool isGanged() const;
+	/// \undoable
+	void ungang();
+	//@}
 
-	private :
+private:
 
-		static const char **childNames();
-		const IECore::GeometricData::Interpretation m_interpretation;
-
+	static const char **childNames();
+	const IECore::GeometricData::Interpretation m_interpretation;
 };
 
 using V2fPlug = CompoundNumericPlug<Imath::V2f>;

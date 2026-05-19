@@ -54,83 +54,82 @@ namespace GafferImage
 class GAFFERIMAGE_API OpenImageIOReader : public ImageNode
 {
 
-	public :
+public:
 
-		explicit OpenImageIOReader( const std::string &name=defaultName<OpenImageIOReader>() );
-		~OpenImageIOReader() override;
+	explicit OpenImageIOReader( const std::string &name = defaultName<OpenImageIOReader>() );
+	~OpenImageIOReader() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::OpenImageIOReader, OpenImageIOReaderTypeId, ImageNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::OpenImageIOReader, OpenImageIOReaderTypeId, ImageNode );
 
-		enum MissingFrameMode
-		{
-			Error = 0,
-			Black,
-			Hold,
-		};
+	enum MissingFrameMode
+	{
+		Error = 0,
+		Black,
+		Hold,
+	};
 
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		/// Number of times the node has been refreshed.
-		Gaffer::IntPlug *refreshCountPlug();
-		const Gaffer::IntPlug *refreshCountPlug() const;
+	/// Number of times the node has been refreshed.
+	Gaffer::IntPlug *refreshCountPlug();
+	const Gaffer::IntPlug *refreshCountPlug() const;
 
-		Gaffer::IntPlug *missingFrameModePlug();
-		const Gaffer::IntPlug *missingFrameModePlug() const;
+	Gaffer::IntPlug *missingFrameModePlug();
+	const Gaffer::IntPlug *missingFrameModePlug() const;
 
-		Gaffer::IntVectorDataPlug *availableFramesPlug();
-		const Gaffer::IntVectorDataPlug *availableFramesPlug() const;
+	Gaffer::IntVectorDataPlug *availableFramesPlug();
+	const Gaffer::IntVectorDataPlug *availableFramesPlug() const;
 
-		Gaffer::BoolPlug *fileValidPlug();
-		const Gaffer::BoolPlug *fileValidPlug() const;
+	Gaffer::BoolPlug *fileValidPlug();
+	const Gaffer::BoolPlug *fileValidPlug() const;
 
-		Gaffer::IntPlug *channelInterpretationPlug();
-		const Gaffer::IntPlug *channelInterpretationPlug() const;
+	Gaffer::IntPlug *channelInterpretationPlug();
+	const Gaffer::IntPlug *channelInterpretationPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		static void setOpenFilesLimit( size_t maxOpenFiles );
-		static size_t getOpenFilesLimit();
+	static void setOpenFilesLimit( size_t maxOpenFiles );
+	static size_t getOpenFilesLimit();
 
-		static size_t supportedExtensions( std::vector<std::string> &extensions );
+	static size_t supportedExtensions( std::vector<std::string> &extensions );
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashMetadata( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashMetadata( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		std::shared_ptr<void> retrieveFile( const Gaffer::Context *context, bool holdForBlack = false ) const;
+	std::shared_ptr<void> retrieveFile( const Gaffer::Context *context, bool holdForBlack = false ) const;
 
-		Gaffer::ObjectVectorPlug *tileBatchPlug();
-		const Gaffer::ObjectVectorPlug *tileBatchPlug() const;
+	Gaffer::ObjectVectorPlug *tileBatchPlug();
+	const Gaffer::ObjectVectorPlug *tileBatchPlug() const;
 
-		void hashFileName( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	void hashFileName( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
 
-		void plugSet( Gaffer::Plug *plug );
+	void plugSet( Gaffer::Plug *plug );
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( OpenImageIOReader )

@@ -74,66 +74,65 @@ IE_CORE_FORWARDDECLARE( View )
 class GAFFERUI_API Tool : public Gaffer::Node
 {
 
-	public :
+public:
 
-		explicit Tool( View *view, const std::string &name = defaultName<Tool>() );
-		~Tool() override;
+	explicit Tool( View *view, const std::string &name = defaultName<Tool>() );
+	~Tool() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferUI::Tool, ToolTypeId, Gaffer::Node );
+	GAFFER_NODE_DECLARE_TYPE( GafferUI::Tool, ToolTypeId, Gaffer::Node );
 
-		View *view();
-		const View *view() const;
+	View *view();
+	const View *view() const;
 
-		/// Plug to define whether or not this tool
-		/// is currently active.
-		Gaffer::BoolPlug *activePlug();
-		const Gaffer::BoolPlug *activePlug() const;
+	/// Plug to define whether or not this tool
+	/// is currently active.
+	Gaffer::BoolPlug *activePlug();
+	const Gaffer::BoolPlug *activePlug() const;
 
-		/// The Tool constructor automatically parents the tool to
-		/// the`View::toolsContainer()`. After that, the tool may not be
-		/// reparented.
-		bool acceptsParent( const GraphComponent *potentialParent ) const override;
+	/// The Tool constructor automatically parents the tool to
+	/// the`View::toolsContainer()`. After that, the tool may not be
+	/// reparented.
+	bool acceptsParent( const GraphComponent *potentialParent ) const override;
 
-		/// @name Factory
-		///////////////////////////////////////////////////////////////////
-		//@{
-		/// Creates a Tool for the specified View.
-		static ToolPtr create( const std::string &toolName, View *view );
-		using ToolCreator = std::function<ToolPtr ( View * )>;
-		/// Registers a function which will return a Tool instance for a
-		/// view of a specific type.
-		static void registerTool( const std::string &toolName, IECore::TypeId viewType, ToolCreator creator );
-		/// Fills toolNames with the names of all tools registered for the view type.
-		static void registeredTools( IECore::TypeId viewType, std::vector<std::string> &toolNames );
-		//@}
+	/// @name Factory
+	///////////////////////////////////////////////////////////////////
+	//@{
+	/// Creates a Tool for the specified View.
+	static ToolPtr create( const std::string &toolName, View *view );
+	using ToolCreator = std::function<ToolPtr( View * )>;
+	/// Registers a function which will return a Tool instance for a
+	/// view of a specific type.
+	static void registerTool( const std::string &toolName, IECore::TypeId viewType, ToolCreator creator );
+	/// Fills toolNames with the names of all tools registered for the view type.
+	static void registeredTools( IECore::TypeId viewType, std::vector<std::string> &toolNames );
+	//@}
 
-	protected :
+protected:
 
-		template<typename ToolType, typename ViewType>
-		struct ToolDescription
+	template<typename ToolType, typename ViewType>
+	struct ToolDescription
+	{
+		ToolDescription()
 		{
-			ToolDescription()
+			registerTool( ToolType::staticTypeName(), ViewType::staticTypeId(), creator );
+		}
+
+		static ToolPtr creator( View *view )
+		{
+			ViewType *typedView = IECore::runTimeCast<ViewType>( view );
+			if( !typedView )
 			{
-				registerTool( ToolType::staticTypeName(), ViewType::staticTypeId(), creator );
+				throw IECore::Exception( "View has incorrect type" );
 			}
+			return new ToolType( typedView );
+		}
+	};
 
-			static ToolPtr creator( View *view )
-			{
-				ViewType *typedView = IECore::runTimeCast<ViewType>( view );
-				if( !typedView )
-				{
-					throw IECore::Exception( "View has incorrect type" );
-				}
-				return new ToolType( typedView );
-			}
-		};
+	void parentChanged( GraphComponent *oldParent ) override;
 
-		void parentChanged( GraphComponent *oldParent ) override;
+private:
 
-	private :
-
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 using ToolContainer = Gaffer::Container<Gaffer::Node, Tool>;

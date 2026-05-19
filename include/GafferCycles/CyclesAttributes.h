@@ -47,13 +47,12 @@ namespace GafferCycles
 class GAFFERCYCLES_API CyclesAttributes : public GafferScene::Attributes
 {
 
-	public :
+public:
 
-		explicit CyclesAttributes( const std::string &name=defaultName<CyclesAttributes>() );
-		~CyclesAttributes() override;
+	explicit CyclesAttributes( const std::string &name = defaultName<CyclesAttributes>() );
+	~CyclesAttributes() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferCycles::CyclesAttributes, CyclesAttributesTypeId, GafferScene::Attributes );
-
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferCycles::CyclesAttributes, CyclesAttributesTypeId, GafferScene::Attributes );
 };
 
 IE_CORE_DECLAREPTR( CyclesAttributes )

@@ -53,10 +53,10 @@ namespace
 void addRect(
 	const V2f &innerSize,
 	const V2f &innerScale,
-	const V4f &innerOffset,  // Convenient way to pass top, left, bottom, right, in that order
+	const V4f &innerOffset, // Convenient way to pass top, left, bottom, right, in that order
 	const float radius,
 	const float falloffWidth,
-	const V4f &falloffScale,  // Same order as above
+	const V4f &falloffScale, // Same order as above
 	std::vector<int> &vertsPerCurve,
 	std::vector<V3f> &p
 )
@@ -80,33 +80,28 @@ void addRect(
 	vertsPerCurve.push_back( numDivisions + 4 );
 
 	for(
-		const auto &[startIndex, quadrantMult, quadrantOffset, falloffMult] : std::array<std::tuple<int, V3f, V3f, V3f>, 4> {
+		const auto &[startIndex, quadrantMult, quadrantOffset, falloffMult] : std::array<std::tuple<int, V3f, V3f, V3f>, 4>{
 			std::tuple<int, V3f, V3f, V3f>{
 				0,
 				V3f( 1.f, 1.f, 0.f ),
 				V3f( innerOffset[3], innerOffset[0], 0.f ),
-				V3f( falloffScale[3], falloffScale[0], 0.f )
-			},  // Top-right
+				V3f( falloffScale[3], falloffScale[0], 0.f ) }, // Top-right
 			std::tuple<int, V3f, V3f, V3f>{
 				numDivisions / 4,
 				V3f( -1.f, 1.f, 0.f ),
 				V3f( -innerOffset[1], innerOffset[0], 0.f ),
-				V3f( falloffScale[1], falloffScale[0], 0.f )
-			},  // Top-left
+				V3f( falloffScale[1], falloffScale[0], 0.f ) }, // Top-left
 			std::tuple<int, V3f, V3f, V3f>{
 				numDivisions / 2,
 				V3f( -1.f, -1.f, 0.f ),
 				V3f( -innerOffset[1], -innerOffset[2], 0.f ),
-				V3f( falloffScale[1], falloffScale[2], 0.f )
-			},  // Bottom-left
+				V3f( falloffScale[1], falloffScale[2], 0.f ) }, // Bottom-left
 			std::tuple<int, V3f, V3f, V3f>{
 				( numDivisions * 3 ) / 4,
 				V3f( 1.f, -1.f, 0.f ),
 				V3f( innerOffset[3], -innerOffset[2], 0.f ),
-				V3f( falloffScale[3], falloffScale[2], 0.f )
-			}  // Bottom-right
-		}
-	)
+				V3f( falloffScale[3], falloffScale[2], 0.f ) } // Bottom-right
+		} )
 	{
 		for( int i = startIndex, eI = startIndex + ( numDivisions / 4 ); i <= eI; ++i )
 		{
@@ -117,7 +112,7 @@ void addRect(
 	}
 }
 
-}  // namespace
+} // namespace
 
 IECoreGL::GroupPtr GafferRenderManUI::lightFilterRectangles( const V2f &innerSize, const float radius, const V2f &innerScale, const V4f &innerOffset, const V4f &falloffScale, const float edge )
 {

@@ -49,9 +49,8 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LinearContainer );
 
-LinearContainer::LinearContainer( const std::string &name, Orientation orientation,
-	Alignment alignment, float spacing, Direction direction )
-	:	ContainerGadget( name ), m_orientation( orientation ), m_alignment( alignment ), m_spacing( spacing ), m_direction( direction )
+LinearContainer::LinearContainer( const std::string &name, Orientation orientation, Alignment alignment, float spacing, Direction direction )
+	: ContainerGadget( name ), m_orientation( orientation ), m_alignment( alignment ), m_spacing( spacing ), m_direction( direction )
 {
 	// We already initialised these values above, but that didn't perform any range checking,
 	// so we set them here as well. The reason we initialize them at all is so that the set
@@ -109,7 +108,7 @@ void LinearContainer::setSpacing( float spacing )
 	{
 		throw IECore::InvalidArgumentException( "Invalid spacing" );
 	}
-	if( spacing!=m_spacing )
+	if( spacing != m_spacing )
 	{
 		m_spacing = spacing;
 		dirty( DirtyType::Layout );
@@ -144,7 +143,7 @@ void LinearContainer::updateLayout() const
 	int axis = m_orientation - 1;
 	V3f size( 0 );
 	vector<Box3f> bounds;
-	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
+	for( ChildContainer::const_iterator it = children().begin(); it != children().end(); it++ )
 	{
 		const Gadget *child = static_cast<const Gadget *>( it->get() );
 		if( !child->getVisible() )
@@ -155,9 +154,9 @@ void LinearContainer::updateLayout() const
 		Box3f b = child->bound();
 		if( !b.isEmpty() )
 		{
-			for( int a=0; a<3; a++ )
+			for( int a = 0; a < 3; a++ )
 			{
-				if( a==axis )
+				if( a == axis )
 				{
 					size[a] += b.size()[a];
 				}
@@ -169,12 +168,12 @@ void LinearContainer::updateLayout() const
 		}
 		bounds.push_back( b );
 	}
-	size[axis] += (bounds.size() - 1) * m_spacing;
+	size[axis] += ( bounds.size() - 1 ) * m_spacing;
 
-	float offset = size[axis] / 2.0f  * ( m_direction==Increasing ? -1.0f : 1.0f );
+	float offset = size[axis] / 2.0f * ( m_direction == Increasing ? -1.0f : 1.0f );
 
 	int i = 0;
-	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
+	for( ChildContainer::const_iterator it = children().begin(); it != children().end(); it++ )
 	{
 		Gadget *child = static_cast<Gadget *>( it->get() );
 		if( !child->getVisible() )
@@ -187,33 +186,34 @@ void LinearContainer::updateLayout() const
 		V3f childOffset( 0 );
 		if( !b.isEmpty() )
 		{
-			for( int a=0; a<3; a++ )
+			for( int a = 0; a < 3; a++ )
 			{
-				if( a==axis )
+				if( a == axis )
 				{
-					childOffset[a] = offset - ( m_direction==Increasing ? b.min[a] : b.max[a] );
+					childOffset[a] = offset - ( m_direction == Increasing ? b.min[a] : b.max[a] );
 				}
 				else
 				{
 					switch( m_alignment )
 					{
 						case Min :
-							childOffset[a] = -size[a]/2.0f - b.min[a];
+							childOffset[a] = -size[a] / 2.0f - b.min[a];
 							break;
 						case Centre :
 							childOffset[a] = -b.center()[a];
 							break;
 						default :
 							// max
-							childOffset[a] = size[a]/2.0f - b.max[a];
+							childOffset[a] = size[a] / 2.0f - b.max[a];
 					}
 				}
 			}
-			offset += b.size()[axis] * ( m_direction==Increasing ? 1.0f : -1.0f );
+			offset += b.size()[axis] * ( m_direction == Increasing ? 1.0f : -1.0f );
 		}
-		offset += m_spacing * ( m_direction==Increasing ? 1.0f : -1.0f );
+		offset += m_spacing * ( m_direction == Increasing ? 1.0f : -1.0f );
 
-		M44f m; m.translate( childOffset );
+		M44f m;
+		m.translate( childOffset );
 		child->setTransform( m );
 	}
 }

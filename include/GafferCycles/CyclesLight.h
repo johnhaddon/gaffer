@@ -49,13 +49,12 @@ namespace GafferCycles
 class GAFFERCYCLES_API CyclesLight : public GafferScene::Light
 {
 
-	public :
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferCycles::CyclesLight, CyclesLightTypeId, GafferScene::Light );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferCycles::CyclesLight, CyclesLightTypeId, GafferScene::Light );
 
-		explicit CyclesLight( const std::string &name=defaultName<CyclesLight>() );
-		~CyclesLight() override;
-
+	explicit CyclesLight( const std::string &name = defaultName<CyclesLight>() );
+	~CyclesLight() override;
 };
 
 IE_CORE_DECLAREPTR( CyclesLight )

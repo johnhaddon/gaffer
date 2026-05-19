@@ -58,7 +58,7 @@ using namespace IECoreScene;
 using namespace Gaffer;
 using namespace GafferScene;
 
-using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
+using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
 
 GAFFER_NODE_DEFINE_TYPE( SceneReader );
 
@@ -85,11 +85,9 @@ bool shouldEmulateDefaultLightsSet( const IECoreScene::SceneInterface *scene, co
 	// When a `defaultLights` set has been authored explicitly, presumably because the file was
 	// written from Gaffer, we prefer that to any automatic behaviour. This allows us to round-trip
 	// light linking within Gaffer itself.
-	return
-		!strcmp( scene->typeName(), "USDScene" ) &&
+	return !strcmp( scene->typeName(), "USDScene" ) &&
 		std::find( setNames.begin(), setNames.end(), g_defaultLights ) == setNames.end() &&
-		std::find( setNames.begin(), setNames.end(), g_lights ) != setNames.end()
-	;
+		std::find( setNames.begin(), setNames.end(), g_lights ) != setNames.end();
 }
 
 double timeAsDouble( const Context *context )
@@ -150,7 +148,7 @@ const ValuePlug::CachePolicy g_setCachePolicy = cachePolicyFromEnv( "GAFFERSCENE
 } // namespace
 
 SceneReader::SceneReader( const std::string &name )
-	:	SceneNode( name )
+	: SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );
@@ -431,7 +429,7 @@ IECore::ConstCompoundObjectPtr SceneReader::computeAttributes( const ScenePath &
 		{
 			// The const cast is ok, because we're only using it to put the object into a CompoundObject that will
 			// be treated as forever const after being returned from this function.
-			result->members()[ std::string( *it ) ] = boost::const_pointer_cast<Object>( attribute );
+			result->members()[std::string( *it )] = boost::const_pointer_cast<Object>( attribute );
 		}
 		else
 		{
@@ -485,7 +483,8 @@ IECore::ConstObjectPtr SceneReader::computeObject( const ScenePath &path, const 
 
 void SceneReader::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
 {
-	int refreshCount = 0; string tags;
+	int refreshCount = 0;
+	string tags;
 	ConstSceneInterfacePtr s = scene( path, context, &refreshCount, &tags );
 	if( !s )
 	{
@@ -755,8 +754,6 @@ bool SceneReader::useSetsAPI( const SceneInterface *scene )
 	const char *typeName = scene->typeName();
 	// We use the tags API for the legacy interfaces listed below, and the sets API
 	// for everything else.
-	return
-		strcmp( typeName, "SceneCache" ) && strcmp( typeName, "MeshCacheSceneInterface" ) &&
-		strcmp( typeName, "LinkedScene" ) && strcmp( typeName, "LiveScene" )
-	;
+	return strcmp( typeName, "SceneCache" ) && strcmp( typeName, "MeshCacheSceneInterface" ) &&
+		strcmp( typeName, "LinkedScene" ) && strcmp( typeName, "LiveScene" );
 }

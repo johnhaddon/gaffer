@@ -61,18 +61,17 @@ namespace
 class ImageViewWrapper : public NodeWrapper<ImageView>
 {
 
-	public :
+public:
 
-		ImageViewWrapper( PyObject *self, ScriptNodePtr scriptNode )
-			:	NodeWrapper<ImageView>( self, scriptNode )
-		{
-		}
+	ImageViewWrapper( PyObject *self, ScriptNodePtr scriptNode )
+		: NodeWrapper<ImageView>( self, scriptNode )
+	{
+	}
 
-		void insertConverter( Gaffer::NodePtr converter )
-		{
-			ImageView::insertConverter( converter );
-		}
-
+	void insertConverter( Gaffer::NodePtr converter )
+	{
+		ImageView::insertConverter( converter );
+	}
 };
 
 } // namespace
@@ -80,8 +79,7 @@ class ImageViewWrapper : public NodeWrapper<ImageView>
 void GafferImageUIModule::bindImageView()
 {
 	scope s = GafferBindings::NodeClass<ImageView, ImageViewWrapper>( nullptr, no_init )
-		.def( init<ScriptNodePtr>() )
-		.def( "imageGadget", (ImageGadget *(ImageView::*)())&ImageView::imageGadget, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-		.def( "_insertConverter", &ImageViewWrapper::insertConverter )
-	;
+				  .def( init<ScriptNodePtr>() )
+				  .def( "imageGadget", ( ImageGadget * (ImageView::*)() ) & ImageView::imageGadget, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+				  .def( "_insertConverter", &ImageViewWrapper::insertConverter );
 }

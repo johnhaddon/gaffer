@@ -44,15 +44,15 @@
 
 namespace
 {
-	bool showSetupMenu( GafferScene::AttributeQuery& query )
-	{
-		IECorePython::ScopedGILRelease gilRelease;
-		return GafferSceneUI::AttributeQueryUI::showSetupMenu( query );
-	}
+bool showSetupMenu( GafferScene::AttributeQuery &query )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return GafferSceneUI::AttributeQueryUI::showSetupMenu( query );
+}
 
 } // namespace
 
 void GafferSceneUIModule::bindQueries()
 {
-	boost::python::def( "__showSetupMenu", & showSetupMenu );
+	boost::python::def( "__showSetupMenu", &showSetupMenu );
 }

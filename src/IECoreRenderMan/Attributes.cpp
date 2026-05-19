@@ -184,7 +184,6 @@ bool isMeshLight( const IECoreScene::ShaderNetwork *lightShader )
 }
 
 IECoreScene::ConstShaderNetworkPtr g_facingRatio = []() {
-
 	ShaderNetworkPtr result = new ShaderNetwork;
 
 	const InternedString facingRatioHandle = result->addShader(
@@ -202,11 +201,9 @@ IECoreScene::ConstShaderNetworkPtr g_facingRatio = []() {
 	result->setOutput( { "constant", "out" } );
 
 	return result;
-
-} ();
+}();
 
 IECoreScene::ConstShaderNetworkPtr g_black = []() {
-
 	ShaderNetworkPtr result = new ShaderNetwork;
 	const InternedString blackHandle = result->addShader(
 		"black", new Shader( "PxrBlack" )
@@ -214,8 +211,7 @@ IECoreScene::ConstShaderNetworkPtr g_black = []() {
 	result->setOutput( { blackHandle, "out" } );
 
 	return result;
-
-} ();
+}();
 
 const std::string g_renderAttributePrefix( "render:" );
 const std::string g_userAttributePrefix( "user:" );
@@ -312,7 +308,6 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 		else
 		{
 			ParamListAlgo::convertParameter( RtUString( name.c_str() + g_renderManPrefix.size() ), data, m_instanceAttributes );
-
 		}
 	}
 

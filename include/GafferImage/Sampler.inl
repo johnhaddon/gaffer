@@ -160,7 +160,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 					const float *tileData;
 					int tilePixelIndex;
 					cachedData( Imath::V2i( clampedX, m_dataWindow.min.y ), tileData, tilePixelIndex );
-					constantValue = tileData[ tilePixelIndex ];
+					constantValue = tileData[tilePixelIndex];
 				}
 				count = std::min( region.max.y, m_dataWindow.min.y ) - y;
 			}
@@ -172,7 +172,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 					const float *tileData;
 					int tilePixelIndex;
 					cachedData( Imath::V2i( clampedX, m_dataWindow.max.y - 1 ), tileData, tilePixelIndex );
-					constantValue = tileData[ tilePixelIndex ];
+					constantValue = tileData[tilePixelIndex];
 				}
 				count = region.max.y - y;
 			}
@@ -185,7 +185,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 				cachedData( Imath::V2i( clampedX, y ), tileData, tilePixelIndex );
 				int pixelY = tilePixelIndex >> ImagePlug::tileSizeLog2();
 				count = std::min( std::min( m_dataWindow.max.y, region.max.y ) - y, ImagePlug::tileSize() - pixelY );
-				valuePointer = &tileData[ tilePixelIndex ];
+				valuePointer = &tileData[tilePixelIndex];
 			}
 
 			// Now we can do the nice tight inner loop where we call visitor repeatedly with valuePointer, or
@@ -231,7 +231,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 			clampedY = std::clamp( y, m_dataWindow.min.y, m_dataWindow.max.y - 1 );
 		}
 
-		if( clampedY < m_dataWindow.min.y ||  clampedY >= m_dataWindow.max.y )
+		if( clampedY < m_dataWindow.min.y || clampedY >= m_dataWindow.max.y )
 		{
 			// If we're outside, and haven't been clamped, then just use the default constantValue of 0.
 			count = region.max.x - x;
@@ -244,7 +244,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 				const float *tileData;
 				int tilePixelIndex;
 				cachedData( Imath::V2i( m_dataWindow.min.x, clampedY ), tileData, tilePixelIndex );
-				constantValue = tileData[ tilePixelIndex ];
+				constantValue = tileData[tilePixelIndex];
 			}
 			count = std::min( region.max.x, m_dataWindow.min.x ) - x;
 		}
@@ -256,7 +256,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 				const float *tileData;
 				int tilePixelIndex;
 				cachedData( Imath::V2i( m_dataWindow.max.x - 1, clampedY ), tileData, tilePixelIndex );
-				constantValue = tileData[ tilePixelIndex ];
+				constantValue = tileData[tilePixelIndex];
 			}
 			count = region.max.x - x;
 		}
@@ -269,7 +269,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 			cachedData( Imath::V2i( x, clampedY ), tileData, tilePixelIndex );
 			int tileX = tilePixelIndex & ( ImagePlug::tileSize() - 1 );
 			count = std::min( std::min( m_dataWindow.max.x, region.max.x ) - x, ImagePlug::tileSize() - tileX );
-			valuePointer = &tileData[ tilePixelIndex ];
+			valuePointer = &tileData[tilePixelIndex];
 		}
 
 		// Now we can do the nice tight inner loop where we call visitor repeatedly with valuePointer, or
@@ -299,7 +299,7 @@ inline void Sampler::visitPixels( const Imath::Box2i &region, F &&visitor )
 	}
 }
 
-inline void Sampler::cachedData( Imath::V2i p, const float *& tileData, int &tilePixelIndex )
+inline void Sampler::cachedData( Imath::V2i p, const float *&tileData, int &tilePixelIndex )
 {
 	// Get the smart pointer to the tile we want.
 
@@ -310,12 +310,12 @@ inline void Sampler::cachedData( Imath::V2i p, const float *& tileData, int &til
 
 	const float *&cacheTileRawPtr = m_dataCacheRaw[cacheIndex];
 
-	if ( cacheTileRawPtr == nullptr )
+	if( cacheTileRawPtr == nullptr )
 	{
 		// Get the origin of the tile we want.
 		Imath::V2i tileOrigin( p.x & ~( ImagePlug::tileSize() - 1 ), p.y & ~( ImagePlug::tileSize() - 1 ) );
 
-		IECore::ConstFloatVectorDataPtr &cacheTilePtr = m_dataCache[ cacheIndex ];
+		IECore::ConstFloatVectorDataPtr &cacheTilePtr = m_dataCache[cacheIndex];
 		cacheTilePtr = m_plug->channelData( m_channelName, tileOrigin );
 		cacheTileRawPtr = &cacheTilePtr->readable()[0];
 	}

@@ -68,8 +68,7 @@ template<typename T>
 using ValuesDataType = std::conditional_t<
 	IECore::TypeTraits::IsVec<T>::value,
 	IECore::GeometricTypedData<vector<T>>,
-	IECore::TypedData<vector<T>>
->;
+	IECore::TypedData<vector<T>>>;
 
 template<typename T>
 using ValuesPlugType = Gaffer::TypedObjectPlug<ValuesDataType<T>>;
@@ -156,7 +155,7 @@ GAFFER_NODE_DEFINE_TYPE( RandomChoice );
 size_t RandomChoice::g_firstPlugIndex = 0;
 
 RandomChoice::RandomChoice( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -179,7 +178,7 @@ void RandomChoice::setup( const ValuePlug *plug )
 
 	dispatchPlugFunction(
 		plug,
-		[this] ( const auto plug ) {
+		[this]( const auto plug ) {
 			using ValueType = typename remove_pointer_t<decltype( plug )>::ValueType;
 			ValuePlugPtr valuesPlug = new ValuesPlugType<ValueType>( "values", Plug::In, new ValuesDataType<ValueType> );
 			this->choicesPlug()->addChild( valuesPlug );
@@ -198,7 +197,7 @@ bool RandomChoice::canSetup( const ValuePlug *plug )
 	bool result = false;
 	dispatchPlugFunction(
 		plug,
-		[&result] ( const auto plug ) {
+		[&result]( const auto plug ) {
 			result = true;
 		}
 	);
@@ -324,8 +323,7 @@ void RandomChoice::compute( ValuePlug *output, const Context *context ) const
 
 		dispatchPlugFunction(
 			outPlug(),
-			[this, output, &weights, &random] ( auto plug ) {
-
+			[this, output, &weights, &random]( auto plug ) {
 				using PlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
 				using ValueType = typename PlugType::ValueType;
 
@@ -339,11 +337,9 @@ void RandomChoice::compute( ValuePlug *output, const Context *context ) const
 
 				if( weights.size() != choices.size() )
 				{
-					throw IECore::Exception( fmt::format(
-						"Length of `choices.weights` does not match length of `choices.values` "
-						"({} but should be {}).",
-						weights.size(), choices.size()
-					) );
+					throw IECore::Exception( fmt::format( "Length of `choices.weights` does not match length of `choices.values` "
+														  "({} but should be {}).",
+														  weights.size(), choices.size() ) );
 				}
 
 				const float weightsSum = accumulate(
@@ -373,7 +369,6 @@ void RandomChoice::compute( ValuePlug *output, const Context *context ) const
 						return;
 					}
 				}
-
 			}
 		);
 	}

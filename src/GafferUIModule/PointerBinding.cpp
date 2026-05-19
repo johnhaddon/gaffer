@@ -61,20 +61,18 @@ PointerPtr getCurrent()
 void GafferUIModule::bindPointer()
 {
 	scope s = IECorePython::RefCountedClass<Pointer, IECore::RefCounted>( "Pointer" )
-		.def( init<const std::string &, const Imath::V2i &>( ( arg( "fileName" ), arg( "hotspot" ) = Imath::V2i( -1 ) ) ) )
-		.def( "fileName", &Pointer::fileName, return_value_policy<copy_const_reference>() )
-		.def( "hotspot", &Pointer::hotspot, return_value_policy<copy_const_reference>() )
-		.def( "setCurrent", (void (*)( ConstPointerPtr ))&Pointer::setCurrent )
-		.def( "setCurrent", (void (*)( const std::string & ))&Pointer::setCurrent )
-		.staticmethod( "setCurrent" )
-		.def( "getCurrent", &getCurrent )
-		.staticmethod( "getCurrent" )
-		.def( "registerPointer", &Pointer::registerPointer )
-		.staticmethod( "registerPointer" )
-		.def( "changedSignal", &Pointer::changedSignal, return_value_policy<reference_existing_object>() )
-		.staticmethod( "changedSignal" )
-	;
+				  .def( init<const std::string &, const Imath::V2i &>( ( arg( "fileName" ), arg( "hotspot" ) = Imath::V2i( -1 ) ) ) )
+				  .def( "fileName", &Pointer::fileName, return_value_policy<copy_const_reference>() )
+				  .def( "hotspot", &Pointer::hotspot, return_value_policy<copy_const_reference>() )
+				  .def( "setCurrent", (void ( * )( ConstPointerPtr ))&Pointer::setCurrent )
+				  .def( "setCurrent", (void ( * )( const std::string & ))&Pointer::setCurrent )
+				  .staticmethod( "setCurrent" )
+				  .def( "getCurrent", &getCurrent )
+				  .staticmethod( "getCurrent" )
+				  .def( "registerPointer", &Pointer::registerPointer )
+				  .staticmethod( "registerPointer" )
+				  .def( "changedSignal", &Pointer::changedSignal, return_value_policy<reference_existing_object>() )
+				  .staticmethod( "changedSignal" );
 
 	SignalClass<Pointer::ChangedSignal>( "ChangedSignal" );
-
 }

@@ -47,37 +47,36 @@ namespace GafferImage
 class GAFFERIMAGE_API DeleteViews : public ImageProcessor
 {
 
-	public :
+public:
 
-		enum Mode
-		{
-			Delete = 0,
-			Keep = 1
-		};
+	enum Mode
+	{
+		Delete = 0,
+		Keep = 1
+	};
 
-		explicit DeleteViews( const std::string &name=defaultName<DeleteViews>() );
-		~DeleteViews() override;
+	explicit DeleteViews( const std::string &name = defaultName<DeleteViews>() );
+	~DeleteViews() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DeleteViews, DeleteViewsTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DeleteViews, DeleteViewsTypeId, ImageProcessor );
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::StringPlug *viewsPlug();
-		const Gaffer::StringPlug *viewsPlug() const;
+	Gaffer::StringPlug *viewsPlug();
+	const Gaffer::StringPlug *viewsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteViews )

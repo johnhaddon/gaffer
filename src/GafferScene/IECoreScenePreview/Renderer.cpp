@@ -69,12 +69,10 @@ CreatorMap &creators()
 
 Renderer::Renderer()
 {
-
 }
 
 Renderer::~Renderer()
 {
-
 }
 
 Renderer::ObjectInterfacePtr Renderer::camera( const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes )
@@ -118,12 +116,10 @@ IECore::DataPtr Renderer::command( const IECore::InternedString name, const IECo
 
 Renderer::AttributesInterface::~AttributesInterface()
 {
-
 }
 
 Renderer::ObjectInterface::~ObjectInterface()
 {
-
 }
 
 void Renderer::ObjectInterface::transform( const Imath::M44f &transform )

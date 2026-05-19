@@ -51,8 +51,8 @@ using namespace GafferImage;
 
 namespace
 {
-	std::string g_premultipliedAverageZName( "__premultipliedAverageZ" );
-}
+std::string g_premultipliedAverageZName( "__premultipliedAverageZ" );
+} // namespace
 
 
 GAFFER_NODE_DEFINE_TYPE( DeepToFlat );
@@ -60,7 +60,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepToFlat );
 size_t DeepToFlat::g_firstPlugIndex = 0;
 
 DeepToFlat::DeepToFlat( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -100,32 +100,32 @@ const Gaffer::IntPlug *DeepToFlat::depthModePlug() const
 
 Gaffer::FloatVectorDataPlug *DeepToFlat::intermediateChannelDataPlug()
 {
-	return getChild<FloatVectorDataPlug>( g_firstPlugIndex+1 );
+	return getChild<FloatVectorDataPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::FloatVectorDataPlug *DeepToFlat::intermediateChannelDataPlug() const
 {
-	return getChild<FloatVectorDataPlug>( g_firstPlugIndex+1 );
+	return getChild<FloatVectorDataPlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::FloatVectorDataPlug *DeepToFlat::flattenedChannelDataPlug()
 {
-	return getChild<FloatVectorDataPlug>( g_firstPlugIndex+2 );
+	return getChild<FloatVectorDataPlug>( g_firstPlugIndex + 2 );
 }
 
 const Gaffer::FloatVectorDataPlug *DeepToFlat::flattenedChannelDataPlug() const
 {
-	return getChild<FloatVectorDataPlug>( g_firstPlugIndex+2 );
+	return getChild<FloatVectorDataPlug>( g_firstPlugIndex + 2 );
 }
 
 GafferImage::DeepState *DeepToFlat::deepState()
 {
-	return getChild<DeepState>( g_firstPlugIndex+3 );
+	return getChild<DeepState>( g_firstPlugIndex + 3 );
 }
 
 const GafferImage::DeepState *DeepToFlat::deepState() const
 {
-	return getChild<DeepState>( g_firstPlugIndex+3 );
+	return getChild<DeepState>( g_firstPlugIndex + 3 );
 }
 
 void DeepToFlat::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const

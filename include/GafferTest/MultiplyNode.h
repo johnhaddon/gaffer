@@ -48,34 +48,33 @@ namespace GafferTest
 class GAFFERTEST_API MultiplyNode : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		MultiplyNode( const std::string &name=defaultName<MultiplyNode>(), bool brokenAffects = false );
-		~MultiplyNode() override;
+	MultiplyNode( const std::string &name = defaultName<MultiplyNode>(), bool brokenAffects = false );
+	~MultiplyNode() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferTest::MultiplyNode, MultiplyNodeTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferTest::MultiplyNode, MultiplyNodeTypeId, Gaffer::ComputeNode );
 
-		Gaffer::IntPlug *op1Plug();
-		const Gaffer::IntPlug *op1Plug() const;
+	Gaffer::IntPlug *op1Plug();
+	const Gaffer::IntPlug *op1Plug() const;
 
-		Gaffer::IntPlug *op2Plug();
-		const Gaffer::IntPlug *op2Plug() const;
+	Gaffer::IntPlug *op2Plug();
+	const Gaffer::IntPlug *op2Plug() const;
 
-		Gaffer::IntPlug *productPlug();
-		const Gaffer::IntPlug *productPlug() const;
+	Gaffer::IntPlug *productPlug();
+	const Gaffer::IntPlug *productPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		bool m_brokenAffects;
-		static size_t g_firstPlugIndex;
-
+	bool m_brokenAffects;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MultiplyNode )

@@ -63,27 +63,24 @@ void GafferUIModule::bindContainerGadget()
 {
 	GadgetClass<ContainerGadget>()
 		.def( "setPadding", &ContainerGadget::setPadding )
-		.def( "getPadding", &ContainerGadget::getPadding, return_value_policy<copy_const_reference>() )
-	;
+		.def( "getPadding", &ContainerGadget::getPadding, return_value_policy<copy_const_reference>() );
 
 	GadgetClass<IndividualContainer>()
 		.def( init<>() )
 		.def( init<GadgetPtr>() )
 		.def( "setChild", &IndividualContainer::setChild )
-		.def( "getChild", &getChild )
-	;
+		.def( "getChild", &getChild );
 
 	/// \todo It would be nice if we could make this behave a lot like the ListContainer
 	GadgetClass<LinearContainer> c;
-		c.def( "setOrientation", &LinearContainer::setOrientation )
+	c.def( "setOrientation", &LinearContainer::setOrientation )
 		.def( "getOrientation", &LinearContainer::getOrientation )
 		.def( "setAlignment", &LinearContainer::setAlignment )
 		.def( "getAlignment", &LinearContainer::getAlignment )
 		.def( "setSpacing", &LinearContainer::setSpacing )
 		.def( "getSpacing", &LinearContainer::getSpacing )
 		.def( "setDirection", &LinearContainer::setDirection )
-		.def( "getDirection", &LinearContainer::getDirection )
-	;
+		.def( "getDirection", &LinearContainer::getDirection );
 
 	{
 		scope s = c;
@@ -92,34 +89,21 @@ void GafferUIModule::bindContainerGadget()
 			.value( "InvalidOrientation", LinearContainer::InvalidOrientation )
 			.value( "X", LinearContainer::X )
 			.value( "Y", LinearContainer::Y )
-			.value( "Z", LinearContainer::Z )
-		;
+			.value( "Z", LinearContainer::Z );
 
 		enum_<LinearContainer::Alignment>( "Alignment" )
 			.value( "InvalidAlignment", LinearContainer::InvalidAlignment )
 			.value( "Min", LinearContainer::Min )
 			.value( "Centre", LinearContainer::Centre )
-			.value( "Max", LinearContainer::Max )
-		;
+			.value( "Max", LinearContainer::Max );
 
 		enum_<LinearContainer::Direction>( "Direction" )
 			.value( "InvalidDirection", LinearContainer::InvalidDirection )
 			.value( "Increasing", LinearContainer::Increasing )
-			.value( "Decreasing", LinearContainer::Decreasing )
-		;
+			.value( "Decreasing", LinearContainer::Decreasing );
 	}
 
 	// we have to define the constructor after the enums, as they must be registered in order for boost::python to figure out the correct
 	// python values for the default arguments
-	c.def( init< optional<const std::string &, LinearContainer::Orientation, LinearContainer::Alignment, float, LinearContainer::Direction> >(
-			(
-				arg_( "name" )=Gaffer::GraphComponent::defaultName<LinearContainer>(),
-				arg_( "orientation" )=LinearContainer::X,
-				arg_( "alignment" )=LinearContainer::Centre,
-				arg_( "spacing" )=0.0f,
-				arg_( "direction" )=LinearContainer::Increasing
-			)
-		)
-	);
-
+	c.def( init<optional<const std::string &, LinearContainer::Orientation, LinearContainer::Alignment, float, LinearContainer::Direction>>( ( arg_( "name" ) = Gaffer::GraphComponent::defaultName<LinearContainer>(), arg_( "orientation" ) = LinearContainer::X, arg_( "alignment" ) = LinearContainer::Centre, arg_( "spacing" ) = 0.0f, arg_( "direction" ) = LinearContainer::Increasing ) ) );
 }

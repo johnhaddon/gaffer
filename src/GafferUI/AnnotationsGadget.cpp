@@ -274,7 +274,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AnnotationsGadget );
 const std::string AnnotationsGadget::untemplatedAnnotations = "__untemplated__";
 
 AnnotationsGadget::AnnotationsGadget()
-	:	Gadget( "AnnotationsGadget" ), m_dirty( true ), m_visibleAnnotations( "*" )
+	: Gadget( "AnnotationsGadget" ), m_dirty( true ), m_visibleAnnotations( "*" )
 {
 	Metadata::nodeValueChangedSignal().connect(
 		boost::bind( &AnnotationsGadget::nodeMetadataChanged, this, ::_1, ::_2, ::_3 )
@@ -612,8 +612,7 @@ void AnnotationsGadget::schedulePlugValueSubstitutions( const Gaffer::Node *node
 		// `this`, `node` and `annotations` are safe to capture because they are
 		// guaranteed to outlive the BackgroundTask, due to `annotations` owning
 		// the task, and waiting for it in its destructor.
-		backgroundTaskSubject, [this, node, annotations] () {
-
+		backgroundTaskSubject, [this, node, annotations]() {
 			// Get new render text for each annotation. Note : We can not access
 			// the Metatada API from a BackgroundTask, as it doesn't participate
 			// in cancellation.
@@ -647,7 +646,6 @@ void AnnotationsGadget::schedulePlugValueSubstitutions( const Gaffer::Node *node
 
 			ParallelAlgo::callOnUIThread(
 				[gadget = Ptr( that ), node = ConstNodePtr( node ), renderText = std::move( renderText ), cancelled] {
-
 					Annotations *annotations = gadget->annotations( node.get() );
 					if( !annotations )
 					{
@@ -664,7 +662,6 @@ void AnnotationsGadget::schedulePlugValueSubstitutions( const Gaffer::Node *node
 					gadget->dirty( DirtyType::Render );
 				}
 			);
-
 		}
 	);
 }
@@ -767,8 +764,8 @@ void AnnotationsGadget::renderAnnotations( const Style *style, AnnotationBufferM
 
 				const Imath::Color4f textColor( 0.8f );
 				glPushMatrix();
-					IECoreGL::glTranslate( V2f( bookmarkIconPos.x - 0.9 - textBounds.size().x, bookmarkIconPos.y - textBounds.size().y * 0.5 - 0.2 ) );
-					style->renderText( Style::LabelText, annotations.numericBookmark.string(), Style::NormalState, &textColor );
+				IECoreGL::glTranslate( V2f( bookmarkIconPos.x - 0.9 - textBounds.size().x, bookmarkIconPos.y - textBounds.size().y * 0.5 - 0.2 ) );
+				style->renderText( Style::LabelText, annotations.numericBookmark.string(), Style::NormalState, &textColor );
 				glPopMatrix();
 			}
 		}
@@ -778,7 +775,7 @@ void AnnotationsGadget::renderAnnotations( const Style *style, AnnotationBufferM
 			if( selectionIds && selector )
 			{
 				unsigned int id = selector->loadName();
-				(*selectionIds)[id] = AnnotationIdentifier( ga.first->node(), a.name );
+				( *selectionIds )[id] = AnnotationIdentifier( ga.first->node(), a.name );
 			}
 
 			annotationOrigin = style->renderAnnotation( annotationOrigin, a.renderText, Style::NormalState, a.colorData ? &a.color() : nullptr );

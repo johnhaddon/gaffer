@@ -61,7 +61,7 @@ struct StringVectorFromStringVectorData
 		boost::python::converter::registry::push_back(
 			&convertible,
 			nullptr,
-			boost::python::type_id<std::vector<std::string> >()
+			boost::python::type_id<std::vector<std::string>>()
 		);
 	}
 
@@ -72,13 +72,12 @@ struct StringVectorFromStringVectorData
 		{
 			if( IECore::StringVectorData *data = dataExtractor() )
 			{
-				return &(data->writable());
+				return &( data->writable() );
 			}
 		}
 
 		return nullptr;
 	}
-
 };
 
 boost::python::list layerNamesWrapper( object pythonChannelNames )
@@ -126,15 +125,13 @@ void parallelGatherTiles1( const GafferImage::ImagePlug &image, object pythonTil
 
 		&image,
 
-		[ &pythonTileFunctor ] ( const ImagePlug *image, const Imath::V2i &tileOrigin )
-		{
+		[&pythonTileFunctor]( const ImagePlug *image, const Imath::V2i &tileOrigin ) {
 			IECorePython::ScopedGILLock gilLock;
 			object tile = pythonTileFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), tileOrigin );
 			return std::shared_ptr<object>( new object( tile ), deleteWithGIL );
 		},
 
-		[ &pythonGatherFunctor ] ( const ImagePlug *image, const Imath::V2i &tileOrigin, std::shared_ptr<object> tile )
-		{
+		[&pythonGatherFunctor]( const ImagePlug *image, const Imath::V2i &tileOrigin, std::shared_ptr<object> tile ) {
 			IECorePython::ScopedGILLock gilLock;
 			pythonGatherFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), tileOrigin, *tile );
 		},
@@ -155,15 +152,13 @@ void parallelGatherTiles2( const GafferImage::ImagePlug &image, object pythonCha
 
 		&image, channelNames,
 
-		[ &pythonTileFunctor ] ( const ImagePlug *image, const std::string &channelName, const Imath::V2i &tileOrigin )
-		{
+		[&pythonTileFunctor]( const ImagePlug *image, const std::string &channelName, const Imath::V2i &tileOrigin ) {
 			IECorePython::ScopedGILLock gilLock;
 			object tile = pythonTileFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), channelName, tileOrigin );
 			return std::shared_ptr<object>( new object( tile ), deleteWithGIL );
 		},
 
-		[ &pythonGatherFunctor ] ( const ImagePlug *image, const std::string &channelName, const Imath::V2i &tileOrigin, std::shared_ptr<object> tile )
-		{
+		[&pythonGatherFunctor]( const ImagePlug *image, const std::string &channelName, const Imath::V2i &tileOrigin, std::shared_ptr<object> tile ) {
 			IECorePython::ScopedGILLock gilLock;
 			pythonGatherFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), channelName, tileOrigin, *tile );
 		},
@@ -211,14 +206,13 @@ void GafferImageModule::bindImageAlgo()
 	def( "channelName", &GafferImage::ImageAlgo::channelName );
 	def( "colorIndex", &GafferImage::ImageAlgo::colorIndex );
 	def( "channelExists", &channelExistsWrapper );
-	def( "channelExists", ( bool (*)( const std::vector<std::string> &channelNames, const std::string &channelName ) )&GafferImage::ImageAlgo::channelExists );
+	def( "channelExists", (bool ( * )( const std::vector<std::string> &channelNames, const std::string &channelName ))&GafferImage::ImageAlgo::channelExists );
 	def( "sortedChannelNames", &sortedChannelNamesWrapper );
 
 	enum_<ImageAlgo::TileOrder>( "TileOrder" )
 		.value( "Unordered", ImageAlgo::Unordered )
 		.value( "TopToBottom", ImageAlgo::TopToBottom )
-		.value( "BottomToTop", ImageAlgo::BottomToTop )
-	;
+		.value( "BottomToTop", ImageAlgo::BottomToTop );
 
 	def(
 		"parallelGatherTiles", &parallelGatherTiles1,
@@ -248,5 +242,4 @@ void GafferImageModule::bindImageAlgo()
 	def( "tiles", &tilesWrapper, ( boost::python::arg( "_copy" ) = true, boost::python::arg( "viewName" ) = object() ) );
 
 	StringVectorFromStringVectorData();
-
 }

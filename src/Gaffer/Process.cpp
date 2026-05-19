@@ -65,7 +65,8 @@ std::string prefixedWhat( const IECore::Exception &e )
 		// Prefixing with type wouldn't add any useful information.
 		return e.what();
 	}
-	s += " : "; s += e.what();
+	s += " : ";
+	s += e.what();
 	return s;
 }
 
@@ -114,8 +115,7 @@ tbb::spin_mutex Process::Collaboration::g_dependentsMutex;
 //////////////////////////////////////////////////////////////////////////
 
 Process::Process( const IECore::InternedString &type, const Plug *plug, const Plug *destinationPlug )
-	:	m_type( type ), m_plug( plug ), m_destinationPlug( destinationPlug ? destinationPlug : plug ),
-		m_parent( m_threadState->m_process ), m_collaboration( m_parent ? m_parent->m_collaboration : nullptr )
+	: m_type( type ), m_plug( plug ), m_destinationPlug( destinationPlug ? destinationPlug : plug ), m_parent( m_threadState->m_process ), m_collaboration( m_parent ? m_parent->m_collaboration : nullptr )
 {
 	IECore::Canceller::check( context()->canceller() );
 	m_threadState->m_process = this;
@@ -237,7 +237,7 @@ bool Process::forceMonitoringInternal( const ThreadState &s, const Plug *plug, c
 //////////////////////////////////////////////////////////////////////////
 
 ProcessException::ProcessException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType, const std::exception_ptr &exception, const char *what )
-	:	std::runtime_error( formatWhat( plug.get(), what ) ), m_plug( plug ), m_context( new Context( *context ) ), m_processType( processType ), m_exception( exception )
+	: std::runtime_error( formatWhat( plug.get(), what ) ), m_plug( plug ), m_context( new Context( *context ) ), m_processType( processType ), m_exception( exception )
 {
 }
 

@@ -82,7 +82,7 @@ struct SurfaceTextureCacheGetterKey
 	}
 
 	SurfaceTextureCacheGetterKey( const IECoreScene::ShaderNetwork::Parameter &out, const IECoreScene::ShaderNetwork *shaderNetwork, const Imath::V2i &resolution )
-		:	output( out ), shaderNetwork( shaderNetwork ), resolution( resolution )
+		: output( out ), shaderNetwork( shaderNetwork ), resolution( resolution )
 	{
 		shaderNetwork->hash( hash );
 		hash.append( resolution.x );
@@ -91,7 +91,7 @@ struct SurfaceTextureCacheGetterKey
 		hash.append( output.name );
 	}
 
-	operator const IECore::MurmurHash & () const
+	operator const IECore::MurmurHash &() const
 	{
 		return hash;
 	}
@@ -193,7 +193,7 @@ IECoreGL::RenderablePtr iesVisualisation( const std::string &filename )
 	const unsigned int h = 32;
 
 	float maxIntensity = 0.0f;
-	std::unique_ptr<float[]> iesIntensities( new float[ w * h ] );
+	std::unique_ptr<float[]> iesIntensities( new float[w * h] );
 
 	if( !AiLightIESLoad( f, w, h, &maxIntensity, iesIntensities.get() ) )
 	{
@@ -207,18 +207,14 @@ IECoreGL::RenderablePtr iesVisualisation( const std::string &filename )
 	{
 		for( unsigned int y = 0; y < h; ++y )
 		{
-			const float theta = 2.0f * M_PI * ( float(x) / w );
-			const float phi = M_PI * ( float(y) / h );
+			const float theta = 2.0f * M_PI * ( float( x ) / w );
+			const float phi = M_PI * ( float( y ) / h );
 			const unsigned int i = y * w + x;
 
 			if( iesIntensities[i] > 0.0f )
 			{
 				p.push_back(
-					iesIntensities[i] * V3f(
-						sin( phi ) * cos( theta ),
-						sin( phi ) * sin( theta ),
-						cos( phi )
-					)
+					iesIntensities[i] * V3f( sin( phi ) * cos( theta ), sin( phi ) * sin( theta ), cos( phi ) )
 				);
 			}
 		}
@@ -236,19 +232,18 @@ IECoreGL::RenderablePtr iesVisualisation( const std::string &filename )
 class ArnoldLightVisualiser : public GafferSceneUI::StandardLightVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( ArnoldLightVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( ArnoldLightVisualiser )
 
-		ArnoldLightVisualiser();
-		~ArnoldLightVisualiser() override;
+	ArnoldLightVisualiser();
+	~ArnoldLightVisualiser() override;
 
-		Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	private :
+private:
 
-		static LightVisualiser::LightVisualiserDescription<ArnoldLightVisualiser> g_description;
-
+	static LightVisualiser::LightVisualiserDescription<ArnoldLightVisualiser> g_description;
 };
 
 IE_CORE_DECLAREPTR( ArnoldLightVisualiser )
@@ -292,4 +287,4 @@ Visualisations ArnoldLightVisualiser::visualise( const IECore::InternedString &a
 	return v;
 }
 
-}
+} // namespace

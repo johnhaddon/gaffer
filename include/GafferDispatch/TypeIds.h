@@ -49,7 +49,6 @@ enum TypeId
 	FrameMaskTypeId = 118804,
 
 	LastTypeId = 118999
-
 };
 
 } // namespace GafferDispatch

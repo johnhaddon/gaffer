@@ -46,26 +46,25 @@ namespace GafferScene
 class GAFFERSCENE_API ShuffleAttributes : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit ShuffleAttributes( const std::string &name=defaultName<ShuffleAttributes>() );
-		~ShuffleAttributes() override;
+	explicit ShuffleAttributes( const std::string &name = defaultName<ShuffleAttributes>() );
+	~ShuffleAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ShuffleAttributes, ShuffleAttributesTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ShuffleAttributes, ShuffleAttributesTypeId, AttributeProcessor );
 
-		Gaffer::ShufflesPlug *shufflesPlug();
-		const Gaffer::ShufflesPlug *shufflesPlug() const;
+	Gaffer::ShufflesPlug *shufflesPlug();
+	const Gaffer::ShufflesPlug *shufflesPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ShuffleAttributes )

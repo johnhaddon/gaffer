@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteImageMetadata );
 size_t DeleteImageMetadata::g_firstPlugIndex = 0;
 
 DeleteImageMetadata::DeleteImageMetadata( const std::string &name )
-	:	MetadataProcessor( name )
+	: MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );
@@ -86,7 +86,7 @@ void DeleteImageMetadata::affects( const Gaffer::Plug *input, AffectedPlugsConta
 {
 	MetadataProcessor::affects( input, outputs );
 
-	if ( input == namesPlug() || input == invertNamesPlug() )
+	if( input == namesPlug() || input == invertNamesPlug() )
 	{
 		outputs.push_back( outPlug()->metadataPlug() );
 	}
@@ -107,7 +107,7 @@ IECore::ConstCompoundDataPtr DeleteImageMetadata::computeProcessedMetadata( cons
 
 	const std::string names = namesPlug()->getValue();
 	const bool invert = invertNamesPlug()->getValue();
-	if ( !invert && !names.size() )
+	if( !invert && !names.size() )
 	{
 		return inputMetadata;
 	}

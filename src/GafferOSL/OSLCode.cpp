@@ -207,23 +207,22 @@ namespace
 class ScopedDirectory : boost::noncopyable
 {
 
-	public :
+public:
 
-		ScopedDirectory( const std::filesystem::path &p )
-			:	m_path( p )
-		{
-			std::filesystem::create_directories( m_path );
-		}
+	ScopedDirectory( const std::filesystem::path &p )
+		: m_path( p )
+	{
+		std::filesystem::create_directories( m_path );
+	}
 
-		~ScopedDirectory()
-		{
-			std::filesystem::remove_all( m_path );
-		}
+	~ScopedDirectory()
+	{
+		std::filesystem::remove_all( m_path );
+	}
 
-	private :
+private:
 
-		std::filesystem::path m_path;
-
+	std::filesystem::path m_path;
 };
 
 std::filesystem::path compile( const std::string &shaderName, const std::string &shaderSource )
@@ -356,7 +355,7 @@ GAFFER_NODE_DEFINE_TYPE( OSLCode );
 size_t OSLCode::g_firstPlugIndex;
 
 OSLCode::OSLCode( const std::string &name )
-	:	OSLShader( name )
+	: OSLShader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

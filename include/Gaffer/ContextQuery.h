@@ -50,54 +50,57 @@ namespace Gaffer
 
 class GAFFER_API ContextQuery : public Gaffer::ComputeNode
 {
-	public:
-		explicit ContextQuery( const std::string &name = defaultName<ContextQuery>() );
-		~ContextQuery() override;
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextQuery, ContextQueryTypeId, Gaffer::ComputeNode );
+	explicit ContextQuery( const std::string &name = defaultName<ContextQuery>() );
+	~ContextQuery() override;
 
-		Gaffer::ArrayPlug *queriesPlug();
-		const Gaffer::ArrayPlug *queriesPlug() const;
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextQuery, ContextQueryTypeId, Gaffer::ComputeNode );
 
-		Gaffer::ArrayPlug *outPlug();
-		const Gaffer::ArrayPlug *outPlug() const;
+	Gaffer::ArrayPlug *queriesPlug();
+	const Gaffer::ArrayPlug *queriesPlug() const;
 
-		/// Adds a query for variable, with a type and default value specified by plug.
-		/// The returned NameValuePlug is parented to queriesPlug() and may be edited
-		/// subsequently to modify the variable name and default. Corresponding children
-		/// are added to existsPlug() and valuePlug() to provide the output from the query.
-		Gaffer::NameValuePlug *addQuery(
-			const Gaffer::ValuePlug *plug,
-			const std::string &variable = ""
-		);
-		/// Removes a query. Throws an Exception if the query or corresponding children
-		/// of `valuesPlug()` and `existsPlug()` can not be deleted.
-		void removeQuery( Gaffer::NameValuePlug *plug );
+	Gaffer::ArrayPlug *outPlug();
+	const Gaffer::ArrayPlug *outPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	/// Adds a query for variable, with a type and default value specified by plug.
+	/// The returned NameValuePlug is parented to queriesPlug() and may be edited
+	/// subsequently to modify the variable name and default. Corresponding children
+	/// are added to existsPlug() and valuePlug() to provide the output from the query.
+	Gaffer::NameValuePlug *addQuery(
+		const Gaffer::ValuePlug *plug,
+		const std::string &variable = ""
+	);
+	/// Removes a query. Throws an Exception if the query or corresponding children
+	/// of `valuesPlug()` and `existsPlug()` can not be deleted.
+	void removeQuery( Gaffer::NameValuePlug *plug );
 
-		/// Returns the child of `out` corresponding to the specified query plug.
-		/// Throws an exception if the query does not exist or the corresponding output
-		const Gaffer::ValuePlug *outPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug ) const;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		/// Returns the child of `query` corresponding to the `outputPlug`.
-		/// Throws an exception if there is no corresponding query or the result is the wrong type.
-		const Gaffer::NameValuePlug *queryPlugFromOutPlug( const Gaffer::ValuePlug *outputPlug ) const;
+	/// Returns the child of `out` corresponding to the specified query plug.
+	/// Throws an exception if the query does not exist or the corresponding output
+	const Gaffer::ValuePlug *outPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug ) const;
 
-		/// Returns the `exists`, `value` or child of `out` corresponding to the specified
-		/// query plug. Throws an exception if the query does not exist or the corresponding output
-		/// plug does not exist or is the wrong type.
-		Gaffer::BoolPlug *existsPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
-		Gaffer::ValuePlug *valuePlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
+	/// Returns the child of `query` corresponding to the `outputPlug`.
+	/// Throws an exception if there is no corresponding query or the result is the wrong type.
+	const Gaffer::NameValuePlug *queryPlugFromOutPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-	protected:
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context) const override;
+	/// Returns the `exists`, `value` or child of `out` corresponding to the specified
+	/// query plug. Throws an exception if the query does not exist or the corresponding output
+	/// plug does not exist or is the wrong type.
+	Gaffer::BoolPlug *existsPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
+	Gaffer::ValuePlug *valuePlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
 
-	private:
-		static size_t g_firstPlugIndex;
+protected:
+
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+
+private:
+
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ContextQuery );
 
-}  // namespace Gaffer
+} // namespace Gaffer

@@ -49,30 +49,29 @@ namespace IECoreRenderMan
 class Object : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public :
+public:
 
-		Object( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session );
-		~Object() override;
+	Object( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session );
+	~Object() override;
 
-		void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
-		bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
-		void assignID( uint32_t id ) override;
-		void assignInstanceID( uint32_t id ) override;
+	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
+	bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
+	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
+	void assignID( uint32_t id ) override;
+	void assignInstanceID( uint32_t id ) override;
 
-	protected :
+protected:
 
-		const Session *m_session;
-		LightLinker *m_lightLinker;
-		riley::GeometryInstanceId m_geometryInstance;
-		/// Used to keep material etc alive as long as we need it.
-		ConstAttributesPtr m_attributes;
-		/// Used to keep geometry prototype alive as long as we need it.
-		ConstGeometryPrototypePtr m_geometryPrototype;
-		RtParamList m_extraAttributes;
-		IECoreScenePreview::Renderer::ConstObjectSetPtr m_linkedLights;
-		IECoreScenePreview::Renderer::ConstObjectSetPtr m_shadowedLights;
-
+	const Session *m_session;
+	LightLinker *m_lightLinker;
+	riley::GeometryInstanceId m_geometryInstance;
+	/// Used to keep material etc alive as long as we need it.
+	ConstAttributesPtr m_attributes;
+	/// Used to keep geometry prototype alive as long as we need it.
+	ConstGeometryPrototypePtr m_geometryPrototype;
+	RtParamList m_extraAttributes;
+	IECoreScenePreview::Renderer::ConstObjectSetPtr m_linkedLights;
+	IECoreScenePreview::Renderer::ConstObjectSetPtr m_shadowedLights;
 };
 
 } // namespace IECoreRenderMan

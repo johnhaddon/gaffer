@@ -41,7 +41,7 @@ using namespace GafferCycles;
 IE_CORE_DEFINERUNTIMETYPED( CyclesBackground );
 
 CyclesBackground::CyclesBackground( const std::string &name )
-	:	GlobalShader( name )
+	: GlobalShader( name )
 {
 }
 

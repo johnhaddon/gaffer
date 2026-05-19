@@ -179,7 +179,8 @@ IECore::PathMatcher ancestorPaths( const IECore::PathMatcher &paths )
 	{
 		if( path.size() > 0 )
 		{
-			auto parentPath = path; parentPath.pop_back();
+			auto parentPath = path;
+			parentPath.pop_back();
 			ancestorPaths.addPath( parentPath );
 		}
 	}
@@ -189,8 +190,7 @@ IECore::PathMatcher ancestorPaths( const IECore::PathMatcher &paths )
 
 IECorePreview::LRUCache<std::string, QPixmap> g_pixmapCache(
 	// Getter
-	[] ( const std::string &fileName, size_t &cost, const IECore::Canceller *canceller ) -> QPixmap
-	{
+	[]( const std::string &fileName, size_t &cost, const IECore::Canceller *canceller ) -> QPixmap {
 		cost = 1;
 
 		// Contrived code path to allow us to use QFileIconProvider for
@@ -230,7 +230,7 @@ QString toString( T v, typename std::enable_if<std::is_floating_point_v<T> || st
 			result.truncate( i );
 			return result;
 		}
-		else if ( c != '0' )
+		else if( c != '0' )
 		{
 			result.truncate( i + 1 );
 			return result;
@@ -305,11 +305,10 @@ std::optional<QString> vectorDataToString( const IECore::Data *data )
 {
 	return IECore::dispatch(
 
-		data, [] ( const auto *typedData ) -> std::optional<QString> {
-
+		data, []( const auto *typedData ) -> std::optional<QString> {
 			using DataType = typename std::remove_pointer_t<decltype( typedData )>;
 
-			if constexpr ( IECore::TypeTraits::IsVectorTypedData<DataType>::value )
+			if constexpr( IECore::TypeTraits::IsVectorTypedData<DataType>::value )
 			{
 				QString result;
 				for( const auto &v : typedData->readable() )
@@ -333,7 +332,6 @@ std::optional<QString> vectorDataToString( const IECore::Data *data )
 			}
 
 			return std::nullopt;
-
 		}
 
 	);
@@ -443,7 +441,7 @@ QVariant dataToVariant( const IECore::Data *value, int role )
 		case IECore::UIntDataTypeId :
 			return static_cast<const IECore::UIntData *>( value )->readable();
 		case IECore::UInt64DataTypeId :
-			return (quint64)static_cast<const IECore::UInt64Data *>( value )->readable();
+			return ( quint64 ) static_cast<const IECore::UInt64Data *>( value )->readable();
 		case IECore::FloatDataTypeId :
 			return toString( static_cast<const IECore::FloatData *>( value )->readable() );
 		case IECore::DoubleDataTypeId :
@@ -468,22 +466,19 @@ QVariant dataToVariant( const IECore::Data *value, int role )
 			return toString( static_cast<const IECore::M33fData *>( value )->readable() );
 		case IECore::M44fDataTypeId :
 			return toString( static_cast<const IECore::M44fData *>( value )->readable() );
-		case IECore::DateTimeDataTypeId :
-		{
+		case IECore::DateTimeDataTypeId : {
 			const IECore::DateTimeData *d = static_cast<const IECore::DateTimeData *>( value );
 			time_t t = ( d->readable() - from_time_t( 0 ) ).total_seconds();
 			return QVariant( QDateTime::fromSecsSinceEpoch( t ) );
 		}
 		case IECore::RampffDataTypeId :
-		case IECore::RampfColor3fDataTypeId :
-		{
+		case IECore::RampfColor3fDataTypeId : {
 			// Pass through directly for use in PathListingWidgetItemDelegate.
 			QVariant v;
 			v.setValue( IECore::ConstDataPtr( value ) );
 			return v;
 		}
-		default :
-		{
+		default : {
 			if( auto s = vectorDataToString( value ) )
 			{
 				return *s;
@@ -515,13 +510,13 @@ struct CellVariants
 	static constexpr Qt::ItemDataRole SortRole = Qt::UserRole;
 
 	CellVariants( const GafferUI::PathColumn::CellData &cellData )
-		:	m_display( dataToVariant( cellData.value.get(), Qt::DisplayRole ) ),
-			m_checkState( dataToVariant( cellData.value.get(), Qt::CheckStateRole ) ),
-			m_decoration( dataToVariant( cellData.icon.get(), Qt::DecorationRole ) ),
-			m_background( dataToVariant( cellData.background.get(), Qt::BackgroundRole ) ),
-			m_toolTip( dataToVariant( cellData.toolTip.get(), Qt::ToolTipRole ) ),
-			m_sort( dataToVariant( cellData.sortValue.get(), SortRole ) ),
-			m_foreground( dataToVariant( cellData.foreground.get(), Qt::ForegroundRole ) )
+		: m_display( dataToVariant( cellData.value.get(), Qt::DisplayRole ) ),
+		  m_checkState( dataToVariant( cellData.value.get(), Qt::CheckStateRole ) ),
+		  m_decoration( dataToVariant( cellData.icon.get(), Qt::DecorationRole ) ),
+		  m_background( dataToVariant( cellData.background.get(), Qt::BackgroundRole ) ),
+		  m_toolTip( dataToVariant( cellData.toolTip.get(), Qt::ToolTipRole ) ),
+		  m_sort( dataToVariant( cellData.sortValue.get(), SortRole ) ),
+		  m_foreground( dataToVariant( cellData.foreground.get(), Qt::ForegroundRole ) )
 	{
 		if( !m_sort.isValid() )
 		{
@@ -531,7 +526,7 @@ struct CellVariants
 
 	CellVariants() = default;
 	CellVariants( const CellVariants &other ) = default;
-	CellVariants& operator=( const CellVariants &rhs ) = default;
+	CellVariants &operator = ( const CellVariants &rhs ) = default;
 
 	QVariant variant( int qtRole ) const
 	{
@@ -556,28 +551,25 @@ struct CellVariants
 		}
 	}
 
-	bool operator== ( const CellVariants &rhs ) const
+	bool operator == ( const CellVariants &rhs ) const
 	{
-		return
-			m_display == rhs.m_display &&
+		return m_display == rhs.m_display &&
 			m_checkState == rhs.m_checkState &&
 			m_decoration == rhs.m_decoration &&
 			m_background == rhs.m_background &&
 			m_toolTip == rhs.m_toolTip &&
-			m_foreground == rhs.m_foreground
-		;
+			m_foreground == rhs.m_foreground;
 	}
 
-	private :
+private:
 
-		QVariant m_display;
-		QVariant m_checkState;
-		QVariant m_decoration;
-		QVariant m_background;
-		QVariant m_toolTip;
-		QVariant m_sort;
-		QVariant m_foreground;
-
+	QVariant m_display;
+	QVariant m_checkState;
+	QVariant m_decoration;
+	QVariant m_background;
+	QVariant m_toolTip;
+	QVariant m_sort;
+	QVariant m_foreground;
 };
 
 IECore::InternedString g_nameProperty( "name" );
@@ -612,1593 +604,1586 @@ class PathModel : public QAbstractItemModel
 
 	Q_OBJECT
 
-	public :
+public:
 
-		PathModel( QTreeView *parent )
-			:	QAbstractItemModel( parent ),
-				m_headerDataState( State::Unrequested ),
-				m_rootItem( new Item( IECore::InternedString(), nullptr ) ),
-				m_flat( true ),
-				m_sortColumn( -1 ),
-				m_sortOrder( Qt::AscendingOrder ),
-				m_modifyingTreeViewExpansion( false ),
-				m_updateScheduled( false ),
-				m_blockUpdateFinished( false )
+	PathModel( QTreeView *parent )
+		: QAbstractItemModel( parent ),
+		  m_headerDataState( State::Unrequested ),
+		  m_rootItem( new Item( IECore::InternedString(), nullptr ) ),
+		  m_flat( true ),
+		  m_sortColumn( -1 ),
+		  m_sortOrder( Qt::AscendingOrder ),
+		  m_modifyingTreeViewExpansion( false ),
+		  m_updateScheduled( false ),
+		  m_blockUpdateFinished( false )
+	{
+		connect( parent, &QTreeView::expanded, this, &PathModel::treeViewExpanded );
+		connect( parent, &QTreeView::collapsed, this, &PathModel::treeViewCollapsed );
+		parent->installEventFilter( this );
+		parent->setModel( this );
+	}
+
+	~PathModel() override
+	{
+		// Cancel update task before the things it relies on are destroyed.
+		// No need to flush pending edits, because Qt won't deliver the events
+		// to us after we're destructed anyway.
+		cancelUpdate( /* flushPendingEdits = */ false );
+	}
+
+	// Selection is stored as a single `IECore::PathMatcher` per column, allowing
+	// per-cell selections. An empty selection is represented by a vector of empty
+	// `PathMatcher()` equal in size to the number of columns.
+	using Selection = std::vector<IECore::PathMatcher>;
+
+	///////////////////////////////////////////////////////////////////
+	// Our public methods - these don't mean anything to Qt
+	///////////////////////////////////////////////////////////////////
+
+	void setColumns( const std::vector<GafferUI::PathColumnPtr> columns )
+	{
+		// Cancel update and flush edit queue before we destroy
+		// the items they reference.
+		cancelUpdate();
+
+		// Connect to signals on new columns so we can update when they are
+		// changed.
+		m_columnChangedConnections.clear();
+		for( const auto &c : columns )
 		{
-			connect( parent, &QTreeView::expanded, this, &PathModel::treeViewExpanded );
-			connect( parent, &QTreeView::collapsed, this, &PathModel::treeViewCollapsed );
-			parent->installEventFilter( this );
-			parent->setModel( this );
+			m_columnChangedConnections.push_back(
+				c->changedSignal().connect( boost::bind( &PathModel::columnChanged, this ) )
+			);
 		}
 
-		~PathModel() override
+		// Deal with the simple case where we are being initialised for the
+		// first time.
+		if( !m_columns.size() && !m_rootPath && !m_selection.size() )
 		{
-			// Cancel update task before the things it relies on are destroyed.
-			// No need to flush pending edits, because Qt won't deliver the events
-			// to us after we're destructed anyway.
-			cancelUpdate( /* flushPendingEdits = */ false );
-		}
-
-		// Selection is stored as a single `IECore::PathMatcher` per column, allowing
-		// per-cell selections. An empty selection is represented by a vector of empty
-		// `PathMatcher()` equal in size to the number of columns.
-		using Selection = std::vector<IECore::PathMatcher>;
-
-		///////////////////////////////////////////////////////////////////
-		// Our public methods - these don't mean anything to Qt
-		///////////////////////////////////////////////////////////////////
-
-		void setColumns( const std::vector<GafferUI::PathColumnPtr> columns )
-		{
-			// Cancel update and flush edit queue before we destroy
-			// the items they reference.
-			cancelUpdate();
-
-			// Connect to signals on new columns so we can update when they are
-			// changed.
-			m_columnChangedConnections.clear();
-			for( const auto &c : columns )
-			{
-				m_columnChangedConnections.push_back(
-					c->changedSignal().connect( boost::bind( &PathModel::columnChanged, this ) )
-				);
-			}
-
-			// Deal with the simple case where we are being initialised for the
-			// first time.
-			if( !m_columns.size() && !m_rootPath && !m_selection.size() )
-			{
-				m_columns = columns;
-				m_selection.resize( m_columns.size() );
-				return;
-			}
-
-			// Build mapping from old columns to new columns.
-			std::vector<int> columnMapping( columns.size(), -1 );
-			std::vector<int> columnForwardMapping( m_columns.size(), -1 );
-			for( size_t newColumnIndex = 0; newColumnIndex < columns.size(); ++newColumnIndex )
-			{
-				auto it = std::find( m_columns.begin(), m_columns.end(), columns[newColumnIndex] );
-				if( it != m_columns.end() )
-				{
-					const size_t oldColumnIndex = it - m_columns.begin();
-					columnForwardMapping[oldColumnIndex] = newColumnIndex;
-					columnMapping[newColumnIndex] = oldColumnIndex;
-				}
-			}
-
-			// Dirty state and assign `m_columns`. We need to do this inside an
-			// `insert/removeColumn()` block so Qt knows what is going on.
-
-			auto rootIndex = indexForPath( m_rootPath->names() );
-			decltype( &PathModel::endInsertColumns ) endFunction = nullptr;
-			if( columns.size() > m_columns.size() )
-			{
-				beginInsertColumns( rootIndex, m_columns.size(), columns.size() - 1 );
-				endFunction = &PathModel::endInsertColumns;
-			}
-			else if( columns.size() < m_columns.size() )
-			{
-				beginRemoveColumns( rootIndex, columns.size(), m_columns.size() - 1 );
-				endFunction = &PathModel::endRemoveColumns;
-			}
-
-			m_rootItem->dirty( /* dirtyChildItems = */ false, /* dirtyData = */ true, &columnMapping );
-			shuffle( m_headerData, columnMapping );
-
-			QModelIndexList changedPersistentIndexesFrom = persistentIndexList();
-			QModelIndexList	changedPersistentIndexesTo; changedPersistentIndexesTo.reserve( changedPersistentIndexesFrom.size() );
-			for( const auto &index : changedPersistentIndexesFrom )
-			{
-				if( columnForwardMapping[index.column()] != -1 )
-				{
-					changedPersistentIndexesTo.push_back(
-						createIndex( index.row(), columnForwardMapping[index.column()], index.internalPointer() )
-					);
-				}
-				else
-				{
-					changedPersistentIndexesTo.push_back( QModelIndex() );
-				}
-			}
-			changePersistentIndexList( changedPersistentIndexesFrom, changedPersistentIndexesTo );
-
-			m_headerDataState = State::Dirty;
 			m_columns = columns;
+			m_selection.resize( m_columns.size() );
+			return;
+		}
 
-			if( endFunction )
+		// Build mapping from old columns to new columns.
+		std::vector<int> columnMapping( columns.size(), -1 );
+		std::vector<int> columnForwardMapping( m_columns.size(), -1 );
+		for( size_t newColumnIndex = 0; newColumnIndex < columns.size(); ++newColumnIndex )
+		{
+			auto it = std::find( m_columns.begin(), m_columns.end(), columns[newColumnIndex] );
+			if( it != m_columns.end() )
 			{
-				std::invoke( endFunction, this );
+				const size_t oldColumnIndex = it - m_columns.begin();
+				columnForwardMapping[oldColumnIndex] = newColumnIndex;
+				columnMapping[newColumnIndex] = oldColumnIndex;
 			}
-
-			// Schedule update to process the dirtied items.
-			scheduleUpdate();
-
-			// Update selection. We do this last so observers see our
-			// final state in `selectionChangedSignal()`.
-			Selection newSelection = m_selection;
-			shuffle( newSelection, columnMapping );
-			setSelection( newSelection, /* scrollToFirst = */ false );
 		}
 
-		const std::vector<GafferUI::PathColumnPtr> &getColumns() const
+		// Dirty state and assign `m_columns`. We need to do this inside an
+		// `insert/removeColumn()` block so Qt knows what is going on.
+
+		auto rootIndex = indexForPath( m_rootPath->names() );
+		decltype( &PathModel::endInsertColumns ) endFunction = nullptr;
+		if( columns.size() > m_columns.size() )
 		{
-			return m_columns;
+			beginInsertColumns( rootIndex, m_columns.size(), columns.size() - 1 );
+			endFunction = &PathModel::endInsertColumns;
+		}
+		else if( columns.size() < m_columns.size() )
+		{
+			beginRemoveColumns( rootIndex, columns.size(), m_columns.size() - 1 );
+			endFunction = &PathModel::endRemoveColumns;
 		}
 
-		Path *getRoot()
-		{
-			return m_rootPath.get();
-		}
+		m_rootItem->dirty( /* dirtyChildItems = */ false, /* dirtyData = */ true, &columnMapping );
+		shuffle( m_headerData, columnMapping );
 
-		void setRoot( PathPtr root )
+		QModelIndexList changedPersistentIndexesFrom = persistentIndexList();
+		QModelIndexList changedPersistentIndexesTo;
+		changedPersistentIndexesTo.reserve( changedPersistentIndexesFrom.size() );
+		for( const auto &index : changedPersistentIndexesFrom )
 		{
-			if( m_rootPath && m_rootPath->names() != root->names() )
+			if( columnForwardMapping[index.column()] != -1 )
 			{
-				// We're changing directory. Our current selection won't make sense
-				// relative to the new directory, so we clear it.
-				setSelection( Selection( getColumns().size(), IECore::PathMatcher() ) );
-			}
-
-			// Cancel update and flush edit queue before we dirty
-			// the items they reference.
-			cancelUpdate();
-			m_rootPath = root;
-			m_rootItem->dirty();
-			m_headerDataState = State::Dirty;
-			m_recursiveExpansionPath.reset();
-			// Schedule update to process the dirtied items.
-			scheduleUpdate();
-		}
-
-		void setFlat( bool flat )
-		{
-			if( flat == m_flat )
-			{
-				return;
-			}
-
-			cancelUpdate();
-			beginResetModel();
-			m_flat = flat;
-			m_recursiveExpansionPath.reset();
-			endResetModel();
-		}
-
-		bool getFlat() const
-		{
-			return m_flat;
-		}
-
-		// In Qt, the expanded indices are a property of the View rather than
-		// the Model. This is perfectly logical, but it's tricky for an
-		// asynchronous model, where the indices you want to expand may not
-		// exist at the time you want to expand them. So we treat expansion as a
-		// property of our model, allowing us to factor it in to our background
-		// update logic. Our "source of truth" is the PathMatcher, not
-		// `QTreeView::isExpanded()`.
-		void setExpansion( const IECore::PathMatcher &expandedPaths )
-		{
-			cancelUpdate();
-
-			m_expandedPaths = IECore::PathMatcher( expandedPaths );
-			m_recursiveExpansionPath.reset();
-			m_rootItem->dirtyExpansion();
-			expansionChanged();
-
-			scheduleUpdate();
-		}
-
-		const IECore::PathMatcher &getExpansion() const
-		{
-			return m_expandedPaths;
-		}
-
-		void scrollToFirst( const IECore::PathMatcher &paths )
-		{
-			cancelUpdate();
-
-			if( paths.isEmpty() )
-			{
-				m_scrollToCandidates.reset();
-				return;
-			}
-
-			m_scrollToCandidates = IECore::PathMatcher( paths );
-			m_rootItem->dirtyExpansion();
-
-			scheduleUpdate();
-		}
-
-		// See comments for `setExpansion()`. The PathMatcher vector is our source of
-		// truth, and we don't even use the QItemSelectionModel.
-		void setSelection( const Selection &selectedPaths, bool scrollToFirst = true )
-		{
-			cancelUpdate();
-
-			IECore::PathMatcher mergedPaths;
-			for( auto &p : selectedPaths )
-			{
-				mergedPaths.addPaths( p );
-			}
-
-			// Copy, so can't be modified without `setSelection()` call.
-			m_selection = Selection( selectedPaths );
-
-			if( scrollToFirst )
-			{
-				// Only scroll to previously unselected paths.
-				IECore::PathMatcher scrollToCandidates = mergedPaths;
-				scrollToCandidates.removePaths( m_selectedPaths );
-				PathModel::scrollToFirst( scrollToCandidates );
+				changedPersistentIndexesTo.push_back(
+					createIndex( index.row(), columnForwardMapping[index.column()], index.internalPointer() )
+				);
 			}
 			else
 			{
-				m_scrollToCandidates.reset();
+				changedPersistentIndexesTo.push_back( QModelIndex() );
 			}
+		}
+		changePersistentIndexList( changedPersistentIndexesFrom, changedPersistentIndexesTo );
 
-			m_selectedPaths = mergedPaths;
+		m_headerDataState = State::Dirty;
+		m_columns = columns;
 
-			selectionChanged();
+		if( endFunction )
+		{
+			std::invoke( endFunction, this );
 		}
 
-		const Selection &getSelection() const
+		// Schedule update to process the dirtied items.
+		scheduleUpdate();
+
+		// Update selection. We do this last so observers see our
+		// final state in `selectionChangedSignal()`.
+		Selection newSelection = m_selection;
+		shuffle( newSelection, columnMapping );
+		setSelection( newSelection, /* scrollToFirst = */ false );
+	}
+
+	const std::vector<GafferUI::PathColumnPtr> &getColumns() const
+	{
+		return m_columns;
+	}
+
+	Path *getRoot()
+	{
+		return m_rootPath.get();
+	}
+
+	void setRoot( PathPtr root )
+	{
+		if( m_rootPath && m_rootPath->names() != root->names() )
 		{
-			return m_selection;
+			// We're changing directory. Our current selection won't make sense
+			// relative to the new directory, so we clear it.
+			setSelection( Selection( getColumns().size(), IECore::PathMatcher() ) );
 		}
 
-		std::vector<std::string> visualOrder( const IECore::PathMatcher &paths ) const
+		// Cancel update and flush edit queue before we dirty
+		// the items they reference.
+		cancelUpdate();
+		m_rootPath = root;
+		m_rootItem->dirty();
+		m_headerDataState = State::Dirty;
+		m_recursiveExpansionPath.reset();
+		// Schedule update to process the dirtied items.
+		scheduleUpdate();
+	}
+
+	void setFlat( bool flat )
+	{
+		if( flat == m_flat )
 		{
-			std::vector<std::string> result;
-			const auto indices = indicesForPaths( paths );
-			for( auto &i : indices )
+			return;
+		}
+
+		cancelUpdate();
+		beginResetModel();
+		m_flat = flat;
+		m_recursiveExpansionPath.reset();
+		endResetModel();
+	}
+
+	bool getFlat() const
+	{
+		return m_flat;
+	}
+
+	// In Qt, the expanded indices are a property of the View rather than
+	// the Model. This is perfectly logical, but it's tricky for an
+	// asynchronous model, where the indices you want to expand may not
+	// exist at the time you want to expand them. So we treat expansion as a
+	// property of our model, allowing us to factor it in to our background
+	// update logic. Our "source of truth" is the PathMatcher, not
+	// `QTreeView::isExpanded()`.
+	void setExpansion( const IECore::PathMatcher &expandedPaths )
+	{
+		cancelUpdate();
+
+		m_expandedPaths = IECore::PathMatcher( expandedPaths );
+		m_recursiveExpansionPath.reset();
+		m_rootItem->dirtyExpansion();
+		expansionChanged();
+
+		scheduleUpdate();
+	}
+
+	const IECore::PathMatcher &getExpansion() const
+	{
+		return m_expandedPaths;
+	}
+
+	void scrollToFirst( const IECore::PathMatcher &paths )
+	{
+		cancelUpdate();
+
+		if( paths.isEmpty() )
+		{
+			m_scrollToCandidates.reset();
+			return;
+		}
+
+		m_scrollToCandidates = IECore::PathMatcher( paths );
+		m_rootItem->dirtyExpansion();
+
+		scheduleUpdate();
+	}
+
+	// See comments for `setExpansion()`. The PathMatcher vector is our source of
+	// truth, and we don't even use the QItemSelectionModel.
+	void setSelection( const Selection &selectedPaths, bool scrollToFirst = true )
+	{
+		cancelUpdate();
+
+		IECore::PathMatcher mergedPaths;
+		for( auto &p : selectedPaths )
+		{
+			mergedPaths.addPaths( p );
+		}
+
+		// Copy, so can't be modified without `setSelection()` call.
+		m_selection = Selection( selectedPaths );
+
+		if( scrollToFirst )
+		{
+			// Only scroll to previously unselected paths.
+			IECore::PathMatcher scrollToCandidates = mergedPaths;
+			scrollToCandidates.removePaths( m_selectedPaths );
+			PathModel::scrollToFirst( scrollToCandidates );
+		}
+		else
+		{
+			m_scrollToCandidates.reset();
+		}
+
+		m_selectedPaths = mergedPaths;
+
+		selectionChanged();
+	}
+
+	const Selection &getSelection() const
+	{
+		return m_selection;
+	}
+
+	std::vector<std::string> visualOrder( const IECore::PathMatcher &paths ) const
+	{
+		std::vector<std::string> result;
+		const auto indices = indicesForPaths( paths );
+		for( auto &i : indices )
+		{
+			if( const auto path = pathForIndex( i ) )
 			{
-				if( const auto path = pathForIndex( i ) )
+				result.push_back( path.get()->string() );
+			}
+		}
+
+		return result;
+	}
+
+	void attachTester()
+	{
+		if( !m_tester )
+		{
+			m_tester = std::make_unique<QAbstractItemModelTester>(
+				this,
+				// Outputs messages that are turned into test failures by
+				// the handler installed by `GafferUI.TestCase.setUp()`.
+				QAbstractItemModelTester::FailureReportingMode::Warning
+			);
+		}
+	}
+
+	Path::Names namesForIndex( const QModelIndex &index ) const
+	{
+		if( !index.isValid() || !m_rootPath )
+		{
+			return Path::Names();
+		}
+
+		std::vector<IECore::InternedString> result;
+		Item *item = static_cast<Item *>( index.internalPointer() );
+		while( item->parent() )
+		{
+			result.push_back( item->name() );
+			item = item->parent();
+		}
+		std::reverse( result.begin(), result.end() );
+		result.insert( result.begin(), m_rootPath->names().begin(), m_rootPath->names().end() );
+		return result;
+	}
+
+	PathPtr pathForIndex( const QModelIndex &index ) const
+	{
+		if( !index.isValid() || !m_rootPath )
+		{
+			return nullptr;
+		}
+		PathPtr result = m_rootPath->copy();
+		std::vector<IECore::InternedString> relativePath;
+		Item *item = static_cast<Item *>( index.internalPointer() );
+		while( item->parent() )
+		{
+			relativePath.push_back( item->name() );
+			item = item->parent();
+		}
+		for( auto it = relativePath.rbegin(); it != relativePath.rend(); ++it )
+		{
+			result->append( *it );
+		}
+		return result;
+	}
+
+	QModelIndex indexForPath( const std::vector<IECore::InternedString> &path ) const
+	{
+		if( !m_rootPath )
+		{
+			return QModelIndex();
+		}
+
+		if( path.size() <= m_rootPath->names().size() )
+		{
+			return QModelIndex();
+		}
+
+		if( !equal( m_rootPath->names().begin(), m_rootPath->names().end(), path.begin() ) )
+		{
+			return QModelIndex();
+		}
+
+		QModelIndex result;
+		Item *item = m_rootItem.get();
+		for( size_t i = m_rootPath->names().size(); i < path.size(); ++i )
+		{
+			bool foundNextItem = false;
+			const Item::ChildContainer &childItems = item->childItems( this );
+			for( auto it = childItems.begin(), eIt = childItems.end(); it != eIt; ++it )
+			{
+				if( ( *it )->name() == path[i] )
 				{
-					result.push_back( path.get()->string() );
+					result = index( it - childItems.begin(), 0, result );
+					item = it->get();
+					foundNextItem = true;
+					break;
 				}
 			}
-
-			return result;
-		}
-
-		void attachTester()
-		{
-			if( !m_tester )
-			{
-				m_tester = std::make_unique<QAbstractItemModelTester>(
-					this,
-					// Outputs messages that are turned into test failures by
-					// the handler installed by `GafferUI.TestCase.setUp()`.
-					QAbstractItemModelTester::FailureReportingMode::Warning
-				);
-			}
-		}
-
-		Path::Names namesForIndex( const QModelIndex &index ) const
-		{
-			if( !index.isValid() || !m_rootPath )
-			{
-				return Path::Names();
-			}
-
-			std::vector<IECore::InternedString> result;
-			Item *item = static_cast<Item *>( index.internalPointer() );
-			while( item->parent() )
-			{
-				result.push_back( item->name() );
-				item = item->parent();
-			}
-			std::reverse( result.begin(), result.end() );
-			result.insert( result.begin(), m_rootPath->names().begin(), m_rootPath->names().end() );
-			return result;
-		}
-
-		PathPtr pathForIndex( const QModelIndex &index ) const
-		{
-			if( !index.isValid() || !m_rootPath )
-			{
-				return nullptr;
-			}
-			PathPtr result = m_rootPath->copy();
-			std::vector<IECore::InternedString> relativePath;
-			Item *item = static_cast<Item *>( index.internalPointer() );
-			while( item->parent() )
-			{
-				relativePath.push_back( item->name() );
-				item = item->parent();
-			}
-			for( auto it = relativePath.rbegin(); it != relativePath.rend(); ++it )
-			{
-				result->append( *it );
-			}
-			return result;
-		}
-
-		QModelIndex indexForPath( const std::vector<IECore::InternedString> &path ) const
-		{
-			if( !m_rootPath )
+			if( !foundNextItem )
 			{
 				return QModelIndex();
 			}
+		}
 
-			if( path.size() <= m_rootPath->names().size() )
-			{
-				return QModelIndex();
-			}
+		return result;
+	}
 
-			if( !equal( m_rootPath->names().begin(), m_rootPath->names().end(), path.begin() ) )
-			{
-				return QModelIndex();
-			}
+	QModelIndex indexForPath( const Path *path ) const
+	{
+		return indexForPath( path->names() );
+	}
 
-			QModelIndex result;
-			Item *item = m_rootItem.get();
-			for( size_t i = m_rootPath->names().size(); i < path.size(); ++i )
-			{
-				bool foundNextItem = false;
-				const Item::ChildContainer &childItems = item->childItems( this );
-				for( auto it = childItems.begin(), eIt = childItems.end(); it != eIt; ++it )
-				{
-					if( (*it)->name() == path[i] )
-					{
-						result = index( it - childItems.begin(), 0, result );
-						item = it->get();
-						foundNextItem = true;
-						break;
-					}
-				}
-				if( !foundNextItem )
-				{
-					return QModelIndex();
-				}
-			}
-
+	std::vector<QModelIndex> indicesForPaths( const IECore::PathMatcher &paths ) const
+	{
+		std::vector<QModelIndex> result;
+		if( !m_rootPath )
+		{
 			return result;
 		}
 
-		QModelIndex indexForPath( const Path *path ) const
+		indicesForPathsWalk( m_rootItem.get(), m_rootPath->names(), QModelIndex(), paths, result );
+		return result;
+	}
+
+	void waitForPendingUpdates()
+	{
+		startUpdate( /* skipIfInvisible = */ false );
+		if( m_updateTask )
 		{
-			return indexForPath( path->names() );
+			m_updateTask->wait();
 		}
+		QCoreApplication::sendPostedEvents( this, EditEvent::staticType() );
+	}
 
-		std::vector<QModelIndex> indicesForPaths( const IECore::PathMatcher &paths ) const
+signals:
+
+	void expansionChanged();
+	void selectionChanged();
+	void headerUpdateFinished();
+	void updateFinished();
+
+	///////////////////////////////////////////////////////////////////
+	// QAbstractItemModel implementation - this is what Qt cares about
+	///////////////////////////////////////////////////////////////////
+
+public:
+
+	QVariant data( const QModelIndex &index, int role ) const override
+	{
+		if( !index.isValid() )
 		{
-			std::vector<QModelIndex> result;
-			if( !m_rootPath )
-			{
-				return result;
-			}
-
-			indicesForPathsWalk( m_rootItem.get(), m_rootPath->names(), QModelIndex(), paths, result );
-			return result;
-		}
-
-		void waitForPendingUpdates()
-		{
-			startUpdate( /* skipIfInvisible = */ false );
-			if( m_updateTask )
-			{
-				m_updateTask->wait();
-			}
-			QCoreApplication::sendPostedEvents( this, EditEvent::staticType() );
-		}
-
-	signals :
-
-		void expansionChanged();
-		void selectionChanged();
-		void headerUpdateFinished();
-		void updateFinished();
-
-		///////////////////////////////////////////////////////////////////
-		// QAbstractItemModel implementation - this is what Qt cares about
-		///////////////////////////////////////////////////////////////////
-
-	public :
-
-		QVariant data( const QModelIndex &index, int role ) const override
-		{
-			if( !index.isValid() )
-			{
-				return QVariant();
-			}
-
-			if( role == Qt::UserRole )
-			{
-				// We use the user role for communicating the
-				// selection state to the drawing code.
-				const int c = index.column();
-				if( (int)m_selection.size() > c )
-				{
-					return m_selection[c].match( namesForIndex( index ) );
-				}
-				return false;
-			}
-
-			Item *item = static_cast<Item *>( index.internalPointer() );
-			return item->data( index.column(), role, this );
-		}
-
-		QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override
-		{
-			if( orientation != Qt::Horizontal )
-			{
-				return QVariant();
-			}
-
-			if( dirtyIfUnrequested( m_headerDataState ) )
-			{
-				const_cast<PathModel *>( this )->scheduleUpdate();
-			}
-
-			if( section < (int)m_headerData.size() )
-			{
-				return m_headerData[section].variant( role );
-			}
 			return QVariant();
 		}
 
-		QModelIndex index( int row, int column, const QModelIndex &parentIndex = QModelIndex() ) const override
+		if( role == Qt::UserRole )
 		{
-			Item *parentItem = parentIndex.isValid() ? static_cast<Item *>( parentIndex.internalPointer() ) : m_rootItem.get();
-
-			if( row >=0 and row < (int)parentItem->childItems( this ).size() and column >=0 and column < (int)m_columns.size() )
+			// We use the user role for communicating the
+			// selection state to the drawing code.
+			const int c = index.column();
+			if( (int)m_selection.size() > c )
 			{
-				return createIndex( row, column, parentItem->childItems( this )[row].get() );
+				return m_selection[c].match( namesForIndex( index ) );
 			}
-			else
-			{
-				return QModelIndex();
-			}
-		}
-
-		QModelIndex parent( const QModelIndex &index ) const override
-		{
-			if( !index.isValid() )
-			{
-				return QModelIndex();
-			}
-
-			Item *item = static_cast<Item *>( index.internalPointer() );
-			if( !item || item->parent() == m_rootItem )
-			{
-				return QModelIndex();
-			}
-
-			return createIndex( item->parent()->row(), 0, item->parent() );
-		}
-
-		int rowCount( const QModelIndex &parentIndex = QModelIndex() ) const override
-		{
-			Item *parentItem;
-			if( parentIndex.isValid() )
-			{
-				// Parent is not the root item.
-				if( m_flat || parentIndex.column() != 0 )
-				{
-					return 0;
-				}
-				parentItem = static_cast<Item *>( parentIndex.internalPointer() );
-			}
-			else
-			{
-				parentItem = m_rootItem.get();
-			}
-			return parentItem->childItems( this ).size();
-		}
-
-		int columnCount( const QModelIndex &parent = QModelIndex() ) const override
-		{
-			return m_columns.size();
-		}
-
-		// Although this method sounds like it means "take what you've got and
-		// sort it right now", it seems really to also mean "and remember that
-		// this is how you should sort all other stuff you might generate later".
-		// So that's what we do. We also use a column of < 0 to say "turn off
-		// sorting".
-		void sort( int column, Qt::SortOrder order = Qt::AscendingOrder ) override
-		{
-			if( m_sortColumn == column && m_sortOrder == order )
-			{
-				return;
-			}
-
-			cancelUpdate();
-
-			m_sortColumn = column;
-			m_sortOrder = order;
-			m_rootItem->dirty();
-
-			scheduleUpdate();
-		}
-
-	private :
-
-		// Async update mechanism
-		// ======================
-		//
-		// Queries such as `Path::children()` and `Path::property()` can take
-		// significant amounts of time, for instance when querying a slow
-		// filesystem via FileSystemPath or a complex scene via ScenePath. We
-		// want to avoid blocking the UI when making such queries, to avoid user
-		// frustration.
-		//
-		// We therefore return immediately from methods such as
-		// `PathModel::rowCount()` and `PathModel::data()`, even if it means
-		// returning default or stale results. At the same time, we call
-		// `scheduleUpdate()` to launch a background task which will compute updates for the
-		// model asynchronously.
-		//
-		// We need to apply the updates and signal them to Qt on the main thread,
-		// for which we use `queueEdit()`.
-
-		// Arranges to peform a background update after a short delay.
-		void scheduleUpdate()
-		{
-			if( !m_rootPath || m_updateScheduled )
-			{
-				return;
-			}
-
-			// It's typical for several queries to `PathModel::data()` and
-			// `PathModel::rowCount()` etc to come in a little flurry, for all
-			// of the visible items in the QTreeView. So we delay the start of
-			// the update for a grace period to avoid repeatedly starting and
-			// cancelling updates when each query happens.
-			QTimer::singleShot(
-				50ms,
-				// Using `this` as the context for Qt means that we can safely
-				// call a method, because the timer will be cancelled if we are
-				// destroyed.
-				this,
-				[this] () { startUpdate(); }
-			);
-			m_updateScheduled = true;
-		}
-
-		void startUpdate( bool skipIfInvisible = true )
-		{
-			if( !m_updateScheduled )
-			{
-				// We can get here if `waitForPendingUpdates()` starts the
-				// update early, and the timer triggers afterwards. Or if
-				// `waitForPendingUpdates()` is called when there are no
-				// updates to do.
-				return;
-			}
-
-			if( skipIfInvisible && !static_cast<QTreeView *>( QObject::parent() )->isVisible() )
-			{
-				// No point in performing an update if we're not visible.
-				// Wait for `eventFilter()` to start the update in the next
-				// `QShowEvent`.
-				return;
-			}
-
-			// Cancel previous update and flush pending edits, as they
-			// may delete or modify the items being visited by the
-			// background task.
-			cancelUpdate();
-
-			// And then we can reschedule our update task.
-			m_updateTask = ParallelAlgo::callOnBackgroundThread(
-				getRoot()->cancellationSubject(),
-				// We take a copy of `expandedPaths` because it may be modified
-				// on the UI thread by `treeViewExpanded()` while we run in the
-				// background. Likewise, we take a copy of the Path to work
-				// with, because anyone could modify that on the UI thread as it
-				// is a public member of PathListingWidget.
-				[this, workingPath = m_rootPath->copy(), expandedPaths = IECore::PathMatcher( m_expandedPaths ), priorityPaths = visiblePaths() ] {
-					try
-					{
-						const IECore::Canceller *canceller = Context::current()->canceller();
-						updateHeaderData( canceller );
-						queueEdit(
-							[this] () {
-								if( !m_blockUpdateFinished )
-								{
-									headerUpdateFinished();
-								}
-							}
-						);
-						m_rootItem->update( this, workingPath.get(), expandedPaths, priorityPaths, canceller );
-						queueEdit(
-							[this] () {
-								finaliseRecursiveExpansion();
-								if( !m_blockUpdateFinished )
-								{
-									updateFinished();
-								}
-							}
-						);
-					}
-					catch( const IECore::Cancelled & )
-					{
-						// Cancellation could be due to several causes :
-						//
-						// - A graph edit that will lead to
-						//   `Path::pathChangedSignal()` being emitted.
-						// - A graph edit that won't lead to
-						//   `Path::pathChangedSignal()` being emitted.
-						// - A member of this class cancelling an update to make
-						//   an edit and launch a new update.
-						// - The QTreeView being hidden.
-						//
-						// In all cases we need to perform an update eventually,
-						// and we can rely on `scheduleUpdate()` to deduplicate
-						// multiple requests, and `startUpdate()` to defer
-						// requests if we're hidden.
-						queueEdit(
-							[this] () { scheduleUpdate(); }
-						);
-					}
-				}
-			);
-			m_updateScheduled = false;
-		}
-
-		// Cancels the current background update, optionally flushing the
-		// queue of pending edits.
-		void cancelUpdate( bool flushPendingEdits = true )
-		{
-			if( PyGILState_Check() )
-			{
-				// Resetting the update task implicitly calls `cancelAndWait()`.
-				// If we hold the GIL, we need to release it first, in case the
-				// Path class is Python-based and needs to acquire the GIL to
-				// respond to cancellation.
-				//
-				// In our own bindings we would release the GIL at the
-				// transition point from Python to C++, rather than in the guts
-				// here. But several functions called by PySide bindings arrive
-				// here, and PySide isn't releasing the GIL before calling into
-				// C++. One such culprit is `QWidget.setParent()` being called
-				// from Python and leading to `PathModel::eventFilter()` in C++.
-				IECorePython::ScopedGILRelease gilRelease;
-				m_updateTask.reset();
-			}
-			else
-			{
-				m_updateTask.reset();
-			}
-
-			if( flushPendingEdits )
-			{
-				Private::ScopedAssignment blockUpdateFinished( m_blockUpdateFinished, true );
-				QCoreApplication::sendPostedEvents( this, EditEvent::staticType() );
-			}
-		}
-
-		// Custom event class used by `queueEdit()`. This simply holds a
-		// `std::function` to be executed on the main thread, allowing us to
-		// write the edit as a lambda at the call site.
-		struct EditEvent : public QEvent
-		{
-
-			using Edit = std::function<void()>;
-
-			EditEvent( const Edit &edit )
-				:	QEvent( staticType() ), edit( edit )
-			{
-			}
-
-			Edit edit;
-
-			static QEvent::Type staticType()
-			{
-				static QEvent::Type g_type = (QEvent::Type)registerEventType();
-				return g_type;
-			}
-
-		};
-
-		// Queues an arbitrary edit to be made on the UI thread.
-		template<typename F>
-		void queueEdit( const F &edit )
-		{
-			// Qt takes responsibility for deleting the event after it is
-			// delivered.
-			QCoreApplication::postEvent( this, new EditEvent( edit ) );
-		}
-
-		// Executed the edit events posted by `queueEdit()`.
-		void customEvent( QEvent *event ) override
-		{
-			if( event->type() == EditEvent::staticType() )
-			{
-				static_cast<EditEvent *>( event )->edit();
-				return;
-			}
-			QObject::customEvent( event );
-		}
-
-		bool eventFilter( QObject *object, QEvent *event ) override
-		{
-			// We are installed as an event filter on our QTreeView
-			// so that we can react to it being shown and hidden.
-			assert( object == QObject::parent() );
-
-			switch( event->type() )
-			{
-				case QEvent::Show :
-					// Do any updates that have been requested
-					// while we were hidden.
-					startUpdate();
-					break;
-				case QEvent::Hide :
-					cancelUpdate();
-					break;
-				default :
-					break;
-			}
-
 			return false;
 		}
 
-		void updateHeaderData( const IECore::Canceller *canceller )
+		Item *item = static_cast<Item *>( index.internalPointer() );
+		return item->data( index.column(), role, this );
+	}
+
+	QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override
+	{
+		if( orientation != Qt::Horizontal )
 		{
-			if( m_headerDataState != State::Dirty )
-			{
-				return;
-			}
+			return QVariant();
+		}
 
-			std::vector<CellVariants> newHeaderData;
-			for( auto &column : m_columns )
-			{
-				newHeaderData.push_back( column->headerData( *m_rootPath, canceller ) );
-			}
+		if( dirtyIfUnrequested( m_headerDataState ) )
+		{
+			const_cast<PathModel *>( this )->scheduleUpdate();
+		}
 
-			if( m_headerData == newHeaderData )
+		if( section < (int)m_headerData.size() )
+		{
+			return m_headerData[section].variant( role );
+		}
+		return QVariant();
+	}
+
+	QModelIndex index( int row, int column, const QModelIndex &parentIndex = QModelIndex() ) const override
+	{
+		Item *parentItem = parentIndex.isValid() ? static_cast<Item *>( parentIndex.internalPointer() ) : m_rootItem.get();
+
+		if( row >= 0 and row < (int)parentItem->childItems( this ).size() and column >= 0 and column < (int)m_columns.size() )
+		{
+			return createIndex( row, column, parentItem->childItems( this )[row].get() );
+		}
+		else
+		{
+			return QModelIndex();
+		}
+	}
+
+	QModelIndex parent( const QModelIndex &index ) const override
+	{
+		if( !index.isValid() )
+		{
+			return QModelIndex();
+		}
+
+		Item *item = static_cast<Item *>( index.internalPointer() );
+		if( !item || item->parent() == m_rootItem )
+		{
+			return QModelIndex();
+		}
+
+		return createIndex( item->parent()->row(), 0, item->parent() );
+	}
+
+	int rowCount( const QModelIndex &parentIndex = QModelIndex() ) const override
+	{
+		Item *parentItem;
+		if( parentIndex.isValid() )
+		{
+			// Parent is not the root item.
+			if( m_flat || parentIndex.column() != 0 )
 			{
+				return 0;
+			}
+			parentItem = static_cast<Item *>( parentIndex.internalPointer() );
+		}
+		else
+		{
+			parentItem = m_rootItem.get();
+		}
+		return parentItem->childItems( this ).size();
+	}
+
+	int columnCount( const QModelIndex &parent = QModelIndex() ) const override
+	{
+		return m_columns.size();
+	}
+
+	// Although this method sounds like it means "take what you've got and
+	// sort it right now", it seems really to also mean "and remember that
+	// this is how you should sort all other stuff you might generate later".
+	// So that's what we do. We also use a column of < 0 to say "turn off
+	// sorting".
+	void sort( int column, Qt::SortOrder order = Qt::AscendingOrder ) override
+	{
+		if( m_sortColumn == column && m_sortOrder == order )
+		{
+			return;
+		}
+
+		cancelUpdate();
+
+		m_sortColumn = column;
+		m_sortOrder = order;
+		m_rootItem->dirty();
+
+		scheduleUpdate();
+	}
+
+private:
+
+	// Async update mechanism
+	// ======================
+	//
+	// Queries such as `Path::children()` and `Path::property()` can take
+	// significant amounts of time, for instance when querying a slow
+	// filesystem via FileSystemPath or a complex scene via ScenePath. We
+	// want to avoid blocking the UI when making such queries, to avoid user
+	// frustration.
+	//
+	// We therefore return immediately from methods such as
+	// `PathModel::rowCount()` and `PathModel::data()`, even if it means
+	// returning default or stale results. At the same time, we call
+	// `scheduleUpdate()` to launch a background task which will compute updates for the
+	// model asynchronously.
+	//
+	// We need to apply the updates and signal them to Qt on the main thread,
+	// for which we use `queueEdit()`.
+
+	// Arranges to peform a background update after a short delay.
+	void scheduleUpdate()
+	{
+		if( !m_rootPath || m_updateScheduled )
+		{
+			return;
+		}
+
+		// It's typical for several queries to `PathModel::data()` and
+		// `PathModel::rowCount()` etc to come in a little flurry, for all
+		// of the visible items in the QTreeView. So we delay the start of
+		// the update for a grace period to avoid repeatedly starting and
+		// cancelling updates when each query happens.
+		QTimer::singleShot(
+			50ms,
+			// Using `this` as the context for Qt means that we can safely
+			// call a method, because the timer will be cancelled if we are
+			// destroyed.
+			this,
+			[this]() { startUpdate(); }
+		);
+		m_updateScheduled = true;
+	}
+
+	void startUpdate( bool skipIfInvisible = true )
+	{
+		if( !m_updateScheduled )
+		{
+			// We can get here if `waitForPendingUpdates()` starts the
+			// update early, and the timer triggers afterwards. Or if
+			// `waitForPendingUpdates()` is called when there are no
+			// updates to do.
+			return;
+		}
+
+		if( skipIfInvisible && !static_cast<QTreeView *>( QObject::parent() )->isVisible() )
+		{
+			// No point in performing an update if we're not visible.
+			// Wait for `eventFilter()` to start the update in the next
+			// `QShowEvent`.
+			return;
+		}
+
+		// Cancel previous update and flush pending edits, as they
+		// may delete or modify the items being visited by the
+		// background task.
+		cancelUpdate();
+
+		// And then we can reschedule our update task.
+		m_updateTask = ParallelAlgo::callOnBackgroundThread(
+			getRoot()->cancellationSubject(),
+			// We take a copy of `expandedPaths` because it may be modified
+			// on the UI thread by `treeViewExpanded()` while we run in the
+			// background. Likewise, we take a copy of the Path to work
+			// with, because anyone could modify that on the UI thread as it
+			// is a public member of PathListingWidget.
+			[this, workingPath = m_rootPath->copy(), expandedPaths = IECore::PathMatcher( m_expandedPaths ), priorityPaths = visiblePaths()] {
+				try
+				{
+					const IECore::Canceller *canceller = Context::current()->canceller();
+					updateHeaderData( canceller );
+					queueEdit(
+						[this]() {
+							if( !m_blockUpdateFinished )
+							{
+								headerUpdateFinished();
+							}
+						}
+					);
+					m_rootItem->update( this, workingPath.get(), expandedPaths, priorityPaths, canceller );
+					queueEdit(
+						[this]() {
+							finaliseRecursiveExpansion();
+							if( !m_blockUpdateFinished )
+							{
+								updateFinished();
+							}
+						}
+					);
+				}
+				catch( const IECore::Cancelled & )
+				{
+					// Cancellation could be due to several causes :
+					//
+					// - A graph edit that will lead to
+					//   `Path::pathChangedSignal()` being emitted.
+					// - A graph edit that won't lead to
+					//   `Path::pathChangedSignal()` being emitted.
+					// - A member of this class cancelling an update to make
+					//   an edit and launch a new update.
+					// - The QTreeView being hidden.
+					//
+					// In all cases we need to perform an update eventually,
+					// and we can rely on `scheduleUpdate()` to deduplicate
+					// multiple requests, and `startUpdate()` to defer
+					// requests if we're hidden.
+					queueEdit(
+						[this]() { scheduleUpdate(); }
+					);
+				}
+			}
+		);
+		m_updateScheduled = false;
+	}
+
+	// Cancels the current background update, optionally flushing the
+	// queue of pending edits.
+	void cancelUpdate( bool flushPendingEdits = true )
+	{
+		if( PyGILState_Check() )
+		{
+			// Resetting the update task implicitly calls `cancelAndWait()`.
+			// If we hold the GIL, we need to release it first, in case the
+			// Path class is Python-based and needs to acquire the GIL to
+			// respond to cancellation.
+			//
+			// In our own bindings we would release the GIL at the
+			// transition point from Python to C++, rather than in the guts
+			// here. But several functions called by PySide bindings arrive
+			// here, and PySide isn't releasing the GIL before calling into
+			// C++. One such culprit is `QWidget.setParent()` being called
+			// from Python and leading to `PathModel::eventFilter()` in C++.
+			IECorePython::ScopedGILRelease gilRelease;
+			m_updateTask.reset();
+		}
+		else
+		{
+			m_updateTask.reset();
+		}
+
+		if( flushPendingEdits )
+		{
+			Private::ScopedAssignment blockUpdateFinished( m_blockUpdateFinished, true );
+			QCoreApplication::sendPostedEvents( this, EditEvent::staticType() );
+		}
+	}
+
+	// Custom event class used by `queueEdit()`. This simply holds a
+	// `std::function` to be executed on the main thread, allowing us to
+	// write the edit as a lambda at the call site.
+	struct EditEvent : public QEvent
+	{
+
+		using Edit = std::function<void()>;
+
+		EditEvent( const Edit &edit )
+			: QEvent( staticType() ), edit( edit )
+		{
+		}
+
+		Edit edit;
+
+		static QEvent::Type staticType()
+		{
+			static QEvent::Type g_type = (QEvent::Type)registerEventType();
+			return g_type;
+		}
+	};
+
+	// Queues an arbitrary edit to be made on the UI thread.
+	template<typename F>
+	void queueEdit( const F &edit )
+	{
+		// Qt takes responsibility for deleting the event after it is
+		// delivered.
+		QCoreApplication::postEvent( this, new EditEvent( edit ) );
+	}
+
+	// Executed the edit events posted by `queueEdit()`.
+	void customEvent( QEvent *event ) override
+	{
+		if( event->type() == EditEvent::staticType() )
+		{
+			static_cast<EditEvent *>( event )->edit();
+			return;
+		}
+		QObject::customEvent( event );
+	}
+
+	bool eventFilter( QObject *object, QEvent *event ) override
+	{
+		// We are installed as an event filter on our QTreeView
+		// so that we can react to it being shown and hidden.
+		assert( object == QObject::parent() );
+
+		switch( event->type() )
+		{
+			case QEvent::Show :
+				// Do any updates that have been requested
+				// while we were hidden.
+				startUpdate();
+				break;
+			case QEvent::Hide :
+				cancelUpdate();
+				break;
+			default :
+				break;
+		}
+
+		return false;
+	}
+
+	void updateHeaderData( const IECore::Canceller *canceller )
+	{
+		if( m_headerDataState != State::Dirty )
+		{
+			return;
+		}
+
+		std::vector<CellVariants> newHeaderData;
+		for( auto &column : m_columns )
+		{
+			newHeaderData.push_back( column->headerData( *m_rootPath, canceller ) );
+		}
+
+		if( m_headerData == newHeaderData )
+		{
+			m_headerDataState = State::Clean;
+			return;
+		}
+
+		queueEdit(
+
+			[this, newHeaderData = std::move( newHeaderData )]() mutable {
+				m_headerData.swap( newHeaderData );
 				m_headerDataState = State::Clean;
-				return;
+				headerDataChanged( Qt::Horizontal, 0, m_headerData.size() - 1 );
 			}
 
-			queueEdit(
+		);
+	}
 
-				[this, newHeaderData = std::move( newHeaderData )] () mutable {
+	// State transitions :
+	//
+	// - Unrequested->Dirty : When first queried.
+	// - Dirty->Clean : When updated.
+	// - Clean->Dirty : When path changes.
+	enum class State
+	{
+		// Initial state. Not yet requested by clients
+		// of the model, therefore not yet computed, and not
+		// in need of consideration during recursive updates.
+		Unrequested,
+		// Computed and up to date.
+		Clean,
+		// Stale data that needs recomputing.
+		Dirty
+	};
 
-					m_headerData.swap( newHeaderData );
-					m_headerDataState = State::Clean;
-					headerDataChanged( Qt::Horizontal, 0, m_headerData.size() - 1 );
+	static bool dirtyIfUnrequested( std::atomic<State> &state )
+	{
+		State unrequested = State::Unrequested;
+		return state.compare_exchange_strong( unrequested, State::Dirty );
+	}
 
+	// A single item in the PathModel - stores a path and caches
+	// data extracted from it to provide the model content.
+	// Uses `scheduleUpdate()` and `queueEdit()` to update itself
+	// asynchronously.
+	struct Item : public IECore::RefCounted
+	{
+
+		Item( const IECore::InternedString &name, Item *parent )
+			: m_name( name ),
+			  m_parent( parent ),
+			  m_row( -1 ), // Assigned true value in `updateChildItems()`
+			  m_dataState( State::Unrequested ),
+			  m_childItemsState( State::Unrequested ),
+			  m_expansionDirty( true ),
+			  m_expandedInTreeView( false )
+		{
+			static auto g_emptyChildItems = std::make_shared<PathModel::Item::ChildContainer>();
+			m_childItems = g_emptyChildItems;
+		}
+
+		IE_CORE_DECLAREMEMBERPTR( Item )
+
+		const IECore::InternedString &name() const
+		{
+			return m_name;
+		}
+
+		void dirty( bool dirtyChildItems = true, bool dirtyData = true, const std::vector<int> *dataMapping = nullptr )
+		{
+			// This is just intended to be called on the root item by the
+			// PathModel when the path changes.
+			assert( !m_parent );
+			dirtyWalk( dirtyChildItems, dirtyData, dataMapping );
+		}
+
+		void dirtyExpansion()
+		{
+			m_expansionDirty = true;
+			for( const auto &child : *m_childItems )
+			{
+				child->dirtyExpansion();
+			}
+		}
+
+		void treeViewExpansionChanged( bool expanded )
+		{
+			m_expandedInTreeView = expanded;
+		}
+
+		void update( PathModel *model, Path *path, const IECore::PathMatcher &expandedPaths, const IECore::PathMatcher &priorityPaths, const IECore::Canceller *canceller )
+		{
+			// Do a queue-based recursion through the hierarchy, updating
+			// each item as we visit it.
+			/// \todo We could consider using a `concurrent_priority_queue()`
+			/// and multiple threads here for improved performance. But
+			/// given all the other modules vying for processor time (the
+			/// Viewer and Renderer in particular), perhaps limiting
+			/// ourselves to a single core is reasonable. If we do use
+			/// multiple threads we need to consider the interaction with
+			/// `m_scrollToCandidates` because the order we visit children
+			/// in would no longer be deterministic.
+
+			std::deque<std::pair<Path::Names, Ptr>> queue( { { path->names(), this } } );
+			while( !queue.empty() )
+			{
+				IECore::Canceller::check( canceller );
+
+				// Update the item from the front of the queue.
+
+				const auto [names, item] = std::move( queue.front() );
+				queue.pop_front();
+
+				path->set( 0, path->names().size(), names );
+				item->updateData( model, path, canceller );
+				item->updateExpansion( model, path, expandedPaths );
+				std::shared_ptr<ChildContainer> updatedChildItems = item->updateChildItems( model, path, canceller );
+
+				// Traverse to children by pushing them in to the queue.
+				// High priority items are pushed to the front of the queue
+				// for immediate processing, and low priority items are
+				// pushed to the back of the queue to be processed last.
+
+				Path::Names childNames = names;
+				childNames.push_back( IECore::InternedString() );
+				size_t newFrontItems = 0;
+				for( const auto &child : *updatedChildItems )
+				{
+					childNames.back() = child->name();
+					// If we're scrolling to something and we haven't found it yet,
+					// then we're processing items above it visually. These have to
+					// be high priority so that we don't end up expanding them _after_
+					// scrolling, which would push the target out of frame.
+					bool highPriority = (bool)model->m_scrollToCandidates;
+					// If we've been told explicitly that something is a priority
+					// (because it is visible in the viewport) then it is.
+					if( !highPriority )
+					{
+						if( priorityPaths.match( childNames ) & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::DescendantMatch ) )
+						{
+							highPriority = true;
+						}
+					}
+					// Lastly, if the child is subject to recursive expansion then it is
+					// a priority, because the user has explicitly asked to see it.
+					if( !highPriority && model->m_recursiveExpansionPath )
+					{
+						if( boost::starts_with( childNames, *model->m_recursiveExpansionPath ) )
+						{
+							highPriority = true;
+						}
+					}
+
+					if( !highPriority )
+					{
+						queue.emplace_back( childNames, child );
+					}
+					else
+					{
+						queue.emplace_front( childNames, child );
+						newFrontItems++;
+					}
+				}
+				// Reverse the items we added at the front, so we'll pop them
+				// in the order we pushed them.
+				std::reverse( queue.begin(), queue.begin() + newFrontItems );
+			}
+		}
+
+		Item *parent()
+		{
+			return m_parent;
+		}
+
+		int row()
+		{
+			return m_row;
+		}
+
+		// Returns the data for the specified column and role. The Item is
+		// responsible for caching the results of these queries internally.
+		QVariant data( int column, int role, const PathModel *model )
+		{
+			if( dirtyIfUnrequested( m_dataState ) )
+			{
+				const_cast<PathModel *>( model )->scheduleUpdate();
+			}
+
+			if( column >= (int)m_data.size() )
+			{
+				// We haven't computed any data yet.
+				if( column < (int)model->m_columns.size() && role == Qt::DisplayRole )
+				{
+					if( auto *standardColumn = dynamic_cast<const GafferUI::StandardPathColumn *>( model->m_columns[column].get() ) )
+					{
+						if( standardColumn->property() == g_nameProperty )
+						{
+							// Optimisation for standard name column. We
+							// know the name already, so there is no need to
+							// wait for the data to be computed. This
+							// reduces flicker when scrolling rapidly
+							// through many items, making it easier to
+							// orientate yourself.
+							return m_name.c_str();
+						}
+					}
+				}
+				return QVariant();
+			}
+
+			return m_data[column].variant( role );
+		}
+
+		using ChildContainer = std::vector<Ptr>;
+
+		ChildContainer &childItems( const PathModel *model )
+		{
+			if( dirtyIfUnrequested( m_childItemsState ) )
+			{
+				const_cast<PathModel *>( model )->scheduleUpdate();
+			}
+			return *m_childItems;
+		}
+
+	private:
+
+		void dirtyWalk( bool dirtyChildItems, bool dirtyData, const std::vector<int> *dataMapping )
+		{
+			if( dirtyData && ( m_dataState == State::Clean ) )
+			{
+				m_dataState = State::Dirty;
+			}
+			if( dataMapping )
+			{
+				shuffle( m_data, *dataMapping );
+			}
+			if( dirtyChildItems && ( m_childItemsState == State::Clean ) )
+			{
+				m_childItemsState = State::Dirty;
+			}
+			for( const auto &child : *m_childItems )
+			{
+				child->dirtyWalk( dirtyChildItems, dirtyData, dataMapping );
+			}
+		}
+
+		static QVariant dataForSort( const std::vector<CellVariants> &data, PathModel *model )
+		{
+			if( model->m_sortColumn < 0 || model->m_sortColumn >= (int)data.size() )
+			{
+				return QVariant();
+			}
+			return data[model->m_sortColumn].variant( CellVariants::SortRole );
+		}
+
+		// Updates data and returns the value that should be used for sorting.
+		// This value is returned because the actual edit to `m_data` will not be
+		// complete until the queued edit is processed by the UI thread.
+		QVariant updateData( PathModel *model, const Path *path, const IECore::Canceller *canceller )
+		{
+			if( m_dataState == State::Clean || m_dataState == State::Unrequested )
+			{
+				return dataForSort( m_data, model );
+			}
+
+			// We generate data for all columns and roles at once, on the
+			// assumption that access to one is likely to indicate upcoming
+			// accesses to the others.
+
+			std::vector<CellVariants> newData;
+
+			newData.reserve( model->m_columns.size() );
+
+			for( int i = 0, e = model->m_columns.size(); i < e; ++i )
+			{
+				CellVariants cellVariants;
+				try
+				{
+					cellVariants = CellVariants( model->m_columns[i]->cellData( *path, canceller ) );
+				}
+				catch( const IECore::Cancelled & )
+				{
+					throw;
+				}
+				catch( const std::exception &e )
+				{
+					// Qt doesn't use exceptions for error handling,
+					// so we must suppress them.
+					cellVariants = CellVariants(
+						GafferUI::PathColumn::CellData(
+							nullptr, // value
+							new IECore::StringData( "errorSmall.png" ), // icon
+							nullptr, // background
+							new IECore::StringData( e.what() ) // toolTip
+						)
+					);
+				}
+				catch( ... )
+				{
+					IECore::msg( IECore::Msg::Warning, "PathListingWidget", "Unknown error" );
+				}
+
+				newData.push_back( cellVariants );
+			}
+
+			if( newData == m_data )
+			{
+				// No update necessary.
+				m_dataState = State::Clean;
+				return dataForSort( m_data, model );
+			}
+
+			if( m_row == -1 )
+			{
+				// We have just been created in `updateChildItems()` and haven't
+				// been made visible to Qt yet. No need to emit `dataChanged` or
+				// worry about concurrent access from the UI thread.
+				m_data.swap( newData );
+				m_dataState = State::Clean;
+				return dataForSort( m_data, model );
+			}
+
+			// Mark clean _now_, to avoid a double update if we are
+			// called from our parent's `updateChildItems()` (to obtain
+			// data for sorting) and then called again from
+			// `updateWalk()` before the queued edit is applied.
+			m_dataState = State::Clean;
+
+			// Get result before we move `newDisplayData` into the lambda.
+			const QVariant result = dataForSort( newData, model );
+
+			model->queueEdit(
+
+				[this, model, newData = std::move( newData )]() mutable {
+					m_data.swap( newData );
+					model->dataChanged( model->createIndex( m_row, 0, this ), model->createIndex( m_row, model->m_columns.size() - 1, this ) );
 				}
 
 			);
+
+			return result;
 		}
 
-		// State transitions :
-		//
-		// - Unrequested->Dirty : When first queried.
-		// - Dirty->Clean : When updated.
-		// - Clean->Dirty : When path changes.
-		enum class State
+		void updateExpansion( PathModel *model, const Gaffer::Path *path, const IECore::PathMatcher &expandedPaths )
 		{
-			// Initial state. Not yet requested by clients
-			// of the model, therefore not yet computed, and not
-			// in need of consideration during recursive updates.
-			Unrequested,
-			// Computed and up to date.
-			Clean,
-			// Stale data that needs recomputing.
-			Dirty
-		};
+			if( !m_expansionDirty )
+			{
+				return;
+			}
 
-		static bool dirtyIfUnrequested( std::atomic<State> &state )
-		{
-			State unrequested = State::Unrequested;
-			return state.compare_exchange_strong( unrequested, State::Dirty );
+			// Handle expanded paths and recursive expansion.
+
+			unsigned match = expandedPaths.match( path->names() );
+			bool expanded = match & IECore::PathMatcher::ExactMatch;
+
+			if( model->m_recursiveExpansionPath )
+			{
+				if( boost::starts_with( path->names(), *model->m_recursiveExpansionPath ) )
+				{
+					match |= IECore::PathMatcher::DescendantMatch;
+					expanded = true;
+				}
+			}
+
+			if( expanded )
+			{
+				// The QTreeView is inevitably going to query the
+				// children after we call `treeView->setExpanded()`.
+				// Get ahead of the game by creating them during this
+				// update.
+				dirtyIfUnrequested( m_childItemsState );
+			}
+
+			if( expanded != m_expandedInTreeView )
+			{
+				model->queueEdit(
+					[this, model, expanded] {
+						QTreeView *treeView = dynamic_cast<QTreeView *>( model->QObject::parent() );
+						Private::ScopedAssignment<bool> assignment( model->m_modifyingTreeViewExpansion, true );
+						// Call `scheduleDelayedItemsLayout()` so that QTreeView doesn't rebuild
+						// its internal layout for every call to `setExpanded()`. When we are delivering
+						// a sequence of calls (as we do for recursive expansion) this provides a major
+						// performance improvement.
+						scheduleDelayedItemsLayout( treeView );
+						treeView->setExpanded( model->createIndex( m_row, 0, this ), expanded );
+					}
+				);
+			}
+
+			// Handle expansion for selection updates.
+
+			if( model->m_scrollToCandidates )
+			{
+				const unsigned scrollToMatch = model->m_scrollToCandidates->match( path->names() );
+				if( scrollToMatch & IECore::PathMatcher::ExactMatch )
+				{
+					model->queueEdit(
+						[this, model] {
+							QTreeView *treeView = dynamic_cast<QTreeView *>( model->QObject::parent() );
+							const QModelIndex index = model->createIndex( m_row, 0, this );
+							treeView->scrollTo( index, QTreeView::EnsureVisible );
+							treeView->selectionModel()->setCurrentIndex( index, QItemSelectionModel::Current );
+						}
+					);
+					// OK to modify from background thread, because only use on UI thread
+					// is preceded by call to `cancelUpdate()`.
+					model->m_scrollToCandidates.reset();
+				}
+
+				if( scrollToMatch & IECore::PathMatcher::DescendantMatch )
+				{
+					// Force creation of children so we can scroll to them.
+					dirtyIfUnrequested( m_childItemsState );
+				}
+			}
+
+			m_expansionDirty = false;
 		}
 
-		// A single item in the PathModel - stores a path and caches
-		// data extracted from it to provide the model content.
-		// Uses `scheduleUpdate()` and `queueEdit()` to update itself
-		// asynchronously.
-		struct Item : public IECore::RefCounted
+		// Returns the updated ChildContainer. This will not be visible in the model
+		// until the queued edit is executed. It is returned so that we can update
+		// the not-yet-visible children in `updateWalk()`.
+		std::shared_ptr<ChildContainer> updateChildItems( PathModel *model, const Gaffer::Path *path, const IECore::Canceller *canceller )
 		{
-
-			Item( const IECore::InternedString &name, Item *parent )
-				:	m_name( name ),
-					m_parent( parent ),
-					m_row( -1 ), // Assigned true value in `updateChildItems()`
-					m_dataState( State::Unrequested ),
-					m_childItemsState( State::Unrequested ),
-					m_expansionDirty( true ),
-					m_expandedInTreeView( false )
+			if( m_childItemsState == State::Unrequested || m_childItemsState == State::Clean )
 			{
-				static auto g_emptyChildItems = std::make_shared<PathModel::Item::ChildContainer>();
-				m_childItems = g_emptyChildItems;
+				return m_childItems;
 			}
 
-			IE_CORE_DECLAREMEMBERPTR( Item )
+			// Construct a new ChildContainer to replace our previous children.
+			// Where possible we reuse existing children instead of creating new
+			// ones.
 
-			const IECore::InternedString &name() const
+			auto newChildItemsPtr = std::make_shared<ChildContainer>();
+			ChildContainer &newChildItems = *newChildItemsPtr;
+
+			std::vector<Gaffer::PathPtr> children;
+			try
 			{
-				return m_name;
+				path->children( children, canceller );
+			}
+			catch( const std::exception &e )
+			{
+				IECore::msg( IECore::Msg::Error, "PathListingWidget", e.what() );
 			}
 
-			void dirty( bool dirtyChildItems = true, bool dirtyData = true, const std::vector<int> *dataMapping = nullptr )
+			std::unordered_map<IECore::InternedString, Item *> oldChildMap;
+			for( const auto &oldChild : *m_childItems )
 			{
-				// This is just intended to be called on the root item by the
-				// PathModel when the path changes.
-				assert( !m_parent );
-				dirtyWalk( dirtyChildItems, dirtyData, dataMapping );
+				oldChildMap[oldChild->m_name] = oldChild.get();
 			}
 
-			void dirtyExpansion()
+			for( auto it = children.begin(), eIt = children.end(); it != eIt; ++it )
 			{
-				m_expansionDirty = true;
-				for( const auto &child : *m_childItems )
+				auto oldIt = oldChildMap.find( ( *it )->names().back() );
+				if( oldIt != oldChildMap.end() )
 				{
-					child->dirtyExpansion();
+					// Reuse previous item.
+					Ptr itemToReuse = oldIt->second;
+					newChildItems.push_back( itemToReuse );
+				}
+				else
+				{
+					// Make new item.
+					newChildItems.push_back( new Item( ( *it )->names().back(), this ) );
 				}
 			}
 
-			void treeViewExpansionChanged( bool expanded )
+			// Sort the new container if necessary.
+
+			if( model->m_sortColumn >= 0 && model->m_sortColumn < (int)model->m_columns.size() )
 			{
-				m_expandedInTreeView = expanded;
+				using SortablePair = std::pair<QVariant, size_t>;
+				std::vector<SortablePair> sortedIndices;
+				sortedIndices.reserve( newChildItems.size() );
+				bool sortingByName = false;
+				if( auto *standardColumn = dynamic_cast<const GafferUI::StandardPathColumn *>( model->m_columns[model->m_sortColumn].get() ) )
+				{
+					if( standardColumn->property() == g_nameProperty )
+					{
+						sortingByName = true;
+						for( const auto &childItem : newChildItems )
+						{
+							// Optimisation for standard name column. We
+							// know the name already, so there is no need to
+							// wait for the data to be computed. This reduces
+							// delay when displaying items sorted by name.
+							sortedIndices.push_back( SortablePair(
+								childItem->name().c_str(),
+								sortedIndices.size()
+							) );
+						}
+					}
+				}
+
+				if( !sortingByName )
+				{
+					for( const auto &childItem : newChildItems )
+					{
+						dirtyIfUnrequested( childItem->m_dataState );
+						sortedIndices.push_back( SortablePair(
+							childItem->updateData( model, children[sortedIndices.size()].get(), canceller ),
+							sortedIndices.size()
+						) );
+					}
+				}
+
+				std::sort(
+					sortedIndices.begin(), sortedIndices.end(),
+					[model]( const SortablePair &l, const SortablePair &r ) {
+						return model->m_sortOrder == Qt::AscendingOrder ? variantLess( l.first, r.first ) : variantLess( r.first, l.first );
+					}
+				);
+
+				ChildContainer sortedChildItems;
+				sortedChildItems.reserve( sortedIndices.size() );
+				for( const auto &item : sortedIndices )
+				{
+					sortedChildItems.push_back( newChildItems[item.second] );
+				}
+				newChildItems.swap( sortedChildItems );
 			}
 
-			void update( PathModel *model, Path *path, const IECore::PathMatcher &expandedPaths, const IECore::PathMatcher &priorityPaths, const IECore::Canceller *canceller )
+			// Early out if nothing has changed.
+
+			if( newChildItems == *m_childItems )
 			{
-				// Do a queue-based recursion through the hierarchy, updating
-				// each item as we visit it.
-				/// \todo We could consider using a `concurrent_priority_queue()`
-				/// and multiple threads here for improved performance. But
-				/// given all the other modules vying for processor time (the
-				/// Viewer and Renderer in particular), perhaps limiting
-				/// ourselves to a single core is reasonable. If we do use
-				/// multiple threads we need to consider the interaction with
-				/// `m_scrollToCandidates` because the order we visit children
-				/// in would no longer be deterministic.
-
-				std::deque<std::pair<Path::Names, Ptr>> queue( { { path->names(), this } } );
-				while( !queue.empty() )
-				{
-					IECore::Canceller::check( canceller );
-
-					// Update the item from the front of the queue.
-
-					const auto [names, item] = std::move( queue.front() );
-					queue.pop_front();
-
-					path->set( 0, path->names().size(), names );
-					item->updateData( model, path, canceller );
-					item->updateExpansion( model, path, expandedPaths );
-					std::shared_ptr<ChildContainer> updatedChildItems = item->updateChildItems( model, path, canceller );
-
-					// Traverse to children by pushing them in to the queue.
-					// High priority items are pushed to the front of the queue
-					// for immediate processing, and low priority items are
-					// pushed to the back of the queue to be processed last.
-
-					Path::Names childNames = names; childNames.push_back( IECore::InternedString() );
-					size_t newFrontItems = 0;
-					for( const auto &child : *updatedChildItems )
-					{
-						childNames.back() = child->name();
-						// If we're scrolling to something and we haven't found it yet,
-						// then we're processing items above it visually. These have to
-						// be high priority so that we don't end up expanding them _after_
-						// scrolling, which would push the target out of frame.
-						bool highPriority = (bool)model->m_scrollToCandidates;
-						// If we've been told explicitly that something is a priority
-						// (because it is visible in the viewport) then it is.
-						if( !highPriority )
-						{
-							if( priorityPaths.match( childNames ) & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::DescendantMatch ) )
-							{
-								highPriority = true;
-							}
-						}
-						// Lastly, if the child is subject to recursive expansion then it is
-						// a priority, because the user has explicitly asked to see it.
-						if( !highPriority && model->m_recursiveExpansionPath )
-						{
-							if( boost::starts_with( childNames, *model->m_recursiveExpansionPath ) )
-							{
-								highPriority = true;
-							}
-						}
-
-						if( !highPriority )
-						{
-							queue.emplace_back( childNames, child );
-						}
-						else
-						{
-							queue.emplace_front( childNames, child );
-							newFrontItems++;
-						}
-					}
-					// Reverse the items we added at the front, so we'll pop them
-					// in the order we pushed them.
-					std::reverse( queue.begin(), queue.begin() + newFrontItems );
-				}
+				m_childItemsState = State::Clean;
+				return m_childItems;
 			}
 
-			Item *parent()
+			// If we had children before, figure out the mapping from old to new,
+			// so we can tell Qt about it. This is necessary so that persistent
+			// indices used to represent selection and expansion remain valid.
+
+			QModelIndexList changedPersistentIndexesFrom, changedPersistentIndexesTo;
+
+			std::unordered_map<IECore::InternedString, size_t> newChildMap;
+			for( size_t i = 0; i < newChildItems.size(); ++i )
 			{
-				return m_parent;
+				newChildMap[newChildItems[i]->m_name] = i;
 			}
 
-			int row()
+			for( const auto &oldChild : *m_childItems )
 			{
-				return m_row;
-			}
-
-			// Returns the data for the specified column and role. The Item is
-			// responsible for caching the results of these queries internally.
-			QVariant data( int column, int role, const PathModel *model )
-			{
-				if( dirtyIfUnrequested( m_dataState ) )
+				auto nIt = newChildMap.find( oldChild->m_name );
+				if( nIt != newChildMap.end() )
 				{
-					const_cast<PathModel *>( model )->scheduleUpdate();
-				}
-
-				if( column >= (int)m_data.size() )
-				{
-					// We haven't computed any data yet.
-					if( column < (int)model->m_columns.size() && role == Qt::DisplayRole )
-					{
-						if( auto *standardColumn = dynamic_cast<const GafferUI::StandardPathColumn *>( model->m_columns[column].get() ) )
-						{
-							if( standardColumn->property() == g_nameProperty )
-							{
-								// Optimisation for standard name column. We
-								// know the name already, so there is no need to
-								// wait for the data to be computed. This
-								// reduces flicker when scrolling rapidly
-								// through many items, making it easier to
-								// orientate yourself.
-								return m_name.c_str();
-							}
-						}
-					}
-					return QVariant();
-				}
-
-				return m_data[column].variant( role );
-			}
-
-			using ChildContainer = std::vector<Ptr>;
-
-			ChildContainer &childItems( const PathModel *model )
-			{
-				if( dirtyIfUnrequested( m_childItemsState ) )
-				{
-					const_cast<PathModel *>( model )->scheduleUpdate();
-				}
-				return *m_childItems;
-			}
-
-			private :
-
-				void dirtyWalk( bool dirtyChildItems, bool dirtyData, const std::vector<int> *dataMapping )
-				{
-					if( dirtyData && ( m_dataState == State::Clean ) )
-					{
-						m_dataState = State::Dirty;
-					}
-					if( dataMapping )
-					{
-						shuffle( m_data, *dataMapping );
-					}
-					if( dirtyChildItems && ( m_childItemsState == State::Clean ) )
-					{
-						m_childItemsState = State::Dirty;
-					}
-					for( const auto &child : *m_childItems )
-					{
-						child->dirtyWalk( dirtyChildItems, dirtyData, dataMapping );
-					}
-				}
-
-				static QVariant dataForSort( const std::vector<CellVariants> &data, PathModel *model )
-				{
-					if( model->m_sortColumn < 0 || model->m_sortColumn >= (int)data.size() )
-					{
-						return QVariant();
-					}
-					return data[model->m_sortColumn].variant( CellVariants::SortRole );
-				}
-
-				// Updates data and returns the value that should be used for sorting.
-				// This value is returned because the actual edit to `m_data` will not be
-				// complete until the queued edit is processed by the UI thread.
-				QVariant updateData( PathModel *model, const Path *path, const IECore::Canceller *canceller )
-				{
-					if( m_dataState == State::Clean || m_dataState == State::Unrequested )
-					{
-						return dataForSort( m_data, model );
-					}
-
-					// We generate data for all columns and roles at once, on the
-					// assumption that access to one is likely to indicate upcoming
-					// accesses to the others.
-
-					std::vector<CellVariants> newData;
-
-					newData.reserve( model->m_columns.size() );
-
-					for( int i = 0, e = model->m_columns.size(); i < e; ++i )
-					{
-						CellVariants cellVariants;
-						try
-						{
-							cellVariants = CellVariants( model->m_columns[i]->cellData( *path, canceller ) );
-						}
-						catch( const IECore::Cancelled & )
-						{
-							throw;
-						}
-						catch( const std::exception &e )
-						{
-							// Qt doesn't use exceptions for error handling,
-							// so we must suppress them.
-							cellVariants = CellVariants(
-								GafferUI::PathColumn::CellData(
-									nullptr,  // value
-									new IECore::StringData( "errorSmall.png" ),  // icon
-									nullptr,  // background
-									new IECore::StringData( e.what() )  // toolTip
-								)
-							);
-						}
-						catch( ... )
-						{
-							IECore::msg( IECore::Msg::Warning, "PathListingWidget", "Unknown error" );
-						}
-
-						newData.push_back( cellVariants );
-					}
-
-					if( newData == m_data )
-					{
-						// No update necessary.
-						m_dataState = State::Clean;
-						return dataForSort( m_data, model );
-					}
-
-					if( m_row == -1 )
-					{
-						// We have just been created in `updateChildItems()` and haven't
-						// been made visible to Qt yet. No need to emit `dataChanged` or
-						// worry about concurrent access from the UI thread.
-						m_data.swap( newData );
-						m_dataState = State::Clean;
-						return dataForSort( m_data, model );
-					}
-
-					// Mark clean _now_, to avoid a double update if we are
-					// called from our parent's `updateChildItems()` (to obtain
-					// data for sorting) and then called again from
-					// `updateWalk()` before the queued edit is applied.
-					m_dataState = State::Clean;
-
-					// Get result before we move `newDisplayData` into the lambda.
-					const QVariant result = dataForSort( newData, model );
-
-					model->queueEdit(
-
-						[this, model, newData = std::move( newData )] () mutable {
-
-							m_data.swap( newData );
-							model->dataChanged( model->createIndex( m_row, 0, this ), model->createIndex( m_row, model->m_columns.size() - 1, this ) );
-
-						}
-
-					);
-
-					return result;
-				}
-
-				void updateExpansion( PathModel *model, const Gaffer::Path *path, const IECore::PathMatcher &expandedPaths )
-				{
-					if( !m_expansionDirty )
-					{
-						return;
-					}
-
-					// Handle expanded paths and recursive expansion.
-
-					unsigned match = expandedPaths.match( path->names() );
-					bool expanded = match & IECore::PathMatcher::ExactMatch;
-
-					if( model->m_recursiveExpansionPath )
-					{
-						if( boost::starts_with( path->names(), *model->m_recursiveExpansionPath ) )
-						{
-							match |= IECore::PathMatcher::DescendantMatch;
-							expanded = true;
-						}
-					}
-
-					if( expanded )
-					{
-						// The QTreeView is inevitably going to query the
-						// children after we call `treeView->setExpanded()`.
-						// Get ahead of the game by creating them during this
-						// update.
-						dirtyIfUnrequested( m_childItemsState );
-					}
-
-					if( expanded != m_expandedInTreeView )
-					{
-						model->queueEdit(
-							[this, model, expanded] {
-								QTreeView *treeView = dynamic_cast<QTreeView *>( model->QObject::parent() );
-								Private::ScopedAssignment<bool> assignment( model->m_modifyingTreeViewExpansion, true );
-								// Call `scheduleDelayedItemsLayout()` so that QTreeView doesn't rebuild
-								// its internal layout for every call to `setExpanded()`. When we are delivering
-								// a sequence of calls (as we do for recursive expansion) this provides a major
-								// performance improvement.
-								scheduleDelayedItemsLayout( treeView );
-								treeView->setExpanded( model->createIndex( m_row, 0, this ), expanded );
-							}
-						);
-					}
-
-					// Handle expansion for selection updates.
-
-					if( model->m_scrollToCandidates )
-					{
-						const unsigned scrollToMatch = model->m_scrollToCandidates->match( path->names() );
-						if( scrollToMatch & IECore::PathMatcher::ExactMatch )
-						{
-							model->queueEdit(
-								[this, model] {
-									QTreeView *treeView = dynamic_cast<QTreeView *>( model->QObject::parent() );
-									const QModelIndex index = model->createIndex( m_row, 0, this );
-									treeView->scrollTo( index, QTreeView::EnsureVisible );
-									treeView->selectionModel()->setCurrentIndex( index, QItemSelectionModel::Current );
-								}
-							);
-							// OK to modify from background thread, because only use on UI thread
-							// is preceded by call to `cancelUpdate()`.
-							model->m_scrollToCandidates.reset();
-						}
-
-						if( scrollToMatch & IECore::PathMatcher::DescendantMatch )
-						{
-							// Force creation of children so we can scroll to them.
-							dirtyIfUnrequested( m_childItemsState );
-						}
-					}
-
-					m_expansionDirty = false;
-				}
-
-				// Returns the updated ChildContainer. This will not be visible in the model
-				// until the queued edit is executed. It is returned so that we can update
-				// the not-yet-visible children in `updateWalk()`.
-				std::shared_ptr<ChildContainer> updateChildItems( PathModel *model, const Gaffer::Path *path, const IECore::Canceller *canceller )
-				{
-					if( m_childItemsState == State::Unrequested || m_childItemsState == State::Clean )
-					{
-						return m_childItems;
-					}
-
-					// Construct a new ChildContainer to replace our previous children.
-					// Where possible we reuse existing children instead of creating new
-					// ones.
-
-					auto newChildItemsPtr = std::make_shared<ChildContainer>();
-					ChildContainer &newChildItems = *newChildItemsPtr;
-
-					std::vector<Gaffer::PathPtr> children;
-					try
-					{
-						path->children( children, canceller );
-					}
-					catch( const std::exception &e )
-					{
-						IECore::msg( IECore::Msg::Error, "PathListingWidget", e.what() );
-					}
-
-					std::unordered_map<IECore::InternedString, Item *> oldChildMap;
-					for( const auto &oldChild : *m_childItems )
-					{
-						oldChildMap[oldChild->m_name] = oldChild.get();
-					}
-
-					for( auto it = children.begin(), eIt = children.end(); it != eIt; ++it )
-					{
-						auto oldIt = oldChildMap.find( (*it)->names().back() );
-						if( oldIt != oldChildMap.end() )
-						{
-							// Reuse previous item.
-							Ptr itemToReuse = oldIt->second;
-							newChildItems.push_back( itemToReuse );
-						}
-						else
-						{
-							// Make new item.
-							newChildItems.push_back( new Item( (*it)->names().back(), this ) );
-						}
-					}
-
-					// Sort the new container if necessary.
-
-					if( model->m_sortColumn >= 0 && model->m_sortColumn < (int)model->m_columns.size() )
-					{
-						using SortablePair = std::pair<QVariant, size_t>;
-						std::vector<SortablePair> sortedIndices;
-						sortedIndices.reserve( newChildItems.size() );
-						bool sortingByName = false;
-						if( auto *standardColumn = dynamic_cast<const GafferUI::StandardPathColumn *>( model->m_columns[model->m_sortColumn].get() ) )
-						{
-							if( standardColumn->property() == g_nameProperty )
-							{
-								sortingByName = true;
-								for( const auto &childItem : newChildItems )
-								{
-									// Optimisation for standard name column. We
-									// know the name already, so there is no need to
-									// wait for the data to be computed. This reduces
-									// delay when displaying items sorted by name.
-									sortedIndices.push_back( SortablePair(
-										childItem->name().c_str(),
-										sortedIndices.size()
-									) );
-								}
-							}
-						}
-
-						if( !sortingByName )
-						{
-							for( const auto &childItem : newChildItems )
-							{
-								dirtyIfUnrequested( childItem->m_dataState );
-								sortedIndices.push_back( SortablePair(
-									childItem->updateData( model, children[sortedIndices.size()].get(), canceller ),
-									sortedIndices.size()
-								) );
-							}
-						}
-
-						std::sort(
-							sortedIndices.begin(), sortedIndices.end(),
-							[model] ( const SortablePair &l, const SortablePair &r ) {
-								return model->m_sortOrder == Qt::AscendingOrder ? variantLess( l.first, r.first ) : variantLess( r.first, l.first );
-							}
-						);
-
-						ChildContainer sortedChildItems;
-						sortedChildItems.reserve( sortedIndices.size() );
-						for( const auto &item : sortedIndices )
-						{
-							sortedChildItems.push_back( newChildItems[item.second] );
-						}
-						newChildItems.swap( sortedChildItems );
-					}
-
-					// Early out if nothing has changed.
-
-					if( newChildItems == *m_childItems )
-					{
-						m_childItemsState = State::Clean;
-						return m_childItems;
-					}
-
-					// If we had children before, figure out the mapping from old to new,
-					// so we can tell Qt about it. This is necessary so that persistent
-					// indices used to represent selection and expansion remain valid.
-
-					QModelIndexList changedPersistentIndexesFrom, changedPersistentIndexesTo;
-
-					std::unordered_map<IECore::InternedString, size_t> newChildMap;
-					for( size_t i = 0; i < newChildItems.size(); ++i )
-					{
-						newChildMap[newChildItems[i]->m_name] = i;
-					}
-
-					for( const auto &oldChild : *m_childItems )
-					{
-						auto nIt = newChildMap.find( oldChild->m_name );
-						if( nIt != newChildMap.end() )
-						{
-							const int toRow = nIt->second;
-							for( int c = 0, ce = model->getColumns().size(); c < ce; ++c )
-							{
-								changedPersistentIndexesFrom.append( model->createIndex( oldChild->row(), c, oldChild.get() ) );
-								changedPersistentIndexesTo.append( model->createIndex( toRow, c, newChildItems[toRow].get() ) );
-							}
-						}
-						else
-						{
-							oldChild->invalidateIndexes( model, changedPersistentIndexesFrom, changedPersistentIndexesTo );
-						}
-					}
-
-					// Apply the update.
-
-					model->queueEdit(
-
-						[this, model, newChildItemsPtr, changedPersistentIndexesFrom, changedPersistentIndexesTo]() mutable {
-
-							// We have to mark ourselves clean _before_ changing
-							// layout, to avoid recursion when Qt responds to
-							// `layoutAboutToBeChanged()`.
-							m_childItemsState = State::Clean;
-							QList<QPersistentModelIndex> parents = { model->createIndex( row(), 0, this ) };
-							model->layoutAboutToBeChanged( parents );
-
-							m_childItems = newChildItemsPtr;
-							for( size_t i = 0; i < m_childItems->size(); ++i )
-							{
-								(*m_childItems)[i]->m_row = i;
-							}
-
-							model->changePersistentIndexList( changedPersistentIndexesFrom, changedPersistentIndexesTo );
-							model->layoutChanged( parents );
-
-						}
-
-					);
-
-					return newChildItemsPtr;
-				}
-
-				void invalidateIndexes( PathModel *model, QModelIndexList &from, QModelIndexList &to )
-				{
+					const int toRow = nIt->second;
 					for( int c = 0, ce = model->getColumns().size(); c < ce; ++c )
 					{
-						from.append( model->createIndex( m_row, c, this ) );
-						to.append( QModelIndex() );
-					}
-					for( const auto &child : *m_childItems )
-					{
-						child->invalidateIndexes( model, from, to );
+						changedPersistentIndexesFrom.append( model->createIndex( oldChild->row(), c, oldChild.get() ) );
+						changedPersistentIndexesTo.append( model->createIndex( toRow, c, newChildItems[toRow].get() ) );
 					}
 				}
+				else
+				{
+					oldChild->invalidateIndexes( model, changedPersistentIndexesFrom, changedPersistentIndexesTo );
+				}
+			}
 
-				const IECore::InternedString m_name;
-				Item *m_parent;
-				int m_row;
+			// Apply the update.
 
-				std::atomic<State> m_dataState;
-				std::vector<CellVariants> m_data;
+			model->queueEdit(
 
-				std::atomic<State> m_childItemsState;
-				// Children are held by `shared_ptr` in order to support
-				// asynchronous update. Newly created children aren't owned
-				// by the Item until `m_childItems` is assigned on the UI
-				// thread, which may happen before, during, or after the
-				// recursive background update completes.
-				std::shared_ptr<ChildContainer> m_childItems;
+				[this, model, newChildItemsPtr, changedPersistentIndexesFrom, changedPersistentIndexesTo]() mutable {
+					// We have to mark ourselves clean _before_ changing
+					// layout, to avoid recursion when Qt responds to
+					// `layoutAboutToBeChanged()`.
+					m_childItemsState = State::Clean;
+					QList<QPersistentModelIndex> parents = { model->createIndex( row(), 0, this ) };
+					model->layoutAboutToBeChanged( parents );
 
-				bool m_expansionDirty;
-				// Mirrors current Qt expansion status, because we can't query it
-				// directly in a threadsafe way.
-				bool m_expandedInTreeView;
+					m_childItems = newChildItemsPtr;
+					for( size_t i = 0; i < m_childItems->size(); ++i )
+					{
+						( *m_childItems )[i]->m_row = i;
+					}
 
-		};
+					model->changePersistentIndexList( changedPersistentIndexesFrom, changedPersistentIndexesTo );
+					model->layoutChanged( parents );
+				}
 
-		void indicesForPathsWalk( Item *item, const Path::Names &itemPath, const QModelIndex &itemIndex, const IECore::PathMatcher &paths, std::vector<QModelIndex> &indices ) const
+			);
+
+			return newChildItemsPtr;
+		}
+
+		void invalidateIndexes( PathModel *model, QModelIndexList &from, QModelIndexList &to )
 		{
-			/// \todo Using `match()` here isn't right, because we want to
-			/// treat wildcards in the selection verbatim rather than perform
-			/// matching with them. We should use `find()`, but that doesn't
-			/// provide a convenient way of checking for descendant matches.
-			const unsigned match = paths.match( itemPath );
-			if( match & IECore::PathMatcher::ExactMatch )
+			for( int c = 0, ce = model->getColumns().size(); c < ce; ++c )
 			{
-				indices.push_back( itemIndex );
+				from.append( model->createIndex( m_row, c, this ) );
+				to.append( QModelIndex() );
 			}
-
-			if( !(match & IECore::PathMatcher::DescendantMatch) )
+			for( const auto &child : *m_childItems )
 			{
-				return;
-			}
-
-			size_t row = 0;
-			Path::Names childItemPath = itemPath;
-			childItemPath.push_back( IECore::InternedString() ); // Room for child name
-			for( const auto &childItem : item->childItems( this ) )
-			{
-				const QModelIndex childIndex = index( row++, 0, itemIndex );
-				childItemPath.back() = childItem->name();
-				indicesForPathsWalk( childItem.get(), childItemPath, childIndex, paths, indices );
+				child->invalidateIndexes( model, from, to );
 			}
 		}
 
-		void treeViewExpanded( const QModelIndex &index )
+		const IECore::InternedString m_name;
+		Item *m_parent;
+		int m_row;
+
+		std::atomic<State> m_dataState;
+		std::vector<CellVariants> m_data;
+
+		std::atomic<State> m_childItemsState;
+		// Children are held by `shared_ptr` in order to support
+		// asynchronous update. Newly created children aren't owned
+		// by the Item until `m_childItems` is assigned on the UI
+		// thread, which may happen before, during, or after the
+		// recursive background update completes.
+		std::shared_ptr<ChildContainer> m_childItems;
+
+		bool m_expansionDirty;
+		// Mirrors current Qt expansion status, because we can't query it
+		// directly in a threadsafe way.
+		bool m_expandedInTreeView;
+	};
+
+	void indicesForPathsWalk( Item *item, const Path::Names &itemPath, const QModelIndex &itemIndex, const IECore::PathMatcher &paths, std::vector<QModelIndex> &indices ) const
+	{
+		/// \todo Using `match()` here isn't right, because we want to
+		/// treat wildcards in the selection verbatim rather than perform
+		/// matching with them. We should use `find()`, but that doesn't
+		/// provide a convenient way of checking for descendant matches.
+		const unsigned match = paths.match( itemPath );
+		if( match & IECore::PathMatcher::ExactMatch )
 		{
-			// Store the expansion state in the Item, so that it can be looked
-			// up in a thread-safe way in `Item::updateExpansion(). We do this
-			// no matter the source of the change to the tree view, so that the
-			// Item has an exact mirror of the tree view state.
-			static_cast<Item *>( index.internalPointer() )->treeViewExpansionChanged( true );
-
-			if( m_modifyingTreeViewExpansion )
-			{
-				// We're modifying the expansion ourselves, to mirror
-				// `m_expandedPaths` into the tree view. In this case there is
-				// no need to sync back into `m_expandedPaths`.
-				return;
-			}
-
-			// The user has modified the expansion interactively. We need to
-			// reflect this back into `m_expandedPaths` and report it via
-			// `expansionChanged()`.
-
-			const Path::Names expandedPath = namesForIndex( index );
-			// It's possible for `addPath()` to return false if the path is
-			// already added, but the async update hasn't transferred it to
-			// the QTreeView yet (allowing a user to expand it manually in
-			// the meantime).
-			if( m_expandedPaths.addPath( expandedPath ) )
-			{
-				expansionChanged();
-			}
-
-			if( QGuiApplication::keyboardModifiers() & Qt::ShiftModifier )
-			{
-				// Recursively expand everything below this index. This
-				// could be expensive, so we do it during the async update.
-				cancelUpdate();
-				m_recursiveExpansionPath = expandedPath;
-				static_cast<Item *>( index.internalPointer() )->dirtyExpansion();
-				scheduleUpdate();
-			}
+			indices.push_back( itemIndex );
 		}
 
-		void finaliseRecursiveExpansion()
+		if( !( match & IECore::PathMatcher::DescendantMatch ) )
 		{
-			if( !m_recursiveExpansionPath )
-			{
-				return;
-			}
-			// We've expanded a bunch of paths on the Qt side, and now
-			// we need to reflect that in `m_expandedPaths`.
-			QModelIndex index = indexForPath( *m_recursiveExpansionPath );
-			assert( index.isValid() );
-			m_expandedPaths.addPath( *m_recursiveExpansionPath );
-			m_expandedPaths.addPaths( descendantPaths( static_cast<Item *>( index.internalPointer() ) ), *m_recursiveExpansionPath );
-			m_recursiveExpansionPath.reset();
+			return;
+		}
+
+		size_t row = 0;
+		Path::Names childItemPath = itemPath;
+		childItemPath.push_back( IECore::InternedString() ); // Room for child name
+		for( const auto &childItem : item->childItems( this ) )
+		{
+			const QModelIndex childIndex = index( row++, 0, itemIndex );
+			childItemPath.back() = childItem->name();
+			indicesForPathsWalk( childItem.get(), childItemPath, childIndex, paths, indices );
+		}
+	}
+
+	void treeViewExpanded( const QModelIndex &index )
+	{
+		// Store the expansion state in the Item, so that it can be looked
+		// up in a thread-safe way in `Item::updateExpansion(). We do this
+		// no matter the source of the change to the tree view, so that the
+		// Item has an exact mirror of the tree view state.
+		static_cast<Item *>( index.internalPointer() )->treeViewExpansionChanged( true );
+
+		if( m_modifyingTreeViewExpansion )
+		{
+			// We're modifying the expansion ourselves, to mirror
+			// `m_expandedPaths` into the tree view. In this case there is
+			// no need to sync back into `m_expandedPaths`.
+			return;
+		}
+
+		// The user has modified the expansion interactively. We need to
+		// reflect this back into `m_expandedPaths` and report it via
+		// `expansionChanged()`.
+
+		const Path::Names expandedPath = namesForIndex( index );
+		// It's possible for `addPath()` to return false if the path is
+		// already added, but the async update hasn't transferred it to
+		// the QTreeView yet (allowing a user to expand it manually in
+		// the meantime).
+		if( m_expandedPaths.addPath( expandedPath ) )
+		{
 			expansionChanged();
 		}
 
-		IECore::PathMatcher descendantPaths( Item *item )
+		if( QGuiApplication::keyboardModifiers() & Qt::ShiftModifier )
 		{
-			IECore::PathMatcher result;
-			for( const auto &child : item->childItems( this ) )
-			{
-				std::vector<IECore::InternedString> childPath( { child->name() } );
-				result.addPath( childPath );
-				result.addPaths( descendantPaths( child.get() ), childPath );
-			}
-			return result;
-		}
-
-		void treeViewCollapsed( const QModelIndex &index )
-		{
-			static_cast<Item *>( index.internalPointer() )->treeViewExpansionChanged( false );
-			if( m_modifyingTreeViewExpansion )
-			{
-				return;
-			}
-
-			const Path::Names collapsedPath = namesForIndex( index );
-			bool expandedPathsChanged = m_expandedPaths.removePath( collapsedPath );
-
-			if( m_recursiveExpansionPath && boost::starts_with( *m_recursiveExpansionPath, collapsedPath ) )
-			{
-				// Abort recursive expansion because a parent path has been
-				// collapsed.
-				cancelUpdate();
-				m_recursiveExpansionPath.reset();
-				scheduleUpdate();
-			}
-
-			if( QGuiApplication::keyboardModifiers() & Qt::ShiftModifier )
-			{
-				// Recursively collapse everything below this index.
-				expandedPathsChanged |= m_expandedPaths.prune( collapsedPath );
-				Private::ScopedAssignment<bool> assignment( m_modifyingTreeViewExpansion, true );
-				collapseDescendants( static_cast<QTreeView *>( QObject::parent() ), index );
-			}
-
-			if( expandedPathsChanged )
-			{
-				expansionChanged();
-			}
-		}
-
-		void collapseDescendants( QTreeView *treeView, const QModelIndex &index )
-		{
-			for( int i = 0, e = rowCount( index ); i < e; ++i )
-			{
-				const QModelIndex childIndex = this->index( i, 0, index );
-				treeView->setExpanded( childIndex, false );
-				collapseDescendants( treeView, childIndex );
-			}
-		}
-
-		IECore::PathMatcher visiblePaths() const
-		{
-			QTreeView *treeView = static_cast<QTreeView *>( QObject::parent() );
-			const int height = treeView->height();
-
-			IECore::PathMatcher result;
-
-			QModelIndex index = treeView->indexAt( QPoint( 0, 0 ) );
-			while( index.isValid() && treeView->visualRect( index ).top() < height )
-			{
-				result.addPath( namesForIndex( index ) );
-				index = treeView->indexBelow( index );
-			}
-
-			return result;
-		}
-
-		// Column change handling
-
-		void columnChanged()
-		{
+			// Recursively expand everything below this index. This
+			// could be expensive, so we do it during the async update.
 			cancelUpdate();
-			m_rootItem->dirty( /* dirtyChildItems = */ false, /* dirtyData = */ true );
-			if( m_headerDataState == State::Clean )
-			{
-				m_headerDataState = State::Dirty;
-			}
+			m_recursiveExpansionPath = expandedPath;
+			static_cast<Item *>( index.internalPointer() )->dirtyExpansion();
+			scheduleUpdate();
+		}
+	}
+
+	void finaliseRecursiveExpansion()
+	{
+		if( !m_recursiveExpansionPath )
+		{
+			return;
+		}
+		// We've expanded a bunch of paths on the Qt side, and now
+		// we need to reflect that in `m_expandedPaths`.
+		QModelIndex index = indexForPath( *m_recursiveExpansionPath );
+		assert( index.isValid() );
+		m_expandedPaths.addPath( *m_recursiveExpansionPath );
+		m_expandedPaths.addPaths( descendantPaths( static_cast<Item *>( index.internalPointer() ) ), *m_recursiveExpansionPath );
+		m_recursiveExpansionPath.reset();
+		expansionChanged();
+	}
+
+	IECore::PathMatcher descendantPaths( Item *item )
+	{
+		IECore::PathMatcher result;
+		for( const auto &child : item->childItems( this ) )
+		{
+			std::vector<IECore::InternedString> childPath( { child->name() } );
+			result.addPath( childPath );
+			result.addPaths( descendantPaths( child.get() ), childPath );
+		}
+		return result;
+	}
+
+	void treeViewCollapsed( const QModelIndex &index )
+	{
+		static_cast<Item *>( index.internalPointer() )->treeViewExpansionChanged( false );
+		if( m_modifyingTreeViewExpansion )
+		{
+			return;
+		}
+
+		const Path::Names collapsedPath = namesForIndex( index );
+		bool expandedPathsChanged = m_expandedPaths.removePath( collapsedPath );
+
+		if( m_recursiveExpansionPath && boost::starts_with( *m_recursiveExpansionPath, collapsedPath ) )
+		{
+			// Abort recursive expansion because a parent path has been
+			// collapsed.
+			cancelUpdate();
+			m_recursiveExpansionPath.reset();
 			scheduleUpdate();
 		}
 
-		// Member data
+		if( QGuiApplication::keyboardModifiers() & Qt::ShiftModifier )
+		{
+			// Recursively collapse everything below this index.
+			expandedPathsChanged |= m_expandedPaths.prune( collapsedPath );
+			Private::ScopedAssignment<bool> assignment( m_modifyingTreeViewExpansion, true );
+			collapseDescendants( static_cast<QTreeView *>( QObject::parent() ), index );
+		}
 
-		Gaffer::PathPtr m_rootPath;
+		if( expandedPathsChanged )
+		{
+			expansionChanged();
+		}
+	}
 
-		std::vector<CellVariants> m_headerData;
-		mutable std::atomic<State> m_headerDataState;
-		Item::Ptr m_rootItem;
-		bool m_flat;
-		std::vector<GafferUI::PathColumnPtr> m_columns;
-		std::vector<Gaffer::Signals::ScopedConnection> m_columnChangedConnections;
-		int m_sortColumn;
-		Qt::SortOrder m_sortOrder;
-		std::unique_ptr<QAbstractItemModelTester> m_tester;
+	void collapseDescendants( QTreeView *treeView, const QModelIndex &index )
+	{
+		for( int i = 0, e = rowCount( index ); i < e; ++i )
+		{
+			const QModelIndex childIndex = this->index( i, 0, index );
+			treeView->setExpanded( childIndex, false );
+			collapseDescendants( treeView, childIndex );
+		}
+	}
 
-		IECore::PathMatcher m_expandedPaths;
-		bool m_modifyingTreeViewExpansion;
-		std::optional<Path::Names> m_recursiveExpansionPath;
+	IECore::PathMatcher visiblePaths() const
+	{
+		QTreeView *treeView = static_cast<QTreeView *>( QObject::parent() );
+		const int height = treeView->height();
 
-		// A vector of `IECore::PathMatcher` objects, one for each column
-		Selection m_selection;
-		// All of the `PathMatchers` from `m_selection` merged into one
-		// to avoid merging every time paths are expanded.
-		IECore::PathMatcher m_selectedPaths;
-		// Parameters used to control expansion update following call to
-		// `setSelection()`.
-		std::optional<IECore::PathMatcher> m_scrollToCandidates;
+		IECore::PathMatcher result;
 
-		std::unique_ptr<Gaffer::BackgroundTask> m_updateTask;
-		bool m_updateScheduled;
-		bool m_blockUpdateFinished;
+		QModelIndex index = treeView->indexAt( QPoint( 0, 0 ) );
+		while( index.isValid() && treeView->visualRect( index ).top() < height )
+		{
+			result.addPath( namesForIndex( index ) );
+			index = treeView->indexBelow( index );
+		}
 
+		return result;
+	}
+
+	// Column change handling
+
+	void columnChanged()
+	{
+		cancelUpdate();
+		m_rootItem->dirty( /* dirtyChildItems = */ false, /* dirtyData = */ true );
+		if( m_headerDataState == State::Clean )
+		{
+			m_headerDataState = State::Dirty;
+		}
+		scheduleUpdate();
+	}
+
+	// Member data
+
+	Gaffer::PathPtr m_rootPath;
+
+	std::vector<CellVariants> m_headerData;
+	mutable std::atomic<State> m_headerDataState;
+	Item::Ptr m_rootItem;
+	bool m_flat;
+	std::vector<GafferUI::PathColumnPtr> m_columns;
+	std::vector<Gaffer::Signals::ScopedConnection> m_columnChangedConnections;
+	int m_sortColumn;
+	Qt::SortOrder m_sortOrder;
+	std::unique_ptr<QAbstractItemModelTester> m_tester;
+
+	IECore::PathMatcher m_expandedPaths;
+	bool m_modifyingTreeViewExpansion;
+	std::optional<Path::Names> m_recursiveExpansionPath;
+
+	// A vector of `IECore::PathMatcher` objects, one for each column
+	Selection m_selection;
+	// All of the `PathMatchers` from `m_selection` merged into one
+	// to avoid merging every time paths are expanded.
+	IECore::PathMatcher m_selectedPaths;
+	// Parameters used to control expansion update following call to
+	// `setSelection()`.
+	std::optional<IECore::PathMatcher> m_scrollToCandidates;
+
+	std::unique_ptr<Gaffer::BackgroundTask> m_updateTask;
+	bool m_updateScheduled;
+	bool m_blockUpdateFinished;
 };
 
 } // namespace
@@ -2220,40 +2205,39 @@ size_t hash_value( const QColor &v )
 namespace
 {
 
-using DisplayTransform = std::function<Imath::Color3f ( const Imath::Color3f & )>;
+using DisplayTransform = std::function<Imath::Color3f( const Imath::Color3f & )>;
 
 struct DisplayColorCache : public IECorePreview::LRUCache<QColor, QIcon, IECorePreview::LRUCachePolicy::Serial>
 {
 	DisplayColorCache( const DisplayTransform &displayTransform, size_t maxIcons = 1000 )
-		:	IECorePreview::LRUCache<QColor, QIcon, IECorePreview::LRUCachePolicy::Serial>(
-				[displayTransform] ( const QColor &color, size_t &cost, const IECore::Canceller *canceller ) {
-					cost = 1;
-					return convert( color, displayTransform );
-				},
-				maxIcons
-			)
+		: IECorePreview::LRUCache<QColor, QIcon, IECorePreview::LRUCachePolicy::Serial>(
+			  [displayTransform]( const QColor &color, size_t &cost, const IECore::Canceller *canceller ) {
+				  cost = 1;
+				  return convert( color, displayTransform );
+			  },
+			  maxIcons
+		  )
 	{
 	}
 
-	private :
+private:
 
-		static QIcon convert( const QColor &qColor, const DisplayTransform &displayTransform )
-		{
-			const Imath::Color3f c = displayTransform(
-				Imath::Color3f( qColor.redF(), qColor.greenF(), qColor.blueF() )
-			);
-			QPixmap pixmap( QSize( 16, 16 ) );
-			pixmap.fill( QColor::fromRgbF( c[0], c[1], c[2] ) );
-			return QIcon( pixmap );
-		}
-
+	static QIcon convert( const QColor &qColor, const DisplayTransform &displayTransform )
+	{
+		const Imath::Color3f c = displayTransform(
+			Imath::Color3f( qColor.redF(), qColor.greenF(), qColor.blueF() )
+		);
+		QPixmap pixmap( QSize( 16, 16 ) );
+		pixmap.fill( QColor::fromRgbF( c[0], c[1], c[2] ) );
+		return QIcon( pixmap );
+	}
 };
 
 struct DisplayGradientCacheGetterKey
 {
 
 	DisplayGradientCacheGetterKey( const IECore::Data *rampData = nullptr )
-		:	rampData( rampData ), hash( rampData ?  rampData->Object::hash() : IECore::MurmurHash() )
+		: rampData( rampData ), hash( rampData ? rampData->Object::hash() : IECore::MurmurHash() )
 	{
 	}
 
@@ -2264,60 +2248,58 @@ struct DisplayGradientCacheGetterKey
 
 	const IECore::Data *rampData;
 	const IECore::MurmurHash hash;
-
 };
 
 struct DisplayGradientCache : public IECorePreview::LRUCache<IECore::MurmurHash, QBrush, IECorePreview::LRUCachePolicy::Serial, DisplayGradientCacheGetterKey>
 {
 
 	DisplayGradientCache( const DisplayTransform &displayTransform, size_t maxGradients = 1000 )
-		:	IECorePreview::LRUCache<IECore::MurmurHash, QBrush, IECorePreview::LRUCachePolicy::Serial, DisplayGradientCacheGetterKey>(
-				[displayTransform] ( const DisplayGradientCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller ) {
-					cost = 1;
-					return convert( key.rampData, displayTransform );
-				},
-				maxGradients
-			)
+		: IECorePreview::LRUCache<IECore::MurmurHash, QBrush, IECorePreview::LRUCachePolicy::Serial, DisplayGradientCacheGetterKey>(
+			  [displayTransform]( const DisplayGradientCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+				  cost = 1;
+				  return convert( key.rampData, displayTransform );
+			  },
+			  maxGradients
+		  )
 	{
 	}
 
-	private :
+private:
 
-		static QBrush convert( const IECore::Data *data, const DisplayTransform &displayTransform )
+	static QBrush convert( const IECore::Data *data, const DisplayTransform &displayTransform )
+	{
+		switch( data->typeId() )
 		{
-			switch( data->typeId() )
+			case IECore::RampffDataTypeId :
+				return convertTyped( static_cast<const IECore::RampffData *>( data )->readable(), displayTransform );
+			case IECore::RampfColor3fDataTypeId :
+				return convertTyped( static_cast<const IECore::RampfColor3fData *>( data )->readable(), displayTransform );
+			default :
+				return QBrush();
+		}
+	}
+
+	template<typename RampType>
+	static QBrush convertTyped( const RampType &ramp, const DisplayTransform &displayTransform )
+	{
+		QLinearGradient gradient( QPoint( 0, 0 ), QPoint( 1, 0 ) );
+		gradient.setCoordinateMode( QGradient::ObjectMode );
+
+		auto evaluator = ramp.evaluator();
+		const int numStops = 100;
+		for( int i = 0; i < numStops; ++i )
+		{
+			float x = (float)i / (float)( numStops - 1 );
+			Imath::Color3f c( evaluator( x ) );
+			if( displayTransform )
 			{
-				case IECore::RampffDataTypeId :
-					return convertTyped( static_cast<const IECore::RampffData *>( data )->readable(), displayTransform );
-				case IECore::RampfColor3fDataTypeId :
-					return convertTyped( static_cast<const IECore::RampfColor3fData *>( data )->readable(), displayTransform );
-				default :
-					return QBrush();
+				c = displayTransform( c );
 			}
+			gradient.setColorAt( x, QColor::fromRgbF( c[0], c[1], c[2] ) );
 		}
 
-		template<typename RampType>
-		static QBrush convertTyped( const RampType &ramp, const DisplayTransform &displayTransform )
-		{
-			QLinearGradient gradient( QPoint( 0, 0 ), QPoint( 1, 0 ) );
-			gradient.setCoordinateMode( QGradient::ObjectMode );
-
-			auto evaluator = ramp.evaluator();
-			const int numStops = 100;
-			for( int i = 0; i < numStops; ++i )
-			{
-				float x = (float)i / (float)(numStops - 1);
-				Imath::Color3f c( evaluator( x ) );
-				if( displayTransform )
-				{
-					c = displayTransform( c );
-				}
-				gradient.setColorAt( x, QColor::fromRgbF( c[0], c[1], c[2] ) );
-			}
-
-			return QBrush( gradient );
-		}
-
+		return QBrush( gradient );
+	}
 };
 
 } // namespace
@@ -2332,82 +2314,81 @@ namespace
 class PathListingWidgetItemDelegate : public QStyledItemDelegate
 {
 
-	public :
+public:
 
-		PathListingWidgetItemDelegate( QObject *parent = nullptr )
-			:	QStyledItemDelegate( parent )
+	PathListingWidgetItemDelegate( QObject *parent = nullptr )
+		: QStyledItemDelegate( parent )
+	{
+	}
+
+	void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override
+	{
+		QStyledItemDelegate::paint( painter, option, index );
+
+		const QVariant displayData = index.data( Qt::DisplayRole );
+		if( auto data = displayData.value<IECore::ConstDataPtr>() )
 		{
-		}
-
-		void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override
-		{
-			QStyledItemDelegate::paint( painter, option, index );
-
-			const QVariant displayData = index.data( Qt::DisplayRole );
-			if( auto data = displayData.value<IECore::ConstDataPtr>() )
+			// When we want to render ramps, we just pass the data
+			// through directly and convert it here.
+			QBrush brush = m_displayGradientCache->get( data.get() );
+			if( brush.style() != Qt::NoBrush )
 			{
-				// When we want to render ramps, we just pass the data
-				// through directly and convert it here.
-				QBrush brush = m_displayGradientCache->get( data.get() );
-				if( brush.style() != Qt::NoBrush )
-				{
-					QRect rect = option.rect;
-					rect.setTopLeft( rect.topLeft() + QPoint( 2, 2 ) );
-					rect.setBottomRight( rect.bottomRight() - QPoint( 2, 2 ) );
-					painter->fillRect( rect, brush );
-				}
+				QRect rect = option.rect;
+				rect.setTopLeft( rect.topLeft() + QPoint( 2, 2 ) );
+				rect.setBottomRight( rect.bottomRight() - QPoint( 2, 2 ) );
+				painter->fillRect( rect, brush );
 			}
 		}
+	}
 
-		void updateDisplayTransform( const DisplayTransform &displayTransform )
+	void updateDisplayTransform( const DisplayTransform &displayTransform )
+	{
+		if( displayTransform )
 		{
-			if( displayTransform )
-			{
-				m_displayColorCache = std::make_unique<DisplayColorCache>( displayTransform );
-			}
-			else
-			{
-				m_displayColorCache.reset();
-			}
-
-			m_displayGradientCache = std::make_unique<DisplayGradientCache>( displayTransform );
+			m_displayColorCache = std::make_unique<DisplayColorCache>( displayTransform );
+		}
+		else
+		{
+			m_displayColorCache.reset();
 		}
 
-	protected :
+		m_displayGradientCache = std::make_unique<DisplayGradientCache>( displayTransform );
+	}
 
-		void initStyleOption( QStyleOptionViewItem *option, const QModelIndex &index ) const override
+protected:
+
+	void initStyleOption( QStyleOptionViewItem *option, const QModelIndex &index ) const override
+	{
+		QStyledItemDelegate::initStyleOption( option, index );
+
+		if( m_displayColorCache )
 		{
-			QStyledItemDelegate::initStyleOption( option, index );
-
-			if( m_displayColorCache )
+			const QVariant decoration = index.data( Qt::DecorationRole );
+			if( decoration.userType() == QMetaType::QColor )
 			{
-				const QVariant decoration = index.data( Qt::DecorationRole );
-				if( decoration.userType() == QMetaType::QColor )
-				{
-					// Update `option` to apply a display transform. Making a
-					// QPixmap for this seems wasteful, but that's what the
-					// QStyledItemDelegate does.
-					const QColor qc = qvariant_cast<QColor>( decoration );
-					option->icon = m_displayColorCache->get( qc );
-				}
-			}
-
-			if( option->state & QStyle::State_MouseOver )
-			{
-				// Ideally the QStyle would automatically use `State_MouseOver`
-				// to draw the `QIcon::Active` version of an icon. But it
-				// doesn't do that. So instead, we switch in the active version
-				// of the icon here, before it gets passed to the style for
-				// drawing.
-				option->icon = QIcon( option->icon.pixmap( option->decorationSize, QIcon::Active ) );
+				// Update `option` to apply a display transform. Making a
+				// QPixmap for this seems wasteful, but that's what the
+				// QStyledItemDelegate does.
+				const QColor qc = qvariant_cast<QColor>( decoration );
+				option->icon = m_displayColorCache->get( qc );
 			}
 		}
 
-	private :
+		if( option->state & QStyle::State_MouseOver )
+		{
+			// Ideally the QStyle would automatically use `State_MouseOver`
+			// to draw the `QIcon::Active` version of an icon. But it
+			// doesn't do that. So instead, we switch in the active version
+			// of the icon here, before it gets passed to the style for
+			// drawing.
+			option->icon = QIcon( option->icon.pixmap( option->decorationSize, QIcon::Active ) );
+		}
+	}
 
-		std::unique_ptr<DisplayColorCache> m_displayColorCache;
-		std::unique_ptr<DisplayGradientCache> m_displayGradientCache;
+private:
 
+	std::unique_ptr<DisplayColorCache> m_displayColorCache;
+	std::unique_ptr<DisplayGradientCache> m_displayGradientCache;
 };
 
 } // namespace
@@ -2479,11 +2460,11 @@ void updateDelegate( uint64_t treeViewAddress, boost::python::object pythonDispl
 		);
 
 		delegate->updateDisplayTransform(
-			[pythonDisplayTransformPtr] ( const Imath::Color3f &color ) -> Imath::Color3f {
+			[pythonDisplayTransformPtr]( const Imath::Color3f &color ) -> Imath::Color3f {
 				IECorePython::ScopedGILLock gilLock;
 				try
 				{
-					return extract<Imath::Color3f>( (*pythonDisplayTransformPtr)( color ) );
+					return extract<Imath::Color3f>( ( *pythonDisplayTransformPtr )( color ) );
 				}
 				catch( const boost::python::error_already_set & )
 				{
@@ -2627,7 +2608,8 @@ IECore::PathMatcher pathsForIndexRange( uint64_t treeViewAddress, uint64_t index
 	IECore::PathMatcher result;
 	// Range is inclusive, so always includes index0 and index1, even
 	// if they are equal.
-	while( index0.isValid() ) {
+	while( index0.isValid() )
+	{
 		result.addPath( model->namesForIndex( index0 ) );
 		if( index0.internalPointer() == index1.internalPointer() )
 		{

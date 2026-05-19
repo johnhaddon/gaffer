@@ -48,52 +48,51 @@ template<typename T>
 class IECORE_EXPORT NumericPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = T;
+	using ValueType = T;
 
-		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( NumericPlug<T>, ValuePlug );
+	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( NumericPlug<T>, ValuePlug );
 
-		explicit NumericPlug(
-			const std::string &name = defaultName<NumericPlug>(),
-			Direction direction=In,
-			T defaultValue = T(),
-			T minValue = std::numeric_limits<T>::lowest(),
-			T maxValue = std::numeric_limits<T>::max(),
-			unsigned flags = Default
-		);
-		~NumericPlug() override;
+	explicit NumericPlug(
+		const std::string &name = defaultName<NumericPlug>(),
+		Direction direction = In,
+		T defaultValue = T(),
+		T minValue = std::numeric_limits<T>::lowest(),
+		T maxValue = std::numeric_limits<T>::max(),
+		unsigned flags = Default
+	);
+	~NumericPlug() override;
 
-		/// Accepts other NumericPlugs, including those of different types, and BoolPlugs.
-		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Accepts other NumericPlugs, including those of different types, and BoolPlugs.
+	bool acceptsInput( const Plug *input ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		T defaultValue() const;
+	T defaultValue() const;
 
-		bool hasMinValue() const;
-		bool hasMaxValue() const;
+	bool hasMinValue() const;
+	bool hasMaxValue() const;
 
-		T minValue() const;
-		T maxValue() const;
+	T minValue() const;
+	T maxValue() const;
 
-		/// Clamps the value between min and max.
-		/// \undoable
-		void setValue( T value );
-		/// Returns the value.
-		/// See comments in TypedObjectPlug::getValue() for details of
-		/// the optional precomputedHash argument - and use with care!
-		T getValue( const IECore::MurmurHash *precomputedHash = nullptr ) const;
+	/// Clamps the value between min and max.
+	/// \undoable
+	void setValue( T value );
+	/// Returns the value.
+	/// See comments in TypedObjectPlug::getValue() for details of
+	/// the optional precomputedHash argument - and use with care!
+	T getValue( const IECore::MurmurHash *precomputedHash = nullptr ) const;
 
-		void setFrom( const ValuePlug *other ) override;
+	void setFrom( const ValuePlug *other ) override;
 
-	private :
+private:
 
-		using DataType = IECore::TypedData<T>;
-		using DataTypePtr = typename DataType::Ptr;
+	using DataType = IECore::TypedData<T>;
+	using DataTypePtr = typename DataType::Ptr;
 
-		T m_minValue;
-		T m_maxValue;
-
+	T m_minValue;
+	T m_maxValue;
 };
 
 using FloatPlug = NumericPlug<float>;

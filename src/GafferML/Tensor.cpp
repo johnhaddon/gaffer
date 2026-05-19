@@ -55,10 +55,14 @@ namespace
 // the supported types.
 
 template<typename T, typename Enabler = void>
-struct HasTensorType : std::false_type {};
+struct HasTensorType : std::false_type
+{
+};
 
 template<typename T>
-struct HasTensorType<T, std::enable_if_t<sizeof( Ort::TypeToTensorType<T> ) != 0>> : std::true_type {};
+struct HasTensorType<T, std::enable_if_t<sizeof( Ort::TypeToTensorType<T> ) != 0>> : std::true_type
+{
+};
 
 // ShapeTraits allows us to automatically determine the tensor layout for
 // types like Imath::Vec3 etc.
@@ -166,8 +170,7 @@ DataPtr dataFromValue( const Ort::Value &value )
 		DataPtr result;
 		dispatchTensorData(
 			value,
-			[&] ( const auto *data ) {
-
+			[&]( const auto *data ) {
 				using ElementType = remove_const_t<remove_pointer_t<decltype( data )>>;
 				const size_t count = value.GetTensorTypeAndShapeInfo().GetElementCount();
 
@@ -196,7 +199,6 @@ DataPtr dataFromValue( const Ort::Value &value )
 					d->writable().insert( d->writable().end(), data, data + count );
 					result = d;
 				}
-
 			}
 		);
 		return result;
@@ -220,12 +222,12 @@ inline void murmurHashAppend( MurmurHash &h, const Ort::BFloat16_t *data, size_t
 	h.append( reinterpret_cast<const unsigned short *>( data ), numElements );
 }
 
-}  // namespace IECore
+} // namespace IECore
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Tensor );
 
 Tensor::State::State( Ort::Value &&value, IECore::ConstDataPtr data )
-	:	value( std::move( value ) ), data( data )
+	: value( std::move( value ) ), data( data )
 {
 	if( value && !value.IsTensor() )
 	{
@@ -238,12 +240,12 @@ Tensor::State::State( Ort::Value &&value, IECore::ConstDataPtr data )
 }
 
 Tensor::Tensor()
-	:	m_state( new State( Ort::Value( nullptr ) ) )
+	: m_state( new State( Ort::Value( nullptr ) ) )
 {
 }
 
 Tensor::Tensor( Ort::Value &&value )
-	:	m_state( new State( std::move( value ) ) )
+	: m_state( new State( std::move( value ) ) )
 {
 }
 
@@ -251,14 +253,12 @@ Tensor::Tensor( const IECore::ConstDataPtr &data, std::vector<int64_t> shape )
 {
 	IECore::dispatch(
 		data.get(),
-		[&] ( auto typedData ) -> void {
-
+		[&]( auto typedData ) -> void {
 			using DataType = remove_const_t<remove_pointer_t<decltype( typedData )>>;
 			using BaseType = typename std::conditional_t<
 				std::is_same_v<DataType, HalfVectorData>,
 				Ort::Float16_t,
-				typename DataType::BaseType
-			>;
+				typename DataType::BaseType>;
 
 			if( !shape.size() )
 			{
@@ -320,7 +320,6 @@ Tensor::Tensor( const IECore::ConstDataPtr &data, std::vector<int64_t> shape )
 			{
 				throw IECore::Exception( fmt::format( "Unsupported data type `{}`", DataType::staticTypeName() ) );
 			}
-
 		}
 	);
 }
@@ -374,7 +373,7 @@ bool Tensor::isEqualTo( const IECore::Object *other ) const
 		const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
 		for( size_t i = 0; i < count; ++i )
 		{
-			if( m_state->value.GetStringTensorElement( i ) != otherTensor->m_state->value.GetStringTensorElement( i  ) )
+			if( m_state->value.GetStringTensorElement( i ) != otherTensor->m_state->value.GetStringTensorElement( i ) )
 			{
 				return false;
 			}
@@ -386,8 +385,7 @@ bool Tensor::isEqualTo( const IECore::Object *other ) const
 		bool equal;
 		dispatchTensorData(
 			m_state->value,
-			[&] ( const auto *data ) {
-
+			[&]( const auto *data ) {
 				using ElementType = remove_const_t<remove_pointer_t<decltype( data )>>;
 				const auto *otherData = otherTensor->m_state->value.GetTensorData<ElementType>();
 				const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
@@ -420,7 +418,7 @@ void Tensor::hash( IECore::MurmurHash &h ) const
 	{
 		dispatchTensorData(
 			m_state->value,
-			[&] ( const auto *data ) {
+			[&]( const auto *data ) {
 				const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
 				h.append( data, count );
 			}
@@ -474,8 +472,7 @@ void Tensor::memoryUsage( IECore::Object::MemoryAccumulator &accumulator ) const
 		{
 			dispatchTensorData(
 				m_state->value,
-				[&] ( const auto *data ) {
-
+				[&]( const auto *data ) {
 					const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
 					accumulator.accumulate( m_state.get(), count * sizeof( *data ) );
 				}

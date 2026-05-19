@@ -48,10 +48,7 @@ const T *ValuePlug::getObjectValue( IECore::ConstObjectPtr &owner, const IECore:
 		return static_cast<const T *>( value );
 	}
 
-	throw IECore::Exception( fmt::format(
-		"{} : getValueInternal() didn't return expected type (wanted {} but got {}). Is the hash being computed correctly?",
-		fullName(), T::staticTypeName(), value ? value->typeName() : "nullptr"
-	) );
+	throw IECore::Exception( fmt::format( "{} : getValueInternal() didn't return expected type (wanted {} but got {}). Is the hash being computed correctly?", fullName(), T::staticTypeName(), value ? value->typeName() : "nullptr" ) );
 }
 
 } // namespace Gaffer

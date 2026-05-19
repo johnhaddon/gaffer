@@ -48,29 +48,28 @@ namespace Gaffer
 class GAFFER_API SubGraph : public DependencyNode
 {
 
-	public :
+public:
 
-		explicit SubGraph( const std::string &name=defaultName<SubGraph>() );
-		~SubGraph() override;
+	explicit SubGraph( const std::string &name = defaultName<SubGraph>() );
+	~SubGraph() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::SubGraph, SubGraphTypeId, DependencyNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::SubGraph, SubGraphTypeId, DependencyNode );
 
-		/// Does nothing
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
+	/// Does nothing
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		/// Returns getChild<BoolPlug>( "enabled" ).
-		BoolPlug *enabledPlug() override;
-		const BoolPlug *enabledPlug() const override;
+	/// Returns getChild<BoolPlug>( "enabled" ).
+	BoolPlug *enabledPlug() override;
+	const BoolPlug *enabledPlug() const override;
 
-		/// Implemented to allow a user to define a pass-through behaviour
-		/// by wiring the nodes inside this sub graph up appropriately. The
-		/// input to the output plug must be connected from a node inside
-		/// the sub graph, where that node itself has its enabled plug driven
-		/// by the external enabled plug, and the correspondingInput for the
-		/// node comes from one of the inputs to the sub graph.
-		Plug *correspondingInput( const Plug *output ) override;
-		const Plug *correspondingInput( const Plug *output ) const override;
-
+	/// Implemented to allow a user to define a pass-through behaviour
+	/// by wiring the nodes inside this sub graph up appropriately. The
+	/// input to the output plug must be connected from a node inside
+	/// the sub graph, where that node itself has its enabled plug driven
+	/// by the external enabled plug, and the correspondingInput for the
+	/// node comes from one of the inputs to the sub graph.
+	Plug *correspondingInput( const Plug *output ) override;
+	const Plug *correspondingInput( const Plug *output ) const override;
 };
 
 } // namespace Gaffer

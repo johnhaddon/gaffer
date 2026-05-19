@@ -47,53 +47,52 @@ namespace GafferScene
 class GAFFERSCENE_API PathFilter : public Filter
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::PathFilter, PathFilterTypeId, Filter );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::PathFilter, PathFilterTypeId, Filter );
 
-		explicit PathFilter( const std::string &name=defaultName<PathFilter>() );
-		~PathFilter() override;
+	explicit PathFilter( const std::string &name = defaultName<PathFilter>() );
+	~PathFilter() override;
 
-		Gaffer::StringVectorDataPlug *pathsPlug();
-		const Gaffer::StringVectorDataPlug *pathsPlug() const;
+	Gaffer::StringVectorDataPlug *pathsPlug();
+	const Gaffer::StringVectorDataPlug *pathsPlug() const;
 
-		FilterPlug *rootsPlug();
-		const FilterPlug *rootsPlug() const;
+	FilterPlug *rootsPlug();
+	const FilterPlug *rootsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const override;
+	void hashMatch( const ScenePlug *scene, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	unsigned computeMatch( const ScenePlug *scene, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		// Used to compute a PathMatcher from `pathsPlug()`.
-		Gaffer::PathMatcherDataPlug *pathMatcherPlug();
-		const Gaffer::PathMatcherDataPlug *pathMatcherPlug() const;
+	// Used to compute a PathMatcher from `pathsPlug()`.
+	Gaffer::PathMatcherDataPlug *pathMatcherPlug();
+	const Gaffer::PathMatcherDataPlug *pathMatcherPlug() const;
 
-		// Used to compute a list containing the lengths of
-		// all the relevant roots matched by `rootsPlug()`.
-		// This is computed on a per-location basis, and roots
-		// are ordered by length with the shortest appearing first.
-		Gaffer::IntVectorDataPlug *rootSizesPlug();
-		const Gaffer::IntVectorDataPlug *rootSizesPlug() const;
+	// Used to compute a list containing the lengths of
+	// all the relevant roots matched by `rootsPlug()`.
+	// This is computed on a per-location basis, and roots
+	// are ordered by length with the shortest appearing first.
+	Gaffer::IntVectorDataPlug *rootSizesPlug();
+	const Gaffer::IntVectorDataPlug *rootSizesPlug() const;
 
-		void hashRootSizes( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstIntVectorDataPtr computeRootSizes( const Gaffer::Context *context ) const;
+	void hashRootSizes( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstIntVectorDataPtr computeRootSizes( const Gaffer::Context *context ) const;
 
-		// Optimisation for when `pathsPlug()` contains a constant
-		// value. We can store a constant `m_pathMatcher` instead
-		// of needing to compute `pathMatcherPlug()`.
-		void plugDirtied( const Gaffer::Plug *plug );
-		IECore::PathMatcherDataPtr m_pathMatcher;
+	// Optimisation for when `pathsPlug()` contains a constant
+	// value. We can store a constant `m_pathMatcher` instead
+	// of needing to compute `pathMatcherPlug()`.
+	void plugDirtied( const Gaffer::Plug *plug );
+	IECore::PathMatcherDataPtr m_pathMatcher;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( PathFilter )

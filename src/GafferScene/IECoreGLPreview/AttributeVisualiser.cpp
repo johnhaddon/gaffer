@@ -62,7 +62,8 @@ AttributeVisualiser::~AttributeVisualiser()
 {
 }
 
-Visualisations AttributeVisualiser::allVisualisations( const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) {
+Visualisations AttributeVisualiser::allVisualisations( const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state )
+{
 	const AttributeVisualisers &v = visualisers();
 
 	Visualisations resultVis;
@@ -84,7 +85,7 @@ Visualisations AttributeVisualiser::allVisualisations( const IECore::CompoundObj
 			{
 				resultState = new IECoreGL::State( false );
 			}
-			resultState->add( const_cast<IECoreGL::State*>( curState.get() ) );
+			resultState->add( const_cast<IECoreGL::State *>( curState.get() ) );
 		}
 	}
 

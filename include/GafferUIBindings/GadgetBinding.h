@@ -47,176 +47,174 @@
 namespace GafferUIBindings
 {
 
-template<typename T, typename TWrapper=T>
+template<typename T, typename TWrapper = T>
 class GadgetClass : public GafferBindings::GraphComponentClass<T, TWrapper>
 {
-	public :
+public:
 
-		GadgetClass( const char *docString = nullptr );
-
+	GadgetClass( const char *docString = nullptr );
 };
 
 template<typename WrappedType>
 class GadgetWrapper : public GafferBindings::GraphComponentWrapper<WrappedType>
 {
-	public :
+public:
 
-		template<typename... Args>
-		GadgetWrapper( PyObject *self, Args&&... args )
-			:	GafferBindings::GraphComponentWrapper<WrappedType>( self, std::forward<Args>( args )... )
-		{
-		}
+	template<typename... Args>
+	GadgetWrapper( PyObject *self, Args &&...args )
+		: GafferBindings::GraphComponentWrapper<WrappedType>( self, std::forward<Args>( args )... )
+	{
+	}
 
-		void setHighlighted( bool highlighted ) override
+	void setHighlighted( bool highlighted ) override
+	{
+		if( this->isSubclassed() )
 		{
-			if( this->isSubclassed() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				boost::python::object f = this->methodOverride( "setHighlighted" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "setHighlighted" );
-					if( f )
-					{
-						f( highlighted );
-						return;
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					f( highlighted );
+					return;
 				}
 			}
-			WrappedType::setHighlighted( highlighted );
-		}
-
-		Imath::Box3f bound() const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		WrappedType::setHighlighted( highlighted );
+	}
+
+	Imath::Box3f bound() const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "bound" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "bound" );
-					if( f )
-					{
-						return boost::python::extract<Imath::Box3f>( f() );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<Imath::Box3f>( f() );
 				}
 			}
-			return WrappedType::bound();
-		}
-
-		std::string getToolTip( const IECore::LineSegment3f &line ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::bound();
+	}
+
+	std::string getToolTip( const IECore::LineSegment3f &line ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "getToolTip" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "getToolTip" );
-					if( f )
-					{
-						return boost::python::extract<std::string>( f( line ) );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<std::string>( f( line ) );
 				}
 			}
-			return WrappedType::getToolTip( line );
-		}
-
-		void updateLayout() const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::getToolTip( line );
+	}
+
+	void updateLayout() const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "updateLayout" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "updateLayout" );
-					if( f )
-					{
-						f();
-						return;
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					f();
+					return;
 				}
 			}
-			WrappedType::updateLayout();
-		}
-
-		void renderLayer( GafferUI::Gadget::Layer layer, const GafferUI::Style *style, GafferUI::Gadget::RenderReason reason ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		WrappedType::updateLayout();
+	}
+
+	void renderLayer( GafferUI::Gadget::Layer layer, const GafferUI::Style *style, GafferUI::Gadget::RenderReason reason ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "renderLayer" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "renderLayer" );
-					if( f )
-					{
-						f( layer, GafferUI::StylePtr( const_cast<GafferUI::Style *>( style ) ), reason );
-						return;
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					f( layer, GafferUI::StylePtr( const_cast<GafferUI::Style *>( style ) ), reason );
+					return;
 				}
 			}
-			WrappedType::renderLayer( layer, style, reason );
-		}
-
-		unsigned layerMask() const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		WrappedType::renderLayer( layer, style, reason );
+	}
+
+	unsigned layerMask() const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "layerMask" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "layerMask" );
-					if( f )
-					{
-						return boost::python::extract<unsigned>( f() );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<unsigned>( f() );
 				}
 			}
-			return WrappedType::layerMask();
-		}
-
-		Imath::Box3f renderBound() const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::layerMask();
+	}
+
+	Imath::Box3f renderBound() const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "renderBound" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "renderBound" );
-					if( f )
-					{
-						return boost::python::extract<Imath::Box3f>( f() );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<Imath::Box3f>( f() );
 				}
 			}
-			return WrappedType::renderBound();
+			catch( const boost::python::error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
-
+		return WrappedType::renderBound();
+	}
 };
 
 } // namespace GafferUIBindings

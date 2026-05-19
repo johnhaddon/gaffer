@@ -91,7 +91,7 @@ struct Gadget::MemberSignals : boost::noncopyable
 	// Utility to emit a signal if it has been created, but do nothing
 	// if it hasn't.
 	template<typename SignalMemberPointer, typename... Args>
-	static void emitLazily( MemberSignals *signals, SignalMemberPointer signalMemberPointer, Args&&... args )
+	static void emitLazily( MemberSignals *signals, SignalMemberPointer signalMemberPointer, Args &&...args )
 	{
 		if( !signals )
 		{
@@ -100,11 +100,10 @@ struct Gadget::MemberSignals : boost::noncopyable
 		auto &signal = signals->*signalMemberPointer;
 		signal( std::forward<Args>( args )... );
 	}
-
 };
 
 Gadget::Gadget( const std::string &name )
-	:	GraphComponent( name ), m_style( nullptr ), m_visible( true ), m_enabled( true ), m_highlighted( false ), m_layoutDirty( false ), m_toolTip( "" )
+	: GraphComponent( name ), m_style( nullptr ), m_visible( true ), m_enabled( true ), m_highlighted( false ), m_layoutDirty( false ), m_toolTip( "" )
 {
 }
 
@@ -124,15 +123,13 @@ bool Gadget::acceptsParent( const Gaffer::GraphComponent *potentialParent ) cons
 
 void Gadget::setStyle( ConstStylePtr style )
 {
-	if( style!=m_style )
+	if( style != m_style )
 	{
 		m_styleChangedConnection.disconnect();
 		m_style = style;
 		if( m_style )
 		{
-			m_styleChangedConnection = const_cast<Style *>( style.get() )->changedSignal().connect(
-				boost::bind( &Gadget::styleChanged, this )
-			);
+			m_styleChangedConnection = const_cast<Style *>( style.get() )->changedSignal().connect( boost::bind( &Gadget::styleChanged, this ) );
 		}
 		// Style affects the bounding box of text,
 		// so we need Layout rather than just Render.
@@ -183,14 +180,14 @@ void Gadget::emitDescendantVisibilityChanged()
 {
 	for( Gadget::Iterator it( this ); !it.done(); ++it )
 	{
-		if( !(*it)->getVisible() )
+		if( !( *it )->getVisible() )
 		{
 			// The overally visibility of hidden children
 			// is unaffected by parent visibility.
 			continue;
 		}
-		(*it)->emitDescendantVisibilityChanged();
-		MemberSignals::emitLazily( (*it)->m_signals.get(), &MemberSignals::visibilityChangedSignal, it->get() );
+		( *it )->emitDescendantVisibilityChanged();
+		MemberSignals::emitLazily( ( *it )->m_signals.get(), &MemberSignals::visibilityChangedSignal, it->get() );
 	}
 }
 
@@ -260,7 +257,7 @@ bool Gadget::getHighlighted() const
 
 void Gadget::setTransform( const Imath::M44f &matrix )
 {
-	if( matrix!=m_transform )
+	if( matrix != m_transform )
 	{
 		m_transform = matrix;
 		if( auto p = parent<Gadget>() )
@@ -283,7 +280,7 @@ Imath::M44f Gadget::fullTransform( const Gadget *ancestor ) const
 	{
 		result *= g->m_transform;
 		g = g->parent<Gadget>();
-	} while( g && g!=ancestor );
+	} while( g && g != ancestor );
 
 	return result;
 }
@@ -343,7 +340,7 @@ Imath::Box3f Gadget::bound() const
 
 	updateLayout();
 	m_bound = Box3f();
-	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
+	for( ChildContainer::const_iterator it = children().begin(); it != children().end(); it++ )
 	{
 		// cast is safe because of the guarantees acceptsChild() gives us
 		const Gadget *c = static_cast<const Gadget *>( it->get() );

@@ -47,28 +47,29 @@ namespace Gaffer
 class GAFFER_API ContextVariableTweaks : public ContextProcessor
 {
 
-	public :
+public:
 
-		explicit ContextVariableTweaks( const std::string &name=defaultName<ContextVariableTweaks>() );
-		~ContextVariableTweaks() override;
+	explicit ContextVariableTweaks( const std::string &name = defaultName<ContextVariableTweaks>() );
+	~ContextVariableTweaks() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextVariableTweaks, ContextVariableTweaksTypeId, ContextProcessor );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextVariableTweaks, ContextVariableTweaksTypeId, ContextProcessor );
 
-		Gaffer::BoolPlug *ignoreMissingPlug();
-		const Gaffer::BoolPlug *ignoreMissingPlug() const;
+	Gaffer::BoolPlug *ignoreMissingPlug();
+	const Gaffer::BoolPlug *ignoreMissingPlug() const;
 
-		Gaffer::TweaksPlug *tweaksPlug();
-		const Gaffer::TweaksPlug *tweaksPlug() const;
+	Gaffer::TweaksPlug *tweaksPlug();
+	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-	protected :
-		bool affectsContext( const Plug *input ) const override;
-		void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
+protected:
 
-	private :
+	bool affectsContext( const Plug *input ) const override;
+	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-		static size_t g_firstPlugIndex;
+private:
+
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ContextVariableTweaks )
 
-}  // namespace Gaffer
+} // namespace Gaffer

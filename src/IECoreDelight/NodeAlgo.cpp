@@ -55,7 +55,7 @@ namespace std
 template<>
 struct hash<IECore::TypeId>
 {
-	size_t operator()( IECore::TypeId typeId ) const
+	size_t operator () ( IECore::TypeId typeId ) const
 	{
 		return hash<size_t>()( typeId );
 	}
@@ -132,14 +132,7 @@ void addPrimitiveVariableParameters( const char *name, const IECoreScene::Primit
 		if( indicesParameterList )
 		{
 			const string indicesName = conformedName + string( ".indices" );
-			indicesParameterList->add( {
-				indicesParameterList->allocate( indicesName ),
-				indices->readable().data(),
-				NSITypeInteger,
-				0,
-				indices->readable().size(),
-				0
-			} );
+			indicesParameterList->add( { indicesParameterList->allocate( indicesName ), indices->readable().data(), NSITypeInteger, 0, indices->readable().size(), 0 } );
 		}
 	}
 

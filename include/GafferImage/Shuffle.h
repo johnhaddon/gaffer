@@ -46,48 +46,47 @@ namespace GafferImage
 class GAFFERIMAGE_API Shuffle : public ImageProcessor
 {
 
-	public :
+public:
 
-		explicit Shuffle( const std::string &name=defaultName<Shuffle>() );
-		~Shuffle() override;
+	explicit Shuffle( const std::string &name = defaultName<Shuffle>() );
+	~Shuffle() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Shuffle, ShuffleTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Shuffle, ShuffleTypeId, ImageProcessor );
 
-		enum class MissingSourceMode
-		{
-			Ignore,
-			Error,
-			Black
-		};
+	enum class MissingSourceMode
+	{
+		Ignore,
+		Error,
+		Black
+	};
 
-		Gaffer::IntPlug *missingSourceModePlug();
-		const Gaffer::IntPlug *missingSourceModePlug() const;
+	Gaffer::IntPlug *missingSourceModePlug();
+	const Gaffer::IntPlug *missingSourceModePlug() const;
 
-		Gaffer::ShufflesPlug *shufflesPlug();
-		const Gaffer::ShufflesPlug *shufflesPlug() const;
+	Gaffer::ShufflesPlug *shufflesPlug();
+	const Gaffer::ShufflesPlug *shufflesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		Gaffer::ObjectPlug *mappingPlug();
-		const Gaffer::ObjectPlug *mappingPlug() const;
+	Gaffer::ObjectPlug *mappingPlug();
+	const Gaffer::ObjectPlug *mappingPlug() const;
 
-		std::string inChannelName( const std::string &outChannelName ) const;
+	std::string inChannelName( const std::string &outChannelName ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Shuffle )

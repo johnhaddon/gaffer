@@ -58,90 +58,89 @@ namespace
 class SwitchPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		SwitchPlugAdder( SwitchPtr node )
-			:	m_switch( node )
+	SwitchPlugAdder( SwitchPtr node )
+		: m_switch( node )
+	{
+		node->childAddedSignal().connect( boost::bind( &SwitchPlugAdder::childAdded, this ) );
+		node->childRemovedSignal().connect( boost::bind( &SwitchPlugAdder::childRemoved, this ) );
+
+		updateVisibility();
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		return PlugAdder::canCreateConnection( endpoint ) && !Gaffer::MetadataAlgo::readOnly( m_switch.get() );
+	}
+
+	void createConnection( Plug *endpoint ) override
+	{
+		auto nameSwitch = runTimeCast<NameSwitch>( m_switch.get() );
+		if( nameSwitch )
 		{
-			node->childAddedSignal().connect( boost::bind( &SwitchPlugAdder::childAdded, this ) );
-			node->childRemovedSignal().connect( boost::bind( &SwitchPlugAdder::childRemoved, this ) );
-
-			updateVisibility();
+			/// \todo Should `Switch::setup()` be virtual so that we don't
+			/// need to downcast?
+			nameSwitch->setup( endpoint );
+		}
+		else
+		{
+			m_switch->setup( endpoint );
 		}
 
-	protected :
+		ArrayPlug *inPlug = m_switch->getChild<ArrayPlug>( "in" );
+		Plug *outPlug = m_switch->getChild<Plug>( "out" );
 
-		bool canCreateConnection( const Plug *endpoint ) const override
+		bool inOpposite = false;
+		if( endpoint->direction() == Plug::Out )
 		{
-			return PlugAdder::canCreateConnection( endpoint ) && !Gaffer::MetadataAlgo::readOnly( m_switch.get() );
-		}
-
-		void createConnection( Plug *endpoint ) override
-		{
-			auto nameSwitch = runTimeCast<NameSwitch>( m_switch.get() );
-			if( nameSwitch  )
+			if( nameSwitch )
 			{
-				/// \todo Should `Switch::setup()` be virtual so that we don't
-				/// need to downcast?
-				nameSwitch->setup( endpoint );
+				inPlug->getChild<NameValuePlug>( 0 )->valuePlug()->setInput( endpoint );
 			}
 			else
 			{
-				m_switch->setup( endpoint );
+				inPlug->getChild<Plug>( 0 )->setInput( endpoint );
 			}
-
-			ArrayPlug *inPlug = m_switch->getChild<ArrayPlug>( "in" );
-			Plug *outPlug = m_switch->getChild<Plug>( "out" );
-
-			bool inOpposite = false;
-			if( endpoint->direction() == Plug::Out )
+			inOpposite = false;
+		}
+		else
+		{
+			if( nameSwitch )
 			{
-				if( nameSwitch )
-				{
-					inPlug->getChild<NameValuePlug>( 0 )->valuePlug()->setInput( endpoint );
-				}
-				else
-				{
-					inPlug->getChild<Plug>( 0 )->setInput( endpoint );
-				}
-				inOpposite = false;
+				endpoint->setInput( static_cast<NameValuePlug *>( outPlug )->valuePlug() );
 			}
 			else
 			{
-				if( nameSwitch )
-				{
-					endpoint->setInput( static_cast<NameValuePlug *>( outPlug )->valuePlug() );
-				}
-				else
-				{
-					endpoint->setInput( outPlug );
-				}
-				inOpposite = true;
+				endpoint->setInput( outPlug );
 			}
-
-			applyEdgeMetadata( inPlug, inOpposite );
-			applyEdgeMetadata( outPlug, !inOpposite );
+			inOpposite = true;
 		}
 
-	private :
+		applyEdgeMetadata( inPlug, inOpposite );
+		applyEdgeMetadata( outPlug, !inOpposite );
+	}
 
-		void childAdded()
-		{
-			updateVisibility();
-		}
+private:
 
-		void childRemoved()
-		{
-			updateVisibility();
-		}
+	void childAdded()
+	{
+		updateVisibility();
+	}
 
-		void updateVisibility()
-		{
-			setVisible( m_switch->getChild<ArrayPlug>( "in" ) == nullptr );
-		}
+	void childRemoved()
+	{
+		updateVisibility();
+	}
 
-		SwitchPtr m_switch;
+	void updateVisibility()
+	{
+		setVisible( m_switch->getChild<ArrayPlug>( "in" ) == nullptr );
+	}
 
+	SwitchPtr m_switch;
 };
 
 struct Registration
@@ -152,19 +151,18 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.SwitchUI.PlugAdder", &create );
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		SwitchPtr switchNode = runTimeCast<Switch>( parent );
+		if( !switchNode )
 		{
-			SwitchPtr switchNode = runTimeCast<Switch>( parent );
-			if( !switchNode )
-			{
-				throw Exception( "SwitchPlugAdder requires a Switch" );
-			}
-
-			return new SwitchPlugAdder( switchNode );
+			throw Exception( "SwitchPlugAdder requires a Switch" );
 		}
 
+		return new SwitchPlugAdder( switchNode );
+	}
 };
 
 Registration g_registration;

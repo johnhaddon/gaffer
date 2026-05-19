@@ -62,131 +62,128 @@ IECore::InternedString g_noduleTypeKey( "nodule:type" );
 class ShaderPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		ShaderPlugAdder( GraphComponentPtr plugsParent )
-			:	m_plugsParent( plugsParent )
+	ShaderPlugAdder( GraphComponentPtr plugsParent )
+		: m_plugsParent( plugsParent )
+	{
+		plugsParent->childAddedSignal().connect( boost::bind( &ShaderPlugAdder::childAdded, this ) );
+		plugsParent->childRemovedSignal().connect( boost::bind( &ShaderPlugAdder::childRemoved, this ) );
+		Metadata::plugValueChangedSignal( plugsParent->ancestor<Node>() ).connect( boost::bind( &ShaderPlugAdder::plugMetadataChanged, this, ::_1, ::_2 ) );
+
+		buttonReleaseSignal().connect( boost::bind( &ShaderPlugAdder::buttonRelease, this, ::_2 ) );
+
+		updateVisibility();
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		vector<Plug *> plugs = showablePlugs( endpoint );
+		return !plugs.empty();
+	}
+
+	void createConnection( Plug *endpoint ) override
+	{
+		vector<Plug *> plugs = showablePlugs( endpoint );
+		Plug *plug = plugMenuSignal()( "Connect To", plugs );
+		if( !plug )
 		{
-			plugsParent->childAddedSignal().connect( boost::bind( &ShaderPlugAdder::childAdded, this ) );
-			plugsParent->childRemovedSignal().connect( boost::bind( &ShaderPlugAdder::childRemoved, this ) );
-			Metadata::plugValueChangedSignal( plugsParent->ancestor<Node>() ).connect(
-				boost::bind( &ShaderPlugAdder::plugMetadataChanged, this, ::_1, ::_2 )
-			);
-
-			buttonReleaseSignal().connect( boost::bind( &ShaderPlugAdder::buttonRelease, this, ::_2 ) );
-
-			updateVisibility();
+			return;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
+		if( plug->direction() == Plug::In )
 		{
-			vector<Plug *> plugs = showablePlugs( endpoint );
-			return !plugs.empty();
+			plug->setInput( endpoint );
+		}
+		else
+		{
+			endpoint->setInput( plug );
+		}
+	}
+
+private:
+
+	bool buttonRelease( const ButtonEvent &event )
+	{
+		vector<Plug *> plugs = showablePlugs();
+		Plug *plug = plugMenuSignal()( "Show Parameter", plugs );
+		if( !plug )
+		{
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		UndoScope undoScope( m_plugsParent->ancestor<ScriptNode>() );
+		Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
+		return true;
+	}
+
+	vector<Plug *> showablePlugs( const Plug *input = nullptr ) const
+	{
+		vector<Plug *> result;
+
+		for( Plug::Iterator it( m_plugsParent.get() ); !it.done(); ++it )
 		{
-			vector<Plug *> plugs = showablePlugs( endpoint );
-			Plug *plug = plugMenuSignal()( "Connect To", plugs );
-			if( !plug )
+			Plug *plug = it->get();
+			if( !plug->getFlags( Plug::AcceptsInputs ) )
 			{
-				return;
+				continue;
 			}
-
-			Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
-			if( plug->direction() == Plug::In )
+			if( input && !plug->acceptsInput( input ) )
 			{
-				plug->setInput( endpoint );
+				continue;
 			}
-			else
+			if( IECore::ConstStringDataPtr noduleType = Metadata::value<IECore::StringData>( plug, g_noduleTypeKey ) )
 			{
-				endpoint->setInput( plug );
-			}
-		}
-
-	private :
-
-		bool buttonRelease( const ButtonEvent &event )
-		{
-			vector<Plug *> plugs = showablePlugs();
-			Plug *plug = plugMenuSignal()( "Show Parameter", plugs );
-			if( !plug )
-			{
-				return false;
-			}
-
-			UndoScope undoScope( m_plugsParent->ancestor<ScriptNode>() );
-			Metadata::registerValue( plug, g_visibleKey, new IECore::BoolData( true ) );
-			return true;
-		}
-
-		vector<Plug *> showablePlugs( const Plug *input = nullptr ) const
-		{
-			vector<Plug *> result;
-
-			for( Plug::Iterator it( m_plugsParent.get() ); !it.done(); ++it )
-			{
-				Plug *plug = it->get();
-				if( !plug->getFlags( Plug::AcceptsInputs ) )
+				if( noduleType->readable() == "" )
 				{
 					continue;
 				}
-				if( input && !plug->acceptsInput( input ) )
-				{
-					continue;
-				}
-				if( IECore::ConstStringDataPtr noduleType = Metadata::value<IECore::StringData>( plug, g_noduleTypeKey ) )
-				{
-					if( noduleType->readable() == "" )
-					{
-						continue;
-					}
-				}
-				IECore::ConstBoolDataPtr visible = Metadata::value<IECore::BoolData>( plug, g_visibleKey );
-				if( !visible || visible->readable() )
-				{
-					continue;
-				}
-				if( MetadataAlgo::readOnly( plug ) )
-				{
-					continue;
-				}
-				result.push_back( it->get() );
 			}
-
-			return result;
-		}
-
-		void updateVisibility()
-		{
-			setVisible( !showablePlugs().empty() );
-		}
-
-		void childAdded()
-		{
-			updateVisibility();
-		}
-
-		void childRemoved()
-		{
-			updateVisibility();
-		}
-
-		void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key )
-		{
-			if( plug->parent() == m_plugsParent )
+			IECore::ConstBoolDataPtr visible = Metadata::value<IECore::BoolData>( plug, g_visibleKey );
+			if( !visible || visible->readable() )
 			{
-				if( key == g_visibleKey || key == g_noduleTypeKey )
-				{
-					updateVisibility();
-				}
+				continue;
 			}
+			if( MetadataAlgo::readOnly( plug ) )
+			{
+				continue;
+			}
+			result.push_back( it->get() );
 		}
 
-		GraphComponentPtr m_plugsParent;
+		return result;
+	}
 
+	void updateVisibility()
+	{
+		setVisible( !showablePlugs().empty() );
+	}
+
+	void childAdded()
+	{
+		updateVisibility();
+	}
+
+	void childRemoved()
+	{
+		updateVisibility();
+	}
+
+	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key )
+	{
+		if( plug->parent() == m_plugsParent )
+		{
+			if( key == g_visibleKey || key == g_noduleTypeKey )
+			{
+				updateVisibility();
+			}
+		}
+	}
+
+	GraphComponentPtr m_plugsParent;
 };
 
 struct Registration
@@ -197,13 +194,12 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferSceneUI.ShaderUI.PlugAdder", &create );
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
-		{
-			return new ShaderPlugAdder( parent );
-		}
-
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		return new ShaderPlugAdder( parent );
+	}
 };
 
 Registration g_registration;

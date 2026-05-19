@@ -53,50 +53,49 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API CameraTool : public GafferSceneUI::SelectionTool
 {
 
-	public :
+public:
 
-		explicit CameraTool( SceneView *view, const std::string &name = defaultName<CameraTool>() );
-		~CameraTool() override;
+	explicit CameraTool( SceneView *view, const std::string &name = defaultName<CameraTool>() );
+	~CameraTool() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::CameraTool, CameraToolTypeId, GafferSceneUI::SelectionTool );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::CameraTool, CameraToolTypeId, GafferSceneUI::SelectionTool );
 
-	private :
+private:
 
-		const GafferScene::ScenePlug *scenePlug() const;
-		const Gaffer::BoolPlug *lookThroughEnabledPlug() const;
-		const Gaffer::StringPlug *lookThroughCameraPlug() const;
+	const GafferScene::ScenePlug *scenePlug() const;
+	const Gaffer::BoolPlug *lookThroughEnabledPlug() const;
+	const Gaffer::StringPlug *lookThroughCameraPlug() const;
 
-		void contextChanged();
-		void plugDirtied( const Gaffer::Plug *plug );
-		GafferScene::ScenePlug::ScenePath cameraPath() const;
-		const TransformTool::Selection &cameraSelection();
-		void preRenderBegin();
-		void preRenderEnd();
+	void contextChanged();
+	void plugDirtied( const Gaffer::Plug *plug );
+	GafferScene::ScenePlug::ScenePath cameraPath() const;
+	const TransformTool::Selection &cameraSelection();
+	void preRenderBegin();
+	void preRenderEnd();
 
-		TransformTool::Selection m_cameraSelection;
-		bool m_cameraSelectionDirty;
+	TransformTool::Selection m_cameraSelection;
+	bool m_cameraSelectionDirty;
 
-		IECore::RunTimeTypedPtr viewportDragBegin( const GafferUI::DragDropEvent &event );
-		bool viewportWheel( const GafferUI::ButtonEvent &event );
-		bool viewportKeyPress( const GafferUI::KeyEvent &event );
-		bool viewportButtonPress( const GafferUI::ButtonEvent &event );
+	IECore::RunTimeTypedPtr viewportDragBegin( const GafferUI::DragDropEvent &event );
+	bool viewportWheel( const GafferUI::ButtonEvent &event );
+	bool viewportKeyPress( const GafferUI::KeyEvent &event );
+	bool viewportButtonPress( const GafferUI::ButtonEvent &event );
 
-		size_t m_dragId;
-		std::string m_undoGroup;
+	size_t m_dragId;
+	std::string m_undoGroup;
 
-		void viewportCameraChanged();
+	void viewportCameraChanged();
 
-		Gaffer::Signals::Connection m_viewportCameraChangedConnection;
+	Gaffer::Signals::Connection m_viewportCameraChangedConnection;
 
-		void setCameraCenterOfInterest( const GafferScene::ScenePlug::ScenePath &camera, float centerOfInterest );
-		float getCameraCenterOfInterest( const GafferScene::ScenePlug::ScenePath &camera ) const;
+	void setCameraCenterOfInterest( const GafferScene::ScenePlug::ScenePath &camera, float centerOfInterest );
+	float getCameraCenterOfInterest( const GafferScene::ScenePlug::ScenePath &camera ) const;
 
-		using CameraCentersOfInterest = std::unordered_map<std::string, float>;
-		CameraCentersOfInterest m_cameraCentersOfInterest;
+	using CameraCentersOfInterest = std::unordered_map<std::string, float>;
+	CameraCentersOfInterest m_cameraCentersOfInterest;
 
-		static ToolDescription<CameraTool, SceneView> g_toolDescription;
-		static size_t g_firstPlugIndex;
-
+	static ToolDescription<CameraTool, SceneView> g_toolDescription;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CameraTool )

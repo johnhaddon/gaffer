@@ -49,37 +49,36 @@ namespace Private
 class GAFFERSCENEUI_API AttributeInspector : public Inspector
 {
 
-	public :
+public:
 
-		AttributeInspector(
-			const GafferScene::ScenePlugPtr &scene,
-			const Gaffer::PlugPtr &editScope,
-			IECore::InternedString attribute,
-			const std::string &name = "",
-			const std::string &type = "attribute"
-		);
+	AttributeInspector(
+		const GafferScene::ScenePlugPtr &scene,
+		const Gaffer::PlugPtr &editScope,
+		IECore::InternedString attribute,
+		const std::string &name = "",
+		const std::string &type = "attribute"
+	);
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::AttributeInspector, AttributeInspectorTypeId, Inspector );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::AttributeInspector, AttributeInspectorTypeId, Inspector );
 
-	protected :
+protected:
 
-		GafferScene::SceneAlgo::History::ConstPtr history() const override;
-		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
-		IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const override;
-		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
-		AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
+	GafferScene::SceneAlgo::History::ConstPtr history() const override;
+	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
+	IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const override;
+	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
+	AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
 
-		bool attributeExists( const bool inheritAttributes ) const;
+	bool attributeExists( const bool inheritAttributes ) const;
 
-	private :
+private:
 
-		const GafferScene::ScenePlugPtr m_scene;
-		const IECore::InternedString m_attribute;
-
+	const GafferScene::ScenePlugPtr m_scene;
+	const IECore::InternedString m_attribute;
 };
 
 IE_CORE_DECLAREPTR( AttributeInspector )
 
-}  // namespace Private
+} // namespace Private
 
-}  // namespace GafferSceneUI
+} // namespace GafferSceneUI

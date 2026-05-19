@@ -53,76 +53,75 @@ namespace
 class EditScopePlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		EditScopePlugAdder( EditScopePtr editScope )
-			:	m_editScope( editScope )
+	EditScopePlugAdder( EditScopePtr editScope )
+		: m_editScope( editScope )
+	{
+		m_editScope->childAddedSignal().connect( boost::bind( &EditScopePlugAdder::childAdded, this ) );
+		m_editScope->childRemovedSignal().connect( boost::bind( &EditScopePlugAdder::childRemoved, this ) );
+		updateVisibility();
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		if( !PlugAdder::canCreateConnection( endpoint ) )
 		{
-			m_editScope->childAddedSignal().connect( boost::bind( &EditScopePlugAdder::childAdded, this ) );
-			m_editScope->childRemovedSignal().connect( boost::bind( &EditScopePlugAdder::childRemoved, this ) );
-			updateVisibility();
+			return false;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		if(
+			endpoint->node() == m_editScope ||
+			m_editScope->inPlug()
+		)
 		{
-			if( !PlugAdder::canCreateConnection( endpoint ) )
-			{
-				return false;
-			}
-
-			if(
-				endpoint->node() == m_editScope ||
-				m_editScope->inPlug()
-			)
-			{
-				return false;
-			}
-
-			if( MetadataAlgo::readOnly( m_editScope.get() ) )
-			{
-				return false;
-			}
-
-			return true;
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		if( MetadataAlgo::readOnly( m_editScope.get() ) )
 		{
-			m_editScope->setup( endpoint );
-			if( endpoint->direction() == Plug::In )
-			{
-				endpoint->setInput( m_editScope->outPlug() );
-			}
-			else
-			{
-				m_editScope->inPlug()->setInput( endpoint );
-			}
-
-			applyEdgeMetadata( m_editScope->inPlug(), endpoint->direction() == Plug::In );
-			applyEdgeMetadata( m_editScope->outPlug(), endpoint->direction() == Plug::Out );
+			return false;
 		}
 
-	private :
+		return true;
+	}
 
-		void updateVisibility()
+	void createConnection( Plug *endpoint ) override
+	{
+		m_editScope->setup( endpoint );
+		if( endpoint->direction() == Plug::In )
 		{
-			setVisible( !m_editScope->inPlug() );
+			endpoint->setInput( m_editScope->outPlug() );
+		}
+		else
+		{
+			m_editScope->inPlug()->setInput( endpoint );
 		}
 
-		void childAdded()
-		{
-			updateVisibility();
-		}
+		applyEdgeMetadata( m_editScope->inPlug(), endpoint->direction() == Plug::In );
+		applyEdgeMetadata( m_editScope->outPlug(), endpoint->direction() == Plug::Out );
+	}
 
-		void childRemoved()
-		{
-			updateVisibility();
-		}
+private:
 
-		EditScopePtr m_editScope;
+	void updateVisibility()
+	{
+		setVisible( !m_editScope->inPlug() );
+	}
 
+	void childAdded()
+	{
+		updateVisibility();
+	}
+
+	void childRemoved()
+	{
+		updateVisibility();
+	}
+
+	EditScopePtr m_editScope;
 };
 
 struct Registration
@@ -141,7 +140,6 @@ struct Registration
 			}
 		);
 	}
-
 };
 
 Registration g_registration;

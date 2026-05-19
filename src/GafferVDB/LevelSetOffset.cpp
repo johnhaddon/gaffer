@@ -59,12 +59,12 @@ GAFFER_NODE_DEFINE_TYPE( LevelSetOffset );
 size_t LevelSetOffset::g_firstPlugIndex = 0;
 
 LevelSetOffset::LevelSetOffset( const std::string &name )
-	:	Deformer( name )
+	: Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild( new StringPlug( "grid", Plug::In, "surface") );
-	addChild( new FloatPlug( "offset", Plug::In, 0.5) );
+	addChild( new StringPlug( "grid", Plug::In, "surface" ) );
+	addChild( new FloatPlug( "offset", Plug::In, 0.5 ) );
 }
 
 LevelSetOffset::~LevelSetOffset()
@@ -73,31 +73,29 @@ LevelSetOffset::~LevelSetOffset()
 
 Gaffer::StringPlug *LevelSetOffset::gridPlug()
 {
-	return  getChild<StringPlug>( g_firstPlugIndex );
+	return getChild<StringPlug>( g_firstPlugIndex );
 }
 
 const Gaffer::StringPlug *LevelSetOffset::gridPlug() const
 {
-	return  getChild<StringPlug>( g_firstPlugIndex );
+	return getChild<StringPlug>( g_firstPlugIndex );
 }
 
 Gaffer::FloatPlug *LevelSetOffset::offsetPlug()
 {
-	return  getChild<FloatPlug>( g_firstPlugIndex + 1 );
+	return getChild<FloatPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::FloatPlug *LevelSetOffset::offsetPlug() const
 {
-	return  getChild<FloatPlug>( g_firstPlugIndex + 1 );
+	return getChild<FloatPlug>( g_firstPlugIndex + 1 );
 }
 
 bool LevelSetOffset::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		Deformer::affectsProcessedObject( input ) ||
+	return Deformer::affectsProcessedObject( input ) ||
 		input == gridPlug() ||
-		input == offsetPlug()
-	;
+		input == offsetPlug();
 }
 
 void LevelSetOffset::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -120,7 +118,7 @@ IECore::ConstObjectPtr LevelSetOffset::computeProcessedObject( const ScenePath &
 
 	openvdb::GridBase::ConstPtr gridBase = vdbObject->findGrid( gridName );
 
-	if (!gridBase)
+	if( !gridBase )
 	{
 		return inputObject;
 	}
@@ -128,14 +126,14 @@ IECore::ConstObjectPtr LevelSetOffset::computeProcessedObject( const ScenePath &
 	openvdb::GridBase::Ptr newGrid;
 	Interrupter interrupter( context->canceller() );
 
-	if ( openvdb::FloatGrid::ConstPtr floatGrid = openvdb::GridBase::constGrid<openvdb::FloatGrid>( gridBase ) )
+	if( openvdb::FloatGrid::ConstPtr floatGrid = openvdb::GridBase::constGrid<openvdb::FloatGrid>( gridBase ) )
 	{
-		openvdb::FloatGrid::Ptr newFloatGrid = openvdb::GridBase::grid<openvdb::FloatGrid> ( floatGrid->deepCopyGrid() );
+		openvdb::FloatGrid::Ptr newFloatGrid = openvdb::GridBase::grid<openvdb::FloatGrid>( floatGrid->deepCopyGrid() );
 		newGrid = newFloatGrid;
 		openvdb::tools::LevelSetFilter<openvdb::FloatGrid, openvdb::FloatGrid, Interrupter> filter( *newFloatGrid, &interrupter );
 		filter.offset( offsetPlug()->getValue() );
 	}
-	else if ( openvdb::DoubleGrid::ConstPtr doubleGrid = openvdb::GridBase::constGrid<openvdb::DoubleGrid>( newGrid ) )
+	else if( openvdb::DoubleGrid::ConstPtr doubleGrid = openvdb::GridBase::constGrid<openvdb::DoubleGrid>( newGrid ) )
 	{
 		openvdb::DoubleGrid::Ptr newDoubleGrid = openvdb::GridBase::grid<openvdb::DoubleGrid>( doubleGrid->deepCopyGrid() );
 		newGrid = newDoubleGrid;
@@ -165,10 +163,8 @@ Gaffer::ValuePlug::CachePolicy LevelSetOffset::processedObjectComputeCachePolicy
 
 bool LevelSetOffset::affectsProcessedObjectBound( const Gaffer::Plug *input ) const
 {
-	return
-		input == inPlug()->boundPlug() ||
-		input == offsetPlug()
-	;
+	return input == inPlug()->boundPlug() ||
+		input == offsetPlug();
 }
 
 void LevelSetOffset::hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -185,8 +181,8 @@ Imath::Box3f LevelSetOffset::computeProcessedObjectBound( const ScenePath &path,
 	Imath::Box3f newBound = inPlug()->boundPlug()->getValue();
 	float offset = -offsetPlug()->getValue();
 
-	newBound.min -= Imath::V3f(offset, offset, offset);
-	newBound.max += Imath::V3f(offset, offset, offset);
+	newBound.min -= Imath::V3f( offset, offset, offset );
+	newBound.max += Imath::V3f( offset, offset, offset );
 
 	return newBound;
 }

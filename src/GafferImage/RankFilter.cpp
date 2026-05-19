@@ -204,6 +204,7 @@ const float infinity = std::numeric_limits<float>::infinity();
 class RankMaxBuffer
 {
 public:
+
 	inline RankMaxBuffer( const V2i &size ) : m_values( size.y )
 	{
 	}
@@ -212,12 +213,9 @@ public:
 	{
 		// Store the maximum value of the given row
 		float r = -infinity;
-		sampler.visitPixels( rowBound,
-			[&r] ( float v, int x, int y )
-			{
-				r = std::max( r, v );
-			}
-		);
+		sampler.visitPixels( rowBound, [&r]( float v, int x, int y ) {
+			r = std::max( r, v );
+		} );
 		m_values[rowIndex] = r;
 	}
 
@@ -239,6 +237,7 @@ public:
 	}
 
 private:
+
 	std::vector<float> m_values;
 };
 
@@ -246,6 +245,7 @@ private:
 class RankMinBuffer
 {
 public:
+
 	inline RankMinBuffer( const V2i &size ) : m_values( size.y )
 	{
 	}
@@ -254,12 +254,9 @@ public:
 	{
 		// Store the minimum value of the given row
 		float r = infinity;
-		sampler.visitPixels( rowBound,
-			[&r] ( float v, int x, int y )
-			{
-				r = std::min( r, v );
-			}
-		);
+		sampler.visitPixels( rowBound, [&r]( float v, int x, int y ) {
+			r = std::min( r, v );
+		} );
 		m_values[rowIndex] = r;
 	}
 
@@ -281,6 +278,7 @@ public:
 	}
 
 private:
+
 	std::vector<float> m_values;
 };
 
@@ -344,8 +342,8 @@ private:
 class RankMedianBuffer
 {
 public:
-	inline RankMedianBuffer( const V2i &size ) :
-		m_size( size ), m_sortedRows( size.x * size.y ), m_splits( size.y ), m_splitValue( 0 )
+
+	inline RankMedianBuffer( const V2i &size ) : m_size( size ), m_sortedRows( size.x * size.y ), m_splits( size.y ), m_splitValue( 0 )
 	{
 		// We need to initialize the storage for everything
 		m_minHeap.reserve( size.y );
@@ -365,21 +363,18 @@ public:
 	inline void sampleRow( int rowIndex, Sampler &sampler, const Box2i &rowBound )
 	{
 		// Find the chunk of pixels in m_sortedRows corresponding to this row
-		float *currentRow = &m_sortedRows[ m_size.x * rowIndex ];
+		float *currentRow = &m_sortedRows[m_size.x * rowIndex];
 
 		// Grab the row of pixels into the buffer
 		float *writePos = currentRow;
-		sampler.visitPixels( rowBound,
-			[&writePos] ( float v, int x, int y )
+		sampler.visitPixels( rowBound, [&writePos]( float v, int x, int y ) {
+			if( std::isnan( v ) )
 			{
-				if( std::isnan( v ) )
-				{
-					v = -infinity;
-				}
-				*writePos = v;
-				writePos++;
+				v = -infinity;
 			}
-		);
+			*writePos = v;
+			writePos++;
+		} );
 
 		// Sort the new row
 		//
@@ -421,7 +416,7 @@ public:
 			// that could be included in the lower set.
 			for( int i = 0; i < m_size.y; i++ )
 			{
-				m_minHeap.update( m_minHeapHandles[i], std::make_pair( m_splits[i] < m_size.x ? m_sortedRows[ i * m_size.x + m_splits[i] ] : infinity, i ) );
+				m_minHeap.update( m_minHeapHandles[i], std::make_pair( m_splits[i] < m_size.x ? m_sortedRows[i * m_size.x + m_splits[i]] : infinity, i ) );
 			}
 
 			// For each element that needs to be added, we need to increment one of the splits
@@ -438,13 +433,13 @@ public:
 				// This is the row where we can increase the split while preserving the invariant.
 				int row = m_minHeap.top().second;
 
-				int newSplit = m_splits[ row ] + 1;
-				m_splits[ row ] = newSplit;
+				int newSplit = m_splits[row] + 1;
+				m_splits[row] = newSplit;
 
 				assert( newSplit <= m_size.x );
 
 				// Update the entry for the row that we incremented, with a priority based on the new next element
-				m_minHeap.update( m_minHeapHandles[row], std::make_pair( newSplit < m_size.x ? m_sortedRows[ row * m_size.x + newSplit ] : infinity, row ) );
+				m_minHeap.update( m_minHeapHandles[row], std::make_pair( newSplit < m_size.x ? m_sortedRows[row * m_size.x + newSplit] : infinity, row ) );
 			}
 
 			// Once we've set all the splits correctly, the split value is the next element that
@@ -458,7 +453,7 @@ public:
 			// that could be removed from the lower set.
 			for( int i = 0; i < m_size.y; i++ )
 			{
-				m_maxHeap.update( m_maxHeapHandles[i], std::make_pair( m_splits[i] > 0 ? m_sortedRows[ i * m_size.x + m_splits[i] -1 ] : -infinity, i ) );
+				m_maxHeap.update( m_maxHeapHandles[i], std::make_pair( m_splits[i] > 0 ? m_sortedRows[i * m_size.x + m_splits[i] - 1] : -infinity, i ) );
 			}
 
 			// For each element that needs to be removed, we need to decrement one of the splits
@@ -477,13 +472,13 @@ public:
 					break;
 				}
 
-				int newSplit = m_splits[ row ] - 1;
-				m_splits[ row ] = newSplit;
+				int newSplit = m_splits[row] - 1;
+				m_splits[row] = newSplit;
 
 				assert( newSplit >= 0 );
 
 				// Update the entry for the row that we decremented, with a priority based on the new next element
-				m_maxHeap.update( m_maxHeapHandles[ row ], std::make_pair( newSplit > 0 ? m_sortedRows[ row * m_size.x + newSplit - 1] : -infinity, row ) );
+				m_maxHeap.update( m_maxHeapHandles[row], std::make_pair( newSplit > 0 ? m_sortedRows[row * m_size.x + newSplit - 1] : -infinity, row ) );
 			}
 
 			// Once we've set all the splits correctly, the split is the last element that
@@ -504,7 +499,7 @@ public:
 		// Everything before the split is <= to the split value - if the last element before the split
 		// isn't equal, then everything before must be less, and the result value doesn't occur in
 		// the lower section
-		if( m_splits[rowIndex] > 0 && m_sortedRows[ m_size.x * rowIndex + m_splits[rowIndex] - 1 ] == result )
+		if( m_splits[rowIndex] > 0 && m_sortedRows[m_size.x * rowIndex + m_splits[rowIndex] - 1] == result )
 		{
 			return true;
 		}
@@ -512,7 +507,7 @@ public:
 		// Everything after the split is >= to the split value - if the first element after the split
 		// isn't equal, then everything after must be greater, and the result value doesn't occur in
 		// the upper section
-		if( m_splits[rowIndex] < m_size.x && m_sortedRows[ m_size.x * rowIndex + m_splits[rowIndex] ] == result )
+		if( m_splits[rowIndex] < m_size.x && m_sortedRows[m_size.x * rowIndex + m_splits[rowIndex]] == result )
 		{
 			return true;
 		}
@@ -544,30 +539,30 @@ private:
 	// m_splits by choosing the row with the lowest value not yet included in the lower set.
 	struct MinCompare
 	{
-		bool operator()(const HeapEntry &a, const HeapEntry &b) const
+		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const
 		{
 			return a.first > b.first;
 		}
 	};
-	using MinHeap = boost::heap::d_ary_heap< HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MinCompare> >;
+	using MinHeap = boost::heap::d_ary_heap<HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MinCompare>>;
 	MinHeap m_minHeap;
 
 	// The max heap is used when we need to decrease the number of elements in the lower set, decreasing
 	// m_splits by choosing the row with the highest value currently in the lower set.
 	struct MaxCompare
 	{
-		bool operator()(const HeapEntry &a, const HeapEntry &b) const
+		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const
 		{
 			return a.first < b.first;
 		}
 	};
-	using MaxHeap = boost::heap::d_ary_heap< HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MaxCompare> >;
+	using MaxHeap = boost::heap::d_ary_heap<HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MaxCompare>>;
 	MaxHeap m_maxHeap;
 
 	// We store the handle for each every element in the heaps, in order matching the rows. This allows us to
 	// update the entry with a new value from the row.
-	std::vector< MinHeap::handle_type > m_minHeapHandles;
-	std::vector< MaxHeap::handle_type > m_maxHeapHandles;
+	std::vector<MinHeap::handle_type> m_minHeapHandles;
+	std::vector<MaxHeap::handle_type> m_maxHeapHandles;
 };
 
 inline int positiveModulo( int a, int d )
@@ -577,7 +572,7 @@ inline int positiveModulo( int a, int d )
 
 // Fill in an accumulator buffer of the appropriate type, and then step it through each pixel, outputting
 // the result for each pixel in the tile.
-template< class Buffer >
+template<class Buffer>
 void processTile( Sampler &sampler, const V2i &radius, const Box2i &tileBound, vector<float> &result, const Canceller *canceller )
 {
 	V2i s = 2 * radius + V2i( 1 );
@@ -609,7 +604,7 @@ void processTile( Sampler &sampler, const V2i &radius, const Box2i &tileBound, v
 			buffer.sampleRow( positiveModulo( rowBound.min.y, s.y ), sampler, rowBound );
 
 			// We now have a buffer with all the row data for this pixel, we can get the result for this pixel
-			result[ ImagePlug::pixelIndex( p, tileBound.min ) ] = buffer.currentResult();
+			result[ImagePlug::pixelIndex( p, tileBound.min )] = buffer.currentResult();
 
 			// Step to the next row
 			rowBound.min.y++;
@@ -618,7 +613,7 @@ void processTile( Sampler &sampler, const V2i &radius, const Box2i &tileBound, v
 	}
 }
 
-template< class Buffer >
+template<class Buffer>
 void processTileIndices( Sampler &sampler, const V2i &radius, const Box2i &tileBound, vector<V2i> &result, const Canceller *canceller )
 {
 	V2i s = 2 * radius + V2i( 1 );
@@ -667,8 +662,8 @@ void processTileIndices( Sampler &sampler, const V2i &radius, const Box2i &tileB
 			uint32_t closestMatch = UINT_MAX;
 
 			if(
-				( std::is_same_v< Buffer, RankMinBuffer > && resultValue == infinity ) ||
-				( std::is_same_v< Buffer, RankMaxBuffer > && resultValue == -infinity )
+				( std::is_same_v<Buffer, RankMinBuffer> && resultValue == infinity ) ||
+				( std::is_same_v<Buffer, RankMaxBuffer> && resultValue == -infinity )
 			)
 			{
 				// If all pixels are the worst possible match, we can just use the current pixel
@@ -680,26 +675,23 @@ void processTileIndices( Sampler &sampler, const V2i &radius, const Box2i &tileB
 				{
 					if( buffer.rowContainsResult( positiveModulo( rescanBound.min.y, s.y ), resultValue ) )
 					{
-						sampler.visitPixels( rescanBound,
-							[p, resultValue, &r, &closestMatch] ( float v, int x, int y )
+						sampler.visitPixels( rescanBound, [p, resultValue, &r, &closestMatch]( float v, int x, int y ) {
+							if(
+								v == resultValue || ( resultValue == -infinity && std::isnan( v ) )
+							)
 							{
-								if(
-									v == resultValue || ( resultValue == -infinity && std::isnan( v ) )
-								)
+								uint32_t absX = abs( x - p.x );
+								uint32_t absY = abs( y - p.y );
+								uint32_t distance = ( max( absX, absY ) << 16 ) + absX + absY;
+								if( distance < closestMatch )
 								{
-									uint32_t absX = abs( x - p.x );
-									uint32_t absY = abs( y - p.y );
-									uint32_t distance = ( max( absX, absY ) << 16 ) + absX + absY;
-									if( distance < closestMatch )
-									{
-										closestMatch = distance;
+									closestMatch = distance;
 
-										// Store the offset to the rank pixel
-										r = V2i( x - p.x, y - p.y );
-									}
+									// Store the offset to the rank pixel
+									r = V2i( x - p.x, y - p.y );
 								}
 							}
-						);
+						} );
 					}
 					rescanBound.min.y++;
 					rescanBound.max.y++;
@@ -709,7 +701,7 @@ void processTileIndices( Sampler &sampler, const V2i &radius, const Box2i &tileB
 			// One of the pixels must match the rank
 			assert( r != V2i( INT_MAX, INT_MAX ) );
 
-			result[ ImagePlug::pixelIndex( p, tileBound.min ) ] = r;
+			result[ImagePlug::pixelIndex( p, tileBound.min )] = r;
 			rowBound.min.y++;
 			rowBound.max.y++;
 		}
@@ -770,13 +762,13 @@ void RankFilter::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 
 		switch( m_mode )
 		{
-			case MedianRank:
+			case MedianRank :
 				processTileIndices<RankMedianBuffer>( sampler, radius, tileBound, result, context->canceller() );
 				break;
-			case ErodeRank:
+			case ErodeRank :
 				processTileIndices<RankMinBuffer>( sampler, radius, tileBound, result, context->canceller() );
 				break;
-			case DilateRank:
+			case DilateRank :
 				processTileIndices<RankMaxBuffer>( sampler, radius, tileBound, result, context->canceller() );
 				break;
 		}
@@ -824,7 +816,6 @@ void RankFilter::hashChannelData( const GafferImage::ImagePlug *parent, const Ga
 
 		pixelOffsetsPlug()->hash( h );
 	}
-
 }
 
 IECore::ConstFloatVectorDataPtr RankFilter::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
@@ -879,13 +870,13 @@ IECore::ConstFloatVectorDataPtr RankFilter::computeChannelData( const std::strin
 
 	switch( m_mode )
 	{
-		case MedianRank:
+		case MedianRank :
 			processTile<RankMedianBuffer>( sampler, radius, tileBound, result, context->canceller() );
 			break;
-		case ErodeRank:
+		case ErodeRank :
 			processTile<RankMinBuffer>( sampler, radius, tileBound, result, context->canceller() );
 			break;
-		case DilateRank:
+		case DilateRank :
 			processTile<RankMaxBuffer>( sampler, radius, tileBound, result, context->canceller() );
 			break;
 	}

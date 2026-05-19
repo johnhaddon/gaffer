@@ -67,4 +67,4 @@ MurmurHash SharedDataHolder<Messages>::hash() const
 
 template class TypedData<Messages>;
 
-};
+}; // namespace IECore

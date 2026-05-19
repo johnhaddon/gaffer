@@ -56,5 +56,4 @@ void GafferImageModule::bindMetadata()
 	GafferBindings::DependencyNodeClass<DeleteImageMetadata>();
 	GafferBindings::DependencyNodeClass<CopyImageMetadata>();
 	GafferBindings::DependencyNodeClass<ShuffleImageMetadata>();
-
 }

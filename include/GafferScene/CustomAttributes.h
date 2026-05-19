@@ -44,13 +44,12 @@ namespace GafferScene
 class GAFFERSCENE_API CustomAttributes : public GafferScene::Attributes
 {
 
-	public :
+public:
 
-		explicit CustomAttributes( const std::string &name=defaultName<CustomAttributes>() );
-		~CustomAttributes() override;
+	explicit CustomAttributes( const std::string &name = defaultName<CustomAttributes>() );
+	~CustomAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CustomAttributes,CustomAttributesTypeId, Attributes );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CustomAttributes, CustomAttributesTypeId, Attributes );
 };
 
 IE_CORE_DECLAREPTR( CustomAttributes )

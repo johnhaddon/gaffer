@@ -53,53 +53,52 @@ IE_CORE_FORWARDDECLARE( FilterPlug )
 class GAFFERSCENE_API FilterQuery : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit FilterQuery( const std::string &name=defaultName<FilterQuery>() );
-		~FilterQuery() override;
+	explicit FilterQuery( const std::string &name = defaultName<FilterQuery>() );
+	~FilterQuery() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::FilterQuery, FilterQueryTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::FilterQuery, FilterQueryTypeId, ComputeNode );
 
-		ScenePlug *scenePlug();
-		const ScenePlug *scenePlug() const;
+	ScenePlug *scenePlug();
+	const ScenePlug *scenePlug() const;
 
-		FilterPlug *filterPlug();
-		const FilterPlug *filterPlug() const;
+	FilterPlug *filterPlug();
+	const FilterPlug *filterPlug() const;
 
-		Gaffer::StringPlug *locationPlug();
-		const Gaffer::StringPlug *locationPlug() const;
+	Gaffer::StringPlug *locationPlug();
+	const Gaffer::StringPlug *locationPlug() const;
 
-		Gaffer::BoolPlug *exactMatchPlug();
-		const Gaffer::BoolPlug *exactMatchPlug() const;
+	Gaffer::BoolPlug *exactMatchPlug();
+	const Gaffer::BoolPlug *exactMatchPlug() const;
 
-		Gaffer::BoolPlug *descendantMatchPlug();
-		const Gaffer::BoolPlug *descendantMatchPlug() const;
+	Gaffer::BoolPlug *descendantMatchPlug();
+	const Gaffer::BoolPlug *descendantMatchPlug() const;
 
-		Gaffer::BoolPlug *ancestorMatchPlug();
-		const Gaffer::BoolPlug *ancestorMatchPlug() const;
+	Gaffer::BoolPlug *ancestorMatchPlug();
+	const Gaffer::BoolPlug *ancestorMatchPlug() const;
 
-		Gaffer::StringPlug *closestAncestorPlug();
-		const Gaffer::StringPlug *closestAncestorPlug() const;
+	Gaffer::StringPlug *closestAncestorPlug();
+	const Gaffer::StringPlug *closestAncestorPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		Gaffer::IntPlug *matchPlug();
-		const Gaffer::IntPlug *matchPlug() const;
+	Gaffer::IntPlug *matchPlug();
+	const Gaffer::IntPlug *matchPlug() const;
 
-		// Used in the computation of `ancestorMatchPlug()`. This uses
-		// `${scene:path}` rather than `locationPlug()` so can be used in
-		// recursive computes to inherit results from ancestor contexts.
-		Gaffer::StringPlug *closestAncestorInternalPlug();
-		const Gaffer::StringPlug *closestAncestorInternalPlug() const;
+	// Used in the computation of `ancestorMatchPlug()`. This uses
+	// `${scene:path}` rather than `locationPlug()` so can be used in
+	// recursive computes to inherit results from ancestor contexts.
+	Gaffer::StringPlug *closestAncestorInternalPlug();
+	const Gaffer::StringPlug *closestAncestorInternalPlug() const;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( FilterQuery )

@@ -49,60 +49,59 @@ IE_CORE_FORWARDDECLARE( GraphGadget );
 class GAFFERUI_API DragEditGadget : public Gadget
 {
 
-	public :
+public:
 
-		~DragEditGadget() override;
+	~DragEditGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::DragEditGadget, DragEditGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::DragEditGadget, DragEditGadgetTypeId, Gadget );
 
-		bool acceptsParent( const GraphComponent *potentialParent ) const override;
+	bool acceptsParent( const GraphComponent *potentialParent ) const override;
 
-	protected :
+protected:
 
-		// Protected constructor and friend status so only GraphGadget can
-		// construct us.
-		DragEditGadget();
-		friend class GraphGadget;
+	// Protected constructor and friend status so only GraphGadget can
+	// construct us.
+	DragEditGadget();
+	friend class GraphGadget;
 
-		void parentChanging( Gaffer::GraphComponent *newParent ) override;
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void parentChanging( Gaffer::GraphComponent *newParent ) override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		GraphGadget *graphGadget();
-		const GraphGadget *graphGadget() const;
+	GraphGadget *graphGadget();
+	const GraphGadget *graphGadget() const;
 
-		bool keyPress( GadgetPtr gadget, const KeyEvent &event );
-		bool keyRelease( GadgetPtr gadget, const KeyEvent &event );
-		bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
-		bool buttonRelease( GadgetPtr gadget, const ButtonEvent &event );
+	bool keyPress( GadgetPtr gadget, const KeyEvent &event );
+	bool keyRelease( GadgetPtr gadget, const KeyEvent &event );
+	bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
+	bool buttonRelease( GadgetPtr gadget, const ButtonEvent &event );
 
-		IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragEnter( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragEnd( GadgetPtr gadget, const DragDropEvent &event );
-		void leave();
+	IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragEnter( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragEnd( GadgetPtr gadget, const DragDropEvent &event );
+	void leave();
 
-		std::string undoMergeGroup() const;
+	std::string undoMergeGroup() const;
 
-		void disconnectConnectionGadgets();
+	void disconnectConnectionGadgets();
 
-		Gaffer::Signals::ScopedConnection m_graphGadgetKeyPressConnection;
-		Gaffer::Signals::ScopedConnection m_graphGadgetKeyReleaseConnection;
+	Gaffer::Signals::ScopedConnection m_graphGadgetKeyPressConnection;
+	Gaffer::Signals::ScopedConnection m_graphGadgetKeyReleaseConnection;
 
-		enum Mode
-		{
-			None,
-			Disconnect
-		};
+	enum Mode
+	{
+		None,
+		Disconnect
+	};
 
-		Mode m_mode;
-		bool m_editable;
-		int m_mergeGroupId;
-		IECore::V3fVectorDataPtr m_dragPositions;
-
+	Mode m_mode;
+	bool m_editable;
+	int m_mergeGroupId;
+	IECore::V3fVectorDataPtr m_dragPositions;
 };
 
 } // namespace GafferUI

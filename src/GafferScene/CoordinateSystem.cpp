@@ -49,7 +49,7 @@ static IECore::InternedString g_coordinateSystemsSetName( "__coordinateSystems" 
 GAFFER_NODE_DEFINE_TYPE( CoordinateSystem );
 
 CoordinateSystem::CoordinateSystem( const std::string &name )
-	:	ObjectSource( name, "coordinateSystem" )
+	: ObjectSource( name, "coordinateSystem" )
 {
 }
 

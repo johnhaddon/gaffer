@@ -114,7 +114,7 @@ bool cameraGlobalsChanged( const CompoundObject *globals, const CompoundObject *
 // This is for the very specific case of determining change for global
 // attributes, where we need to avoid comparisons of certain synthetic members
 // that are only present in previousFullAttributes.
-bool globalAttributesChanged( const CompoundObject* globalAttributes, const CompoundObject* previousFullAttributes )
+bool globalAttributesChanged( const CompoundObject *globalAttributes, const CompoundObject *previousFullAttributes )
 {
 	static const boost::container::flat_set<IECore::InternedString> ignoredMembers = { IECore::InternedString( "sets" ) };
 
@@ -147,14 +147,14 @@ bool globalAttributesChanged( const CompoundObject* globalAttributes, const Comp
 			return true;
 		}
 
-		if ( it1->second != it2->second )
+		if( it1->second != it2->second )
 		{
-			if ( !it1->second || !it2->second )
+			if( !it1->second || !it2->second )
 			{
 				/// either one of the pointers is NULL
 				return true;
 			}
-			if( ! it1->second->isEqualTo( it2->second.get() ) )
+			if( !it1->second->isEqualTo( it2->second.get() ) )
 			{
 				return true;
 			}
@@ -171,10 +171,10 @@ bool globalAttributesChanged( const CompoundObject* globalAttributes, const Comp
 struct ObjectInterfaceHandle : public boost::noncopyable
 {
 
-	using RemovalCallback = std::function<void ()>;
+	using RemovalCallback = std::function<void()>;
 
 	ObjectInterfaceHandle()
-		:	m_isCapsule( false )
+		: m_isCapsule( false )
 	{
 	}
 
@@ -202,7 +202,7 @@ struct ObjectInterfaceHandle : public boost::noncopyable
 		m_isCapsule = isCapsule;
 	}
 
-	IECoreScenePreview::Renderer::ObjectInterface *operator->() const
+	IECoreScenePreview::Renderer::ObjectInterface *operator ->() const
 	{
 		return m_objectInterface.get();
 	}
@@ -212,7 +212,7 @@ struct ObjectInterfaceHandle : public boost::noncopyable
 		return m_objectInterface.get();
 	}
 
-	operator bool () const
+	operator bool() const
 	{
 		return m_objectInterface.get();
 	}
@@ -222,12 +222,11 @@ struct ObjectInterfaceHandle : public boost::noncopyable
 		return m_isCapsule;
 	}
 
-	private :
+private:
 
-		IECoreScenePreview::Renderer::ObjectInterfacePtr m_objectInterface;
-		RemovalCallback m_removalCallback;
-		bool m_isCapsule;
-
+	IECoreScenePreview::Renderer::ObjectInterfacePtr m_objectInterface;
+	RemovalCallback m_removalCallback;
+	bool m_isCapsule;
 };
 
 } // namespace
@@ -244,904 +243,899 @@ struct ObjectInterfaceHandle : public boost::noncopyable
 class RenderController::SceneGraph
 {
 
-	public :
+public:
 
-		// We store separate scene graphs for
-		// objects which are classified differently
-		// by the renderer. This lets us output
-		// lights and cameras prior to the
-		// rest of the scene, which may be a
-		// requirement of some renderer backends.
-		enum Type
+	// We store separate scene graphs for
+	// objects which are classified differently
+	// by the renderer. This lets us output
+	// lights and cameras prior to the
+	// rest of the scene, which may be a
+	// requirement of some renderer backends.
+	enum Type
+	{
+		CameraType = 0,
+		LightType = 1,
+		LightFilterType = 2,
+		ObjectType = 3,
+		FirstType = CameraType,
+		LastType = ObjectType,
+		NoType = LastType + 1
+	};
+
+	enum Component
+	{
+		NoComponent = 0,
+		BoundComponent = 1,
+		TransformComponent = 2,
+		AttributesComponent = 4,
+		ObjectComponent = 8,
+		ChildNamesComponent = 16,
+		VisibleSetComponent = 32,
+		IDComponent = 64,
+		AllComponents = BoundComponent | TransformComponent | AttributesComponent | ObjectComponent | ChildNamesComponent | VisibleSetComponent | IDComponent,
+	};
+
+	// Constructs the root of the scene graph.
+	// Children are constructed using updateChildren().
+	SceneGraph()
+		: m_parent( nullptr ), m_fullAttributes( new CompoundObject ), m_purposeIncluded( true ), m_dirtyComponents( AllComponents ), m_changedComponents( NoComponent )
+	{
+		clear();
+	}
+
+	~SceneGraph()
+	{
+		clear();
+	}
+
+	const InternedString &name() const
+	{
+		return m_name;
+	}
+
+	void dirty( unsigned components )
+	{
+		if( ( components & m_dirtyComponents ) == components )
 		{
-			CameraType = 0,
-			LightType = 1,
-			LightFilterType = 2,
-			ObjectType = 3,
-			FirstType = CameraType,
-			LastType = ObjectType,
-			NoType = LastType + 1
-		};
-
-		enum Component
+			return;
+		}
+		m_dirtyComponents |= components;
+		for( const auto &c : m_children )
 		{
-			NoComponent = 0,
-			BoundComponent = 1,
-			TransformComponent = 2,
-			AttributesComponent = 4,
-			ObjectComponent = 8,
-			ChildNamesComponent = 16,
-			VisibleSetComponent = 32,
-			IDComponent = 64,
-			AllComponents = BoundComponent | TransformComponent | AttributesComponent | ObjectComponent | ChildNamesComponent | VisibleSetComponent | IDComponent,
-		};
+			c->dirty( components );
+		}
+	}
 
-		// Constructs the root of the scene graph.
-		// Children are constructed using updateChildren().
-		SceneGraph()
-			:	m_parent( nullptr ), m_fullAttributes( new CompoundObject ), m_purposeIncluded( true ), m_dirtyComponents( AllComponents ), m_changedComponents( NoComponent )
+	void update(
+		RenderController *controller,
+		SceneGraph::Type sceneGraphType,
+		unsigned changedGlobalComponents,
+		const ThreadState &threadState,
+		const ScenePlug::ScenePath &scenePath,
+		const ProgressCallback &callback,
+		const PathMatcher *pathsToUpdate,
+		tbb::task_group_context &taskGroupContext
+	)
+	{
+
+		const unsigned pathsToUpdateMatch = pathsToUpdate ? pathsToUpdate->match( scenePath ) : (unsigned)PathMatcher::EveryMatch;
+		if( !pathsToUpdateMatch )
+		{
+			return;
+		}
+
+		// Figure out if this location belongs in the type
+		// of scene graph we're constructing. If it doesn't
+		// belong, and neither do any of its descendants,
+		// we can just early out.
+
+		const unsigned sceneGraphMatch = this->sceneGraphMatch( controller, sceneGraphType, scenePath );
+		if( !( sceneGraphMatch & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::DescendantMatch ) ) )
 		{
 			clear();
+			return;
 		}
 
-		~SceneGraph()
+		// Set up a context to compute the scene at the right
+		// location.
+
+		ScenePlug::PathScope pathScope( threadState, &scenePath );
+
+		// Update the scene graph at this location.
+
+		const bool changesMade = updateLocation(
+			scenePath,
+			changedGlobalComponents,
+			sceneGraphMatch & IECore::PathMatcher::ExactMatch ? sceneGraphType : SceneGraph::NoType,
+			controller
+		);
+
+		if( changesMade && callback )
 		{
-			clear();
+			callback( BackgroundTask::Running );
 		}
 
-		const InternedString &name() const
+		// Apply updates to each child.
+
+		if( this->expanded() && m_children.size() )
 		{
-			return m_name;
-		}
-
-		void dirty( unsigned components )
-		{
-			if( ( components & m_dirtyComponents ) == components )
+			if( m_children.size() > 1 )
 			{
-				return;
-			}
-			m_dirtyComponents |= components;
-			for( const auto &c : m_children )
-			{
-				c->dirty( components );
-			}
-		}
-
-		void update(
-			RenderController *controller,
-			SceneGraph::Type sceneGraphType,
-			unsigned changedGlobalComponents,
-			const ThreadState &threadState,
-			const ScenePlug::ScenePath &scenePath,
-			const ProgressCallback &callback,
-			const PathMatcher *pathsToUpdate,
-			tbb::task_group_context &taskGroupContext
-		)
-		{
-
-			const unsigned pathsToUpdateMatch = pathsToUpdate ? pathsToUpdate->match( scenePath ) : (unsigned)PathMatcher::EveryMatch;
-			if( !pathsToUpdateMatch )
-			{
-				return;
-			}
-
-			// Figure out if this location belongs in the type
-			// of scene graph we're constructing. If it doesn't
-			// belong, and neither do any of its descendants,
-			// we can just early out.
-
-			const unsigned sceneGraphMatch = this->sceneGraphMatch( controller, sceneGraphType, scenePath );
-			if( !( sceneGraphMatch & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::DescendantMatch ) ) )
-			{
-				clear();
-				return;
-			}
-
-			// Set up a context to compute the scene at the right
-			// location.
-
-			ScenePlug::PathScope pathScope( threadState, &scenePath );
-
-			// Update the scene graph at this location.
-
-			const bool changesMade = updateLocation(
-				scenePath,
-				changedGlobalComponents,
-				sceneGraphMatch & IECore::PathMatcher::ExactMatch ? sceneGraphType : SceneGraph::NoType,
-				controller
-			);
-
-			if( changesMade && callback )
-			{
-				callback( BackgroundTask::Running );
-			}
-
-			// Apply updates to each child.
-
-			if( this->expanded() && m_children.size() )
-			{
-				if( m_children.size() > 1 )
-				{
-					tbb::parallel_for(
-						tbb::blocked_range<size_t>( 0, m_children.size() ),
-						[&]( const tbb::blocked_range<size_t> &r )
+				tbb::parallel_for(
+					tbb::blocked_range<size_t>( 0, m_children.size() ),
+					[&]( const tbb::blocked_range<size_t> &r ) {
+						ScenePlug::ScenePath childPath = scenePath;
+						childPath.push_back( IECore::InternedString() ); // space for the child name
+						for( size_t i = r.begin(); i != r.end(); ++i )
 						{
-							ScenePlug::ScenePath childPath = scenePath;
-							childPath.push_back( IECore::InternedString() ); // space for the child name
-							for( size_t i = r.begin(); i != r.end(); ++i )
-							{
-								childPath.back() = m_children[i]->name();
-								m_children[i].get()->update( controller, sceneGraphType, changedGlobalComponents, threadState, childPath, callback, pathsToUpdate, taskGroupContext );
-							}
-						},
-						taskGroupContext
-					);
-				}
-				else
-				{
-					// Serial execution
-					ScenePlug::ScenePath childPath = scenePath;
-					childPath.push_back( m_children[0]->name() );
-					m_children[0].get()->update( controller, sceneGraphType, changedGlobalComponents, threadState, childPath, callback, pathsToUpdate, taskGroupContext );
-				}
-
+							childPath.back() = m_children[i]->name();
+							m_children[i].get()->update( controller, sceneGraphType, changedGlobalComponents, threadState, childPath, callback, pathsToUpdate, taskGroupContext );
+						}
+					},
+					taskGroupContext
+				);
 			}
 			else
 			{
-				for( auto &child : m_children )
-				{
-					child->clear();
-				}
-			}
-
-			if( pathsToUpdateMatch & ( PathMatcher::AncestorMatch | PathMatcher::ExactMatch ) )
-			{
-				allChildrenUpdated();
+				// Serial execution
+				ScenePlug::ScenePath childPath = scenePath;
+				childPath.push_back( m_children[0]->name() );
+				m_children[0].get()->update( controller, sceneGraphType, changedGlobalComponents, threadState, childPath, callback, pathsToUpdate, taskGroupContext );
 			}
 		}
-
-		bool expanded() const
+		else
 		{
-			return m_descendantsVisible;
-		}
-
-		const std::vector<std::unique_ptr<SceneGraph>> &children()
-		{
-			return m_children;
-		}
-
-		void allChildrenUpdated()
-		{
-			m_changedComponents = NoComponent;
-		}
-
-		// Invalidates this location, removing any resources it
-		// holds in the renderer, and clearing all children. This is
-		// used to "remove" a location without having to delete it
-		// from the children() of its parent. We avoid the latter
-		// because it would involve some unwanted locking - we
-		// process children in parallel, and therefore want to avoid
-		// child updates having to write to the parent.
-		void clear()
-		{
-			m_children.clear();
-			clearObject();
-			m_attributesHash = m_lightLinksHash = m_transformHash = m_childNamesHash = IECore::MurmurHash();
-			m_cleared = true;
-			m_descendantsVisible = false;
-			m_drawMode = VisibleSet::Visibility::None;
-			m_boundInterface = nullptr;
-			m_dirtyComponents = AllComponents;
-		}
-
-		// Returns true if the location has not been finalised
-		// since the last call to clear() - ie that it is not
-		// in a valid state.
-		bool cleared()
-		{
-			return m_cleared;
-		}
-
-	private :
-
-		SceneGraph( const InternedString &name, const SceneGraph *parent )
-			:	m_name( name ), m_parent( parent ), m_fullAttributes( new CompoundObject ), m_purposeIncluded( true )
-		{
-			clear();
-		}
-
-		// Called by update to update this location. Returns true if
-		// anything changed.
-		bool updateLocation( const ScenePlug::ScenePath &path, unsigned changedGlobals, Type type, RenderController *controller )
-		{
-			const unsigned originalChangedComponents = m_changedComponents;
-
-			// Attributes
-
-			if( !m_parent )
+			for( auto &child : m_children )
 			{
-				// Root - get attributes from globals.
-				if( changedGlobals & GlobalsGlobalComponent )
+				child->clear();
+			}
+		}
+
+		if( pathsToUpdateMatch & ( PathMatcher::AncestorMatch | PathMatcher::ExactMatch ) )
+		{
+			allChildrenUpdated();
+		}
+	}
+
+	bool expanded() const
+	{
+		return m_descendantsVisible;
+	}
+
+	const std::vector<std::unique_ptr<SceneGraph>> &children()
+	{
+		return m_children;
+	}
+
+	void allChildrenUpdated()
+	{
+		m_changedComponents = NoComponent;
+	}
+
+	// Invalidates this location, removing any resources it
+	// holds in the renderer, and clearing all children. This is
+	// used to "remove" a location without having to delete it
+	// from the children() of its parent. We avoid the latter
+	// because it would involve some unwanted locking - we
+	// process children in parallel, and therefore want to avoid
+	// child updates having to write to the parent.
+	void clear()
+	{
+		m_children.clear();
+		clearObject();
+		m_attributesHash = m_lightLinksHash = m_transformHash = m_childNamesHash = IECore::MurmurHash();
+		m_cleared = true;
+		m_descendantsVisible = false;
+		m_drawMode = VisibleSet::Visibility::None;
+		m_boundInterface = nullptr;
+		m_dirtyComponents = AllComponents;
+	}
+
+	// Returns true if the location has not been finalised
+	// since the last call to clear() - ie that it is not
+	// in a valid state.
+	bool cleared()
+	{
+		return m_cleared;
+	}
+
+private:
+
+	SceneGraph( const InternedString &name, const SceneGraph *parent )
+		: m_name( name ), m_parent( parent ), m_fullAttributes( new CompoundObject ), m_purposeIncluded( true )
+	{
+		clear();
+	}
+
+	// Called by update to update this location. Returns true if
+	// anything changed.
+	bool updateLocation( const ScenePlug::ScenePath &path, unsigned changedGlobals, Type type, RenderController *controller )
+	{
+		const unsigned originalChangedComponents = m_changedComponents;
+
+		// Attributes
+
+		if( !m_parent )
+		{
+			// Root - get attributes from globals.
+			if( changedGlobals & GlobalsGlobalComponent )
+			{
+				if( updateAttributes( controller->m_renderOptions.globals.get() ) )
 				{
-					if( updateAttributes( controller->m_renderOptions.globals.get() ) )
-					{
-						m_changedComponents |= AttributesComponent;
-					}
+					m_changedComponents |= AttributesComponent;
 				}
 			}
-			else
+		}
+		else
+		{
+			// Non-root - get attributes the standard way.
+			const bool parentAttributesChanged = m_parent->m_changedComponents & AttributesComponent;
+			if( parentAttributesChanged || ( m_dirtyComponents & AttributesComponent ) )
 			{
-				// Non-root - get attributes the standard way.
-				const bool parentAttributesChanged = m_parent->m_changedComponents & AttributesComponent;
-				if( parentAttributesChanged || ( m_dirtyComponents & AttributesComponent ) )
-				{
-					if( updateAttributes( controller->m_scene->attributesPlug(), parentAttributesChanged ) )
-					{
-						m_changedComponents |= AttributesComponent;
-					}
-				}
-
-				// If attributes have changed, need to check if this has affected our motion sample times
-				if( ( m_changedComponents & AttributesComponent ) || ( changedGlobals & TransformBlurGlobalComponent ) )
-				{
-					if( Private::RendererAlgo::transformMotionTimes( controller->m_renderOptions, m_fullAttributes.get(), m_transformTimes ) )
-					{
-						m_dirtyComponents |= TransformComponent;
-					}
-				}
-
-				if( ( m_changedComponents & AttributesComponent ) || ( changedGlobals & DeformationBlurGlobalComponent ) )
-				{
-					if( Private::RendererAlgo::deformationMotionTimes( controller->m_renderOptions, m_fullAttributes.get(), m_deformationTimes ) )
-					{
-						m_dirtyComponents |= ObjectComponent;
-					}
-				}
-
-				if( changedGlobals & IDGlobalComponent )
-				{
-					m_dirtyComponents |= IDComponent;
-				}
-			}
-
-			if( !::visible( m_fullAttributes.get() ) )
-			{
-				clear();
-				return originalChangedComponents != m_changedComponents;
-			}
-
-			// Render Sets. We must obviously update these if
-			// the sets have changed, but we also need to do an
-			// update if the attributes have changed, because in
-			// that case we may have overwritten the sets attribute.
-
-			if( ( changedGlobals & RenderSetsGlobalComponent ) || ( m_changedComponents & AttributesComponent ) )
-			{
-				if( updateRenderSets( path, controller->m_renderSets ) )
+				if( updateAttributes( controller->m_scene->attributesPlug(), parentAttributesChanged ) )
 				{
 					m_changedComponents |= AttributesComponent;
 				}
 			}
 
-			clean( AttributesComponent );
-
-			// Purpose
-
-			if( ( m_changedComponents & AttributesComponent ) || ( changedGlobals & IncludedPurposesGlobalComponent ) )
+			// If attributes have changed, need to check if this has affected our motion sample times
+			if( ( m_changedComponents & AttributesComponent ) || ( changedGlobals & TransformBlurGlobalComponent ) )
 			{
-				const bool purposeIncludedPreviously = m_purposeIncluded;
-				m_purposeIncluded = controller->m_renderOptions.purposeIncluded( m_fullAttributes.get() );
-				if( m_purposeIncluded != purposeIncludedPreviously )
+				if( Private::RendererAlgo::transformMotionTimes( controller->m_renderOptions, m_fullAttributes.get(), m_transformTimes ) )
 				{
-					// We'll need to hide or show the object by considering `m_purposeIncluded` in
-					// `updateObject().`
-					m_dirtyComponents |= ObjectComponent;
+					m_dirtyComponents |= TransformComponent;
 				}
 			}
 
-			// Transform
-
-			const bool parentTransformChanged = m_parent && ( m_parent->m_changedComponents & TransformComponent );
-			if( ( m_dirtyComponents & TransformComponent ) || parentTransformChanged )
+			if( ( m_changedComponents & AttributesComponent ) || ( changedGlobals & DeformationBlurGlobalComponent ) )
 			{
-				if( updateTransform( controller->m_scene->transformPlug(), parentTransformChanged ) )
-				{
-					m_changedComponents |= TransformComponent;
-				}
-			}
-
-			clean( TransformComponent );
-
-			// VisibleSet
-
-			const auto currentDrawMode = m_drawMode;
-			if( ( m_dirtyComponents & VisibleSetComponent ) && updateVisibleSet( path, controller->m_visibleSet, controller->m_minimumExpansionDepth ) )
-			{
-				m_changedComponents |= VisibleSetComponent;
-
-				// An object update is only required on change of draw mode for this location.
-				if( currentDrawMode != m_drawMode )
+				if( Private::RendererAlgo::deformationMotionTimes( controller->m_renderOptions, m_fullAttributes.get(), m_deformationTimes ) )
 				{
 					m_dirtyComponents |= ObjectComponent;
 				}
 			}
 
-			// Object
-
-			if( m_objectInterface.isCapsule() && ( changedGlobals & CapsuleAffectingGlobalComponents ) )
+			if( changedGlobals & IDGlobalComponent )
 			{
-				// Account for `Capsule::setRenderOptions()` being called in `updateObject()`.
-				m_dirtyComponents |= ObjectComponent;
-				m_objectHash = MurmurHash();
+				m_dirtyComponents |= IDComponent;
 			}
+		}
 
-			if( ( m_dirtyComponents & ObjectComponent ) && updateObject( controller->m_scene->objectPlug(), type, controller->m_renderer.get(), controller->m_renderOptions, controller->m_scene.get(), controller->m_lightLinks.get() ) )
-			{
-				m_changedComponents |= ObjectComponent;
-			}
-
-			if( m_objectInterface )
-			{
-				if( !(m_changedComponents & ObjectComponent) )
-				{
-					// Apply attribute update to old object if necessary.
-					if( m_changedComponents & AttributesComponent )
-					{
-						if( m_objectInterface->attributes( attributesInterface( controller->m_renderer.get() ) ) )
-						{
-							// Update succeeded. Update light filter links if necessary.
-							if( type == LightFilterType && controller->m_lightLinks )
-							{
-								controller->m_lightLinks->updateLightFilter( m_objectInterface.get(), m_fullAttributes.get() );
-							}
-						}
-						else
-						{
-							// Failed to apply attributes - must replace entire object.
-							m_objectHash = MurmurHash();
-							if( updateObject( controller->m_scene->objectPlug(), type, controller->m_renderer.get(), controller->m_renderOptions, controller->m_scene.get(), controller->m_lightLinks.get() ) )
-							{
-								m_changedComponents |= ObjectComponent;
-								controller->m_failedAttributeEdits++;
-							}
-						}
-					}
-				}
-			}
-
-			if( m_objectInterface )
-			{
-				// If the transform has changed, or we have an entirely new object,
-				// the apply the transform.
-				if( m_changedComponents & ( ObjectComponent | TransformComponent ) )
-				{
-					assert( m_fullTransform.samples.size() );
-					m_objectInterface->transform( m_fullTransform.samples, m_fullTransform.sampleTimes );
-				}
-
-				// Assign an ID
-				if( ( m_changedComponents & ObjectComponent ) || ( m_dirtyComponents & IDComponent )  )
-				{
-					if( controller->m_renderManifest )
-					{
-						m_objectInterface->assignID( controller->m_renderManifest->acquireID( path ) );
-					}
-				}
-
-				if( type == ObjectType && controller->m_lightLinks )
-				{
-					// Apply light links if necessary.
-					if( m_changedComponents & ( ObjectComponent | AttributesComponent ) || controller->m_lightLinks->lightLinksDirty() )
-					{
-						controller->m_lightLinks->outputLightLinks( controller->m_scene.get(), m_fullAttributes.get(), m_objectInterface.get(), &m_lightLinksHash );
-					}
-				}
-			}
-
-			clean( ObjectComponent );
-			clean( IDComponent );
-
-			// Children
-
-			if( ( m_dirtyComponents & ChildNamesComponent ) && updateChildren( controller->m_scene->childNamesPlug() ) )
-			{
-				m_changedComponents |= ChildNamesComponent;
-			}
-
-			clean( ChildNamesComponent );
-
-			bool newBound = false;
-			if(
-				( m_changedComponents & ( VisibleSetComponent | ChildNamesComponent ) ) ||
-				( m_dirtyComponents & BoundComponent )
-			)
-			{
-				// Create bounding box if needed
-				Box3f bound;
-				if( ( m_drawMode == VisibleSet::Visibility::Visible && !m_descendantsVisible && m_children.size() ) || m_drawMode == VisibleSet::Visibility::ExcludedBounds )
-				{
-					bound = controller->m_scene->boundPlug()->getValue();
-				}
-
-				if( !bound.isEmpty() )
-				{
-					IECoreScenePreview::PlaceholderPtr placeholder = new IECoreScenePreview::Placeholder(
-						bound,
-						m_drawMode == VisibleSet::Visibility::ExcludedBounds ? IECoreScenePreview::Placeholder::Mode::Excluded : IECoreScenePreview::Placeholder::Mode::Default
-					);
-
-					std::string boundName;
-					ScenePlug::pathToString( path, boundName );
-					boundName += "/__unexpandedChildren__";
-
-					if( controller->m_renderer->name() != g_openGLRendererName )
-					{
-						// See comments in `updateObject()`.
-						m_boundInterface = nullptr;
-					}
-
-					m_boundInterface = controller->m_renderer->object( boundName, { placeholder.get() }, { 0.0 }, controller->m_defaultAttributes.get() );
-					if( m_boundInterface )
-					{
-						newBound = true;
-					}
-				}
-				else
-				{
-					m_boundInterface = nullptr;
-				}
-			}
-
-			if( newBound || ( m_boundInterface && ( m_changedComponents & TransformComponent ) ) )
-			{
-				// Apply transform to bounding box
-				assert( m_fullTransform.samples.size() );
-				m_boundInterface->transform( m_fullTransform.samples, m_fullTransform.sampleTimes );
-			}
-
-			clean( VisibleSetComponent | BoundComponent );
-
-			m_cleared = false;
-
-			assert( m_dirtyComponents == NoComponent );
-
+		if( !::visible( m_fullAttributes.get() ) )
+		{
+			clear();
 			return originalChangedComponents != m_changedComponents;
 		}
 
-		// Returns true if the attributes changed.
-		bool updateAttributes( const CompoundObjectPlug *attributesPlug, bool parentAttributesChanged )
+		// Render Sets. We must obviously update these if
+		// the sets have changed, but we also need to do an
+		// update if the attributes have changed, because in
+		// that case we may have overwritten the sets attribute.
+
+		if( ( changedGlobals & RenderSetsGlobalComponent ) || ( m_changedComponents & AttributesComponent ) )
 		{
-			assert( m_parent );
-
-			const IECore::MurmurHash attributesHash = attributesPlug->hash();
-			if( attributesHash == m_attributesHash && !parentAttributesChanged )
+			if( updateRenderSets( path, controller->m_renderSets ) )
 			{
-				return false;
-			}
-
-			ConstCompoundObjectPtr attributes = attributesPlug->getValue( &attributesHash );
-			CompoundObject::ObjectMap &fullAttributes = m_fullAttributes->members();
-			fullAttributes = m_parent->m_fullAttributes->members();
-			for( CompoundObject::ObjectMap::const_iterator it = attributes->members().begin(), eIt = attributes->members().end(); it != eIt; ++it )
-			{
-				fullAttributes[it->first] = it->second;
-			}
-
-			m_attributesInterface = nullptr; // Will be updated lazily in attributesInterface()
-			m_attributesHash = attributesHash;
-			return true;
-		}
-
-		// As above, but for use at the root.
-		bool updateAttributes( const CompoundObject *globals )
-		{
-			assert( !m_parent );
-
-			ConstCompoundObjectPtr globalAttributes = GafferScene::SceneAlgo::globalAttributes( globals );
-
-			// m_fullAttributes contains things other than just the globals attributes
-			// (@see updateRenderSets). We have a couple of options here:
-			//
-			//  1) Tracks set changes separately to attributes, and create
-			//     fullAttributes on the fly.
-			//  2) Minimise held state and the needs to recreate fullAttributes,
-			//     at the expense of maintaining custom comparison code.
-			//
-			//  The second options seems preferable, given a direct comparison
-			//  already involves a full iteration over attributes, and as such
-			//  we're not adding much overhead.
-			if( !globalAttributesChanged( globalAttributes.get(), m_fullAttributes.get() ) )
-			{
-				return false;
-			}
-
-			m_fullAttributes->members() = globalAttributes->members();
-			m_attributesInterface = nullptr;
-
-			return true;
-		}
-
-		bool updateRenderSets( const ScenePlug::ScenePath &path, const Private::RendererAlgo::RenderSets &renderSets )
-		{
-			renderSets.attributes( m_fullAttributes->members(), path );
-			m_attributesInterface = nullptr;
-			return true;
-		}
-
-		IECoreScenePreview::Renderer::AttributesInterface *attributesInterface( IECoreScenePreview::Renderer *renderer )
-		{
-			if( !m_attributesInterface )
-			{
-				m_attributesInterface = renderer->attributes( m_fullAttributes.get() );
-			}
-			return m_attributesInterface.get();
-		}
-
-		// Returns true if the transform changed.
-		bool updateTransform( const M44fPlug *transformPlug, bool parentTransformChanged )
-		{
-			if( parentTransformChanged )
-			{
-				// We don't store the local transform - if the parent has changed, wipe the hash
-				// to ensure that we recompute the local transform so we can redo the concatenation
-				m_transformHash = IECore::MurmurHash();
-			}
-
-			auto sampledTransform = Private::RendererAlgo::transformSamples( transformPlug, m_transformTimes, &m_transformHash );
-			if( !sampledTransform )
-			{
-				return false;
-			}
-
-			if( !m_parent )
-			{
-				m_fullTransform = *sampledTransform;
-			}
-			else
-			{
-				m_fullTransform = m_parent->m_fullTransform;
-				m_fullTransform.concatenate( *sampledTransform );
-			}
-
-			return true;
-		}
-
-		// Returns true if the object changed.
-		bool updateObject( const ObjectPlug *objectPlug, Type type, IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const ScenePlug *scene, LightLinks *lightLinks )
-		{
-			const bool hadObjectInterface = static_cast<bool>( m_objectInterface );
-			if( type == NoType || m_drawMode != VisibleSet::Visibility::Visible || !m_purposeIncluded )
-			{
-				clearObject();
-				return hadObjectInterface;
-			}
-
-			auto sampledObject = Private::RendererAlgo::objectSamples( objectPlug, m_deformationTimes, &m_objectHash );
-			if( !sampledObject )
-			{
-				// No update required.
-				return false;
-			}
-
-			if( renderer->name() != g_openGLRendererName )
-			{
-				// Delete our current object interface before we potentially
-				// create a new one. This is essential for renderer backends
-				// which rely on object names being unique (typically because
-				// they use them as handles in the renderer they connect to).
-				// We avoid doing this for the OpenGL renderer though, because
-				// destroying the object before its replacement is ready can
-				// lead to the object flickering during progressive updates
-				// in Gaffer's viewport (the OpenGL renderer is designed such
-				// that it can draw concurrently with the updates we make,
-				// whereas other renderers must wait for all edits to be complete
-				// first).
-				//
-				/// \todo Consider ways of redesigning the Renderer API so this
-				/// is cleaner. Should there be an atomic way of swapping an
-				/// ObjectInterface? Or a way of updating geometry without creating
-				/// a new object? Perhaps the latter could allow a smart backend to make
-				/// more minimal edits?
-				m_objectInterface = nullptr;
-			}
-
-			// First consider types that don't require object samples.
-
-			std::string name;
-			ScenePlug::pathToString( Context::current()->get<vector<InternedString> >( ScenePlug::scenePathContextName ), name );
-			if( type == LightType )
-			{
-				auto light = renderer->light( name, sampledObject->samples, sampledObject->sampleTimes, attributesInterface( renderer ) );
-				if( light && lightLinks )
-				{
-					lightLinks->addLight( name, light );
-					m_objectInterface.assign(
-						light,
-						[name, lightLinks]() {
-							lightLinks->removeLight( name );
-						}
-					);
-				}
-				else
-				{
-					m_objectInterface = light;
-				}
-				return true;
-			}
-			else if( type == LightFilterType )
-			{
-				auto lightFilter = renderer->lightFilter( name, sampledObject->samples, sampledObject->sampleTimes, attributesInterface( renderer ) );
-				if( lightFilter && lightLinks )
-				{
-					lightLinks->addLightFilter( lightFilter, m_fullAttributes.get() );
-					m_objectInterface.assign(
-						lightFilter,
-						[lightFilter, lightLinks]() {
-							lightLinks->removeLightFilter( lightFilter );
-						}
-					);
-				}
-				else
-				{
-					m_objectInterface = lightFilter;
-				}
-				return true;
-			}
-
-			// Remaining types require object samples, so early out if we don't
-			// have any.
-
-			if( sampledObject->samples.empty() )
-			{
-				m_objectInterface = nullptr;
-				return hadObjectInterface;
-			}
-
-			if( type == CameraType )
-			{
-				IECoreScenePreview::Renderer::CameraSamples cameraSamples; cameraSamples.reserve( sampledObject->samples.size() );
-				for( const auto &sample : sampledObject->samples )
-				{
-					if( auto cameraSample = runTimeCast<const Camera>( sample.get() ) )
-					{
-						IECoreScene::CameraPtr cameraSampleCopy = cameraSample->copy();
-						SceneAlgo::applyCameraGlobals( cameraSampleCopy.get(), renderOptions.globals.get(), scene );
-						cameraSamples.push_back( cameraSampleCopy );
-					}
-				}
-
-				// Create ObjectInterface
-
-				if( !sampledObject->samples.size() || cameraSamples.size() != sampledObject->samples.size() )
-				{
-					IECore::msg(
-						IECore::Msg::Warning,
-						"RenderController::updateObject",
-						fmt::format(
-							"Camera missing for location \"{}\" at frame {}",
-							name, Context::current()->getFrame()
-						)
-					);
-				}
-				else
-				{
-					m_objectInterface = renderer->camera(
-						name,
-						cameraSamples,
-						sampledObject->sampleTimes,
-						attributesInterface( renderer )
-					);
-				}
-				return true;
-			}
-			else
-			{
-				bool isCapsule = false;
-				if( sampledObject->samples.size() == 1 )
-				{
-					if( auto capsule = runTimeCast<const Capsule>( sampledObject->samples[0].get() ) )
-					{
-						CapsulePtr capsuleCopy = capsule->copy();
-						capsuleCopy->setRenderOptions( renderOptions );
-						sampledObject->samples[0] = capsuleCopy;
-						isCapsule = true;
-					}
-				}
-
-				m_objectInterface.assign(
-					renderer->object( name, sampledObject->samples, sampledObject->sampleTimes, attributesInterface( renderer ) ),
-					ObjectInterfaceHandle::RemovalCallback(),
-					isCapsule
-				);
-				return true;
+				m_changedComponents |= AttributesComponent;
 			}
 		}
 
-		void clearObject()
+		clean( AttributesComponent );
+
+		// Purpose
+
+		if( ( m_changedComponents & AttributesComponent ) || ( changedGlobals & IncludedPurposesGlobalComponent ) )
 		{
-			m_objectInterface = nullptr;
+			const bool purposeIncludedPreviously = m_purposeIncluded;
+			m_purposeIncluded = controller->m_renderOptions.purposeIncluded( m_fullAttributes.get() );
+			if( m_purposeIncluded != purposeIncludedPreviously )
+			{
+				// We'll need to hide or show the object by considering `m_purposeIncluded` in
+				// `updateObject().`
+				m_dirtyComponents |= ObjectComponent;
+			}
+		}
+
+		// Transform
+
+		const bool parentTransformChanged = m_parent && ( m_parent->m_changedComponents & TransformComponent );
+		if( ( m_dirtyComponents & TransformComponent ) || parentTransformChanged )
+		{
+			if( updateTransform( controller->m_scene->transformPlug(), parentTransformChanged ) )
+			{
+				m_changedComponents |= TransformComponent;
+			}
+		}
+
+		clean( TransformComponent );
+
+		// VisibleSet
+
+		const auto currentDrawMode = m_drawMode;
+		if( ( m_dirtyComponents & VisibleSetComponent ) && updateVisibleSet( path, controller->m_visibleSet, controller->m_minimumExpansionDepth ) )
+		{
+			m_changedComponents |= VisibleSetComponent;
+
+			// An object update is only required on change of draw mode for this location.
+			if( currentDrawMode != m_drawMode )
+			{
+				m_dirtyComponents |= ObjectComponent;
+			}
+		}
+
+		// Object
+
+		if( m_objectInterface.isCapsule() && ( changedGlobals & CapsuleAffectingGlobalComponents ) )
+		{
+			// Account for `Capsule::setRenderOptions()` being called in `updateObject()`.
+			m_dirtyComponents |= ObjectComponent;
 			m_objectHash = MurmurHash();
 		}
 
-		bool updateVisibleSet( const ScenePlug::ScenePath &path, const GafferScene::VisibleSet &visibleSet, size_t minimumExpansionDepth )
+		if( ( m_dirtyComponents & ObjectComponent ) && updateObject( controller->m_scene->objectPlug(), type, controller->m_renderer.get(), controller->m_renderOptions, controller->m_scene.get(), controller->m_lightLinks.get() ) )
 		{
-			const auto visibility = visibleSet.visibility( path, minimumExpansionDepth );
-
-			if( visibility.descendantsVisible == m_descendantsVisible && visibility.drawMode == m_drawMode )
-			{
-				return false;
-			}
-			m_descendantsVisible = visibility.descendantsVisible;
-			m_drawMode = visibility.drawMode;
-
-			return true;
+			m_changedComponents |= ObjectComponent;
 		}
 
-		// Ensures that children() contains a child for every name specified
-		// by childNamesPlug(). This just ensures that the children exist - they
-		// will subsequently be updated in parallel by update().
-		bool updateChildren( const InternedStringVectorDataPlug *childNamesPlug )
+		if( m_objectInterface )
 		{
-			const IECore::MurmurHash childNamesHash = childNamesPlug->hash();
-			if( childNamesHash == m_childNamesHash )
+			if( !( m_changedComponents & ObjectComponent ) )
 			{
-				return false;
-			}
-
-			IECore::ConstInternedStringVectorDataPtr childNamesData = childNamesPlug->getValue( &childNamesHash );
-			const std::vector<IECore::InternedString> &childNames = childNamesData->readable();
-			m_childNamesHash = childNamesHash;
-
-			// Our vector of children no longer matches `childNames`, but we may be
-			// able to reuse most of them (often only one has been added or removed).
-			// Move them to the side and sort them by name for quick lookups.
-
-			vector<unique_ptr<SceneGraph>> oldChildren;
-			oldChildren.swap( m_children );
-			sort(
-				oldChildren.begin(), oldChildren.end(),
-				[]( const unique_ptr<SceneGraph> &a, const unique_ptr<SceneGraph> &b )
+				// Apply attribute update to old object if necessary.
+				if( m_changedComponents & AttributesComponent )
 				{
-					return a->m_name < b->m_name;
-				}
-			);
-
-			// As we refill `m_children`, we're going to transfer ownership out of
-			// `oldChildren` as we go. This will leave nullptr gaps in `oldChildren`,
-			// breaking the sorting needed by `lower_bound()`. We therefore use this
-			// non-owning copy to perform the search.
-
-			vector<SceneGraph *> oldChildrenRaw;
-			oldChildrenRaw.reserve( oldChildren.size() );
-			for( const auto &c : oldChildren )
-			{
-				oldChildrenRaw.push_back( c.get() );
-			}
-
-			// Fill m_children with a combination of old and new children as necessary.
-
-			m_children.reserve( childNames.size() );
-			for( const auto &name : childNames )
-			{
-				auto it = lower_bound(
-					oldChildrenRaw.begin(), oldChildrenRaw.end(),
-					name,
-					[]( const SceneGraph *a, const InternedString &b )
+					if( m_objectInterface->attributes( attributesInterface( controller->m_renderer.get() ) ) )
 					{
-						return a->m_name < b;
-					}
-				);
-
-				if( it != oldChildrenRaw.end() && (*it)->m_name == name )
-				{
-					decltype( it )::difference_type index = it - oldChildrenRaw.begin();
-					if( !oldChildren[ index ] )
-					{
-						std::string path;
-						ScenePlug::pathToString( Context::current()->get<vector<InternedString> >( ScenePlug::scenePathContextName ), path );
-						path += "/" + name.string();
-						throw Exception( "RenderControllerSceneGraph::updateChildren() failed.  Duplicate children with name: " + path );
-					}
-					m_children.push_back( std::move( oldChildren[ index ] ) );
-				}
-				else
-				{
-					m_children.push_back( unique_ptr<SceneGraph>( new SceneGraph( name, this ) ) );
-				}
-			}
-
-			return true;
-		}
-
-		void clean( unsigned components )
-		{
-			m_dirtyComponents &= ~components;
-		}
-
-		/// \todo Fast path for when sets were not dirtied.
-		static unsigned sceneGraphMatch( RenderController *controller, SceneGraph::Type sceneGraphType, const ScenePlug::ScenePath &scenePath )
-		{
-			switch( sceneGraphType )
-			{
-				case SceneGraph::CameraType :
-					return controller->m_renderSets.camerasSet().match( scenePath );
-				case SceneGraph::LightType :
-					return controller->m_renderSets.lightsSet().match( scenePath );
-				case SceneGraph::LightFilterType :
-					return controller->m_renderSets.lightFiltersSet().match( scenePath );
-				case SceneGraph::ObjectType :
-				{
-					unsigned m = controller->m_renderSets.lightsSet().match( scenePath ) |
-								 controller->m_renderSets.camerasSet().match( scenePath );
-					if( m & IECore::PathMatcher::ExactMatch )
-					{
-						return IECore::PathMatcher::AncestorMatch | IECore::PathMatcher::DescendantMatch;
+						// Update succeeded. Update light filter links if necessary.
+						if( type == LightFilterType && controller->m_lightLinks )
+						{
+							controller->m_lightLinks->updateLightFilter( m_objectInterface.get(), m_fullAttributes.get() );
+						}
 					}
 					else
 					{
-						return IECore::PathMatcher::EveryMatch;
+						// Failed to apply attributes - must replace entire object.
+						m_objectHash = MurmurHash();
+						if( updateObject( controller->m_scene->objectPlug(), type, controller->m_renderer.get(), controller->m_renderOptions, controller->m_scene.get(), controller->m_lightLinks.get() ) )
+						{
+							m_changedComponents |= ObjectComponent;
+							controller->m_failedAttributeEdits++;
+						}
 					}
 				}
-				default :
-					return IECore::PathMatcher::NoMatch;
 			}
 		}
 
-		IECore::InternedString m_name;
+		if( m_objectInterface )
+		{
+			// If the transform has changed, or we have an entirely new object,
+			// the apply the transform.
+			if( m_changedComponents & ( ObjectComponent | TransformComponent ) )
+			{
+				assert( m_fullTransform.samples.size() );
+				m_objectInterface->transform( m_fullTransform.samples, m_fullTransform.sampleTimes );
+			}
 
-		const SceneGraph *m_parent;
+			// Assign an ID
+			if( ( m_changedComponents & ObjectComponent ) || ( m_dirtyComponents & IDComponent ) )
+			{
+				if( controller->m_renderManifest )
+				{
+					m_objectInterface->assignID( controller->m_renderManifest->acquireID( path ) );
+				}
+			}
 
-		IECore::MurmurHash m_objectHash;
-		ObjectInterfaceHandle m_objectInterface;
-		IECoreScenePreview::Renderer::SampleTimes m_deformationTimes;
+			if( type == ObjectType && controller->m_lightLinks )
+			{
+				// Apply light links if necessary.
+				if( m_changedComponents & ( ObjectComponent | AttributesComponent ) || controller->m_lightLinks->lightLinksDirty() )
+				{
+					controller->m_lightLinks->outputLightLinks( controller->m_scene.get(), m_fullAttributes.get(), m_objectInterface.get(), &m_lightLinksHash );
+				}
+			}
+		}
 
-		IECore::MurmurHash m_attributesHash;
-		IECore::CompoundObjectPtr m_fullAttributes;
-		IECoreScenePreview::Renderer::AttributesInterfacePtr m_attributesInterface;
-		IECore::MurmurHash m_lightLinksHash;
-		bool m_purposeIncluded;
+		clean( ObjectComponent );
+		clean( IDComponent );
 
-		IECore::MurmurHash m_transformHash;
-		// The times we sample the local transform at.
-		IECoreScenePreview::Renderer::SampleTimes m_transformTimes;
+		// Children
 
-		// The full transform to be applied to the object. The number of samples
-		// here may differ from `m_transformTimes`, either because the transform
-		// turned out to be static, or due to inheriting from a parent with
-		// different numbers of samples.
-		Private::RendererAlgo::SampledTransform m_fullTransform;
+		if( ( m_dirtyComponents & ChildNamesComponent ) && updateChildren( controller->m_scene->childNamesPlug() ) )
+		{
+			m_changedComponents |= ChildNamesComponent;
+		}
 
-		IECore::MurmurHash m_childNamesHash;
-		std::vector<std::unique_ptr<SceneGraph>> m_children;
+		clean( ChildNamesComponent );
 
-		IECoreScenePreview::Renderer::ObjectInterfacePtr m_boundInterface;
-		bool m_descendantsVisible;
-		VisibleSet::Visibility::DrawMode m_drawMode;
+		bool newBound = false;
+		if(
+			( m_changedComponents & ( VisibleSetComponent | ChildNamesComponent ) ) ||
+			( m_dirtyComponents & BoundComponent )
+		)
+		{
+			// Create bounding box if needed
+			Box3f bound;
+			if( ( m_drawMode == VisibleSet::Visibility::Visible && !m_descendantsVisible && m_children.size() ) || m_drawMode == VisibleSet::Visibility::ExcludedBounds )
+			{
+				bound = controller->m_scene->boundPlug()->getValue();
+			}
 
-		// Tracks work which needs to be done on
-		// the next call to `update()`.
-		unsigned m_dirtyComponents;
-		// Tracks things that were changed on the last
-		// call to `update()`. This is needed in two
-		// scenarios :
+			if( !bound.isEmpty() )
+			{
+				IECoreScenePreview::PlaceholderPtr placeholder = new IECoreScenePreview::Placeholder(
+					bound,
+					m_drawMode == VisibleSet::Visibility::ExcludedBounds ? IECoreScenePreview::Placeholder::Mode::Excluded : IECoreScenePreview::Placeholder::Mode::Default
+				);
+
+				std::string boundName;
+				ScenePlug::pathToString( path, boundName );
+				boundName += "/__unexpandedChildren__";
+
+				if( controller->m_renderer->name() != g_openGLRendererName )
+				{
+					// See comments in `updateObject()`.
+					m_boundInterface = nullptr;
+				}
+
+				m_boundInterface = controller->m_renderer->object( boundName, { placeholder.get() }, { 0.0 }, controller->m_defaultAttributes.get() );
+				if( m_boundInterface )
+				{
+					newBound = true;
+				}
+			}
+			else
+			{
+				m_boundInterface = nullptr;
+			}
+		}
+
+		if( newBound || ( m_boundInterface && ( m_changedComponents & TransformComponent ) ) )
+		{
+			// Apply transform to bounding box
+			assert( m_fullTransform.samples.size() );
+			m_boundInterface->transform( m_fullTransform.samples, m_fullTransform.sampleTimes );
+		}
+
+		clean( VisibleSetComponent | BoundComponent );
+
+		m_cleared = false;
+
+		assert( m_dirtyComponents == NoComponent );
+
+		return originalChangedComponents != m_changedComponents;
+	}
+
+	// Returns true if the attributes changed.
+	bool updateAttributes( const CompoundObjectPlug *attributesPlug, bool parentAttributesChanged )
+	{
+		assert( m_parent );
+
+		const IECore::MurmurHash attributesHash = attributesPlug->hash();
+		if( attributesHash == m_attributesHash && !parentAttributesChanged )
+		{
+			return false;
+		}
+
+		ConstCompoundObjectPtr attributes = attributesPlug->getValue( &attributesHash );
+		CompoundObject::ObjectMap &fullAttributes = m_fullAttributes->members();
+		fullAttributes = m_parent->m_fullAttributes->members();
+		for( CompoundObject::ObjectMap::const_iterator it = attributes->members().begin(), eIt = attributes->members().end(); it != eIt; ++it )
+		{
+			fullAttributes[it->first] = it->second;
+		}
+
+		m_attributesInterface = nullptr; // Will be updated lazily in attributesInterface()
+		m_attributesHash = attributesHash;
+		return true;
+	}
+
+	// As above, but for use at the root.
+	bool updateAttributes( const CompoundObject *globals )
+	{
+		assert( !m_parent );
+
+		ConstCompoundObjectPtr globalAttributes = GafferScene::SceneAlgo::globalAttributes( globals );
+
+		// m_fullAttributes contains things other than just the globals attributes
+		// (@see updateRenderSets). We have a couple of options here:
 		//
-		//  - When `update()` is cancelled part way
-		//    through either through cancellation or
-		//    a computation error. In the next call to
-		//    `update()` we need to know what we
-		//    changed previously because we won't repeat
-		//    the part of the update that we completed before.
-		//  - From the `update()` call for our children.
-		//    The children need to know if the parent transform
-		//    or attributes changed so they can concatenate
-		//    them appropriately.
+		//  1) Tracks set changes separately to attributes, and create
+		//     fullAttributes on the fly.
+		//  2) Minimise held state and the needs to recreate fullAttributes,
+		//     at the expense of maintaining custom comparison code.
 		//
-		// We clear `m_changedComponents` once all children have
-		// been updated successfully, in `allChildrenUpdated()`.
-		unsigned m_changedComponents;
+		//  The second options seems preferable, given a direct comparison
+		//  already involves a full iteration over attributes, and as such
+		//  we're not adding much overhead.
+		if( !globalAttributesChanged( globalAttributes.get(), m_fullAttributes.get() ) )
+		{
+			return false;
+		}
 
-		bool m_cleared;
+		m_fullAttributes->members() = globalAttributes->members();
+		m_attributesInterface = nullptr;
 
+		return true;
+	}
+
+	bool updateRenderSets( const ScenePlug::ScenePath &path, const Private::RendererAlgo::RenderSets &renderSets )
+	{
+		renderSets.attributes( m_fullAttributes->members(), path );
+		m_attributesInterface = nullptr;
+		return true;
+	}
+
+	IECoreScenePreview::Renderer::AttributesInterface *attributesInterface( IECoreScenePreview::Renderer *renderer )
+	{
+		if( !m_attributesInterface )
+		{
+			m_attributesInterface = renderer->attributes( m_fullAttributes.get() );
+		}
+		return m_attributesInterface.get();
+	}
+
+	// Returns true if the transform changed.
+	bool updateTransform( const M44fPlug *transformPlug, bool parentTransformChanged )
+	{
+		if( parentTransformChanged )
+		{
+			// We don't store the local transform - if the parent has changed, wipe the hash
+			// to ensure that we recompute the local transform so we can redo the concatenation
+			m_transformHash = IECore::MurmurHash();
+		}
+
+		auto sampledTransform = Private::RendererAlgo::transformSamples( transformPlug, m_transformTimes, &m_transformHash );
+		if( !sampledTransform )
+		{
+			return false;
+		}
+
+		if( !m_parent )
+		{
+			m_fullTransform = *sampledTransform;
+		}
+		else
+		{
+			m_fullTransform = m_parent->m_fullTransform;
+			m_fullTransform.concatenate( *sampledTransform );
+		}
+
+		return true;
+	}
+
+	// Returns true if the object changed.
+	bool updateObject( const ObjectPlug *objectPlug, Type type, IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const ScenePlug *scene, LightLinks *lightLinks )
+	{
+		const bool hadObjectInterface = static_cast<bool>( m_objectInterface );
+		if( type == NoType || m_drawMode != VisibleSet::Visibility::Visible || !m_purposeIncluded )
+		{
+			clearObject();
+			return hadObjectInterface;
+		}
+
+		auto sampledObject = Private::RendererAlgo::objectSamples( objectPlug, m_deformationTimes, &m_objectHash );
+		if( !sampledObject )
+		{
+			// No update required.
+			return false;
+		}
+
+		if( renderer->name() != g_openGLRendererName )
+		{
+			// Delete our current object interface before we potentially
+			// create a new one. This is essential for renderer backends
+			// which rely on object names being unique (typically because
+			// they use them as handles in the renderer they connect to).
+			// We avoid doing this for the OpenGL renderer though, because
+			// destroying the object before its replacement is ready can
+			// lead to the object flickering during progressive updates
+			// in Gaffer's viewport (the OpenGL renderer is designed such
+			// that it can draw concurrently with the updates we make,
+			// whereas other renderers must wait for all edits to be complete
+			// first).
+			//
+			/// \todo Consider ways of redesigning the Renderer API so this
+			/// is cleaner. Should there be an atomic way of swapping an
+			/// ObjectInterface? Or a way of updating geometry without creating
+			/// a new object? Perhaps the latter could allow a smart backend to make
+			/// more minimal edits?
+			m_objectInterface = nullptr;
+		}
+
+		// First consider types that don't require object samples.
+
+		std::string name;
+		ScenePlug::pathToString( Context::current()->get<vector<InternedString>>( ScenePlug::scenePathContextName ), name );
+		if( type == LightType )
+		{
+			auto light = renderer->light( name, sampledObject->samples, sampledObject->sampleTimes, attributesInterface( renderer ) );
+			if( light && lightLinks )
+			{
+				lightLinks->addLight( name, light );
+				m_objectInterface.assign(
+					light,
+					[name, lightLinks]() {
+						lightLinks->removeLight( name );
+					}
+				);
+			}
+			else
+			{
+				m_objectInterface = light;
+			}
+			return true;
+		}
+		else if( type == LightFilterType )
+		{
+			auto lightFilter = renderer->lightFilter( name, sampledObject->samples, sampledObject->sampleTimes, attributesInterface( renderer ) );
+			if( lightFilter && lightLinks )
+			{
+				lightLinks->addLightFilter( lightFilter, m_fullAttributes.get() );
+				m_objectInterface.assign(
+					lightFilter,
+					[lightFilter, lightLinks]() {
+						lightLinks->removeLightFilter( lightFilter );
+					}
+				);
+			}
+			else
+			{
+				m_objectInterface = lightFilter;
+			}
+			return true;
+		}
+
+		// Remaining types require object samples, so early out if we don't
+		// have any.
+
+		if( sampledObject->samples.empty() )
+		{
+			m_objectInterface = nullptr;
+			return hadObjectInterface;
+		}
+
+		if( type == CameraType )
+		{
+			IECoreScenePreview::Renderer::CameraSamples cameraSamples;
+			cameraSamples.reserve( sampledObject->samples.size() );
+			for( const auto &sample : sampledObject->samples )
+			{
+				if( auto cameraSample = runTimeCast<const Camera>( sample.get() ) )
+				{
+					IECoreScene::CameraPtr cameraSampleCopy = cameraSample->copy();
+					SceneAlgo::applyCameraGlobals( cameraSampleCopy.get(), renderOptions.globals.get(), scene );
+					cameraSamples.push_back( cameraSampleCopy );
+				}
+			}
+
+			// Create ObjectInterface
+
+			if( !sampledObject->samples.size() || cameraSamples.size() != sampledObject->samples.size() )
+			{
+				IECore::msg(
+					IECore::Msg::Warning,
+					"RenderController::updateObject",
+					fmt::format(
+						"Camera missing for location \"{}\" at frame {}",
+						name, Context::current()->getFrame()
+					)
+				);
+			}
+			else
+			{
+				m_objectInterface = renderer->camera(
+					name,
+					cameraSamples,
+					sampledObject->sampleTimes,
+					attributesInterface( renderer )
+				);
+			}
+			return true;
+		}
+		else
+		{
+			bool isCapsule = false;
+			if( sampledObject->samples.size() == 1 )
+			{
+				if( auto capsule = runTimeCast<const Capsule>( sampledObject->samples[0].get() ) )
+				{
+					CapsulePtr capsuleCopy = capsule->copy();
+					capsuleCopy->setRenderOptions( renderOptions );
+					sampledObject->samples[0] = capsuleCopy;
+					isCapsule = true;
+				}
+			}
+
+			m_objectInterface.assign(
+				renderer->object( name, sampledObject->samples, sampledObject->sampleTimes, attributesInterface( renderer ) ),
+				ObjectInterfaceHandle::RemovalCallback(),
+				isCapsule
+			);
+			return true;
+		}
+	}
+
+	void clearObject()
+	{
+		m_objectInterface = nullptr;
+		m_objectHash = MurmurHash();
+	}
+
+	bool updateVisibleSet( const ScenePlug::ScenePath &path, const GafferScene::VisibleSet &visibleSet, size_t minimumExpansionDepth )
+	{
+		const auto visibility = visibleSet.visibility( path, minimumExpansionDepth );
+
+		if( visibility.descendantsVisible == m_descendantsVisible && visibility.drawMode == m_drawMode )
+		{
+			return false;
+		}
+		m_descendantsVisible = visibility.descendantsVisible;
+		m_drawMode = visibility.drawMode;
+
+		return true;
+	}
+
+	// Ensures that children() contains a child for every name specified
+	// by childNamesPlug(). This just ensures that the children exist - they
+	// will subsequently be updated in parallel by update().
+	bool updateChildren( const InternedStringVectorDataPlug *childNamesPlug )
+	{
+		const IECore::MurmurHash childNamesHash = childNamesPlug->hash();
+		if( childNamesHash == m_childNamesHash )
+		{
+			return false;
+		}
+
+		IECore::ConstInternedStringVectorDataPtr childNamesData = childNamesPlug->getValue( &childNamesHash );
+		const std::vector<IECore::InternedString> &childNames = childNamesData->readable();
+		m_childNamesHash = childNamesHash;
+
+		// Our vector of children no longer matches `childNames`, but we may be
+		// able to reuse most of them (often only one has been added or removed).
+		// Move them to the side and sort them by name for quick lookups.
+
+		vector<unique_ptr<SceneGraph>> oldChildren;
+		oldChildren.swap( m_children );
+		sort(
+			oldChildren.begin(), oldChildren.end(),
+			[]( const unique_ptr<SceneGraph> &a, const unique_ptr<SceneGraph> &b ) {
+				return a->m_name < b->m_name;
+			}
+		);
+
+		// As we refill `m_children`, we're going to transfer ownership out of
+		// `oldChildren` as we go. This will leave nullptr gaps in `oldChildren`,
+		// breaking the sorting needed by `lower_bound()`. We therefore use this
+		// non-owning copy to perform the search.
+
+		vector<SceneGraph *> oldChildrenRaw;
+		oldChildrenRaw.reserve( oldChildren.size() );
+		for( const auto &c : oldChildren )
+		{
+			oldChildrenRaw.push_back( c.get() );
+		}
+
+		// Fill m_children with a combination of old and new children as necessary.
+
+		m_children.reserve( childNames.size() );
+		for( const auto &name : childNames )
+		{
+			auto it = lower_bound(
+				oldChildrenRaw.begin(), oldChildrenRaw.end(),
+				name,
+				[]( const SceneGraph *a, const InternedString &b ) {
+					return a->m_name < b;
+				}
+			);
+
+			if( it != oldChildrenRaw.end() && ( *it )->m_name == name )
+			{
+				decltype( it )::difference_type index = it - oldChildrenRaw.begin();
+				if( !oldChildren[index] )
+				{
+					std::string path;
+					ScenePlug::pathToString( Context::current()->get<vector<InternedString>>( ScenePlug::scenePathContextName ), path );
+					path += "/" + name.string();
+					throw Exception( "RenderControllerSceneGraph::updateChildren() failed.  Duplicate children with name: " + path );
+				}
+				m_children.push_back( std::move( oldChildren[index] ) );
+			}
+			else
+			{
+				m_children.push_back( unique_ptr<SceneGraph>( new SceneGraph( name, this ) ) );
+			}
+		}
+
+		return true;
+	}
+
+	void clean( unsigned components )
+	{
+		m_dirtyComponents &= ~components;
+	}
+
+	/// \todo Fast path for when sets were not dirtied.
+	static unsigned sceneGraphMatch( RenderController *controller, SceneGraph::Type sceneGraphType, const ScenePlug::ScenePath &scenePath )
+	{
+		switch( sceneGraphType )
+		{
+			case SceneGraph::CameraType :
+				return controller->m_renderSets.camerasSet().match( scenePath );
+			case SceneGraph::LightType :
+				return controller->m_renderSets.lightsSet().match( scenePath );
+			case SceneGraph::LightFilterType :
+				return controller->m_renderSets.lightFiltersSet().match( scenePath );
+			case SceneGraph::ObjectType : {
+				unsigned m = controller->m_renderSets.lightsSet().match( scenePath ) |
+					controller->m_renderSets.camerasSet().match( scenePath );
+				if( m & IECore::PathMatcher::ExactMatch )
+				{
+					return IECore::PathMatcher::AncestorMatch | IECore::PathMatcher::DescendantMatch;
+				}
+				else
+				{
+					return IECore::PathMatcher::EveryMatch;
+				}
+			}
+			default :
+				return IECore::PathMatcher::NoMatch;
+		}
+	}
+
+	IECore::InternedString m_name;
+
+	const SceneGraph *m_parent;
+
+	IECore::MurmurHash m_objectHash;
+	ObjectInterfaceHandle m_objectInterface;
+	IECoreScenePreview::Renderer::SampleTimes m_deformationTimes;
+
+	IECore::MurmurHash m_attributesHash;
+	IECore::CompoundObjectPtr m_fullAttributes;
+	IECoreScenePreview::Renderer::AttributesInterfacePtr m_attributesInterface;
+	IECore::MurmurHash m_lightLinksHash;
+	bool m_purposeIncluded;
+
+	IECore::MurmurHash m_transformHash;
+	// The times we sample the local transform at.
+	IECoreScenePreview::Renderer::SampleTimes m_transformTimes;
+
+	// The full transform to be applied to the object. The number of samples
+	// here may differ from `m_transformTimes`, either because the transform
+	// turned out to be static, or due to inheriting from a parent with
+	// different numbers of samples.
+	Private::RendererAlgo::SampledTransform m_fullTransform;
+
+	IECore::MurmurHash m_childNamesHash;
+	std::vector<std::unique_ptr<SceneGraph>> m_children;
+
+	IECoreScenePreview::Renderer::ObjectInterfacePtr m_boundInterface;
+	bool m_descendantsVisible;
+	VisibleSet::Visibility::DrawMode m_drawMode;
+
+	// Tracks work which needs to be done on
+	// the next call to `update()`.
+	unsigned m_dirtyComponents;
+	// Tracks things that were changed on the last
+	// call to `update()`. This is needed in two
+	// scenarios :
+	//
+	//  - When `update()` is cancelled part way
+	//    through either through cancellation or
+	//    a computation error. In the next call to
+	//    `update()` we need to know what we
+	//    changed previously because we won't repeat
+	//    the part of the update that we completed before.
+	//  - From the `update()` call for our children.
+	//    The children need to know if the parent transform
+	//    or attributes changed so they can concatenate
+	//    them appropriately.
+	//
+	// We clear `m_changedComponents` once all children have
+	// been updated successfully, in `allChildrenUpdated()`.
+	unsigned m_changedComponents;
+
+	bool m_cleared;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -1149,14 +1143,14 @@ class RenderController::SceneGraph
 //////////////////////////////////////////////////////////////////////////
 
 RenderController::RenderController( const ConstScenePlugPtr &scene, const Gaffer::ConstContextPtr &context, const IECoreScenePreview::RendererPtr &renderer )
-	:	m_renderer( renderer ),
-		m_minimumExpansionDepth( 0 ),
-		m_updateRequired( false ),
-		m_updateRequested( false ),
-		m_failedAttributeEdits( 0 ),
-		m_dirtyGlobalComponents( NoGlobalComponent ),
-		m_changedGlobalComponents( NoGlobalComponent ),
-		m_manifestRequired( false )
+	: m_renderer( renderer ),
+	  m_minimumExpansionDepth( 0 ),
+	  m_updateRequired( false ),
+	  m_updateRequested( false ),
+	  m_failedAttributeEdits( 0 ),
+	  m_dirtyGlobalComponents( NoGlobalComponent ),
+	  m_changedGlobalComponents( NoGlobalComponent ),
+	  m_manifestRequired( false )
 {
 	for( int i = SceneGraph::FirstType; i <= SceneGraph::LastType; ++i )
 	{
@@ -1183,11 +1177,8 @@ RenderController::~RenderController()
 	const StringData *manifestPath = m_renderOptions.globals->member<StringData>( "option:render:manifestFilePath" );
 	if( manifestPath && manifestPath->readable().size() )
 	{
-		IECore::msg( IECore::Msg::Warning,
-			"RenderController",
-			"Ignoring \"render:manifestFilePath\" during interactive render. The "
-			"catalogue generates its own manifest files, this option is not needed."
-		);
+		IECore::msg( IECore::Msg::Warning, "RenderController", "Ignoring \"render:manifestFilePath\" during interactive render. The "
+															   "catalogue generates its own manifest files, this option is not needed." );
 	}
 
 	// Cancel background task before the things it relies
@@ -1246,9 +1237,7 @@ void RenderController::setContext( const Gaffer::ConstContextPtr &context )
 	cancelBackgroundTask();
 
 	m_context = context;
-	m_contextChangedConnection = const_cast<Context *>( m_context.get() )->changedSignal().connect(
-		boost::bind( &RenderController::contextChanged, this, ::_2 )
-	);
+	m_contextChangedConnection = const_cast<Context *>( m_context.get() )->changedSignal().connect( boost::bind( &RenderController::contextChanged, this, ::_2 ) );
 
 	dirtyGlobals( AllGlobalComponents );
 	dirtySceneGraphs( SceneGraph::AllComponents );

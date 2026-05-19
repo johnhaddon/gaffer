@@ -65,121 +65,115 @@ class Nodule;
 class GAFFERUI_API AuxiliaryConnectionsGadget : public Gadget
 {
 
-	public :
+public:
 
-		~AuxiliaryConnectionsGadget() override;
+	~AuxiliaryConnectionsGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::AuxiliaryConnectionsGadget, AuxiliaryConnectionsGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::AuxiliaryConnectionsGadget, AuxiliaryConnectionsGadgetTypeId, Gadget );
 
-		/// Gadgets may either be NodeGadgets or Nodules.
-		bool hasConnection( const Gadget *srcGadget, const Gadget *dstGadget ) const;
-		bool hasConnection( const Gaffer::Node *srcNode, const Gaffer::Node *dstNode ) const;
+	/// Gadgets may either be NodeGadgets or Nodules.
+	bool hasConnection( const Gadget *srcGadget, const Gadget *dstGadget ) const;
+	bool hasConnection( const Gaffer::Node *srcNode, const Gaffer::Node *dstNode ) const;
 
-		std::pair<Gadget *, Gadget *> connectionAt( const IECore::LineSegment3f &position );
-		std::pair<const Gadget *, const Gadget *> connectionAt( const IECore::LineSegment3f &position ) const;
+	std::pair<Gadget *, Gadget *> connectionAt( const IECore::LineSegment3f &position );
+	std::pair<const Gadget *, const Gadget *> connectionAt( const IECore::LineSegment3f &position ) const;
 
-		bool acceptsParent( const GraphComponent *potentialParent ) const override;
-		std::string getToolTip( const IECore::LineSegment3f &position ) const override;
+	bool acceptsParent( const GraphComponent *potentialParent ) const override;
+	std::string getToolTip( const IECore::LineSegment3f &position ) const override;
 
-	protected :
+protected:
 
-		// Constructor is protected because we only want
-		// GraphGadget to be able to construct these, which
-		// we allow by giving it friend access.
-		AuxiliaryConnectionsGadget();
+	// Constructor is protected because we only want
+	// GraphGadget to be able to construct these, which
+	// we allow by giving it friend access.
+	AuxiliaryConnectionsGadget();
 
-		friend class GraphGadget;
+	friend class GraphGadget;
 
-		void parentChanging( Gaffer::GraphComponent *newParent ) override;
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void parentChanging( Gaffer::GraphComponent *newParent ) override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		GraphGadget *graphGadget();
-		const GraphGadget *graphGadget() const;
+	GraphGadget *graphGadget();
+	const GraphGadget *graphGadget() const;
 
-		void graphGadgetChildAdded( GraphComponent *child );
-		void graphGadgetChildRemoved( const GraphComponent *child );
+	void graphGadgetChildAdded( GraphComponent *child );
+	void graphGadgetChildRemoved( const GraphComponent *child );
 
-		void plugInputChanged( const Gaffer::Plug *plug );
-		void childRemoved( const Gaffer::GraphComponent *node, const Gaffer::GraphComponent *child );
+	void plugInputChanged( const Gaffer::Plug *plug );
+	void childRemoved( const Gaffer::GraphComponent *node, const Gaffer::GraphComponent *child );
 
-		void noduleAdded( const NodeGadget *nodeGadget, const Nodule *nodule );
-		void noduleRemoved( const NodeGadget *nodeGadget, const Nodule *nodule );
+	void noduleAdded( const NodeGadget *nodeGadget, const Nodule *nodule );
+	void noduleRemoved( const NodeGadget *nodeGadget, const Nodule *nodule );
 
-		void dirtyInputConnections( const NodeGadget *nodeGadget );
-		void dirtyOutputConnections( const NodeGadget *nodeGadget );
+	void dirtyInputConnections( const NodeGadget *nodeGadget );
+	void dirtyOutputConnections( const NodeGadget *nodeGadget );
 
-		void updateConnections() const;
+	void updateConnections() const;
 
-		struct AuxiliaryConnection;
-		void renderConnection( const AuxiliaryConnection &connection, const Style *style ) const;
+	struct AuxiliaryConnection;
+	void renderConnection( const AuxiliaryConnection &connection, const Style *style ) const;
 
-		struct Connections
-		{
-			Gaffer::Signals::ScopedConnection plugInputChangedConnection;
-			Gaffer::Signals::ScopedConnection noduleAddedConnection;
-			Gaffer::Signals::ScopedConnection noduleRemovedConnection;
-			Gaffer::Signals::ScopedConnection childRemovedConnection;
-			bool dirty = true;
-		};
+	struct Connections
+	{
+		Gaffer::Signals::ScopedConnection plugInputChangedConnection;
+		Gaffer::Signals::ScopedConnection noduleAddedConnection;
+		Gaffer::Signals::ScopedConnection noduleRemovedConnection;
+		Gaffer::Signals::ScopedConnection childRemovedConnection;
+		bool dirty = true;
+	};
 
-		Gaffer::Signals::ScopedConnection m_graphGadgetChildAddedConnection;
-		Gaffer::Signals::ScopedConnection m_graphGadgetChildRemovedConnection;
+	Gaffer::Signals::ScopedConnection m_graphGadgetChildAddedConnection;
+	Gaffer::Signals::ScopedConnection m_graphGadgetChildRemovedConnection;
 
-		// Key is the NodeGadget at the destination end of the connections
-		// tracked by `Connections.dirty`.
-		using NodeGadgetConnections = std::unordered_map<const NodeGadget *, Connections>;
-		mutable NodeGadgetConnections m_nodeGadgetConnections;
+	// Key is the NodeGadget at the destination end of the connections
+	// tracked by `Connections.dirty`.
+	using NodeGadgetConnections = std::unordered_map<const NodeGadget *, Connections>;
+	mutable NodeGadgetConnections m_nodeGadgetConnections;
 
-		// An auxiliary connection that we will draw.
-		struct AuxiliaryConnection
-		{
-			const NodeGadget *srcNodeGadget;
-			const NodeGadget *dstNodeGadget;
-			// Endpoints may be srcNodeGadget/dstNodeGadget, or Nodules
-			// belonging to them.
-			std::pair<const Gadget *, const Gadget *> endpoints;
-		};
+	// An auxiliary connection that we will draw.
+	struct AuxiliaryConnection
+	{
+		const NodeGadget *srcNodeGadget;
+		const NodeGadget *dstNodeGadget;
+		// Endpoints may be srcNodeGadget/dstNodeGadget, or Nodules
+		// belonging to them.
+		std::pair<const Gadget *, const Gadget *> endpoints;
+	};
 
-		// Container for all our auxiliary connections.
-		using AuxiliaryConnections = boost::multi_index::multi_index_container<
-			AuxiliaryConnection,
-			boost::multi_index::indexed_by<
-				// Primary key is the unique pair of endpoint
-				// gadgets the connection represents.
-				boost::multi_index::hashed_unique<
-					boost::multi_index::key<&AuxiliaryConnection::endpoints>
-				>,
-				// Access to the range of connections originating
-				// at `srcNodeGadget`. This will include all source
-				// endpoints which are either `srcNodeGadget` itself
-				// or are a nodule belonging to it.
-				boost::multi_index::hashed_non_unique<
-					boost::multi_index::key<&AuxiliaryConnection::srcNodeGadget>
-				>,
-				// Access to the range of connections ending at
-				// `dstNodeGadget`. This will include all destination
-				// endpoints which are either `dstNodeGadget` itself or
-				// are a nodule belonging to it.
-				boost::multi_index::hashed_non_unique<
-					boost::multi_index::key<&AuxiliaryConnection::dstNodeGadget>
-				>
-			>
-		>;
+	// Container for all our auxiliary connections.
+	using AuxiliaryConnections = boost::multi_index::multi_index_container<
+		AuxiliaryConnection,
+		boost::multi_index::indexed_by<
+			// Primary key is the unique pair of endpoint
+			// gadgets the connection represents.
+			boost::multi_index::hashed_unique<
+				boost::multi_index::key<&AuxiliaryConnection::endpoints>>,
+			// Access to the range of connections originating
+			// at `srcNodeGadget`. This will include all source
+			// endpoints which are either `srcNodeGadget` itself
+			// or are a nodule belonging to it.
+			boost::multi_index::hashed_non_unique<
+				boost::multi_index::key<&AuxiliaryConnection::srcNodeGadget>>,
+			// Access to the range of connections ending at
+			// `dstNodeGadget`. This will include all destination
+			// endpoints which are either `dstNodeGadget` itself or
+			// are a nodule belonging to it.
+			boost::multi_index::hashed_non_unique<
+				boost::multi_index::key<&AuxiliaryConnection::dstNodeGadget>>>>;
 
-		mutable AuxiliaryConnections m_auxiliaryConnections;
-		mutable bool m_dirty;
+	mutable AuxiliaryConnections m_auxiliaryConnections;
+	mutable bool m_dirty;
 
-		// Convenience accessors for the secondary indexes of `m_auxiliaryConnections`.
+	// Convenience accessors for the secondary indexes of `m_auxiliaryConnections`.
 
-		using SrcNodeGadgetIndex = AuxiliaryConnections::nth_index<1>::type;
-		using DstNodeGadgetIndex = AuxiliaryConnections::nth_index<2>::type;
-		SrcNodeGadgetIndex &srcNodeGadgetIndex() const;
-		DstNodeGadgetIndex &dstNodeGadgetIndex() const;
-
+	using SrcNodeGadgetIndex = AuxiliaryConnections::nth_index<1>::type;
+	using DstNodeGadgetIndex = AuxiliaryConnections::nth_index<2>::type;
+	SrcNodeGadgetIndex &srcNodeGadgetIndex() const;
+	DstNodeGadgetIndex &dstNodeGadgetIndex() const;
 };
 
 } // namespace GafferUI

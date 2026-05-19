@@ -71,84 +71,83 @@ IE_CORE_FORWARDDECLARE( Action );
 class GAFFER_API Action : public IECore::RunTimeTyped
 {
 
-	public :
+public:
 
-		/// The stages of the the do/undo/redo sequence.
-		enum Stage
-		{
-			Invalid,
-			Do,
-			Undo,
-			Redo
-		};
+	/// The stages of the the do/undo/redo sequence.
+	enum Stage
+	{
+		Invalid,
+		Do,
+		Undo,
+		Redo
+	};
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Action, ActionTypeId, IECore::RunTimeTyped );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Action, ActionTypeId, IECore::RunTimeTyped );
 
-		using Function = std::function<void ()>;
+	using Function = std::function<void()>;
 
-		/// Enacts the specified action by calling doAction() and
-		/// adding it to the undo queue in the appropriate ScriptNode.
-		static void enact( ActionPtr action );
-		/// Convenience function to enact a simple action without
-		/// needing to create a new Action subclass. The callables
-		/// passed will form the implementation of doAction() and
-		/// undoAction(). Typically the callables would be constructed
-		/// by using boost::bind with private member functions of the class
-		/// implementing the undoable method. Note that the Functions
-		/// will be stored in the ScriptNode's undo queue, so must not include
-		/// intrusive pointers back to the ScriptNode, as this would result in a
-		/// circular reference. It is guaranteed that the subject will
-		/// remain alive for as long as the Functions are in use by the undo
-		/// system, so it is sufficient to bind only raw pointers to the subject.
-		///
-		/// > Caution : Only pass `cancelBackgroundTasks = false` if you are
-		/// > _certain_ that there is no possible interaction between this Action
-		/// > and a concurrent background task. At the time of writing, the only
-		/// > known valid use is in the Metadata system (because computations are
-		/// > not allowed to depend on metadata).
-		static void enact( GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks = true );
+	/// Enacts the specified action by calling doAction() and
+	/// adding it to the undo queue in the appropriate ScriptNode.
+	static void enact( ActionPtr action );
+	/// Convenience function to enact a simple action without
+	/// needing to create a new Action subclass. The callables
+	/// passed will form the implementation of doAction() and
+	/// undoAction(). Typically the callables would be constructed
+	/// by using boost::bind with private member functions of the class
+	/// implementing the undoable method. Note that the Functions
+	/// will be stored in the ScriptNode's undo queue, so must not include
+	/// intrusive pointers back to the ScriptNode, as this would result in a
+	/// circular reference. It is guaranteed that the subject will
+	/// remain alive for as long as the Functions are in use by the undo
+	/// system, so it is sufficient to bind only raw pointers to the subject.
+	///
+	/// > Caution : Only pass `cancelBackgroundTasks = false` if you are
+	/// > _certain_ that there is no possible interaction between this Action
+	/// > and a concurrent background task. At the time of writing, the only
+	/// > known valid use is in the Metadata system (because computations are
+	/// > not allowed to depend on metadata).
+	static void enact( GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks = true );
 
-	protected :
+protected:
 
-		explicit Action( bool cancelBackgroundTasks = true );
-		~Action() override;
+	explicit Action( bool cancelBackgroundTasks = true );
+	~Action() override;
 
-		/// Must be implemented by derived classes to
-		/// return the subject of the work they perform -
-		/// this is used to find the ScriptNode in which
-		/// to store the action.
-		virtual GraphComponent *subject() const = 0;
-		/// Must be implemented by derived classes to
-		/// perform the action. Implementations should
-		/// call the base class implementation before
-		/// performing their own work.
-		virtual void doAction() = 0;
-		/// Must be implemented by derived classes to
-		/// undo the effects of doAction(). Implementations should
-		/// call the base class implementation before
-		/// performing their own work.
-		virtual void undoAction() = 0;
+	/// Must be implemented by derived classes to
+	/// return the subject of the work they perform -
+	/// this is used to find the ScriptNode in which
+	/// to store the action.
+	virtual GraphComponent *subject() const = 0;
+	/// Must be implemented by derived classes to
+	/// perform the action. Implementations should
+	/// call the base class implementation before
+	/// performing their own work.
+	virtual void doAction() = 0;
+	/// Must be implemented by derived classes to
+	/// undo the effects of doAction(). Implementations should
+	/// call the base class implementation before
+	/// performing their own work.
+	virtual void undoAction() = 0;
 
-		/// May be reimplemented by derived classes to return
-		/// true if it is valid to call merge( other ).
-		/// Implementations must only return true if the base
-		/// class implementation also returns true.
-		virtual bool canMerge( const Action *other ) const = 0;
-		/// May be implemented to merge another action into
-		/// this one, so that doAction() now has the effect
-		/// of having performed both actions (other second),
-		/// and undoAction has the effect of undoing both.
-		/// Implementations must call the base class
-		/// implementation before performing their own merging.
-		virtual void merge( const Action *other ) = 0;
+	/// May be reimplemented by derived classes to return
+	/// true if it is valid to call merge( other ).
+	/// Implementations must only return true if the base
+	/// class implementation also returns true.
+	virtual bool canMerge( const Action *other ) const = 0;
+	/// May be implemented to merge another action into
+	/// this one, so that doAction() now has the effect
+	/// of having performed both actions (other second),
+	/// and undoAction has the effect of undoing both.
+	/// Implementations must call the base class
+	/// implementation before performing their own merging.
+	virtual void merge( const Action *other ) = 0;
 
-	private :
+private:
 
-		friend class ScriptNode;
+	friend class ScriptNode;
 
-		bool m_done;
-		const bool m_cancelBackgroundTasks;
-
+	bool m_done;
+	const bool m_cancelBackgroundTasks;
 };
 
 IE_CORE_DECLAREPTR( Action );

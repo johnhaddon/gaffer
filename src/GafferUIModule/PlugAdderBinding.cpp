@@ -68,13 +68,12 @@ struct PlugMenuSignalCaller
 	{
 		return s( title, plugs );
 	}
-
 };
 
 struct PlugMenuSlotCaller
 {
 
-	Plug *operator()( boost::python::object slot, const std::string &title, const vector<Plug *> &plugs )
+	Plug *operator () ( boost::python::object slot, const std::string &title, const vector<Plug *> &plugs )
 	{
 		try
 		{
@@ -93,13 +92,12 @@ struct PlugMenuSlotCaller
 		}
 		return nullptr;
 	}
-
 };
 
 struct MenuSlotCaller
 {
 
-	std::string operator()( boost::python::object slot, const std::string &title, const std::vector<std::string> &items )
+	std::string operator () ( boost::python::object slot, const std::string &title, const std::vector<std::string> &items )
 	{
 		try
 		{
@@ -116,7 +114,6 @@ struct MenuSlotCaller
 			IECorePython::ExceptionAlgo::translatePythonException();
 		}
 	}
-
 };
 
 } // namespace
@@ -124,12 +121,11 @@ struct MenuSlotCaller
 void GafferUIModule::bindPlugAdder()
 {
 	scope s = ConnectionCreatorClass<PlugAdder, ConnectionCreatorWrapper<PlugAdder>>( "PlugAdder" )
-		.def( init<>() )
-		.def( "plugMenuSignal", &PlugAdder::plugMenuSignal, return_value_policy<reference_existing_object>() )
-		.staticmethod( "plugMenuSignal" )
-		.def( "menuSignal", &PlugAdder::menuSignal, return_value_policy<reference_existing_object>() )
-		.staticmethod( "menuSignal" )
-	;
+				  .def( init<>() )
+				  .def( "plugMenuSignal", &PlugAdder::plugMenuSignal, return_value_policy<reference_existing_object>() )
+				  .staticmethod( "plugMenuSignal" )
+				  .def( "menuSignal", &PlugAdder::menuSignal, return_value_policy<reference_existing_object>() )
+				  .staticmethod( "menuSignal" );
 
 	SignalClass<PlugAdder::PlugMenuSignal, PlugMenuSignalCaller, PlugMenuSlotCaller>( "PlugMenuSignal" );
 	SignalClass<PlugAdder::MenuSignal, DefaultSignalCaller<PlugAdder::MenuSignal>, MenuSlotCaller>( "MenuSignal" );

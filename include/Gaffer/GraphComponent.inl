@@ -52,9 +52,9 @@ T *GraphComponent::getChild( const IECore::InternedString &name )
 template<typename T>
 const T *GraphComponent::getChild( const IECore::InternedString &name ) const
 {
-	for( ChildContainer::const_iterator it=m_children.begin(), eIt=m_children.end(); it!=eIt; it++ )
+	for( ChildContainer::const_iterator it = m_children.begin(), eIt = m_children.end(); it != eIt; it++ )
 	{
-		if( (*it)->m_name==name )
+		if( ( *it )->m_name == name )
 		{
 			return IECore::runTimeCast<const T>( it->get() );
 		}
@@ -94,17 +94,17 @@ inline const T *GraphComponent::descendant( const std::string &relativePath ) co
 		return nullptr;
 	}
 
-	using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
+	using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
 
 	Tokenizer t( relativePath, boost::char_separator<char>( "." ) );
 	const GraphComponent *result = this;
-	for( Tokenizer::iterator tIt=t.begin(); tIt!=t.end(); tIt++ )
+	for( Tokenizer::iterator tIt = t.begin(); tIt != t.end(); tIt++ )
 	{
 		const GraphComponent *child = nullptr;
 		IECore::InternedString internedName( *tIt );
-		for( ChildContainer::const_iterator it=result->m_children.begin(), eIt=result->m_children.end(); it!=eIt; it++ )
+		for( ChildContainer::const_iterator it = result->m_children.begin(), eIt = result->m_children.end(); it != eIt; it++ )
 		{
-			if( (*it)->m_name==internedName )
+			if( ( *it )->m_name == internedName )
 			{
 				child = it->get();
 				break;

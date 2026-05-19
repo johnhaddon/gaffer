@@ -45,7 +45,7 @@ namespace Gaffer
 {
 
 template<class T>
-const IECore::RunTimeTyped::TypeDescription<TypedPlug<T> > TypedPlug<T>::g_typeDescription;
+const IECore::RunTimeTyped::TypeDescription<TypedPlug<T>> TypedPlug<T>::g_typeDescription;
 
 template<class T>
 TypedPlug<T>::TypedPlug(
@@ -54,7 +54,7 @@ TypedPlug<T>::TypedPlug(
 	const T &defaultValue,
 	unsigned flags
 )
-	:	ValuePlug( name, direction, new DataType( defaultValue ), flags )
+	: ValuePlug( name, direction, new DataType( defaultValue ), flags )
 {
 }
 
@@ -98,7 +98,7 @@ void TypedPlug<T>::setValue( const T &value )
 template<class T>
 void TypedPlug<T>::setFrom( const ValuePlug *other )
 {
-	const TypedPlug<T> *tOther = IECore::runTimeCast<const TypedPlug<T> >( other );
+	const TypedPlug<T> *tOther = IECore::runTimeCast<const TypedPlug<T>>( other );
 	if( tOther )
 	{
 		setValue( tOther->getValue() );

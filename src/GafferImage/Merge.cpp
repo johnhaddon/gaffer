@@ -64,13 +64,13 @@ enum SingleInputMode
 
 struct OpAdd
 {
-	static float operate( float A, float B, float a, float b){ return A + B; }
+	static float operate( float A, float B, float a, float b ) { return A + B; }
 	static const SingleInputMode onlyA = Copy;
 	static const SingleInputMode onlyB = Copy;
 };
 struct OpAtop
 {
-	static float operate( float A, float B, float a, float b){ return A*b + B*(1.-a); }
+	static float operate( float A, float B, float a, float b ) { return A * b + B * ( 1. - a ); }
 	static const SingleInputMode onlyA = Black;
 	static const SingleInputMode onlyB = Copy;
 };
@@ -82,9 +82,9 @@ struct OpDivide
 // if it should return zero or infinity when dividing by zero. For now
 // we retain the current behavior and disable the warning.
 #ifdef _MSC_VER
-#pragma warning( disable: 4723 )
+#pragma warning( disable : 4723 )
 #endif
-	static float operate( float A, float B, float a, float b)
+	static float operate( float A, float B, float a, float b )
 	{
 		if( A == 0.0f )
 		{
@@ -97,56 +97,56 @@ struct OpDivide
 		return A / B;
 	}
 #ifdef _MSC_VER
-#pragma warning( default: 4723 )
+#pragma warning( default : 4723 )
 #endif
 	static const SingleInputMode onlyA = Operate;
 	static const SingleInputMode onlyB = Black;
 };
 struct OpIn
 {
-	static float operate( float A, float B, float a, float b){ return A*b; }
+	static float operate( float A, float B, float a, float b ) { return A * b; }
 	static const SingleInputMode onlyA = Black;
 	static const SingleInputMode onlyB = Black;
 };
 struct OpOut
 {
-	static float operate( float A, float B, float a, float b){ return A*(1.-b); }
+	static float operate( float A, float B, float a, float b ) { return A * ( 1. - b ); }
 	static const SingleInputMode onlyA = Copy;
 	static const SingleInputMode onlyB = Black;
 };
 struct OpMask
 {
-	static float operate( float A, float B, float a, float b){ return B*a; }
+	static float operate( float A, float B, float a, float b ) { return B * a; }
 	static const SingleInputMode onlyA = Black;
 	static const SingleInputMode onlyB = Black;
 };
 struct OpMatte
 {
-	static float operate( float A, float B, float a, float b){ return A*a + B*(1.-a); }
+	static float operate( float A, float B, float a, float b ) { return A * a + B * ( 1. - a ); }
 	static const SingleInputMode onlyA = Operate;
 	static const SingleInputMode onlyB = Copy;
 };
 struct OpMultiply
 {
-	static float operate( float A, float B, float a, float b){ return A * B; }
+	static float operate( float A, float B, float a, float b ) { return A * B; }
 	static const SingleInputMode onlyA = Black;
 	static const SingleInputMode onlyB = Black;
 };
 struct OpOver
 {
-	static float operate( float A, float B, float a, float b){ return A + B*(1.-a); }
+	static float operate( float A, float B, float a, float b ) { return A + B * ( 1. - a ); }
 	static const SingleInputMode onlyA = Copy;
 	static const SingleInputMode onlyB = Copy;
 };
 struct OpSubtract
 {
-	static float operate( float A, float B, float a, float b){ return A - B; }
+	static float operate( float A, float B, float a, float b ) { return A - B; }
 	static const SingleInputMode onlyA = Copy;
 	static const SingleInputMode onlyB = Operate;
 };
 struct OpDifference
 {
-	static float operate( float A, float B, float a, float b)
+	static float operate( float A, float B, float a, float b )
 	{
 		if( memcmp( &A, &B, 4 ) == 0 )
 		{
@@ -164,43 +164,57 @@ struct OpDifference
 };
 struct OpUnder
 {
-	static float operate( float A, float B, float a, float b){ return A*(1.-b) + B; }
+	static float operate( float A, float B, float a, float b ) { return A * ( 1. - b ) + B; }
 	static const SingleInputMode onlyA = Copy;
 	static const SingleInputMode onlyB = Copy;
 };
 struct OpMin
 {
-	static float operate( float A, float B, float a, float b){ return std::min( A, B ); }
+	static float operate( float A, float B, float a, float b ) { return std::min( A, B ); }
 	static const SingleInputMode onlyA = Operate;
 	static const SingleInputMode onlyB = Operate;
 };
 struct OpMax
 {
-	static float operate( float A, float B, float a, float b){ return std::max( A, B ); }
+	static float operate( float A, float B, float a, float b ) { return std::max( A, B ); }
 	static const SingleInputMode onlyA = Operate;
 	static const SingleInputMode onlyB = Operate;
 };
 
-template< class Functor, typename... Args >
-typename Functor::ReturnType dispatchOperation( Merge::Operation op, Functor &&functor, Args&&... args )
+template<class Functor, typename... Args>
+typename Functor::ReturnType dispatchOperation( Merge::Operation op, Functor &&functor, Args &&...args )
 {
 	switch( op )
 	{
-		case Merge::Add : return functor.template operator()<OpAdd>( std::forward<Args>( args )... );
-		case Merge::Atop : return functor.template operator()<OpAtop>( std::forward<Args>( args )... );
-		case Merge::Divide : return functor.template operator()<OpDivide>( std::forward<Args>( args )... );
-		case Merge::In : return functor.template operator()<OpIn>( std::forward<Args>( args )... );
-		case Merge::Out : return functor.template operator()<OpOut>( std::forward<Args>( args )... );
-		case Merge::Mask : return functor.template operator()<OpMask>( std::forward<Args>( args )... );
-		case Merge::Matte : return functor.template operator()<OpMatte>( std::forward<Args>( args )... );
-		case Merge::Multiply : return functor.template operator()<OpMultiply>( std::forward<Args>( args )... );
-		case Merge::Over : return functor.template operator()<OpOver>( std::forward<Args>( args )... );
-		case Merge::Subtract : return functor.template operator()<OpSubtract>( std::forward<Args>( args )... );
-		case Merge::Difference : return functor.template operator()<OpDifference>( std::forward<Args>( args )... );
-		case Merge::Under : return functor.template operator()<OpUnder>( std::forward<Args>( args )... );
-		case Merge::Min : return functor.template operator()<OpMin>( std::forward<Args>( args )... );
-		case Merge::Max : return functor.template operator()<OpMax>( std::forward<Args>( args )... );
-		default:
+		case Merge::Add :
+			return functor.template operator ()<OpAdd>( std::forward<Args>( args )... );
+		case Merge::Atop :
+			return functor.template operator ()<OpAtop>( std::forward<Args>( args )... );
+		case Merge::Divide :
+			return functor.template operator ()<OpDivide>( std::forward<Args>( args )... );
+		case Merge::In :
+			return functor.template operator ()<OpIn>( std::forward<Args>( args )... );
+		case Merge::Out :
+			return functor.template operator ()<OpOut>( std::forward<Args>( args )... );
+		case Merge::Mask :
+			return functor.template operator ()<OpMask>( std::forward<Args>( args )... );
+		case Merge::Matte :
+			return functor.template operator ()<OpMatte>( std::forward<Args>( args )... );
+		case Merge::Multiply :
+			return functor.template operator ()<OpMultiply>( std::forward<Args>( args )... );
+		case Merge::Over :
+			return functor.template operator ()<OpOver>( std::forward<Args>( args )... );
+		case Merge::Subtract :
+			return functor.template operator ()<OpSubtract>( std::forward<Args>( args )... );
+		case Merge::Difference :
+			return functor.template operator ()<OpDifference>( std::forward<Args>( args )... );
+		case Merge::Under :
+			return functor.template operator ()<OpUnder>( std::forward<Args>( args )... );
+		case Merge::Min :
+			return functor.template operator ()<OpMin>( std::forward<Args>( args )... );
+		case Merge::Max :
+			return functor.template operator ()<OpMax>( std::forward<Args>( args )... );
+		default :
 			throw InvalidArgumentException( fmt::format( "Invalid Merge Operation : {}", op ) );
 	}
 }
@@ -300,7 +314,7 @@ inline MergeRegion tileRegion( int i, const Box2i &boundA, const Box2i &boundB, 
 	);
 
 	length = next - i;
-	return (MergeRegion)(( InsideA * inA ) | ( InsideB * inB ));
+	return (MergeRegion)( ( InsideA * inA ) | ( InsideB * inB ) );
 }
 
 struct MergeFunctor
@@ -314,8 +328,8 @@ struct MergeFunctor
 	// If both bounds are non-zero however, it will require allocating the merge buffers,
 	// and actually performing per-pixel operations into them
 	// boundB and boundA are local tile bounds, relative to the tile origin
-	template< class Op >
-	ReturnType operator()(
+	template<class Op>
+	ReturnType operator () (
 		const Box2i &boundB,
 		ConstFloatVectorDataPtr &channelDataB,
 		ConstFloatVectorDataPtr &alphaDataB,
@@ -426,9 +440,12 @@ struct MergeFunctor
 				// black, then everything is this region is black
 				memset( R, 0, length * sizeof( float ) );
 				memset( r, 0, length * sizeof( float ) );
-				A += length; a += length;
-				B += length; b += length;
-				R += length; r += length;
+				A += length;
+				a += length;
+				B += length;
+				b += length;
+				R += length;
+				r += length;
 			}
 			else if( region == InsideB )
 			{
@@ -452,9 +469,12 @@ struct MergeFunctor
 						memcpy( R, B, length * sizeof( float ) );
 						memcpy( r, b, length * sizeof( float ) );
 					}
-					A += length; a += length;
-					B += length; b += length;
-					R += length; r += length;
+					A += length;
+					a += length;
+					B += length;
+					b += length;
+					R += length;
+					r += length;
 				}
 				else
 				{
@@ -463,10 +483,13 @@ struct MergeFunctor
 					{
 						*R = Op::operate( 0.0f, *B, 0.0f, *b );
 						*r = Op::operate( 0.0f, *b, 0.0f, *b );
-						++B; ++b;
-						++R; ++r;
+						++B;
+						++b;
+						++R;
+						++r;
 					}
-					A += length; a += length;
+					A += length;
+					a += length;
 				}
 			}
 			else if( region == InsideA )
@@ -477,9 +500,12 @@ struct MergeFunctor
 					// an input, we can just copy it over.
 					memcpy( R, A, length * sizeof( float ) );
 					memcpy( r, a, length * sizeof( float ) );
-					A += length; a += length;
-					B += length; b += length;
-					R += length; r += length;
+					A += length;
+					a += length;
+					B += length;
+					b += length;
+					R += length;
+					r += length;
 				}
 				else
 				{
@@ -488,10 +514,13 @@ struct MergeFunctor
 					{
 						*R = Op::operate( *A, 0.0f, *a, 0.0f );
 						*r = Op::operate( *a, 0.0f, *a, 0.0f );
-						++A; ++a;
-						++R; ++r;
+						++A;
+						++a;
+						++R;
+						++r;
 					}
-					B += length; b += length;
+					B += length;
+					b += length;
 				}
 			}
 			else
@@ -501,9 +530,12 @@ struct MergeFunctor
 				{
 					*R = Op::operate( *A, *B, *a, *b );
 					*r = Op::operate( *a, *b, *a, *b );
-					++A; ++a;
-					++B; ++b;
-					++R; ++r;
+					++A;
+					++a;
+					++B;
+					++b;
+					++R;
+					++r;
 				}
 			}
 			i += length;
@@ -513,7 +545,6 @@ struct MergeFunctor
 		channelDataB = mergeChannelBuffer;
 		alphaDataB = mergeAlphaBuffer;
 	}
-
 };
 
 struct PassthroughHashFunctor
@@ -531,8 +562,8 @@ struct PassthroughHashFunctor
 	// tracking it, we can detect situations where the input is entirely black.
 	// If a passthrough is not possible, this just sets passthrough to false, and hashChannelData
 	// will just use the first approach instead
-	template< class Op >
-	ReturnType operator()(
+	template<class Op>
+	ReturnType operator () (
 		MurmurHash &channelHashB,
 		MurmurHash &alphaHashB,
 		const MurmurHash &channelHashA,
@@ -584,7 +615,6 @@ struct PassthroughHashFunctor
 			}
 		}
 	}
-
 };
 
 struct MergeDataWindowFunctor
@@ -598,7 +628,7 @@ struct MergeDataWindowFunctor
 	// Based on our convention for merges we output to windowB - we accumulate to the
 	// first input
 	template<class Op>
-	ReturnType operator()( Box2i &windowB, const Box2i &windowA, bool initialize )
+	ReturnType operator () ( Box2i &windowB, const Box2i &windowA, bool initialize )
 	{
 		if( initialize )
 		{
@@ -636,7 +666,6 @@ struct MergeDataWindowFunctor
 			}
 		}
 	}
-
 };
 
 } // namespace
@@ -646,16 +675,16 @@ GAFFER_NODE_DEFINE_TYPE( Merge );
 size_t Merge::g_firstPlugIndex = 0;
 
 Merge::Merge( const std::string &name )
-	:	FlatImageProcessor( name, 2 )
+	: FlatImageProcessor( name, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild(
 		new IntPlug(
 			"operation", // name
-			Plug::In,    // direction
-			Add,         // default
-			Add,         // min
-			Max          // the maximum value in the enum, which just happens to currently be named "Max"
+			Plug::In, // direction
+			Add, // default
+			Add, // min
+			Max // the maximum value in the enum, which just happens to currently be named "Max"
 		)
 	);
 
@@ -722,9 +751,9 @@ void Merge::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::
 		// need to check viewNames on the first iteration, since the output viewNames are identical to
 		// the first iteration viewNames, so the view is guaranteed to be valid, unless the downstream
 		// node has a bug
-		if( (*it)->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ( *it )->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			(*it)->dataWindowPlug()->hash( h );
+			( *it )->dataWindowPlug()->hash( h );
 		}
 	}
 }
@@ -736,9 +765,9 @@ Imath::Box2i Merge::computeDataWindow( const Gaffer::Context *context, const Ima
 	bool first = true;
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( (*it)->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ( *it )->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			dispatchOperation( op, MergeDataWindowFunctor(), dataWindow, (*it)->dataWindowPlug()->getValue(), first );
+			dispatchOperation( op, MergeDataWindowFunctor(), dataWindow, ( *it )->dataWindowPlug()->getValue(), first );
 			first = false;
 		}
 	}
@@ -752,9 +781,9 @@ void Merge::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( (*it)->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ( *it )->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			(*it)->channelNamesPlug()->hash( h );
+			( *it )->channelNamesPlug()->hash( h );
 		}
 	}
 }
@@ -766,12 +795,12 @@ IECore::ConstStringVectorDataPtr Merge::computeChannelNames( const Gaffer::Conte
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( (*it)->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ( *it )->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			IECore::ConstStringVectorDataPtr inChannelStrVectorData((*it)->channelNamesPlug()->getValue() );
-			for ( const std::string &c : inChannelStrVectorData->readable() )
+			IECore::ConstStringVectorDataPtr inChannelStrVectorData( ( *it )->channelNamesPlug()->getValue() );
+			for( const std::string &c : inChannelStrVectorData->readable() )
 			{
-				if ( std::find( outChannels.begin(), outChannels.end(), c ) == outChannels.end() )
+				if( std::find( outChannels.begin(), outChannels.end(), c ) == outChannels.end() )
 				{
 					outChannels.push_back( c );
 				}
@@ -779,7 +808,7 @@ IECore::ConstStringVectorDataPtr Merge::computeChannelNames( const Gaffer::Conte
 		}
 	}
 
-	if ( !outChannels.empty() )
+	if( !outChannels.empty() )
 	{
 		return outChannelStrVectorData;
 	}
@@ -813,7 +842,7 @@ void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( !(*it)->getInput<ValuePlug>() || !ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( !( *it )->getInput<ValuePlug>() || !ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
 			continue;
 		}
@@ -823,8 +852,8 @@ void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 
 		{
 			ImagePlug::GlobalScope c( context );
-			channelNamesData = (*it)->channelNamesPlug()->getValue();
-			dataWindow = (*it)->dataWindowPlug()->getValue();
+			channelNamesData = ( *it )->channelNamesPlug()->getValue();
+			dataWindow = ( *it )->dataWindowPlug()->getValue();
 		}
 
 		// The hash of the channel data we do below represents just the data in
@@ -858,13 +887,13 @@ void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 
 			if( ImageAlgo::channelExists( channelNames, channelName ) )
 			{
-				channelHash = (*it)->channelDataPlug()->hash();
+				channelHash = ( *it )->channelDataPlug()->hash();
 				h.append( channelHash );
 			}
 
 			if( ImageAlgo::channelExists( channelNames, "A" ) )
 			{
-				alphaHash =  (*it)->channelDataHash( "A", tileOrigin );
+				alphaHash = ( *it )->channelDataHash( "A", tileOrigin );
 				h.append( alphaHash );
 
 				// Make sure we differentiate this hash from the hash above, so that an image with just RGB
@@ -888,7 +917,6 @@ void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 		h = passthroughHash;
 		return;
 	}
-
 }
 
 IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
@@ -920,7 +948,7 @@ IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &ch
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( !(*it)->getInput<ValuePlug>() || !ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( !( *it )->getInput<ValuePlug>() || !ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
 			continue;
 		}
@@ -929,8 +957,8 @@ IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &ch
 		Box2i dataWindow;
 		{
 			ImagePlug::GlobalScope c( Context::current() );
-			channelNamesData = (*it)->channelNamesPlug()->getValue();
-			dataWindow = (*it)->dataWindowPlug()->getValue();
+			channelNamesData = ( *it )->channelNamesPlug()->getValue();
+			dataWindow = ( *it )->dataWindowPlug()->getValue();
 		}
 		Box2i dataWindowLocal( dataWindow.min - tileOrigin, dataWindow.max - tileOrigin );
 
@@ -948,7 +976,7 @@ IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &ch
 		// a performance priority.
 		if( ImageAlgo::channelExists( channelNames, channelName ) && !BufferAlgo::empty( validBound ) )
 		{
-			channelData = (*it)->channelDataPlug()->getValue();
+			channelData = ( *it )->channelDataPlug()->getValue();
 		}
 		else
 		{
@@ -957,14 +985,14 @@ IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &ch
 
 		if( ImageAlgo::channelExists( channelNames, "A" ) && !BufferAlgo::empty( validBound ) )
 		{
-			alphaData = (*it)->channelData( "A", tileOrigin );
+			alphaData = ( *it )->channelData( "A", tileOrigin );
 		}
 		else
 		{
 			alphaData = ImagePlug::blackTile();
 		}
 
-		if( (int)alphaData->readable().size() != ImagePlug::tilePixels()  )
+		if( (int)alphaData->readable().size() != ImagePlug::tilePixels() )
 		{
 			throw IECore::Exception( "Merge::computeChannelData : Cannot process deep data." );
 		}
@@ -981,7 +1009,6 @@ IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &ch
 		bool first = !resultChannelData;
 		dispatchOperation( op, MergeFunctor(), resultBound, resultChannelData, resultAlphaData, validBound, channelData, alphaData, mergeChannelBuffer, mergeAlphaBuffer, partialBound );
 		dispatchOperation( op, MergeDataWindowFunctor(), resultBound, validBound, first );
-
 	}
 
 	return resultChannelData;

@@ -57,7 +57,7 @@ void testConstructionPerformance()
 void testConnectionPerformance()
 {
 	Signals::Signal<void()> signal;
-	auto slot = [](){};
+	auto slot = []() {};
 
 	for( int i = 0; i < 1000000; ++i )
 	{
@@ -72,7 +72,7 @@ void testCallPerformance()
 	Signals::Signal<void( int )> signal;
 
 	int callsMade = 0;
-	signal.connect( [&callsMade]( int i ){ callsMade += i; } );
+	signal.connect( [&callsMade]( int i ) { callsMade += i; } );
 
 	const int callsToMake = 10000000;
 	for( int i = 0; i < callsToMake; ++i )
@@ -139,7 +139,7 @@ void testScopedConnectionMoveConstructor()
 
 	Signals::Signal<void()> signal;
 
-	Signals::Connection c = signal.connect( []{} );
+	Signals::Connection c = signal.connect( [] {} );
 
 	{
 		Signals::ScopedConnection sc1( c );
@@ -161,7 +161,7 @@ void testScopedConnectionMoveAssignment()
 
 	Signals::Signal<void()> signal;
 
-	Signals::Connection c = signal.connect( []{} );
+	Signals::Connection c = signal.connect( [] {} );
 	Signals::ScopedConnection sc1;
 
 	{
@@ -198,7 +198,7 @@ void testVectorOfScopedConnections()
 	// move operations on ScopedConnection.
 	while( scopedConnections.size() < initialCapacity * 4 )
 	{
-		Signals::Connection c = signal.connect( []{} );
+		Signals::Connection c = signal.connect( [] {} );
 		connections.push_back( c );
 		scopedConnections.push_back( c );
 	}

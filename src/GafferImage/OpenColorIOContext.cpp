@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( OpenColorIOContext );
 size_t OpenColorIOContext::g_firstPlugIndex;
 
 OpenColorIOContext::OpenColorIOContext( const std::string &name )
-	:	ContextProcessor( name )
+	: ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -176,7 +176,7 @@ void OpenColorIOContext::compute( ValuePlug *output, const Context *context ) co
 			}
 			if( auto stringData = runTimeCast<const StringData>( value ) )
 			{
-				result["ocio:stringVar:"+name.string()] = boost::const_pointer_cast<StringData>( stringData );
+				result["ocio:stringVar:" + name.string()] = boost::const_pointer_cast<StringData>( stringData );
 			}
 			else
 			{
@@ -201,7 +201,7 @@ void OpenColorIOContext::compute( ValuePlug *output, const Context *context ) co
 			}
 			if( auto stringPlug = plug->valuePlug<StringPlug>() )
 			{
-				result["ocio:stringVar:"+name] = new StringData( stringPlug->getValue() );
+				result["ocio:stringVar:" + name] = new StringData( stringPlug->getValue() );
 			}
 			else
 			{

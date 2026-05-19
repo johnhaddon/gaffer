@@ -54,7 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepMerge );
 size_t DeepMerge::g_firstPlugIndex = 0;
 
 DeepMerge::DeepMerge( const std::string &name )
-	:	ImageProcessor( name, 2 )
+	: ImageProcessor( name, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -110,8 +110,7 @@ void DeepMerge::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 			}
 
 			if( input == inputImage->dataWindowPlug() ||
-				input == inputImage->sampleOffsetsPlug()
-			)
+				input == inputImage->sampleOffsetsPlug() )
 			{
 				outputs.push_back( offsetsCachePlug() );
 			}
@@ -124,7 +123,6 @@ void DeepMerge::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 				outputs.push_back( offsetsCachePlug() );
 			}
 		}
-
 	}
 }
 
@@ -142,12 +140,12 @@ void DeepMerge::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *co
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( (*it)->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ( *it )->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
 			Box2i dataWindow;
 			{
 				ImagePlug::GlobalScope c( context );
-				dataWindow = (*it)->dataWindowPlug()->getValue();
+				dataWindow = ( *it )->dataWindowPlug()->getValue();
 			}
 			Box2i validBound = BufferAlgo::intersection( tileBound, dataWindow );
 
@@ -158,7 +156,7 @@ void DeepMerge::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *co
 			}
 			h.append( validBound );
 
-			(*it)->sampleOffsetsPlug()->hash( h );
+			( *it )->sampleOffsetsPlug()->hash( h );
 		}
 	}
 }
@@ -241,17 +239,17 @@ void DeepMerge::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			int pixel = minX + ImagePlug::tileSize() * y;
 			if( pixel != 0 )
 			{
-				prevOffset = sampleOffsets[ pixel - 1 ];
+				prevOffset = sampleOffsets[pixel - 1];
 			}
 
 			for( int x = minX; x < maxX; x++ )
 			{
 				int offset = sampleOffsets[pixel];
 				// The position in the current input in written directly
-				offsets[ 2 * numInputs * pixel ] = prevOffset;
+				offsets[2 * numInputs * pixel] = prevOffset;
 				// The output offset is initially written as a number of samples
 				// per pixel - we accumulate this afterwards to convert to an offset
-				offsets[ 2 * numInputs * pixel + 1] = offset - prevOffset;
+				offsets[2 * numInputs * pixel + 1] = offset - prevOffset;
 				prevOffset = offset;
 				pixel++;
 			}
@@ -265,7 +263,7 @@ void DeepMerge::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	{
 		accum += *offsetPtr;
 		*offsetPtr = accum;
-		offsetPtr+=2;
+		offsetPtr += 2;
 	}
 
 	static_cast<IntVectorDataPlug *>( output )->setValue( resultData );
@@ -277,9 +275,9 @@ void DeepMerge::hashDataWindow( const GafferImage::ImagePlug *output, const Gaff
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			(*it)->dataWindowPlug()->hash( h );
+			( *it )->dataWindowPlug()->hash( h );
 		}
 	}
 }
@@ -289,10 +287,10 @@ Imath::Box2i DeepMerge::computeDataWindow( const Gaffer::Context *context, const
 	Imath::Box2i dataWindow;
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
 			// We don't need to check that the plug is connected here as unconnected plugs don't have data windows.
-			dataWindow.extendBy( (*it)->dataWindowPlug()->getValue() );
+			dataWindow.extendBy( ( *it )->dataWindowPlug()->getValue() );
 		}
 	}
 
@@ -305,9 +303,9 @@ void DeepMerge::hashChannelNames( const GafferImage::ImagePlug *output, const Ga
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			(*it)->channelNamesPlug()->hash( h );
+			( *it )->channelNamesPlug()->hash( h );
 		}
 	}
 }
@@ -319,13 +317,13 @@ IECore::ConstStringVectorDataPtr DeepMerge::computeChannelNames( const Gaffer::C
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			IECore::ConstStringVectorDataPtr inChannelStrVectorData((*it)->channelNamesPlug()->getValue() );
+			IECore::ConstStringVectorDataPtr inChannelStrVectorData( ( *it )->channelNamesPlug()->getValue() );
 			const std::vector<std::string> &inChannels( inChannelStrVectorData->readable() );
-			for ( std::vector<std::string>::const_iterator cIt( inChannels.begin() ); cIt != inChannels.end(); ++cIt )
+			for( std::vector<std::string>::const_iterator cIt( inChannels.begin() ); cIt != inChannels.end(); ++cIt )
 			{
-				if ( std::find( outChannels.begin(), outChannels.end(), *cIt ) == outChannels.end() )
+				if( std::find( outChannels.begin(), outChannels.end(), *cIt ) == outChannels.end() )
 				{
 					outChannels.push_back( *cIt );
 				}
@@ -333,7 +331,7 @@ IECore::ConstStringVectorDataPtr DeepMerge::computeChannelNames( const Gaffer::C
 		}
 	}
 
-	if ( !outChannels.empty() )
+	if( !outChannels.empty() )
 	{
 		return outChannelStrVectorData;
 	}
@@ -359,20 +357,20 @@ void DeepMerge::hashChannelData( const GafferImage::ImagePlug *output, const Gaf
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( !(*it)->getInput<ValuePlug>() || !ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( !( *it )->getInput<ValuePlug>() || !ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
 			continue;
 		}
 
-		ConstStringVectorDataPtr channelNamesData = (*it)->channelNames();
+		ConstStringVectorDataPtr channelNamesData = ( *it )->channelNames();
 		const std::vector<std::string> &channelNames = channelNamesData->readable();
 		if( ImageAlgo::channelExists( channelNames, channelName ) )
 		{
-			(*it)->channelDataPlug()->hash( h );
+			( *it )->channelDataPlug()->hash( h );
 		}
 		else if( channelName == "ZBack" && ImageAlgo::channelExists( channelNames, "Z" ) )
 		{
-			h.append( (*it)->channelDataHash( "Z", context->get<Imath::V2i>( ImagePlug::tileOriginContextName ) ) );
+			h.append( ( *it )->channelDataHash( "Z", context->get<Imath::V2i>( ImagePlug::tileOriginContextName ) ) );
 		}
 	}
 }
@@ -420,8 +418,8 @@ IECore::ConstFloatVectorDataPtr DeepMerge::computeChannelData( const std::string
 	// In a per-tile and per-channel context, get a ptr to the channel data of each input
 	reusedScope.setTileOrigin( &tileOrigin );
 	reusedScope.setChannelName( &channelName );
-	std::vector< ConstFloatVectorDataPtr > channelDatas( numInputs );
-	std::vector< const float* > channelPtrs( numInputs, nullptr );
+	std::vector<ConstFloatVectorDataPtr> channelDatas( numInputs );
+	std::vector<const float *> channelPtrs( numInputs, nullptr );
 	for( int j = 0; j < numInputs; j++ )
 	{
 		int plugIndex = offsetsCache[j];
@@ -447,12 +445,12 @@ IECore::ConstFloatVectorDataPtr DeepMerge::computeChannelData( const std::string
 	}
 
 	// Now we can loop through just pasting in the samples from each input to each pixel
-	const int *offsets = &offsetsCache[ numInputs ];
+	const int *offsets = &offsetsCache[numInputs];
 	int prevOffset = 0;
 	for( int i = 0; i < numInputs * ImagePlug::tilePixels(); i++ )
 	{
-		int inputOffset = offsets[ 2 * i ];
-		int offset = offsets[ 2 * i + 1 ];
+		int inputOffset = offsets[2 * i];
+		int offset = offsets[2 * i + 1];
 		int input = i % numInputs;
 		if( channelPtrs[input] && offset != prevOffset )
 		{
@@ -487,7 +485,7 @@ IECore::ConstIntVectorDataPtr DeepMerge::computeSampleOffsets( const Imath::V2i 
 	// from each pixel
 	int numInputs = offsetsCacheData->readable().size() / ( 1 + 2 * ImagePlug::tilePixels() );
 
-	const int *pixelOffsetPtr = &offsetsCacheData->readable()[ numInputs * 3 - 1 ];
+	const int *pixelOffsetPtr = &offsetsCacheData->readable()[numInputs * 3 - 1];
 
 	for( int pixel = 0; pixel < ImagePlug::tilePixels(); pixel++ )
 	{

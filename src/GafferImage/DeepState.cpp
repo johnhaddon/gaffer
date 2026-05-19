@@ -74,206 +74,203 @@ const IECore::InternedString g_contributionOffsetsName = "contributionOffsets";
 // Converting this into an alpha value is done in alphaToLinearWeights
 class SampleMerge
 {
-	public :
-		SampleMerge( const vector<int> &inSampleOffsets, const vector<float> *inZ, const vector<float> *inZBack )
-			:	zData( new FloatVectorData() ),
-				zBackData( new FloatVectorData() ),
-				sampleOffsetsData( new IntVectorData() ),
-				contributionIdsData( new IntVectorData() ),
-				contributionAmountsData( new FloatVectorData() ),
-				contributionOffsetsData( new IntVectorData() ),
-				m_inZ( inZ ? *inZ : zData->writable() ),  // Unused when there is no inZ
-				m_inZBack( inZBack ? *inZBack : zBackData->writable() ),  // Unused when there is no inZ
-				m_zOut( zData->writable() ),
-				m_zBackOut( zBackData->writable() ),
-				m_contributionIdsOut( contributionIdsData->writable() ),
-				m_contributionAmountsOut( contributionAmountsData->writable() ),
-				m_contributionOffsetsOut( contributionOffsetsData->writable() )
+public:
+
+	SampleMerge( const vector<int> &inSampleOffsets, const vector<float> *inZ, const vector<float> *inZBack )
+		: zData( new FloatVectorData() ),
+		  zBackData( new FloatVectorData() ),
+		  sampleOffsetsData( new IntVectorData() ),
+		  contributionIdsData( new IntVectorData() ),
+		  contributionAmountsData( new FloatVectorData() ),
+		  contributionOffsetsData( new IntVectorData() ),
+		  m_inZ( inZ ? *inZ : zData->writable() ), // Unused when there is no inZ
+		  m_inZBack( inZBack ? *inZBack : zBackData->writable() ), // Unused when there is no inZ
+		  m_zOut( zData->writable() ),
+		  m_zBackOut( zBackData->writable() ),
+		  m_contributionIdsOut( contributionIdsData->writable() ),
+		  m_contributionAmountsOut( contributionAmountsData->writable() ),
+		  m_contributionOffsetsOut( contributionOffsetsData->writable() )
+	{
+		vector<int> &sampleOffsetsOut = sampleOffsetsData->writable();
+		sampleOffsetsOut.reserve( ImagePlug::tilePixels() );
+
+		if( !inZ )
 		{
-			vector<int> &sampleOffsetsOut = sampleOffsetsData->writable();
-			sampleOffsetsOut.reserve( ImagePlug::tilePixels() );
+			// If we don't have a Z channel, then no samples can "overlap", so we shouldn't really need
+			// to perform merging.  But we could still to run a "tidy" in order to do the pruning of
+			// transparent or occluded samples.  In order to set up for that, we set up all the merging
+			// data structures with an identity transform that just passes through all the input data.
+			std::copy( inSampleOffsets.begin(), inSampleOffsets.end(), std::back_inserter( sampleOffsetsOut ) );
+			m_contributionIdsOut.resize( inSampleOffsets.back() );
+			m_contributionAmountsOut.resize( inSampleOffsets.back(), 1.0f );
+			m_contributionOffsetsOut.resize( inSampleOffsets.back() );
 
-			if( !inZ )
+			for( int i = 0; i < inSampleOffsets.back(); i++ )
 			{
-				// If we don't have a Z channel, then no samples can "overlap", so we shouldn't really need
-				// to perform merging.  But we could still to run a "tidy" in order to do the pruning of
-				// transparent or occluded samples.  In order to set up for that, we set up all the merging
-				// data structures with an identity transform that just passes through all the input data.
-				std::copy(inSampleOffsets.begin(), inSampleOffsets.end(), std::back_inserter( sampleOffsetsOut ) );
-				m_contributionIdsOut.resize( inSampleOffsets.back() );
-				m_contributionAmountsOut.resize( inSampleOffsets.back(), 1.0f );
-				m_contributionOffsetsOut.resize( inSampleOffsets.back() );
-
-				for( int i = 0; i < inSampleOffsets.back(); i++ )
-				{
-					m_contributionIdsOut[i] = i;
-					m_contributionOffsetsOut[i] = i + 1;
-				}
-				return;
+				m_contributionIdsOut[i] = i;
+				m_contributionOffsetsOut[i] = i + 1;
 			}
+			return;
+		}
 
-			// We don't know how many merged samples we will end up with, but in image with many
-			// hard surfaces, it's often just slightly higher than the number of input samples
-			m_zOut.reserve( m_inZ.size() * 1.1f );
-			m_zBackOut.reserve( m_inZ.size() * 1.1f );
-			m_contributionOffsetsOut.reserve( m_inZ.size() * 1.1f );
+		// We don't know how many merged samples we will end up with, but in image with many
+		// hard surfaces, it's often just slightly higher than the number of input samples
+		m_zOut.reserve( m_inZ.size() * 1.1f );
+		m_zBackOut.reserve( m_inZ.size() * 1.1f );
+		m_contributionOffsetsOut.reserve( m_inZ.size() * 1.1f );
 
-			// The number of contributions could get a lot higher, but for the moment use a low estimate
-			m_contributionIdsOut.reserve( m_inZ.size() * 1.1f );
-			m_contributionAmountsOut.reserve( m_inZ.size() * 1.1f );
+		// The number of contributions could get a lot higher, but for the moment use a low estimate
+		m_contributionIdsOut.reserve( m_inZ.size() * 1.1f );
+		m_contributionAmountsOut.reserve( m_inZ.size() * 1.1f );
 
-			int currentSampleId = 0;
-			for( int i = 0; i < ImagePlug::tilePixels(); i++ )
+		int currentSampleId = 0;
+		for( int i = 0; i < ImagePlug::tilePixels(); i++ )
+		{
+			float outputDepth = numeric_limits<float>::lowest();
+			int offset = inSampleOffsets[i];
+
+			while( currentSampleId < offset )
 			{
-				float outputDepth = numeric_limits<float>::lowest();
-				int offset = inSampleOffsets[i];
+				const float currentSampleZ = m_inZ[currentSampleId];
+				const float currentSampleZBack = std::max( currentSampleZ, m_inZBack[currentSampleId] );
 
-				while( currentSampleId < offset )
+				if( m_openSamples.size() )
 				{
-					const float currentSampleZ = m_inZ[currentSampleId];
-					const float currentSampleZBack = std::max( currentSampleZ, m_inZBack[currentSampleId] );
-
-					if( m_openSamples.size() )
+					const int lastOpen = m_openSamples.back();
+					// Check if we match the last already open sample, starting with Z
+					if( m_inZ[lastOpen] == currentSampleZ && (
+																 // Now check if both ZBacks are valid and match
+																 m_inZBack[lastOpen] == currentSampleZBack ||
+																 // Or if neither ZBack is valid, and they are both treated as point samples
+																 !( m_inZBack[lastOpen] > currentSampleZ || currentSampleZBack > currentSampleZ )
+															 ) )
 					{
-						const int lastOpen = m_openSamples.back();
-						// Check if we match the last already open sample, starting with Z
-						if( m_inZ[ lastOpen ] == currentSampleZ && (
-							// Now check if both ZBacks are valid and match
-							m_inZBack[ lastOpen ] == currentSampleZBack ||
-							// Or if neither ZBack is valid, and they are both treated as point samples
-							!( m_inZBack[ lastOpen ] > currentSampleZ || currentSampleZBack > currentSampleZ )
-						) )
-						{
-							// We exactly match an existing open sample, we don't need to close anything
-							// ( This check avoids closing an open point sample when receiving another
-							// point sample at the same depth )
-						}
-						else
-						{
-							closeOpenSamples( outputDepth, m_inZ[currentSampleId] );
-							outputDepth = m_inZ[currentSampleId];
-						}
-					}
-
-					if( m_openSamples.size() == 0 && ( currentSampleId + 1 == offset ||
-						( m_inZBack[currentSampleId] <= m_inZ[currentSampleId+1] &&
-							m_inZ[currentSampleId] < m_inZBack[currentSampleId+1] )
-					) )
-					{
-						// There are no open samples, and this sample does not interact with the next sample.
-						// We can take a fast path, knowing that we can directly output this sample without
-						// putting it in the open samples list.
-						// This does the same thing that that putting it in the open sample list and then
-						// closing it immediately would do, but is an optimization that saves ~15% of
-						// sampleMapping compute time when tidying data that is almost all already tidy
-						m_zOut.push_back( currentSampleZ );
-						m_zBackOut.push_back( currentSampleZBack );
-						m_contributionIdsOut.push_back( currentSampleId );
-						m_contributionAmountsOut.push_back( 1.0 );
-						m_contributionOffsetsOut.push_back( m_contributionIdsOut.size() );
+						// We exactly match an existing open sample, we don't need to close anything
+						// ( This check avoids closing an open point sample when receiving another
+						// point sample at the same depth )
 					}
 					else
 					{
-						// This sample interacts with the previous or next sample, so we need to add it
-						// to the open sample list, so it can be merged appropriately
-						unsigned int insertionIndex = m_openSamples.size();
-						while( insertionIndex > 0 && m_inZBack[ m_openSamples[insertionIndex - 1] ] < currentSampleZBack )
-						{
-							insertionIndex--;
-						}
-						m_openSamples.insert( m_openSamples.begin() + insertionIndex, currentSampleId );
+						closeOpenSamples( outputDepth, m_inZ[currentSampleId] );
+						outputDepth = m_inZ[currentSampleId];
 					}
-
-					currentSampleId++;
-				}
-				closeOpenSamples( outputDepth, numeric_limits<float>::infinity() );
-				sampleOffsetsOut.push_back( m_contributionOffsetsOut.size() );
-			}
-		}
-
-		FloatVectorDataPtr zData;
-		FloatVectorDataPtr zBackData;
-		IntVectorDataPtr sampleOffsetsData;
-
-		// Which sorted samples are contributing to which tidy samples, and by how much.
-		// mergedSampleContributionIds : The indices of the original samples that will
-		//    be used in each new sample
-		// mergedSampleContributionAmounts : The proportion of each of the original samples
-		//    that will be used in the new samples
-		// mergedSampleContributionOffsets : The offsets in the mergedSampleContribution
-		//    vectors for each of the new samples
-		IntVectorDataPtr contributionIdsData;
-		FloatVectorDataPtr contributionAmountsData;
-		IntVectorDataPtr contributionOffsetsData;
-
-
-	private :
-
-		void closeOpenSamples( float currentDepth, const float closeUpToZ )
-		{
-			while( m_openSamples.size() && !( m_inZBack[ m_openSamples.back() ] > closeUpToZ ) )
-			{
-				currentDepth = std::max( currentDepth, m_inZ[ m_openSamples.back() ] );
-				const float closeBack = std::max( currentDepth, m_inZBack[ m_openSamples.back() ] );
-
-				outputSample( currentDepth, closeBack );
-
-				while( m_openSamples.size() && !( m_inZBack[ m_openSamples.back() ] > closeBack ) )
-				{
-					m_openSamples.pop_back();
 				}
 
-				currentDepth = closeBack;
-			}
-
-			if( m_openSamples.size() )
-			{
-				currentDepth = std::max( currentDepth, m_inZ[ m_openSamples.back() ] );
-				if( currentDepth < closeUpToZ )
+				if( m_openSamples.size() == 0 && ( currentSampleId + 1 == offset || ( m_inZBack[currentSampleId] <= m_inZ[currentSampleId + 1] && m_inZ[currentSampleId] < m_inZBack[currentSampleId + 1] ) ) )
 				{
-					outputSample( currentDepth, closeUpToZ );
-				}
-			}
-		}
-
-		void outputSample( float z, float zBack )
-		{
-			m_zOut.push_back( z );
-			m_zBackOut.push_back( std::max( z, zBack ) );
-			if( zBack <= z )
-			{
-				// Outputting a point sample, it will only contain contributions from matching point samples
-				for( int i = m_openSamples.size() - 1; i >= 0; i-- )
-				{
-					if( m_inZBack[ m_openSamples[i] ] > z )
-					{
-						break;
-					}
-					m_contributionIdsOut.push_back( m_openSamples[i] );
+					// There are no open samples, and this sample does not interact with the next sample.
+					// We can take a fast path, knowing that we can directly output this sample without
+					// putting it in the open samples list.
+					// This does the same thing that that putting it in the open sample list and then
+					// closing it immediately would do, but is an optimization that saves ~15% of
+					// sampleMapping compute time when tidying data that is almost all already tidy
+					m_zOut.push_back( currentSampleZ );
+					m_zBackOut.push_back( currentSampleZBack );
+					m_contributionIdsOut.push_back( currentSampleId );
 					m_contributionAmountsOut.push_back( 1.0 );
+					m_contributionOffsetsOut.push_back( m_contributionIdsOut.size() );
 				}
-			}
-			else
-			{
-				for( const auto &i : m_openSamples )
+				else
 				{
-					const float amount = std::min( 1.0f, ( zBack - z ) / ( m_inZBack[i] - m_inZ[i] ) );
-					m_contributionIdsOut.push_back( i );
-					m_contributionAmountsOut.push_back( amount );
+					// This sample interacts with the previous or next sample, so we need to add it
+					// to the open sample list, so it can be merged appropriately
+					unsigned int insertionIndex = m_openSamples.size();
+					while( insertionIndex > 0 && m_inZBack[m_openSamples[insertionIndex - 1]] < currentSampleZBack )
+					{
+						insertionIndex--;
+					}
+					m_openSamples.insert( m_openSamples.begin() + insertionIndex, currentSampleId );
 				}
+
+				currentSampleId++;
 			}
-			m_contributionOffsetsOut.push_back( m_contributionIdsOut.size() );
+			closeOpenSamples( outputDepth, numeric_limits<float>::infinity() );
+			sampleOffsetsOut.push_back( m_contributionOffsetsOut.size() );
+		}
+	}
+
+	FloatVectorDataPtr zData;
+	FloatVectorDataPtr zBackData;
+	IntVectorDataPtr sampleOffsetsData;
+
+	// Which sorted samples are contributing to which tidy samples, and by how much.
+	// mergedSampleContributionIds : The indices of the original samples that will
+	//    be used in each new sample
+	// mergedSampleContributionAmounts : The proportion of each of the original samples
+	//    that will be used in the new samples
+	// mergedSampleContributionOffsets : The offsets in the mergedSampleContribution
+	//    vectors for each of the new samples
+	IntVectorDataPtr contributionIdsData;
+	FloatVectorDataPtr contributionAmountsData;
+	IntVectorDataPtr contributionOffsetsData;
+
+
+private:
+
+	void closeOpenSamples( float currentDepth, const float closeUpToZ )
+	{
+		while( m_openSamples.size() && !( m_inZBack[m_openSamples.back()] > closeUpToZ ) )
+		{
+			currentDepth = std::max( currentDepth, m_inZ[m_openSamples.back()] );
+			const float closeBack = std::max( currentDepth, m_inZBack[m_openSamples.back()] );
+
+			outputSample( currentDepth, closeBack );
+
+			while( m_openSamples.size() && !( m_inZBack[m_openSamples.back()] > closeBack ) )
+			{
+				m_openSamples.pop_back();
+			}
+
+			currentDepth = closeBack;
 		}
 
-		const vector<float> &m_inZ;
-		const vector<float> &m_inZBack;
-		std::vector<int> m_openSamples;
-		vector<float> &m_zOut;
-		vector<float> &m_zBackOut;
-		vector<int> &m_contributionIdsOut;
-		vector<float> &m_contributionAmountsOut;
-		vector<int> &m_contributionOffsetsOut;
+		if( m_openSamples.size() )
+		{
+			currentDepth = std::max( currentDepth, m_inZ[m_openSamples.back()] );
+			if( currentDepth < closeUpToZ )
+			{
+				outputSample( currentDepth, closeUpToZ );
+			}
+		}
+	}
 
+	void outputSample( float z, float zBack )
+	{
+		m_zOut.push_back( z );
+		m_zBackOut.push_back( std::max( z, zBack ) );
+		if( zBack <= z )
+		{
+			// Outputting a point sample, it will only contain contributions from matching point samples
+			for( int i = m_openSamples.size() - 1; i >= 0; i-- )
+			{
+				if( m_inZBack[m_openSamples[i]] > z )
+				{
+					break;
+				}
+				m_contributionIdsOut.push_back( m_openSamples[i] );
+				m_contributionAmountsOut.push_back( 1.0 );
+			}
+		}
+		else
+		{
+			for( const auto &i : m_openSamples )
+			{
+				const float amount = std::min( 1.0f, ( zBack - z ) / ( m_inZBack[i] - m_inZ[i] ) );
+				m_contributionIdsOut.push_back( i );
+				m_contributionAmountsOut.push_back( amount );
+			}
+		}
+		m_contributionOffsetsOut.push_back( m_contributionIdsOut.size() );
+	}
+
+	const vector<float> &m_inZ;
+	const vector<float> &m_inZBack;
+	std::vector<int> m_openSamples;
+	vector<float> &m_zOut;
+	vector<float> &m_zBackOut;
+	vector<int> &m_contributionIdsOut;
+	vector<float> &m_contributionAmountsOut;
+	vector<int> &m_contributionOffsetsOut;
 };
 
 // Given alpha values interpreted as exponential fog, and contribution weights for the fraction
@@ -283,12 +280,12 @@ class SampleMerge
 // per sample.  The return value is the final alpha, per sample, or per pixel ( depending on
 // flatten ).
 FloatVectorDataPtr alphaToLinearWeights(
-		std::vector<float> &contributionWeightsBuffer,  // Modified in place
-		const std::vector<int> &contributionIds,
-		const std::vector<int> &contributionOffsets,
-		const std::vector<float> &alpha,
-		const std::vector<int> &sampleOffsets,
-		bool flatten
+	std::vector<float> &contributionWeightsBuffer, // Modified in place
+	const std::vector<int> &contributionIds,
+	const std::vector<int> &contributionOffsets,
+	const std::vector<float> &alpha,
+	const std::vector<int> &sampleOffsets,
+	bool flatten
 )
 {
 	static const float MAX = numeric_limits<float>::max();
@@ -321,7 +318,7 @@ FloatVectorDataPtr alphaToLinearWeights(
 	unsigned int contributionStart = 0;
 	for( unsigned int sample = 0; sample < contributionOffsets.size(); sample++ )
 	{
-		unsigned int contributionEnd = contributionOffsets[ sample ];
+		unsigned int contributionEnd = contributionOffsets[sample];
 
 		assert( contributionEnd != contributionStart ); // There can't be a sample with no contributions
 
@@ -438,7 +435,7 @@ FloatVectorDataPtr alphaToLinearWeights(
 			if( opaqueSamples )
 			{
 				// When we're dealing with an opaque sample, we just average all the opaque contributions
-				sampleWeightMultiplier = 1.0f / float(opaqueSamples);
+				sampleWeightMultiplier = 1.0f / float( opaqueSamples );
 				sampleAccumAlpha = 1.0f;
 			}
 			else
@@ -466,7 +463,7 @@ FloatVectorDataPtr alphaToLinearWeights(
 			if( sample + 1 == pixelEnd )
 			{
 				assert( pixel < sampleOffsets.size() );
-				mergedAlpha[ pixel ] = pixelAlpha;
+				mergedAlpha[pixel] = pixelAlpha;
 
 				while( pixelEnd == sample + 1 && pixel + 1 < sampleOffsets.size() )
 				{
@@ -493,14 +490,14 @@ FloatVectorDataPtr alphaToLinearWeights(
 // past the occluded threshold, but not 100% hidden, are merged with the last sample, to preserve the
 // flattened appearance of the image
 void pruneSamples(
-		std::vector<float> &contributionWeights,
-		std::vector<int> &contributionIds,
-		std::vector<int> &contributionOffsets,
-		std::vector<float> &alpha,
-		std::vector<float> *z,
-		std::vector<float> *zBack,
-		std::vector<int> &sampleOffsets,
-		bool pruneTransparent, bool pruneOccluded, float occludedThreshold
+	std::vector<float> &contributionWeights,
+	std::vector<int> &contributionIds,
+	std::vector<int> &contributionOffsets,
+	std::vector<float> &alpha,
+	std::vector<float> *z,
+	std::vector<float> *zBack,
+	std::vector<int> &sampleOffsets,
+	bool pruneTransparent, bool pruneOccluded, float occludedThreshold
 )
 {
 	// If we considered an alpha value of 0 to be occluded, the initial alpha value would be
@@ -519,7 +516,7 @@ void pruneSamples(
 		float squashAlpha = 0.0f;
 		for( int sample = prevSampleOffset; sample < sampleOffset; sample++ )
 		{
-			int contributionOffset = contributionOffsets[ sample ];
+			int contributionOffset = contributionOffsets[sample];
 			float sampleAlpha = alpha[sample];
 			if( ( pruneTransparent && sampleAlpha == 0.0f ) || ( pruneOccluded && pixelAlpha == 1.0f ) )
 			{
@@ -547,8 +544,8 @@ void pruneSamples(
 				alpha[writeSampleIndex] = sampleAlpha;
 				if( z )
 				{
-					(*z)[writeSampleIndex] = (*z)[sample];
-					(*zBack)[writeSampleIndex] = (*zBack)[sample];
+					( *z )[writeSampleIndex] = ( *z )[sample];
+					( *zBack )[writeSampleIndex] = ( *zBack )[sample];
 				}
 			}
 			pixelAlpha = pixelAlpha + sampleAlpha - pixelAlpha * sampleAlpha;
@@ -597,9 +594,9 @@ void pruneSamples(
 // and then feeding the contribution amounts through alphaToLinearWeights.  When we are
 // starting with tidy data, however, we can get to the same end point with a simple accumulate.
 FloatVectorDataPtr tidyAlphaToFlatLinearWeights(
-		std::vector<float> &outputWeights,
-		const std::vector<float> &alpha,
-		const std::vector<int> &sampleOffsets
+	std::vector<float> &outputWeights,
+	const std::vector<float> &alpha,
+	const std::vector<int> &sampleOffsets
 )
 {
 	FloatVectorDataPtr mergedAlphaData = new FloatVectorData;
@@ -634,18 +631,14 @@ IECore::ConstFloatVectorDataPtr sortByIndices( const std::vector<float> &input, 
 
 	for( unsigned int i = 0; i < input.size(); i++ )
 	{
-		result[ i ] = input[ indices[ i ] ];
+		result[i] = input[indices[i]];
 	}
 
 	return resultData;
 }
 
 // Return a FloatVectorData which for each element of indices, contains the element of input with that index.
-IECore::ConstFloatVectorDataPtr sumByIndicesAndWeights( const std::vector<float> &input,
-	const vector<int> &indices,
-	const vector<float> &weights,
-	const vector<int> &offsets
-)
+IECore::ConstFloatVectorDataPtr sumByIndicesAndWeights( const std::vector<float> &input, const vector<int> &indices, const vector<float> &weights, const vector<int> &offsets )
 {
 	FloatVectorDataPtr resultData = new FloatVectorData;
 	vector<float> &result = resultData->writable();
@@ -659,7 +652,7 @@ IECore::ConstFloatVectorDataPtr sumByIndicesAndWeights( const std::vector<float>
 		float accumValue = 0;
 		for( int sample = prevOffset; sample < offset; sample++ )
 		{
-			accumValue += input[ indices[ sample ] ] * weights[sample];
+			accumValue += input[indices[sample]] * weights[sample];
 		}
 
 		result[pixel] = accumValue;
@@ -671,10 +664,7 @@ IECore::ConstFloatVectorDataPtr sumByIndicesAndWeights( const std::vector<float>
 
 // For each range of samples indicated by offsets, multiply the corresponding input sample by the
 // corresponding weight, and sum.  Returns a FloatVectorData with the sum for each range.
-IECore::ConstFloatVectorDataPtr sumByWeights( const std::vector<float> &input,
-	const vector<float> &weights,
-	const vector<int> &offsets
-)
+IECore::ConstFloatVectorDataPtr sumByWeights( const std::vector<float> &input, const vector<float> &weights, const vector<int> &offsets )
 {
 	FloatVectorDataPtr resultData = new FloatVectorData;
 	vector<float> &result = resultData->writable();
@@ -688,7 +678,7 @@ IECore::ConstFloatVectorDataPtr sumByWeights( const std::vector<float> &input,
 		float accumValue = 0;
 		for( int j = prevOffset; j < offset; j++ )
 		{
-			accumValue += input[ j ] * weights[j];
+			accumValue += input[j] * weights[j];
 		}
 
 		result[i] = accumValue;
@@ -712,9 +702,10 @@ IECore::IntVectorDataPtr computeSampleSorting(
 
 		CompareDepth( const vector<float> &zSamples, const vector<float> &zBackSamples )
 			: m_zSamples( zSamples ), m_zBackSamples( zBackSamples )
-		{}
+		{
+		}
 
-		bool operator()( int a, int b ) const
+		bool operator () ( int a, int b ) const
 		{
 			if( m_zSamples[a] != m_zSamples[b] )
 			{
@@ -755,9 +746,7 @@ IECore::IntVectorDataPtr computeSampleSorting(
 	return resultData;
 }
 
-void checkState( const std::vector<int> &offsets,
-	const std::vector<float> &zChannel, const std::vector<float> &zBackChannel,
-	bool &isSorted, bool &isTidy )
+void checkState( const std::vector<int> &offsets, const std::vector<float> &zChannel, const std::vector<float> &zBackChannel, bool &isSorted, bool &isTidy )
 {
 	isSorted = true;
 	isTidy = true;
@@ -822,12 +811,12 @@ void checkState( const std::vector<int> &offsets,
 	}
 }
 
-};
+}; // namespace
 
 size_t DeepState::g_firstPlugIndex = 0;
 
 DeepState::DeepState( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -1087,19 +1076,18 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 					sampleOffsetsData->readable()
 				);
 
-				result->members()[ g_AName ] = mergedAlphaData;
-				result->members()[ g_contributionWeightsName ] = sampleWeightsData;
+				result->members()[g_AName] = mergedAlphaData;
+				result->members()[g_contributionWeightsName] = sampleWeightsData;
 			}
 			else
 			{
 				sampleWeights.resize( sampleOffsetsData->readable().back(), 1.0f );
-				result->members()[ g_contributionWeightsName ] = sampleWeightsData;
+				result->members()[g_contributionWeightsName] = sampleWeightsData;
 			}
 			static_cast<CompoundObjectPlug *>( output )->setValue( result );
 			return;
 		}
-		else if( requestedDeepState == TargetState::Sorted || ( requestedDeepState == TargetState::Tidy &&
-			!pruneTransparent && !pruneOccluded ) )
+		else if( requestedDeepState == TargetState::Sorted || ( requestedDeepState == TargetState::Tidy && !pruneTransparent && !pruneOccluded ) )
 		{
 			// We're already sorted, nothing needs to be done
 			static_cast<CompoundObjectPlug *>( output )->setValue( result );
@@ -1110,8 +1098,8 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	if( !isSorted )
 	{
 		sampleSortingData = computeSampleSorting(
-				sampleOffsetsData->readable(), zData->readable(), zBackData->readable()
-			);
+			sampleOffsetsData->readable(), zData->readable(), zBackData->readable()
+		);
 	}
 
 	if( requestedDeepState == TargetState::Sorted )
@@ -1119,7 +1107,7 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		// If all we want is to sort, we can just return the sort indices
 		if( sampleSortingData )
 		{
-			result->members()[ g_contributionIdsName ] = sampleSortingData;
+			result->members()[g_contributionIdsName] = sampleSortingData;
 		}
 	}
 	else
@@ -1140,8 +1128,7 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		}
 
 		// Set up the sample merge data
-		SampleMerge sampleMerge( sampleOffsetsData->readable(),
-			hasZ ? &zData->readable() : nullptr, hasZ ? &zBackData->readable() : nullptr );
+		SampleMerge sampleMerge( sampleOffsetsData->readable(), hasZ ? &zData->readable() : nullptr, hasZ ? &zBackData->readable() : nullptr );
 
 		if( sampleSortingData )
 		{
@@ -1151,7 +1138,7 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			const std::vector<int> &sampleSorting = sampleSortingData->readable();
 			for( unsigned int i = 0; i < contributionIds.size(); i++ )
 			{
-				contributionIds[i] = sampleSorting[ contributionIds[i] ];
+				contributionIds[i] = sampleSorting[contributionIds[i]];
 			}
 		}
 
@@ -1173,7 +1160,7 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 
 		// Do the math that converts from depth fractions into linear weights
 		FloatVectorDataPtr mergedAlphaData = alphaToLinearWeights(
-			sampleMerge.contributionAmountsData->writable(),  // Modified in place
+			sampleMerge.contributionAmountsData->writable(), // Modified in place
 			sampleMerge.contributionIdsData->readable(),
 			sampleMerge.contributionOffsetsData->readable(),
 			alphaData->readable(),
@@ -1187,14 +1174,14 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			{
 				// Prune transparent or occluded samples
 				pruneSamples(
-						sampleMerge.contributionAmountsData->writable(),
-						sampleMerge.contributionIdsData->writable(),
-						sampleMerge.contributionOffsetsData->writable(),
-						mergedAlphaData->writable(),
-						hasZ ? &sampleMerge.zData->writable() : nullptr,
-						hasZ ? &sampleMerge.zBackData->writable() : nullptr,
-						sampleMerge.sampleOffsetsData->writable(),
-						pruneTransparent, pruneOccluded, occludedThreshold
+					sampleMerge.contributionAmountsData->writable(),
+					sampleMerge.contributionIdsData->writable(),
+					sampleMerge.contributionOffsetsData->writable(),
+					mergedAlphaData->writable(),
+					hasZ ? &sampleMerge.zData->writable() : nullptr,
+					hasZ ? &sampleMerge.zBackData->writable() : nullptr,
+					sampleMerge.sampleOffsetsData->writable(),
+					pruneTransparent, pruneOccluded, occludedThreshold
 				);
 			}
 
@@ -1218,14 +1205,14 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 
 			if( hasZ )
 			{
-				result->members()[ g_ZName ] = sampleMerge.zData;
-				result->members()[ g_ZBackName ] = sampleMerge.zBackData;
+				result->members()[g_ZName] = sampleMerge.zData;
+				result->members()[g_ZBackName] = sampleMerge.zBackData;
 			}
-			result->members()[ g_AName ] = mergedAlphaData;
-			result->members()[ g_sampleOffsetsName ] = sampleMerge.sampleOffsetsData;
-			result->members()[ g_contributionIdsName ] = sampleMerge.contributionIdsData;
-			result->members()[ g_contributionWeightsName ] = sampleMerge.contributionAmountsData;
-			result->members()[ g_contributionOffsetsName ] = sampleMerge.contributionOffsetsData;
+			result->members()[g_AName] = mergedAlphaData;
+			result->members()[g_sampleOffsetsName] = sampleMerge.sampleOffsetsData;
+			result->members()[g_contributionIdsName] = sampleMerge.contributionIdsData;
+			result->members()[g_contributionWeightsName] = sampleMerge.contributionAmountsData;
+			result->members()[g_contributionOffsetsName] = sampleMerge.contributionOffsetsData;
 		}
 		else // requestedDeepState must be TargetState::Flat
 		{
@@ -1235,15 +1222,15 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 
 			// Accumulate all contribution weights into the index corresponding to the original samples
 			// This allows us to then apply these weights in one pass through the channel data
-			const std::vector<int> &ids =  sampleMerge.contributionIdsData->readable();
-			const std::vector<float> &weights =  sampleMerge.contributionAmountsData->readable();
+			const std::vector<int> &ids = sampleMerge.contributionIdsData->readable();
+			const std::vector<float> &weights = sampleMerge.contributionAmountsData->readable();
 			for( unsigned int i = 0; i < ids.size(); i++ )
 			{
-				sampleWeights[ ids[i] ] += weights[i];
+				sampleWeights[ids[i]] += weights[i];
 			}
 
-			result->members()[ g_AName ] = mergedAlphaData;
-			result->members()[ g_contributionWeightsName ] = sampleWeightsData;
+			result->members()[g_AName] = mergedAlphaData;
+			result->members()[g_contributionWeightsName] = sampleWeightsData;
 		}
 	}
 
@@ -1423,10 +1410,7 @@ IECore::ConstFloatVectorDataPtr DeepState::computeChannelData( const std::string
 			ConstFloatVectorDataPtr mergedSampleContributionAmountsData = sampleMappingData->member<FloatVectorData>( g_contributionWeightsName, true );
 			ConstIntVectorDataPtr sampleOffsetsData = inPlug()->sampleOffsetsPlug()->getValue();
 			assert( (int)inData->readable().size() == sampleOffsetsData->readable().back() );
-			result = sumByWeights( inData->readable(),
-				mergedSampleContributionAmountsData->readable(),
-				sampleOffsetsData->readable()
-			);
+			result = sumByWeights( inData->readable(), mergedSampleContributionAmountsData->readable(), sampleOffsetsData->readable() );
 		}
 		else
 		{
@@ -1443,11 +1427,7 @@ IECore::ConstFloatVectorDataPtr DeepState::computeChannelData( const std::string
 			{
 				ConstFloatVectorDataPtr mergedSampleContributionAmountsData = sampleMappingData->member<FloatVectorData>( g_contributionWeightsName, true );
 				ConstIntVectorDataPtr mergedSampleContributionOffsetsData = sampleMappingData->member<IntVectorData>( g_contributionOffsetsName, true );
-				result = sumByIndicesAndWeights( inData->readable(),
-					mergedSampleContributionIdsData->readable(),
-					mergedSampleContributionAmountsData->readable(),
-					mergedSampleContributionOffsetsData->readable()
-				);
+				result = sumByIndicesAndWeights( inData->readable(), mergedSampleContributionIdsData->readable(), mergedSampleContributionAmountsData->readable(), mergedSampleContributionOffsetsData->readable() );
 			}
 		}
 	}

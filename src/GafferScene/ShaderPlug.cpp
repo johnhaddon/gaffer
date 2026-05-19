@@ -84,7 +84,7 @@ bool isParameterType( const Plug *plug )
 {
 	switch( (int)plug->typeId() )
 	{
-		case PlugTypeId :      // These two could be used to represent
+		case PlugTypeId : // These two could be used to represent
 		case ValuePlugTypeId : // struct parameters
 		case FloatPlugTypeId :
 		case IntPlugTypeId :
@@ -104,10 +104,8 @@ bool isParameterType( const Plug *plug )
 			// GafferRenderMan. It may be that we should move ClosurePlug to
 			// GafferScene anyway, and give it an additional property to say what
 			// type of closure it is.
-			return
-				plug->isInstanceOf( "GafferOSL::ClosurePlug" ) ||
-				plug->isInstanceOf( "GafferRenderMan::BXDFPlug" )
-			;
+			return plug->isInstanceOf( "GafferOSL::ClosurePlug" ) ||
+				plug->isInstanceOf( "GafferRenderMan::BXDFPlug" );
 	}
 }
 
@@ -123,7 +121,7 @@ const IECore::InternedString g_out( "out" );
 GAFFER_PLUG_DEFINE_TYPE( ShaderPlug );
 
 ShaderPlug::ShaderPlug( const std::string &name, Direction direction, unsigned flags )
-	:	Plug( name, direction, flags )
+	: Plug( name, direction, flags )
 {
 }
 
@@ -194,7 +192,7 @@ bool ShaderPlug::acceptsInput( const Gaffer::Plug *input ) const
 			// Reject switches which have inputs from non-shader nodes.
 			for( Plug::Iterator it( switchNode->inPlugs() ); !it.done(); ++it )
 			{
-				if( (*it)->getInput() && !isShaderOutPlug( (*it)->source() ) )
+				if( ( *it )->getInput() && !isShaderOutPlug( ( *it )->source() ) )
 				{
 					return false;
 				}
@@ -241,7 +239,6 @@ struct ShaderPlug::ShaderContext
 	ConstContextPtr context;
 	std::optional<ScenePlug::GlobalScope> scope;
 	std::string outputParameter;
-
 };
 
 IECore::MurmurHash ShaderPlug::attributesHash() const
@@ -251,7 +248,7 @@ IECore::MurmurHash ShaderPlug::attributesHash() const
 	const Gaffer::Plug *plug = shaderOutPlug( context );
 	if( plug )
 	{
-		auto shader = static_cast<const Shader*>( plug->node() );
+		auto shader = static_cast<const Shader *>( plug->node() );
 		h = shader->outAttributesPlug()->hash();
 	}
 
@@ -264,13 +261,13 @@ IECore::ConstCompoundObjectPtr ShaderPlug::attributes() const
 	const Gaffer::Plug *plug = shaderOutPlug( context );
 	if( plug )
 	{
-		auto shader = static_cast<const Shader*>( plug->node() );
+		auto shader = static_cast<const Shader *>( plug->node() );
 		IECore::ConstCompoundObjectPtr result = shader->outAttributesPlug()->getValue();
 
 		// Check for outputs from ShaderTweakProxy, which should only be used with ShaderTweaks nodes
 		for( const auto &i : result->members() )
 		{
-			if( const IECoreScene::ShaderNetwork *shaderNetwork = IECore::runTimeCast< const IECoreScene::ShaderNetwork >( i.second.get() ) )
+			if( const IECoreScene::ShaderNetwork *shaderNetwork = IECore::runTimeCast<const IECoreScene::ShaderNetwork>( i.second.get() ) )
 			{
 				if( const BoolData *hasProxyNodes = shaderNetwork->blindData()->member<IECore::BoolData>( hasProxyNodesIdentifier ) )
 				{
@@ -279,7 +276,6 @@ IECore::ConstCompoundObjectPtr ShaderPlug::attributes() const
 						throw IECore::Exception(
 							"ShaderTweakProxy only works with ShaderTweaks - it doesn't make sense to connect one here"
 						);
-
 					}
 				}
 			}
@@ -291,14 +287,14 @@ IECore::ConstCompoundObjectPtr ShaderPlug::attributes() const
 	return new CompoundObject;
 }
 
-const Gaffer::ValuePlug *ShaderPlug::parameterSource( const IECoreScene::ShaderNetwork::Parameter &parameter) const
+const Gaffer::ValuePlug *ShaderPlug::parameterSource( const IECoreScene::ShaderNetwork::Parameter &parameter ) const
 {
 	ShaderContext context;
 	const Gaffer::Plug *plug = shaderOutPlug( context );
 
 	if( plug )
 	{
-		auto shader = static_cast<const Shader*>( plug->node() );
+		auto shader = static_cast<const Shader *>( plug->node() );
 		if( parameter.shader.string().empty() )
 		{
 			return shader->parametersPlug()->descendant<ValuePlug>( parameter.name );
@@ -308,7 +304,7 @@ const Gaffer::ValuePlug *ShaderPlug::parameterSource( const IECoreScene::ShaderN
 	return nullptr;
 }
 
-Gaffer::ValuePlug *ShaderPlug::parameterSource( const IECoreScene::ShaderNetwork::Parameter &parameter)
+Gaffer::ValuePlug *ShaderPlug::parameterSource( const IECoreScene::ShaderNetwork::Parameter &parameter )
 {
 	return const_cast<ValuePlug *>( const_cast<const ShaderPlug *>( this )->parameterSource( parameter ) );
 }

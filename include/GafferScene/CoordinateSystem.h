@@ -44,19 +44,19 @@ namespace GafferScene
 class GAFFERSCENE_API CoordinateSystem : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CoordinateSystem, CoordinateSystemTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CoordinateSystem, CoordinateSystemTypeId, ObjectSource );
 
-		explicit CoordinateSystem( const std::string &name=defaultName<CoordinateSystem>() );
-		~CoordinateSystem() override;
+	explicit CoordinateSystem( const std::string &name = defaultName<CoordinateSystem>() );
+	~CoordinateSystem() override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-		IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
+	IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 };
 
 IE_CORE_DECLAREPTR( CoordinateSystem )

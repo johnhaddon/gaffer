@@ -46,30 +46,29 @@ namespace GafferImage
 class GAFFERIMAGE_API DeleteImageMetadata : public MetadataProcessor
 {
 
-	public :
+public:
 
-		explicit DeleteImageMetadata( const std::string &name=defaultName<DeleteImageMetadata>() );
-		~DeleteImageMetadata() override;
+	explicit DeleteImageMetadata( const std::string &name = defaultName<DeleteImageMetadata>() );
+	~DeleteImageMetadata() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DeleteImageMetadata, DeleteImageMetadataTypeId, MetadataProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DeleteImageMetadata, DeleteImageMetadataTypeId, MetadataProcessor );
 
-		Gaffer::StringPlug *namesPlug();
-		const Gaffer::StringPlug *namesPlug() const;
+	Gaffer::StringPlug *namesPlug();
+	const Gaffer::StringPlug *namesPlug() const;
 
-		Gaffer::BoolPlug *invertNamesPlug();
-		const Gaffer::BoolPlug *invertNamesPlug() const;
+	Gaffer::BoolPlug *invertNamesPlug();
+	const Gaffer::BoolPlug *invertNamesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
+	void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteImageMetadata );

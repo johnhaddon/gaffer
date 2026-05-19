@@ -50,33 +50,33 @@ namespace GafferVDB
 class GAFFERVDB_API LevelSetOffset : public GafferScene::Deformer
 {
 
-	public :
+public:
 
-		explicit LevelSetOffset(const std::string &name = defaultName<LevelSetOffset>() );
-		~LevelSetOffset() override;
+	explicit LevelSetOffset( const std::string &name = defaultName<LevelSetOffset>() );
+	~LevelSetOffset() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferVDB::LevelSetOffset, LevelSetOffsetTypeId, GafferScene::Deformer );
+	GAFFER_NODE_DECLARE_TYPE( GafferVDB::LevelSetOffset, LevelSetOffsetTypeId, GafferScene::Deformer );
 
-		Gaffer::StringPlug *gridPlug();
-		const Gaffer::StringPlug *gridPlug() const;
+	Gaffer::StringPlug *gridPlug();
+	const Gaffer::StringPlug *gridPlug() const;
 
-		Gaffer::FloatPlug *offsetPlug();
-		const Gaffer::FloatPlug *offsetPlug() const;
+	Gaffer::FloatPlug *offsetPlug();
+	const Gaffer::FloatPlug *offsetPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
-		Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
 
-		bool affectsProcessedObjectBound( const Gaffer::Plug *input ) const override;
-		void hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box3f computeProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context ) const override;
+	bool affectsProcessedObjectBound( const Gaffer::Plug *input ) const override;
+	void hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box3f computeProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context ) const override;
 
-	private:
+private:
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( LevelSetOffset )

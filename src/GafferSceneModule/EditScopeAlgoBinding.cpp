@@ -314,8 +314,7 @@ void bindEditScopeAlgo()
 		.add_property( "pivot", &pivotAccessor )
 		.def( "matrix", &matrixWrapper )
 		.def( self == self )
-		.def( self != self )
-	;
+		.def( self != self );
 
 	def( "acquireTransformEdit", &acquireTransformEditWrapper, ( arg( "scope" ), arg( "path" ), arg( "createIfNecessary" ) = true ) );
 	def( "hasTransformEdit", &hasTransformEditWrapper );
@@ -339,8 +338,7 @@ void bindEditScopeAlgo()
 	enum_<EditScopeAlgo::SetMembership>( "SetMembership" )
 		.value( "Added", EditScopeAlgo::SetMembership::Added )
 		.value( "Removed", EditScopeAlgo::SetMembership::Removed )
-		.value( "Unchanged", EditScopeAlgo::SetMembership::Unchanged )
-	;
+		.value( "Unchanged", EditScopeAlgo::SetMembership::Unchanged );
 
 	def( "acquireOptionEdit", &acquireOptionEditWrapper, ( arg( "scope" ), arg( "option" ), arg( "createIfNecessary" ) = true ) );
 	def( "hasOptionEdit", &hasOptionEditWrapper, ( arg( "scope" ), arg( "option" ) ) );
@@ -355,7 +353,6 @@ void bindEditScopeAlgo()
 	def( "renderPassesReadOnlyReason", &renderPassesReadOnlyReasonWrapper );
 	def( "renameRenderPass", &renameRenderPassWrapper, ( arg( "scope" ), arg( "oldName" ), arg( "newName" ) ) );
 	def( "renameRenderPassNonEditableReason", &renameRenderPassNonEditableReasonWrapper, ( arg( "scope" ), arg( "newName" ) ) );
-
 }
 
 } // namespace GafferSceneModule

@@ -49,57 +49,56 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Dot : public DependencyNode
 {
 
-	public :
+public:
 
-		explicit Dot( const std::string &name=defaultName<Dot>() );
-		~Dot() override;
+	explicit Dot( const std::string &name = defaultName<Dot>() );
+	~Dot() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Dot, DotTypeId, DependencyNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Dot, DotTypeId, DependencyNode );
 
-		/// Because plugs are strongly typed in Gaffer, a
-		/// Dot cannot be set up in advance to work with
-		/// any type. This method should be called after
-		/// construction to set the Dot up for a plug of
-		/// a particular type. The passed plug is used as
-		/// a template, but will not be referenced by the
-		/// Dot itself - typically you will pass a plug
-		/// which you will connect to the Dot after calling
-		/// setup().
-		/// \undoable
-		void setup( const Plug *plug );
+	/// Because plugs are strongly typed in Gaffer, a
+	/// Dot cannot be set up in advance to work with
+	/// any type. This method should be called after
+	/// construction to set the Dot up for a plug of
+	/// a particular type. The passed plug is used as
+	/// a template, but will not be referenced by the
+	/// Dot itself - typically you will pass a plug
+	/// which you will connect to the Dot after calling
+	/// setup().
+	/// \undoable
+	void setup( const Plug *plug );
 
-		template<typename T=Plug>
-		T *inPlug();
-		template<typename T=Plug>
-		const T *inPlug() const;
+	template<typename T = Plug>
+	T *inPlug();
+	template<typename T = Plug>
+	const T *inPlug() const;
 
-		template<typename T=Plug>
-		T *outPlug();
-		template<typename T=Plug>
-		const T *outPlug() const;
+	template<typename T = Plug>
+	T *outPlug();
+	template<typename T = Plug>
+	const T *outPlug() const;
 
-		enum LabelType
-		{
-			None = 0,
-			NodeName = 1,
-			UpstreamNodeName = 2,
-			Custom = 3
-		};
+	enum LabelType
+	{
+		None = 0,
+		NodeName = 1,
+		UpstreamNodeName = 2,
+		Custom = 3
+	};
 
-		IntPlug *labelTypePlug();
-		const IntPlug *labelTypePlug() const;
+	IntPlug *labelTypePlug();
+	const IntPlug *labelTypePlug() const;
 
-		StringPlug *labelPlug();
-		const StringPlug *labelPlug() const;
+	StringPlug *labelPlug();
+	const StringPlug *labelPlug() const;
 
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
-		Plug *correspondingInput( const Plug *output ) override;
-		const Plug *correspondingInput( const Plug *output ) const override;
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
+	Plug *correspondingInput( const Plug *output ) override;
+	const Plug *correspondingInput( const Plug *output ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Dot )

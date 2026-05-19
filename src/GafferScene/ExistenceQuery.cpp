@@ -45,8 +45,8 @@ size_t ExistenceQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( ExistenceQuery );
 
-ExistenceQuery::ExistenceQuery( const std::string& name )
-: Gaffer::ComputeNode( name )
+ExistenceQuery::ExistenceQuery( const std::string &name )
+	: Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
@@ -56,66 +56,72 @@ ExistenceQuery::ExistenceQuery( const std::string& name )
 }
 
 ExistenceQuery::~ExistenceQuery()
-{}
-
-ScenePlug* ExistenceQuery::scenePlug()
 {
-	return const_cast< ScenePlug* >(
-		static_cast< const ExistenceQuery* >( this )->scenePlug() );
 }
 
-const ScenePlug* ExistenceQuery::scenePlug() const
+ScenePlug *ExistenceQuery::scenePlug()
 {
-	return getChild< ScenePlug >( g_firstPlugIndex );
+	return const_cast<ScenePlug *>(
+		static_cast<const ExistenceQuery *>( this )->scenePlug()
+	);
 }
 
-Gaffer::StringPlug* ExistenceQuery::locationPlug()
+const ScenePlug *ExistenceQuery::scenePlug() const
 {
-	return const_cast< Gaffer::StringPlug* >(
-		static_cast< const ExistenceQuery* >( this )->locationPlug() );
+	return getChild<ScenePlug>( g_firstPlugIndex );
 }
 
-const Gaffer::StringPlug* ExistenceQuery::locationPlug() const
+Gaffer::StringPlug *ExistenceQuery::locationPlug()
 {
-	return getChild< Gaffer::StringPlug >( g_firstPlugIndex + 1 );
+	return const_cast<Gaffer::StringPlug *>(
+		static_cast<const ExistenceQuery *>( this )->locationPlug()
+	);
 }
 
-Gaffer::BoolPlug* ExistenceQuery::existsPlug()
+const Gaffer::StringPlug *ExistenceQuery::locationPlug() const
 {
-	return const_cast< Gaffer::BoolPlug* >(
-		static_cast< const ExistenceQuery* >( this )->existsPlug() );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 1 );
 }
 
-const Gaffer::BoolPlug* ExistenceQuery::existsPlug() const
+Gaffer::BoolPlug *ExistenceQuery::existsPlug()
 {
-	return getChild< Gaffer::BoolPlug >( g_firstPlugIndex + 2 );
+	return const_cast<Gaffer::BoolPlug *>(
+		static_cast<const ExistenceQuery *>( this )->existsPlug()
+	);
 }
 
-Gaffer::StringPlug* ExistenceQuery::closestAncestorPlug()
+const Gaffer::BoolPlug *ExistenceQuery::existsPlug() const
 {
-	return const_cast< Gaffer::StringPlug* >(
-		static_cast< const ExistenceQuery* >( this )->closestAncestorPlug() );
+	return getChild<Gaffer::BoolPlug>( g_firstPlugIndex + 2 );
 }
 
-const Gaffer::StringPlug* ExistenceQuery::closestAncestorPlug() const
+Gaffer::StringPlug *ExistenceQuery::closestAncestorPlug()
 {
-	return getChild< Gaffer::StringPlug >( g_firstPlugIndex + 3 );
+	return const_cast<Gaffer::StringPlug *>(
+		static_cast<const ExistenceQuery *>( this )->closestAncestorPlug()
+	);
 }
 
-void ExistenceQuery::affects( const Gaffer::Plug* const input, AffectedPlugsContainer& outputs ) const
+const Gaffer::StringPlug *ExistenceQuery::closestAncestorPlug() const
+{
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 3 );
+}
+
+void ExistenceQuery::affects( const Gaffer::Plug *const input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 
 	if(
 		( input == locationPlug() ) ||
-		( input == scenePlug()->existsPlug() ) )
+		( input == scenePlug()->existsPlug() )
+	)
 	{
 		outputs.push_back( existsPlug() );
 		outputs.push_back( closestAncestorPlug() );
 	}
 }
 
-void ExistenceQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::Context* const context, IECore::MurmurHash& h ) const
+void ExistenceQuery::hash( const Gaffer::ValuePlug *const output, const Gaffer::Context *const context, IECore::MurmurHash &h ) const
 {
 	ComputeNode::hash( output, context, h );
 
@@ -123,16 +129,16 @@ void ExistenceQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::
 	{
 		const std::string loc = locationPlug()->getValue();
 
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			const Gaffer::BoolPlug* const eplug = scenePlug()->existsPlug();
+			const Gaffer::BoolPlug *const eplug = scenePlug()->existsPlug();
 
 			// NOTE : scene exists plug returns true by default when there is no input scene. See issue #4245
 
 			if( eplug->getInput() )
 			{
 				const ScenePlug::ScenePath path = ScenePlug::stringToPath( loc );
-				const ScenePlug::PathScope scope( context, & path );
+				const ScenePlug::PathScope scope( context, &path );
 				h = eplug->hash();
 			}
 		}
@@ -141,9 +147,9 @@ void ExistenceQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::
 	{
 		const std::string loc = locationPlug()->getValue();
 
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			const Gaffer::BoolPlug* const eplug = scenePlug()->existsPlug();
+			const Gaffer::BoolPlug *const eplug = scenePlug()->existsPlug();
 
 			// NOTE : scene exists plug returns true by default when there is no input scene. See issue #4245
 
@@ -152,9 +158,9 @@ void ExistenceQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::
 				ScenePlug::ScenePath path = ScenePlug::stringToPath( loc );
 				ScenePlug::PathScope scope( context );
 
-				while ( ! path.empty() )
+				while( !path.empty() )
 				{
-					scope.setPath( & path );
+					scope.setPath( &path );
 
 					if( eplug->getValue() )
 					{
@@ -177,7 +183,7 @@ void ExistenceQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::
 	}
 }
 
-void ExistenceQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Context* const context ) const
+void ExistenceQuery::compute( Gaffer::ValuePlug *const output, const Gaffer::Context *const context ) const
 {
 	if( output == existsPlug() )
 	{
@@ -185,29 +191,29 @@ void ExistenceQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Con
 
 		const std::string loc = locationPlug()->getValue();
 
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			const Gaffer::BoolPlug* const eplug = scenePlug()->existsPlug();
+			const Gaffer::BoolPlug *const eplug = scenePlug()->existsPlug();
 
 			// NOTE : scene exists plug returns true by default when there is no input scene. See issue #4245
 
 			if( eplug->getInput() )
 			{
 				const ScenePlug::ScenePath path = ScenePlug::stringToPath( loc );
-				ScenePlug::PathScope scope( context, & path );
+				ScenePlug::PathScope scope( context, &path );
 				exists = eplug->getValue();
 			}
 		}
 
-		IECore::assertedStaticCast< Gaffer::BoolPlug >( output )->setValue( exists );
+		IECore::assertedStaticCast<Gaffer::BoolPlug>( output )->setValue( exists );
 	}
 	else if( output == closestAncestorPlug() )
 	{
 		std::string loc = locationPlug()->getValue();
 
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			const Gaffer::BoolPlug* const eplug = scenePlug()->existsPlug();
+			const Gaffer::BoolPlug *const eplug = scenePlug()->existsPlug();
 
 			// NOTE : scene exists plug returns true by default when there is no input scene. See issue #4245
 
@@ -216,9 +222,9 @@ void ExistenceQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Con
 				ScenePlug::ScenePath path = ScenePlug::stringToPath( loc );
 				ScenePlug::PathScope scope( context );
 
-				while( ! path.empty() )
+				while( !path.empty() )
 				{
-					scope.setPath( & path );
+					scope.setPath( &path );
 
 					if( eplug->getValue() )
 					{
@@ -236,10 +242,10 @@ void ExistenceQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Con
 			}
 		}
 
-		IECore::assertedStaticCast< Gaffer::StringPlug >( output )->setValue( loc );
+		IECore::assertedStaticCast<Gaffer::StringPlug>( output )->setValue( loc );
 	}
 
 	ComputeNode::compute( output, context );
 }
 
-} // GafferScene
+} // namespace GafferScene

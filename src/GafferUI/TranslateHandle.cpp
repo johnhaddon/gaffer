@@ -46,7 +46,7 @@ using namespace GafferUI;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TranslateHandle );
 
 TranslateHandle::TranslateHandle( Style::Axes axes )
-	:	Handle( defaultName<TranslateHandle>() ), m_axes( Style::X )
+	: Handle( defaultName<TranslateHandle>() ), m_axes( Style::X )
 {
 	setAxes( axes );
 }
@@ -118,7 +118,7 @@ Imath::V3f TranslateHandle::translation( const DragDropEvent &event )
 				return V3f( 0, offset, 0 );
 			case Style::Z :
 				return V3f( 0, 0, offset );
-			default:
+			default :
 				break;
 		}
 	}

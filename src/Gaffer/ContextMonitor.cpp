@@ -86,7 +86,7 @@ const ContextMonitor::Statistics::CountingMap &ContextMonitor::Statistics::varia
 	return g_emptyCountingMap;
 }
 
-ContextMonitor::Statistics & ContextMonitor::Statistics::operator += ( const Context *context )
+ContextMonitor::Statistics &ContextMonitor::Statistics::operator += ( const Context *context )
 {
 	m_contexts.insert( context->hash() );
 	vector<InternedString> names;
@@ -98,7 +98,7 @@ ContextMonitor::Statistics & ContextMonitor::Statistics::operator += ( const Con
 	return *this;
 }
 
-ContextMonitor::Statistics & ContextMonitor::Statistics::operator += ( const Statistics &rhs )
+ContextMonitor::Statistics &ContextMonitor::Statistics::operator += ( const Statistics &rhs )
 {
 	m_contexts.insert( rhs.m_contexts.begin(), rhs.m_contexts.end() );
 	for( VariableMap::const_iterator it = rhs.m_variables.begin(), eIt = rhs.m_variables.end(); it != eIt; ++it )
@@ -127,7 +127,7 @@ bool ContextMonitor::Statistics::operator != ( const Statistics &rhs )
 //////////////////////////////////////////////////////////////////////////
 
 ContextMonitor::ContextMonitor( const GraphComponent *root )
-	:	m_root( root )
+	: m_root( root )
 {
 }
 

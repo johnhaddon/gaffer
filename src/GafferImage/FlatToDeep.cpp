@@ -50,18 +50,14 @@ GAFFER_NODE_DEFINE_TYPE( FlatToDeep );
 size_t FlatToDeep::g_firstPlugIndex = 0;
 
 FlatToDeep::FlatToDeep( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild( new IntPlug( "zMode", Plug::In, int(ZMode::Constant),
-		int(ZMode::Constant), int(ZMode::Channel )
-	) );
+	addChild( new IntPlug( "zMode", Plug::In, int( ZMode::Constant ), int( ZMode::Constant ), int( ZMode::Channel ) ) );
 	addChild( new FloatPlug( "depth" ) );
 	addChild( new StringPlug( "zChannel", Plug::In, "Z" ) );
 
-	addChild( new IntPlug( "zBackMode", Plug::In, int(ZBackMode::None),
-		int(ZBackMode::None), int(ZBackMode::Channel )
-	) );
+	addChild( new IntPlug( "zBackMode", Plug::In, int( ZBackMode::None ), int( ZBackMode::None ), int( ZBackMode::Channel ) ) );
 	addChild( new FloatPlug( "thickness", Plug::In, 0.0f, 0.0f ) );
 	addChild( new StringPlug( "zBackChannel", Plug::In, "ZBack" ) );
 
@@ -182,8 +178,7 @@ IECore::ConstStringVectorDataPtr FlatToDeep::computeChannelNames( const Gaffer::
 	}
 
 	if( ZBackMode( zBackModePlug()->getValue() ) != ZBackMode::None &&
-		find( result.begin(), result.end(), "ZBack" ) == result.end()
-	)
+		find( result.begin(), result.end(), "ZBack" ) == result.end() )
 	{
 		result.push_back( "ZBack" );
 	}
@@ -211,7 +206,7 @@ void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 
 	const V2i tileOrigin = context->get<V2i>( ImagePlug::tileOriginContextName );
 
-	if ( channelName == "Z" )
+	if( channelName == "Z" )
 	{
 		if( zMode == ZMode::Constant )
 		{
@@ -224,9 +219,7 @@ void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 
 			if( find( channelNames.begin(), channelNames.end(), zChannel ) == channelNames.end() )
 			{
-				throw( IECore::Exception( "FlatToDeep : Cannot find requested Z channel - no channel \""
-					+ zChannel + "\" found."
-				) );
+				throw( IECore::Exception( "FlatToDeep : Cannot find requested Z channel - no channel \"" + zChannel + "\" found." ) );
 			}
 
 			reusedScope.setTileOrigin( &tileOrigin );
@@ -253,9 +246,7 @@ void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 			{
 				if( find( channelNames.begin(), channelNames.end(), zBackChannel ) == channelNames.end() )
 				{
-					throw( IECore::Exception( "FlatToDeep : Cannot find requested ZBack channel - no channel \""
-						+ zBackChannel + "\" found."
-					) );
+					throw( IECore::Exception( "FlatToDeep : Cannot find requested ZBack channel - no channel \"" + zBackChannel + "\" found." ) );
 				}
 				reusedScope.setTileOrigin( &tileOrigin );
 				reusedScope.setChannelName( &zBackChannel );
@@ -267,7 +258,7 @@ void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 
 				reusedScope.setTileOrigin( &tileOrigin );
 				reusedScope.setChannelName( &zChannel );
-				outPlug()->channelDataPlug()->hash(h);
+				outPlug()->channelDataPlug()->hash( h );
 			}
 		}
 	}
@@ -287,7 +278,7 @@ IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData( const std::strin
 	ZMode zMode = ZMode( zModePlug()->getValue() );
 	const std::string zChannel = zChannelPlug()->getValue();
 
-	if ( channelName == "Z" )
+	if( channelName == "Z" )
 	{
 		if( zMode == ZMode::Constant )
 		{
@@ -307,9 +298,7 @@ IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData( const std::strin
 			// Pass through Z
 			if( find( channelNames.begin(), channelNames.end(), zChannel ) == channelNames.end() )
 			{
-				throw( IECore::Exception( "FlatToDeep : Cannot find requested Z channel - no channel \""
-					+ zChannel + "\" found."
-				) );
+				throw( IECore::Exception( "FlatToDeep : Cannot find requested Z channel - no channel \"" + zChannel + "\" found." ) );
 			}
 
 			reusedScope.setTileOrigin( &tileOrigin );
@@ -342,9 +331,7 @@ IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData( const std::strin
 				// Pass through ZBack
 				if( find( channelNames.begin(), channelNames.end(), zBackChannel ) == channelNames.end() )
 				{
-					throw( IECore::Exception( "FlatToDeep : Cannot find requested ZBack channel - no channel \""
-						+ zBackChannel + "\" found."
-					) );
+					throw( IECore::Exception( "FlatToDeep : Cannot find requested ZBack channel - no channel \"" + zBackChannel + "\" found." ) );
 				}
 
 				reusedScope.setTileOrigin( &tileOrigin );

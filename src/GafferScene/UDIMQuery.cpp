@@ -58,7 +58,7 @@ GAFFER_NODE_DEFINE_TYPE( UDIMQuery );
 size_t UDIMQuery::g_firstPlugIndex = 0;
 
 UDIMQuery::UDIMQuery( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Plug::In ) );
@@ -144,7 +144,7 @@ namespace
 
 struct InfoHashAccumulator
 {
-	bool operator()( const GafferScene::ScenePlug *in, const GafferScene::ScenePlug::ScenePath &path )
+	bool operator () ( const GafferScene::ScenePlug *in, const GafferScene::ScenePlug::ScenePath &path )
 	{
 		IECore::MurmurHash locationHash;
 		in->objectPlug()->hash( locationHash );
@@ -165,7 +165,7 @@ struct InfoHashAccumulator
 		}
 	}
 
-	tbb::concurrent_vector< std::pair< std::string, IECore::MurmurHash > > m_hashes;
+	tbb::concurrent_vector<std::pair<std::string, IECore::MurmurHash>> m_hashes;
 };
 
 } // namespace
@@ -184,7 +184,8 @@ void UDIMQuery::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *co
 	}
 }
 
-namespace {
+namespace
+{
 
 struct BakeInfoData
 {
@@ -200,7 +201,7 @@ struct InfoDataAccumulator
 	{
 	}
 
-	bool operator()( const GafferScene::ScenePlug *in, const GafferScene::ScenePlug::ScenePath &path )
+	bool operator () ( const GafferScene::ScenePlug *in, const GafferScene::ScenePlug::ScenePath &path )
 	{
 		IECore::CompoundObjectPtr locationDict;
 
@@ -213,12 +214,12 @@ struct InfoDataAccumulator
 
 		// First check if there are face-varying UVs
 		bool faceVarying = true;
-		auto uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( m_uvSet,  IECoreScene::PrimitiveVariable::FaceVarying );
+		auto uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( m_uvSet, IECoreScene::PrimitiveVariable::FaceVarying );
 		if( !uvs )
 		{
 			// Next check for vertex UVs
 			faceVarying = false;
-			uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( m_uvSet,  IECoreScene::PrimitiveVariable::Vertex );
+			uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( m_uvSet, IECoreScene::PrimitiveVariable::Vertex );
 		}
 
 		if( !uvs )
@@ -253,12 +254,12 @@ struct InfoDataAccumulator
 		int faceVertId = 0;
 		for( int numVerts : vertsPerFace )
 		{
-			Imath::V2f accum = Imath::V2f(0);
+			Imath::V2f accum = Imath::V2f( 0 );
 			if( faceVarying )
 			{
 				for( int i = 0; i < numVerts; i++ )
 				{
-					accum += (*uvs)[faceVertId];
+					accum += ( *uvs )[faceVertId];
 					faceVertId++;
 				}
 			}
@@ -266,7 +267,7 @@ struct InfoDataAccumulator
 			{
 				for( int i = 0; i < numVerts; i++ )
 				{
-					accum += (*uvs)[ meshPrimitive->vertexIds()->readable()[faceVertId] ];
+					accum += ( *uvs )[meshPrimitive->vertexIds()->readable()[faceVertId]];
 					faceVertId++;
 				}
 			}
@@ -284,7 +285,7 @@ struct InfoDataAccumulator
 			{
 				if( StringAlgo::matchMultiple( i.first, m_attributeNames ) )
 				{
-					info.attributes->members()[ i.first ] = i.second;
+					info.attributes->members()[i.first] = i.second;
 				}
 			}
 		}
@@ -294,7 +295,7 @@ struct InfoDataAccumulator
 
 	std::string m_uvSet;
 	IECore::StringAlgo::MatchPattern m_attributeNames;
-	tbb::concurrent_vector< BakeInfoData > m_data;
+	tbb::concurrent_vector<BakeInfoData> m_data;
 };
 
 } // namespace
@@ -319,7 +320,7 @@ void UDIMQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 				);
 
 				// Result treated as const anyway, so this is safe.
-				udimEntry->members()[i.mesh] = const_cast<CompoundObject*>( i.attributes.get() );
+				udimEntry->members()[i.mesh] = const_cast<CompoundObject *>( i.attributes.get() );
 			}
 		}
 		static_cast<CompoundObjectPlug *>( output )->setValue( result );
@@ -347,4 +348,3 @@ Gaffer::ValuePlug::CachePolicy UDIMQuery::hashCachePolicy( const Gaffer::ValuePl
 	}
 	return ComputeNode::hashCachePolicy( output );
 }
-

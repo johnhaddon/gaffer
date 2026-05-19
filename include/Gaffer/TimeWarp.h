@@ -45,28 +45,27 @@ namespace Gaffer
 class GAFFER_API TimeWarp : public ContextProcessor
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::TimeWarp, TimeWarpTypeId, ContextProcessor );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::TimeWarp, TimeWarpTypeId, ContextProcessor );
 
-		explicit TimeWarp( const std::string &name=GraphComponent::defaultName<TimeWarp>() );
-		~TimeWarp() override;
+	explicit TimeWarp( const std::string &name = GraphComponent::defaultName<TimeWarp>() );
+	~TimeWarp() override;
 
-		FloatPlug *speedPlug();
-		const FloatPlug *speedPlug() const;
+	FloatPlug *speedPlug();
+	const FloatPlug *speedPlug() const;
 
-		FloatPlug *offsetPlug();
-		const FloatPlug *offsetPlug() const;
+	FloatPlug *offsetPlug();
+	const FloatPlug *offsetPlug() const;
 
-	protected :
+protected:
 
-		bool affectsContext( const Plug *input ) const override;
-		void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
+	bool affectsContext( const Plug *input ) const override;
+	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( TimeWarp );

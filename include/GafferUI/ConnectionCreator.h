@@ -51,26 +51,25 @@ namespace GafferUI
 class GAFFERUI_API ConnectionCreator : public Gadget
 {
 
-	public :
+public:
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ConnectionCreator, ConnectionCreatorTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ConnectionCreator, ConnectionCreatorTypeId, Gadget );
 
-		explicit ConnectionCreator( const std::string &name=defaultName<ConnectionCreator>() );
-		~ConnectionCreator() override;
+	explicit ConnectionCreator( const std::string &name = defaultName<ConnectionCreator>() );
+	~ConnectionCreator() override;
 
-		/// May be called by the recipient of a drag to figure out if this
-		/// ConnectionCreator can set up the connection.
-		virtual bool canCreateConnection( const Gaffer::Plug *endpoint ) const = 0;
+	/// May be called by the recipient of a drag to figure out if this
+	/// ConnectionCreator can set up the connection.
+	virtual bool canCreateConnection( const Gaffer::Plug *endpoint ) const = 0;
 
-		/// May be called by the recipient of a drag to set a more appropriate position
-		/// and tangent for the connection as the drag progresses within the destination.
-		virtual void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) = 0;
+	/// May be called by the recipient of a drag to set a more appropriate position
+	/// and tangent for the connection as the drag progresses within the destination.
+	virtual void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) = 0;
 
-		/// May be called by the recipient of a drag to create a connection,
-		/// allowing this ConnectionCreator to set up the necessary plugs or clean up
-		/// potentially outdated connections afterwards.
-		virtual void createConnection( Gaffer::Plug *plug ) = 0;
-
+	/// May be called by the recipient of a drag to create a connection,
+	/// allowing this ConnectionCreator to set up the necessary plugs or clean up
+	/// potentially outdated connections afterwards.
+	virtual void createConnection( Gaffer::Plug *plug ) = 0;
 };
 
 IE_CORE_DECLAREPTR( ConnectionCreator )

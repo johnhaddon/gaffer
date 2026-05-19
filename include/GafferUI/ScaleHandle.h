@@ -45,33 +45,32 @@ namespace GafferUI
 class GAFFERUI_API ScaleHandle : public Handle
 {
 
-	public :
+public:
 
-		explicit ScaleHandle( Style::Axes axes );
-		~ScaleHandle() override;
+	explicit ScaleHandle( Style::Axes axes );
+	~ScaleHandle() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ScaleHandle, ScaleHandleTypeId, Handle );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ScaleHandle, ScaleHandleTypeId, Handle );
 
-		void setAxes( Style::Axes axes );
-		Style::Axes getAxes() const;
+	void setAxes( Style::Axes axes );
+	Style::Axes getAxes() const;
 
-		// Returns a vector where each component is 0 or 1,
-		// indicating whether or not the handle will produce
-		// scaling in that axis.
-		Imath::V3i axisMask() const;
+	// Returns a vector where each component is 0 or 1,
+	// indicating whether or not the handle will produce
+	// scaling in that axis.
+	Imath::V3i axisMask() const;
 
-		Imath::V3f scaling( const DragDropEvent &event );
+	Imath::V3f scaling( const DragDropEvent &event );
 
-	protected :
+protected:
 
-		void renderHandle( const Style *style, Style::State state ) const override;
-		void dragBegin( const DragDropEvent &event ) override;
+	void renderHandle( const Style *style, Style::State state ) const override;
+	void dragBegin( const DragDropEvent &event ) override;
 
-	private :
+private:
 
-		Style::Axes m_axes;
-		LinearDrag m_drag;
-
+	Style::Axes m_axes;
+	LinearDrag m_drag;
 };
 
 IE_CORE_DECLAREPTR( ScaleHandle )

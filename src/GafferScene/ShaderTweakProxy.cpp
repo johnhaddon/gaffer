@@ -57,7 +57,7 @@ GAFFER_NODE_DEFINE_TYPE( ShaderTweakProxy );
 size_t ShaderTweakProxy::g_firstPlugIndex;
 
 ShaderTweakProxy::ShaderTweakProxy( const std::string &name )
-	:	Shader( name )
+	: Shader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -88,15 +88,13 @@ void ShaderTweakProxy::typePrefixAndSourceShaderName( std::string &typePrefix, s
 		return;
 	}
 
-	size_t sep = shaderName.find(":");
+	size_t sep = shaderName.find( ":" );
 	if( sep == std::string::npos )
 	{
-		throw IECore::Exception( fmt::format(
-			"Malformed ShaderTweakProxy shader name \"{}\". Must include type prefix.", shaderName
-		) );
+		throw IECore::Exception( fmt::format( "Malformed ShaderTweakProxy shader name \"{}\". Must include type prefix.", shaderName ) );
 	}
 
-	typePrefix = shaderName.substr(0, sep );
+	typePrefix = shaderName.substr( 0, sep );
 	sourceShaderName = shaderName.substr( sep + 1 );
 }
 
@@ -121,7 +119,7 @@ void ShaderTweakProxy::loadShader( const std::string &shaderName, bool keepExist
 	ShaderPtr loaderNode;
 
 	// Find the correct node type to load this shader with, and create a temporary loader node
-	const ShaderLoaderCreatorMap& creatorMap = shaderLoaderCreators();
+	const ShaderLoaderCreatorMap &creatorMap = shaderLoaderCreators();
 	auto match = creatorMap.find( shaderTypePrefix );
 	if( match != creatorMap.end() )
 	{
@@ -154,7 +152,7 @@ void ShaderTweakProxy::loadShader( const std::string &shaderName, bool keepExist
 	}
 }
 
-void ShaderTweakProxy::setupAutoProxy( const Plug* referencePlug )
+void ShaderTweakProxy::setupAutoProxy( const Plug *referencePlug )
 {
 	loadShader( "autoProxy" );
 	PlugPtr newPlug = referencePlug->createCounterpart( "auto", Plug::Direction::Out );

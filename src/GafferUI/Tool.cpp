@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( Tool );
 size_t Tool::g_firstPlugIndex = 0;
 
 Tool::Tool( View *view, const std::string &name )
-	:	Node( name )
+	: Node( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "active", Plug::In, false ) );

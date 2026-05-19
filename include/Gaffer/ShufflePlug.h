@@ -49,32 +49,31 @@ namespace Gaffer
 class GAFFER_API ShufflePlug : public ValuePlug
 {
 
-	public :
+public:
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflePlug, ShufflePlugTypeId, ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflePlug, ShufflePlugTypeId, ValuePlug );
 
-		ShufflePlug( const std::string &source, const std::string &destination, bool deleteSource=false, bool enabled=true, bool replaceDestination=true );
-		/// Primarily used for serialisation.
-		explicit ShufflePlug( const std::string &name = defaultName<ShufflePlug>(), Direction direction=In, unsigned flags = Default );
+	ShufflePlug( const std::string &source, const std::string &destination, bool deleteSource = false, bool enabled = true, bool replaceDestination = true );
+	/// Primarily used for serialisation.
+	explicit ShufflePlug( const std::string &name = defaultName<ShufflePlug>(), Direction direction = In, unsigned flags = Default );
 
-		StringPlug *sourcePlug();
-		const StringPlug *sourcePlug() const;
+	StringPlug *sourcePlug();
+	const StringPlug *sourcePlug() const;
 
-		BoolPlug *enabledPlug();
-		const BoolPlug *enabledPlug() const;
+	BoolPlug *enabledPlug();
+	const BoolPlug *enabledPlug() const;
 
-		StringPlug *destinationPlug();
-		const StringPlug *destinationPlug() const;
+	StringPlug *destinationPlug();
+	const StringPlug *destinationPlug() const;
 
-		BoolPlug *deleteSourcePlug();
-		const BoolPlug *deleteSourcePlug() const;
+	BoolPlug *deleteSourcePlug();
+	const BoolPlug *deleteSourcePlug() const;
 
-		BoolPlug *replaceDestinationPlug();
-		const BoolPlug *replaceDestinationPlug() const;
+	BoolPlug *replaceDestinationPlug();
+	const BoolPlug *replaceDestinationPlug() const;
 
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
-
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 };
 
 IE_CORE_DECLAREPTR( ShufflePlug )
@@ -84,35 +83,34 @@ IE_CORE_DECLAREPTR( ShufflePlug )
 class GAFFER_API ShufflesPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflesPlug, ShufflesPlugTypeId, ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflesPlug, ShufflesPlugTypeId, ValuePlug );
 
-		ShufflesPlug( const std::string &name=defaultName<ShufflesPlug>(), Direction direction=In, unsigned flags=Default );
+	ShufflesPlug( const std::string &name = defaultName<ShufflesPlug>(), Direction direction = In, unsigned flags = Default );
 
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	bool acceptsInput( const Plug *input ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		/// Shuffles the sources into a destination container. The container type should have a map
-		/// compatible interface with string-compatible keys (eg std::string, IECore::InternedString).
-		/// If `ignoreMissingSource` is false, then an exception will be thrown if a source is not
-		/// found.
-		template<typename T>
-		T shuffle( const T &sourceContainer, bool ignoreMissingSource = true ) const;
-		/// As above, but using `extraSources` to provide fallback values for sources not
-		/// found in `sourceContainer`. A special key, `*`, may be included to provide a fallback
-		/// for _any_ source.
-		/// > Note : The `additionalSources` container is only searched for exact matches, _not_
-		/// > for wildcard matches.
-		template<typename T>
-		T shuffleWithExtraSources( const T &sourceContainer, const T &extraSources, bool ignoreMissingSource = true ) const;
+	/// Shuffles the sources into a destination container. The container type should have a map
+	/// compatible interface with string-compatible keys (eg std::string, IECore::InternedString).
+	/// If `ignoreMissingSource` is false, then an exception will be thrown if a source is not
+	/// found.
+	template<typename T>
+	T shuffle( const T &sourceContainer, bool ignoreMissingSource = true ) const;
+	/// As above, but using `extraSources` to provide fallback values for sources not
+	/// found in `sourceContainer`. A special key, `*`, may be included to provide a fallback
+	/// for _any_ source.
+	/// > Note : The `additionalSources` container is only searched for exact matches, _not_
+	/// > for wildcard matches.
+	template<typename T>
+	T shuffleWithExtraSources( const T &sourceContainer, const T &extraSources, bool ignoreMissingSource = true ) const;
 
-	private :
+private:
 
-		template<typename T>
-		T shuffleInternal( const T &sourceContainer, const T *extraSources, bool ignoreMissingSource ) const;
-
+	template<typename T>
+	T shuffleInternal( const T &sourceContainer, const T *extraSources, bool ignoreMissingSource ) const;
 };
 
 } // namespace Gaffer

@@ -46,26 +46,25 @@ namespace GafferScene
 class GAFFERSCENE_API ParentConstraint : public Constraint
 {
 
-	public :
+public:
 
-		explicit ParentConstraint( const std::string &name=defaultName<ParentConstraint>() );
-		~ParentConstraint() override;
+	explicit ParentConstraint( const std::string &name = defaultName<ParentConstraint>() );
+	~ParentConstraint() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ParentConstraint, ParentConstraintTypeId, Constraint );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ParentConstraint, ParentConstraintTypeId, Constraint );
 
-		Gaffer::TransformPlug *relativeTransformPlug();
-		const Gaffer::TransformPlug *relativeTransformPlug() const;
+	Gaffer::TransformPlug *relativeTransformPlug();
+	const Gaffer::TransformPlug *relativeTransformPlug() const;
 
-	protected :
+protected:
 
-		bool affectsConstraint( const Gaffer::Plug *input ) const override;
-		void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
+	bool affectsConstraint( const Gaffer::Plug *input ) const override;
+	void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ParentConstraint )

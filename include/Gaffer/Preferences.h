@@ -45,18 +45,17 @@ namespace Gaffer
 class GAFFER_API Preferences : public Node
 {
 
-	public :
+public:
 
-		explicit Preferences( const std::string &name=defaultName<Preferences>() );
-		~Preferences() override;
+	explicit Preferences( const std::string &name = defaultName<Preferences>() );
+	~Preferences() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Preferences, PreferencesTypeId, Node );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Preferences, PreferencesTypeId, Node );
 
-		/// Accepts only Plugs.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		/// Accepts only ApplicationRoots.
-		bool acceptsParent( const GraphComponent *potentialParent ) const override;
-
+	/// Accepts only Plugs.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	/// Accepts only ApplicationRoots.
+	bool acceptsParent( const GraphComponent *potentialParent ) const override;
 };
 
 IE_CORE_DECLAREPTR( Preferences );

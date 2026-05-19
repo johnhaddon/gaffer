@@ -123,121 +123,116 @@ using SourcePaths = std::vector<ScenePlug::ScenePath>;
 class TreeData : public IECore::Data
 {
 
-	public :
+public:
 
-		struct Location
-		{
-			using Ptr = std::unique_ptr<Location>;
+	struct Location
+	{
+		using Ptr = std::unique_ptr<Location>;
 
-			// A location stores two things:
+		// A location stores two things:
 
-			// A map of child locations.
-			std::unordered_map< IECore::InternedString, Ptr > children;
+		// A map of child locations.
+		std::unordered_map<IECore::InternedString, Ptr> children;
 
-			// A map of child destinations.
-			// We store these separately because name resolution is handled separately for these two:
-			// an intermediate location may share a name with an original location that hasn't been
-			// filtered, but a destination requires a new name in this case.
-			std::unordered_map< InternedString, SourcePaths > destinations;
+		// A map of child destinations.
+		// We store these separately because name resolution is handled separately for these two:
+		// an intermediate location may share a name with an original location that hasn't been
+		// filtered, but a destination requires a new name in this case.
+		std::unordered_map<InternedString, SourcePaths> destinations;
+	};
+
+	TreeData( const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug )
+		: m_root( new Location() )
+	{
+		auto f = [this, destinationPlug]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath ) {
+			if( sourcePath.size() )
+			{
+				addDestination( destinationPlug, sourcePath );
+			}
+			return true;
 		};
+		SceneAlgo::filteredParallelTraverse( inPlug, filterPlug, f );
+	}
 
-		TreeData( const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug )
-			:	m_root( new Location() )
+	static bool affectedBy( const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug, const Plug *input )
+	{
+		return input == filterPlug ||
+			input == inPlug->childNamesPlug() ||
+			input == destinationPlug;
+	}
+
+	static void hash(
+		const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug,
+		IECore::MurmurHash &h
+	)
+	{
+		// See `SceneAlgo::matchingPathsHash()` for documentation of this hashing strategy.
+		std::atomic<uint64_t> h1( 0 ), h2( 0 );
+		auto f = [destinationPlug, &h1, &h2]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath ) {
+			IECore::MurmurHash h;
+			hashDestination( destinationPlug, sourcePath, h );
+			h1 += h.h1();
+			h2 += h.h2();
+			return true;
+		};
+		SceneAlgo::filteredParallelTraverse( inPlug, filterPlug, f );
+		h.append( MurmurHash( h1, h2 ) );
+	}
+
+	const Location *location( const ScenePlug::ScenePath &path ) const
+	{
+		const Location *result = m_root.get();
+		for( const auto &name : path )
 		{
-			auto f = [this, destinationPlug]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath )
+			const auto it = result->children.find( name );
+			if( it != result->children.end() )
 			{
-				if( sourcePath.size() )
-				{
-					addDestination( destinationPlug, sourcePath );
-				}
-				return true;
-			};
-			SceneAlgo::filteredParallelTraverse( inPlug, filterPlug, f );
-		}
-
-		static bool affectedBy( const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug, const Plug *input )
-		{
-			return
-				input == filterPlug ||
-				input == inPlug->childNamesPlug() ||
-				input == destinationPlug
-			;
-		}
-
-		static void hash(
-			const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug,
-			IECore::MurmurHash &h
-		)
-		{
-			// See `SceneAlgo::matchingPathsHash()` for documentation of this hashing strategy.
-			std::atomic<uint64_t> h1( 0 ), h2( 0 );
-			auto f = [destinationPlug, &h1, &h2]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath )
-			{
-				IECore::MurmurHash h;
-				hashDestination( destinationPlug, sourcePath, h );
-				h1 += h.h1();
-				h2 += h.h2();
-				return true;
-			};
-			SceneAlgo::filteredParallelTraverse( inPlug, filterPlug, f );
-			h.append( MurmurHash( h1, h2 ) );
-		}
-
-		const Location *location( const ScenePlug::ScenePath &path ) const
-		{
-			const Location *result = m_root.get();
-			for( const auto &name : path )
-			{
-				const auto it = result->children.find( name );
-				if( it != result->children.end() )
-				{
-					result = it->second.get();
-				}
-				else
-				{
-					return nullptr;
-				}
+				result = it->second.get();
 			}
-			return result;
-		}
-
-	private :
-
-		static void hashDestination( const StringPlug *destinationPlug, const ScenePlug::ScenePath &sourcePath, IECore::MurmurHash &h )
-		{
-			h.append( sourcePath.data(), sourcePath.size() );
-			h.append( (uint64_t)sourcePath.size() );
-
-			destinationPlug->hash( h );
-		}
-
-		void addDestination( const StringPlug *destinationPlug, const ScenePlug::ScenePath &sourcePath )
-		{
-			const ScenePlug::ScenePath destination = ScenePlug::stringToPath( destinationPlug->getValue() );
-			validateDestination( destination, sourcePath );
-
-			tbb::spin_mutex::scoped_lock lock( m_mutex );
-
-			Location *location = m_root.get();
-			for( unsigned int i = 0; i < destination.size() - 1; i++ )
+			else
 			{
-				const auto &name = destination[i];
-				const auto inserted = location->children.try_emplace( name );
-				if( inserted.second )
-				{
-					inserted.first->second = std::make_unique<Location>();
-				}
+				return nullptr;
+			}
+		}
+		return result;
+	}
 
-				location = inserted.first->second.get();
+private:
+
+	static void hashDestination( const StringPlug *destinationPlug, const ScenePlug::ScenePath &sourcePath, IECore::MurmurHash &h )
+	{
+		h.append( sourcePath.data(), sourcePath.size() );
+		h.append( (uint64_t)sourcePath.size() );
+
+		destinationPlug->hash( h );
+	}
+
+	void addDestination( const StringPlug *destinationPlug, const ScenePlug::ScenePath &sourcePath )
+	{
+		const ScenePlug::ScenePath destination = ScenePlug::stringToPath( destinationPlug->getValue() );
+		validateDestination( destination, sourcePath );
+
+		tbb::spin_mutex::scoped_lock lock( m_mutex );
+
+		Location *location = m_root.get();
+		for( unsigned int i = 0; i < destination.size() - 1; i++ )
+		{
+			const auto &name = destination[i];
+			const auto inserted = location->children.try_emplace( name );
+			if( inserted.second )
+			{
+				inserted.first->second = std::make_unique<Location>();
 			}
 
-			auto insertResult = location->destinations.try_emplace( destination.back() );
-			insertResult.first->second.push_back( sourcePath );
+			location = inserted.first->second.get();
 		}
 
-		tbb::spin_mutex m_mutex;
-		Location::Ptr m_root;
+		auto insertResult = location->destinations.try_emplace( destination.back() );
+		insertResult.first->second.push_back( sourcePath );
+	}
 
+	tbb::spin_mutex m_mutex;
+	Location::Ptr m_root;
 };
 
 IE_CORE_DECLAREPTR( TreeData )
@@ -245,258 +240,254 @@ IE_CORE_DECLAREPTR( TreeData )
 class MergeLocationData : public IECore::Data
 {
 
-	public :
-		MergeLocationData( const TreeData::Location *location, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects, const Context *context, const int rootFilterValue )
+public:
+
+	MergeLocationData( const TreeData::Location *location, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects, const Context *context, const int rootFilterValue )
+	{
+		std::unordered_set<IECore::InternedString> availableDestinations;
+
+		bool hasDestinations = location && location->destinations.size();
+		m_hasDescendantDestinations = ( location && location->children.size() ) || hasDestinations;
+
+		InternedStringVectorDataPtr childNamesData;
+
+		if( mergeObjects->inPlug()->existsPlug()->getValue() )
 		{
-			std::unordered_set< IECore::InternedString > availableDestinations;
+			// If there is a source location for this path, conceptually, we want to take the source
+			// child names, remove any that have been filtered out, and then move to the next branch
+			// where they may be added back while adding paths used by destinations. If we actually
+			// removed names that were subsequently added back, however, we change the order of the
+			// names in a way that might not match a user's expectations ( especially if the
+			// destination is ${scene:path}, so no change in the hierarchy is expected.
+			//
+			// To get around this, we check if a child name is used by any destination, and if it is,
+			// we don't remove it, and instead insert it in availableDestinations so we no we can use
+			// this name despite it not having actually been removed.
+			ConstInternedStringVectorDataPtr inChildNamesData = mergeObjects->inPlug()->childNamesPlug()->getValue();
+			const std::vector<InternedString> &inChildNames = inChildNamesData->readable();
 
-			bool hasDestinations = location && location->destinations.size();
-			m_hasDescendantDestinations = ( location && location->children.size() ) || hasDestinations;
-
-			InternedStringVectorDataPtr childNamesData;
-
-			if( mergeObjects->inPlug()->existsPlug()->getValue() )
+			std::vector<int> prune;
+			if( rootFilterValue & IECore::PathMatcher::EveryMatch )
 			{
-				// If there is a source location for this path, conceptually, we want to take the source
-				// child names, remove any that have been filtered out, and then move to the next branch
-				// where they may be added back while adding paths used by destinations. If we actually
-				// removed names that were subsequently added back, however, we change the order of the
-				// names in a way that might not match a user's expectations ( especially if the
-				// destination is ${scene:path}, so no change in the hierarchy is expected.
-				//
-				// To get around this, we check if a child name is used by any destination, and if it is,
-				// we don't remove it, and instead insert it in availableDestinations so we no we can use
-				// this name despite it not having actually been removed.
-				ConstInternedStringVectorDataPtr inChildNamesData = mergeObjects->inPlug()->childNamesPlug()->getValue();
-				const std::vector< InternedString > &inChildNames = inChildNamesData->readable();
 
-				std::vector<int> prune;
-				if( rootFilterValue & IECore::PathMatcher::EveryMatch )
+				FilterPlug::SceneScope sceneScope( context, mergeObjects->inPlug() );
+				ScenePlug::ScenePath childPath = path;
+				childPath.push_back( InternedString() ); // for the child name
+				for( unsigned int i = 0; i < inChildNames.size(); i++ )
 				{
+					childPath[path.size()] = inChildNames[i];
+					sceneScope.set( ScenePlug::scenePathContextName, &childPath );
 
-					FilterPlug::SceneScope sceneScope( context, mergeObjects->inPlug() );
-					ScenePlug::ScenePath childPath = path;
-					childPath.push_back( InternedString() ); // for the child name
-					for( unsigned int i = 0; i < inChildNames.size(); i++ )
+					// NOTE : We include ancestor matches here so that if a parent location is filtered,
+					// and this location is not filtered, it will always be discarded.
+					// The corner case this covers is if you filter to a group, removing all of that
+					// groups children, but then use that group as the destination - it is fairly
+					// ambiguous what should happen to the group's children in this case ( do they
+					// come back because the parent group is no longer Pruned because it is used as a
+					// destination? ). I've made the call that it's more consistent if the principle is
+					// "Children of filtered locations that aren't themselves filtered are always
+					// discarded ( whether or not their parent are used as part of a destination )".
+					// This also matches a natural way of handling sets.
+					if( mergeObjects->filterPlug()->getValue() &
+						( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch ) )
 					{
-						childPath[path.size()] = inChildNames[i];
-						sceneScope.set( ScenePlug::scenePathContextName, &childPath );
-
-						// NOTE : We include ancestor matches here so that if a parent location is filtered,
-						// and this location is not filtered, it will always be discarded.
-						// The corner case this covers is if you filter to a group, removing all of that
-						// groups children, but then use that group as the destination - it is fairly
-						// ambiguous what should happen to the group's children in this case ( do they
-						// come back because the parent group is no longer Pruned because it is used as a
-						// destination? ). I've made the call that it's more consistent if the principle is
-						// "Children of filtered locations that aren't themselves filtered are always
-						// discarded ( whether or not their parent are used as part of a destination )".
-						// This also matches a natural way of handling sets.
-						if( mergeObjects->filterPlug()->getValue() &
-							( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch )
-						)
+						// Check if this name is used by any destination
+						if( !( location && ( location->children.find( inChildNames[i] ) != location->children.end() || location->destinations.find( inChildNames[i] ) != location->destinations.end() ) ) )
 						{
-							// Check if this name is used by any destination
-							if( !( location && (
-								location->children.find( inChildNames[i] ) != location->children.end() ||
-								location->destinations.find( inChildNames[i] ) != location->destinations.end()
-							) ) )
+							// Not used, we can prune it
+							if( !prune.size() )
 							{
-								// Not used, we can prune it
-								if( !prune.size() )
-								{
-									prune.resize( inChildNames.size() );
-								}
-								prune[i] = true;
+								prune.resize( inChildNames.size() );
 							}
-							else
+							prune[i] = true;
+						}
+						else
+						{
+							// Is used, so we don't actually remove it, but we do record that it is available
+							if( hasDestinations )
 							{
-								// Is used, so we don't actually remove it, but we do record that it is available
-								if( hasDestinations )
-								{
-									availableDestinations.insert( inChildNames[i] );
-								}
+								availableDestinations.insert( inChildNames[i] );
 							}
 						}
 					}
 				}
+			}
 
 
-				if( prune.size() )
+			if( prune.size() )
+			{
+				childNamesData = new InternedStringVectorData();
+				std::vector<IECore::InternedString> &childNames = childNamesData->writable();
+				for( unsigned int i = 0; i < inChildNames.size(); i++ )
 				{
-					childNamesData = new InternedStringVectorData();
-					std::vector< IECore::InternedString > &childNames = childNamesData->writable();
-					for( unsigned int i = 0; i < inChildNames.size(); i++ )
+					if( !prune[i] )
 					{
-						if( !prune[i] )
-						{
-							childNames.push_back( inChildNames[i] );
-						}
+						childNames.push_back( inChildNames[i] );
 					}
-				}
-				else
-				{
-					// This should be a copy-on-write, and we shouldn't call writable on this unless their
-					// is actually a new child name, so this often shouldn't actually allocate.
-					childNamesData = inChildNamesData->copy();
 				}
 			}
 			else
 			{
-				childNamesData = new InternedStringVectorData();
+				// This should be a copy-on-write, and we shouldn't call writable on this unless their
+				// is actually a new child name, so this often shouldn't actually allocate.
+				childNamesData = inChildNamesData->copy();
 			}
-
-			std::unordered_set< IECore::InternedString > usedNames;
-			for( const IECore::InternedString &i : childNamesData->readable() )
-			{
-				usedNames.insert( i );
-			}
-
-			// Intermediate locations can be shared with the existing child names - all that happens
-			// here is that new parent locations are added if necessary to support the destination locations.
-			if( location && location->children.size() )
-			{
-				InternedStringVectorDataPtr newChildNamesData = new InternedStringVectorData();
-				std::vector< IECore::InternedString > &newChildNames = newChildNamesData->writable();
-				newChildNames.reserve( location->children.size() );
-				for( const auto &i : location->children )
-				{
-					if( usedNames.find( i.first ) == usedNames.end() )
-					{
-						newChildNames.push_back( i.first );
-						usedNames.insert( i.first );
-						if( hasDestinations )
-						{
-							availableDestinations.insert( i.first );
-						}
-					}
-				}
-
-				if( newChildNames.size() )
-				{
-					std::sort( newChildNames.begin(), newChildNames.end(), internedStringValueLess );
-
-					std::vector< IECore::InternedString > &childNames = childNamesData->writable();
-					if( childNames.size() == 0 )
-					{
-						childNames.swap( newChildNames );
-					}
-					else
-					{
-						for( const InternedString &i : newChildNames )
-						{
-							childNames.push_back( i );
-						}
-					}
-				}
-			}
-
-			// Destinations aren't allowed to share names with the existing child names, unless they are
-			// "available". "available" means either that they would have been removed, but were kept
-			// because we noticed ahead of time that they are destinations, or that they were created
-			// to support an intermediate location.
-			if( hasDestinations )
-			{
-				std::vector< IECore::InternedString > &childNames = childNamesData->writable();
-
-				std::vector< IECore::InternedString > destinationNames;
-				destinationNames.reserve( location->destinations.size() );
-
-				for( const auto &i : location->destinations )
-				{
-					if( availableDestinations.count( i.first ) )
-					{
-						// I don't like copying all this memory from the Location when we could
-						// theoretically share it with the Location, but we need to sort it, so
-						// if we were going to share it, we would need a mutex to control the sort,
-						// and the cost of copying it is worst case <1% of a trivial MergeObjects
-						// implementation, so just copying is the simple solution.
-						m_destinations[ i.first ] = i.second;
-					}
-					else
-					{
-						// We have a new name - we can't set up an entry in destination map yet,
-						// we need to sort and uniquify the names first.
-						destinationNames.push_back( i.first );
-					}
-				}
-
-				// It's important to sort the new destination names before we uniquify them, because
-				// they were collected in parallel, and the order could be non-deterministic.
-				std::sort( destinationNames.begin(), destinationNames.end(), internedStringValueLess );
-
-				// Add the new names to the destinations map, uniquifying as necessary
-				for( const InternedString &i : destinationNames )
-				{
-					const InternedString unique = GafferScene::Private::ChildNamesMap::uniqueName( i, usedNames );
-					usedNames.insert( unique );
-					childNames.push_back( unique );
-
-					m_destinations[unique] = location->destinations.at(i);
-				}
-
-				// Sort the sources for each destination
-				for( auto &i : m_destinations )
-				{
-					// Depending on `sortKey`, we may be doing another sort later, but either way
-					// we do this comparatively cheap sort here.  This gives us a consistent starting
-					// point - without it, we could get non-deterministic results if the prim var values
-					// are not unique. If the later sort happens, it will be a stable_sort, so in the
-					// case of non-unique values for a key primitive variable, this will determine order.
-					std::sort(
-						i.second.begin(), i.second.end(),
-						[] ( const ScenePlug::ScenePath &a, const ScenePlug::ScenePath &b ) {
-							return lexicographical_compare(
-								a.begin(), a.end(), b.begin(), b.end(),
-								internedStringValueLess
-							);
-						}
-					);
-				}
-			}
-
-			m_childNamesData = childNamesData;
 		}
-
-		static void hash( const IECore::MurmurHash &treeHash, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects, const Context *context, const int rootFilterValue, IECore::MurmurHash &h )
+		else
 		{
-			if( mergeObjects->inPlug()->existsPlug()->getValue() )
+			childNamesData = new InternedStringVectorData();
+		}
+
+		std::unordered_set<IECore::InternedString> usedNames;
+		for( const IECore::InternedString &i : childNamesData->readable() )
+		{
+			usedNames.insert( i );
+		}
+
+		// Intermediate locations can be shared with the existing child names - all that happens
+		// here is that new parent locations are added if necessary to support the destination locations.
+		if( location && location->children.size() )
+		{
+			InternedStringVectorDataPtr newChildNamesData = new InternedStringVectorData();
+			std::vector<IECore::InternedString> &newChildNames = newChildNamesData->writable();
+			newChildNames.reserve( location->children.size() );
+			for( const auto &i : location->children )
 			{
-				mergeObjects->inPlug()->childNamesPlug()->hash( h );
-
-				if( rootFilterValue )
+				if( usedNames.find( i.first ) == usedNames.end() )
 				{
-					ConstInternedStringVectorDataPtr inChildNamesData =
-						mergeObjects->inPlug()->childNamesPlug()->getValue();
-					const std::vector< InternedString > &inChildNames = inChildNamesData->readable();
-
-					FilterPlug::SceneScope sceneScope( context, mergeObjects->inPlug() );
-
-					ScenePlug::ScenePath childPath = path;
-					childPath.push_back( InternedString() ); // for the child name
-					for( unsigned int i = 0; i < inChildNames.size(); i++ )
+					newChildNames.push_back( i.first );
+					usedNames.insert( i.first );
+					if( hasDestinations )
 					{
-						childPath[path.size()] = inChildNames[i];
-						sceneScope.set( ScenePlug::scenePathContextName, &childPath );
-						mergeObjects->filterPlug()->hash( h );
+						availableDestinations.insert( i.first );
 					}
 				}
 			}
 
-			h.append( treeHash );
-			h.append( path );
+			if( newChildNames.size() )
+			{
+				std::sort( newChildNames.begin(), newChildNames.end(), internedStringValueLess );
+
+				std::vector<IECore::InternedString> &childNames = childNamesData->writable();
+				if( childNames.size() == 0 )
+				{
+					childNames.swap( newChildNames );
+				}
+				else
+				{
+					for( const InternedString &i : newChildNames )
+					{
+						childNames.push_back( i );
+					}
+				}
+			}
 		}
 
-		ConstInternedStringVectorDataPtr m_childNamesData;
-		std::unordered_map< InternedString, SourcePaths > m_destinations;
+		// Destinations aren't allowed to share names with the existing child names, unless they are
+		// "available". "available" means either that they would have been removed, but were kept
+		// because we noticed ahead of time that they are destinations, or that they were created
+		// to support an intermediate location.
+		if( hasDestinations )
+		{
+			std::vector<IECore::InternedString> &childNames = childNamesData->writable();
 
-		// It feels slightly weird to store this here - it's not really related to this class's main
-		// purpose of storing the child names and destinations present at this location. But we need
-		// to compute this as part the initialization, and we need to access this per-location during
-		// bounds computation, so it makes sense to store it here, rather than adding a separate plug
-		// and recomputing it.
-		bool m_hasDescendantDestinations;
+			std::vector<IECore::InternedString> destinationNames;
+			destinationNames.reserve( location->destinations.size() );
 
+			for( const auto &i : location->destinations )
+			{
+				if( availableDestinations.count( i.first ) )
+				{
+					// I don't like copying all this memory from the Location when we could
+					// theoretically share it with the Location, but we need to sort it, so
+					// if we were going to share it, we would need a mutex to control the sort,
+					// and the cost of copying it is worst case <1% of a trivial MergeObjects
+					// implementation, so just copying is the simple solution.
+					m_destinations[i.first] = i.second;
+				}
+				else
+				{
+					// We have a new name - we can't set up an entry in destination map yet,
+					// we need to sort and uniquify the names first.
+					destinationNames.push_back( i.first );
+				}
+			}
+
+			// It's important to sort the new destination names before we uniquify them, because
+			// they were collected in parallel, and the order could be non-deterministic.
+			std::sort( destinationNames.begin(), destinationNames.end(), internedStringValueLess );
+
+			// Add the new names to the destinations map, uniquifying as necessary
+			for( const InternedString &i : destinationNames )
+			{
+				const InternedString unique = GafferScene::Private::ChildNamesMap::uniqueName( i, usedNames );
+				usedNames.insert( unique );
+				childNames.push_back( unique );
+
+				m_destinations[unique] = location->destinations.at( i );
+			}
+
+			// Sort the sources for each destination
+			for( auto &i : m_destinations )
+			{
+				// Depending on `sortKey`, we may be doing another sort later, but either way
+				// we do this comparatively cheap sort here.  This gives us a consistent starting
+				// point - without it, we could get non-deterministic results if the prim var values
+				// are not unique. If the later sort happens, it will be a stable_sort, so in the
+				// case of non-unique values for a key primitive variable, this will determine order.
+				std::sort(
+					i.second.begin(), i.second.end(),
+					[]( const ScenePlug::ScenePath &a, const ScenePlug::ScenePath &b ) {
+						return lexicographical_compare(
+							a.begin(), a.end(), b.begin(), b.end(),
+							internedStringValueLess
+						);
+					}
+				);
+			}
+		}
+
+		m_childNamesData = childNamesData;
+	}
+
+	static void hash( const IECore::MurmurHash &treeHash, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects, const Context *context, const int rootFilterValue, IECore::MurmurHash &h )
+	{
+		if( mergeObjects->inPlug()->existsPlug()->getValue() )
+		{
+			mergeObjects->inPlug()->childNamesPlug()->hash( h );
+
+			if( rootFilterValue )
+			{
+				ConstInternedStringVectorDataPtr inChildNamesData =
+					mergeObjects->inPlug()->childNamesPlug()->getValue();
+				const std::vector<InternedString> &inChildNames = inChildNamesData->readable();
+
+				FilterPlug::SceneScope sceneScope( context, mergeObjects->inPlug() );
+
+				ScenePlug::ScenePath childPath = path;
+				childPath.push_back( InternedString() ); // for the child name
+				for( unsigned int i = 0; i < inChildNames.size(); i++ )
+				{
+					childPath[path.size()] = inChildNames[i];
+					sceneScope.set( ScenePlug::scenePathContextName, &childPath );
+					mergeObjects->filterPlug()->hash( h );
+				}
+			}
+		}
+
+		h.append( treeHash );
+		h.append( path );
+	}
+
+	ConstInternedStringVectorDataPtr m_childNamesData;
+	std::unordered_map<InternedString, SourcePaths> m_destinations;
+
+	// It feels slightly weird to store this here - it's not really related to this class's main
+	// purpose of storing the child names and destinations present at this location. But we need
+	// to compute this as part the initialization, and we need to access this per-location during
+	// bounds computation, so it makes sense to store it here, rather than adding a separate plug
+	// and recomputing it.
+	bool m_hasDescendantDestinations;
 };
 
 IE_CORE_DECLAREPTR( MergeLocationData )
@@ -520,7 +511,7 @@ void treeHash( const ObjectPlug *treePlug, const Gaffer::Context *context, IECor
 // parentHolder is used to ensure the memory isn't freed - the return value will be valid
 // as long as it is held.
 const std::vector<ScenePlug::ScenePath> *findSources(
-	const ObjectPlug* mergeLocationPlug,
+	const ObjectPlug *mergeLocationPlug,
 	const ScenePlug::ScenePath &path, const Gaffer::Context *context, ConstObjectPtr &parentHolder
 )
 {
@@ -531,7 +522,7 @@ const std::vector<ScenePlug::ScenePath> *findSources(
 	const ScenePlug::ScenePath parentPath( path.begin(), path.begin() + path.size() - 1 );
 	ScenePlug::PathScope pathScope( context, &parentPath );
 	parentHolder = mergeLocationPlug->getValue();
-	const MergeLocationData* mergeLocation = IECore::runTimeCast<const MergeLocationData>( parentHolder.get() );
+	const MergeLocationData *mergeLocation = IECore::runTimeCast<const MergeLocationData>( parentHolder.get() );
 	if( !mergeLocation )
 	{
 		return nullptr;
@@ -578,7 +569,7 @@ M44f relativeTransform(
 	{
 		for( unsigned int i = 0; i < matchingLength; i++ )
 		{
-			if( sourcePath[ i ] != destPath[ i ] )
+			if( sourcePath[i] != destPath[i] )
 			{
 				matchingLength = i;
 				break;
@@ -598,7 +589,7 @@ M44f relativeTransform(
 		curPath.reserve( destPath.size() );
 		while( curPath.size() < destPath.size() )
 		{
-			curPath.push_back( destPath[ curPath.size() ] );
+			curPath.push_back( destPath[curPath.size()] );
 		}
 
 		toDest = M44f();
@@ -620,7 +611,7 @@ M44f relativeTransform(
 	curPath.reserve( sourcePath.size() );
 	while( curPath.size() < sourcePath.size() )
 	{
-		curPath.push_back( sourcePath[ curPath.size() ] );
+		curPath.push_back( sourcePath[curPath.size()] );
 	}
 
 	M44f fromSource;
@@ -634,7 +625,7 @@ M44f relativeTransform(
 	return fromSource * toDest;
 }
 
-IECore::MurmurHash g_invalidTransformHash = [](){
+IECore::MurmurHash g_invalidTransformHash = []() {
 	IECore::MurmurHash r;
 	r.append( -1 );
 	return r;
@@ -661,7 +652,7 @@ IECore::MurmurHash relativeTransformHash(
 	{
 		for( unsigned int i = 0; i < matchingLength; i++ )
 		{
-			if( sourcePath[ i ] != destPath[ i ] )
+			if( sourcePath[i] != destPath[i] )
 			{
 				matchingLength = i;
 				break;
@@ -681,7 +672,7 @@ IECore::MurmurHash relativeTransformHash(
 		curPath.reserve( destPath.size() );
 		while( curPath.size() < destPath.size() )
 		{
-			curPath.push_back( destPath[ curPath.size() ] );
+			curPath.push_back( destPath[curPath.size()] );
 		}
 
 		toDestHash = IECore::MurmurHash();
@@ -701,7 +692,7 @@ IECore::MurmurHash relativeTransformHash(
 	curPath.reserve( sourcePath.size() );
 	while( curPath.size() < sourcePath.size() )
 	{
-		curPath.push_back( sourcePath[ curPath.size() ] );
+		curPath.push_back( sourcePath[curPath.size()] );
 	}
 
 	IECore::MurmurHash r;
@@ -740,8 +731,8 @@ GAFFER_NODE_DEFINE_TYPE( MergeObjects );
 
 size_t MergeObjects::g_firstPlugIndex = 0;
 
-MergeObjects::MergeObjects( const std::string &name, const std::string &defaultDestination  )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+MergeObjects::MergeObjects( const std::string &name, const std::string &defaultDestination )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "source" ) );
@@ -955,7 +946,7 @@ void MergeObjects::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 		// win for the common case where we are going to evaluate everything anyway.
 		ConstTreeDataPtr treeData = tree( treePlug(), context );
 		const ScenePlug::ScenePath &path = context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
-		const TreeData::Location* loc = treeData->location( path );
+		const TreeData::Location *loc = treeData->location( path );
 
 		int filterValue = pruneFilterValue( inPlug(), filterPlug(), sourcePlug(), context );
 
@@ -1002,8 +993,7 @@ void MergeObjects::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 		const IECore::MurmurHash reduction = tbb::parallel_deterministic_reduce(
 			tbb::blocked_range<size_t>( 0, sourcePaths->size() ),
 			IECore::MurmurHash(),
-			[&] ( const tbb::blocked_range<size_t> &range, const MurmurHash &hash )
-			{
+			[&]( const tbb::blocked_range<size_t> &range, const MurmurHash &hash ) {
 				ScenePlug::ScenePath matchingPrefix;
 				IECore::MurmurHash toDestHash = g_invalidTransformHash;
 
@@ -1011,18 +1001,17 @@ void MergeObjects::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 				IECore::MurmurHash result = hash;
 				for( size_t i = range.begin(); i != range.end(); ++i )
 				{
-					pathScope.setPath( &((*sourcePaths)[i]) );
+					pathScope.setPath( &( ( *sourcePaths )[i] ) );
 					effectiveSource->objectPlug()->hash( result );
 					result.append( relativeTransformHash(
-						(*sourcePaths)[i], path, effectiveSource, inPlug(), pathScope,
+						( *sourcePaths )[i], path, effectiveSource, inPlug(), pathScope,
 						matchingPrefix, toDestHash
 					) );
 				}
 
 				return result;
 			},
-			[] ( const MurmurHash &x, const MurmurHash &y )
-			{
+			[]( const MurmurHash &x, const MurmurHash &y ) {
 				MurmurHash result = x;
 				result.append( y );
 				return result;
@@ -1048,7 +1037,7 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 	{
 		ConstTreeDataPtr treeData = tree( treePlug(), context );
 		const ScenePlug::ScenePath &path = context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
-		const TreeData::Location* loc = treeData->location( path );
+		const TreeData::Location *loc = treeData->location( path );
 
 		int filterValue = pruneFilterValue( inPlug(), filterPlug(), sourcePlug(), context );
 
@@ -1089,7 +1078,7 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 		}
 
 		// Prepare a vector of pairs of objects and transforms, to be merged.
-		std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > sources( sourcePaths->size() );
+		std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> sources( sourcePaths->size() );
 
 		const ScenePlug *effectiveSource = effectiveSourcePlug();
 
@@ -1098,8 +1087,7 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 
 		tbb::parallel_for(
 			tbb::blocked_range<size_t>( 0, sourcePaths->size() ),
-			[&] ( const tbb::blocked_range<size_t> &range )
-			{
+			[&]( const tbb::blocked_range<size_t> &range ) {
 				ScenePlug::ScenePath matchingPrefix;
 				M44f toDest( 0.0f );
 
@@ -1116,14 +1104,13 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 						sourcePathIndex = sourcePaths->size() - 1 - i;
 					}
 
-					pathScope.setPath( &((*sourcePaths)[sourcePathIndex]) );
+					pathScope.setPath( &( ( *sourcePaths )[sourcePathIndex] ) );
 					sources[i].first = effectiveSource->objectPlug()->getValue();
 					sources[i].second = relativeTransform(
-						(*sourcePaths)[sourcePathIndex], path, effectiveSource, inPlug(), pathScope,
+						( *sourcePaths )[sourcePathIndex], path, effectiveSource, inPlug(), pathScope,
 						matchingPrefix, toDest
 					);
 				}
-
 			},
 			tbb::auto_partitioner(),
 			taskGroupContext
@@ -1189,68 +1176,62 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 				}
 			}
 
-			IECore::dispatch( sortVarTypeExemplar,
-				[&sources, &sortOrder, &sortPrimitiveVariable]( const auto *typed )
+			IECore::dispatch( sortVarTypeExemplar, [&sources, &sortOrder, &sortPrimitiveVariable]( const auto *typed ) {
+				using TargetType = typename std::remove_const_t<std::remove_pointer_t<decltype( typed )>>;
+				if constexpr(
+					std::is_same_v<TargetType, IntData> ||
+					std::is_same_v<TargetType, FloatData> ||
+					std::is_same_v<TargetType, StringData>
+				)
 				{
-					using TargetType = typename std::remove_const_t<std::remove_pointer_t<decltype( typed )> >;
-					if constexpr(
-						std::is_same_v<TargetType, IntData> ||
-						std::is_same_v<TargetType, FloatData> ||
-						std::is_same_v<TargetType, StringData>
-					)
-					{
-						std::stable_sort( sources.begin(), sources.end(),
-							[&sortOrder, &sortPrimitiveVariable]( const auto &a, const auto &b)
+					std::stable_sort( sources.begin(), sources.end(), [&sortOrder, &sortPrimitiveVariable]( const auto &a, const auto &b ) {
+						const IECoreScene::Primitive *aPrim = IECore::runTimeCast<const IECoreScene::Primitive>( a.first.get() );
+						const IECoreScene::Primitive *bPrim = IECore::runTimeCast<const IECoreScene::Primitive>( b.first.get() );
+
+						if( !( aPrim && bPrim ) )
+						{
+							if( sortOrder == MergeObjects::SortOrder::Ascending )
 							{
-								const IECoreScene::Primitive* aPrim = IECore::runTimeCast<const IECoreScene::Primitive>( a.first.get() );
-								const IECoreScene::Primitive* bPrim = IECore::runTimeCast<const IECoreScene::Primitive>( b.first.get() );
-
-								if( !( aPrim && bPrim ) )
-								{
-									if( sortOrder == MergeObjects::SortOrder::Ascending )
-									{
-										return (bool)aPrim < (bool)bPrim;
-									}
-									else
-									{
-										return (bool)bPrim < (bool)aPrim;
-									}
-								}
-
-								// I don't love doing these lookups inside the sort comparison. If the sources
-								// vector is large, it would probably be more efficient to copy the sources to
-								// a new vector where each element was augmented with a pointer directly to the
-								// data. Then we could sort that using the data pointers before copying back to
-								// the sources vector.
-								// For now, this is a bit simpler, and it probably won't be an issue unless
-								// someone requires an ordered merge while merging a huge number of tiny meshes,
-								// which is pretty special case.
-								const auto &aVal = aPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
-								const auto &bVal = bPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
-
-								if( sortOrder == MergeObjects::SortOrder::Ascending )
-								{
-									return aVal < bVal;
-								}
-								else
-								{
-									return bVal < aVal;
-								}
+								return (bool)aPrim < (bool)bPrim;
 							}
-						);
-					}
-					else
-					{
-						throw IECore::Exception(
-							fmt::format(
-								"Sort key primitive variable \"{}\", unsupported type {}.",
-								sortPrimitiveVariable,
-								typed->typeName()
-							)
-						);
-					}
+							else
+							{
+								return (bool)bPrim < (bool)aPrim;
+							}
+						}
+
+						// I don't love doing these lookups inside the sort comparison. If the sources
+						// vector is large, it would probably be more efficient to copy the sources to
+						// a new vector where each element was augmented with a pointer directly to the
+						// data. Then we could sort that using the data pointers before copying back to
+						// the sources vector.
+						// For now, this is a bit simpler, and it probably won't be an issue unless
+						// someone requires an ordered merge while merging a huge number of tiny meshes,
+						// which is pretty special case.
+						const auto &aVal = aPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
+						const auto &bVal = bPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
+
+						if( sortOrder == MergeObjects::SortOrder::Ascending )
+						{
+							return aVal < bVal;
+						}
+						else
+						{
+							return bVal < aVal;
+						}
+					} );
 				}
-			);
+				else
+				{
+					throw IECore::Exception(
+						fmt::format(
+							"Sort key primitive variable \"{}\", unsupported type {}.",
+							sortPrimitiveVariable,
+							typed->typeName()
+						)
+					);
+				}
+			} );
 		}
 
 
@@ -1267,13 +1248,12 @@ void MergeObjects::hashBound( const ScenePath &path, const Gaffer::Context *cont
 	ConstObjectPtr parentHolder;
 	const SourcePaths *sourcePaths = findSources( mergeLocationPlug(), path, context, parentHolder );
 
-	ConstMergeLocationDataPtr mergeLocationData = IECore::runTimeCast< const MergeLocationData >( mergeLocationPlug()->getValue() );
+	ConstMergeLocationDataPtr mergeLocationData = IECore::runTimeCast<const MergeLocationData>( mergeLocationPlug()->getValue() );
 	bool hasDescendantDestinations = mergeLocationData && mergeLocationData->m_hasDescendantDestinations;
 	bool inputExists = inPlug()->existsPlug()->getValue();
 	bool hasDescendantPruned = false;
 	if( inputExists &&
-		( pruneFilterValue( inPlug(), filterPlug(), sourcePlug(), context ) & IECore::PathMatcher::DescendantMatch )
-	)
+		( pruneFilterValue( inPlug(), filterPlug(), sourcePlug(), context ) & IECore::PathMatcher::DescendantMatch ) )
 	{
 		if( inPlug()->childNamesPlug()->getValue()->readable().size() )
 		{
@@ -1338,21 +1318,18 @@ void MergeObjects::hashBound( const ScenePath &path, const Gaffer::Context *cont
 	const IECore::MurmurHash reduction = tbb::parallel_deterministic_reduce(
 		tbb::blocked_range<size_t>( 0, sourcePaths->size() ),
 		IECore::MurmurHash(),
-		[&] ( const tbb::blocked_range<size_t> &range, const MurmurHash &hash ) {
-
+		[&]( const tbb::blocked_range<size_t> &range, const MurmurHash &hash ) {
 			ScenePlug::PathScope pathScope( threadState );
 			IECore::MurmurHash result = hash;
 			for( size_t i = range.begin(); i != range.end(); ++i )
 			{
-				pathScope.setPath( &((*sourcePaths)[i]) );
+				pathScope.setPath( &( ( *sourcePaths )[i] ) );
 				effectiveSource->boundPlug()->hash( result );
-				result.append( effectiveSource->fullTransformHash( (*sourcePaths)[i] ) );
+				result.append( effectiveSource->fullTransformHash( ( *sourcePaths )[i] ) );
 			}
 			return result;
-
 		},
-		[] ( const MurmurHash &x, const MurmurHash &y ) {
-
+		[]( const MurmurHash &x, const MurmurHash &y ) {
 			MurmurHash result = x;
 			result.append( y );
 			return result;
@@ -1374,7 +1351,7 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 
 	// To know if we need to check the child bounds, we need to know if there are any destinations below this
 	// location. We can efficiently query this from the mergeLocationData.
-	ConstMergeLocationDataPtr mergeLocationData = IECore::runTimeCast< const MergeLocationData >( mergeLocationPlug()->getValue() );
+	ConstMergeLocationDataPtr mergeLocationData = IECore::runTimeCast<const MergeLocationData>( mergeLocationPlug()->getValue() );
 
 	bool hasDescendantDestinations = mergeLocationData && mergeLocationData->m_hasDescendantDestinations;
 
@@ -1383,8 +1360,7 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 	// If some of the locations in the original scene are getting pruned below this location, then we should
 	// adjust the bounds.
 	if( inputExists &&
-		( pruneFilterValue( inPlug(), filterPlug(), sourcePlug(), context ) & IECore::PathMatcher::DescendantMatch )
-	)
+		( pruneFilterValue( inPlug(), filterPlug(), sourcePlug(), context ) & IECore::PathMatcher::DescendantMatch ) )
 	{
 		if( inPlug()->childNamesPlug()->getValue()->readable().size() )
 		{
@@ -1451,8 +1427,7 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 	return tbb::parallel_reduce(
 		tbb::blocked_range<size_t>( 0, sourcePaths->size() ),
 		childBound,
-		[&] ( const tbb::blocked_range<size_t> &range, const Box3f &bound ) {
-
+		[&]( const tbb::blocked_range<size_t> &range, const Box3f &bound ) {
 			ScenePlug::PathScope pathScope( threadState );
 			Box3f result = bound;
 
@@ -1461,26 +1436,20 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 
 			for( size_t i = range.begin(); i != range.end(); ++i )
 			{
-				pathScope.setPath( &((*sourcePaths)[i]) );
+				pathScope.setPath( &( ( *sourcePaths )[i] ) );
 				Box3f childBound = effectiveSource->boundPlug()->getValue();
 
 				// We're evaluating relativeTransform here, which is also needed in computeObject(). It doesn't seem
 				// expensive enough to be worth another caching plug.
-				childBound = Imath::transform( childBound, relativeTransform(
-					(*sourcePaths)[i], path, effectiveSource, inPlug(), pathScope,
-					matchingPrefix, toDest
-				) );
+				childBound = Imath::transform( childBound, relativeTransform( ( *sourcePaths )[i], path, effectiveSource, inPlug(), pathScope, matchingPrefix, toDest ) );
 				result.extendBy( childBound );
 			}
 			return result;
-
 		},
-		[] ( const Box3f &x, const Box3f &y ) {
-
+		[]( const Box3f &x, const Box3f &y ) {
 			Box3f result = x;
 			result.extendBy( y );
 			return result;
-
 		},
 		tbb::auto_partitioner(),
 		taskGroupContext
@@ -1685,14 +1654,14 @@ IECore::ConstPathMatcherDataPtr MergeObjects::computeSet( const IECore::Interned
 	// We maintain a stack of locations matching our current position while traversing the set.
 	// Set traversal is guaranteed to never add more than one level of nesting at a time, so we can keep
 	// things in sync.
-	std::vector< const TreeData::Location* > locationStack;
+	std::vector<const TreeData::Location *> locationStack;
 
 	FilterPlug::SceneScope sceneScope( context, inPlug() );
 	sceneScope.remove( ScenePlug::setNameContextName );
 
 	for( PathMatcher::RawIterator pIt = inputSet.begin(), peIt = inputSet.end(); pIt != peIt; )
 	{
-		sceneScope.set( ScenePlug::scenePathContextName, &(*pIt) );
+		sceneScope.set( ScenePlug::scenePathContextName, &( *pIt ) );
 		const int m = filterPlug()->getValue();
 
 		locationStack.resize( pIt->size() );
@@ -1724,7 +1693,7 @@ IECore::ConstPathMatcherDataPtr MergeObjects::computeSet( const IECore::Interned
 			// Check if there's a location for the current path
 			locationStack.back() ||
 			// Otherwise, maybe the parent location has this path as a destination?
-			( locationStack.size() >= 2 && locationStack[ locationStack.size() - 2 ] && locationStack[ locationStack.size() - 2 ]->destinations.count( pIt->back() ) )
+			( locationStack.size() >= 2 && locationStack[locationStack.size() - 2] && locationStack[locationStack.size() - 2]->destinations.count( pIt->back() ) )
 		)
 		{
 			// If this path is in the treeData, we don't prune it

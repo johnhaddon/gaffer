@@ -59,113 +59,112 @@ class LightFilter;
 class LightLinker
 {
 
-	public :
+public:
 
-		LightLinker();
+	LightLinker();
 
-		// Interface used by Light, LightFilter and ObjectInterface
-		// ========================================================
-		//
-		// These methods are used to keep the LightLinker up to date with
-		// changes made to the scene, and may all be called
-		// concurrently.
+	// Interface used by Light, LightFilter and ObjectInterface
+	// ========================================================
+	//
+	// These methods are used to keep the LightLinker up to date with
+	// changes made to the scene, and may all be called
+	// concurrently.
 
-		IECoreScene::ConstShaderNetworkPtr registerFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
-		void deregisterFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
-		void dirtyLightFilter( const LightFilter *lightFilter );
+	IECoreScene::ConstShaderNetworkPtr registerFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
+	void deregisterFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
+	void dirtyLightFilter( const LightFilter *lightFilter );
 
-		enum class SetType
-		{
-			Light = 0,
-			Shadow = 1
-		};
+	enum class SetType
+	{
+		Light = 0,
+		Shadow = 1
+	};
 
-		// Returns an attribute to be added to the registering object :
-		//
-		// - SetType::Light : Return value is for the `lighting:subset` attribute.
-		// - SetType::Shadow : Return value is to be included in the `grouping:membership` attribute.
-		const RtUString registerLightSet( SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights );
-		void deregisterLightSet( SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights );
+	// Returns an attribute to be added to the registering object :
+	//
+	// - SetType::Light : Return value is for the `lighting:subset` attribute.
+	// - SetType::Shadow : Return value is to be included in the `grouping:membership` attribute.
+	const RtUString registerLightSet( SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights );
+	void deregisterLightSet( SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights );
 
-		// Interface used by Renderer
-		// ==========================
+	// Interface used by Renderer
+	// ==========================
 
-		// Called prior to rendering to synchronise any pending changes. Should
-		// not be called concurrently with other methods.
-		void updateDirtyLinks();
+	// Called prior to rendering to synchronise any pending changes. Should
+	// not be called concurrently with other methods.
+	void updateDirtyLinks();
 
-	private :
+private:
 
-		// Light Filter Linking
-		// ====================
+	// Light Filter Linking
+	// ====================
 
-		static IECoreScene::ConstShaderNetworkPtr lightFilterShader( const IECoreScenePreview::Renderer::ObjectSet *filters );
-		void updateDirtyFilterLinks();
+	static IECoreScene::ConstShaderNetworkPtr lightFilterShader( const IECoreScenePreview::Renderer::ObjectSet *filters );
+	void updateDirtyFilterLinks();
 
-		// Data structure for tracking dependencies between light filters and
-		// lights. The goal is to be able to efficiently update all affected
-		// Lights when the shader changes on a LightFilter. We don't use a naive
-		// mapping directly from LightFilters to sets of affected Lights because
-		// the number of connections scales quadratically (`N * N` connections)
-		// when N lights depend on the same N filters. Instead our tracking is
-		// based around the ObjectSets used to perform the linking. We track
-		// which ObjectSets each filter is a member of, and which lights are
-		// affected by each ObjectSet, giving a total of `N + N` connections.
-		// When a filter is modified, we dirty the ObjectSet, and to perform our
-		// update we update all the lights affected by the dirty sets.
+	// Data structure for tracking dependencies between light filters and
+	// lights. The goal is to be able to efficiently update all affected
+	// Lights when the shader changes on a LightFilter. We don't use a naive
+	// mapping directly from LightFilters to sets of affected Lights because
+	// the number of connections scales quadratically (`N * N` connections)
+	// when N lights depend on the same N filters. Instead our tracking is
+	// based around the ObjectSets used to perform the linking. We track
+	// which ObjectSets each filter is a member of, and which lights are
+	// affected by each ObjectSet, giving a total of `N + N` connections.
+	// When a filter is modified, we dirty the ObjectSet, and to perform our
+	// update we update all the lights affected by the dirty sets.
 
-		// Forms the basis for our tracking, giving us the identity of each
-		// ObjectSet but without keeping the ObjectInterface members alive
-		// longer than necessary.
-		using WeakObjectSetPtr = std::weak_ptr<const IECoreScenePreview::Renderer::ObjectSet>;
+	// Forms the basis for our tracking, giving us the identity of each
+	// ObjectSet but without keeping the ObjectInterface members alive
+	// longer than necessary.
+	using WeakObjectSetPtr = std::weak_ptr<const IECoreScenePreview::Renderer::ObjectSet>;
 
-		// Stores information for each unique set of LightFilters - which
-		// lights they are linked to, and their combined shader.
-		struct FilterSet
-		{
-			IECoreScene::ConstShaderNetworkPtr lightFilterShader;
-			std::unordered_set<Light *> affectedLights;
-		};
+	// Stores information for each unique set of LightFilters - which
+	// lights they are linked to, and their combined shader.
+	struct FilterSet
+	{
+		IECoreScene::ConstShaderNetworkPtr lightFilterShader;
+		std::unordered_set<Light *> affectedLights;
+	};
 
-		/// Maps from ObjectSet to the information provided by FilterSet.
-		/// \todo Use `unordered_map` (or `concurrent_unordered_map`) when `std::owner_hash()`
-		/// becomes available (in C++26).
-		using FilterSets = std::map<WeakObjectSetPtr, FilterSet, std::owner_less<WeakObjectSetPtr>>;
-		std::mutex m_filterSetsMutex;
-		FilterSets m_filterSets;
+	/// Maps from ObjectSet to the information provided by FilterSet.
+	/// \todo Use `unordered_map` (or `concurrent_unordered_map`) when `std::owner_hash()`
+	/// becomes available (in C++26).
+	using FilterSets = std::map<WeakObjectSetPtr, FilterSet, std::owner_less<WeakObjectSetPtr>>;
+	std::mutex m_filterSetsMutex;
+	FilterSets m_filterSets;
 
-		// Stores the dirty filter sets to be handled in `updateDirtyLinks()`.
-		/// \todo Use `unordered_set` (or `concurrent_unordered_set`) when `std::owner_hash()`
-		/// becomes available (in C++26).
-		using DirtyFilterSets = std::set<WeakObjectSetPtr, std::owner_less<WeakObjectSetPtr>>;
-		std::mutex m_dirtyFilterSetsMutex;
-		DirtyFilterSets m_dirtyFilterSets;
+	// Stores the dirty filter sets to be handled in `updateDirtyLinks()`.
+	/// \todo Use `unordered_set` (or `concurrent_unordered_set`) when `std::owner_hash()`
+	/// becomes available (in C++26).
+	using DirtyFilterSets = std::set<WeakObjectSetPtr, std::owner_less<WeakObjectSetPtr>>;
+	std::mutex m_dirtyFilterSetsMutex;
+	DirtyFilterSets m_dirtyFilterSets;
 
-		// Light Linking
-		// =============
+	// Light Linking
+	// =============
 
-		void updateDirtyLightLinks();
+	void updateDirtyLightLinks();
 
-		// Maps from a set of lights to its group name.
-		struct LightSet
-		{
-			size_t useCount = 0;
-			RtUString groupName;
-		};
+	// Maps from a set of lights to its group name.
+	struct LightSet
+	{
+		size_t useCount = 0;
+		RtUString groupName;
+	};
 
-		struct LightSets
-		{
-			using Map = std::unordered_map<IECoreScenePreview::Renderer::ConstObjectSetPtr, LightSet>;
-			Map map;
-			std::string groupNamePrefix;
-			size_t nextGroupIndex = 0;
-		};
+	struct LightSets
+	{
+		using Map = std::unordered_map<IECoreScenePreview::Renderer::ConstObjectSetPtr, LightSet>;
+		Map map;
+		std::string groupNamePrefix;
+		size_t nextGroupIndex = 0;
+	};
 
-		std::mutex m_lightAndShadowSetsMutex;
-		LightSets m_lightSets;
-		LightSets m_shadowSets;
-		bool m_lightLinksDirty = false;
-
+	std::mutex m_lightAndShadowSetsMutex;
+	LightSets m_lightSets;
+	LightSets m_shadowSets;
+	bool m_lightLinksDirty = false;
 };
 
 } // namespace IECoreRenderMan

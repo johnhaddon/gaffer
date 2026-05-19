@@ -104,7 +104,7 @@ RenderController::ProgressCallback progressCallbackFromPython( object &callback 
 		return RenderController::ProgressCallback();
 	}
 
-	return [callback] ( Gaffer::BackgroundTask::Status status ) {
+	return [callback]( Gaffer::BackgroundTask::Status status ) {
 		IECorePython::ScopedGILLock gilLock;
 		callback( status );
 	};
@@ -144,26 +144,24 @@ void GafferSceneModule::bindRenderController()
 {
 
 	scope s = class_<RenderController, boost::noncopyable>( "RenderController", no_init )
-		.def( init<ConstScenePlugPtr, ConstContextPtr, RendererPtr>() )
-		.def( "renderer", &RenderController::renderer, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-		.def( "setScene", &setScene )
-		.def( "getScene", &getScene )
-		.def( "setContext", &setContext )
-		.def( "getContext", &getContext )
-		.def( "setVisibleSet", &setVisibleSet )
-		.def( "getVisibleSet", &RenderController::getVisibleSet, return_value_policy<copy_const_reference>() )
-		.def( "setMinimumExpansionDepth", &setMinimumExpansionDepth )
-		.def( "getMinimumExpansionDepth", &RenderController::getMinimumExpansionDepth )
-		.def( "setManifestRequired", &setManifestRequired )
-		.def( "getManifestRequired", &RenderController::getManifestRequired )
-		.def( "updateRequiredSignal", &RenderController::updateRequiredSignal, return_internal_reference<1>() )
-		.def( "updateRequired", &RenderController::updateRequired )
-		.def( "update", &update, ( arg( "callback" ) = object() ) )
-		.def( "updateMatchingPaths", &updateMatchingPaths, ( arg( "pathsToUpdate" ), arg( "callback" ) = object() ) )
-		.def( "updateInBackground", &updateInBackground, ( arg( "callback" ) = object(), arg( "priorityPaths" ) = IECore::PathMatcher() ) )
-		.def( "renderManifest", (std::shared_ptr<RenderManifest>( RenderController::*)())&RenderController::renderManifest )
-	;
+				  .def( init<ConstScenePlugPtr, ConstContextPtr, RendererPtr>() )
+				  .def( "renderer", &RenderController::renderer, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+				  .def( "setScene", &setScene )
+				  .def( "getScene", &getScene )
+				  .def( "setContext", &setContext )
+				  .def( "getContext", &getContext )
+				  .def( "setVisibleSet", &setVisibleSet )
+				  .def( "getVisibleSet", &RenderController::getVisibleSet, return_value_policy<copy_const_reference>() )
+				  .def( "setMinimumExpansionDepth", &setMinimumExpansionDepth )
+				  .def( "getMinimumExpansionDepth", &RenderController::getMinimumExpansionDepth )
+				  .def( "setManifestRequired", &setManifestRequired )
+				  .def( "getManifestRequired", &RenderController::getManifestRequired )
+				  .def( "updateRequiredSignal", &RenderController::updateRequiredSignal, return_internal_reference<1>() )
+				  .def( "updateRequired", &RenderController::updateRequired )
+				  .def( "update", &update, ( arg( "callback" ) = object() ) )
+				  .def( "updateMatchingPaths", &updateMatchingPaths, ( arg( "pathsToUpdate" ), arg( "callback" ) = object() ) )
+				  .def( "updateInBackground", &updateInBackground, ( arg( "callback" ) = object(), arg( "priorityPaths" ) = IECore::PathMatcher() ) )
+				  .def( "renderManifest", (std::shared_ptr<RenderManifest> ( RenderController::* )())&RenderController::renderManifest );
 
 	SignalClass<RenderController::UpdateRequiredSignal>( "UpdateRequiredSignal" );
-
 }

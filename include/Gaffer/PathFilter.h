@@ -57,36 +57,35 @@ IE_CORE_FORWARDDECLARE( PathFilter )
 class GAFFER_API PathFilter : public IECore::RunTimeTyped
 {
 
-	public :
+public:
 
-		explicit PathFilter( IECore::CompoundDataPtr userData = nullptr );
-		~PathFilter() override;
+	explicit PathFilter( IECore::CompoundDataPtr userData = nullptr );
+	~PathFilter() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::PathFilter, PathFilterTypeId, IECore::RunTimeTyped );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::PathFilter, PathFilterTypeId, IECore::RunTimeTyped );
 
-		IECore::CompoundData *userData();
+	IECore::CompoundData *userData();
 
-		void setEnabled( bool enabled );
-		bool getEnabled() const;
+	void setEnabled( bool enabled );
+	bool getEnabled() const;
 
-		void filter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller = nullptr ) const;
+	void filter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller = nullptr ) const;
 
-		using ChangedSignal = Signals::Signal<void ( PathFilter * )>;
-		ChangedSignal &changedSignal();
+	using ChangedSignal = Signals::Signal<void( PathFilter * )>;
+	ChangedSignal &changedSignal();
 
-	protected :
+protected:
 
-		/// Must be implemented by derived classes to filter the passed
-		/// paths in place.
-		virtual void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const = 0;
+	/// Must be implemented by derived classes to filter the passed
+	/// paths in place.
+	virtual void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const = 0;
 
-	private :
+private:
 
-		IECore::CompoundDataPtr m_userData;
-		bool m_enabled;
+	IECore::CompoundDataPtr m_userData;
+	bool m_enabled;
 
-		ChangedSignal m_changedSignal;
-
+	ChangedSignal m_changedSignal;
 };
 
 IE_CORE_DECLAREPTR( PathFilter )

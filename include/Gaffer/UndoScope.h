@@ -53,31 +53,30 @@ IE_CORE_FORWARDDECLARE( ScriptNode );
 class GAFFER_API UndoScope : DirtyPropagationScope
 {
 
-	public :
+public:
 
-		enum State
-		{
-			Invalid,
-			Enabled,
-			Disabled
-		};
+	enum State
+	{
+		Invalid,
+		Enabled,
+		Disabled
+	};
 
-		/// Script can be 0, in which case the subsequent actions
-		/// will not be undoable regardless of the specified state.
-		///
-		/// If mergeGroup is specified and matches the group used by
-		/// the previous UndoScope, then the actions performed will
-		/// be merged with the previous entry on the undo stack. This
-		/// can be used by UI elements to compress a series of individual
-		/// editing events such as an interactively updated drag into
-		/// a single item on the undo stack.
-		explicit UndoScope( ScriptNodePtr script, State state=Enabled, const std::string &mergeGroup=std::string() );
-		~UndoScope();
+	/// Script can be 0, in which case the subsequent actions
+	/// will not be undoable regardless of the specified state.
+	///
+	/// If mergeGroup is specified and matches the group used by
+	/// the previous UndoScope, then the actions performed will
+	/// be merged with the previous entry on the undo stack. This
+	/// can be used by UI elements to compress a series of individual
+	/// editing events such as an interactively updated drag into
+	/// a single item on the undo stack.
+	explicit UndoScope( ScriptNodePtr script, State state = Enabled, const std::string &mergeGroup = std::string() );
+	~UndoScope();
 
-	private :
+private:
 
-		ScriptNodePtr m_script;
-
+	ScriptNodePtr m_script;
 };
 
 } // namespace Gaffer

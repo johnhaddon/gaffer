@@ -67,7 +67,7 @@ static void createConnection( T &connectionCreator, Gaffer::Plug *endpoint )
 
 template<typename T, typename TWrapper>
 ConnectionCreatorClass<T, TWrapper>::ConnectionCreatorClass( const char *docString )
-	:	GafferUIBindings::GadgetClass<T, TWrapper>( docString )
+	: GafferUIBindings::GadgetClass<T, TWrapper>( docString )
 {
 	this->def( "canCreateConnection", &Detail::canCreateConnection<T> );
 	this->def( "updateDragEndPoint", &Detail::updateDragEndPoint<T> );

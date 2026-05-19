@@ -68,5 +68,4 @@ BOOST_PYTHON_MODULE( _GafferSceneUI )
 	bindRenderPassEditor();
 	bindScriptNodeAlgo();
 	bindSceneInspector();
-
 }

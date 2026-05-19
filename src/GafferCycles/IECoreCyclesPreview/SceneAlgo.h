@@ -41,7 +41,8 @@ IECORE_POP_DEFAULT_VISIBILITY
 namespace IECoreCycles::SceneAlgo
 {
 
-template<typename T, typename... Args> T *createNodeWithLock( ccl::Scene *scene, Args &&...args )
+template<typename T, typename... Args>
+T *createNodeWithLock( ccl::Scene *scene, Args &&...args )
 {
 	// `Scene::create_node()` adds the new node to the relevant list
 	// (`lights`, `geometry` etc) in the Scene, so we need the lock
@@ -57,4 +58,4 @@ void tagUpdateWithLock( T *node, ccl::Scene *scene )
 	node->tag_update( scene );
 }
 
-} // IECoreCycles::SceneAlgo
+} // namespace IECoreCycles::SceneAlgo

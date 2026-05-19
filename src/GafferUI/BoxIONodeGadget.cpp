@@ -65,80 +65,79 @@ namespace
 class BoxIOPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		BoxIOPlugAdder( BoxIOPtr boxIO )
-			:	m_boxIO( boxIO )
+	BoxIOPlugAdder( BoxIOPtr boxIO )
+		: m_boxIO( boxIO )
+	{
+		m_boxIO->childAddedSignal().connect( boost::bind( &BoxIOPlugAdder::childAdded, this ) );
+		m_boxIO->childRemovedSignal().connect( boost::bind( &BoxIOPlugAdder::childRemoved, this ) );
+		updateVisibility();
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		if( !PlugAdder::canCreateConnection( endpoint ) )
 		{
-			m_boxIO->childAddedSignal().connect( boost::bind( &BoxIOPlugAdder::childAdded, this ) );
-			m_boxIO->childRemovedSignal().connect( boost::bind( &BoxIOPlugAdder::childRemoved, this ) );
-			updateVisibility();
+			return false;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		if( MetadataAlgo::readOnly( m_boxIO.get() ) )
 		{
-			if( !PlugAdder::canCreateConnection( endpoint ) )
-			{
-				return false;
-			}
-
-			if( MetadataAlgo::readOnly( m_boxIO.get() ) )
-			{
-				return false;
-			}
-
-			return endpoint->direction() == m_boxIO->direction();
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		return endpoint->direction() == m_boxIO->direction();
+	}
+
+	void createConnection( Plug *endpoint ) override
+	{
+		std::string name = endpoint->relativeName( endpoint->node() );
+		boost::replace_all( name, ".", "_" );
+		m_boxIO->namePlug()->setValue( name );
+
+		m_boxIO->setup( endpoint );
+
+		applyEdgeMetadata( m_boxIO->plug() );
+		if( BoxOut *boxOut = runTimeCast<BoxOut>( m_boxIO.get() ) )
 		{
-			std::string name = endpoint->relativeName( endpoint->node() );
-			boost::replace_all( name, ".", "_" );
-			m_boxIO->namePlug()->setValue( name );
-
-			m_boxIO->setup( endpoint );
-
-			applyEdgeMetadata( m_boxIO->plug() );
-			if( BoxOut *boxOut = runTimeCast<BoxOut>( m_boxIO.get() ) )
-			{
-				applyEdgeMetadata( boxOut->passThroughPlug() );
-			}
-			if( m_boxIO->promotedPlug() )
-			{
-				applyEdgeMetadata( m_boxIO->promotedPlug(), /* opposite = */ true );
-			}
-
-			if( m_boxIO->direction() == Plug::In )
-			{
-				endpoint->setInput( m_boxIO->plug() );
-			}
-			else
-			{
-				m_boxIO->plug()->setInput( endpoint );
-			}
+			applyEdgeMetadata( boxOut->passThroughPlug() );
+		}
+		if( m_boxIO->promotedPlug() )
+		{
+			applyEdgeMetadata( m_boxIO->promotedPlug(), /* opposite = */ true );
 		}
 
-	private :
-
-		void childAdded()
+		if( m_boxIO->direction() == Plug::In )
 		{
-			updateVisibility();
+			endpoint->setInput( m_boxIO->plug() );
 		}
-
-		void childRemoved()
+		else
 		{
-			updateVisibility();
+			m_boxIO->plug()->setInput( endpoint );
 		}
+	}
 
-		void updateVisibility()
-		{
-			setVisible( !m_boxIO->plug() );
-		}
+private:
 
-		BoxIOPtr m_boxIO;
+	void childAdded()
+	{
+		updateVisibility();
+	}
 
+	void childRemoved()
+	{
+		updateVisibility();
+	}
+
+	void updateVisibility()
+	{
+		setVisible( !m_boxIO->plug() );
+	}
+
+	BoxIOPtr m_boxIO;
 };
 
 } // namespace
@@ -153,26 +152,25 @@ namespace
 class NameGadget : public TextGadget
 {
 
-	public :
+public:
 
-		NameGadget( BoxIOPtr boxIO )
-			:	TextGadget( boxIO->namePlug()->getValue() ), m_boxIO( boxIO )
+	NameGadget( BoxIOPtr boxIO )
+		: TextGadget( boxIO->namePlug()->getValue() ), m_boxIO( boxIO )
+	{
+		boxIO->plugSetSignal().connect( boost::bind( &NameGadget::plugSet, this, ::_1 ) );
+	}
+
+private:
+
+	void plugSet( const Plug *plug )
+	{
+		if( plug == m_boxIO->namePlug() )
 		{
-			boxIO->plugSetSignal().connect( boost::bind( &NameGadget::plugSet, this, ::_1 ) );
+			setText( m_boxIO->namePlug()->getValue() );
 		}
+	}
 
-	private :
-
-		void plugSet( const Plug *plug )
-		{
-			if( plug == m_boxIO->namePlug() )
-			{
-				setText( m_boxIO->namePlug()->getValue() );
-			}
-		}
-
-		BoxIOPtr m_boxIO;
-
+	BoxIOPtr m_boxIO;
 };
 
 } // namespace
@@ -192,7 +190,7 @@ struct BoxIONodeGadgetCreator
 		NodeGadget::registerNodeGadget( BoxIO::staticTypeId(), *this );
 	}
 
-	NodeGadgetPtr operator()( NodePtr node )
+	NodeGadgetPtr operator () ( NodePtr node )
 	{
 		BoxIOPtr boxIO = runTimeCast<BoxIO>( node );
 		if( !boxIO )
@@ -207,7 +205,6 @@ struct BoxIONodeGadgetCreator
 		result->setContents( new NameGadget( boxIO ) );
 		return result;
 	}
-
 };
 
 BoxIONodeGadgetCreator g_boxIONodeGadgetCreator;

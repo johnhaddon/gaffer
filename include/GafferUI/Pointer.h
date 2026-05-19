@@ -52,38 +52,37 @@ IE_CORE_FORWARDDECLARE( Pointer )
 class GAFFERUI_API Pointer : public IECore::RefCounted
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( Pointer )
+	IE_CORE_DECLAREMEMBERPTR( Pointer )
 
-		/// Images are loaded from the paths specified by the
-		/// GAFFERUI_IMAGE_PATHS environment variable.
-		Pointer( const std::string &fileName, const Imath::V2i &hotspot = Imath::V2i( -1 ) );
+	/// Images are loaded from the paths specified by the
+	/// GAFFERUI_IMAGE_PATHS environment variable.
+	Pointer( const std::string &fileName, const Imath::V2i &hotspot = Imath::V2i( -1 ) );
 
-		const std::string &fileName() const;
-		const Imath::V2i &hotspot() const;
+	const std::string &fileName() const;
+	const Imath::V2i &hotspot() const;
 
-		/// Sets the current pointer. Passing null resets the
-		/// pointer to its default state.
-		static void setCurrent( ConstPointerPtr pointer );
-		/// Sets the current pointer to one registered using
-		/// registerPointer(). Passing the empty string resets
-		/// the pointer to its default state.
-		static void setCurrent( const std::string &name );
-		static const Pointer *getCurrent();
+	/// Sets the current pointer. Passing null resets the
+	/// pointer to its default state.
+	static void setCurrent( ConstPointerPtr pointer );
+	/// Sets the current pointer to one registered using
+	/// registerPointer(). Passing the empty string resets
+	/// the pointer to its default state.
+	static void setCurrent( const std::string &name );
+	static const Pointer *getCurrent();
 
-		/// Registers a named pointer for use in setCurrent().
-		static void registerPointer( const std::string &name, ConstPointerPtr pointer );
+	/// Registers a named pointer for use in setCurrent().
+	static void registerPointer( const std::string &name, ConstPointerPtr pointer );
 
-		/// A signal emitted whenever the pointer is changed.
-		using ChangedSignal = Gaffer::Signals::Signal<void ()>;
-		static ChangedSignal &changedSignal();
+	/// A signal emitted whenever the pointer is changed.
+	using ChangedSignal = Gaffer::Signals::Signal<void()>;
+	static ChangedSignal &changedSignal();
 
-	private :
+private:
 
-		std::string m_fileName;
-		Imath::V2i m_hotspot;
-
+	std::string m_fileName;
+	Imath::V2i m_hotspot;
 };
 
 } // namespace GafferUI

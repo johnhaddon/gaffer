@@ -47,68 +47,67 @@ namespace Gaffer
 class GAFFER_API Loop : public ComputeNode
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Loop, LoopTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Loop, LoopTypeId, ComputeNode );
 
-		explicit Loop( const std::string &name=GraphComponent::defaultName<Loop>() );
-		~Loop() override;
+	explicit Loop( const std::string &name = GraphComponent::defaultName<Loop>() );
+	~Loop() override;
 
-		/// \undoable
-		void setup( const ValuePlug *plug );
+	/// \undoable
+	void setup( const ValuePlug *plug );
 
-		ValuePlug *inPlug();
-		const ValuePlug *inPlug() const;
+	ValuePlug *inPlug();
+	const ValuePlug *inPlug() const;
 
-		ValuePlug *outPlug();
-		const ValuePlug *outPlug() const;
+	ValuePlug *outPlug();
+	const ValuePlug *outPlug() const;
 
-		ValuePlug *nextPlug();
-		const ValuePlug *nextPlug() const;
+	ValuePlug *nextPlug();
+	const ValuePlug *nextPlug() const;
 
-		ValuePlug *previousPlug();
-		const ValuePlug *previousPlug() const;
+	ValuePlug *previousPlug();
+	const ValuePlug *previousPlug() const;
 
-		IntPlug *iterationsPlug();
-		const IntPlug *iterationsPlug() const;
+	IntPlug *iterationsPlug();
+	const IntPlug *iterationsPlug() const;
 
-		StringPlug *indexVariablePlug();
-		const StringPlug *indexVariablePlug() const;
+	StringPlug *indexVariablePlug();
+	const StringPlug *indexVariablePlug() const;
 
-		Gaffer::BoolPlug *enabledPlug() override;
-		const Gaffer::BoolPlug *enabledPlug() const override;
+	Gaffer::BoolPlug *enabledPlug() override;
+	const Gaffer::BoolPlug *enabledPlug() const override;
 
-		Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
-		const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
+	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
+	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-		/// Returns the input plug and context that form the previous iteration of the loop
-		/// with respect to the `output` plug and the current context. Returns `{ nullptr, nullptr }`
-		/// if there is no such iteration.
-		std::pair<const ValuePlug *, ContextPtr> previousIteration( const ValuePlug *output ) const;
+	/// Returns the input plug and context that form the previous iteration of the loop
+	/// with respect to the `output` plug and the current context. Returns `{ nullptr, nullptr }`
+	/// if there is no such iteration.
+	std::pair<const ValuePlug *, ContextPtr> previousIteration( const ValuePlug *output ) const;
 
-		void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-	private :
+private:
 
-		size_t m_inPlugIndex;
-		size_t m_outPlugIndex;
-		size_t m_firstPlugIndex;
+	size_t m_inPlugIndex;
+	size_t m_outPlugIndex;
+	size_t m_firstPlugIndex;
 
-		Signals::Connection m_childAddedConnection;
+	Signals::Connection m_childAddedConnection;
 
-		void childAdded();
-		bool setupPlugs();
+	void childAdded();
+	bool setupPlugs();
 
-		void addAffectedPlug( const ValuePlug *output, DependencyNode::AffectedPlugsContainer &outputs ) const;
-		const ValuePlug *ancestorPlug( const ValuePlug *plug, std::vector<IECore::InternedString> &relativeName ) const;
-		const ValuePlug *descendantPlug( const ValuePlug *plug, const std::vector<IECore::InternedString> &relativeName ) const;
-		const ValuePlug *sourcePlug( const ValuePlug *output, const Context *context, int &sourceLoopIndex, IECore::InternedString &indexVariable ) const;
-
+	void addAffectedPlug( const ValuePlug *output, DependencyNode::AffectedPlugsContainer &outputs ) const;
+	const ValuePlug *ancestorPlug( const ValuePlug *plug, std::vector<IECore::InternedString> &relativeName ) const;
+	const ValuePlug *descendantPlug( const ValuePlug *plug, const std::vector<IECore::InternedString> &relativeName ) const;
+	const ValuePlug *sourcePlug( const ValuePlug *output, const Context *context, int &sourceLoopIndex, IECore::InternedString &indexVariable ) const;
 };
 
 IE_CORE_DECLAREPTR( Loop )

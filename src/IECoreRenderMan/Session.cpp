@@ -104,7 +104,7 @@ struct Session::ExceptionHandler : public RixXcpt::XcptHandler
 {
 
 	ExceptionHandler( const IECore::MessageHandlerPtr &messageHandler )
-		:	m_messageHandler( messageHandler )
+		: m_messageHandler( messageHandler )
 	{
 	}
 
@@ -134,16 +134,13 @@ struct Session::ExceptionHandler : public RixXcpt::XcptHandler
 		/// any further attempt to interact with the renderer?
 	}
 
-	private :
+private:
 
-		IECore::MessageHandlerPtr m_messageHandler;
-
+	IECore::MessageHandlerPtr m_messageHandler;
 };
 
 Session::Session( RtUString rileyVariant, const RtParamList &rileyParameters, IECoreScenePreview::Renderer::RenderType renderType, const RtParamList &options, const IECore::MessageHandlerPtr &messageHandler )
-	:	riley( nullptr ), rileyVariant( rileyVariant ), renderType( renderType ),
-		m_riCtl( (RixRiCtl *)Loader::context()->GetRixInterface( k_RixRiCtl ) ),
-		m_portalsDirty( false )
+	: riley( nullptr ), rileyVariant( rileyVariant ), renderType( renderType ), m_riCtl( (RixRiCtl *)Loader::context()->GetRixInterface( k_RixRiCtl ) ), m_portalsDirty( false )
 {
 	const Session *currentInstance = nullptr;
 	if( !g_sessionInstance.compare_exchange_strong( currentInstance, this ) )
@@ -261,7 +258,7 @@ void Session::deleteCamera( riley::CameraId cameraId )
 riley::LightShaderId Session::createLightShader( const riley::ShadingNetwork &light, const riley::ShadingNetwork &lightFilter )
 {
 	riley::LightShaderId result = riley->CreateLightShader( riley::UserId(), light, lightFilter );
-	RtUString type = light.nodeCount ? light.nodes[light.nodeCount-1].name : RtUString();
+	RtUString type = light.nodeCount ? light.nodes[light.nodeCount - 1].name : RtUString();
 	if( type == g_pxrDomeLightUStr || type == g_pxrPortalLightUStr )
 	{
 		LightShaderInfo &lightShaderInfo = m_domeAndPortalShaders[result.AsUInt32()];
@@ -336,7 +333,7 @@ riley::LightInstanceResult Session::modifyLightInstance(
 		}
 		if( transform )
 		{
-			it->second.transform = *(transform->matrix);
+			it->second.transform = *( transform->matrix );
 		}
 		if( attributes )
 		{
@@ -397,7 +394,7 @@ void Session::updatePortals()
 	// Find the dome light, while cleaning up any zombies created
 	// by `deleteLightInstance()`.
 
-	auto isPortal = [&] ( riley::LightShaderId lightShader ) {
+	auto isPortal = [&]( riley::LightShaderId lightShader ) {
 		auto it = m_domeAndPortalShaders.find( lightShader.AsUInt32() );
 		if( it != m_domeAndPortalShaders.end() )
 		{
@@ -465,7 +462,8 @@ void Session::updatePortals()
 				//  Except that `lightColorMap` is unhelpfully renamed to
 				// `domeColorMap`, so sort that out.
 				portalParams.Remove( g_lightColorMapUStr );
-				RtUString colorMap; domeParams.GetString( g_lightColorMapUStr, colorMap );
+				RtUString colorMap;
+				domeParams.GetString( g_lightColorMapUStr, colorMap );
 				portalParams.SetString( g_domeColorMapUStr, colorMap );
 				// And of course the portal shader couldn't possibly apply tint
 				// etc itself. That is obviously the responsibility of every
@@ -485,7 +483,8 @@ void Session::updatePortals()
 
 				// We are also responsible for adding a parameter providing the
 				// transform between the portal and the dome.
-				RtMatrix4x4 domeInverse; domeInverse.Identity();
+				RtMatrix4x4 domeInverse;
+				domeInverse.Identity();
 				domeLight->transform.Inverse( &domeInverse );
 				const RtMatrix4x4 portalToDome = info.transform * domeInverse;
 				portalParams.SetMatrix( g_portalToDomeUStr, portalToDome );

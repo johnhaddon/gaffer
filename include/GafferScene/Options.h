@@ -47,37 +47,36 @@ namespace GafferScene
 class GAFFERSCENE_API Options : public GlobalsProcessor
 {
 
-	public :
+public:
 
-		explicit Options( const std::string &name=defaultName<Options>() );
-		~Options() override;
+	explicit Options( const std::string &name = defaultName<Options>() );
+	~Options() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Options, OptionsTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Options, OptionsTypeId, GlobalsProcessor );
 
-		Gaffer::CompoundDataPlug *optionsPlug();
-		const Gaffer::CompoundDataPlug *optionsPlug() const;
+	Gaffer::CompoundDataPlug *optionsPlug();
+	const Gaffer::CompoundDataPlug *optionsPlug() const;
 
-		Gaffer::CompoundObjectPlug *extraOptionsPlug();
-		const Gaffer::CompoundObjectPlug *extraOptionsPlug() const;
+	Gaffer::CompoundObjectPlug *extraOptionsPlug();
+	const Gaffer::CompoundObjectPlug *extraOptionsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Automatically adds plugs for all options for the specified renderer, based
-		/// on `option:{rendererPrefix}:*` metadata registrations.
-		Options( const std::string &name, const std::string &rendererPrefix );
+	/// Automatically adds plugs for all options for the specified renderer, based
+	/// on `option:{rendererPrefix}:*` metadata registrations.
+	Options( const std::string &name, const std::string &rendererPrefix );
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-		virtual void hashPrefix( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		virtual std::string computePrefix( const Gaffer::Context *context ) const;
+	virtual void hashPrefix( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	virtual std::string computePrefix( const Gaffer::Context *context ) const;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Options );

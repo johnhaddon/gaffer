@@ -55,18 +55,17 @@ namespace Private
 class GAFFERSCENEUI_API VisibilityColumn : public GafferSceneUI::Private::InspectorColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( VisibilityColumn )
+	IE_CORE_DECLAREMEMBERPTR( VisibilityColumn )
 
-		VisibilityColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope );
+	VisibilityColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope );
 
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
 
-	private :
+private:
 
-		const GafferScene::ScenePlugPtr m_scene;
-
+	const GafferScene::ScenePlugPtr m_scene;
 };
 
 IE_CORE_DECLAREPTR( VisibilityColumn )

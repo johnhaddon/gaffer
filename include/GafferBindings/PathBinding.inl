@@ -180,7 +180,7 @@ Gaffer::PlugPtr cancellationSubject( const T &p )
 
 template<typename T, typename TWrapper>
 PathClass<T, TWrapper>::PathClass( const char *docString )
-	:	IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
+	: IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
 {
 	this->def( "isValid", &Detail::isValid<T>, boost::python::arg( "canceller" ) = boost::python::object() );
 	this->def( "isLeaf", &Detail::isLeaf<T>, boost::python::arg( "canceller" ) = boost::python::object() );

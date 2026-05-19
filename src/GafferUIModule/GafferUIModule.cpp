@@ -89,5 +89,4 @@ BOOST_PYTHON_MODULE( _GafferUI )
 	bindPlugAdder();
 	bindAnimationGadget();
 	bindPathColumn();
-
 }

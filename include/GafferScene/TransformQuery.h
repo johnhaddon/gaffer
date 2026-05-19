@@ -54,45 +54,45 @@ struct GAFFERSCENE_API TransformQuery : Gaffer::ComputeNode
 {
 	enum class Space
 	{
-		Local    = 0x00,
-		World    = 0x01,
+		Local = 0x00,
+		World = 0x01,
 		Relative = 0x02
 	};
 
-	explicit TransformQuery( std::string const& name = defaultName< TransformQuery >() );
+	explicit TransformQuery( std::string const &name = defaultName<TransformQuery>() );
 	~TransformQuery() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::TransformQuery, TransformQueryTypeId, Gaffer::ComputeNode );
 
-	ScenePlug* scenePlug();
-	ScenePlug const* scenePlug() const;
-	Gaffer::StringPlug* locationPlug();
-	Gaffer::StringPlug const* locationPlug() const;
-	Gaffer::IntPlug* spacePlug();
-	Gaffer::IntPlug const* spacePlug() const;
-	Gaffer::StringPlug* relativeLocationPlug();
-	Gaffer::StringPlug const* relativeLocationPlug() const;
-	Gaffer::BoolPlug* invertPlug();
-	Gaffer::BoolPlug const* invertPlug() const;
-	Gaffer::M44fPlug* matrixPlug();
-	Gaffer::M44fPlug const* matrixPlug() const;
-	Gaffer::V3fPlug* translatePlug();
-	Gaffer::V3fPlug const* translatePlug() const;
-	Gaffer::V3fPlug* rotatePlug();
-	Gaffer::V3fPlug const* rotatePlug() const;
-	Gaffer::V3fPlug* scalePlug();
-	Gaffer::V3fPlug const* scalePlug() const;
+	ScenePlug *scenePlug();
+	ScenePlug const *scenePlug() const;
+	Gaffer::StringPlug *locationPlug();
+	Gaffer::StringPlug const *locationPlug() const;
+	Gaffer::IntPlug *spacePlug();
+	Gaffer::IntPlug const *spacePlug() const;
+	Gaffer::StringPlug *relativeLocationPlug();
+	Gaffer::StringPlug const *relativeLocationPlug() const;
+	Gaffer::BoolPlug *invertPlug();
+	Gaffer::BoolPlug const *invertPlug() const;
+	Gaffer::M44fPlug *matrixPlug();
+	Gaffer::M44fPlug const *matrixPlug() const;
+	Gaffer::V3fPlug *translatePlug();
+	Gaffer::V3fPlug const *translatePlug() const;
+	Gaffer::V3fPlug *rotatePlug();
+	Gaffer::V3fPlug const *rotatePlug() const;
+	Gaffer::V3fPlug *scalePlug();
+	Gaffer::V3fPlug const *scalePlug() const;
 
-	void affects( Gaffer::Plug const* input, AffectedPlugsContainer& outputs ) const override;
+	void affects( Gaffer::Plug const *input, AffectedPlugsContainer &outputs ) const override;
 
 protected:
 
-	void hash( Gaffer::ValuePlug const* output, Gaffer::Context const* context, IECore::MurmurHash& hash ) const override;
-	void compute( Gaffer::ValuePlug* output, Gaffer::Context const* context ) const override;
+	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &hash ) const override;
+	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
 	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( TransformQuery )
 
-} // GafferScene
+} // namespace GafferScene

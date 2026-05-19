@@ -54,7 +54,7 @@ const RtUString g_name( "name" );
 } // namespace
 
 LightFilter::LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker )
-	:	m_session( session ), m_coordinateSystemName( name.c_str() ), m_lightLinker( lightLinker )
+	: m_session( session ), m_coordinateSystemName( name.c_str() ), m_lightLinker( lightLinker )
 {
 	RtParamList params;
 	params.SetString( g_name, m_coordinateSystemName );

@@ -83,7 +83,7 @@ size_t first( const std::bitset<32> &inputs )
 //////////////////////////////////////////////////////////////////////////
 
 MergeScenes::MergeScenes( const std::string &name )
-	:	SceneProcessor( name, /* minInputs = */ 2, /* maxInputs = */ InputMask().size() )
+	: SceneProcessor( name, /* minInputs = */ 2, /* maxInputs = */ InputMask().size() )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -260,7 +260,6 @@ void MergeScenes::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
-
 }
 
 void MergeScenes::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -321,7 +320,7 @@ int MergeScenes::computeActiveInputs( const Gaffer::Context *context ) const
 		// each descendant location;
 		visit(
 			connectedInputs(),
-			[&result] ( InputType type, size_t index, const ScenePlug *scene ) {
+			[&result]( InputType type, size_t index, const ScenePlug *scene ) {
 				if( scene->childNamesPlug()->getValue()->readable().size() )
 				{
 					result[index] = true;
@@ -341,7 +340,8 @@ int MergeScenes::computeActiveInputs( const Gaffer::Context *context ) const
 		// Get active inputs from the parent.
 		InputMask parentActiveInputs;
 		{
-			ScenePath parentPath = scenePath; parentPath.pop_back();
+			ScenePath parentPath = scenePath;
+			parentPath.pop_back();
 			ScenePlug::PathScope parentScope( context, &parentPath );
 			parentActiveInputs = activeInputsPlug()->getValue();
 		}
@@ -363,7 +363,7 @@ int MergeScenes::computeActiveInputs( const Gaffer::Context *context ) const
 			// scenes.
 			visit(
 				parentActiveInputs,
-				[&result] ( InputType type, size_t index, const ScenePlug *scene ) {
+				[&result]( InputType type, size_t index, const ScenePlug *scene ) {
 					if( scene->existsPlug()->getValue() )
 					{
 						result[index] = true;
@@ -541,7 +541,7 @@ void MergeScenes::hashTransform( const ScenePath &path, const Gaffer::Context *c
 {
 	visit(
 		activeInputsPlug()->getValue(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			h = scene->transformPlug()->hash();
 			return false;
 		},
@@ -554,7 +554,7 @@ Imath::M44f MergeScenes::computeTransform( const ScenePath &path, const Gaffer::
 	M44f result;
 	visit(
 		activeInputsPlug()->getValue(),
-		[&result] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&result]( InputType type, size_t index, const ScenePlug *scene ) {
 			result = scene->transformPlug()->getValue();
 			return false;
 		},
@@ -568,7 +568,7 @@ void MergeScenes::hashAttributes( const ScenePath &path, const Gaffer::Context *
 {
 	visit(
 		activeInputsPlug()->getValue(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -595,7 +595,7 @@ IECore::ConstCompoundObjectPtr MergeScenes::computeAttributes( const ScenePath &
 	CompoundObjectPtr merged;
 	visit(
 		activeInputsPlug()->getValue(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -628,7 +628,7 @@ void MergeScenes::hashObject( const ScenePath &path, const Gaffer::Context *cont
 {
 	visit(
 		activeInputsPlug()->getValue(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -654,7 +654,7 @@ IECore::ConstObjectPtr MergeScenes::computeObject( const ScenePath &path, const 
 	ConstObjectPtr result = IECore::NullObject::defaultNullObject();
 	visit(
 		activeInputsPlug()->getValue(),
-		[&result] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&result]( InputType type, size_t index, const ScenePlug *scene ) {
 			ConstObjectPtr o = scene->objectPlug()->getValue();
 			if( runTimeCast<const NullObject>( o.get() ) )
 			{
@@ -678,7 +678,7 @@ void MergeScenes::hashChildNames( const ScenePath &path, const Gaffer::Context *
 {
 	visit(
 		activeInputsPlug()->getValue(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -703,7 +703,7 @@ IECore::ConstInternedStringVectorDataPtr MergeScenes::computeChildNames( const S
 
 	visit(
 		activeInputsPlug()->getValue(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -721,7 +721,7 @@ IECore::ConstInternedStringVectorDataPtr MergeScenes::computeChildNames( const S
 							visited.insert( merged->readable().begin(), merged->readable().end() );
 						}
 
-						for( const auto & n : toMerge->readable() )
+						for( const auto &n : toMerge->readable() )
 						{
 							if( visited.insert( n ).second )
 							{
@@ -741,7 +741,7 @@ void MergeScenes::hashGlobals( const Gaffer::Context *context, const ScenePlug *
 {
 	visit(
 		connectedInputs(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -768,7 +768,7 @@ IECore::ConstCompoundObjectPtr MergeScenes::computeGlobals( const Gaffer::Contex
 	CompoundObjectPtr merged;
 	visit(
 		connectedInputs(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -801,7 +801,7 @@ void MergeScenes::hashSetNames( const Gaffer::Context *context, const ScenePlug 
 {
 	visit(
 		connectedInputs(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -827,7 +827,7 @@ IECore::ConstInternedStringVectorDataPtr MergeScenes::computeSetNames( const Gaf
 	InternedStringVectorDataPtr merged;
 	visit(
 		connectedInputs(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -866,7 +866,7 @@ void MergeScenes::hashSet( const IECore::InternedString &setName, const Gaffer::
 	/// the cases where the set only exists in one of the inputs.
 	visit(
 		connectedInputs(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :
@@ -892,7 +892,7 @@ IECore::ConstPathMatcherDataPtr MergeScenes::computeSet( const IECore::InternedS
 	PathMatcherDataPtr merged;
 	visit(
 		connectedInputs(),
-		[&] ( InputType type, size_t index, const ScenePlug *scene ) {
+		[&]( InputType type, size_t index, const ScenePlug *scene ) {
 			switch( type )
 			{
 				case InputType::Sole :

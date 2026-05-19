@@ -61,6 +61,6 @@ GAFFEROSL_API IECore::CompoundDataPtr shadeUVTexture(
 	IECoreScene::ShaderNetwork::Parameter output = IECoreScene::ShaderNetwork::Parameter()
 );
 
-}
+} // namespace ShadingEngineAlgo
 
-}
+} // namespace GafferOSL

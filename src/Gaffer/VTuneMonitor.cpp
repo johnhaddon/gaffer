@@ -48,16 +48,16 @@
 
 namespace
 {
-	const IECore::InternedString hashProcessType( "computeNode:hash" );
-	__itt_domain* g_domain = NULL;
-}
+const IECore::InternedString hashProcessType( "computeNode:hash" );
+__itt_domain *g_domain = NULL;
+} // namespace
 
 using namespace Gaffer;
 
-VTuneMonitor::VTuneMonitor(bool monitorHashProcess /* = false */ )
-: m_monitorHashProcess( monitorHashProcess )
+VTuneMonitor::VTuneMonitor( bool monitorHashProcess /* = false */ )
+	: m_monitorHashProcess( monitorHashProcess )
 {
-	if (!g_domain)
+	if( !g_domain )
 	{
 		g_domain = __itt_domain_create( "org.gafferhq.gaffer" );
 	}
@@ -69,27 +69,26 @@ VTuneMonitor::~VTuneMonitor()
 
 void VTuneMonitor::processStarted( const Process *process )
 {
-	if (!m_monitorHashProcess && process->type() != hashProcessType)
+	if( !m_monitorHashProcess && process->type() != hashProcessType )
 	{
 		return;
 	}
 
-	const Node* node = process->plug()->node();
+	const Node *node = process->plug()->node();
 
-	const char* typeName = node->typeName();
-	__itt_string_handle* handle = __itt_string_handle_create( typeName );
-	__itt_task_begin(g_domain, __itt_null, __itt_null, handle );
+	const char *typeName = node->typeName();
+	__itt_string_handle *handle = __itt_string_handle_create( typeName );
+	__itt_task_begin( g_domain, __itt_null, __itt_null, handle );
 }
 
 void VTuneMonitor::processFinished( const Process *process )
 {
-	if (!m_monitorHashProcess && process->type() != hashProcessType)
+	if( !m_monitorHashProcess && process->type() != hashProcessType )
 	{
 		return;
 	}
 
-	__itt_task_end( g_domain);
-
+	__itt_task_end( g_domain );
 }
 
 #endif //GAFFER_VTUNE

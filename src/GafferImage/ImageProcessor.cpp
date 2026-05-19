@@ -48,14 +48,14 @@ GAFFER_NODE_DEFINE_TYPE( ImageProcessor );
 size_t ImageProcessor::g_firstPlugIndex = 0;
 
 ImageProcessor::ImageProcessor( const std::string &name )
-	:	ImageNode( name )
+	: ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "in", Gaffer::Plug::In ) );
 }
 
 ImageProcessor::ImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	ImageNode( name )
+	: ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild(
@@ -105,7 +105,7 @@ const Gaffer::ArrayPlug *ImageProcessor::inPlugs() const
 
 Plug *ImageProcessor::correspondingInput( const Plug *output )
 {
-	if ( output == outPlug() )
+	if( output == outPlug() )
 	{
 		return inPlug();
 	}
@@ -115,7 +115,7 @@ Plug *ImageProcessor::correspondingInput( const Plug *output )
 
 const Plug *ImageProcessor::correspondingInput( const Plug *output ) const
 {
-	if ( output == outPlug() )
+	if( output == outPlug() )
 	{
 		return inPlug();
 	}

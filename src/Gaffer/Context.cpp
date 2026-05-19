@@ -69,38 +69,37 @@ namespace
 class Environment
 {
 
-	public :
+public:
 
-		Environment()
+	Environment()
+	{
+		for( char **e = environ; *e; e++ )
 		{
-			for( char **e = environ; *e; e++ )
+			const char *separator = strchr( *e, '=' );
+			if( !separator )
 			{
-				const char *separator = strchr( *e, '=' );
-				if( !separator )
-				{
-					continue;
-				}
-				InternedString name( *e, separator - *e );
-				InternedString value( separator + 1 );
-				m_map[name] = value;
+				continue;
 			}
+			InternedString name( *e, separator - *e );
+			InternedString value( separator + 1 );
+			m_map[name] = value;
 		}
+	}
 
-		const std::string *get( IECore::InternedString name ) const
+	const std::string *get( IECore::InternedString name ) const
+	{
+		Map::const_iterator it = m_map.find( name );
+		if( it != m_map.end() )
 		{
-			Map::const_iterator it = m_map.find( name );
-			if( it != m_map.end() )
-			{
-				return &it->second.string();
-			}
-			return nullptr;
+			return &it->second.string();
 		}
+		return nullptr;
+	}
 
-	private :
+private:
 
-		using Map = boost::container::flat_map<IECore::InternedString, IECore::InternedString>;
-		Map m_map;
-
+	using Map = boost::container::flat_map<IECore::InternedString, IECore::InternedString>;
+	Map m_map;
 };
 
 Environment g_environment;
@@ -112,12 +111,12 @@ Environment g_environment;
 //////////////////////////////////////////////////////////////////////////
 
 Context::Value::Value( const IECore::InternedString &name, const IECore::Data *value )
-	:	Value( typeFunctions( value->typeId() ).constructor( name, value ) )
+	: Value( typeFunctions( value->typeId() ).constructor( name, value ) )
 {
 }
 
 Context::Value::Value( IECore::TypeId typeId, const void *value, const IECore::MurmurHash &hash )
-	:	m_typeId( typeId ), m_value( value ), m_hash( hash )
+	: m_typeId( typeId ), m_value( value ), m_hash( hash )
 {
 }
 
@@ -136,7 +135,7 @@ bool Context::Value::operator == ( const Value &rhs ) const
 
 bool Context::Value::operator != ( const Value &rhs ) const
 {
-	return !(*this == rhs);
+	return !( *this == rhs );
 }
 
 bool Context::Value::references( const IECore::Data *data ) const
@@ -229,22 +228,22 @@ static InternedString g_frame( "frame" );
 static InternedString g_framesPerSecond( "framesPerSecond" );
 
 Context::Context()
-	:	m_changedSignal( nullptr ), m_hashValid( false ), m_canceller( nullptr )
+	: m_changedSignal( nullptr ), m_hashValid( false ), m_canceller( nullptr )
 {
 	set( g_frame, 1.0f );
 	set( g_framesPerSecond, 24.0f );
 }
 
 Context::Context( const Context &other )
-	:	Context( other, CopyMode::Owning )
+	: Context( other, CopyMode::Owning )
 {
 }
 
 Context::Context( const Context &other, CopyMode mode )
-	:	m_changedSignal( nullptr ),
-		m_hash( other.m_hash ),
-		m_hashValid( other.m_hashValid ),
-		m_canceller( other.m_canceller )
+	: m_changedSignal( nullptr ),
+	  m_hash( other.m_hash ),
+	  m_hashValid( other.m_hashValid ),
+	  m_canceller( other.m_canceller )
 {
 	// Reserving one extra spot before we copy in the existing variables means that we will
 	// avoid a second allocation in the common case where we set exactly one context
@@ -286,7 +285,7 @@ Context::Context( const Context &other, CopyMode mode )
 }
 
 Context::Context( const Context &other, const IECore::ConstCancellerPtr &canceller )
-	:	Context( other )
+	: Context( other )
 {
 	if( m_canceller )
 	{
@@ -297,7 +296,7 @@ Context::Context( const Context &other, const IECore::ConstCancellerPtr &cancell
 }
 
 Context::Context( const Context &other, bool omitCanceller )
-	:	Context( other )
+	: Context( other )
 {
 	if( omitCanceller )
 	{
@@ -342,7 +341,7 @@ void Context::remove( const IECore::InternedString &name )
 		m_hashValid = false;
 		if( m_changedSignal )
 		{
-			(*m_changedSignal)( this, name );
+			( *m_changedSignal )( this, name );
 		}
 	}
 }
@@ -362,7 +361,7 @@ void Context::removeMatching( const StringAlgo::MatchPattern &pattern )
 			m_hashValid = false;
 			if( m_changedSignal )
 			{
-				(*m_changedSignal)( this, it->first );
+				( *m_changedSignal )( this, it->first );
 			}
 		}
 		else
@@ -464,7 +463,7 @@ std::string Context::substitute( const std::string &s, unsigned substitutions ) 
 //////////////////////////////////////////////////////////////////////////
 
 Context::Scope::Scope( const Context *context )
-	:	ThreadState::Scope( /* push = */ static_cast<bool>( context ) )
+	: ThreadState::Scope( /* push = */ static_cast<bool>( context ) )
 {
 	if( m_threadState )
 	{
@@ -481,13 +480,13 @@ Context::Scope::~Scope()
 }
 
 Context::EditableScope::EditableScope( const Context *context )
-	:	m_context( new Context( *context, CopyMode::NonOwning ) )
+	: m_context( new Context( *context, CopyMode::NonOwning ) )
 {
 	m_threadState->m_context = m_context.get();
 }
 
 Context::EditableScope::EditableScope( const ThreadState &threadState )
-	:	ThreadState::Scope( threadState ), m_context( new Context( *threadState.m_context, CopyMode::NonOwning ) )
+	: ThreadState::Scope( threadState ), m_context( new Context( *threadState.m_context, CopyMode::NonOwning ) )
 {
 	m_threadState->m_context = m_context.get();
 }
@@ -542,7 +541,7 @@ const Context *Context::current()
 //////////////////////////////////////////////////////////////////////////
 
 Context::SubstitutionProvider::SubstitutionProvider( const Context *context )
-	:	m_context( context )
+	: m_context( context )
 {
 }
 
@@ -560,7 +559,7 @@ const std::string &Context::SubstitutionProvider::variable( const boost::string_
 		{
 			case IECore::StringDataTypeId :
 				recurse = true;
-				return *static_cast<const std::string*>( value->rawValue() );
+				return *static_cast<const std::string *>( value->rawValue() );
 			case IECore::InternedStringDataTypeId :
 				recurse = true;
 				return *static_cast<const IECore::InternedString *>( value->rawValue() );
@@ -578,7 +577,7 @@ const std::string &Context::SubstitutionProvider::variable( const boost::string_
 				// This is unashamedly tailored to the needs of GafferScene's `${scene:path}`
 				// variable. We could make this cleaner by adding a mechanism for registering custom
 				// formatters, but that would be overkill for this one use case.
-				const auto &v = *static_cast<const std::vector<InternedString>* >( value->rawValue() );
+				const auto &v = *static_cast<const std::vector<InternedString> *>( value->rawValue() );
 				m_formattedString.clear();
 				if( v.empty() )
 				{

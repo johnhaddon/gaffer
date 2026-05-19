@@ -49,44 +49,43 @@ namespace Private
 class GAFFERSCENEUI_API PrimitiveVariableInspector : public Inspector
 {
 
-	public :
+public:
 
-		enum class Property
-		{
-			Interpolation,
-			Type,
-			Interpretation,
-			Data,
-			Indices,
-		};
+	enum class Property
+	{
+		Interpolation,
+		Type,
+		Interpretation,
+		Data,
+		Indices,
+	};
 
-		PrimitiveVariableInspector(
-			const GafferScene::ScenePlugPtr &scene,
-			const Gaffer::PlugPtr &editScope,
-			IECore::InternedString primitiveVariable,
-			Property property,
-			const std::string &name = "",
-			const std::string &type = "primitiveVariable"
-		);
+	PrimitiveVariableInspector(
+		const GafferScene::ScenePlugPtr &scene,
+		const Gaffer::PlugPtr &editScope,
+		IECore::InternedString primitiveVariable,
+		Property property,
+		const std::string &name = "",
+		const std::string &type = "primitiveVariable"
+	);
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::PrimitiveVariableInspector, PrimitiveVariableInspectorTypeId, Inspector );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::PrimitiveVariableInspector, PrimitiveVariableInspectorTypeId, Inspector );
 
-	protected :
+protected:
 
-		GafferScene::SceneAlgo::History::ConstPtr history() const override;
-		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
-		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
+	GafferScene::SceneAlgo::History::ConstPtr history() const override;
+	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
+	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
 
-	private :
+private:
 
-		const GafferScene::ScenePlugPtr m_scene;
-		const IECore::InternedString m_primitiveVariable;
-		const Property m_property;
-
+	const GafferScene::ScenePlugPtr m_scene;
+	const IECore::InternedString m_primitiveVariable;
+	const Property m_property;
 };
 
 IE_CORE_DECLAREPTR( PrimitiveVariableInspector )
 
-}  // namespace Private
+} // namespace Private
 
-}  // namespace GafferSceneUI
+} // namespace GafferSceneUI

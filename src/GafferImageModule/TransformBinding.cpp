@@ -66,18 +66,16 @@ void GafferImageModule::bindTransforms()
 			.value( "Vertical", Resize::Vertical )
 			.value( "Fit", Resize::Fit )
 			.value( "Fill", Resize::Fill )
-			.value( "Distort", Resize::Distort )
-		;
+			.value( "Distort", Resize::Distort );
 	}
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<Resample>();
 
-		enum_<Resample::Debug>( "Debug")
+		enum_<Resample::Debug>( "Debug" )
 			.value( "Off", Resample::Off )
 			.value( "HorizontalPass", Resample::HorizontalPass )
-			.value( "SinglePass", Resample::SinglePass )
-		;
+			.value( "SinglePass", Resample::SinglePass );
 	}
 
 	{
@@ -88,8 +86,6 @@ void GafferImageModule::bindTransforms()
 			.value( "Format", Crop::Format )
 			.value( "DataWindow", Crop::DataWindow )
 			.value( "DisplayWindow", Crop::DisplayWindow )
-			.value( "Auto", Crop::Auto )
-		;
+			.value( "Auto", Crop::Auto );
 	}
-
 }

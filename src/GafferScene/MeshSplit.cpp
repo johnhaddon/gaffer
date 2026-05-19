@@ -58,18 +58,19 @@ using namespace IECoreScene;
 using namespace Gaffer;
 using namespace GafferScene;
 
-namespace {
+namespace
+{
 
 // Various private helpers for formatAsInternedString
 
 const std::string g_commaStr( ", " );
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const T &a, char *&current, char *end )
 {
 	// This interface was planned for std::to_chars, but it works fine with fmt::format_to_n
 	// too. It's all private anyway.
-	auto result = fmt::format_to_n( current, end - current, FMT_COMPILE("{}"), a);
+	auto result = fmt::format_to_n( current, end - current, FMT_COMPILE( "{}" ), a );
 	if( result.size > (size_t)( end - current ) )
 	{
 		throw IECore::Exception( "Internal error in formatAsInternedString - buffer not large enough" );
@@ -83,7 +84,7 @@ void stringConvertHelper( const half &a, char *&current, char *end )
 	stringConvertHelper( f, current, end );
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Vec2<T> &a, char *&current, char *end )
 {
 	stringConvertHelper( a.x, current, end );
@@ -91,7 +92,7 @@ void stringConvertHelper( const Imath::Vec2<T> &a, char *&current, char *end )
 	stringConvertHelper( a.y, current, end );
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Vec3<T> &a, char *&current, char *end )
 {
 	stringConvertHelper( a.x, current, end );
@@ -101,7 +102,7 @@ void stringConvertHelper( const Imath::Vec3<T> &a, char *&current, char *end )
 	stringConvertHelper( a.z, current, end );
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Color3<T> &a, char *&current, char *end )
 {
 	stringConvertHelper( a.x, current, end );
@@ -111,7 +112,7 @@ void stringConvertHelper( const Imath::Color3<T> &a, char *&current, char *end )
 	stringConvertHelper( a.z, current, end );
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Color4<T> &a, char *&current, char *end )
 {
 	stringConvertHelper( a.r, current, end );
@@ -123,7 +124,7 @@ void stringConvertHelper( const Imath::Color4<T> &a, char *&current, char *end )
 	stringConvertHelper( a.a, current, end );
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Quat<T> &a, char *&current, char *end )
 {
 	stringConvertHelper( a.r, current, end );
@@ -131,7 +132,7 @@ void stringConvertHelper( const Imath::Quat<T> &a, char *&current, char *end )
 	stringConvertHelper( a.v, current, end );
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Matrix33<T> &a, char *&current, char *end )
 {
 	for( int i = 0; i < 3; i++ )
@@ -147,7 +148,7 @@ void stringConvertHelper( const Imath::Matrix33<T> &a, char *&current, char *end
 	}
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Matrix44<T> &a, char *&current, char *end )
 {
 	for( int i = 0; i < 4; i++ )
@@ -163,7 +164,7 @@ void stringConvertHelper( const Imath::Matrix44<T> &a, char *&current, char *end
 	}
 }
 
-template< typename T >
+template<typename T>
 void stringConvertHelper( const Imath::Box<T> &a, char *&current, char *end )
 {
 	static const std::string arrowStr = " -> ";
@@ -174,13 +175,13 @@ void stringConvertHelper( const Imath::Box<T> &a, char *&current, char *end )
 
 // A fast function for converting any of the value types supported by vector typed data to an interned string,
 // including Imath types.
-template< typename T >
+template<typename T>
 inline IECore::InternedString formatAsInternedString( const T &a, std::string &buffer )
 {
 	if constexpr(
-		std::is_integral< T >::value ||
-		std::is_same< T, std::string >::value ||
-		std::is_same< T, IECore::InternedString >::value
+		std::is_integral<T>::value ||
+		std::is_same<T, std::string>::value ||
+		std::is_same<T, IECore::InternedString>::value
 	)
 	{
 		return IECore::InternedString( a );
@@ -203,92 +204,89 @@ inline IECore::InternedString formatAsInternedString( const T &a, std::string &b
 class MeshSplit::MeshSplitterData : public IECore::Data
 {
 
-	public :
-		MeshSplitterData( ConstMeshPrimitivePtr mesh, const PrimitiveVariable &primitiveVariable, bool nameFromSegment, const IECore::Canceller *canceller ) : m_splitter( mesh, primitiveVariable, canceller )
-		{
-			InternedStringVectorDataPtr namesData = new InternedStringVectorData;
-			std::vector<InternedString> &names = namesData->writable();
-			names.reserve( m_splitter.numMeshes() );
+public:
 
-			if( !nameFromSegment )
+	MeshSplitterData( ConstMeshPrimitivePtr mesh, const PrimitiveVariable &primitiveVariable, bool nameFromSegment, const IECore::Canceller *canceller ) : m_splitter( mesh, primitiveVariable, canceller )
+	{
+		InternedStringVectorDataPtr namesData = new InternedStringVectorData;
+		std::vector<InternedString> &names = namesData->writable();
+		names.reserve( m_splitter.numMeshes() );
+
+		if( !nameFromSegment )
+		{
+			for( int i = 0; i < m_splitter.numMeshes(); i++ )
 			{
-				for( int i = 0; i < m_splitter.numMeshes(); i++ )
+				if( i % 10000 == 0 )
 				{
-					if( i % 10000 == 0 )
-					{
-						Canceller::check( canceller );
-					}
-					InternedString name( i );
-					names.push_back( name );
+					Canceller::check( canceller );
 				}
+				InternedString name( i );
+				names.push_back( name );
 			}
-			else
-			{
-				IECore::dispatch( primitiveVariable.data.get(),
-					[ this, &names, canceller]( const auto *primVarData )
+		}
+		else
+		{
+			IECore::dispatch( primitiveVariable.data.get(), [this, &names, canceller]( const auto *primVarData ) {
+				using DataType = typename std::remove_pointer_t<decltype( primVarData )>;
+				if constexpr( !TypeTraits::IsVectorTypedData<DataType>::value )
+				{
+					throw IECore::Exception( "Invalid PrimitiveVariable, data is not a vector." );
+				}
+				else
+				{
+					using ElementType = typename DataType::ValueType::value_type;
+					std::string buffer;
+					for( int i = 0; i < m_splitter.numMeshes(); i++ )
 					{
-						using DataType = typename std::remove_pointer_t< decltype( primVarData ) >;
-						if constexpr ( !TypeTraits::IsVectorTypedData<DataType>::value )
+						if( i % 10000 == 0 )
 						{
-							throw IECore::Exception( "Invalid PrimitiveVariable, data is not a vector." );
+							Canceller::check( canceller );
 						}
-						else
-						{
-							using ElementType = typename DataType::ValueType::value_type;
-							std::string buffer;
-							for( int i = 0; i < m_splitter.numMeshes(); i++ )
-							{
-								if( i % 10000 == 0 )
-								{
-									Canceller::check( canceller );
-								}
-								const ElementType& val = m_splitter.value< ElementType >( i );
-								InternedString name = formatAsInternedString( val, buffer );
-								m_nameMap[ name ] = i;
-								names.push_back( name );
-							}
-						}
+						const ElementType &val = m_splitter.value<ElementType>( i );
+						InternedString name = formatAsInternedString( val, buffer );
+						m_nameMap[name] = i;
+						names.push_back( name );
 					}
-				);
-			}
-
-			m_names = namesData;
+				}
+			} );
 		}
 
-		ConstInternedStringVectorDataPtr names() const
+		m_names = namesData;
+	}
+
+	ConstInternedStringVectorDataPtr names() const
+	{
+		return m_names;
+	}
+
+	MeshPrimitivePtr splitMesh( const IECore::InternedString &name ) const
+	{
+		return m_splitter.mesh( indexFromName( name ) );
+	}
+
+	Imath::Box3f splitBound( const IECore::InternedString &name ) const
+	{
+		return m_splitter.bound( indexFromName( name ) );
+	}
+
+private:
+
+	inline int indexFromName( const IECore::InternedString &name ) const
+	{
+		if( m_nameMap.size() )
 		{
-			return m_names;
+			return m_nameMap.at( name );
 		}
-
-		MeshPrimitivePtr splitMesh( const IECore::InternedString &name ) const
+		else
 		{
-			return m_splitter.mesh( indexFromName( name ) );
+			return stoi( name.string() );
 		}
+	}
 
-		Imath::Box3f splitBound( const IECore::InternedString &name ) const
-		{
-			return m_splitter.bound( indexFromName( name ) );
-		}
+	IECore::ConstInternedStringVectorDataPtr m_names;
+	std::unordered_map<InternedString, int> m_nameMap;
 
-	private:
-
-		inline int indexFromName( const IECore::InternedString &name ) const
-		{
-			if( m_nameMap.size() )
-			{
-				return m_nameMap.at( name );
-			}
-			else
-			{
-				return stoi( name.string() );
-			}
-		}
-
-		IECore::ConstInternedStringVectorDataPtr m_names;
-		std::unordered_map< InternedString, int > m_nameMap;
-
-		const MeshAlgo::MeshSplitter m_splitter;
-
+	const MeshAlgo::MeshSplitter m_splitter;
 };
 
 GAFFER_NODE_DEFINE_TYPE( MeshSplit );
@@ -296,7 +294,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshSplit );
 size_t MeshSplit::g_firstPlugIndex = 0;
 
 MeshSplit::MeshSplit( const std::string &name )
-	:	BranchCreator( name )
+	: BranchCreator( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -411,7 +409,7 @@ void MeshSplit::compute( ValuePlug *output, const Context *context ) const
 			splitter = new MeshSplitterData( mesh, varIt->second, nameFromSegment, context->canceller() );
 		}
 
-		static_cast<ObjectPlug *>( output )->setValue( splitter ? (const Object*)splitter.get() : NullObject::defaultNullObject() );
+		static_cast<ObjectPlug *>( output )->setValue( splitter ? (const Object *)splitter.get() : NullObject::defaultNullObject() );
 		return;
 	}
 
@@ -563,7 +561,7 @@ IECore::ConstInternedStringVectorDataPtr MeshSplit::computeBranchChildNames( con
 			return inPlug()->childNamesPlug()->defaultValue();
 		}
 
-		const MeshSplitterData *meshSplitter = static_cast<const MeshSplitterData*>( meshSplitterRaw.get() );
+		const MeshSplitterData *meshSplitter = static_cast<const MeshSplitterData *>( meshSplitterRaw.get() );
 		return meshSplitter->names();
 	}
 	else

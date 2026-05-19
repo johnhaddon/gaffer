@@ -102,20 +102,18 @@ InternedString g_lightsSetName( "__lights" );
 
 const char *constantFragSource()
 {
-	return
-		"#version 120\n"
-		""
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"in vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-			"gl_FragColor = vec4( fragmentCs, 1 );"
-		"}"
-	;
+	return "#version 120\n"
+		   ""
+		   "#if __VERSION__ <= 120\n"
+		   "#define in varying\n"
+		   "#endif\n"
+		   ""
+		   "in vec3 fragmentCs;"
+		   ""
+		   "void main()"
+		   "{"
+		   "gl_FragColor = vec4( fragmentCs, 1 );"
+		   "}";
 }
 
 const char *faceCameraVertexSource()
@@ -184,7 +182,7 @@ const char *faceCameraVertexSource()
 		"	fragmentCs = geometryCs;"
 		"}"
 
-	;
+		;
 }
 
 // Adapted from `Handle::rasterScaleFactor()` to get the raster scale factor for
@@ -291,7 +289,7 @@ IECoreGL::MeshPrimitivePtr unitCone()
 
 V3f shadowSourcePosition( const V3f &Pivot, const V3f &Target, const float pivotDistance )
 {
-	return (Pivot - Target ).normalized() * pivotDistance + Pivot;
+	return ( Pivot - Target ).normalized() * pivotDistance + Pivot;
 }
 
 // Must be called with the current context scoped.
@@ -312,7 +310,6 @@ M44f sourceOrientation( const TransformTool::Selection &s, const V3f &origin, co
 	worldParentTransformInverse.multDirMatrix( ( target - origin ), targetZAxis );
 
 	return rotationMatrixWithUpDir( V3f( 0.f, 0.f, -1.f ), targetZAxis, currentYAxis );
-
 }
 
 std::string selectedUpstreamPathToString( const std::vector<TransformTool::Selection> &s )
@@ -327,230 +324,226 @@ std::string selectedUpstreamPathToString( const std::vector<TransformTool::Selec
 class DistanceHandle : public Handle
 {
 
-	public :
+public:
 
-		DistanceHandle( const bool requiresPivot ) : m_requiresPivot( requiresPivot )
+	DistanceHandle( const bool requiresPivot ) : m_requiresPivot( requiresPivot )
+	{
+	}
+
+	~DistanceHandle() override
+	{
+	}
+
+	// Set the position of the pivot from the given world-space coordinate.
+	void setPivot( const std::optional<V3f> &p )
+	{
+		m_pivot = p;
+		dirty( DirtyType::Render );
+	}
+
+	const std::optional<V3f> &getPivot() const
+	{
+		return m_pivot;
+	}
+
+	// Set the position of the target from the given world-space coordinate.
+	void setTarget( const std::optional<V3f> &p )
+	{
+		m_target = p;
+		dirty( DirtyType::Render );
+	}
+
+	const std::optional<V3f> &getTarget() const
+	{
+		return m_target;
+	}
+
+	void setPivotDistance( const std::optional<float> d )
+	{
+		m_pivotDistance = d;
+	}
+
+	const std::optional<float> &getPivotDistance() const
+	{
+		return m_pivotDistance;
+	}
+
+	V3f translation( const DragDropEvent &event )
+	{
+		return V3f( 0, 0, m_drag.updatedPosition( event ) - m_drag.startPosition() );
+	}
+
+	void setTransformToSceneSpace( const M44f &t )
+	{
+		m_transformToSceneSpace = t;
+	}
+
+	void setRequiresPivot( const bool requiresPivot )
+	{
+		m_requiresPivot = requiresPivot;
+	}
+
+	bool getRequiresPivot() const
+	{
+		return m_requiresPivot;
+	}
+
+protected:
+
+	void renderHandle( const Style *style, Style::State state ) const override
+	{
+		if( !m_pivot && !m_target )
 		{
-
+			return;
 		}
 
-		~DistanceHandle() override
-		{
+		float lineRadius = 0;
+		float circleSize = 0;
+		float coneSize = 0;
 
+		const bool highlighted = state == Style::State::HighlightedState;
+		const bool selectionPass = (bool)IECoreGL::Selector::currentSelector();
+
+		if( selectionPass )
+		{
+			lineRadius = g_lineSelectionWidth;
+			circleSize = g_circleHandleSelectionWidth;
+			coneSize = g_arrowHandleSelectionSize;
+		}
+		else
+		{
+			lineRadius = highlighted ? g_lineHandleWidthLarge : g_lineHandleWidth;
+			circleSize = highlighted ? g_circleHandleWidthLarge : g_circleHandleWidth;
+			coneSize = highlighted ? g_arrowHandleSizeLarge : g_arrowHandleSize;
 		}
 
-		// Set the position of the pivot from the given world-space coordinate.
-		void setPivot( const std::optional<V3f> &p )
+		State::bindBaseState();
+		auto glState = const_cast<State *>( State::defaultState() );
+
+		IECoreGL::GroupPtr group = new IECoreGL::Group;
+
+		group->getState()->add(
+			new IECoreGL::ShaderStateComponent(
+				ShaderLoader::defaultShaderLoader(),
+				TextureLoader::defaultTextureLoader(),
+				"",
+				"",
+				constantFragSource(),
+				new CompoundObject
+			)
+		);
+
+		auto standardStyle = runTimeCast<const StandardStyle>( style );
+		const Color3f highlightColor3 = standardStyle ? standardStyle->getColor( StandardStyle::Color::HighlightColor ) : Color3f( 0.466, 0.612, 0.741 );
+		const Color4f highlightColor4 = Color4f( highlightColor3.x, highlightColor3.y, highlightColor3.z, 1.f );
+
+		group->getState()->add(
+			new IECoreGL::Color(
+				enabled() ? ( highlighted ? highlightColor4 : g_lightToolColor4 ) : g_lightToolDisabledColor4
+			)
+		);
+
+		const M44f fullTransformInverse = fullTransform().inverse();
+
+		if( m_pivot && m_requiresPivot )
 		{
-			m_pivot = p;
-			dirty( DirtyType::Render );
-		}
-
-		const std::optional<V3f> &getPivot() const
-		{
-			return m_pivot;
-		}
-
-		// Set the position of the target from the given world-space coordinate.
-		void setTarget( const std::optional<V3f> &p )
-		{
-			m_target = p;
-			dirty( DirtyType::Render );
-		}
-
-		const std::optional<V3f> &getTarget() const
-		{
-			return m_target;
-		}
-
-		void setPivotDistance( const std::optional<float> d )
-		{
-			m_pivotDistance = d;
-		}
-
-		const std::optional<float> &getPivotDistance() const
-		{
-			return m_pivotDistance;
-		}
-
-		V3f translation( const DragDropEvent &event )
-		{
-			return V3f( 0, 0, m_drag.updatedPosition( event ) - m_drag.startPosition() );
-		}
-
-		void setTransformToSceneSpace( const M44f &t )
-		{
-			m_transformToSceneSpace = t;
-		}
-
-		void setRequiresPivot( const bool requiresPivot )
-		{
-			m_requiresPivot = requiresPivot;
-		}
-
-		bool getRequiresPivot() const
-		{
-			return m_requiresPivot;
-		}
-
-	protected :
-
-		void renderHandle( const Style *style, Style::State state ) const override
-		{
-			if( !m_pivot && !m_target )
-			{
-				return;
-			}
-
-			float lineRadius = 0;
-			float circleSize = 0;
-			float coneSize = 0;
-
-			const bool highlighted = state == Style::State::HighlightedState;
-			const bool selectionPass = (bool)IECoreGL::Selector::currentSelector();
-
-			if( selectionPass )
-			{
-				lineRadius = g_lineSelectionWidth;
-				circleSize = g_circleHandleSelectionWidth;
-				coneSize = g_arrowHandleSelectionSize;
-			}
-			else
-			{
-				lineRadius = highlighted ? g_lineHandleWidthLarge : g_lineHandleWidth;
-				circleSize = highlighted ? g_circleHandleWidthLarge : g_circleHandleWidth;
-				coneSize = highlighted ? g_arrowHandleSizeLarge : g_arrowHandleSize;
-			}
-
-			State::bindBaseState();
-			auto glState = const_cast<State *>( State::defaultState() );
-
-			IECoreGL::GroupPtr group = new IECoreGL::Group;
-
-			group->getState()->add(
+			IECoreGL::GroupPtr pivotGroup = new IECoreGL::Group;
+			pivotGroup->getState()->add(
 				new IECoreGL::ShaderStateComponent(
 					ShaderLoader::defaultShaderLoader(),
 					TextureLoader::defaultTextureLoader(),
-					"",
+					faceCameraVertexSource(),
 					"",
 					constantFragSource(),
 					new CompoundObject
 				)
 			);
+			pivotGroup->addChild( circle() );
 
-			auto standardStyle = runTimeCast<const StandardStyle>( style );
-			const Color3f highlightColor3 = standardStyle ? standardStyle->getColor( StandardStyle::Color::HighlightColor ) : Color3f( 0.466, 0.612, 0.741 );
-			const Color4f highlightColor4 = Color4f( highlightColor3.x, highlightColor3.y, highlightColor3.z, 1.f );
+			const V3f localPivot = m_pivot.value() * m_transformToSceneSpace * fullTransformInverse;
 
-			group->getState()->add(
-				new IECoreGL::Color(
-					enabled() ? ( highlighted ? highlightColor4 : g_lightToolColor4 ) : g_lightToolDisabledColor4
-				)
+			pivotGroup->setTransform(
+				M44f().scale( V3f( circleSize ) * ::rasterScaleFactor( this, localPivot ) ) *
+				M44f().translate( localPivot )
 			);
 
-			const M44f fullTransformInverse = fullTransform().inverse();
+			group->addChild( pivotGroup );
+		}
 
-			if( m_pivot && m_requiresPivot )
+		V3f localTarget;
+		V3f coneHeightOffset;
+
+		if( m_target )
+		{
+			IECoreGL::GroupPtr coneGroup = new IECoreGL::Group;
+			coneGroup->addChild( unitCone() );
+
+			localTarget = m_target.value() * m_transformToSceneSpace * fullTransformInverse;
+			const V3f coneScale = V3f( coneSize ) * ::rasterScaleFactor( this, localTarget );
+			coneHeightOffset = V3f( 0, 0, g_unitConeHeight * coneScale.z );
+
+			coneGroup->setTransform(
+				M44f().scale( coneScale ) *
+				M44f().translate( localTarget + coneHeightOffset )
+			);
+
+			group->addChild( coneGroup );
+
+			if( !m_requiresPivot || m_pivot )
 			{
-				IECoreGL::GroupPtr pivotGroup = new IECoreGL::Group;
-				pivotGroup->getState()->add(
-					new IECoreGL::ShaderStateComponent(
-						ShaderLoader::defaultShaderLoader(),
-						TextureLoader::defaultTextureLoader(),
-						faceCameraVertexSource(),
-						"",
-						constantFragSource(),
-						new CompoundObject
+				IECoreGL::GroupPtr lineGroup = new IECoreGL::Group;
+				lineGroup->addChild(
+					cone(
+						localTarget.length() - coneHeightOffset.z,
+						lineRadius * ::rasterScaleFactor( this, V3f( 0 ) ),
+						lineRadius * ::rasterScaleFactor( this, localTarget )
 					)
 				);
-				pivotGroup->addChild( circle() );
 
-				const V3f localPivot = m_pivot.value() * m_transformToSceneSpace * fullTransformInverse;
-
-				pivotGroup->setTransform(
-					M44f().scale( V3f( circleSize ) * ::rasterScaleFactor( this, localPivot ) ) *
-					M44f().translate( localPivot )
-				);
-
-				group->addChild( pivotGroup );
+				group->addChild( lineGroup );
 			}
-
-			V3f localTarget;
-			V3f coneHeightOffset;
-
-			if( m_target )
-			{
-				IECoreGL::GroupPtr coneGroup = new IECoreGL::Group;
-				coneGroup->addChild( unitCone() );
-
-				localTarget = m_target.value() * m_transformToSceneSpace * fullTransformInverse;
-				const V3f coneScale = V3f( coneSize ) * ::rasterScaleFactor( this, localTarget );
-				coneHeightOffset = V3f( 0, 0, g_unitConeHeight * coneScale.z );
-
-				coneGroup->setTransform(
-					M44f().scale( coneScale ) *
-					M44f().translate( localTarget + coneHeightOffset )
-				);
-
-				group->addChild( coneGroup );
-
-				if( !m_requiresPivot || m_pivot )
-				{
-					IECoreGL::GroupPtr lineGroup = new IECoreGL::Group;
-					lineGroup->addChild(
-						cone(
-							localTarget.length() - coneHeightOffset.z,
-							lineRadius * ::rasterScaleFactor( this, V3f( 0 ) ),
-							lineRadius * ::rasterScaleFactor( this, localTarget )
-						)
-					);
-
-					group->addChild( lineGroup );
-				}
-			}
-
-			group->render( glState );
 		}
 
-		void dragBegin( const DragDropEvent &event ) override
-		{
-			m_drag = LinearDrag( this, LineSegment3f( V3f( 0 ), V3f( 0, 0, 1 ) ), event );
+		group->render( glState );
+	}
 
-			assert( m_pivotDistance );
+	void dragBegin( const DragDropEvent &event ) override
+	{
+		m_drag = LinearDrag( this, LineSegment3f( V3f( 0 ), V3f( 0, 0, 1 ) ), event );
 
-			m_startDistance = m_pivotDistance.value();
-		}
+		assert( m_pivotDistance );
 
-	private :
+		m_startDistance = m_pivotDistance.value();
+	}
 
-		// As with `LightPositionTool::m_pivotMap` and `LightPositionTool::m_targetMap`,
-		// we store the pivot and target position in transform space.
-		std::optional<V3f> m_pivot;
-		std::optional<V3f> m_target;
+private:
 
-		std::optional<float> m_pivotDistance;
+	// As with `LightPositionTool::m_pivotMap` and `LightPositionTool::m_targetMap`,
+	// we store the pivot and target position in transform space.
+	std::optional<V3f> m_pivot;
+	std::optional<V3f> m_target;
 
-		// Used to transform the rendered elements from transform to world space.
-		M44f m_transformToSceneSpace;
+	std::optional<float> m_pivotDistance;
 
-		LinearDrag m_drag;
-		float m_startDistance;
+	// Used to transform the rendered elements from transform to world space.
+	M44f m_transformToSceneSpace;
 
-		bool m_requiresPivot;
+	LinearDrag m_drag;
+	float m_startDistance;
 
+	bool m_requiresPivot;
 };
 
-}  // namespace
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( LightPositionTool );
 
 LightPositionTool::ToolDescription<LightPositionTool, SceneView> LightPositionTool::g_toolDescription;
 size_t LightPositionTool::g_firstPlugIndex = 0;
 
-LightPositionTool::LightPositionTool( SceneView *view, const std::string &name ) :
-	TransformTool( view, name ),
-	m_targetMode( TargetMode::None ),
-	m_draggingTarget( false )
+LightPositionTool::LightPositionTool( SceneView *view, const std::string &name ) : TransformTool( view, name ),
+																				   m_targetMode( TargetMode::None ),
+																				   m_draggingTarget( false )
 {
 	m_distanceHandle = new DistanceHandle( true );
 	m_distanceHandle->setRasterScale( 0 );
@@ -655,7 +648,7 @@ void LightPositionTool::positionAlongNormal(
 
 	Context::Scope scopedContext( s.context() );
 
-	const M44f orientationMatrix = sourceOrientation ( s, newP, target );
+	const M44f orientationMatrix = sourceOrientation( s, newP, target );
 
 	const M44f localTransform = s.scene()->transform( s.path() );
 	translateAndOrient( s, localTransform, newP, orientationMatrix );
@@ -750,13 +743,9 @@ void LightPositionTool::updateHandles( float rasterScale )
 
 	if(
 		!m_drag &&
-		(
-			!direction.normalized().equalWithAbsError( handleDir, 1e-4 ) ||
-			(
-				distanceHandle->getPivotDistance() &&
-				handleLine.distanceTo( p ) > distanceHandle->getPivotDistance().value() * 1e-4
-			)
-		)
+		( !direction.normalized().equalWithAbsError( handleDir, 1e-4 ) ||
+		  ( distanceHandle->getPivotDistance() &&
+			handleLine.distanceTo( p ) > distanceHandle->getPivotDistance().value() * 1e-4 ) )
 	)
 	{
 		distanceHandle->setPivot( std::nullopt );
@@ -785,7 +774,7 @@ IECore::RunTimeTypedPtr LightPositionTool::handleDragBegin( Gadget *gadget )
 
 	TransformTool::dragBegin();
 
-	return nullptr;  // let the handle start the drag with the event system
+	return nullptr; // let the handle start the drag with the event system
 }
 
 bool LightPositionTool::handleDragMove( Gadget *gadget, const DragDropEvent &event )
@@ -1031,7 +1020,8 @@ bool LightPositionTool::placeTarget( const LineSegment3f &eventLine )
 				(
 					( V3f( 0 ) * ( s.orientedTransform( Orientation::World ) * sceneToTransformSpace ) ) -
 					gadgetTargetPos * sceneGadget->fullTransform().inverse()
-				).length()
+				)
+					.length()
 			);
 		}
 		setTarget( gadgetTargetPos * sceneGadget->fullTransform() * sceneToTransformSpace, scriptNode );
@@ -1313,7 +1303,7 @@ void LightPositionTool::TranslationRotation::applyTranslation( const V3f &transl
 		FloatPlug *pTranslate = translatePlug->getChild( i );
 		if( canSetValueOrAddKey( pTranslate ) )
 		{
-			setValueOrAddKey( pTranslate, m_selection.context()->getTime(), (*m_originalTranslation)[i] + offsetInTransformSpace[i] );
+			setValueOrAddKey( pTranslate, m_selection.context()->getTime(), ( *m_originalTranslation )[i] + offsetInTransformSpace[i] );
 		}
 	}
 }
@@ -1386,7 +1376,8 @@ V3f LightPositionTool::TranslationRotation::updatedRotateValue( const V3fPlug *r
 		*currentValue = current;
 	}
 
-	Eulerf e; e.extract( mFinal );
+	Eulerf e;
+	e.extract( mFinal );
 	e.makeNear( degreesToRadians( current ) );
 
 	return radiansToDegrees( V3f( e ) );

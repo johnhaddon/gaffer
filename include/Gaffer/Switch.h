@@ -48,85 +48,84 @@ namespace Gaffer
 class GAFFER_API Switch : public ComputeNode
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Switch, SwitchTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Switch, SwitchTypeId, ComputeNode );
 
-		explicit Switch( const std::string &name=GraphComponent::defaultName<Switch>() );
-		~Switch() override;
+	explicit Switch( const std::string &name = GraphComponent::defaultName<Switch>() );
+	~Switch() override;
 
-		/// Sets up the switch to work with the specified plug type.
-		/// The passed plug is used as a template, but will not be
-		/// referenced by the Switch itself - typically you will pass a plug
-		/// which you will connect to the Switch after calling
-		/// `setup()`.
-		/// \undoable
-		void setup( const Plug *plug );
+	/// Sets up the switch to work with the specified plug type.
+	/// The passed plug is used as a template, but will not be
+	/// referenced by the Switch itself - typically you will pass a plug
+	/// which you will connect to the Switch after calling
+	/// `setup()`.
+	/// \undoable
+	void setup( const Plug *plug );
 
-		/// Will return null unless `setup()` has been called.
-		ArrayPlug *inPlugs();
-		const ArrayPlug *inPlugs() const;
+	/// Will return null unless `setup()` has been called.
+	ArrayPlug *inPlugs();
+	const ArrayPlug *inPlugs() const;
 
-		/// Will return null unless `setup()` has been called.
-		Plug *outPlug();
-		const Plug *outPlug() const;
+	/// Will return null unless `setup()` has been called.
+	Plug *outPlug();
+	const Plug *outPlug() const;
 
-		/// Returns the input plug which will be passed through
-		/// by the switch in the current context.
-		/// \todo Remove, and add `nullptr` default to the version
-		/// below.
-		Plug *activeInPlug();
-		const Plug *activeInPlug() const;
-		/// Returns the input plug which will be passed through
-		/// by the switch when evaluating `outPlug` in the
-		/// current context.
-		Plug *activeInPlug( const Plug *outPlug );
-		const Plug *activeInPlug( const Plug *outPlug ) const;
+	/// Returns the input plug which will be passed through
+	/// by the switch in the current context.
+	/// \todo Remove, and add `nullptr` default to the version
+	/// below.
+	Plug *activeInPlug();
+	const Plug *activeInPlug() const;
+	/// Returns the input plug which will be passed through
+	/// by the switch when evaluating `outPlug` in the
+	/// current context.
+	Plug *activeInPlug( const Plug *outPlug );
+	const Plug *activeInPlug( const Plug *outPlug ) const;
 
-		IntPlug *indexPlug();
-		const IntPlug *indexPlug() const;
+	IntPlug *indexPlug();
+	const IntPlug *indexPlug() const;
 
-		BoolPlug *enabledPlug() override;
-		const BoolPlug *enabledPlug() const override;
+	BoolPlug *enabledPlug() override;
+	const BoolPlug *enabledPlug() const override;
 
-		StringPlug *deleteContextVariablesPlug();
-		const StringPlug *deleteContextVariablesPlug() const;
+	StringPlug *deleteContextVariablesPlug();
+	const StringPlug *deleteContextVariablesPlug() const;
 
-		IntVectorDataPlug *connectedInputsPlug();
-		const IntVectorDataPlug *connectedInputsPlug() const;
+	IntVectorDataPlug *connectedInputsPlug();
+	const IntVectorDataPlug *connectedInputsPlug() const;
 
-		Plug *correspondingInput( const Plug *output ) override;
-		const Plug *correspondingInput( const Plug *output ) const override;
+	Plug *correspondingInput( const Plug *output ) override;
+	const Plug *correspondingInput( const Plug *output ) const override;
 
-		void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		// Implemented to reject input branches inputs if they wouldn't be accepted by the output.
-		bool acceptsInput( const Plug *plug, const Plug *inputPlug ) const override;
+	// Implemented to reject input branches inputs if they wouldn't be accepted by the output.
+	bool acceptsInput( const Plug *plug, const Plug *inputPlug ) const override;
 
-		// The hash() and compute() methods are implemented to pass through the results from
-		// the input branch specified by indexPlug(). They operate via the hashInternal() and
-		// computeInternal() methods, which are specialised for the cases where we do and do
-		// not inherit from ComputeNode.
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
+	// The hash() and compute() methods are implemented to pass through the results from
+	// the input branch specified by indexPlug(). They operate via the hashInternal() and
+	// computeInternal() methods, which are specialised for the cases where we do and do
+	// not inherit from ComputeNode.
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-	private :
+private:
 
-		void childAdded( GraphComponent *child );
-		void plugSet( Plug *plug );
-		void plugInputChanged( Plug *plug );
-		size_t inputIndex( const Context *context ) const;
+	void childAdded( GraphComponent *child );
+	void plugSet( Plug *plug );
+	void plugInputChanged( Plug *plug );
+	size_t inputIndex( const Context *context ) const;
 
-		// Returns the input corresponding to the output and vice versa. Returns null
-		// if plug is not meaningful to the switching process.
-		const Plug *oppositePlug( const Plug *plug, const Context *context = nullptr ) const;
+	// Returns the input corresponding to the output and vice versa. Returns null
+	// if plug is not meaningful to the switching process.
+	const Plug *oppositePlug( const Plug *plug, const Context *context = nullptr ) const;
 
-		void updateInternalConnection();
+	void updateInternalConnection();
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Switch );

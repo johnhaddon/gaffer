@@ -126,7 +126,7 @@ string regexReplace( const std::string &s, const std::regex &r, const std::strin
 
 struct InternedStringAddressHash
 {
-	inline size_t operator()( const IECore::InternedString &v ) const
+	inline size_t operator () ( const IECore::InternedString &v ) const
 	{
 		return boost::hash<const char *>()( v.c_str() );
 	}
@@ -149,12 +149,9 @@ struct NameMapData : public IECore::Data
 			// First index allows lookup using `inputName`.
 			boost::multi_index::hashed_unique<boost::multi_index::key<&Names::inputName>, InternedStringAddressHash>,
 			// Second index allows lookup using `outputName`.
-			boost::multi_index::hashed_unique<boost::multi_index::key<&Names::outputName>, InternedStringAddressHash>
-		>
-	>;
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Names::outputName>, InternedStringAddressHash>>>;
 
 	Map map;
-
 };
 
 IE_CORE_DECLAREPTR( NameMapData );
@@ -177,7 +174,7 @@ struct Rename::InputScope : ScenePlug::PathScope
 {
 
 	InputScope( const Context *context, const InternedStringVectorDataPlug *inputPathPlug, const ScenePlug::ScenePath *outputPath = nullptr )
-		:	PathScope( context )
+		: PathScope( context )
 	{
 		if( outputPath )
 		{
@@ -192,14 +189,13 @@ struct Rename::InputScope : ScenePlug::PathScope
 		return m_inputPath;
 	}
 
-	private :
+private:
 
-		ConstInternedStringVectorDataPtr m_inputPath;
-
+	ConstInternedStringVectorDataPtr m_inputPath;
 };
 
 Rename::Rename( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "name", Plug::In, "" ) );
@@ -417,16 +413,14 @@ Gaffer::ValuePlug::CachePolicy Rename::computeCachePolicy( const Gaffer::ValuePl
 
 bool Rename::affectsOutputName( const Gaffer::Plug *input ) const
 {
-	return
-		input == namePlug() ||
+	return input == namePlug() ||
 		input == deletePrefixPlug() ||
 		input == deleteSuffixPlug() ||
 		input == findPlug() ||
 		input == replacePlug() ||
 		input == useRegularExpressionsPlug() ||
 		input == addPrefixPlug() ||
-		input == addSuffixPlug()
-	;
+		input == addSuffixPlug();
 }
 
 void Rename::hashOutputName( IECore::MurmurHash &h ) const
@@ -484,18 +478,16 @@ std::string Rename::outputName( IECore::InternedString inputName ) const
 
 bool Rename::affectsNameMap( const Gaffer::Plug *input ) const
 {
-	return
-		input == filterPlug() ||
+	return input == filterPlug() ||
 		input == inPlug()->childNamesPlug() ||
-		affectsOutputName( input )
-	;
+		affectsOutputName( input );
 }
 
 void Rename::hashNameMap( const Gaffer::Context *context, IECore::MurmurHash &h ) const
 {
 	FilteredSceneProcessor::hash( nameMapPlug(), context, h );
 
-	if( !(filterValue( context ) & PathMatcher::DescendantMatch) )
+	if( !( filterValue( context ) & PathMatcher::DescendantMatch ) )
 	{
 		return;
 	}
@@ -529,7 +521,7 @@ void Rename::hashNameMap( const Gaffer::Context *context, IECore::MurmurHash &h 
 
 IECore::ConstObjectPtr Rename::computeNameMap( const Gaffer::Context *context ) const
 {
-	if( !(filterValue( context ) & PathMatcher::DescendantMatch) )
+	if( !( filterValue( context ) & PathMatcher::DescendantMatch ) )
 	{
 		// No renaming here.
 		return g_emptyNameMap;
@@ -610,7 +602,7 @@ void Rename::hashInputPath( const Gaffer::Context *context, IECore::MurmurHash &
 	FilteredSceneProcessor::hash( inputPathPlug(), context, h );
 
 	ConstInternedStringVectorDataPtr parentInputPathData;
-	ScenePlug::ScenePath parentOutputPath( outputPath.begin(), outputPath.end() -1 );
+	ScenePlug::ScenePath parentOutputPath( outputPath.begin(), outputPath.end() - 1 );
 	{
 		InputScope inputScope( context, inputPathPlug(), &parentOutputPath );
 		parentInputPathData = inputScope.inputPath();
@@ -632,7 +624,7 @@ IECore::ConstInternedStringVectorDataPtr Rename::computeInputPath( const Gaffer:
 
 	ConstInternedStringVectorDataPtr parentInputPathData;
 	ConstNameMapDataPtr parentNameMapData;
-	ScenePlug::ScenePath parentOutputPath( outputPath.begin(), outputPath.end() -1 );
+	ScenePlug::ScenePath parentOutputPath( outputPath.begin(), outputPath.end() - 1 );
 	{
 		InputScope inputScope( context, inputPathPlug(), &parentOutputPath );
 		parentInputPathData = inputScope.inputPath();
@@ -775,16 +767,16 @@ void Rename::hashSet( const IECore::InternedString &setName, const Gaffer::Conte
 	{
 
 		LocationProcessor( const Rename *rename, const PathMatcher &inputSet, ThreadLocalHash &hash )
-			:	m_rename( rename ), m_parent( nullptr ), m_inputSet( inputSet ), m_hash( hash )
+			: m_rename( rename ), m_parent( nullptr ), m_inputSet( inputSet ), m_hash( hash )
 		{
 		}
 
 		LocationProcessor( const LocationProcessor &parent )
-			:	m_rename( parent.m_rename ), m_parent( &parent ), m_inputSet( parent.m_inputSet ), m_hash( parent.m_hash )
+			: m_rename( parent.m_rename ), m_parent( &parent ), m_inputSet( parent.m_inputSet ), m_hash( parent.m_hash )
 		{
 		}
 
-		bool operator()( const ScenePlug *scene, const ScenePlug::ScenePath &path )
+		bool operator () ( const ScenePlug *scene, const ScenePlug::ScenePath &path )
 		{
 			const int setMatch = m_inputSet.match( path );
 			if( !( setMatch & ( PathMatcher::ExactMatch | PathMatcher::DescendantMatch ) ) )
@@ -793,7 +785,7 @@ void Rename::hashSet( const IECore::InternedString &setName, const Gaffer::Conte
 			}
 
 			const int filterMatch = m_rename->filterValue( Context::current() );
-			if( m_parent && (filterMatch & PathMatcher::ExactMatch) )
+			if( m_parent && ( filterMatch & PathMatcher::ExactMatch ) )
 			{
 				const NameMapData::Map &nameMap = m_parent->m_nameMap->map;
 				auto it = nameMap.find( path.back() );
@@ -818,14 +810,13 @@ void Rename::hashSet( const IECore::InternedString &setName, const Gaffer::Conte
 			}
 		}
 
-		private :
+	private:
 
-			const Rename *m_rename;
-			const LocationProcessor *m_parent;
-			const PathMatcher &m_inputSet;
-			ThreadLocalHash &m_hash;
-			ConstNameMapDataPtr m_nameMap;
-
+		const Rename *m_rename;
+		const LocationProcessor *m_parent;
+		const PathMatcher &m_inputSet;
+		ThreadLocalHash &m_hash;
+		ConstNameMapDataPtr m_nameMap;
 	};
 
 	ScenePlug::GlobalScope globalScope( context );
@@ -834,7 +825,7 @@ void Rename::hashSet( const IECore::InternedString &setName, const Gaffer::Conte
 	SceneAlgo::parallelProcessLocations( inPlug(), processor );
 
 	const MurmurHash renamesHash = threadLocalHash.combine(
-		[] ( const MurmurHash &a, const MurmurHash &b ) {
+		[]( const MurmurHash &a, const MurmurHash &b ) {
 			// See SceneAlgo's ThreadablePathHashAccumulator for further discussion of
 			// this "sum of hashes" strategy for deterministic parallel hashing.
 			return MurmurHash( a.h1() + b.h1(), a.h2() + b.h2() );
@@ -873,18 +864,18 @@ IECore::ConstPathMatcherDataPtr Rename::computeSet( const IECore::InternedString
 	{
 
 		LocationProcessor( const Rename *rename, const PathMatcher &inputSet, ThreadLocalSet &outputSet )
-			:	m_rename( rename ), m_parent( nullptr ), m_inputSet( inputSet ), m_outputSet( outputSet )
+			: m_rename( rename ), m_parent( nullptr ), m_inputSet( inputSet ), m_outputSet( outputSet )
 		{
 		}
 
 		// Constructor used for child locations, allowing us to inherit stuff
 		// from the parent processor.
 		LocationProcessor( const LocationProcessor &parent )
-			:	m_rename( parent.m_rename ), m_parent( &parent ), m_inputSet( parent.m_inputSet ), m_outputSet( parent.m_outputSet )
+			: m_rename( parent.m_rename ), m_parent( &parent ), m_inputSet( parent.m_inputSet ), m_outputSet( parent.m_outputSet )
 		{
 		}
 
-		bool operator()( const ScenePlug *scene, const ScenePlug::ScenePath &path )
+		bool operator () ( const ScenePlug *scene, const ScenePlug::ScenePath &path )
 		{
 			const int setMatch = m_inputSet.match( path );
 			if( !( setMatch & ( PathMatcher::ExactMatch | PathMatcher::DescendantMatch ) ) )
@@ -936,15 +927,14 @@ IECore::ConstPathMatcherDataPtr Rename::computeSet( const IECore::InternedString
 			}
 		}
 
-		private :
+	private:
 
-			const Rename *m_rename;
-			const LocationProcessor *m_parent;
-			const PathMatcher &m_inputSet;
-			ThreadLocalSet &m_outputSet;
-			ScenePlug::ScenePath m_outputPath;
-			ConstNameMapDataPtr m_nameMap;
-
+		const Rename *m_rename;
+		const LocationProcessor *m_parent;
+		const PathMatcher &m_inputSet;
+		ThreadLocalSet &m_outputSet;
+		ScenePlug::ScenePath m_outputPath;
+		ConstNameMapDataPtr m_nameMap;
 	};
 
 	ScenePlug::GlobalScope globalScope( context );
@@ -954,7 +944,7 @@ IECore::ConstPathMatcherDataPtr Rename::computeSet( const IECore::InternedString
 
 	return new PathMatcherData(
 		outputSets.combine(
-			[] ( const PathMatcher &a, const PathMatcher &b ) {
+			[]( const PathMatcher &a, const PathMatcher &b ) {
 				PathMatcher c = a;
 				c.addPaths( b );
 				return c;

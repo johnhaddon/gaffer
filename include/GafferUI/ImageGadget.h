@@ -59,51 +59,50 @@ namespace GafferUI
 class GAFFERUI_API ImageGadget : public Gadget
 {
 
-	public :
+public:
 
-		/// Images are searched for on the paths defined by
-		/// the GAFFERUI_IMAGE_PATHS environment variable.
-		/// Throws if the file cannot be loaded.
-		explicit ImageGadget( const std::string &fileName );
-		/// \deprecated
-		ImageGadget( const IECoreImage::ConstImagePrimitivePtr image );
-		~ImageGadget() override;
+	/// Images are searched for on the paths defined by
+	/// the GAFFERUI_IMAGE_PATHS environment variable.
+	/// Throws if the file cannot be loaded.
+	explicit ImageGadget( const std::string &fileName );
+	/// \deprecated
+	ImageGadget( const IECoreImage::ConstImagePrimitivePtr image );
+	~ImageGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ImageGadget, ImageGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ImageGadget, ImageGadgetTypeId, Gadget );
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-		struct GAFFERUI_API TextureParameters
-		{
-			GLint minFilter = GL_LINEAR_MIPMAP_LINEAR;
-			GLint magFilter = GL_LINEAR;
-			float lodBias = -1.0;
-			GLint wrapS = GL_CLAMP_TO_BORDER;
-			GLint wrapT = GL_CLAMP_TO_BORDER;
-			static TextureParameters defaultParameters() { return {}; }
-		};
+	struct GAFFERUI_API TextureParameters
+	{
+		GLint minFilter = GL_LINEAR_MIPMAP_LINEAR;
+		GLint magFilter = GL_LINEAR;
+		float lodBias = -1.0;
+		GLint wrapS = GL_CLAMP_TO_BORDER;
+		GLint wrapT = GL_CLAMP_TO_BORDER;
+		static TextureParameters defaultParameters() { return {}; }
+	};
 
-		/// Loads a texture suitable for rendering with `StandardStyle::renderImage()`,
-		/// searching for it on the paths defined by the `GAFFERUI_IMAGE_PATHS` environment
-		/// variable. Throws if the file cannot be loaded. Uses an internal cache, so the
-		/// returned texture may be shared with other code, and is therefore const.
-		static IECoreGL::ConstTexturePtr loadTexture( const std::string &fileName, const TextureParameters &parameters = TextureParameters::defaultParameters() );
+	/// Loads a texture suitable for rendering with `StandardStyle::renderImage()`,
+	/// searching for it on the paths defined by the `GAFFERUI_IMAGE_PATHS` environment
+	/// variable. Throws if the file cannot be loaded. Uses an internal cache, so the
+	/// returned texture may be shared with other code, and is therefore const.
+	static IECoreGL::ConstTexturePtr loadTexture( const std::string &fileName, const TextureParameters &parameters = TextureParameters::defaultParameters() );
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		Imath::Box3f m_bound;
-		// We can't actually generate the GL texture until renderLayer(), as
-		// the GL state might not be valid until then. so we store either
-		// the image to convert, the filename to load, or the previously
-		// converted texture in this member.
-		mutable IECore::ConstRunTimeTypedPtr m_imageOrTextureOrFileName;
-
+	Imath::Box3f m_bound;
+	// We can't actually generate the GL texture until renderLayer(), as
+	// the GL state might not be valid until then. so we store either
+	// the image to convert, the filename to load, or the previously
+	// converted texture in this member.
+	mutable IECore::ConstRunTimeTypedPtr m_imageOrTextureOrFileName;
 };
 
 IE_CORE_DECLAREPTR( ImageGadget )

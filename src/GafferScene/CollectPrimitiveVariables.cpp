@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( CollectPrimitiveVariables );
 size_t CollectPrimitiveVariables::g_firstPlugIndex = 0;
 
 CollectPrimitiveVariables::CollectPrimitiveVariables( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -109,13 +109,11 @@ const Gaffer::BoolPlug *CollectPrimitiveVariables::requireVariationPlug() const
 
 bool CollectPrimitiveVariables::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == suffixesPlug() ||
 		input == suffixContextVariablePlug() ||
 		input == primitiveVariablesPlug() ||
-		input == requireVariationPlug()
-	;
+		input == requireVariationPlug();
 }
 
 void CollectPrimitiveVariables::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -139,7 +137,7 @@ void CollectPrimitiveVariables::hashProcessedObject( const ScenePath &path, cons
 
 	bool hasVariation = false;
 	InternedString suffixContextVariableName( suffixContextVariablePlug()->getValue() );
-	for( const std::string & suffix : suffixesData->readable() )
+	for( const std::string &suffix : suffixesData->readable() )
 	{
 		scope.set( suffixContextVariableName, &suffix );
 		IECore::MurmurHash curHash = inPlug()->objectPlug()->hash();
@@ -158,7 +156,7 @@ void CollectPrimitiveVariables::hashProcessedObject( const ScenePath &path, cons
 
 IECore::ConstObjectPtr CollectPrimitiveVariables::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
 {
-	const IECoreScene::Primitive* inPrimitive = runTimeCast<const IECoreScene::Primitive>( inputObject );
+	const IECoreScene::Primitive *inPrimitive = runTimeCast<const IECoreScene::Primitive>( inputObject );
 	if( !inPrimitive )
 	{
 		return inputObject;
@@ -167,7 +165,7 @@ IECore::ConstObjectPtr CollectPrimitiveVariables::computeProcessedObject( const 
 	std::string primitiveVariables = primitiveVariablesPlug()->getValue();
 
 	ConstStringVectorDataPtr suffixesData = suffixesPlug()->getValue();
-	const vector<string>& suffixes = suffixesData->readable();
+	const vector<string> &suffixes = suffixesData->readable();
 
 	IECore::MurmurHash inputHash = inPlug()->objectPlug()->hash();
 
@@ -215,7 +213,7 @@ IECore::ConstObjectPtr CollectPrimitiveVariables::computeProcessedObject( const 
 	IECoreScene::PrimitivePtr result = inPrimitive->copy();
 	for( unsigned int i = 0; i < suffixes.size(); i++ )
 	{
-		const IECoreScene::Primitive* collectPrimitive = runTimeCast<const IECoreScene::Primitive>( collectedObjects[i].get() );
+		const IECoreScene::Primitive *collectPrimitive = runTimeCast<const IECoreScene::Primitive>( collectedObjects[i].get() );
 
 		if( !collectPrimitive )
 		{
@@ -226,7 +224,7 @@ IECore::ConstObjectPtr CollectPrimitiveVariables::computeProcessedObject( const 
 		{
 			if( StringAlgo::matchMultiple( sourceVar.first, primitiveVariables ) )
 			{
-				result->variables[ sourceVar.first + suffixes[i] ] = sourceVar.second;
+				result->variables[sourceVar.first + suffixes[i]] = sourceVar.second;
 			}
 		}
 	}

@@ -51,55 +51,54 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API SetQuery : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit SetQuery( const std::string &name=defaultName<SetQuery>() );
-		~SetQuery() override;
+	explicit SetQuery( const std::string &name = defaultName<SetQuery>() );
+	~SetQuery() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::SetQuery, SetQueryTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::SetQuery, SetQueryTypeId, ComputeNode );
 
-		ScenePlug *scenePlug();
-		const ScenePlug *scenePlug() const;
+	ScenePlug *scenePlug();
+	const ScenePlug *scenePlug() const;
 
-		Gaffer::StringPlug *locationPlug();
-		const Gaffer::StringPlug *locationPlug() const;
+	Gaffer::StringPlug *locationPlug();
+	const Gaffer::StringPlug *locationPlug() const;
 
-		Gaffer::StringPlug *setsPlug();
-		const Gaffer::StringPlug *setsPlug() const;
+	Gaffer::StringPlug *setsPlug();
+	const Gaffer::StringPlug *setsPlug() const;
 
-		Gaffer::BoolPlug *inheritPlug();
-		const Gaffer::BoolPlug *inheritPlug() const;
+	Gaffer::BoolPlug *inheritPlug();
+	const Gaffer::BoolPlug *inheritPlug() const;
 
-		Gaffer::StringVectorDataPlug *matchesPlug();
-		const Gaffer::StringVectorDataPlug *matchesPlug() const;
+	Gaffer::StringVectorDataPlug *matchesPlug();
+	const Gaffer::StringVectorDataPlug *matchesPlug() const;
 
-		Gaffer::StringPlug *firstMatchPlug();
-		const Gaffer::StringPlug *firstMatchPlug() const;
+	Gaffer::StringPlug *firstMatchPlug();
+	const Gaffer::StringPlug *firstMatchPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		// Internal plug used to compute MatchesData, from which the output
-		// for `matchesPlug()` and `firstMatch()` plug is derived. This uses
-		// `${scene:path}` rather than `locationPlug()` so we can use recursive
-		// computes to inherit from ancestor locations.
-		Gaffer::ObjectPlug *matchesInternalPlug();
-		const Gaffer::ObjectPlug *matchesInternalPlug() const;
+	// Internal plug used to compute MatchesData, from which the output
+	// for `matchesPlug()` and `firstMatch()` plug is derived. This uses
+	// `${scene:path}` rather than `locationPlug()` so we can use recursive
+	// computes to inherit from ancestor locations.
+	Gaffer::ObjectPlug *matchesInternalPlug();
+	const Gaffer::ObjectPlug *matchesInternalPlug() const;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		bool affectsMatchesInternal( const Gaffer::Plug *input ) const;
-		void hashMatchesInternal( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstObjectPtr computeMatchesInternal( const Gaffer::Context *context ) const;
+	bool affectsMatchesInternal( const Gaffer::Plug *input ) const;
+	void hashMatchesInternal( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstObjectPtr computeMatchesInternal( const Gaffer::Context *context ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( SetQuery )

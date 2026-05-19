@@ -57,7 +57,7 @@ namespace
 
 struct DriverCreatedSlotCaller
 {
-	void operator()( boost::python::object slot, IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters )
+	void operator () ( boost::python::object slot, IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters )
 	{
 		try
 		{
@@ -91,7 +91,6 @@ class CatalogueSerialiser : public NodeSerialiser
 		}
 		return NodeSerialiser::childNeedsSerialisation( child, serialisation );
 	}
-
 };
 
 void copyFrom( Catalogue::Image &image, const Catalogue::Image *other )
@@ -125,23 +124,23 @@ void GafferSceneModule::bindCatalogue()
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<Display>()
-			.def( "setDriver", &Display::setDriver, ( arg( "driver" ), arg( "copy" ) = false ) )
-			.def( "getDriver", (IECoreImage::DisplayDriver *(Display::*)())&Display::getDriver, return_value_policy<CastToIntrusivePtr>() )
-			.def( "driverClosed", &Display::driverClosed )
-			.def( "driverCreatedSignal", &Display::driverCreatedSignal, return_value_policy<reference_existing_object>() ).staticmethod( "driverCreatedSignal" )
-			.def( "imageReceivedSignal", &Display::imageReceivedSignal, return_value_policy<reference_existing_object>() ).staticmethod( "imageReceivedSignal" )
-		;
+					  .def( "setDriver", &Display::setDriver, ( arg( "driver" ), arg( "copy" ) = false ) )
+					  .def( "getDriver", ( IECoreImage::DisplayDriver * (Display::*)() ) & Display::getDriver, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "driverClosed", &Display::driverClosed )
+					  .def( "driverCreatedSignal", &Display::driverCreatedSignal, return_value_policy<reference_existing_object>() )
+					  .staticmethod( "driverCreatedSignal" )
+					  .def( "imageReceivedSignal", &Display::imageReceivedSignal, return_value_policy<reference_existing_object>() )
+					  .staticmethod( "imageReceivedSignal" );
 
 		SignalClass<Display::DriverCreatedSignal, DefaultSignalCaller<Display::DriverCreatedSignal>, DriverCreatedSlotCaller>( "DriverCreated" );
 	}
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<Catalogue>()
-			.def( "generateFileName", &generateFileName1 )
-			.def( "generateFileName", &generateFileName2 )
-			.def( "displayDriverServer", &Catalogue::displayDriverServer, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-			.staticmethod( "displayDriverServer" )
-		;
+					  .def( "generateFileName", &generateFileName1 )
+					  .def( "generateFileName", &generateFileName2 )
+					  .def( "displayDriverServer", &Catalogue::displayDriverServer, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+					  .staticmethod( "displayDriverServer" );
 
 		GafferBindings::PlugClass<Catalogue::Image>()
 			.def(
@@ -157,8 +156,7 @@ void GafferSceneModule::bindCatalogue()
 			.def( "load", Catalogue::Image::load )
 			.def( "save", &save )
 			.staticmethod( "load" )
-			.attr( "__qualname__" ) = "Catalogue.Image"
-		;
+			.attr( "__qualname__" ) = "Catalogue.Image";
 
 		Serialisation::registerSerialiser( Catalogue::staticTypeId(), new CatalogueSerialiser );
 	}
@@ -174,5 +172,4 @@ void GafferSceneModule::bindCatalogue()
 	boost::python::objects::copy_class_object(
 		type_id<GafferImage::ImageNode>(), Catalogue::internalImageTypeInfo()
 	);
-
 }

@@ -53,50 +53,49 @@ namespace GafferScene
 class GAFFERSCENE_API FilterProcessor : public Filter
 {
 
-	public :
+public:
 
-		/// Constructs with a single input filter plug named "in". Use inPlug()
-		/// to access this plug.
-		explicit FilterProcessor( const std::string &name=defaultName<FilterProcessor>() );
-		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
-		/// convenience for accessing the first child in the array, and use
-		/// inPlugs() to access the array itself.
-		FilterProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
+	/// Constructs with a single input filter plug named "in". Use inPlug()
+	/// to access this plug.
+	explicit FilterProcessor( const std::string &name = defaultName<FilterProcessor>() );
+	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
+	/// convenience for accessing the first child in the array, and use
+	/// inPlugs() to access the array itself.
+	FilterProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
 
-		~FilterProcessor() override;
+	~FilterProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::FilterProcessor, FilterProcessorTypeId, Filter );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::FilterProcessor, FilterProcessorTypeId, Filter );
 
-		/// Returns the primary filter input. For nodes with multiple inputs
-		/// this will be the first child of the inPlugs() array. For nodes
-		/// with a single input, it will be a plug parented directly to the
-		/// node. If the node is disabled via enabledPlug(), then the inPlug()
-		/// is automatically passed through directly to the outPlug().
-		FilterPlug *inPlug();
-		const FilterPlug *inPlug() const;
+	/// Returns the primary filter input. For nodes with multiple inputs
+	/// this will be the first child of the inPlugs() array. For nodes
+	/// with a single input, it will be a plug parented directly to the
+	/// node. If the node is disabled via enabledPlug(), then the inPlug()
+	/// is automatically passed through directly to the outPlug().
+	FilterPlug *inPlug();
+	const FilterPlug *inPlug() const;
 
-		/// For nodes with multiple inputs, returns the ArrayPlug which
-		/// hosts them. For single input nodes, returns null.
-		Gaffer::ArrayPlug *inPlugs();
-		const Gaffer::ArrayPlug *inPlugs() const;
+	/// For nodes with multiple inputs, returns the ArrayPlug which
+	/// hosts them. For single input nodes, returns null.
+	Gaffer::ArrayPlug *inPlugs();
+	const Gaffer::ArrayPlug *inPlugs() const;
 
-		/// Returns inPlug() as the correspondingInput of outPlug();
-		Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
-		const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
+	/// Returns inPlug() as the correspondingInput of outPlug();
+	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
+	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Reimplemented to pass through the inPlug() hash when the node is disabled.
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		/// Reimplemented to pass through the inPlug() result when the node is disabled.
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	/// Reimplemented to pass through the inPlug() hash when the node is disabled.
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	/// Reimplemented to pass through the inPlug() result when the node is disabled.
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( FilterProcessor )

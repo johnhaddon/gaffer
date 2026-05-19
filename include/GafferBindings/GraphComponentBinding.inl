@@ -58,7 +58,7 @@ static bool acceptsParent( const T &p, const Gaffer::GraphComponent *potentialPa
 
 template<typename T, typename TWrapper>
 GraphComponentClass<T, TWrapper>::GraphComponentClass( const char *docString )
-	:	IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
+	: IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
 {
 	this->def( "acceptsChild", &Detail::acceptsChild<T> );
 	this->def( "acceptsParent", &Detail::acceptsParent<T> );

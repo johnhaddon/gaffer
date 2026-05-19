@@ -84,7 +84,6 @@ class ArnoldColorManagerSerialiser : public GafferBindings::NodeSerialiser
 
 		return result;
 	}
-
 };
 
 } // namespace
@@ -99,8 +98,7 @@ BOOST_PYTHON_MODULE( _GafferArnold )
 	GafferBindings::NodeClass<ArnoldLight>();
 
 	GafferBindings::DependencyNodeClass<ArnoldColorManager>()
-		.def( "loadColorManager", &loadColorManagerWrapper, ( arg( "name" ), arg( "keepExistingValues" ) = false ) )
-	;
+		.def( "loadColorManager", &loadColorManagerWrapper, ( arg( "name" ), arg( "keepExistingValues" ) = false ) );
 
 	GafferBindings::Serialisation::registerSerialiser( ArnoldColorManager::staticTypeId(), new ArnoldColorManagerSerialiser() );
 
@@ -118,7 +116,6 @@ BOOST_PYTHON_MODULE( _GafferArnold )
 		enum_<ArnoldImager::Mode>( "Mode" )
 			.value( "Replace", ArnoldImager::Mode::Replace )
 			.value( "InsertFirst", ArnoldImager::Mode::InsertFirst )
-			.value( "InsertLast", ArnoldImager::Mode::InsertLast )
-		;
+			.value( "InsertLast", ArnoldImager::Mode::InsertLast );
 	}
 }

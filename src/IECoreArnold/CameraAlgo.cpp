@@ -60,20 +60,20 @@ namespace
 
 NodeAlgo::ConverterDescription<Camera> g_description( CameraAlgo::convert );
 
-const AtString g_perspCameraArnoldString("persp_camera");
-const AtString g_orthoCameraArnoldString("ortho_camera");
-const AtString g_fovArnoldString("fov");
-const AtString g_nearClipArnoldString("near_clip");
-const AtString g_farClipArnoldString("far_clip");
-const AtString g_shutterCurveArnoldString("shutter_curve");
-const AtString g_shutterStartArnoldString("shutter_start");
-const AtString g_shutterEndArnoldString("shutter_end");
-const AtString g_screenWindowMinArnoldString("screen_window_min");
-const AtString g_screenWindowMaxArnoldString("screen_window_max");
-const AtString g_apertureSizeArnoldString("aperture_size");
-const AtString g_focusDistanceArnoldString("focus_distance");
-const AtString g_motionStartArnoldString("motion_start");
-const AtString g_motionEndArnoldString("motion_end");
+const AtString g_perspCameraArnoldString( "persp_camera" );
+const AtString g_orthoCameraArnoldString( "ortho_camera" );
+const AtString g_fovArnoldString( "fov" );
+const AtString g_nearClipArnoldString( "near_clip" );
+const AtString g_farClipArnoldString( "far_clip" );
+const AtString g_shutterCurveArnoldString( "shutter_curve" );
+const AtString g_shutterStartArnoldString( "shutter_start" );
+const AtString g_shutterEndArnoldString( "shutter_end" );
+const AtString g_screenWindowMinArnoldString( "screen_window_min" );
+const AtString g_screenWindowMaxArnoldString( "screen_window_max" );
+const AtString g_apertureSizeArnoldString( "aperture_size" );
+const AtString g_focusDistanceArnoldString( "focus_distance" );
+const AtString g_motionStartArnoldString( "motion_start" );
+const AtString g_motionEndArnoldString( "motion_end" );
 
 AtVector2 curvePoint( const Rampff::Point &point )
 {
@@ -135,11 +135,11 @@ AtNode *convertStatic( const IECoreScene::Camera *camera, AtUniverse *universe, 
 	const std::string projection = camera->getProjection();
 
 	AtNode *result = nullptr;
-	if( projection=="perspective" )
+	if( projection == "perspective" )
 	{
 		result = AiNode( universe, g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
 	}
-	else if( projection=="orthographic" )
+	else if( projection == "orthographic" )
 	{
 		result = AiNode( universe, g_orthoCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
 	}
@@ -250,7 +250,7 @@ auto parameterSamples( const IECoreArnold::CameraAlgo::CameraSamples &cameraSamp
 	return result;
 }
 
-void setAnimatedFloat( AtNode *node, AtString name, const IECoreArnold::CameraAlgo::CameraSamples &cameraSamples, float (*parameterFunction)( const IECoreScene::Camera * ) )
+void setAnimatedFloat( AtNode *node, AtString name, const IECoreArnold::CameraAlgo::CameraSamples &cameraSamples, float ( *parameterFunction )( const IECoreScene::Camera * ) )
 {
 	const auto samples = parameterSamples( cameraSamples, parameterFunction );
 	if( samples.size() > 1 )
@@ -268,7 +268,7 @@ void setAnimatedFloat( AtNode *node, AtString name, const IECoreArnold::CameraAl
 AtNode *CameraAlgo::convert( const CameraSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
 {
 	AtNode *result = convertStatic( samples[0], universe, nodeName, parentNode, messageContext );
-	if( samples[0]->getProjection()=="perspective" )
+	if( samples[0]->getProjection() == "perspective" )
 	{
 		setAnimatedFloat( result, g_fovArnoldString, samples, fieldOfView );
 		setAnimatedFloat( result, g_apertureSizeArnoldString, samples, apertureSize );

@@ -48,56 +48,56 @@ namespace GafferImage
 class GAFFERIMAGE_API RankFilter : public FlatImageProcessor
 {
 
-	public :
+public:
 
-		~RankFilter() override;
+	~RankFilter() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::RankFilter, RankFilterTypeId, FlatImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::RankFilter, RankFilterTypeId, FlatImageProcessor );
 
-		Gaffer::V2iPlug *radiusPlug();
-		const Gaffer::V2iPlug *radiusPlug() const;
+	Gaffer::V2iPlug *radiusPlug();
+	const Gaffer::V2iPlug *radiusPlug() const;
 
-		Gaffer::IntPlug *boundingModePlug();
-		const Gaffer::IntPlug *boundingModePlug() const;
+	Gaffer::IntPlug *boundingModePlug();
+	const Gaffer::IntPlug *boundingModePlug() const;
 
-		Gaffer::BoolPlug *expandDataWindowPlug();
-		const Gaffer::BoolPlug *expandDataWindowPlug() const;
+	Gaffer::BoolPlug *expandDataWindowPlug();
+	const Gaffer::BoolPlug *expandDataWindowPlug() const;
 
-		Gaffer::StringPlug *masterChannelPlug();
-		const Gaffer::StringPlug *masterChannelPlug() const;
+	Gaffer::StringPlug *masterChannelPlug();
+	const Gaffer::StringPlug *masterChannelPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		enum Mode
-		{
-			MedianRank,
-			ErodeRank,
-			DilateRank
-		};
+	enum Mode
+	{
+		MedianRank,
+		ErodeRank,
+		DilateRank
+	};
 
-		explicit RankFilter( const std::string &name=defaultName<RankFilter>(), Mode mode=MedianRank );
+	explicit RankFilter( const std::string &name = defaultName<RankFilter>(), Mode mode = MedianRank );
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private:
+private:
 
-		// This private plug stores an offset for each pixel to where the rank is located
-		// It should only be evaluated if masterChannelPlug is set, and it should only be evaluated
-		// with the correct driver channel set in the context
-		Gaffer::V2iVectorDataPlug *pixelOffsetsPlug();
-		const Gaffer::V2iVectorDataPlug *pixelOffsetsPlug() const;
+	// This private plug stores an offset for each pixel to where the rank is located
+	// It should only be evaluated if masterChannelPlug is set, and it should only be evaluated
+	// with the correct driver channel set in the context
+	Gaffer::V2iVectorDataPlug *pixelOffsetsPlug();
+	const Gaffer::V2iVectorDataPlug *pixelOffsetsPlug() const;
 
-		static size_t g_firstPlugIndex;
-		int m_mode;
+	static size_t g_firstPlugIndex;
+	int m_mode;
 };
 
 IE_CORE_DECLAREPTR( RankFilter );

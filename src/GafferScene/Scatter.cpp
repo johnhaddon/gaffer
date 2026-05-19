@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( Scatter );
 size_t Scatter::g_firstPlugIndex = 0;
 
 Scatter::Scatter( const std::string &name )
-	:	BranchCreator( name )
+	: BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -199,15 +199,13 @@ IECore::ConstCompoundObjectPtr Scatter::computeBranchAttributes( const ScenePath
 
 bool Scatter::affectsBranchObject( const Gaffer::Plug *input ) const
 {
-	return
-		input == inPlug()->objectPlug() ||
+	return input == inPlug()->objectPlug() ||
 		input == densityPlug() ||
 		input == densityPrimitiveVariablePlug() ||
 		input == referencePositionPlug() ||
 		input == uvPlug() ||
 		input == primitiveVariablesPlug() ||
-		input == pointTypePlug()
-	;
+		input == pointTypePlug();
 }
 
 void Scatter::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const

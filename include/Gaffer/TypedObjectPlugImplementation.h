@@ -45,7 +45,7 @@ namespace Gaffer
 {
 
 template<class T>
-const IECore::RunTimeTyped::TypeDescription<TypedObjectPlug<T> > TypedObjectPlug<T>::g_typeDescription;
+const IECore::RunTimeTyped::TypeDescription<TypedObjectPlug<T>> TypedObjectPlug<T>::g_typeDescription;
 
 template<class T>
 TypedObjectPlug<T>::TypedObjectPlug(
@@ -54,7 +54,7 @@ TypedObjectPlug<T>::TypedObjectPlug(
 	ConstValuePtr defaultValue,
 	unsigned flags
 )
-	:	ValuePlug( name, direction, defaultValue->copy(), flags )
+	: ValuePlug( name, direction, defaultValue->copy(), flags )
 {
 }
 

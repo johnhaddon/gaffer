@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshType );
 size_t MeshType::g_firstPlugIndex = 0;
 
 MeshType::MeshType( const std::string &name )
-	:	ObjectProcessor( name, PathMatcher::EveryMatch )
+	: ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "meshType", Plug::In, "" ) );
@@ -128,15 +128,13 @@ const Gaffer::StringPlug *MeshType::triangleSubdivisionRulePlug() const
 
 bool MeshType::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == meshTypePlug() ||
 		input == calculatePolygonNormalsPlug() ||
 		input == overwriteExistingNormalsPlug() ||
 		input == interpolateBoundaryPlug() ||
 		input == faceVaryingLinearInterpolationPlug() ||
-		input == triangleSubdivisionRulePlug()
-	;
+		input == triangleSubdivisionRulePlug();
 }
 
 void MeshType::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -202,7 +200,7 @@ IECore::ConstObjectPtr MeshType::computeProcessedObject( const ScenePath &path, 
 
 		if( doNormals )
 		{
-			result->variables[ "N" ] = MeshAlgo::calculateNormals( result.get(), PrimitiveVariable::Interpolation::Vertex, "P", context->canceller() );
+			result->variables["N"] = MeshAlgo::calculateNormals( result.get(), PrimitiveVariable::Interpolation::Vertex, "P", context->canceller() );
 		}
 	}
 

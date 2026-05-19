@@ -47,13 +47,12 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManMeshLight : public GafferScene::MeshLight
 {
 
-	public :
+public:
 
-		explicit RenderManMeshLight( const std::string &name=defaultName<RenderManMeshLight>() );
-		~RenderManMeshLight() override;
+	explicit RenderManMeshLight( const std::string &name = defaultName<RenderManMeshLight>() );
+	~RenderManMeshLight() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManMeshLight, RenderManMeshLightTypeId, MeshLight );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManMeshLight, RenderManMeshLightTypeId, MeshLight );
 };
 
 IE_CORE_DECLAREPTR( RenderManMeshLight )

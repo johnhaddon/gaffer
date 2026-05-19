@@ -55,57 +55,56 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API StandardLightVisualiser : public IECoreGLPreview::LightVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( StandardLightVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( StandardLightVisualiser )
 
-		StandardLightVisualiser();
-		~StandardLightVisualiser() override;
+	StandardLightVisualiser();
+	~StandardLightVisualiser() override;
 
-		IECoreGLPreview::Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	IECoreGLPreview::Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-		static void spotlightParameters( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, float &innerAngle, float &outerAngle, float &radius, float &lensRadius );
+	static void spotlightParameters( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, float &innerAngle, float &outerAngle, float &radius, float &lensRadius );
 
-		// Visualisers for specific renderers can register a function with
-		// this signature to provide textures for area-based lights.
-		//
-		// It should return one of :
-		//  - nullptr : No texture applicable
-		//  - StringData : The file path of a texture.
-		//  - CompoundData : An image representation of the texture data, as
-		//      supported by IECoreGL::ToGLTextureConverter.
+	// Visualisers for specific renderers can register a function with
+	// this signature to provide textures for area-based lights.
+	//
+	// It should return one of :
+	//  - nullptr : No texture applicable
+	//  - StringData : The file path of a texture.
+	//  - CompoundData : An image representation of the texture data, as
+	//      supported by IECoreGL::ToGLTextureConverter.
 
-		using SurfaceTexture = std::function< IECore::DataPtr (
-			const IECore::InternedString &attributeName,
-			const IECoreScene::ShaderNetwork *shaderNetwork,
-			const IECore::CompoundObject *attributes,
-			int maxTextureResolution
-		) >;
+	using SurfaceTexture = std::function<IECore::DataPtr(
+		const IECore::InternedString &attributeName,
+		const IECoreScene::ShaderNetwork *shaderNetwork,
+		const IECore::CompoundObject *attributes,
+		int maxTextureResolution
+	)>;
 
-		// Registers a `SurfaceTexture` function to be used when visualising
-		// lights. The first first non-nullptr value returned from a registered
-		// function will be used as the texture. If no texture data is found,
-		// `surfaceTexture` will look for a string parameter registered as the
-		// "textureNameParameter" metadata value for the supplied shader
-		// network's output shader.
-		static void registerSurfaceTexture( SurfaceTexture texture );
+	// Registers a `SurfaceTexture` function to be used when visualising
+	// lights. The first first non-nullptr value returned from a registered
+	// function will be used as the texture. If no texture data is found,
+	// `surfaceTexture` will look for a string parameter registered as the
+	// "textureNameParameter" metadata value for the supplied shader
+	// network's output shader.
+	static void registerSurfaceTexture( SurfaceTexture texture );
 
-		// Convenience class to allow static registration of surface texture functions.
-		// e.g. `static SurfaceTextureRegistration g_texture( surfaceTextureFunction )`.
-		struct SurfaceTextureRegistration
+	// Convenience class to allow static registration of surface texture functions.
+	// e.g. `static SurfaceTextureRegistration g_texture( surfaceTextureFunction )`.
+	struct SurfaceTextureRegistration
+	{
+		SurfaceTextureRegistration( SurfaceTexture texture )
 		{
-			SurfaceTextureRegistration( SurfaceTexture texture )
-			{
-				registerSurfaceTexture( texture );
-			}
-		};
+			registerSurfaceTexture( texture );
+		}
+	};
 
-	private :
+private:
 
-		IECore::DataPtr surfaceTexture( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, int maxTextureResolution ) const;
+	IECore::DataPtr surfaceTexture( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, int maxTextureResolution ) const;
 
-		static LightVisualiser::LightVisualiserDescription<StandardLightVisualiser> g_description;
-
+	static LightVisualiser::LightVisualiserDescription<StandardLightVisualiser> g_description;
 };
 
 IE_CORE_DECLAREPTR( StandardLightVisualiser )

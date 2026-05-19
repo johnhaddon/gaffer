@@ -54,7 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( ColorSpace );
 size_t ColorSpace::g_firstPlugIndex = 0;
 
 ColorSpace::ColorSpace( const std::string &name )
-	:	OpenColorIOTransform( name, true )
+	: OpenColorIOTransform( name, true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "inputSpace" ) );

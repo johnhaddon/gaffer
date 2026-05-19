@@ -65,11 +65,11 @@ namespace
 struct DefaultColorSpaceFunction
 {
 	DefaultColorSpaceFunction( object fn )
-		:	m_fn( fn )
+		: m_fn( fn )
 	{
 	}
 
-	string operator()( const std::string &fileName, const std::string &fileFormat, const std::string &dataType, const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config )
+	string operator () ( const std::string &fileName, const std::string &fileFormat, const std::string &dataType, const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config )
 	{
 
 		IECorePython::ScopedGILLock gilock;
@@ -83,9 +83,9 @@ struct DefaultColorSpaceFunction
 		}
 	}
 
-	private:
+private:
 
-		object m_fn;
+	object m_fn;
 };
 
 template<typename T>
@@ -130,65 +130,57 @@ void GafferImageModule::bindIO()
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<OpenImageIOReader>()
-			.def( "setOpenFilesLimit", &OpenImageIOReader::setOpenFilesLimit )
-			.staticmethod( "setOpenFilesLimit" )
-			.def( "getOpenFilesLimit", &OpenImageIOReader::getOpenFilesLimit )
-			.staticmethod( "getOpenFilesLimit" )
-			.def( "supportedExtensions", &supportedExtensions<OpenImageIOReader> )
-			.staticmethod( "supportedExtensions" )
-		;
+					  .def( "setOpenFilesLimit", &OpenImageIOReader::setOpenFilesLimit )
+					  .staticmethod( "setOpenFilesLimit" )
+					  .def( "getOpenFilesLimit", &OpenImageIOReader::getOpenFilesLimit )
+					  .staticmethod( "getOpenFilesLimit" )
+					  .def( "supportedExtensions", &supportedExtensions<OpenImageIOReader> )
+					  .staticmethod( "supportedExtensions" );
 
 		enum_<OpenImageIOReader::MissingFrameMode>( "MissingFrameMode" )
 			.value( "Error", OpenImageIOReader::Error )
 			.value( "Black", OpenImageIOReader::Black )
-			.value( "Hold", OpenImageIOReader::Hold )
-		;
+			.value( "Hold", OpenImageIOReader::Hold );
 	}
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<ImageReader>()
-			.def( "supportedExtensions", &supportedExtensions<ImageReader> )
-			.staticmethod( "supportedExtensions" )
-			.def( "setDefaultColorSpaceFunction", &setDefaultColorSpaceFunction<ImageReader> )
-			.staticmethod( "setDefaultColorSpaceFunction" )
-			.def( "getDefaultColorSpaceFunction", &getDefaultColorSpaceFunction<ImageReader> )
-			.staticmethod( "getDefaultColorSpaceFunction" )
-		;
+					  .def( "supportedExtensions", &supportedExtensions<ImageReader> )
+					  .staticmethod( "supportedExtensions" )
+					  .def( "setDefaultColorSpaceFunction", &setDefaultColorSpaceFunction<ImageReader> )
+					  .staticmethod( "setDefaultColorSpaceFunction" )
+					  .def( "getDefaultColorSpaceFunction", &getDefaultColorSpaceFunction<ImageReader> )
+					  .staticmethod( "getDefaultColorSpaceFunction" );
 
 		enum_<ImageReader::MissingFrameMode>( "MissingFrameMode" )
 			.value( "Error", ImageReader::Error )
 			.value( "Black", ImageReader::Black )
-			.value( "Hold", ImageReader::Hold )
-		;
+			.value( "Hold", ImageReader::Hold );
 
 		enum_<ImageReader::FrameMaskMode>( "FrameMaskMode" )
 			.value( "None", ImageReader::None )
 			.value( "None_", ImageReader::None )
 			.value( "BlackOutside", ImageReader::BlackOutside )
-			.value( "ClampToFrame", ImageReader::ClampToFrame )
-		;
+			.value( "ClampToFrame", ImageReader::ClampToFrame );
 
 		enum_<ImageReader::ChannelInterpretation>( "ChannelInterpretation" )
 			.value( "Legacy", ImageReader::ChannelInterpretation::Legacy )
 			.value( "Default", ImageReader::ChannelInterpretation::Default )
-			.value( "Specification", ImageReader::ChannelInterpretation::Specification )
-		;
+			.value( "Specification", ImageReader::ChannelInterpretation::Specification );
 	}
 
 	{
 		using ImageWriterWrapper = TaskNodeWrapper<ImageWriter>;
 
 		scope s = TaskNodeClass<ImageWriter, ImageWriterWrapper>()
-			.def( "currentFileFormat", &ImageWriter::currentFileFormat )
-			.def( "setDefaultColorSpaceFunction", &setDefaultColorSpaceFunction<ImageWriter> )
-			.staticmethod( "setDefaultColorSpaceFunction" )
-			.def( "getDefaultColorSpaceFunction", &getDefaultColorSpaceFunction<ImageWriter> )
-			.staticmethod( "getDefaultColorSpaceFunction" )
-		;
+					  .def( "currentFileFormat", &ImageWriter::currentFileFormat )
+					  .def( "setDefaultColorSpaceFunction", &setDefaultColorSpaceFunction<ImageWriter> )
+					  .staticmethod( "setDefaultColorSpaceFunction" )
+					  .def( "getDefaultColorSpaceFunction", &getDefaultColorSpaceFunction<ImageWriter> )
+					  .staticmethod( "getDefaultColorSpaceFunction" );
 
 		enum_<ImageWriter::Mode>( "Mode" )
 			.value( "Scanline", ImageWriter::Scanline )
-			.value( "Tile", ImageWriter::Tile )
-		;
+			.value( "Tile", ImageWriter::Tile );
 	}
 }

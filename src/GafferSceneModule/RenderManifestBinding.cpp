@@ -106,7 +106,5 @@ void GafferSceneModule::bindRenderManifest()
 		.def( "size", &RenderManifest::size )
 		.def( "loadFromImageMetadata", &loadFromImageMetadataWrapper )
 		.staticmethod( "loadFromImageMetadata" )
-		.def( "writeEXRManifest", &RenderManifest::writeEXRManifest )
-	;
-
+		.def( "writeEXRManifest", &RenderManifest::writeEXRManifest );
 }

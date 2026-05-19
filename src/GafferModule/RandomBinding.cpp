@@ -100,7 +100,6 @@ class RandomChoiceSerialiser : public NodeSerialiser
 
 		return result;
 	}
-
 };
 
 } // namespace
@@ -109,14 +108,12 @@ void GafferModule::bindRandom()
 {
 
 	DependencyNodeClass<Random>()
-		.def( "randomColor", &randomColor )
-	;
+		.def( "randomColor", &randomColor );
 
 	DependencyNodeClass<RandomChoice>()
 		.def( "setup", &setupWrapper )
-		.def( "canSetup", &RandomChoice::canSetup ).staticmethod( "canSetup" )
-	;
+		.def( "canSetup", &RandomChoice::canSetup )
+		.staticmethod( "canSetup" );
 
 	Serialisation::registerSerialiser( RandomChoice::staticTypeId(), new RandomChoiceSerialiser );
-
 }

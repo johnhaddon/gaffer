@@ -122,14 +122,12 @@ GAFFER_API std::unique_ptr<BackgroundTask> ParallelAlgo::callOnBackgroundThread(
 
 		subject,
 
-		[backgroundContext, backgroundMonitors, function] ( const IECore::Canceller &canceller ) {
-
+		[backgroundContext, backgroundMonitors, function]( const IECore::Canceller &canceller ) {
 			Context::EditableScope contextScope( backgroundContext.get() );
 			contextScope.setCanceller( &canceller );
 			Monitor::Scope monitorScope( backgroundMonitors );
 
 			function();
-
 		}
 
 	);

@@ -64,15 +64,12 @@ void GafferImageModule::bindShape()
 			// enum value scoping causing clashes with VerticalAlignment.
 			// In C++11 we should be able to use `enum class` to avoid
 			// this problem.
-			.value( "Center", Text::HorizontalCenter )
-		;
+			.value( "Center", Text::HorizontalCenter );
 
 		enum_<Text::VerticalAlignment>( "VerticalAlignment" )
 			.value( "Bottom", Text::Bottom )
 			.value( "Top", Text::Top )
 			.value( "VerticalCenter", Text::VerticalCenter )
-			.value( "Center", Text::VerticalCenter )
-		;
+			.value( "Center", Text::VerticalCenter );
 	}
-
 }

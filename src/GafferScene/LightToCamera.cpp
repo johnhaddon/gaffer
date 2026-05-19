@@ -87,10 +87,10 @@ T parameter( InternedString metadataTarget, const IECore::CompoundData *paramete
 }
 
 // Return the first light shader found in attributes
-void light( const CompoundObject *attributes, const IECore::CompoundData* &shaderParameters, std::string &metadataTarget )
+void light( const CompoundObject *attributes, const IECore::CompoundData *&shaderParameters, std::string &metadataTarget )
 {
 	for( IECore::CompoundObject::ObjectMap::const_iterator it = attributes->members().begin();
-		it != attributes->members().end(); it++ )
+		 it != attributes->members().end(); it++ )
 	{
 		const std::string &attributeName = it->first.string();
 		if( !( boost::ends_with( attributeName, ":light" ) || attributeName == "light" ) )
@@ -265,7 +265,7 @@ GAFFER_NODE_DEFINE_TYPE( LightToCamera );
 size_t LightToCamera::g_firstPlugIndex = 0;
 
 LightToCamera::LightToCamera( const std::string &name )
-	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
+	: SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -352,7 +352,7 @@ void LightToCamera::hashProcessedObject( const ScenePath &path, const Gaffer::Co
 
 IECore::ConstObjectPtr LightToCamera::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const
 {
-	const IECore::CompoundData* shaderParameters;
+	const IECore::CompoundData *shaderParameters;
 	std::string metadataTarget;
 	IECore::ConstCompoundObjectPtr attributes = inPlug()->attributesPlug()->getValue();
 	light( attributes.get(), shaderParameters, metadataTarget );
@@ -389,7 +389,7 @@ void LightToCamera::hashProcessedTransform( const ScenePath &path, const Gaffer:
 
 M44f LightToCamera::computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const M44f &inputTransform ) const
 {
-	const IECore::CompoundData* shaderParameters;
+	const IECore::CompoundData *shaderParameters;
 	std::string metadataTarget;
 	light( inPlug()->attributesPlug()->getValue().get(), shaderParameters, metadataTarget );
 	IECoreScene::ConstCameraPtr camera = nullptr;
@@ -512,7 +512,7 @@ IECore::ConstPathMatcherDataPtr LightToCamera::computeSet( const IECore::Interne
 	/// work for us.
 	for( PathMatcher::Iterator pIt = lightSet.begin(), peIt = lightSet.end(); pIt != peIt; ++pIt )
 	{
-		sceneScope.set( ScenePlug::scenePathContextName, &(*pIt) );
+		sceneScope.set( ScenePlug::scenePathContextName, &( *pIt ) );
 		const int m = filterPlug()->getValue();
 		if( m & IECore::PathMatcher::ExactMatch )
 		{

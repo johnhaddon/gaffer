@@ -43,7 +43,7 @@
 
 namespace IECore
 {
-	IECORE_DECLARE_TYPEDDATA( FormatData, GafferImage::Format, void, IECore::SimpleDataHolder );
+IECORE_DECLARE_TYPEDDATA( FormatData, GafferImage::Format, void, IECore::SimpleDataHolder );
 } // namespace IECore
 
 namespace GafferImage

@@ -83,7 +83,7 @@ Gaffer::BoolPlugPtr cropWindowToolEnabledPlugWrapper( CropWindowTool &tool )
 
 struct StatusChangedSlotCaller
 {
-	void operator()( boost::python::object slot, CropWindowTool &t )
+	void operator () ( boost::python::object slot, CropWindowTool &t )
 	{
 		try
 		{
@@ -98,7 +98,7 @@ struct StatusChangedSlotCaller
 
 struct ImageSelectionToolStatusChangedSlotCaller
 {
-	void operator()( boost::python::object slot, ImageSelectionTool &t )
+	void operator () ( boost::python::object slot, ImageSelectionTool &t )
 	{
 		try
 		{
@@ -136,7 +136,7 @@ bool selectionEditable( const TransformTool &tool )
 template<typename T>
 struct SelectionChangedSlotCaller
 {
-	void operator()( boost::python::object slot, T &t )
+	void operator () ( boost::python::object slot, T &t )
 	{
 		try
 		{
@@ -213,14 +213,13 @@ void registerSelectMode( const std::string &modifierName, object modifier )
 		[selectModePtr](
 			const GafferScene::ScenePlug *scene,
 			const GafferScene::ScenePlug::ScenePath &path
-		) -> GafferScene::ScenePlug::ScenePath
-		{
+		) -> GafferScene::ScenePlug::ScenePath {
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
 				const std::string pathString = GafferScene::ScenePlug::pathToString( path );
 				return extract<GafferScene::ScenePlug::ScenePath>(
-					(*selectModePtr)( GafferScene::ScenePlugPtr( const_cast<GafferScene::ScenePlug *>( scene ) ), pathString )
+					( *selectModePtr )( GafferScene::ScenePlugPtr( const_cast<GafferScene::ScenePlug *>( scene ) ), pathString )
 				);
 			}
 			catch( const boost::python::error_already_set & )
@@ -252,8 +251,7 @@ void GafferSceneUIModule::bindTools()
 		.def( "registeredSelectModes", &registeredSelectModesWrapper )
 		.staticmethod( "registeredSelectModes" )
 		.def( "deregisterSelectMode", &SelectionTool::deregisterSelectMode )
-		.staticmethod( "deregisterSelectMode" )
-	;
+		.staticmethod( "deregisterSelectMode" );
 
 	{
 		GafferBindings::NodeClass<CropWindowTool>( nullptr, no_init )
@@ -261,19 +259,17 @@ void GafferSceneUIModule::bindTools()
 			.def( "status", &CropWindowTool::status )
 			.def( "plug", &cropWindowToolPlugWrapper )
 			.def( "enabledPlug", &cropWindowToolEnabledPlugWrapper )
-			.def( "statusChangedSignal", &CropWindowTool::statusChangedSignal, return_internal_reference<1>() )
-		;
+			.def( "statusChangedSignal", &CropWindowTool::statusChangedSignal, return_internal_reference<1>() );
 
 		GafferBindings::SignalClass<CropWindowTool::StatusChangedSignal, GafferBindings::DefaultSignalCaller<CropWindowTool::StatusChangedSignal>, StatusChangedSlotCaller>( "StatusChangedSignal" );
 	}
 
 	{
 		scope s = GafferBindings::NodeClass<TransformTool>( nullptr, no_init )
-			.def( "selection", &selection )
-			.def( "selectionEditable", &selectionEditable )
-			.def( "selectionChangedSignal", &TransformTool::selectionChangedSignal, return_internal_reference<1>() )
-			.def( "handlesTransform", &TransformTool::handlesTransform )
-		;
+					  .def( "selection", &selection )
+					  .def( "selectionEditable", &selectionEditable )
+					  .def( "selectionChangedSignal", &TransformTool::selectionChangedSignal, return_internal_reference<1>() )
+					  .def( "handlesTransform", &TransformTool::handlesTransform );
 
 		class_<TransformTool::Selection>( "Selection", no_init )
 
@@ -294,74 +290,63 @@ void GafferSceneUIModule::bindTools()
 			.def( "editTarget", &TransformTool::Selection::editTarget, return_value_policy<CastToIntrusivePtr>() )
 			.def( "transformSpace", &TransformTool::Selection::transformSpace, return_value_policy<copy_const_reference>() )
 
-		;
+			;
 
 		enum_<TransformTool::Orientation>( "Orientation" )
 			.value( "Local", TransformTool::Local )
 			.value( "Parent", TransformTool::Parent )
-			.value( "World", TransformTool::World )
-		;
+			.value( "World", TransformTool::World );
 
 		GafferBindings::SignalClass<TransformTool::SelectionChangedSignal, GafferBindings::DefaultSignalCaller<TransformTool::SelectionChangedSignal>, SelectionChangedSlotCaller<TransformTool>>( "SelectionChangedSignal" );
 	}
 
 	GafferBindings::NodeClass<TranslateTool>( nullptr, no_init )
 		.def( init<SceneView *>() )
-		.def( "translate", &TranslateTool::translate )
-	;
+		.def( "translate", &TranslateTool::translate );
 
 	GafferBindings::NodeClass<ScaleTool>( nullptr, no_init )
 		.def( init<SceneView *>() )
-		.def( "scale", &ScaleTool::scale )
-	;
+		.def( "scale", &ScaleTool::scale );
 
 	GafferBindings::NodeClass<RotateTool>( nullptr, no_init )
 		.def( init<SceneView *>() )
-		.def( "rotate", &RotateTool::rotate )
-	;
+		.def( "rotate", &RotateTool::rotate );
 
 	GafferBindings::NodeClass<CameraTool>( nullptr, no_init )
-		.def( init<SceneView *>() )
-	;
+		.def( init<SceneView *>() );
 
 	GafferBindings::NodeClass<LightTool>( nullptr, no_init )
-		.def( init<SceneView *>() )
-	;
+		.def( init<SceneView *>() );
 
 	{
 		scope s = GafferBindings::NodeClass<LightPositionTool>( nullptr, no_init )
-			.def( init<SceneView *>() )
-			.def( "positionShadow", &LightPositionTool::positionShadow )
-			.def( "positionHighlight", &LightPositionTool::positionHighlight )
-			.def( "positionAlongNormal", &LightPositionTool::positionAlongNormal )
-		;
+					  .def( init<SceneView *>() )
+					  .def( "positionShadow", &LightPositionTool::positionShadow )
+					  .def( "positionHighlight", &LightPositionTool::positionHighlight )
+					  .def( "positionAlongNormal", &LightPositionTool::positionAlongNormal );
 
 		enum_<LightPositionTool::Mode>( "Mode" )
 			.value( "Shadow", LightPositionTool::Mode::Shadow )
 			.value( "Highlight", LightPositionTool::Mode::Highlight )
-			.value( "Diffuse", LightPositionTool::Mode::Diffuse )
-		;
+			.value( "Diffuse", LightPositionTool::Mode::Diffuse );
 	}
 
 	{
 		scope s = GafferBindings::NodeClass<VisualiserTool>( nullptr, no_init )
-			.def( init<SceneView *>() )
-		;
+					  .def( init<SceneView *>() );
 
 		enum_<VisualiserTool::Mode>( "Mode" )
 			.value( "Auto", VisualiserTool::Mode::Auto )
 			.value( "ColorAutoRange", VisualiserTool::Mode::ColorAutoRange )
 			.value( "Color", VisualiserTool::Mode::Color )
-			.value( "VertexLabel", VisualiserTool::Mode::VertexLabel )
-		;
+			.value( "VertexLabel", VisualiserTool::Mode::VertexLabel );
 	}
 
 	{
 		GafferBindings::NodeClass<ImageSelectionTool>( nullptr, no_init )
 			.def( init<GafferUI::View *>() )
 			.def( "status", &ImageSelectionTool::status )
-			.def( "statusChangedSignal", &ImageSelectionTool::statusChangedSignal, return_internal_reference<1>() )
-		;
+			.def( "statusChangedSignal", &ImageSelectionTool::statusChangedSignal, return_internal_reference<1>() );
 
 		GafferBindings::SignalClass<ImageSelectionTool::StatusChangedSignal, GafferBindings::DefaultSignalCaller<ImageSelectionTool::StatusChangedSignal>, ImageSelectionToolStatusChangedSlotCaller>( "StatusChangedSignal" );
 	}

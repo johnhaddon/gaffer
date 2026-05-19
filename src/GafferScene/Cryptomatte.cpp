@@ -67,7 +67,7 @@ namespace
 
 inline uint32_t rotl32( uint32_t x, int8_t r )
 {
-	return (x << r) | (x >> (32 - r));
+	return ( x << r ) | ( x >> ( 32 - r ) );
 }
 
 inline uint32_t fmix( uint32_t h )
@@ -93,7 +93,7 @@ uint32_t MurmurHash3_x86_32( const void *key, size_t len, uint32_t seed )
 
 	/* body */
 
-	const uint32_t *blocks = (const uint32_t *)(data + nblocks * 4);
+	const uint32_t *blocks = (const uint32_t *)( data + nblocks * 4 );
 
 	for( size_t i = -nblocks; i; i++ )
 	{
@@ -110,24 +110,24 @@ uint32_t MurmurHash3_x86_32( const void *key, size_t len, uint32_t seed )
 
 	/* tail */
 
-	const uint8_t *tail = (const uint8_t *)(data + nblocks * 4);
+	const uint8_t *tail = (const uint8_t *)( data + nblocks * 4 );
 
 	uint32_t k1 = 0;
 
 	switch( len & 3 )
 	{
-	case 3:
-		k1 ^= tail[2] << 16;
-		[[fallthrough]];
-	case 2:
-		k1 ^= tail[1] << 8;
-		[[fallthrough]];
-	case 1:
-		k1 ^= tail[0];
-		k1 *= c1;
-		k1 = rotl32( k1, 15 );
-		k1 *= c2;
-		h1 ^= k1;
+		case 3 :
+			k1 ^= tail[2] << 16;
+			[[fallthrough]];
+		case 2 :
+			k1 ^= tail[1] << 8;
+			[[fallthrough]];
+		case 1 :
+			k1 ^= tail[0];
+			k1 *= c1;
+			k1 = rotl32( k1, 15 );
+			k1 *= c2;
+			h1 ^= k1;
 	}
 
 	/* finalization */
@@ -143,7 +143,7 @@ uint32_t MurmurHash3_x86_32( const void *key, size_t len, uint32_t seed )
 
 inline float matteNameToValue( const std::string &matteName )
 {
-	uint32_t hash = MurmurHash3_x86_32( matteName.c_str(), matteName.length(), 0);
+	uint32_t hash = MurmurHash3_x86_32( matteName.c_str(), matteName.length(), 0 );
 
 	// Taken from the Cryptomatte specification - https://github.com/Psyop/Cryptomatte/blob/master/specification/cryptomatte_specification.pdf
 	// if all exponent bits are 0 (subnormals, +zero, -zero) set exponent to 1
@@ -358,8 +358,8 @@ size_t Cryptomatte::g_firstPlugIndex = 0;
 // first channel contains id, second contains alpha contribution
 using ChannelMap = std::unordered_map<std::string, std::string>;
 static const ChannelMap g_channelMap = {
-	{"R", "G"},
-	{"B", "A"},
+	{ "R", "G" },
+	{ "B", "A" },
 };
 
 const std::string g_firstDataChannelSuffix = "00.R";
@@ -371,9 +371,9 @@ Cryptomatte::Cryptomatte( const std::string &name )
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "layer", Gaffer::Plug::In, "" ) );
 	addChild( new IntPlug( "manifestSource", Gaffer::Plug::In, (int)ManifestSource::Metadata, /* min */ (int)ManifestSource::None, /* max */ (int)ManifestSource::Sidecar ) );
-	addChild( new StringPlug( "manifestDirectory", Gaffer::Plug::In, "") );
-	addChild( new StringPlug( "sidecarFile", Gaffer::Plug::In, "") );
-	addChild( new StringPlug( "outputChannel", Gaffer::Plug::In, "A") );
+	addChild( new StringPlug( "manifestDirectory", Gaffer::Plug::In, "" ) );
+	addChild( new StringPlug( "sidecarFile", Gaffer::Plug::In, "" ) );
+	addChild( new StringPlug( "outputChannel", Gaffer::Plug::In, "A" ) );
 	addChild( new StringVectorDataPlug( "matteNames", Gaffer::Plug::In, new StringVectorData() ) );
 	addChild( new FloatVectorDataPlug( "__matteValues", Gaffer::Plug::Out, new FloatVectorData() ) );
 	addChild( new AtomicCompoundDataPlug( "__manifest", Gaffer::Plug::Out, new CompoundData() ) );
@@ -500,9 +500,9 @@ const Gaffer::FloatVectorDataPlug *Cryptomatte::matteChannelDataPlug() const
 	return getChild<FloatVectorDataPlug>( g_firstPlugIndex + 10 );
 }
 
-void Cryptomatte::affects(const Gaffer::Plug *input, AffectedPlugsContainer &outputs) const
+void Cryptomatte::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {
-	FlatImageProcessor::affects(input, outputs);
+	FlatImageProcessor::affects( input, outputs );
 
 	if( input == inPlug()->channelDataPlug() ||
 		input == layerPlug() ||
@@ -558,8 +558,7 @@ void Cryptomatte::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 		manifestSourcePlug()->hash( h );
 		switch( (ManifestSource)manifestSourcePlug()->getValue() )
 		{
-			case ManifestSource::Metadata :
-			{
+			case ManifestSource::Metadata : {
 				layerPlug()->hash( h );
 				if( !layerPlug()->isSetToDefault() )
 				{
@@ -568,13 +567,11 @@ void Cryptomatte::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 				}
 				break;
 			}
-			case ManifestSource::Sidecar :
-			{
+			case ManifestSource::Sidecar : {
 				sidecarFilePlug()->hash( h );
 				break;
 			}
-			case ManifestSource::None :
-			{
+			case ManifestSource::None : {
 				break;
 			}
 		}
@@ -593,7 +590,7 @@ void Cryptomatte::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 		const GafferScene::ScenePlug::ScenePath &scenePath = context->get<GafferScene::ScenePlug::ScenePath>( GafferScene::ScenePlug::scenePathContextName );
 		h.append( &scenePath.front(), scenePath.size() );
 		ScenePlug::GlobalScope globalScope( context );
-		manifestPathDataPlug()->hash(h);
+		manifestPathDataPlug()->hash( h );
 	}
 	else if( output == matteChannelDataPlug() )
 	{
@@ -645,8 +642,7 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 		switch( (ManifestSource)manifestSourcePlug()->getValue() )
 		{
-			case ManifestSource::Metadata :
-			{
+			case ManifestSource::Metadata : {
 				const std::string cryptomatteLayer = layerPlug()->getValue();
 				if( cryptomatteLayer != "" )
 				{
@@ -657,14 +653,12 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 				break;
 			}
-			case ManifestSource::Sidecar :
-			{
+			case ManifestSource::Sidecar : {
 				const std::string sidecarFile = sidecarFilePlug()->getValue();
 				resultData = parseManifestFromSidecarFile( sidecarFile );
 				break;
 			}
-			case ManifestSource::None :
-			{
+			case ManifestSource::None : {
 				break;
 			}
 		}
@@ -694,7 +688,7 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 			{
 				try
 				{
-					matteValues.insert( std::stof( name.substr(1, name.size() - 2) ) );
+					matteValues.insert( std::stof( name.substr( 1, name.size() - 2 ) ) );
 				}
 				catch( const std::exception & )
 				{
@@ -783,7 +777,7 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 		std::sort(
 			result.begin(), result.end(),
-			[] ( const InternedString a, const InternedString b ) {
+			[]( const InternedString a, const InternedString b ) {
 				return a.string() < b.string();
 			}
 		);
@@ -976,7 +970,6 @@ void Cryptomatte::hashChannelData( const GafferImage::ImagePlug *output, const G
 	h.append( inPlug()->channelDataHash( firstDataChannel, tileOrigin ) );
 	matteChannelDataPlug()->hash( h );
 	h.append( channelName );
-
 }
 
 IECore::ConstFloatVectorDataPtr Cryptomatte::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
@@ -1051,8 +1044,8 @@ IECore::ConstFloatVectorDataPtr Cryptomatte::computeChannelData( const std::stri
 	for( std::vector<float>::iterator it = result.begin(), eIt = result.end(); it != eIt; ++it, ++vIt, ++aIt )
 	{
 		// Adapted from the Cryptomatte specification
-		std::memcpy( &h, &(*vIt), sizeof( uint32_t ) );
-		*it = (float)(h << shift) / (float)UINT32_MAX * 0.3f + *aIt * mult;
+		std::memcpy( &h, &( *vIt ), sizeof( uint32_t ) );
+		*it = (float)( h << shift ) / (float)UINT32_MAX * 0.3f + *aIt * mult;
 	}
 
 	return resultData;

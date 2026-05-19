@@ -107,8 +107,7 @@ ConstTensorPtr typedImageTensor(
 	ImageAlgo::parallelProcessTiles(
 		imagePlug,
 		channels,
-		[&] ( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin )
-		{
+		[&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin ) {
 			IECore::Canceller::check( canceller );
 
 			ConstFloatVectorDataPtr channelData = image->channelDataPlug()->getValue();
@@ -161,14 +160,14 @@ ConstTensorPtr typedImageTensor(
 	return tensor;
 }
 
-}  // namespace
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( ImageToTensor );
 
 size_t ImageToTensor::g_firstPlugIndex = 0;
 
 ImageToTensor::ImageToTensor( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image", Plug::In ) );
@@ -291,14 +290,12 @@ void ImageToTensor::hash( const Gaffer::ValuePlug *output, const Gaffer::Context
 			imagePlug(),
 			channels->readable(),
 			// Tile
-			[&] ( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin )
-			{
+			[&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin ) {
 				IECore::Canceller::check( context->canceller() );
 				return image->channelDataPlug()->hash();
 			},
 			// Gather
-			[&] ( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash )
-			{
+			[&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
 				h.append( tileHash );
 			},
 			dataWindow,
@@ -379,4 +376,3 @@ Gaffer::ValuePlug::CachePolicy ImageToTensor::computeCachePolicy( const Gaffer::
 	}
 	return ComputeNode::computeCachePolicy( output );
 }
-

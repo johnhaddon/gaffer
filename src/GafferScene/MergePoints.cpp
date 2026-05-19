@@ -54,7 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( MergePoints );
 size_t MergePoints::g_firstPlugIndex = 0;
 
 MergePoints::MergePoints( const std::string &name )
-	:	MergeObjects( name, "/mergedPoints" )
+	: MergeObjects( name, "/mergedPoints" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 }
@@ -63,13 +63,13 @@ MergePoints::~MergePoints()
 {
 }
 
-IECore::ConstObjectPtr MergePoints::computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MergePoints::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
 {
-	std::vector< std::pair< const IECoreScene::Primitive *, Imath::M44f > > points;
+	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> points;
 
 	for( const auto &[object, transform] : sources )
 	{
-		const IECoreScene::PointsPrimitive * m = IECore::runTimeCast< const IECoreScene::PointsPrimitive >( object.get() );
+		const IECoreScene::PointsPrimitive *m = IECore::runTimeCast<const IECoreScene::PointsPrimitive>( object.get() );
 		if( !m )
 		{
 			// Just skip anything that's not points

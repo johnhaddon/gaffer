@@ -44,13 +44,12 @@ namespace GafferImage
 class GAFFERIMAGE_API Median : public RankFilter
 {
 
-	public :
+public:
 
-		explicit Median( const std::string &name=defaultName<Median>() );
-		~Median() override;
+	explicit Median( const std::string &name = defaultName<Median>() );
+	~Median() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Median, MedianTypeId, RankFilter );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Median, MedianTypeId, RankFilter );
 };
 
 IE_CORE_DECLAREPTR( Median );

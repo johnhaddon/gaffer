@@ -169,7 +169,7 @@ string gadgetName( const Gadget *gadget )
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AuxiliaryConnectionsGadget );
 
 AuxiliaryConnectionsGadget::AuxiliaryConnectionsGadget()
-	:	Gadget( "AuxiliaryConnections" ), m_dirty( false )
+	: Gadget( "AuxiliaryConnections" ), m_dirty( false )
 {
 }
 
@@ -238,7 +238,7 @@ std::pair<const Gadget *, const Gadget *> AuxiliaryConnectionsGadget::connection
 		return { nullptr, nullptr };
 	}
 
-	return connections[selection[0].name-1];
+	return connections[selection[0].name - 1];
 }
 
 bool AuxiliaryConnectionsGadget::acceptsParent( const GraphComponent *potentialParent ) const
@@ -282,8 +282,7 @@ std::string AuxiliaryConnectionsGadget::getToolTip( const IECore::LineSegment3f 
 	s += "Auxiliary connections from " + gadgetName( connection.first ) + " to " + gadgetName( connection.second ) + " : \n\n";
 	visitAuxiliaryConnections(
 		graphGadget(), dstNodeGadget,
-		[ &s, &connection ] ( const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget, const NodeGadget *dstNodeGadget, const Gadget *srcGadget, const Gadget *dstGadget )
-		{
+		[&s, &connection]( const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget, const NodeGadget *dstNodeGadget, const Gadget *srcGadget, const Gadget *dstGadget ) {
 			if( srcGadget == connection.first && dstGadget == connection.second )
 			{
 				s +=
@@ -291,8 +290,7 @@ std::string AuxiliaryConnectionsGadget::getToolTip( const IECore::LineSegment3f 
 					srcPlug->relativeName( srcNodeGadget->node() ) +
 					" -> " +
 					dstPlug->relativeName( dstNodeGadget->node() ) +
-					"\n"
-				;
+					"\n";
 			}
 		}
 	);
@@ -492,8 +490,7 @@ void AuxiliaryConnectionsGadget::updateConnections() const
 
 		visitAuxiliaryConnections(
 			graphGadget(), x.first,
-			[this] ( const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget, const NodeGadget *dstNodeGadget, const Gadget *srcGadget, const Gadget *dstGadget )
-			{
+			[this]( const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget, const NodeGadget *dstNodeGadget, const Gadget *srcGadget, const Gadget *dstGadget ) {
 				AuxiliaryConnection c = { srcNodeGadget, dstNodeGadget, { srcGadget, dstGadget } };
 				m_auxiliaryConnections.insert( c );
 			}

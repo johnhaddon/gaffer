@@ -44,20 +44,19 @@ namespace GafferScene
 class GAFFERSCENE_API ClippingPlane : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ClippingPlane, ClippingPlaneTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ClippingPlane, ClippingPlaneTypeId, ObjectSource );
 
-		explicit ClippingPlane( const std::string &name=defaultName<ClippingPlane>() );
-		~ClippingPlane() override;
+	explicit ClippingPlane( const std::string &name = defaultName<ClippingPlane>() );
+	~ClippingPlane() override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-		IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
-
+	IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 };
 
 IE_CORE_DECLAREPTR( ClippingPlane )

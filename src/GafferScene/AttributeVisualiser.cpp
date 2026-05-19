@@ -56,7 +56,7 @@ GAFFER_NODE_DEFINE_TYPE( AttributeVisualiser );
 size_t AttributeVisualiser::g_firstPlugIndex = 0;
 
 AttributeVisualiser::AttributeVisualiser( const std::string &name )
-	:	AttributeProcessor( name, IECore::PathMatcher::EveryMatch )
+	: AttributeProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -162,8 +162,7 @@ const Gaffer::StringPlug *AttributeVisualiser::shaderParameterPlug() const
 
 bool AttributeVisualiser::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		AttributeProcessor::affectsProcessedAttributes( input ) ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) ||
 		input == attributeNamePlug() ||
 		input == modePlug() ||
 		input == minPlug() ||
@@ -171,8 +170,7 @@ bool AttributeVisualiser::affectsProcessedAttributes( const Gaffer::Plug *input 
 		input == shaderTypePlug() ||
 		input == shaderNamePlug() ||
 		input == shaderParameterPlug() ||
-		rampPlug()->isAncestorOf( input )
-	;
+		rampPlug()->isAncestorOf( input );
 }
 
 void AttributeVisualiser::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const

@@ -45,40 +45,39 @@ namespace GafferUI
 class GAFFERUI_API TranslateHandle : public Handle
 {
 
-	public :
+public:
 
-		explicit TranslateHandle( Style::Axes axes );
-		~TranslateHandle() override;
+	explicit TranslateHandle( Style::Axes axes );
+	~TranslateHandle() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::TranslateHandle, TranslateHandleTypeId, Handle );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::TranslateHandle, TranslateHandleTypeId, Handle );
 
-		void setAxes( Style::Axes axes );
-		Style::Axes getAxes() const;
+	void setAxes( Style::Axes axes );
+	Style::Axes getAxes() const;
 
-		// Returns a vector where each component is 0 or 1,
-		// indicating whether or not the handle will produce
-		// translation in that axis.
-		Imath::V3i axisMask() const;
+	// Returns a vector where each component is 0 or 1,
+	// indicating whether or not the handle will produce
+	// translation in that axis.
+	Imath::V3i axisMask() const;
 
-		// Translation is measured in the local space of the handle.
-		//
-		// > Note :
-		// > The use of a non-zero raster scale may make it appear
-		// > that a handle has no scaling applied, but that scaling
-		// > will still affect the results of `translation()`.
-		Imath::V3f translation( const DragDropEvent &event );
+	// Translation is measured in the local space of the handle.
+	//
+	// > Note :
+	// > The use of a non-zero raster scale may make it appear
+	// > that a handle has no scaling applied, but that scaling
+	// > will still affect the results of `translation()`.
+	Imath::V3f translation( const DragDropEvent &event );
 
-	protected :
+protected:
 
-		void renderHandle( const Style *style, Style::State state ) const override;
-		void dragBegin( const DragDropEvent &event ) override;
+	void renderHandle( const Style *style, Style::State state ) const override;
+	void dragBegin( const DragDropEvent &event ) override;
 
-	private :
+private:
 
-		Style::Axes m_axes;
-		LinearDrag m_linearDrag;
-		PlanarDrag m_planarDrag;
-
+	Style::Axes m_axes;
+	LinearDrag m_linearDrag;
+	PlanarDrag m_planarDrag;
 };
 
 IE_CORE_DECLAREPTR( TranslateHandle )

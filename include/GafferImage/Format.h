@@ -56,79 +56,78 @@ namespace GafferImage
 class GAFFERIMAGE_API Format
 {
 
-	public :
+public:
 
-		Format();
-		explicit Format( const Imath::Box2i &displayWindow, double pixelAspect = 1., bool fromEXRSpace = false );
-		Format( int width, int height, double pixelAspect = 1. );
+	Format();
+	explicit Format( const Imath::Box2i &displayWindow, double pixelAspect = 1., bool fromEXRSpace = false );
+	Format( int width, int height, double pixelAspect = 1. );
 
-		const Imath::Box2i &getDisplayWindow() const;
-		void setDisplayWindow( const Imath::Box2i &window );
+	const Imath::Box2i &getDisplayWindow() const;
+	void setDisplayWindow( const Imath::Box2i &window );
 
-		int width() const;
-		int height() const;
+	int width() const;
+	int height() const;
 
-		double getPixelAspect() const;
-		void setPixelAspect( double pixelAspect );
+	double getPixelAspect() const;
+	void setPixelAspect( double pixelAspect );
 
-		bool operator == ( const Format &rhs ) const;
-		bool operator != ( const Format &rhs ) const;
+	bool operator == ( const Format &rhs ) const;
+	bool operator != ( const Format &rhs ) const;
 
-		/// @name Coordinate system conversions.
-		/// The image coordinate system used by Gaffer has the origin at the
-		/// bottom, with increasing Y coordinates going up. It also considers
-		/// image bounds to be exclusive at the max end.
-		///
-		/// The Cortex and OpenEXR coordinate systems have the origin at the
-		/// top with increasing Y coordinates going down. They use inclusive
-		/// image bounds.
-		///
-		/// These methods assist in converting between the two coordinate
-		/// systems.
-		////////////////////////////////////////////////////////////////////
-		//@{
-		/// Converts from the EXR coordinate space to the internal space of
-		/// the Format.
-		int fromEXRSpace( int exrSpace ) const;
-		Imath::V2i fromEXRSpace( const Imath::V2i &exrSpace ) const;
-		Imath::Box2i fromEXRSpace( const Imath::Box2i &exrSpace ) const;
-		/// Converts from the internal space of the format to the EXR
-		/// coordinate space.
-		int toEXRSpace( int internalSpace ) const;
-		Imath::V2i toEXRSpace( const Imath::V2i &internalSpace ) const;
-		Imath::Box2i toEXRSpace( const Imath::Box2i &internalSpace ) const;
-		//@}
+	/// @name Coordinate system conversions.
+	/// The image coordinate system used by Gaffer has the origin at the
+	/// bottom, with increasing Y coordinates going up. It also considers
+	/// image bounds to be exclusive at the max end.
+	///
+	/// The Cortex and OpenEXR coordinate systems have the origin at the
+	/// top with increasing Y coordinates going down. They use inclusive
+	/// image bounds.
+	///
+	/// These methods assist in converting between the two coordinate
+	/// systems.
+	////////////////////////////////////////////////////////////////////
+	//@{
+	/// Converts from the EXR coordinate space to the internal space of
+	/// the Format.
+	int fromEXRSpace( int exrSpace ) const;
+	Imath::V2i fromEXRSpace( const Imath::V2i &exrSpace ) const;
+	Imath::Box2i fromEXRSpace( const Imath::Box2i &exrSpace ) const;
+	/// Converts from the internal space of the format to the EXR
+	/// coordinate space.
+	int toEXRSpace( int internalSpace ) const;
+	Imath::V2i toEXRSpace( const Imath::V2i &internalSpace ) const;
+	Imath::Box2i toEXRSpace( const Imath::Box2i &internalSpace ) const;
+	//@}
 
-		/// @name Format registry
-		/// Maintains a list of named formats which may be registered
-		/// by config files, and made available to the user via the UI.
-		////////////////////////////////////////////////////////////////////
-		//@{
-		/// Registers a format with the specified name.
-		static void registerFormat( const std::string &name, const Format &format );
-		/// Removes a previously registered format.
-		static void deregisterFormat( const std::string &name );
-		/// Lists all currently registered formats.
-		static void registeredFormats( std::vector<std::string> &names );
-		/// Returns the format registered with the specified name, or
-		/// an empty format if the name is not registered.
-		static Format format( const std::string &name );
-		/// Returns a name registered for the specific format, or
-		/// the empty string if the format has not been registered.
-		/// Note that this is unrelated to the ostream operator.
-		static std::string name( const Format &format );
-		//@}
+	/// @name Format registry
+	/// Maintains a list of named formats which may be registered
+	/// by config files, and made available to the user via the UI.
+	////////////////////////////////////////////////////////////////////
+	//@{
+	/// Registers a format with the specified name.
+	static void registerFormat( const std::string &name, const Format &format );
+	/// Removes a previously registered format.
+	static void deregisterFormat( const std::string &name );
+	/// Lists all currently registered formats.
+	static void registeredFormats( std::vector<std::string> &names );
+	/// Returns the format registered with the specified name, or
+	/// an empty format if the name is not registered.
+	static Format format( const std::string &name );
+	/// Returns a name registered for the specific format, or
+	/// the empty string if the format has not been registered.
+	/// Note that this is unrelated to the ostream operator.
+	static std::string name( const Format &format );
+	//@}
 
-	private :
+private:
 
-		Imath::Box2i m_displayWindow;
-		double m_pixelAspect;
-
+	Imath::Box2i m_displayWindow;
+	double m_pixelAspect;
 };
 
 /// Outputs a numeric description of the format, omitting default information
 /// where possible. Note that this is unrelated to Format::name().
-GAFFERIMAGE_API std::ostream & operator << ( std::ostream &os, const GafferImage::Format &format );
+GAFFERIMAGE_API std::ostream &operator << ( std::ostream &os, const GafferImage::Format &format );
 
 void murmurHashAppend( IECore::MurmurHash &h, const GafferImage::Format &data );
 

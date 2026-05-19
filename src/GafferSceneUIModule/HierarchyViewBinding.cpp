@@ -80,182 +80,181 @@ namespace
 class InclusionsColumn : public PathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( InclusionsColumn )
+	IE_CORE_DECLAREMEMBERPTR( InclusionsColumn )
 
-		InclusionsColumn( ScriptNodePtr script )
-			:	PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	InclusionsColumn( ScriptNodePtr script )
+		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	{
+		buttonPressSignal().connect( boost::bind( &InclusionsColumn::buttonPress, this, ::_3 ) );
+		buttonReleaseSignal().connect( boost::bind( &InclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &InclusionsColumn::visibleSetChanged, this ) );
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result;
+
+		auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
+		if( !scenePath )
 		{
-			buttonPressSignal().connect( boost::bind( &InclusionsColumn::buttonPress, this, ::_3 ) );
-			buttonReleaseSignal().connect( boost::bind( &InclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-			ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &InclusionsColumn::visibleSetChanged, this ) );
-		}
-
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result;
-
-			auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
-			if( !scenePath )
-			{
-				return result;
-			}
-
-			const auto inclusionsMatch = m_visibleSet.inclusions.match( scenePath->names() );
-			const auto locationExcluded = m_visibleSet.exclusions.match( scenePath->names() ) & (IECore::PathMatcher::Result::ExactMatch | IECore::PathMatcher::Result::AncestorMatch);
-
-			auto iconData = new CompoundData;
-			iconData->writable()["state:highlighted"] = g_locationIncludedHighlightedTransparentIconName;
-			result.icon = iconData;
-
-			if( !locationExcluded )
-			{
-				if( inclusionsMatch & IECore::PathMatcher::Result::ExactMatch )
-				{
-					iconData->writable()["state:highlighted"] = g_locationIncludedHighlightedIconName;
-					iconData->writable()["state:normal"] = g_locationIncludedIconName;
-					result.toolTip = g_locationIncludedToolTip;
-				}
-				else if( inclusionsMatch & IECore::PathMatcher::Result::AncestorMatch )
-				{
-					iconData->writable()["state:normal"] = g_ancestorIncludedIconName;
-					result.toolTip = g_ancestorIncludedToolTip;
-				}
-				else if( inclusionsMatch & IECore::PathMatcher::Result::DescendantMatch )
-				{
-					iconData->writable()["state:normal"] =  g_descendantIncludedIconName;
-					result.toolTip = g_descendantIncludedToolTip;
-				}
-				else if( m_visibleSet.expansions.match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
-				{
-					iconData->writable()["state:normal"] = g_locationExpandedIconName;
-					result.toolTip = g_locationExpandedToolTip;
-				}
-				else
-				{
-					result.toolTip = g_inclusionToolTip;
-				}
-			}
-			else
-			{
-				if( inclusionsMatch & IECore::PathMatcher::Result::ExactMatch )
-				{
-					iconData->writable()["state:highlighted"] = g_locationIncludedHighlightedIconName;
-					iconData->writable()["state:normal"] = g_locationIncludedDisabledIconName;
-					result.toolTip = g_locationIncludedOverrideToolTip;
-				}
-				else if( inclusionsMatch & IECore::PathMatcher::Result::DescendantMatch )
-				{
-					iconData->writable()["state:normal"] = g_descendantIncludedTransparentIconName;
-					result.toolTip = g_descendantIncludedOverrideToolTip;
-				}
-				else
-				{
-					result.toolTip = g_inclusionOverrideToolTip;
-				}
-			}
-
 			return result;
 		}
 
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+		const auto inclusionsMatch = m_visibleSet.inclusions.match( scenePath->names() );
+		const auto locationExcluded = m_visibleSet.exclusions.match( scenePath->names() ) & ( IECore::PathMatcher::Result::ExactMatch | IECore::PathMatcher::Result::AncestorMatch );
+
+		auto iconData = new CompoundData;
+		iconData->writable()["state:highlighted"] = g_locationIncludedHighlightedTransparentIconName;
+		result.icon = iconData;
+
+		if( !locationExcluded )
 		{
-			return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_ancestorIncludedIconName : g_locationIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
+			if( inclusionsMatch & IECore::PathMatcher::Result::ExactMatch )
+			{
+				iconData->writable()["state:highlighted"] = g_locationIncludedHighlightedIconName;
+				iconData->writable()["state:normal"] = g_locationIncludedIconName;
+				result.toolTip = g_locationIncludedToolTip;
+			}
+			else if( inclusionsMatch & IECore::PathMatcher::Result::AncestorMatch )
+			{
+				iconData->writable()["state:normal"] = g_ancestorIncludedIconName;
+				result.toolTip = g_ancestorIncludedToolTip;
+			}
+			else if( inclusionsMatch & IECore::PathMatcher::Result::DescendantMatch )
+			{
+				iconData->writable()["state:normal"] = g_descendantIncludedIconName;
+				result.toolTip = g_descendantIncludedToolTip;
+			}
+			else if( m_visibleSet.expansions.match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+			{
+				iconData->writable()["state:normal"] = g_locationExpandedIconName;
+				result.toolTip = g_locationExpandedToolTip;
+			}
+			else
+			{
+				result.toolTip = g_inclusionToolTip;
+			}
+		}
+		else
+		{
+			if( inclusionsMatch & IECore::PathMatcher::Result::ExactMatch )
+			{
+				iconData->writable()["state:highlighted"] = g_locationIncludedHighlightedIconName;
+				iconData->writable()["state:normal"] = g_locationIncludedDisabledIconName;
+				result.toolTip = g_locationIncludedOverrideToolTip;
+			}
+			else if( inclusionsMatch & IECore::PathMatcher::Result::DescendantMatch )
+			{
+				iconData->writable()["state:normal"] = g_descendantIncludedTransparentIconName;
+				result.toolTip = g_descendantIncludedOverrideToolTip;
+			}
+			else
+			{
+				result.toolTip = g_inclusionOverrideToolTip;
+			}
 		}
 
-	private :
+		return result;
+	}
 
-		void visibleSetChanged()
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+	{
+		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_ancestorIncludedIconName : g_locationIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
+	}
+
+private:
+
+	void visibleSetChanged()
+	{
+		// We take a copy, because `cellData()` is called from background threads,
+		// and it's not safe to call `getVisibleSet()` concurrently with modifications
+		// on the foreground thread.
+		m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
+		changedSignal()( this );
+	}
+
+	bool buttonPress( const ButtonEvent &event )
+	{
+		if( event.buttons != ButtonEvent::Left )
 		{
-			// We take a copy, because `cellData()` is called from background threads,
-			// and it's not safe to call `getVisibleSet()` concurrently with modifications
-			// on the foreground thread.
-			m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
-			changedSignal()( this );
+			return false;
 		}
 
-		bool buttonPress( const ButtonEvent &event )
-		{
-			if( event.buttons != ButtonEvent::Left )
-			{
-				return false;
-			}
+		return true;
+	}
 
-			return true;
+	bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+	{
+		auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
+		if( !scenePath )
+		{
+			return false;
 		}
 
-		bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+		auto paths = IECore::PathMatcher();
+		paths.addPath( scenePath->names() );
+		const auto selection = widget.getSelection();
+		if( std::holds_alternative<std::vector<IECore::PathMatcher>>( selection ) )
 		{
-			auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
-			if( !scenePath )
+			// Permit bulk editing of a selection of paths when clicking on one of the selected paths
+			const auto selectedPaths = std::get<std::vector<IECore::PathMatcher>>( selection );
+			if( selectedPaths.size() && selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
 			{
-				return false;
+				paths = selectedPaths[0];
 			}
-
-			auto paths = IECore::PathMatcher();
-			paths.addPath( scenePath->names() );
-			const auto selection = widget.getSelection();
-			if( std::holds_alternative<std::vector<IECore::PathMatcher>>( selection ) )
-			{
-				// Permit bulk editing of a selection of paths when clicking on one of the selected paths
-				const auto selectedPaths = std::get<std::vector<IECore::PathMatcher>>( selection );
-				if( selectedPaths.size() && selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
-				{
-					paths = selectedPaths[0];
-				}
-			}
-
-			bool update = false;
-			auto visibleSet = m_visibleSet;
-			if( event.button == ButtonEvent::Left && !event.modifiers )
-			{
-				if( visibleSet.inclusions.match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
-				{
-					update = visibleSet.inclusions.removePaths( paths );
-				}
-				else
-				{
-					update = visibleSet.inclusions.addPaths( paths );
-				}
-			}
-			else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
-			{
-				for( IECore::PathMatcher::Iterator it = paths.begin(), eIt = paths.end(); it != eIt; ++it )
-				{
-					update |= visibleSet.inclusions.prune( *it );
-				}
-			}
-
-			if( update )
-			{
-				ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
-			}
-
-			return true;
 		}
 
-		ScriptNodePtr m_script;
-		VisibleSet m_visibleSet;
+		bool update = false;
+		auto visibleSet = m_visibleSet;
+		if( event.button == ButtonEvent::Left && !event.modifiers )
+		{
+			if( visibleSet.inclusions.match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+			{
+				update = visibleSet.inclusions.removePaths( paths );
+			}
+			else
+			{
+				update = visibleSet.inclusions.addPaths( paths );
+			}
+		}
+		else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
+		{
+			for( IECore::PathMatcher::Iterator it = paths.begin(), eIt = paths.end(); it != eIt; ++it )
+			{
+				update |= visibleSet.inclusions.prune( *it );
+			}
+		}
 
-		static IECore::StringDataPtr g_descendantIncludedIconName;
-		static IECore::StringDataPtr g_descendantIncludedTransparentIconName;
-		static IECore::StringDataPtr g_locationExpandedIconName;
-		static IECore::StringDataPtr g_locationIncludedIconName;
-		static IECore::StringDataPtr g_locationIncludedDisabledIconName;
-		static IECore::StringDataPtr g_ancestorIncludedIconName;
-		static IECore::StringDataPtr g_locationIncludedHighlightedIconName;
-		static IECore::StringDataPtr g_locationIncludedHighlightedTransparentIconName;
+		if( update )
+		{
+			ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
+		}
 
-		static IECore::StringDataPtr g_inclusionToolTip;
-		static IECore::StringDataPtr g_inclusionOverrideToolTip;
-		static IECore::StringDataPtr g_locationExpandedToolTip;
-		static IECore::StringDataPtr g_locationIncludedToolTip;
-		static IECore::StringDataPtr g_locationIncludedOverrideToolTip;
-		static IECore::StringDataPtr g_ancestorIncludedToolTip;
-		static IECore::StringDataPtr g_descendantIncludedToolTip;
-		static IECore::StringDataPtr g_descendantIncludedOverrideToolTip;
+		return true;
+	}
 
+	ScriptNodePtr m_script;
+	VisibleSet m_visibleSet;
+
+	static IECore::StringDataPtr g_descendantIncludedIconName;
+	static IECore::StringDataPtr g_descendantIncludedTransparentIconName;
+	static IECore::StringDataPtr g_locationExpandedIconName;
+	static IECore::StringDataPtr g_locationIncludedIconName;
+	static IECore::StringDataPtr g_locationIncludedDisabledIconName;
+	static IECore::StringDataPtr g_ancestorIncludedIconName;
+	static IECore::StringDataPtr g_locationIncludedHighlightedIconName;
+	static IECore::StringDataPtr g_locationIncludedHighlightedTransparentIconName;
+
+	static IECore::StringDataPtr g_inclusionToolTip;
+	static IECore::StringDataPtr g_inclusionOverrideToolTip;
+	static IECore::StringDataPtr g_locationExpandedToolTip;
+	static IECore::StringDataPtr g_locationIncludedToolTip;
+	static IECore::StringDataPtr g_locationIncludedOverrideToolTip;
+	static IECore::StringDataPtr g_ancestorIncludedToolTip;
+	static IECore::StringDataPtr g_descendantIncludedToolTip;
+	static IECore::StringDataPtr g_descendantIncludedOverrideToolTip;
 };
 
 StringDataPtr InclusionsColumn::g_descendantIncludedIconName = new StringData( "descendantIncluded.png" );
@@ -310,147 +309,147 @@ StringDataPtr InclusionsColumn::g_descendantIncludedOverrideToolTip = new String
 class ExclusionsColumn : public PathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( ExclusionsColumn )
+	IE_CORE_DECLAREMEMBERPTR( ExclusionsColumn )
 
-		ExclusionsColumn( ScriptNodePtr script )
-			:	PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	ExclusionsColumn( ScriptNodePtr script )
+		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	{
+		buttonPressSignal().connect( boost::bind( &ExclusionsColumn::buttonPress, this, ::_3 ) );
+		buttonReleaseSignal().connect( boost::bind( &ExclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &ExclusionsColumn::visibleSetChanged, this ) );
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result;
+
+		auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
+		if( !scenePath )
 		{
-			buttonPressSignal().connect( boost::bind( &ExclusionsColumn::buttonPress, this, ::_3 ) );
-			buttonReleaseSignal().connect( boost::bind( &ExclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-			ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &ExclusionsColumn::visibleSetChanged, this ) );
-		}
-
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result;
-
-			auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
-			if( !scenePath )
-			{
-				return result;
-			}
-
-			auto exclusionsMatch = m_visibleSet.exclusions.match( scenePath->names() );
-
-			auto iconData = new CompoundData;
-			iconData->writable()["state:highlighted"] = g_locationExcludedHighlightedTransparentIconName;
-			result.icon = iconData;
-
-			if( exclusionsMatch & IECore::PathMatcher::Result::ExactMatch )
-			{
-				iconData->writable()["state:highlighted"] = g_locationExcludedHighlightedIconName;
-				iconData->writable()["state:normal"] = g_locationExcludedIconName;
-				result.toolTip = g_locationExcludedToolTip;
-			}
-			else if( exclusionsMatch & IECore::PathMatcher::Result::AncestorMatch )
-			{
-				iconData->writable()["state:normal"] = g_ancestorExcludedIconName;
-				result.toolTip = g_ancestorExcludedToolTip;
-			}
-			else if( exclusionsMatch & IECore::PathMatcher::Result::DescendantMatch )
-			{
-				iconData->writable()["state:normal"] = g_descendantExcludedIconName;
-				result.toolTip = g_descendantExcludedToolTip;
-			}
-			else
-			{
-				result.toolTip = g_exclusionToolTip;
-			}
-
 			return result;
 		}
 
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+		auto exclusionsMatch = m_visibleSet.exclusions.match( scenePath->names() );
+
+		auto iconData = new CompoundData;
+		iconData->writable()["state:highlighted"] = g_locationExcludedHighlightedTransparentIconName;
+		result.icon = iconData;
+
+		if( exclusionsMatch & IECore::PathMatcher::Result::ExactMatch )
 		{
-			return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_ancestorExcludedIconName : g_locationExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
+			iconData->writable()["state:highlighted"] = g_locationExcludedHighlightedIconName;
+			iconData->writable()["state:normal"] = g_locationExcludedIconName;
+			result.toolTip = g_locationExcludedToolTip;
+		}
+		else if( exclusionsMatch & IECore::PathMatcher::Result::AncestorMatch )
+		{
+			iconData->writable()["state:normal"] = g_ancestorExcludedIconName;
+			result.toolTip = g_ancestorExcludedToolTip;
+		}
+		else if( exclusionsMatch & IECore::PathMatcher::Result::DescendantMatch )
+		{
+			iconData->writable()["state:normal"] = g_descendantExcludedIconName;
+			result.toolTip = g_descendantExcludedToolTip;
+		}
+		else
+		{
+			result.toolTip = g_exclusionToolTip;
 		}
 
-	private :
+		return result;
+	}
 
-		void visibleSetChanged()
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+	{
+		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_ancestorExcludedIconName : g_locationExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
+	}
+
+private:
+
+	void visibleSetChanged()
+	{
+		// We take a copy, because `cellData()` is called from background threads,
+		// and it's not safe to call `getVisibleSet()` concurrently with modifications
+		// on the foreground thread.
+		m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
+		changedSignal()( this );
+	}
+
+	bool buttonPress( const ButtonEvent &event )
+	{
+		if( event.buttons != ButtonEvent::Left )
 		{
-			// We take a copy, because `cellData()` is called from background threads,
-			// and it's not safe to call `getVisibleSet()` concurrently with modifications
-			// on the foreground thread.
-			m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
-			changedSignal()( this );
+			return false;
 		}
 
-		bool buttonPress( const ButtonEvent &event )
-		{
-			if( event.buttons != ButtonEvent::Left )
-			{
-				return false;
-			}
+		return true;
+	}
 
-			return true;
+	bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+	{
+		auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
+		if( !scenePath )
+		{
+			return false;
 		}
 
-		bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+		auto paths = IECore::PathMatcher();
+		paths.addPath( scenePath->names() );
+		const auto selection = widget.getSelection();
+		if( std::holds_alternative<std::vector<IECore::PathMatcher>>( selection ) )
 		{
-			auto scenePath = IECore::runTimeCast<const ScenePath>( &path );
-			if( !scenePath )
+			// Permit bulk editing of a selection of paths when clicking on one of the selected paths
+			const auto selectedPaths = std::get<std::vector<IECore::PathMatcher>>( selection );
+			if( selectedPaths.size() && selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
 			{
-				return false;
+				paths = selectedPaths[0];
 			}
-
-			auto paths = IECore::PathMatcher();
-			paths.addPath( scenePath->names() );
-			const auto selection = widget.getSelection();
-			if( std::holds_alternative<std::vector<IECore::PathMatcher>>( selection ) )
-			{
-				// Permit bulk editing of a selection of paths when clicking on one of the selected paths
-				const auto selectedPaths = std::get<std::vector<IECore::PathMatcher>>( selection );
-				if( selectedPaths.size() && selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
-				{
-					paths = selectedPaths[0];
-				}
-			}
-
-			bool update = false;
-			auto visibleSet = m_visibleSet;
-			if( event.button == ButtonEvent::Left && !event.modifiers )
-			{
-				if( visibleSet.exclusions.match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
-				{
-					update = visibleSet.exclusions.removePaths( paths );
-				}
-				else
-				{
-					update = visibleSet.exclusions.addPaths( paths );
-				}
-			}
-			else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
-			{
-				for( IECore::PathMatcher::Iterator it = paths.begin(), eIt = paths.end(); it != eIt; ++it )
-				{
-					update |= visibleSet.exclusions.prune( *it );
-				}
-			}
-
-			if( update )
-			{
-				ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
-			}
-
-			return true;
 		}
 
-		ScriptNodePtr m_script;
-		VisibleSet m_visibleSet;
+		bool update = false;
+		auto visibleSet = m_visibleSet;
+		if( event.button == ButtonEvent::Left && !event.modifiers )
+		{
+			if( visibleSet.exclusions.match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+			{
+				update = visibleSet.exclusions.removePaths( paths );
+			}
+			else
+			{
+				update = visibleSet.exclusions.addPaths( paths );
+			}
+		}
+		else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
+		{
+			for( IECore::PathMatcher::Iterator it = paths.begin(), eIt = paths.end(); it != eIt; ++it )
+			{
+				update |= visibleSet.exclusions.prune( *it );
+			}
+		}
 
-		static IECore::StringDataPtr g_descendantExcludedIconName;
-		static IECore::StringDataPtr g_locationExcludedIconName;
-		static IECore::StringDataPtr g_ancestorExcludedIconName;
-		static IECore::StringDataPtr g_locationExcludedHighlightedIconName;
-		static IECore::StringDataPtr g_locationExcludedHighlightedTransparentIconName;
+		if( update )
+		{
+			ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
+		}
 
-		static IECore::StringDataPtr g_exclusionToolTip;
-		static IECore::StringDataPtr g_locationExcludedToolTip;
-		static IECore::StringDataPtr g_ancestorExcludedToolTip;
-		static IECore::StringDataPtr g_descendantExcludedToolTip;
+		return true;
+	}
+
+	ScriptNodePtr m_script;
+	VisibleSet m_visibleSet;
+
+	static IECore::StringDataPtr g_descendantExcludedIconName;
+	static IECore::StringDataPtr g_locationExcludedIconName;
+	static IECore::StringDataPtr g_ancestorExcludedIconName;
+	static IECore::StringDataPtr g_locationExcludedHighlightedIconName;
+	static IECore::StringDataPtr g_locationExcludedHighlightedTransparentIconName;
+
+	static IECore::StringDataPtr g_exclusionToolTip;
+	static IECore::StringDataPtr g_locationExcludedToolTip;
+	static IECore::StringDataPtr g_ancestorExcludedToolTip;
+	static IECore::StringDataPtr g_descendantExcludedToolTip;
 };
 
 StringDataPtr ExclusionsColumn::g_descendantExcludedIconName = new StringData( "descendantExcluded.png" );
@@ -481,11 +480,8 @@ void GafferSceneUIModule::bindHierarchyView()
 {
 
 	RefCountedClass<InclusionsColumn, GafferUI::PathColumn>( "_HierarchyViewInclusionsColumn" )
-		.def( init<ScriptNodePtr>() )
-	;
+		.def( init<ScriptNodePtr>() );
 
 	RefCountedClass<ExclusionsColumn, GafferUI::PathColumn>( "_HierarchyViewExclusionsColumn" )
-		.def( init<ScriptNodePtr>() )
-	;
-
+		.def( init<ScriptNodePtr>() );
 }

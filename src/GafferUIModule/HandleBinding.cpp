@@ -52,21 +52,17 @@ void GafferUIModule::bindHandle()
 
 	GadgetClass<Handle>()
 		.def( "setRasterScale", &Handle::setRasterScale )
-		.def( "getRasterScale", &Handle::getRasterScale )
-	;
+		.def( "getRasterScale", &Handle::getRasterScale );
 
 	GadgetClass<TranslateHandle>()
 		.def( init<Style::Axes>() )
 		.def( "setAxes", &TranslateHandle::setAxes )
 		.def( "getAxes", &TranslateHandle::getAxes )
-		.def( "translation", &TranslateHandle::translation )
-	;
+		.def( "translation", &TranslateHandle::translation );
 
 	GadgetClass<ScaleHandle>()
 		.def( init<Style::Axes>() )
 		.def( "setAxes", &ScaleHandle::setAxes )
 		.def( "getAxes", &ScaleHandle::getAxes )
-		.def( "scaling", &ScaleHandle::scaling )
-	;
-
+		.def( "scaling", &ScaleHandle::scaling );
 }

@@ -48,58 +48,57 @@ namespace Gaffer
 class GAFFER_API ContextProcessor : public ComputeNode
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextProcessor, ContextProcessorTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextProcessor, ContextProcessorTypeId, ComputeNode );
 
-		explicit ContextProcessor( const std::string &name=GraphComponent::defaultName<ContextProcessor>() );
-		~ContextProcessor() override;
+	explicit ContextProcessor( const std::string &name = GraphComponent::defaultName<ContextProcessor>() );
+	~ContextProcessor() override;
 
-		/// \undoable
-		void setup( const Plug *plug );
+	/// \undoable
+	void setup( const Plug *plug );
 
-		Plug *inPlug();
-		const Plug *inPlug() const;
+	Plug *inPlug();
+	const Plug *inPlug() const;
 
-		Plug *outPlug();
-		const Plug *outPlug() const;
+	Plug *outPlug();
+	const Plug *outPlug() const;
 
-		BoolPlug *enabledPlug() override;
-		const BoolPlug *enabledPlug() const override;
+	BoolPlug *enabledPlug() override;
+	const BoolPlug *enabledPlug() const override;
 
-		Plug *correspondingInput( const Plug *output ) override;
-		const Plug *correspondingInput( const Plug *output ) const override;
+	Plug *correspondingInput( const Plug *output ) override;
+	const Plug *correspondingInput( const Plug *output ) const override;
 
-		void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-		/// Returns the context that `inPlug()` will be evaluated in
-		/// when `outPlug()` is evaluated in the current context.
-		ContextPtr inPlugContext() const;
+	/// Returns the context that `inPlug()` will be evaluated in
+	/// when `outPlug()` is evaluated in the current context.
+	ContextPtr inPlugContext() const;
 
-	protected :
+protected:
 
-		/// Implemented to return the hash of the matching input using a context modified by
-		/// processContext() - derived class should therefore not need to reimplement hash(),
-		/// and should only implement processContext().
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
+	/// Implemented to return the hash of the matching input using a context modified by
+	/// processContext() - derived class should therefore not need to reimplement hash(),
+	/// and should only implement processContext().
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-		/// Must be implemented to return true if the input is used in `processContext()`.
-		virtual bool affectsContext( const Plug *input ) const = 0;
-		/// Must be implemented to modify context in place.
-		virtual void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const = 0;
+	/// Must be implemented to return true if the input is used in `processContext()`.
+	virtual bool affectsContext( const Plug *input ) const = 0;
+	/// Must be implemented to modify context in place.
+	virtual void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const = 0;
 
-	private :
+private:
 
-		class ProcessedScope;
+	class ProcessedScope;
 
-		static const Plug *correspondingDescendant( const Plug *plug, const Plug *plugAncestor, const Plug *oppositeAncestor );
+	static const Plug *correspondingDescendant( const Plug *plug, const Plug *plugAncestor, const Plug *oppositeAncestor );
 
-		/// Returns the input corresponding to the output and vice versa.
-		const Plug *oppositePlug( const Plug *plug ) const;
+	/// Returns the input corresponding to the output and vice versa.
+	const Plug *oppositePlug( const Plug *plug ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ContextProcessor );

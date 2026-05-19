@@ -45,8 +45,8 @@
 
 namespace Gaffer
 {
-	IE_CORE_FORWARDDECLARE( Plug )
-}
+IE_CORE_FORWARDDECLARE( Plug )
+} // namespace Gaffer
 
 namespace GafferUI
 {
@@ -56,57 +56,56 @@ IE_CORE_FORWARDDECLARE( Nodule )
 class GAFFERUI_API Nodule : public ConnectionCreator
 {
 
-	public :
+public:
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Nodule, NoduleTypeId, ConnectionCreator );
-		~Nodule() override;
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Nodule, NoduleTypeId, ConnectionCreator );
+	~Nodule() override;
 
-		Gaffer::Plug *plug();
-		const Gaffer::Plug *plug() const;
+	Gaffer::Plug *plug();
+	const Gaffer::Plug *plug() const;
 
-		/// Returns a nodule for a child of the plug being represented.
-		/// Default implementation returns `nullptr`. Derived classes that
-		/// manage nodules for child plugs should reimplement appropriately.
-		virtual Nodule *nodule( const Gaffer::Plug *plug );
-		virtual const Nodule *nodule( const Gaffer::Plug *plug ) const;
+	/// Returns a nodule for a child of the plug being represented.
+	/// Default implementation returns `nullptr`. Derived classes that
+	/// manage nodules for child plugs should reimplement appropriately.
+	virtual Nodule *nodule( const Gaffer::Plug *plug );
+	virtual const Nodule *nodule( const Gaffer::Plug *plug ) const;
 
-		void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) override;
+	void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) override;
 
-		/// Creates a Nodule for the specified plug. The type of nodule created can be
-		/// controlled by registering a "nodule:type" metadata value for the plug. Note
-		/// that registering a value of "" suppresses the creation of a Nodule, and in
-		/// this case nullptr will be returned.
-		static NodulePtr create( Gaffer::PlugPtr plug );
+	/// Creates a Nodule for the specified plug. The type of nodule created can be
+	/// controlled by registering a "nodule:type" metadata value for the plug. Note
+	/// that registering a value of "" suppresses the creation of a Nodule, and in
+	/// this case nullptr will be returned.
+	static NodulePtr create( Gaffer::PlugPtr plug );
 
-		using NoduleCreator = std::function<NodulePtr ( Gaffer::PlugPtr )>;
-		/// Registers a Nodule subclass, optionally registering it as the default
-		/// nodule type for a particular type of plug.
-		static void registerNodule( const std::string &noduleTypeName, NoduleCreator creator, IECore::TypeId plugType = IECore::InvalidTypeId );
+	using NoduleCreator = std::function<NodulePtr( Gaffer::PlugPtr )>;
+	/// Registers a Nodule subclass, optionally registering it as the default
+	/// nodule type for a particular type of plug.
+	static void registerNodule( const std::string &noduleTypeName, NoduleCreator creator, IECore::TypeId plugType = IECore::InvalidTypeId );
 
-		std::string getToolTip( const IECore::LineSegment3f &line ) const override;
+	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-	protected :
+protected:
 
-		explicit Nodule( Gaffer::PlugPtr plug );
+	explicit Nodule( Gaffer::PlugPtr plug );
 
-		/// Creating a static one of these is a convenient way of registering a Nodule type.
-		template<class T>
-		struct NoduleTypeDescription
-		{
-			NoduleTypeDescription( IECore::TypeId plugType = IECore::InvalidTypeId ) { Nodule::registerNodule( T::staticTypeName(), &creator, plugType ); };
-			static NodulePtr creator( Gaffer::PlugPtr plug ) { return new T( plug ); };
-		};
+	/// Creating a static one of these is a convenient way of registering a Nodule type.
+	template<class T>
+	struct NoduleTypeDescription
+	{
+		NoduleTypeDescription( IECore::TypeId plugType = IECore::InvalidTypeId ) { Nodule::registerNodule( T::staticTypeName(), &creator, plugType ); };
+		static NodulePtr creator( Gaffer::PlugPtr plug ) { return new T( plug ); };
+	};
 
-	private :
+private:
 
-		Gaffer::PlugPtr m_plug;
+	Gaffer::PlugPtr m_plug;
 
-		using TypeNameCreatorMap = std::map<std::string, NoduleCreator>;
-		static TypeNameCreatorMap &typeNameCreators();
+	using TypeNameCreatorMap = std::map<std::string, NoduleCreator>;
+	static TypeNameCreatorMap &typeNameCreators();
 
-		using PlugCreatorMap = std::map<IECore::TypeId, NoduleCreator>;
-		static PlugCreatorMap &plugCreators();
-
+	using PlugCreatorMap = std::map<IECore::TypeId, NoduleCreator>;
+	static PlugCreatorMap &plugCreators();
 };
 
 IE_CORE_DECLAREPTR( Nodule );

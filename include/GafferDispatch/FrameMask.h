@@ -46,28 +46,28 @@ namespace GafferDispatch
 class GAFFERDISPATCH_API FrameMask : public TaskNode
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferDispatch::FrameMask, FrameMaskTypeId, TaskNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferDispatch::FrameMask, FrameMaskTypeId, TaskNode );
 
-		explicit FrameMask( const std::string &name=defaultName<FrameMask>() );
-		~FrameMask() override;
+	explicit FrameMask( const std::string &name = defaultName<FrameMask>() );
+	~FrameMask() override;
 
-		Gaffer::StringPlug *maskPlug();
-		const Gaffer::StringPlug *maskPlug() const;
+	Gaffer::StringPlug *maskPlug();
+	const Gaffer::StringPlug *maskPlug() const;
 
-	protected :
+protected:
 
-		void preTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
-		IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
-		void execute() const override;
+	void preTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
+	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
+	void execute() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 
-		// Friendship for the bindings
-		friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
+	// Friendship for the bindings
+	friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
 };
 
 } // namespace GafferDispatch

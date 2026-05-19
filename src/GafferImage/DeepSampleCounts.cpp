@@ -49,7 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepSampleCounts );
 size_t DeepSampleCounts::g_firstPlugIndex = 0;
 
 DeepSampleCounts::DeepSampleCounts( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( SetFilter );
 size_t SetFilter::g_firstPlugIndex = 0;
 
 SetFilter::SetFilter( const std::string &name )
-	:	Filter( name )
+	: Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -101,7 +101,6 @@ void SetFilter::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 	{
 		outputs.push_back( outPlug() );
 	}
-
 }
 
 void SetFilter::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const

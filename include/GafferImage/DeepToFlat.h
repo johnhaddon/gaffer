@@ -48,52 +48,53 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepToFlat : public ImageProcessor
 {
 
-	public :
-		enum class DepthMode
-		{
-			Range,
-			Filtered,
-			None
-		};
+public:
 
-		explicit DeepToFlat( const std::string &name=defaultName<DeepToFlat>() );
-		~DeepToFlat() override;
+	enum class DepthMode
+	{
+		Range,
+		Filtered,
+		None
+	};
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepToFlat, DeepToFlatTypeId, ImageProcessor );
+	explicit DeepToFlat( const std::string &name = defaultName<DeepToFlat>() );
+	~DeepToFlat() override;
 
-		Gaffer::IntPlug *depthModePlug();
-		const Gaffer::IntPlug *depthModePlug() const;
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepToFlat, DeepToFlatTypeId, ImageProcessor );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	Gaffer::IntPlug *depthModePlug();
+	const Gaffer::IntPlug *depthModePlug() const;
 
-	protected :
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+protected:
 
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+
+	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
 
-	private :
-		Gaffer::FloatVectorDataPlug *intermediateChannelDataPlug();
-		const Gaffer::FloatVectorDataPlug *intermediateChannelDataPlug() const;
+private:
 
-		Gaffer::FloatVectorDataPlug *flattenedChannelDataPlug();
-		const Gaffer::FloatVectorDataPlug *flattenedChannelDataPlug() const;
+	Gaffer::FloatVectorDataPlug *intermediateChannelDataPlug();
+	const Gaffer::FloatVectorDataPlug *intermediateChannelDataPlug() const;
 
-		DeepState *deepState();
-		const DeepState *deepState() const;
+	Gaffer::FloatVectorDataPlug *flattenedChannelDataPlug();
+	const Gaffer::FloatVectorDataPlug *flattenedChannelDataPlug() const;
 
-		static size_t g_firstPlugIndex;
+	DeepState *deepState();
+	const DeepState *deepState() const;
 
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeepToFlat )

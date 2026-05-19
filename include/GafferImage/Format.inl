@@ -42,13 +42,13 @@ namespace GafferImage
 {
 
 inline Format::Format()
-	:	m_pixelAspect( 1. )
+	: m_pixelAspect( 1. )
 {
 }
 
 inline Format::Format( const Imath::Box2i &displayWindow, double pixelAspect, bool fromEXRSpace )
-	:	m_displayWindow( displayWindow ),
-		m_pixelAspect( pixelAspect )
+	: m_displayWindow( displayWindow ),
+	  m_pixelAspect( pixelAspect )
 {
 	if( fromEXRSpace )
 	{
@@ -57,7 +57,7 @@ inline Format::Format( const Imath::Box2i &displayWindow, double pixelAspect, bo
 }
 
 inline Format::Format( int width, int height, double pixelAspect )
-	:	m_pixelAspect( pixelAspect )
+	: m_pixelAspect( pixelAspect )
 {
 	width = std::max( 0, width );
 	height = std::max( 0, height );
@@ -102,12 +102,12 @@ inline void Format::setPixelAspect( double pixelAspect )
 	m_pixelAspect = pixelAspect;
 }
 
-inline bool Format::operator == ( const Format& rhs ) const
+inline bool Format::operator == ( const Format &rhs ) const
 {
 	return m_displayWindow == rhs.m_displayWindow && m_pixelAspect == rhs.m_pixelAspect;
 }
 
-inline bool Format::operator != ( const Format& rhs ) const
+inline bool Format::operator != ( const Format &rhs ) const
 {
 	return m_displayWindow != rhs.m_displayWindow || m_pixelAspect != rhs.m_pixelAspect;
 }

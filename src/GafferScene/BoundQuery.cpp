@@ -49,20 +49,19 @@ float ensurePositiveZero( float const value )
 	return ( value == 0.0f ) ? std::fabs( value ) : value;
 }
 
-void
-setV3fPlugComponentValue( Gaffer::V3fPlug const& parent, Gaffer::NumericPlug< float >& child, Imath::V3f const& value )
+void setV3fPlugComponentValue( Gaffer::V3fPlug const &parent, Gaffer::NumericPlug<float> &child, Imath::V3f const &value )
 {
 	float cv;
 
-	if( & child == parent.getChild( 0 ) )
+	if( &child == parent.getChild( 0 ) )
 	{
 		cv = value.x;
 	}
-	else if( & child == parent.getChild( 1 ) )
+	else if( &child == parent.getChild( 1 ) )
 	{
 		cv = value.y;
 	}
-	else if( & child == parent.getChild( 2 ) )
+	else if( &child == parent.getChild( 2 ) )
 	{
 		cv = value.z;
 	}
@@ -86,15 +85,13 @@ size_t BoundQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( BoundQuery );
 
-BoundQuery::BoundQuery( std::string const& name )
-: Gaffer::ComputeNode( name )
+BoundQuery::BoundQuery( std::string const &name )
+	: Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
 	addChild( new Gaffer::StringPlug( "location" ) );
-	addChild( new Gaffer::IntPlug( "space", Gaffer::Plug::In,
-		static_cast< int >( Space::World ),
-		0, static_cast< int >( Space::Relative ) ) );
+	addChild( new Gaffer::IntPlug( "space", Gaffer::Plug::In, static_cast<int>( Space::World ), 0, static_cast<int>( Space::Relative ) ) );
 	addChild( new Gaffer::StringPlug( "relativeLocation" ) );
 	addChild( new Gaffer::Box3fPlug( "bound", Gaffer::Plug::Out ) );
 	addChild( new Gaffer::AtomicBox3fPlug( "__internalBound", Gaffer::Plug::Out ) );
@@ -103,97 +100,106 @@ BoundQuery::BoundQuery( std::string const& name )
 }
 
 BoundQuery::~BoundQuery()
-{}
-
-ScenePlug* BoundQuery::scenePlug()
 {
-	return const_cast< ScenePlug* >(
-		static_cast< BoundQuery const* >( this )->scenePlug() );
 }
 
-ScenePlug const* BoundQuery::scenePlug() const
+ScenePlug *BoundQuery::scenePlug()
 {
-	return getChild< ScenePlug >( g_firstPlugIndex );
+	return const_cast<ScenePlug *>(
+		static_cast<BoundQuery const *>( this )->scenePlug()
+	);
 }
 
-Gaffer::StringPlug* BoundQuery::locationPlug()
+ScenePlug const *BoundQuery::scenePlug() const
 {
-	return const_cast< Gaffer::StringPlug* >(
-		static_cast< BoundQuery const* >( this )->locationPlug() );
+	return getChild<ScenePlug>( g_firstPlugIndex );
 }
 
-Gaffer::StringPlug const* BoundQuery::locationPlug() const
+Gaffer::StringPlug *BoundQuery::locationPlug()
 {
-	return getChild< Gaffer::StringPlug >( g_firstPlugIndex + 1 );
+	return const_cast<Gaffer::StringPlug *>(
+		static_cast<BoundQuery const *>( this )->locationPlug()
+	);
 }
 
-Gaffer::IntPlug* BoundQuery::spacePlug()
+Gaffer::StringPlug const *BoundQuery::locationPlug() const
 {
-	return const_cast< Gaffer::IntPlug* >(
-		static_cast< BoundQuery const* >( this )->spacePlug() );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 1 );
 }
 
-Gaffer::IntPlug const* BoundQuery::spacePlug() const
+Gaffer::IntPlug *BoundQuery::spacePlug()
 {
-	return getChild< Gaffer::IntPlug >( g_firstPlugIndex + 2 );
+	return const_cast<Gaffer::IntPlug *>(
+		static_cast<BoundQuery const *>( this )->spacePlug()
+	);
 }
 
-Gaffer::StringPlug* BoundQuery::relativeLocationPlug()
+Gaffer::IntPlug const *BoundQuery::spacePlug() const
 {
-	return const_cast< Gaffer::StringPlug* >(
-		static_cast< BoundQuery const* >( this )->relativeLocationPlug() );
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 2 );
 }
 
-Gaffer::StringPlug const* BoundQuery::relativeLocationPlug() const
+Gaffer::StringPlug *BoundQuery::relativeLocationPlug()
 {
-	return getChild< Gaffer::StringPlug >( g_firstPlugIndex + 3 );
+	return const_cast<Gaffer::StringPlug *>(
+		static_cast<BoundQuery const *>( this )->relativeLocationPlug()
+	);
 }
 
-Gaffer::Box3fPlug* BoundQuery::boundPlug()
+Gaffer::StringPlug const *BoundQuery::relativeLocationPlug() const
 {
-	return const_cast< Gaffer::Box3fPlug* >(
-		static_cast< BoundQuery const* >( this )->boundPlug() );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 3 );
 }
 
-Gaffer::Box3fPlug const* BoundQuery::boundPlug() const
+Gaffer::Box3fPlug *BoundQuery::boundPlug()
 {
-	return getChild< Gaffer::Box3fPlug >( g_firstPlugIndex + 4 );
+	return const_cast<Gaffer::Box3fPlug *>(
+		static_cast<BoundQuery const *>( this )->boundPlug()
+	);
 }
 
-Gaffer::AtomicBox3fPlug* BoundQuery::internalBoundPlug()
+Gaffer::Box3fPlug const *BoundQuery::boundPlug() const
 {
-	return const_cast< Gaffer::AtomicBox3fPlug* >(
-		static_cast< BoundQuery const* >( this )->internalBoundPlug() );
+	return getChild<Gaffer::Box3fPlug>( g_firstPlugIndex + 4 );
 }
 
-Gaffer::AtomicBox3fPlug const* BoundQuery::internalBoundPlug() const
+Gaffer::AtomicBox3fPlug *BoundQuery::internalBoundPlug()
 {
-	return getChild< Gaffer::AtomicBox3fPlug >( g_firstPlugIndex + 5 );
+	return const_cast<Gaffer::AtomicBox3fPlug *>(
+		static_cast<BoundQuery const *>( this )->internalBoundPlug()
+	);
 }
 
-Gaffer::V3fPlug* BoundQuery::centerPlug()
+Gaffer::AtomicBox3fPlug const *BoundQuery::internalBoundPlug() const
 {
-	return const_cast< Gaffer::V3fPlug* >(
-		static_cast< BoundQuery const* >( this )->centerPlug() );
+	return getChild<Gaffer::AtomicBox3fPlug>( g_firstPlugIndex + 5 );
 }
 
-Gaffer::V3fPlug const* BoundQuery::centerPlug() const
+Gaffer::V3fPlug *BoundQuery::centerPlug()
 {
-	return getChild< Gaffer::V3fPlug >( g_firstPlugIndex + 6 );
+	return const_cast<Gaffer::V3fPlug *>(
+		static_cast<BoundQuery const *>( this )->centerPlug()
+	);
 }
 
-Gaffer::V3fPlug* BoundQuery::sizePlug()
+Gaffer::V3fPlug const *BoundQuery::centerPlug() const
 {
-	return const_cast< Gaffer::V3fPlug* >(
-		static_cast< BoundQuery const* >( this )->sizePlug() );
+	return getChild<Gaffer::V3fPlug>( g_firstPlugIndex + 6 );
 }
 
-Gaffer::V3fPlug const* BoundQuery::sizePlug() const
+Gaffer::V3fPlug *BoundQuery::sizePlug()
 {
-	return getChild< Gaffer::V3fPlug >( g_firstPlugIndex + 7 );
+	return const_cast<Gaffer::V3fPlug *>(
+		static_cast<BoundQuery const *>( this )->sizePlug()
+	);
 }
 
-void BoundQuery::affects( Gaffer::Plug const* const input, AffectedPlugsContainer& outputs ) const
+Gaffer::V3fPlug const *BoundQuery::sizePlug() const
+{
+	return getChild<Gaffer::V3fPlug>( g_firstPlugIndex + 7 );
+}
+
+void BoundQuery::affects( Gaffer::Plug const *const input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 
@@ -218,42 +224,42 @@ void BoundQuery::affects( Gaffer::Plug const* const input, AffectedPlugsContaine
 		( input == relativeLocationPlug() ) ||
 		( input == scenePlug()->boundPlug() ) ||
 		( input == scenePlug()->existsPlug() ) ||
-		( input == scenePlug()->transformPlug() ) )
+		( input == scenePlug()->transformPlug() )
+	)
 	{
 		outputs.push_back( internalBoundPlug() );
 	}
 }
 
-void BoundQuery::hash( Gaffer::ValuePlug const* const output, Gaffer::Context const* const context, IECore::MurmurHash& h ) const
+void BoundQuery::hash( Gaffer::ValuePlug const *const output, Gaffer::Context const *const context, IECore::MurmurHash &h ) const
 {
 	ComputeNode::hash( output, context, h );
 
 	if( output == internalBoundPlug() )
 	{
 		std::string const loc = locationPlug()->getValue();
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			ScenePlug const* const splug = scenePlug();
+			ScenePlug const *const splug = scenePlug();
 			assert( splug != 0 );
 
 			ScenePlug::ScenePath const path = ScenePlug::stringToPath( loc );
 
 			if( splug->exists( path ) )
 			{
-				switch( static_cast< Space >( spacePlug()->getValue() ) )
+				switch( static_cast<Space>( spacePlug()->getValue() ) )
 				{
-					case Space::Local:
+					case Space::Local :
 						h = splug->boundHash( path );
 						break;
-					case Space::World:
+					case Space::World :
 						h.append( splug->fullTransformHash( path ) );
 						h.append( splug->boundHash( path ) );
 						break;
-					case Space::Relative:
-					{
+					case Space::Relative : {
 						std::string const rloc = relativeLocationPlug()->getValue();
 
-						if( ! rloc.empty() )
+						if( !rloc.empty() )
 						{
 							if( loc == rloc )
 							{
@@ -273,7 +279,7 @@ void BoundQuery::hash( Gaffer::ValuePlug const* const output, Gaffer::Context co
 						}
 						break;
 					}
-					default:
+					default :
 						break;
 				}
 			}
@@ -281,48 +287,48 @@ void BoundQuery::hash( Gaffer::ValuePlug const* const output, Gaffer::Context co
 	}
 	else
 	{
-		Gaffer::GraphComponent const* const parent = output->parent();
+		Gaffer::GraphComponent const *const parent = output->parent();
 
 		if(
 			( parent == boundPlug()->minPlug() ) ||
 			( parent == boundPlug()->maxPlug() ) ||
 			( parent == centerPlug() ) ||
-			( parent == sizePlug() ) )
+			( parent == sizePlug() )
+		)
 		{
 			internalBoundPlug()->hash( h );
 		}
 	}
 }
 
-void BoundQuery::compute( Gaffer::ValuePlug* const output, Gaffer::Context const* const context ) const
+void BoundQuery::compute( Gaffer::ValuePlug *const output, Gaffer::Context const *const context ) const
 {
 	if( output == internalBoundPlug() )
 	{
 		Imath::Box3f b;
 
 		std::string const loc = locationPlug()->getValue();
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			ScenePlug const* const splug = scenePlug();
+			ScenePlug const *const splug = scenePlug();
 			assert( splug != 0 );
 
 			ScenePlug::ScenePath const path = ScenePlug::stringToPath( loc );
 
 			if( splug->exists( path ) )
 			{
-				switch( static_cast< Space >( spacePlug()->getValue() ) )
+				switch( static_cast<Space>( spacePlug()->getValue() ) )
 				{
-					case Space::Local:
+					case Space::Local :
 						b = splug->bound( path );
 						break;
-					case Space::World:
+					case Space::World :
 						b = Imath::transform( splug->bound( path ), splug->fullTransform( path ) );
 						break;
-					case Space::Relative:
-					{
+					case Space::Relative : {
 						std::string const rloc = relativeLocationPlug()->getValue();
 
-						if( ! rloc.empty() )
+						if( !rloc.empty() )
 						{
 							if( loc == rloc )
 							{
@@ -334,56 +340,59 @@ void BoundQuery::compute( Gaffer::ValuePlug* const output, Gaffer::Context const
 
 								if( splug->exists( rpath ) )
 								{
-									b = Imath::transform( splug->bound( path ),
-										splug->fullTransform( path ) * splug->fullTransform( rpath ).inverse() );
+									b = Imath::transform( splug->bound( path ), splug->fullTransform( path ) * splug->fullTransform( rpath ).inverse() );
 								}
 							}
 						}
 						break;
 					}
-					default:
+					default :
 						break;
 				}
 			}
 		}
 
-		IECore::assertedStaticCast< Gaffer::AtomicBox3fPlug >( output )->setValue( b.isEmpty() ? g_singularBox : b );
+		IECore::assertedStaticCast<Gaffer::AtomicBox3fPlug>( output )->setValue( b.isEmpty() ? g_singularBox : b );
 	}
 	else
 	{
-		Gaffer::GraphComponent* const parent = output->parent();
+		Gaffer::GraphComponent *const parent = output->parent();
 
 		if( parent == boundPlug()->minPlug() )
 		{
 			Imath::Box3f const b = internalBoundPlug()->getValue();
 			setV3fPlugComponentValue(
-				*( IECore::assertedStaticCast< Gaffer::V3fPlug >( parent ) ),
-				*( IECore::assertedStaticCast< Gaffer::NumericPlug< float > >( output ) ), b.min );
+				*( IECore::assertedStaticCast<Gaffer::V3fPlug>( parent ) ),
+				*( IECore::assertedStaticCast<Gaffer::NumericPlug<float>>( output ) ), b.min
+			);
 		}
 		else if( parent == boundPlug()->maxPlug() )
 		{
 			Imath::Box3f const b = internalBoundPlug()->getValue();
 			setV3fPlugComponentValue(
-				*( IECore::assertedStaticCast< Gaffer::V3fPlug >( parent ) ),
-				*( IECore::assertedStaticCast< Gaffer::NumericPlug< float > >( output ) ), b.max );
+				*( IECore::assertedStaticCast<Gaffer::V3fPlug>( parent ) ),
+				*( IECore::assertedStaticCast<Gaffer::NumericPlug<float>>( output ) ), b.max
+			);
 		}
 		else if( parent == centerPlug() )
 		{
 			Imath::Box3f const b = internalBoundPlug()->getValue();
 			setV3fPlugComponentValue(
-				*( IECore::assertedStaticCast< Gaffer::V3fPlug >( parent ) ),
-				*( IECore::assertedStaticCast< Gaffer::NumericPlug< float > >( output ) ), b.center() );
+				*( IECore::assertedStaticCast<Gaffer::V3fPlug>( parent ) ),
+				*( IECore::assertedStaticCast<Gaffer::NumericPlug<float>>( output ) ), b.center()
+			);
 		}
 		else if( parent == sizePlug() )
 		{
 			Imath::Box3f const b = internalBoundPlug()->getValue();
 			setV3fPlugComponentValue(
-				*( IECore::assertedStaticCast< Gaffer::V3fPlug >( parent ) ),
-				*( IECore::assertedStaticCast< Gaffer::NumericPlug< float > >( output ) ), b.size() );
+				*( IECore::assertedStaticCast<Gaffer::V3fPlug>( parent ) ),
+				*( IECore::assertedStaticCast<Gaffer::NumericPlug<float>>( output ) ), b.size()
+			);
 		}
 	}
 
 	ComputeNode::compute( output, context );
 }
 
-} // GafferScene
+} // namespace GafferScene

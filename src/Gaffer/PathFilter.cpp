@@ -46,7 +46,7 @@ using namespace Gaffer;
 IE_CORE_DEFINERUNTIMETYPED( PathFilter );
 
 PathFilter::PathFilter( IECore::CompoundDataPtr userData )
-	:	m_userData( userData ), m_enabled( true )
+	: m_userData( userData ), m_enabled( true )
 {
 }
 
@@ -88,7 +88,7 @@ void PathFilter::filter( std::vector<PathPtr> &paths, const IECore::Canceller *c
 	doFilter( paths, canceller );
 }
 
-using ChangedSignal = Signals::Signal<void ( PathFilter * )>;
+using ChangedSignal = Signals::Signal<void( PathFilter * )>;
 ChangedSignal &PathFilter::changedSignal()
 {
 	return m_changedSignal;

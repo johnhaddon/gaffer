@@ -59,64 +59,63 @@ template<typename T>
 class IECORE_EXPORT TypedObjectPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = T;
-		using ValuePtr = typename ValueType::Ptr;
-		using ConstValuePtr = typename ValueType::ConstPtr;
+	using ValueType = T;
+	using ValuePtr = typename ValueType::Ptr;
+	using ConstValuePtr = typename ValueType::ConstPtr;
 
-		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( TypedObjectPlug<T>, ValuePlug );
+	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( TypedObjectPlug<T>, ValuePlug );
 
-		/// A copy of defaultValue is taken - it must not be null.
-		explicit TypedObjectPlug(
-			const std::string &name,
-			Direction direction = In,
-			ConstValuePtr defaultValue = new ValueType,
-			unsigned flags = Default
-		);
-		~TypedObjectPlug() override;
+	/// A copy of defaultValue is taken - it must not be null.
+	explicit TypedObjectPlug(
+		const std::string &name,
+		Direction direction = In,
+		ConstValuePtr defaultValue = new ValueType,
+		unsigned flags = Default
+	);
+	~TypedObjectPlug() override;
 
-		/// Accepts only instances of TypedObjectPlug<T>, or derived classes.
-		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Accepts only instances of TypedObjectPlug<T>, or derived classes.
+	bool acceptsInput( const Plug *input ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		const ValueType *defaultValue() const;
+	const ValueType *defaultValue() const;
 
-		/// Sets the value, which must be non-null. The value is referenced directly
-		/// and may be shared internally with other Plugs and the cache - under no
-		/// circumstances should you /ever/ modify value after calling setValue( value ).
-		/// Note that the python bindings perform an automatic copy before calling
-		/// setValue() (unless instructed otherwise), to make it harder
-		/// for less experienced coders to get this wrong.
-		void setValue( ConstValuePtr value );
-		/// Returns the value. Note that the returned value is not a copy
-		/// and may be shared with other Plugs and the cache - it is therefore
-		/// imperative that it not be modified in any way. The python bindings
-		/// automatically return a copy from getValue() (unless instructed otherwise)
-		/// to make it harder for less experienced coders to get this wrong.
-		///
-		/// If available, an optional precomputed hash may be passed to avoid the cost
-		/// of computing it again. This hash must have been computed in the current context
-		/// with the node graph in the current state. Passing an incorrect hash has dire
-		/// consequences - use with care.
-		///
-		/// Precomputed hashes are intended to support the following use pattern :
-		///
-		/// MurmurHash currentHash = plug->hash();
-		/// if( currentHash != storedHash )
-		/// {
-		/// 	ConstObjectPtr currentObject = plug->getValue( &currentHash );
-		/// 	storedObject = convertObjectInSomeWay( currentObject );
-		/// 	storedHash = currentHash;
-		/// }
-		///
-		/// This pattern is particularly effective because it not only
-		/// avoids unnecessary conversions, but it also avoids churn in
-		/// the ValuePlug cache.
-		ConstValuePtr getValue( const IECore::MurmurHash *precomputedHash = nullptr ) const;
+	/// Sets the value, which must be non-null. The value is referenced directly
+	/// and may be shared internally with other Plugs and the cache - under no
+	/// circumstances should you /ever/ modify value after calling setValue( value ).
+	/// Note that the python bindings perform an automatic copy before calling
+	/// setValue() (unless instructed otherwise), to make it harder
+	/// for less experienced coders to get this wrong.
+	void setValue( ConstValuePtr value );
+	/// Returns the value. Note that the returned value is not a copy
+	/// and may be shared with other Plugs and the cache - it is therefore
+	/// imperative that it not be modified in any way. The python bindings
+	/// automatically return a copy from getValue() (unless instructed otherwise)
+	/// to make it harder for less experienced coders to get this wrong.
+	///
+	/// If available, an optional precomputed hash may be passed to avoid the cost
+	/// of computing it again. This hash must have been computed in the current context
+	/// with the node graph in the current state. Passing an incorrect hash has dire
+	/// consequences - use with care.
+	///
+	/// Precomputed hashes are intended to support the following use pattern :
+	///
+	/// MurmurHash currentHash = plug->hash();
+	/// if( currentHash != storedHash )
+	/// {
+	/// 	ConstObjectPtr currentObject = plug->getValue( &currentHash );
+	/// 	storedObject = convertObjectInSomeWay( currentObject );
+	/// 	storedHash = currentHash;
+	/// }
+	///
+	/// This pattern is particularly effective because it not only
+	/// avoids unnecessary conversions, but it also avoids churn in
+	/// the ValuePlug cache.
+	ConstValuePtr getValue( const IECore::MurmurHash *precomputedHash = nullptr ) const;
 
-		void setFrom( const ValuePlug *other ) override;
-
+	void setFrom( const ValuePlug *other ) override;
 };
 
 #if !defined( Gaffer_EXPORTS ) && !defined( _MSC_VER )

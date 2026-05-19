@@ -68,16 +68,12 @@ void sampleChannel( const ImagePlug *image, const Box2i &displayWindow, const st
 	sampler.populate(); // Multithread the population of image tiles
 
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::parallel_for( tbb::blocked_range<size_t>( 0, positions.size() ),
-		[&] ( const tbb::blocked_range<size_t> &range ) {
+	tbb::parallel_for( tbb::blocked_range<size_t>( 0, positions.size() ), [&]( const tbb::blocked_range<size_t> &range ) {
 			IECore::Canceller::check( canceller );
 			for( size_t i = range.begin(); i < range.end(); ++i )
 			{
 				outData[i*stride] = sampler.sample( positions[i].x / pixelAspect, positions[i].y ) * multiplier;
-			}
-		},
-		taskGroupContext
-	);
+			} }, taskGroupContext );
 }
 
 } // namespace
@@ -91,7 +87,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageScatter );
 size_t ImageScatter::g_firstPlugIndex = 0;
 
 ImageScatter::ImageScatter( const std::string &name )
-	:	ObjectSource( name, "points" )
+	: ObjectSource( name, "points" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image" ) );
@@ -282,7 +278,7 @@ IECore::ConstObjectPtr ImageScatter::computeSource( const Context *context ) con
 	const float scale = std::max( outputArea.size().x, outputArea.size().y );
 	const V2i offset = displayWindow.min;
 
-	auto densityFunction = [&] ( const V2f &p ) {
+	auto densityFunction = [&]( const V2f &p ) {
 		IECore::Canceller::check( context->canceller() );
 		return densitySampler.sample( offset.x + p.x * scale / pixelAspect, offset.y + p.y * scale );
 	};
@@ -290,7 +286,7 @@ IECore::ConstObjectPtr ImageScatter::computeSource( const Context *context ) con
 	V3fVectorDataPtr positionsData = new V3fVectorData;
 	positionsData->setInterpretation( IECore::GeometricData::Point );
 	vector<V3f> &positions = positionsData->writable();
-	auto emitter = [&] ( const V2f &p ) {
+	auto emitter = [&]( const V2f &p ) {
 		positions.push_back( V3f( offset.x + p.x * scale, offset.y + p.y * scale, 0.0f ) );
 	};
 

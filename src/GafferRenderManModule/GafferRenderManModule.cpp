@@ -56,15 +56,7 @@ using namespace GafferRenderMan;
 BOOST_PYTHON_MODULE( _GafferRenderMan )
 {
 	GafferBindings::PlugClass<BXDFPlug>()
-		.def( init<const std::string &, Gaffer::Plug::Direction, unsigned>(
-				(
-					arg( "name" ) = Gaffer::GraphComponent::defaultName<BXDFPlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
-			)
-		)
-	;
+		.def( init<const std::string &, Gaffer::Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<BXDFPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) );
 
 
 	GafferBindings::DependencyNodeClass<RenderManLight>();
@@ -80,8 +72,7 @@ BOOST_PYTHON_MODULE( _GafferRenderMan )
 		enum_<RenderManOutputFilter::Mode>( "Mode" )
 			.value( "Replace", RenderManOutputFilter::Mode::Replace )
 			.value( "InsertFirst", RenderManOutputFilter::Mode::InsertFirst )
-			.value( "InsertLast", RenderManOutputFilter::Mode::InsertLast )
-		;
+			.value( "InsertLast", RenderManOutputFilter::Mode::InsertLast );
 	}
 
 	GafferBindings::DependencyNodeClass<RenderManSampleFilter>();

@@ -87,7 +87,7 @@ Imath::V2f getWipePosition( const ImageGadget &g )
 
 struct ImageGadgetSlotCaller
 {
-	void operator()( boost::python::object slot, ImageGadgetPtr g )
+	void operator () ( boost::python::object slot, ImageGadgetPtr g )
 	{
 		try
 		{
@@ -105,35 +105,33 @@ struct ImageGadgetSlotCaller
 void GafferImageUIModule::bindImageGadget()
 {
 	scope s = GadgetClass<ImageGadget>()
-		.def( init<>() )
-		.def( "setImage", &ImageGadget::setImage )
-		.def( "getImage", &getImage )
-		.def( "setContext", &ImageGadget::setContext )
-		.def( "getContext", (Context *(ImageGadget::*)())&ImageGadget::getContext, return_value_policy<CastToIntrusivePtr>() )
-		.def( "setSoloChannel", &ImageGadget::setSoloChannel )
-		.def( "getSoloChannel", &ImageGadget::getSoloChannel )
-		.def( "setPaused", &setPaused )
-		.def( "getPaused", &ImageGadget::getPaused )
-		.def( "tileUpdateCount", &ImageGadget::tileUpdateCount )
-		.staticmethod( "tileUpdateCount" )
-		.def( "resetTileUpdateCount", &ImageGadget::resetTileUpdateCount )
-		.staticmethod( "resetTileUpdateCount" )
-		.def( "state", &ImageGadget::state )
-		.def( "stateChangedSignal", &ImageGadget::stateChangedSignal, return_internal_reference<1>() )
-		.def( "pixelAt", &pixelAt )
-		.def( "setWipeEnabled", &ImageGadget::setWipeEnabled )
-		.def( "getWipeEnabled", &ImageGadget::getWipeEnabled )
-		.def( "setWipePosition", &ImageGadget::setWipePosition )
-		.def( "getWipePosition", &getWipePosition )
-		.def( "setWipeAngle", &ImageGadget::setWipeAngle )
-		.def( "getWipeAngle", &ImageGadget::getWipeAngle )
-	;
+				  .def( init<>() )
+				  .def( "setImage", &ImageGadget::setImage )
+				  .def( "getImage", &getImage )
+				  .def( "setContext", &ImageGadget::setContext )
+				  .def( "getContext", ( Context * (ImageGadget::*)() ) & ImageGadget::getContext, return_value_policy<CastToIntrusivePtr>() )
+				  .def( "setSoloChannel", &ImageGadget::setSoloChannel )
+				  .def( "getSoloChannel", &ImageGadget::getSoloChannel )
+				  .def( "setPaused", &setPaused )
+				  .def( "getPaused", &ImageGadget::getPaused )
+				  .def( "tileUpdateCount", &ImageGadget::tileUpdateCount )
+				  .staticmethod( "tileUpdateCount" )
+				  .def( "resetTileUpdateCount", &ImageGadget::resetTileUpdateCount )
+				  .staticmethod( "resetTileUpdateCount" )
+				  .def( "state", &ImageGadget::state )
+				  .def( "stateChangedSignal", &ImageGadget::stateChangedSignal, return_internal_reference<1>() )
+				  .def( "pixelAt", &pixelAt )
+				  .def( "setWipeEnabled", &ImageGadget::setWipeEnabled )
+				  .def( "getWipeEnabled", &ImageGadget::getWipeEnabled )
+				  .def( "setWipePosition", &ImageGadget::setWipePosition )
+				  .def( "getWipePosition", &getWipePosition )
+				  .def( "setWipeAngle", &ImageGadget::setWipeAngle )
+				  .def( "getWipeAngle", &ImageGadget::getWipeAngle );
 
 	enum_<ImageGadget::State>( "State" )
 		.value( "Paused", ImageGadget::Paused )
 		.value( "Running", ImageGadget::Running )
-		.value( "Complete", ImageGadget::Complete )
-	;
+		.value( "Complete", ImageGadget::Complete );
 
 	SignalClass<ImageGadget::ImageGadgetSignal, DefaultSignalCaller<ImageGadget::ImageGadgetSignal>, ImageGadgetSlotCaller>( "ImageGadgetSignal" );
 }

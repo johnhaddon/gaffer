@@ -50,40 +50,39 @@ IE_CORE_FORWARDDECLARE( FileSequencePathFilter )
 class GAFFER_API FileSequencePathFilter : public PathFilter
 {
 
-	public :
+public:
 
-		/// Defines which child paths should remain after the filter runs.
-		enum Keep
-		{
-			/// Leaf paths which are not valid as files in an IECore::FileSequence
-			Files = 0x00000001,
-			/// Leaf paths which are valid as files in an IECore::FileSequence
-			SequentialFiles = 0x00000002,
-			/// Leaf paths which are themselves valid IECore::FileSequences
-			Sequences = 0x00000004,
-			Concise = Files | Sequences,
-			Verbose = Files | SequentialFiles,
-			All = Files | SequentialFiles | Sequences,
-		};
+	/// Defines which child paths should remain after the filter runs.
+	enum Keep
+	{
+		/// Leaf paths which are not valid as files in an IECore::FileSequence
+		Files = 0x00000001,
+		/// Leaf paths which are valid as files in an IECore::FileSequence
+		SequentialFiles = 0x00000002,
+		/// Leaf paths which are themselves valid IECore::FileSequences
+		Sequences = 0x00000004,
+		Concise = Files | Sequences,
+		Verbose = Files | SequentialFiles,
+		All = Files | SequentialFiles | Sequences,
+	};
 
-		explicit FileSequencePathFilter( Keep mode = Concise, IECore::CompoundDataPtr userData = nullptr );
-		~FileSequencePathFilter() override;
+	explicit FileSequencePathFilter( Keep mode = Concise, IECore::CompoundDataPtr userData = nullptr );
+	~FileSequencePathFilter() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::FileSequencePathFilter, FileSequencePathFilterTypeId, Gaffer::PathFilter );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::FileSequencePathFilter, FileSequencePathFilterTypeId, Gaffer::PathFilter );
 
-		Keep getMode() const;
-		void setMode( Keep mode );
+	Keep getMode() const;
+	void setMode( Keep mode );
 
-	protected :
+protected:
 
-		void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
+	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-	private :
+private:
 
-		bool remove( PathPtr path ) const;
+	bool remove( PathPtr path ) const;
 
-		Keep m_mode;
-
+	Keep m_mode;
 };
 
 IE_CORE_DECLAREPTR( FileSequencePathFilter )

@@ -64,15 +64,20 @@ IECORERENDERMAN_API Imath::M44f usdLightTransform( const IECoreScene::Shader *li
 
 struct VStructAction
 {
-	enum class Type { None, Connect, Set };
+	enum class Type
+	{
+		None,
+		Connect,
+		Set
+	};
 	Type type = Type::None;
 	double value = 0;
 };
 
 /// A function which returns the value of a shader parameter.
-using ParameterValueFunction = std::function<IECore::ConstDataPtr ( IECore::InternedString )>;
+using ParameterValueFunction = std::function<IECore::ConstDataPtr( IECore::InternedString )>;
 /// A function which returns true if a shader parameter has an input connection.
-using ParameterIsConnectedFunction = std::function<bool ( IECore::InternedString )>;
+using ParameterIsConnectedFunction = std::function<bool( IECore::InternedString )>;
 
 /// Evaluates a vstruct expression, returning the action that should be taken.
 /// `valueFunction` and `isConnectedFunction` abstract away access to the

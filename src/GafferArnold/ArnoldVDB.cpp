@@ -103,7 +103,7 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldVDB );
 size_t ArnoldVDB::g_firstPlugIndex = 0;
 
 ArnoldVDB::ArnoldVDB( const std::string &name )
-	:	ObjectSource( name, "volume" )
+	: ObjectSource( name, "volume" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );

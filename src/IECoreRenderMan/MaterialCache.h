@@ -58,31 +58,30 @@ IE_CORE_DECLAREPTR( LightShader );
 class MaterialCache
 {
 
-	public :
+public:
 
-		MaterialCache( Session *session );
+	MaterialCache( Session *session );
 
-		// Can be called concurrently with other calls to `get()`
-		ConstMaterialPtr getMaterial( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
-		ConstDisplacementPtr getDisplacement( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
-		ConstLightShaderPtr getLightShader( const IECoreScene::ShaderNetwork *network, const IECoreScene::ShaderNetwork *lightFilter, RtUString shadowSubset );
+	// Can be called concurrently with other calls to `get()`
+	ConstMaterialPtr getMaterial( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
+	ConstDisplacementPtr getDisplacement( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
+	ConstLightShaderPtr getLightShader( const IECoreScene::ShaderNetwork *network, const IECoreScene::ShaderNetwork *lightFilter, RtUString shadowSubset );
 
-		// Must not be called concurrently with anything.
-		void clearUnused();
+	// Must not be called concurrently with anything.
+	void clearUnused();
 
-	private :
+private:
 
-		Session *m_session;
+	Session *m_session;
 
-		using Cache = tbb::concurrent_hash_map<IECore::MurmurHash, ConstMaterialPtr>;
-		Cache m_cache;
+	using Cache = tbb::concurrent_hash_map<IECore::MurmurHash, ConstMaterialPtr>;
+	Cache m_cache;
 
-		using DisplacementCache = tbb::concurrent_hash_map<IECore::MurmurHash, ConstDisplacementPtr>;
-		DisplacementCache m_displacementCache;
+	using DisplacementCache = tbb::concurrent_hash_map<IECore::MurmurHash, ConstDisplacementPtr>;
+	DisplacementCache m_displacementCache;
 
-		using LightShaderCache = tbb::concurrent_hash_map<IECore::MurmurHash, ConstLightShaderPtr>;
-		LightShaderCache m_lightShaderCache;
-
+	using LightShaderCache = tbb::concurrent_hash_map<IECore::MurmurHash, ConstLightShaderPtr>;
+	LightShaderCache m_lightShaderCache;
 };
 
 } // namespace IECoreRenderMan

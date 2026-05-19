@@ -51,50 +51,49 @@ namespace
 class DirtyPropagationScopeWrapper : boost::noncopyable
 {
 
-	public :
+public:
 
-		DirtyPropagationScopeWrapper()
-			:	m_scope( nullptr )
+	DirtyPropagationScopeWrapper()
+		: m_scope( nullptr )
+	{
+	}
+
+	~DirtyPropagationScopeWrapper()
+	{
+		reset();
+	}
+
+	void enter()
+	{
+		reset();
+		m_scope = new DirtyPropagationScope();
+	}
+
+	void exit( object type, object value, object traceback )
+	{
+		reset();
+	}
+
+private:
+
+	void reset()
+	{
+		if( !m_scope )
 		{
+			return;
 		}
 
-		~DirtyPropagationScopeWrapper()
-		{
-			reset();
-		}
+		// The destructor for the scope may trigger a dirty
+		// propagation, and observers of plugDirtiedSignal() may
+		// well invoke a compute. We need to release the GIL so that
+		// if that compute is multithreaded, those threads can acquire
+		// the GIL for python based nodes and expressions.
+		IECorePython::ScopedGILRelease gilRelease;
+		delete m_scope;
+		m_scope = nullptr;
+	}
 
-		void enter()
-		{
-			reset();
-			m_scope = new DirtyPropagationScope();
-		}
-
-		void exit( object type, object value, object traceback )
-		{
-			reset();
-		}
-
-	private :
-
-		void reset()
-		{
-			if( !m_scope )
-			{
-				return;
-			}
-
-			// The destructor for the scope may trigger a dirty
-			// propagation, and observers of plugDirtiedSignal() may
-			// well invoke a compute. We need to release the GIL so that
-			// if that compute is multithreaded, those threads can acquire
-			// the GIL for python based nodes and expressions.
-			IECorePython::ScopedGILRelease gilRelease;
-			delete m_scope;
-			m_scope = nullptr;
-		}
-
-		DirtyPropagationScope *m_scope;
-
+	DirtyPropagationScope *m_scope;
 };
 
 } // namespace
@@ -103,6 +102,5 @@ void GafferModule::bindDirtyPropagationScope()
 {
 	class_<DirtyPropagationScopeWrapper, boost::noncopyable>( "DirtyPropagationScope" )
 		.def( "__enter__", &DirtyPropagationScopeWrapper::enter )
-		.def( "__exit__", &DirtyPropagationScopeWrapper::exit )
-	;
+		.def( "__exit__", &DirtyPropagationScopeWrapper::exit );
 }

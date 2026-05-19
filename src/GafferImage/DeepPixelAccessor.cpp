@@ -45,8 +45,8 @@ using namespace GafferImage;
 
 DeepPixelAccessor::DeepPixelAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode )
 	: m_plug( plug ),
-	m_channelName( channelName ),
-	m_boundingMode( boundingMode )
+	  m_channelName( channelName ),
+	  m_boundingMode( boundingMode )
 {
 	{
 		ImagePlug::GlobalScope c( Context::current() );
@@ -110,11 +110,14 @@ DeepPixelAccessor::DeepPixelAccessor( const GafferImage::ImagePlug *plug, const 
 
 DeepPixelAccessor::DeepPixelAccessor( const DeepPixelAccessor &source, const std::string &channelName )
 	: m_plug( source.m_plug ),
-	m_channelName( channelName ),
-	m_sampleWindow( source.m_sampleWindow ), m_dataWindow( source.m_dataWindow ),
-	m_offsetsCache( source.m_offsetsCache ), m_cacheWindow( source.m_cacheWindow ),
-	m_cacheOriginIndex( source.m_cacheOriginIndex ), m_cacheWidth( source.m_cacheWidth ),
-	m_boundingMode( source.m_boundingMode )
+	  m_channelName( channelName ),
+	  m_sampleWindow( source.m_sampleWindow ),
+	  m_dataWindow( source.m_dataWindow ),
+	  m_offsetsCache( source.m_offsetsCache ),
+	  m_cacheWindow( source.m_cacheWindow ),
+	  m_cacheOriginIndex( source.m_cacheOriginIndex ),
+	  m_cacheWidth( source.m_cacheWidth ),
+	  m_boundingMode( source.m_boundingMode )
 {
 	if( m_channelName.size() )
 	{
@@ -126,7 +129,7 @@ void DeepPixelAccessor::populate()
 {
 	ImageAlgo::parallelProcessTiles(
 		m_plug,
-		[&] ( const ImagePlug *imagePlug, const V2i &tileOrigin ) {
+		[&]( const ImagePlug *imagePlug, const V2i &tileOrigin ) {
 			const float *tileData;
 			const int *tileOffsets;
 			int tilePixelIndex;
@@ -139,9 +142,9 @@ void DeepPixelAccessor::populate()
 
 void DeepPixelAccessor::hash( IECore::MurmurHash &h ) const
 {
-	for ( int x = m_cacheWindow.min.x; x < m_cacheWindow.max.x; x += GafferImage::ImagePlug::tileSize() )
+	for( int x = m_cacheWindow.min.x; x < m_cacheWindow.max.x; x += GafferImage::ImagePlug::tileSize() )
 	{
-		for ( int y = m_cacheWindow.min.y; y < m_cacheWindow.max.y; y += GafferImage::ImagePlug::tileSize() )
+		for( int y = m_cacheWindow.min.y; y < m_cacheWindow.max.y; y += GafferImage::ImagePlug::tileSize() )
 		{
 			if( m_channelName.size() )
 			{

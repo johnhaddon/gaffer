@@ -49,29 +49,28 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Backdrop : public Node
 {
 
-	public :
+public:
 
-		explicit Backdrop( const std::string &name=defaultName<Backdrop>() );
-		~Backdrop() override;
+	explicit Backdrop( const std::string &name = defaultName<Backdrop>() );
+	~Backdrop() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Backdrop, BackdropTypeId, Node );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Backdrop, BackdropTypeId, Node );
 
-		StringPlug *titlePlug();
-		const StringPlug *titlePlug() const;
+	StringPlug *titlePlug();
+	const StringPlug *titlePlug() const;
 
-		FloatPlug *scalePlug();
-		const FloatPlug *scalePlug() const;
+	FloatPlug *scalePlug();
+	const FloatPlug *scalePlug() const;
 
-		StringPlug *descriptionPlug();
-		const StringPlug *descriptionPlug() const;
+	StringPlug *descriptionPlug();
+	const StringPlug *descriptionPlug() const;
 
-		IntPlug *depthPlug();
-		const IntPlug *depthPlug() const;
+	IntPlug *depthPlug();
+	const IntPlug *depthPlug() const;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Backdrop )

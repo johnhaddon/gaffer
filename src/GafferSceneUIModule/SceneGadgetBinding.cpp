@@ -99,7 +99,7 @@ void waitForCompletion( SceneGadget &g )
 
 struct SceneGadgetSlotCaller
 {
-	void operator()( boost::python::object slot, SceneGadgetPtr g )
+	void operator () ( boost::python::object slot, SceneGadgetPtr g )
 	{
 		try
 		{
@@ -202,50 +202,46 @@ void GafferSceneUIModule::bindSceneGadget()
 {
 
 	scope s = GafferUIBindings::GadgetClass<SceneGadget>()
-		.def( init<>() )
-		.def( "setScene", &setScene )
-		.def( "getScene", &getScene )
-		.def( "setContext", &setContext )
-		.def( "getContext", (Gaffer::Context *(SceneGadget::*)())&SceneGadget::getContext, return_value_policy<CastToIntrusivePtr>() )
-		.def( "setVisibleSet", &setVisibleSet )
-		.def( "getVisibleSet", &SceneGadget::getVisibleSet, return_value_policy<copy_const_reference>() )
-		.def( "setMinimumExpansionDepth", &setMinimumExpansionDepth )
-		.def( "getMinimumExpansionDepth", &SceneGadget::getMinimumExpansionDepth )
-		.def( "getPaused", &SceneGadget::getPaused )
-		.def( "setPaused", &setPaused )
-		.def( "state", &SceneGadget::state )
-		.def( "stateChangedSignal", &SceneGadget::stateChangedSignal, return_internal_reference<1>() )
-		.def( "waitForCompletion", &waitForCompletion )
-		.def( "setRenderer", &setRenderer )
-		.def( "getRenderer", &getRenderer )
-		.def( "setOpenGLOptions", &SceneGadget::setOpenGLOptions )
-		.def( "getOpenGLOptions", &getOpenGLOptions )
-		.def( "setLayer", &SceneGadget::setLayer )
-		.def( "getLayer", &SceneGadget::getLayer )
-		.def( "setSelectionMask", &SceneGadget::setSelectionMask )
-		.def( "getSelectionMask", &getSelectionMask )
-		.def( "objectAt", &objectAt )
-		.def( "objectAndIntersectionAt", &objectAndIntersectionAt )
-		.def( "objectsAt", &objectsAt )
-		.def( "normalAt", &normalAt )
-		.def( "setSelection", &SceneGadget::setSelection )
-		.def( "getSelection", &SceneGadget::getSelection, return_value_policy<copy_const_reference>() )
-		.def( "selectionBound", &selectionBound )
-		.def( "bound", &bound, ( arg( "selected" ), arg( "omitted" ) = object() ) )
-		.def(
-			"snapshotToFile",
-			&snapshotToFile,
-			( arg( "fileName" ), arg( "resolutionGate" ) = Imath::Box2f(), arg( "metadata" ) = object() )
-		)
-	;
+				  .def( init<>() )
+				  .def( "setScene", &setScene )
+				  .def( "getScene", &getScene )
+				  .def( "setContext", &setContext )
+				  .def( "getContext", ( Gaffer::Context * (SceneGadget::*)() ) & SceneGadget::getContext, return_value_policy<CastToIntrusivePtr>() )
+				  .def( "setVisibleSet", &setVisibleSet )
+				  .def( "getVisibleSet", &SceneGadget::getVisibleSet, return_value_policy<copy_const_reference>() )
+				  .def( "setMinimumExpansionDepth", &setMinimumExpansionDepth )
+				  .def( "getMinimumExpansionDepth", &SceneGadget::getMinimumExpansionDepth )
+				  .def( "getPaused", &SceneGadget::getPaused )
+				  .def( "setPaused", &setPaused )
+				  .def( "state", &SceneGadget::state )
+				  .def( "stateChangedSignal", &SceneGadget::stateChangedSignal, return_internal_reference<1>() )
+				  .def( "waitForCompletion", &waitForCompletion )
+				  .def( "setRenderer", &setRenderer )
+				  .def( "getRenderer", &getRenderer )
+				  .def( "setOpenGLOptions", &SceneGadget::setOpenGLOptions )
+				  .def( "getOpenGLOptions", &getOpenGLOptions )
+				  .def( "setLayer", &SceneGadget::setLayer )
+				  .def( "getLayer", &SceneGadget::getLayer )
+				  .def( "setSelectionMask", &SceneGadget::setSelectionMask )
+				  .def( "getSelectionMask", &getSelectionMask )
+				  .def( "objectAt", &objectAt )
+				  .def( "objectAndIntersectionAt", &objectAndIntersectionAt )
+				  .def( "objectsAt", &objectsAt )
+				  .def( "normalAt", &normalAt )
+				  .def( "setSelection", &SceneGadget::setSelection )
+				  .def( "getSelection", &SceneGadget::getSelection, return_value_policy<copy_const_reference>() )
+				  .def( "selectionBound", &selectionBound )
+				  .def( "bound", &bound, ( arg( "selected" ), arg( "omitted" ) = object() ) )
+				  .def(
+					  "snapshotToFile",
+					  &snapshotToFile,
+					  ( arg( "fileName" ), arg( "resolutionGate" ) = Imath::Box2f(), arg( "metadata" ) = object() )
+				  );
 
 	enum_<SceneGadget::State>( "State" )
 		.value( "Paused", SceneGadget::Paused )
 		.value( "Running", SceneGadget::Running )
-		.value( "Complete", SceneGadget::Complete )
-	;
+		.value( "Complete", SceneGadget::Complete );
 
 	SignalClass<SceneGadget::SceneGadgetSignal, DefaultSignalCaller<SceneGadget::SceneGadgetSignal>, SceneGadgetSlotCaller>( "ImageGadgetSignal" );
-
-
 }

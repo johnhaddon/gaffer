@@ -93,7 +93,7 @@ NodeCreatorMap &nodeCreators()
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( NodeGadget );
 
 NodeGadget::NodeGadget( Gaffer::NodePtr node )
-	:	m_active( false ), m_node( node.get() )
+	: m_active( false ), m_node( node.get() )
 {
 }
 
@@ -199,7 +199,7 @@ std::string NodeGadget::getToolTip( const IECore::LineSegment3f &line ) const
 	boost::iterator_range<string::const_iterator> r = boost::find_last( title, ":" );
 	if( r )
 	{
-		title = &*(r.end());
+		title = &*( r.end() );
 	}
 
 	result = "# " + title;

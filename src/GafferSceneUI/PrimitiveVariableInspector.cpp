@@ -72,17 +72,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
 	{
 	}
 
-	bool operator==( const HistoryCacheKey &rhs ) const
+	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return
-			plug == rhs.plug &&
+		return plug == rhs.plug &&
 			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount
-		;
+			dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -103,7 +101,7 @@ using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History
 
 HistoryCache g_historyCache(
 	// Getter
-	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		return SceneAlgo::history(
@@ -113,13 +111,13 @@ HistoryCache g_historyCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// Histories contain PlugPtrs, which could potentially be the sole
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -129,13 +127,13 @@ struct PrimitiveVariableHistoryCacheKey : public HistoryCacheKey
 {
 	PrimitiveVariableHistoryCacheKey() {};
 	PrimitiveVariableHistoryCacheKey( const ScenePlug *plug, IECore::InternedString primitiveVariable )
-		:	HistoryCacheKey( plug->objectPlug() ), primitiveVariable( primitiveVariable )
+		: HistoryCacheKey( plug->objectPlug() ), primitiveVariable( primitiveVariable )
 	{
 	}
 
-	bool operator==( const PrimitiveVariableHistoryCacheKey &rhs ) const
+	bool operator == ( const PrimitiveVariableHistoryCacheKey &rhs ) const
 	{
-		return HistoryCacheKey::operator==( rhs ) && primitiveVariable == rhs.primitiveVariable;
+		return HistoryCacheKey::operator == ( rhs ) && primitiveVariable == rhs.primitiveVariable;
 	}
 
 	IECore::InternedString primitiveVariable;
@@ -153,7 +151,7 @@ using PrimitiveVariableHistoryCache = IECorePreview::LRUCache<PrimitiveVariableH
 
 PrimitiveVariableHistoryCache g_primitiveVariableHistoryCache(
 	// Getter
-	[] ( const PrimitiveVariableHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
+	[]( const PrimitiveVariableHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		SceneAlgo::History::ConstPtr primitiveVariablesHistory = g_historyCache.get( key, canceller );
@@ -172,10 +170,10 @@ PrimitiveVariableHistoryCache g_primitiveVariableHistoryCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const PrimitiveVariableHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const PrimitiveVariableHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// See comment in g_historyCache
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -217,8 +215,10 @@ PrimitiveVariableInspector::PrimitiveVariableInspector(
 	const std::string &name,
 	const std::string &type
 )
-	:	Inspector( { scene->objectPlug() }, type, name == "" ? primitiveVariable.string() : name, editScope ),
-		m_scene( scene ), m_primitiveVariable( primitiveVariable ), m_property( property )
+	: Inspector( { scene->objectPlug() }, type, name == "" ? primitiveVariable.string() : name, editScope ),
+	  m_scene( scene ),
+	  m_primitiveVariable( primitiveVariable ),
+	  m_property( property )
 {
 }
 
@@ -291,7 +291,7 @@ Gaffer::ValuePlugPtr PrimitiveVariableInspector::source( const GafferScene::Scen
 	}
 	else if( auto primitiveVariablesNode = runTimeCast<GafferScene::PrimitiveVariables>( sceneNode ) )
 	{
-		if( !(primitiveVariablesNode->filterPlug()->match( primitiveVariablesNode->inPlug() ) & PathMatcher::ExactMatch ) )
+		if( !( primitiveVariablesNode->filterPlug()->match( primitiveVariablesNode->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
@@ -340,7 +340,7 @@ Gaffer::ValuePlugPtr PrimitiveVariableInspector::source( const GafferScene::Scen
 		{
 			previousValue = value( history->predecessors.front().get() );
 		}
-		if( (bool)v != bool(previousValue) || (v && !v->isEqualTo( previousValue.get() )) )
+		if( (bool)v != bool( previousValue ) || ( v && !v->isEqualTo( previousValue.get() ) ) )
 		{
 			return sceneNode->outPlug();
 		}

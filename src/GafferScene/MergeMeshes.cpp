@@ -54,7 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( MergeMeshes );
 size_t MergeMeshes::g_firstPlugIndex = 0;
 
 MergeMeshes::MergeMeshes( const std::string &name )
-	:	MergeObjects( name, "/mergedMesh" )
+	: MergeObjects( name, "/mergedMesh" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 }
@@ -63,13 +63,13 @@ MergeMeshes::~MergeMeshes()
 {
 }
 
-IECore::ConstObjectPtr MergeMeshes::computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MergeMeshes::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
 {
-	std::vector< std::pair< const IECoreScene::Primitive *, Imath::M44f > > meshes;
+	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> meshes;
 
 	for( const auto &[object, transform] : sources )
 	{
-		const IECoreScene::MeshPrimitive * m = IECore::runTimeCast< const IECoreScene::MeshPrimitive >( object.get() );
+		const IECoreScene::MeshPrimitive *m = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( object.get() );
 		if( !m )
 		{
 			// Just skip anything that's not a mesh

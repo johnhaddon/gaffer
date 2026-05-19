@@ -100,7 +100,7 @@ void hash2( ValuePlug *plug, IECore::MurmurHash &h )
 	// we use a GIL release here to prevent a lock in the case where this triggers a graph
 	// evaluation which decides to go back into python on another thread:
 	IECorePython::ScopedGILRelease r;
-	plug->hash( h);
+	plug->hash( h );
 }
 
 
@@ -108,58 +108,48 @@ void hash2( ValuePlug *plug, IECore::MurmurHash &h )
 
 void GafferModule::bindValuePlug()
 {
-	scope s = PlugClass<ValuePlug, PlugWrapper<ValuePlug> >()
-		.def( boost::python::init<const std::string &, Plug::Direction, unsigned>(
-				(
-					boost::python::arg_( "name" ) = GraphComponent::defaultName<ValuePlug>(),
-					boost::python::arg_( "direction" ) = Plug::In,
-					boost::python::arg_( "flags" ) = Plug::Default
-				)
-			)
-		)
-		.def( "settable", &ValuePlug::settable )
-		.def( "setFrom", setFrom )
-		.def( "setToDefault", setToDefault )
-		.def( "isSetToDefault", isSetToDefault )
-		.def( "resetDefault", resetDefault )
-		.def( "defaultHash", &ValuePlug::defaultHash )
-		.def( "hash", hash )
-		.def( "hash", hash2 )
-		.def( "getCacheMemoryLimit", &ValuePlug::getCacheMemoryLimit )
-		.staticmethod( "getCacheMemoryLimit" )
-		.def( "setCacheMemoryLimit", &ValuePlug::setCacheMemoryLimit )
-		.staticmethod( "setCacheMemoryLimit" )
-		.def( "cacheMemoryUsage", &ValuePlug::cacheMemoryUsage )
-		.staticmethod( "cacheMemoryUsage" )
-		.def( "clearCache", &ValuePlug::clearCache )
-		.staticmethod( "clearCache" )
-		.def( "getHashCacheSizeLimit", &ValuePlug::getHashCacheSizeLimit )
-		.staticmethod( "getHashCacheSizeLimit" )
-		.def( "setHashCacheSizeLimit", &ValuePlug::setHashCacheSizeLimit )
-		.staticmethod( "setHashCacheSizeLimit" )
-		.def( "hashCacheTotalUsage", &ValuePlug::hashCacheTotalUsage )
-		.staticmethod( "hashCacheTotalUsage" )
-		.def( "clearHashCache", &ValuePlug::clearHashCache, arg( "now" ) = false )
-		.staticmethod( "clearHashCache" )
-		.def( "getHashCacheMode", &ValuePlug::getHashCacheMode )
-		.staticmethod( "getHashCacheMode" )
-		.def( "setHashCacheMode", &ValuePlug::setHashCacheMode )
-		.staticmethod( "setHashCacheMode" )
-		.def( "dirtyCount", &ValuePlug::dirtyCount )
-		.def( "__repr__", &repr )
-	;
+	scope s = PlugClass<ValuePlug, PlugWrapper<ValuePlug>>()
+				  .def( boost::python::init<const std::string &, Plug::Direction, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<ValuePlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default ) ) )
+				  .def( "settable", &ValuePlug::settable )
+				  .def( "setFrom", setFrom )
+				  .def( "setToDefault", setToDefault )
+				  .def( "isSetToDefault", isSetToDefault )
+				  .def( "resetDefault", resetDefault )
+				  .def( "defaultHash", &ValuePlug::defaultHash )
+				  .def( "hash", hash )
+				  .def( "hash", hash2 )
+				  .def( "getCacheMemoryLimit", &ValuePlug::getCacheMemoryLimit )
+				  .staticmethod( "getCacheMemoryLimit" )
+				  .def( "setCacheMemoryLimit", &ValuePlug::setCacheMemoryLimit )
+				  .staticmethod( "setCacheMemoryLimit" )
+				  .def( "cacheMemoryUsage", &ValuePlug::cacheMemoryUsage )
+				  .staticmethod( "cacheMemoryUsage" )
+				  .def( "clearCache", &ValuePlug::clearCache )
+				  .staticmethod( "clearCache" )
+				  .def( "getHashCacheSizeLimit", &ValuePlug::getHashCacheSizeLimit )
+				  .staticmethod( "getHashCacheSizeLimit" )
+				  .def( "setHashCacheSizeLimit", &ValuePlug::setHashCacheSizeLimit )
+				  .staticmethod( "setHashCacheSizeLimit" )
+				  .def( "hashCacheTotalUsage", &ValuePlug::hashCacheTotalUsage )
+				  .staticmethod( "hashCacheTotalUsage" )
+				  .def( "clearHashCache", &ValuePlug::clearHashCache, arg( "now" ) = false )
+				  .staticmethod( "clearHashCache" )
+				  .def( "getHashCacheMode", &ValuePlug::getHashCacheMode )
+				  .staticmethod( "getHashCacheMode" )
+				  .def( "setHashCacheMode", &ValuePlug::setHashCacheMode )
+				  .staticmethod( "setHashCacheMode" )
+				  .def( "dirtyCount", &ValuePlug::dirtyCount )
+				  .def( "__repr__", &repr );
 
 	enum_<ValuePlug::HashCacheMode>( "HashCacheMode" )
 		.value( "Standard", ValuePlug::HashCacheMode::Standard )
 		.value( "Checked", ValuePlug::HashCacheMode::Checked )
-		.value( "Legacy", ValuePlug::HashCacheMode::Legacy )
-	;
+		.value( "Legacy", ValuePlug::HashCacheMode::Legacy );
 
 	enum_<ValuePlug::CachePolicy>( "CachePolicy" )
 		.value( "Uncached", ValuePlug::CachePolicy::Uncached )
 		.value( "TaskCollaboration", ValuePlug::CachePolicy::TaskCollaboration )
-		.value( "Default", ValuePlug::CachePolicy::Default )
-	;
+		.value( "Default", ValuePlug::CachePolicy::Default );
 
 	Serialisation::registerSerialiser( Gaffer::ValuePlug::staticTypeId(), new ValuePlugSerialiser );
 }

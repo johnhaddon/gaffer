@@ -119,7 +119,6 @@ struct GAFFERSCENE_API Visualisation
 	// such as spot lights. By default they don't contribute to the framing bound
 	// for the location to make scene navigation easier.
 	static Visualisation createFrustum( const IECoreGL::ConstRenderablePtr &renderable, Scale scale, ColorSpace colorSpace = ColorSpace::Display );
-
 };
 
 

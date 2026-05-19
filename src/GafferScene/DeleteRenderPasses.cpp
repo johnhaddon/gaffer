@@ -50,7 +50,7 @@ const std::string g_passNamesOptionName = "option:renderPass:names";
 size_t DeleteRenderPasses::g_firstPlugIndex = 0;
 
 DeleteRenderPasses::DeleteRenderPasses( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "mode", Plug::In, Delete, Delete, Keep ) );
@@ -119,8 +119,7 @@ IECore::ConstCompoundObjectPtr DeleteRenderPasses::computeProcessedGlobals( cons
 		std::remove_if(
 			copy->writable().begin(),
 			copy->writable().end(),
-			[names, mode]( const auto &elem )
-			{
+			[names, mode]( const auto &elem ) {
 				return IECore::StringAlgo::matchMultiple( elem, names ) == ( mode == Delete );
 			}
 		),

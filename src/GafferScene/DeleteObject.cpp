@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( GafferScene::DeleteObject );
 size_t DeleteObject::g_firstPlugIndex = 0;
 
 DeleteObject::DeleteObject( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "adjustBounds", Plug::In, false ) );
@@ -137,7 +137,7 @@ void DeleteObject::hashBound( const ScenePath &path, const Gaffer::Context *cont
 		{
 			FilteredSceneProcessor::hashBound( path, context, parent, h );
 			outPlug()->childBoundsPlug()->hash( h );
-			if( !(m & IECore::PathMatcher::ExactMatch) )
+			if( !( m & IECore::PathMatcher::ExactMatch ) )
 			{
 				inPlug()->objectPlug()->hash( h );
 			}
@@ -155,7 +155,7 @@ Imath::Box3f DeleteObject::computeBound( const ScenePath &path, const Gaffer::Co
 		if( m & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::DescendantMatch ) )
 		{
 			Box3f result = outPlug()->childBoundsPlug()->getValue();
-			if( !(m & IECore::PathMatcher::ExactMatch) )
+			if( !( m & IECore::PathMatcher::ExactMatch ) )
 			{
 				ConstObjectPtr o = inPlug()->objectPlug()->getValue();
 				if( !runTimeCast<const NullObject>( o.get() ) )

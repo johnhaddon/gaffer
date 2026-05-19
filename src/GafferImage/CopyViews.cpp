@@ -53,13 +53,12 @@ GAFFER_NODE_DEFINE_TYPE( CopyViews );
 size_t CopyViews::g_firstPlugIndex = 0;
 
 CopyViews::CopyViews( const std::string &name )
-	:	ImageProcessor( name, /* minInputs = */ 1 )
+	: ImageProcessor( name, /* minInputs = */ 1 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new StringPlug( "views", Plug::In, "*" ) );
 	addChild( new CompoundObjectPlug( "__mapping", Plug::Out, new CompoundObject() ) );
-
 }
 
 CopyViews::~CopyViews()
@@ -154,12 +153,12 @@ void CopyViews::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		{
 			// We don't want to add a "default" view coming from the default value of an
 			// unconnected input
-			if( !(*it)->getInput() )
+			if( !( *it )->getInput() )
 			{
 				continue;
 			}
 
-			ConstStringVectorDataPtr inputViewNamesData = (*it)->viewNamesPlug()->getValue();
+			ConstStringVectorDataPtr inputViewNamesData = ( *it )->viewNamesPlug()->getValue();
 			for( const std::string &v : inputViewNamesData->readable() )
 			{
 				if( i > 0 && !StringAlgo::matchMultiple( v, viewMatchPatterns ) )

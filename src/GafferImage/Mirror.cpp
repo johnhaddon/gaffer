@@ -58,13 +58,13 @@ Box2i mirror( const Box2i &box, bool horizontal, bool vertical, const Box2i &dis
 	Box2i result = box;
 	if( horizontal )
 	{
-		result.max.x = displayWindow.max.x - (box.min.x - displayWindow.min.x);
-		result.min.x = displayWindow.max.x - (box.max.x - displayWindow.min.x);
+		result.max.x = displayWindow.max.x - ( box.min.x - displayWindow.min.x );
+		result.min.x = displayWindow.max.x - ( box.max.x - displayWindow.min.x );
 	}
 	if( vertical )
 	{
-		result.max.y = displayWindow.max.y - (box.min.y - displayWindow.min.y);
-		result.min.y = displayWindow.max.y - (box.max.y - displayWindow.min.y);
+		result.max.y = displayWindow.max.y - ( box.min.y - displayWindow.min.y );
+		result.min.y = displayWindow.max.y - ( box.max.y - displayWindow.min.y );
 	}
 
 	return result;
@@ -75,11 +75,11 @@ V2i mirror( const V2i &point, bool horizontal, bool vertical, const Box2i &displ
 	V2i result = point;
 	if( horizontal )
 	{
-		result.x = displayWindow.max.x - 1 - (point.x - displayWindow.min.x);
+		result.x = displayWindow.max.x - 1 - ( point.x - displayWindow.min.x );
 	}
 	if( vertical )
 	{
-		result.y = displayWindow.max.y - 1 - (point.y - displayWindow.min.y);
+		result.y = displayWindow.max.y - 1 - ( point.y - displayWindow.min.y );
 	}
 	return result;
 }
@@ -95,7 +95,7 @@ GAFFER_NODE_DEFINE_TYPE( Mirror );
 size_t Mirror::g_firstPlugIndex = 0;
 
 Mirror::Mirror( const std::string &name )
-	:	FlatImageProcessor( name )
+	: FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "horizontal" ) );
@@ -138,8 +138,7 @@ void Mirror::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs
 	const bool affectsTransform =
 		input == inPlug()->formatPlug() ||
 		input == horizontalPlug() ||
-		input == verticalPlug()
-	;
+		input == verticalPlug();
 
 	if(
 		affectsTransform ||

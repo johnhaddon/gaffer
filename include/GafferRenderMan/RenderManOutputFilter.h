@@ -50,47 +50,46 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManOutputFilter : public GafferScene::GlobalsProcessor
 {
 
-	public :
+public:
 
-		~RenderManOutputFilter() override;
+	~RenderManOutputFilter() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManOutputFilter, RenderManOutputFilterTypeId, GafferScene::GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManOutputFilter, RenderManOutputFilterTypeId, GafferScene::GlobalsProcessor );
 
-		enum class Mode
-		{
-			Replace,
-			InsertFirst,
-			InsertLast
-		};
+	enum class Mode
+	{
+		Replace,
+		InsertFirst,
+		InsertLast
+	};
 
-		GafferScene::ShaderPlug *shaderPlug();
-		const GafferScene::ShaderPlug *shaderPlug() const;
+	GafferScene::ShaderPlug *shaderPlug();
+	const GafferScene::ShaderPlug *shaderPlug() const;
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		enum class FilterType
-		{
-			Display,
-			Sample
-		};
+	enum class FilterType
+	{
+		Display,
+		Sample
+	};
 
-		RenderManOutputFilter( const std::string &name, FilterType filterType );
+	RenderManOutputFilter( const std::string &name, FilterType filterType );
 
-		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		const FilterType m_filterType;
-		static size_t g_firstPlugIndex;
-
+	const FilterType m_filterType;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( RenderManOutputFilter )

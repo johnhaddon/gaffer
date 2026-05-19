@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteViews );
 size_t DeleteViews::g_firstPlugIndex = 0;
 
 DeleteViews::DeleteViews( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

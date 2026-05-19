@@ -56,29 +56,29 @@ namespace IECoreCycles
 
 class OIIOOutputDriver : public ccl::OutputDriver
 {
-	public:
+public:
 
-		OIIOOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers );
-		~OIIOOutputDriver() override;
+	OIIOOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers );
+	~OIIOOutputDriver() override;
 
-		void write_render_tile( const Tile &tile ) override;
+	void write_render_tile( const Tile &tile ) override;
 
-	protected:
+protected:
 
-		struct Layer
-		{
-			std::string name;
-			int numChannels;
-			std::string path;
-			OIIO::TypeDesc typeDesc;
-			ccl::PassType passType;
-			IECore::CompoundDataPtr metadata;
-		};
+	struct Layer
+	{
+		std::string name;
+		int numChannels;
+		std::string path;
+		OIIO::TypeDesc typeDesc;
+		ccl::PassType passType;
+		IECore::CompoundDataPtr metadata;
+	};
 
-		Imath::Box2i m_displayWindow;
-		Imath::Box2i m_dataWindow;
-		using Layers = std::vector<Layer>;
-		Layers m_layers;
+	Imath::Box2i m_displayWindow;
+	Imath::Box2i m_dataWindow;
+	using Layers = std::vector<Layer>;
+	Layers m_layers;
 };
 
-} // namespace
+} // namespace IECoreCycles

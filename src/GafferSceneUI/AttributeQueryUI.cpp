@@ -67,58 +67,55 @@ using namespace boost::placeholders;
 namespace
 {
 
-template< typename ValueType >
+template<typename ValueType>
 Gaffer::ConstValuePlugPtr createNumericPlug(
-	const std::string& name, const Gaffer::Plug::Direction direction, const ValueType& value, const unsigned flags )
+	const std::string &name, const Gaffer::Plug::Direction direction, const ValueType &value, const unsigned flags
+)
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::NumericPlug< ValueType >( name, direction, value,
-		ValueType( std::numeric_limits< ValueType >::lowest() ),
-		ValueType( std::numeric_limits< ValueType >::max() ), flags ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::NumericPlug<ValueType>( name, direction, value, ValueType( std::numeric_limits<ValueType>::lowest() ), ValueType( std::numeric_limits<ValueType>::max() ), flags ) );
 	return plug;
 }
 
-template< typename ValueType >
+template<typename ValueType>
 Gaffer::ConstValuePlugPtr createCompoundNumericPlug(
-	const std::string& name, const Gaffer::Plug::Direction direction, const ValueType& value, const unsigned flags )
+	const std::string &name, const Gaffer::Plug::Direction direction, const ValueType &value, const unsigned flags
+)
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::CompoundNumericPlug< ValueType >( name, direction, value,
-		ValueType( std::numeric_limits< typename ValueType::BaseType >::lowest() ),
-		ValueType( std::numeric_limits< typename ValueType::BaseType >::max() ), flags ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::CompoundNumericPlug<ValueType>( name, direction, value, ValueType( std::numeric_limits<typename ValueType::BaseType>::lowest() ), ValueType( std::numeric_limits<typename ValueType::BaseType>::max() ), flags ) );
 	return plug;
 }
 
-template< typename ValueType >
+template<typename ValueType>
 Gaffer::ConstValuePlugPtr createBoxPlug(
-	const std::string& name, const Gaffer::Plug::Direction direction, const Imath::Box< ValueType >& value, const unsigned flags )
+	const std::string &name, const Gaffer::Plug::Direction direction, const Imath::Box<ValueType> &value, const unsigned flags
+)
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::BoxPlug< Imath::Box< ValueType > >( name, direction, value,
-		ValueType( std::numeric_limits< typename ValueType::BaseType >::lowest() ),
-		ValueType( std::numeric_limits< typename ValueType::BaseType >::max() ), flags ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::BoxPlug<Imath::Box<ValueType>>( name, direction, value, ValueType( std::numeric_limits<typename ValueType::BaseType>::lowest() ), ValueType( std::numeric_limits<typename ValueType::BaseType>::max() ), flags ) );
 	return plug;
 }
 
-template< typename ValueType >
+template<typename ValueType>
 Gaffer::ConstValuePlugPtr createVectorDataPlug(
-	const std::string& name, const Gaffer::Plug::Direction direction, const IECore::TypedData< std::vector< ValueType > >* value, const unsigned flags )
+	const std::string &name, const Gaffer::Plug::Direction direction, const IECore::TypedData<std::vector<ValueType>> *value, const unsigned flags
+)
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::TypedObjectPlug< IECore::TypedData< std::vector< ValueType > > >( name, direction, value, flags ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::TypedObjectPlug<IECore::TypedData<std::vector<ValueType>>>( name, direction, value, flags ) );
 	return plug;
 }
 
 struct MenuItem
 {
-	explicit
-	MenuItem( const std::string& name, Gaffer::ConstValuePlugPtr plug = Gaffer::ConstValuePlugPtr() )
-	: m_name( name )
-	, m_plug( plug )
-	{}
+	explicit MenuItem( const std::string &name, Gaffer::ConstValuePlugPtr plug = Gaffer::ConstValuePlugPtr() )
+		: m_name( name ), m_plug( plug )
+	{
+	}
 
-	const std::string& getName() const
+	const std::string &getName() const
 	{
 		return m_name;
 	}
 
-	const Gaffer::ValuePlug* getPlug() const
+	const Gaffer::ValuePlug *getPlug() const
 	{
 		return m_plug.get();
 	}
@@ -134,31 +131,28 @@ using MenuItemContainer = boost::multi_index_container<
 	boost::multi_index::indexed_by<
 		boost::multi_index::random_access<>,
 		boost::multi_index::ordered_non_unique<
-			boost::multi_index::key<&MenuItem::getName>
-		>
-	>
->;
+			boost::multi_index::key<&MenuItem::getName>>>>;
 
 struct PlugAdder : GafferUI::PlugAdder
 {
-	explicit PlugAdder( GafferScene::AttributeQuery& query )
-	: GafferUI::PlugAdder()
-	, m_query( & query )
+	explicit PlugAdder( GafferScene::AttributeQuery &query )
+		: GafferUI::PlugAdder(), m_query( &query )
 	{
-		m_query->childAddedSignal().connect( boost::bind( & PlugAdder::updateVisibility, this ) );
-		m_query->childRemovedSignal().connect( boost::bind( & PlugAdder::updateVisibility, this ) );
+		m_query->childAddedSignal().connect( boost::bind( &PlugAdder::updateVisibility, this ) );
+		m_query->childRemovedSignal().connect( boost::bind( &PlugAdder::updateVisibility, this ) );
 
-		buttonReleaseSignal().connect( boost::bind( & PlugAdder::buttonRelease, this, ::_2 ) );
+		buttonReleaseSignal().connect( boost::bind( &PlugAdder::buttonRelease, this, ::_2 ) );
 
 		updateVisibility();
 	}
 
 	~PlugAdder() override
-	{}
+	{
+	}
 
 protected:
 
-	bool canCreateConnection( const Gaffer::Plug* plug ) const override
+	bool canCreateConnection( const Gaffer::Plug *plug ) const override
 	{
 		assert( m_query );
 
@@ -166,21 +160,22 @@ protected:
 			( GafferUI::PlugAdder::canCreateConnection( plug ) ) &&
 			( plug->direction() == Gaffer::Plug::In ) &&
 			( plug->node() != m_query ) &&
-			( m_query->canSetup( IECore::runTimeCast< const Gaffer::ValuePlug >( plug ) ) ) );
+			( m_query->canSetup( IECore::runTimeCast<const Gaffer::ValuePlug>( plug ) ) )
+		);
 	}
 
-	void createConnection( Gaffer::Plug* plug ) override
+	void createConnection( Gaffer::Plug *plug ) override
 	{
 		assert( plug->direction() == Gaffer::Plug::In );
 
-		m_query->setup( IECore::assertedStaticCast< const Gaffer::ValuePlug >( plug ) );
+		m_query->setup( IECore::assertedStaticCast<const Gaffer::ValuePlug>( plug ) );
 
 		plug->setInput( m_query->valuePlug() );
 	}
 
 private:
 
-	bool buttonRelease( const GafferUI::ButtonEvent& event )
+	bool buttonRelease( const GafferUI::ButtonEvent &event )
 	{
 		return GafferSceneUI::AttributeQueryUI::showSetupMenu( *m_query );
 	}
@@ -197,14 +192,14 @@ struct Registration
 {
 	Registration()
 	{
-		GafferUI::NoduleLayout::registerCustomGadget( "GafferSceneUI.AttributeQueryUI.PlugAdder", & Registration::create );
+		GafferUI::NoduleLayout::registerCustomGadget( "GafferSceneUI.AttributeQueryUI.PlugAdder", &Registration::create );
 	}
 
 	static GafferUI::GadgetPtr create( Gaffer::GraphComponentPtr parent )
 	{
-		const GafferScene::AttributeQueryPtr query = IECore::runTimeCast< GafferScene::AttributeQuery >( parent );
+		const GafferScene::AttributeQueryPtr query = IECore::runTimeCast<GafferScene::AttributeQuery>( parent );
 
-		if( ! query )
+		if( !query )
 		{
 			throw IECore::Exception( "AttributeQueryUI.PlugAdder requires an AttributeQuery" );
 		}
@@ -223,10 +218,10 @@ namespace GafferSceneUI
 namespace AttributeQueryUI
 {
 
-bool showSetupMenu( GafferScene::AttributeQuery& query )
+bool showSetupMenu( GafferScene::AttributeQuery &query )
 {
 	static MenuItemContainer items;
-	static std::vector< std::string > names;
+	static std::vector<std::string> names;
 	static const std::string title( "Plug type" );
 
 	if( items.empty() )
@@ -265,8 +260,8 @@ bool showSetupMenu( GafferScene::AttributeQuery& query )
 
 	if( names.empty() )
 	{
-		const MenuItemContainer::nth_index< 0 >::type& index = items.get< 0 >();
-		std::transform( index.begin(), index.end(), std::back_inserter( names ), std::mem_fn( & MenuItem::getName ) );
+		const MenuItemContainer::nth_index<0>::type &index = items.get<0>();
+		std::transform( index.begin(), index.end(), std::back_inserter( names ), std::mem_fn( &MenuItem::getName ) );
 	}
 
 	if( query.isSetup() )
@@ -281,8 +276,8 @@ bool showSetupMenu( GafferScene::AttributeQuery& query )
 		return false;
 	}
 
-	const MenuItemContainer::nth_index< 1 >::type& index = items.get< 1 >();
-	const MenuItemContainer::nth_index< 1 >::type::iterator it = index.find( name );
+	const MenuItemContainer::nth_index<1>::type &index = items.get<1>();
+	const MenuItemContainer::nth_index<1>::type::iterator it = index.find( name );
 
 	if( it == index.end() )
 	{
@@ -290,12 +285,12 @@ bool showSetupMenu( GafferScene::AttributeQuery& query )
 	}
 
 	{
-		Gaffer::UndoScope undoScope( query.ancestor< Gaffer::ScriptNode >() );
+		Gaffer::UndoScope undoScope( query.ancestor<Gaffer::ScriptNode>() );
 		query.setup( ( *it ).getPlug() );
 	}
 
 	return true;
 }
 
-} // AttributeQueryUI
-} // GafferSceneUI
+} // namespace AttributeQueryUI
+} // namespace GafferSceneUI

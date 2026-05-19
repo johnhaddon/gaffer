@@ -238,12 +238,12 @@ std::string PlugSerialiser::flagsRepr( unsigned flags )
 	int defaultButOffCount = 0;
 	std::string defaultButOff;
 	std::string nonDefaultButOn;
-	for( int i=0; names[i]; i++ )
+	for( int i = 0; names[i]; i++ )
 	{
 		std::string *s = nullptr;
 		if( flags & values[i] )
 		{
-			if( !(values[i] & Plug::Default) )
+			if( !( values[i] & Plug::Default ) )
 			{
 				s = &nonDefaultButOn;
 			}
@@ -293,7 +293,7 @@ std::string PlugSerialiser::repr( const Plug *plug, unsigned flagsMask )
 {
 	std::string result = Serialisation::classPath( plug ) + "( \"" + plug->getName().string() + "\", ";
 
-	if( plug->direction()!=Plug::In )
+	if( plug->direction() != Plug::In )
 	{
 		result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
 	}

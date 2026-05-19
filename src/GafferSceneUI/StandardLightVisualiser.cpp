@@ -186,20 +186,14 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 
 	const bool haveCone =
 		type == "spot" ||
-		parameter<float>( metadataTarget, shaderParameters, g_coneAngleParameterString, -1.0f ) >= 0.0f
-	;
+		parameter<float>( metadataTarget, shaderParameters, g_coneAngleParameterString, -1.0f ) >= 0.0f;
 	if( haveCone )
 	{
 		float innerAngle, outerAngle, radius, lensRadius;
 		spotlightParameters( attributeName, shaderNetwork, innerAngle, outerAngle, radius, lensRadius );
-		result.push_back( Visualisation::createOrnament(
-			spotlightCone( innerAngle, outerAngle, lensRadius / visualiserScale, 1.0f, 1.0f, muted ),
-			/* affectsFramingBound = */ true
-		) );
-		result.push_back( Visualisation::createFrustum(
-			spotlightCone( innerAngle, outerAngle, lensRadius / visualiserScale, 10.0f * frustumScale, 0.5f, muted ),
-			Visualisation::Scale::Visualiser
-		) );
+		result.push_back( Visualisation::createOrnament( spotlightCone( innerAngle, outerAngle, lensRadius / visualiserScale, 1.0f, 1.0f, muted ),
+														 /* affectsFramingBound = */ true ) );
+		result.push_back( Visualisation::createFrustum( spotlightCone( innerAngle, outerAngle, lensRadius / visualiserScale, 10.0f * frustumScale, 0.5f, muted ), Visualisation::Scale::Visualiser ) );
 	}
 
 	// Now do visualisations based on light type.
@@ -209,15 +203,11 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 		if( drawShaded )
 		{
 			ConstDataPtr textureData = drawTextured ? surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) : nullptr;
-			result.push_back( Visualisation::createOrnament(
-				environmentSphereSurface( textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color ),
-				/* affectsFramingBound = */ true, Visualisation::ColorSpace::Scene
-			) );
+			result.push_back( Visualisation::createOrnament( environmentSphereSurface( textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color ),
+															 /* affectsFramingBound = */ true, Visualisation::ColorSpace::Scene ) );
 		}
-		result.push_back( Visualisation::createOrnament(
-			sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
-			/* affectsFramingBound = */ true
-		) );
+		result.push_back( Visualisation::createOrnament( sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
+														 /* affectsFramingBound = */ true ) );
 	}
 	else if( type == "spot" )
 	{
@@ -248,10 +238,7 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 		if( drawShaded )
 		{
 			ConstDataPtr textureData = drawTextured ? surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) : nullptr;
-			result.push_back( Visualisation::createGeometry(
-				roundedQuadSurface( size, radii, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color, uvOrientation ? uvOrientation->readable() : M33f() ),
-				Visualisation::ColorSpace::Scene
-			) );
+			result.push_back( Visualisation::createGeometry( roundedQuadSurface( size, radii, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color, uvOrientation ? uvOrientation->readable() : M33f() ), Visualisation::ColorSpace::Scene ) );
 		}
 		else
 		{
@@ -283,10 +270,7 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 		if( drawShaded )
 		{
 			ConstDataPtr textureData = drawTextured ? surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) : nullptr;
-			result.push_back( Visualisation::createGeometry(
-				diskSurface( radius, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color ),
-				Visualisation::ColorSpace::Scene
-			) );
+			result.push_back( Visualisation::createGeometry( diskSurface( radius, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color ), Visualisation::ColorSpace::Scene ) );
 		}
 		else
 		{
@@ -446,7 +430,7 @@ void StandardLightVisualiser::spotlightParameters( const InternedString &attribu
 	else if( *penumbraType == "outset" )
 	{
 		outerAngle = coneAngle + 2.0f * penumbraAngle;
-		innerAngle = coneAngle ;
+		innerAngle = coneAngle;
 	}
 	else if( *penumbraType == "absolute" )
 	{
@@ -461,5 +445,4 @@ void StandardLightVisualiser::spotlightParameters( const InternedString &attribu
 	}
 
 	radius = parameter<float>( metadataTarget, shaderParameters, "radiusParameter", 0.0f );
-
 }

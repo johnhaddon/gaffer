@@ -40,7 +40,7 @@
 using namespace Gaffer;
 
 template<typename T>
-const IECore::RunTimeTyped::TypeDescription<BoxPlug<T> > BoxPlug<T>::g_typeDescription;
+const IECore::RunTimeTyped::TypeDescription<BoxPlug<T>> BoxPlug<T>::g_typeDescription;
 
 template<typename T>
 BoxPlug<T>::BoxPlug(
@@ -49,7 +49,7 @@ BoxPlug<T>::BoxPlug(
 	T defaultValue,
 	unsigned flags
 )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
 	addChild(
@@ -82,7 +82,7 @@ BoxPlug<T>::BoxPlug(
 	const PointType &maxValue,
 	unsigned flags
 )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
 	addChild(
@@ -208,4 +208,4 @@ template class BoxPlug<Imath::Box3i>;
 template class BoxPlug<Imath::Box2f>;
 template class BoxPlug<Imath::Box3f>;
 
-}
+} // namespace Gaffer

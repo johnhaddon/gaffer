@@ -54,7 +54,7 @@ TransformPlug::TransformPlug(
 	const V3f &defaultPivot,
 	unsigned flags
 )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

@@ -46,46 +46,45 @@ namespace IECoreRenderMan
 class Attributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-	public :
+public:
 
-		Attributes( const IECore::CompoundObject *attributes, MaterialCache *materialCache );
-		~Attributes() override;
+	Attributes( const IECore::CompoundObject *attributes, MaterialCache *materialCache );
+	~Attributes() override;
 
-		/// Returns a hash of everything in `prototypeParamList()`, to be
-		/// used by GeometryPrototypeCache when automaticaly deduplicating
-		/// objects. Returns `std::nullopt` if automatic instancing is
-		/// turned off.
-		/// \todo Should we have different hashes for different object types,
-		/// so attributes for curves (for example) don't mess with instancing
-		/// of meshes?
-		const std::optional<IECore::MurmurHash> &prototypeHash() const;
-		/// Attributes to be applied when creating GeometryPrototypes.
-		const RtParamList &prototypeAttributes() const;
-		/// Attributes to be applied to GeometryInstances.
-		const RtParamList &instanceAttributes() const;
+	/// Returns a hash of everything in `prototypeParamList()`, to be
+	/// used by GeometryPrototypeCache when automaticaly deduplicating
+	/// objects. Returns `std::nullopt` if automatic instancing is
+	/// turned off.
+	/// \todo Should we have different hashes for different object types,
+	/// so attributes for curves (for example) don't mess with instancing
+	/// of meshes?
+	const std::optional<IECore::MurmurHash> &prototypeHash() const;
+	/// Attributes to be applied when creating GeometryPrototypes.
+	const RtParamList &prototypeAttributes() const;
+	/// Attributes to be applied to GeometryInstances.
+	const RtParamList &instanceAttributes() const;
 
-		const Material *surfaceMaterial() const;
-		const Displacement *displacement() const { return m_displacement.get(); }
+	const Material *surfaceMaterial() const;
+	const Displacement *displacement() const { return m_displacement.get(); }
 
-		const IECoreScene::ShaderNetwork *lightShader() const;
-		/// Material to be assigned to lights. RenderMan uses this to
-		/// shade ray hits on mesh lights, while using `lightShader()` for
-		/// light emission. Returns `nullptr` for all non-mesh lights.
-		const Material *lightMaterial() const;
+	const IECoreScene::ShaderNetwork *lightShader() const;
+	/// Material to be assigned to lights. RenderMan uses this to
+	/// shade ray hits on mesh lights, while using `lightShader()` for
+	/// light emission. Returns `nullptr` for all non-mesh lights.
+	const Material *lightMaterial() const;
 
-		const IECoreScene::ShaderNetwork *lightFilter() const;
+	const IECoreScene::ShaderNetwork *lightFilter() const;
 
-	private :
+private:
 
-		std::optional<IECore::MurmurHash> m_prototypeHash;
-		RtParamList m_prototypeAttributes;
-		RtParamList m_instanceAttributes;
-		ConstMaterialPtr m_surfaceMaterial;
-		ConstDisplacementPtr m_displacement;
-		IECoreScene::ConstShaderNetworkPtr m_lightShader;
-		ConstMaterialPtr m_lightMaterial;
-		IECoreScene::ConstShaderNetworkPtr m_lightFilter;
-
+	std::optional<IECore::MurmurHash> m_prototypeHash;
+	RtParamList m_prototypeAttributes;
+	RtParamList m_instanceAttributes;
+	ConstMaterialPtr m_surfaceMaterial;
+	ConstDisplacementPtr m_displacement;
+	IECoreScene::ConstShaderNetworkPtr m_lightShader;
+	ConstMaterialPtr m_lightMaterial;
+	IECoreScene::ConstShaderNetworkPtr m_lightFilter;
 };
 
 IE_CORE_DECLAREPTR( Attributes )

@@ -77,19 +77,18 @@ void addWireframeCurveState( IECoreGL::Group *group )
 class BarnVisualiser final : public LightFilterVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( BarnVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( BarnVisualiser )
 
-		BarnVisualiser();
-		~BarnVisualiser() override;
+	BarnVisualiser();
+	~BarnVisualiser() override;
 
-		Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	protected :
+protected:
 
-		static LightFilterVisualiser::LightFilterVisualiserDescription<BarnVisualiser> g_visualiserDescription;
-
+	static LightFilterVisualiser::LightFilterVisualiserDescription<BarnVisualiser> g_visualiserDescription;
 };
 
 IE_CORE_DECLAREPTR( BarnVisualiser )
@@ -144,4 +143,4 @@ Visualisations BarnVisualiser::visualise( const InternedString &attributeName, c
 	return { Visualisation::createGeometry( result ) };
 }
 
-}  // namespace
+} // namespace

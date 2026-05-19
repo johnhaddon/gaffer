@@ -40,7 +40,7 @@ using namespace GafferImage;
 GAFFER_NODE_DEFINE_TYPE( Median );
 
 Median::Median( const std::string &name )
-	:   RankFilter( name, MedianRank )
+	: RankFilter( name, MedianRank )
 {
 }
 

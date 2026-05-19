@@ -99,19 +99,19 @@ PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const c
 
 	for( int p = 0; p < paramcount; p++ )
 	{
-		if ( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].valueType == (char)'i' && parameters[p].valueCount == (char)2 && parameters[p].nbytes == (int) (parameters[p].valueCount * sizeof(int)) )
+		if( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].valueType == (char)'i' && parameters[p].valueCount == (char)2 && parameters[p].nbytes == (int)( parameters[p].valueCount * sizeof( int ) ) )
 		{
-			originalSize.x = static_cast<const int *>(parameters[p].value)[0];
-			originalSize.y = static_cast<const int *>(parameters[p].value)[1];
+			originalSize.x = static_cast<const int *>( parameters[p].value )[0];
+			originalSize.y = static_cast<const int *>( parameters[p].value )[1];
 		}
-		else if ( !strcmp( parameters[p].name, "origin" ) && parameters[p].valueType == (char)'i' && parameters[p].valueCount == (char)2 && parameters[p].nbytes == (int)(parameters[p].valueCount * sizeof(int)) )
+		else if( !strcmp( parameters[p].name, "origin" ) && parameters[p].valueType == (char)'i' && parameters[p].valueCount == (char)2 && parameters[p].nbytes == (int)( parameters[p].valueCount * sizeof( int ) ) )
 		{
-			origin.x = static_cast<const int *>(parameters[p].value)[0];
-			origin.y = static_cast<const int *>(parameters[p].value)[1];
+			origin.x = static_cast<const int *>( parameters[p].value )[0];
+			origin.y = static_cast<const int *>( parameters[p].value )[1];
 		}
 		else if( 0 == strcmp( parameters[p].name, "layername" ) && parameters[p].valueType == 's' )
 		{
-			const string layerName = *(const char **)(parameters[p].value);
+			const string layerName = *(const char **)( parameters[p].value );
 			if( !layerName.empty() )
 			{
 				if( channels.size() == 1 )
@@ -138,7 +138,7 @@ PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const c
 		{
 			DataPtr newParam;
 
-			if ( !parameters[p].nbytes )
+			if( !parameters[p].nbytes )
 			{
 				continue;
 			}
@@ -150,69 +150,69 @@ PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const c
 			// generic converter
 			switch( parameters[p].valueType )
 			{
-			case 'i':
-				// sanity check
-				if ( parameters[p].nbytes / parameters[p].valueCount != sizeof(int) )
-				{
-					msg( Msg::Error, "Dspy::imageOpen", "Invalid int data size" );
-					continue;
-				}
-				pInt = static_cast<const int *>(parameters[p].value);
-				if ( parameters[p].valueCount == 1 )
-				{
-					newParam = new IntData( pInt[0] );
-				}
-				else
-				{
-					std::vector< int > newVec( pInt, pInt + parameters[p].valueCount );
-					newParam = new IntVectorData( newVec );
-				}
-				break;
-			case 'f':
-				if ( parameters[p].nbytes / parameters[p].valueCount != sizeof(float) )
-				{
-					msg( Msg::Error, "Dspy::imageOpen", "Invalid float data size" );
-					continue;
-				}
-				pFloat = static_cast<const float *>(parameters[p].value);
-				if ( parameters[p].valueCount == 1 )
-				{
-					newParam = new FloatData( pFloat[0] );
-				}
-				else
-				{
-					std::vector< float > newVec( pFloat, pFloat + parameters[p].valueCount );
-					newParam = new FloatVectorData( newVec );
-				}
-				break;
-			case 's':
-				pChar = (const char **)(parameters[p].value);
-				if ( parameters[p].valueCount == 1 )
-				{
-					newParam = new StringData( pChar[0] );
-				}
-				else
-				{
-					StringVectorDataPtr newStringVec = new StringVectorData();
-					for ( int s = 0; s < parameters[p].valueCount; s++ )
+				case 'i' :
+					// sanity check
+					if( parameters[p].nbytes / parameters[p].valueCount != sizeof( int ) )
 					{
-						newStringVec->writable().push_back( pChar[s] );
+						msg( Msg::Error, "Dspy::imageOpen", "Invalid int data size" );
+						continue;
 					}
-					newParam = newStringVec;
-				}
-				break;
-			default :
-				// We shouldn't ever get here...
-				break;
+					pInt = static_cast<const int *>( parameters[p].value );
+					if( parameters[p].valueCount == 1 )
+					{
+						newParam = new IntData( pInt[0] );
+					}
+					else
+					{
+						std::vector<int> newVec( pInt, pInt + parameters[p].valueCount );
+						newParam = new IntVectorData( newVec );
+					}
+					break;
+				case 'f' :
+					if( parameters[p].nbytes / parameters[p].valueCount != sizeof( float ) )
+					{
+						msg( Msg::Error, "Dspy::imageOpen", "Invalid float data size" );
+						continue;
+					}
+					pFloat = static_cast<const float *>( parameters[p].value );
+					if( parameters[p].valueCount == 1 )
+					{
+						newParam = new FloatData( pFloat[0] );
+					}
+					else
+					{
+						std::vector<float> newVec( pFloat, pFloat + parameters[p].valueCount );
+						newParam = new FloatVectorData( newVec );
+					}
+					break;
+				case 's' :
+					pChar = (const char **)( parameters[p].value );
+					if( parameters[p].valueCount == 1 )
+					{
+						newParam = new StringData( pChar[0] );
+					}
+					else
+					{
+						StringVectorDataPtr newStringVec = new StringVectorData();
+						for( int s = 0; s < parameters[p].valueCount; s++ )
+						{
+							newStringVec->writable().push_back( pChar[s] );
+						}
+						newParam = newStringVec;
+					}
+					break;
+				default :
+					// We shouldn't ever get here...
+					break;
 			}
 			if( newParam )
 			{
-				convertedParameters->writable()[ parameters[p].name ] = newParam;
+				convertedParameters->writable()[parameters[p].name] = newParam;
 			}
 		}
 	}
 
-	convertedParameters->writable()[ "fileName" ] = new StringData( fileName );
+	convertedParameters->writable()["fileName"] = new StringData( fileName );
 
 	// Calculate display and data windows
 
@@ -223,7 +223,7 @@ PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const c
 
 	Box2i dataWindow(
 		origin,
-		origin + V2i( width - 1, height - 1)
+		origin + V2i( width - 1, height - 1 )
 	);
 
 	// Create the display driver
@@ -256,7 +256,6 @@ PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const c
 	dd->addRef(); // This will be removed in imageClose()
 	*image = (PtDspyImageHandle)dd.get();
 	return PkDspyErrorNone;
-
 }
 
 
@@ -266,26 +265,26 @@ PtDspyError imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size,
 
 	if( type == PkRedrawQuery )
 	{
-		if( (!dd->scanLineOrderOnly()) && dd->acceptsRepeatedData() )
+		if( ( !dd->scanLineOrderOnly() ) && dd->acceptsRepeatedData() )
 		{
-			((PtDspyRedrawInfo *)data)->redraw = 1;
+			( (PtDspyRedrawInfo *)data )->redraw = 1;
 		}
 		else
 		{
-			((PtDspyRedrawInfo *)data)->redraw = 0;
+			( (PtDspyRedrawInfo *)data )->redraw = 0;
 		}
 		return PkDspyErrorNone;
 	}
 
 	if( type == PkProgressiveQuery )
 	{
-		if( (!dd->scanLineOrderOnly()) && dd->acceptsRepeatedData() )
+		if( ( !dd->scanLineOrderOnly() ) && dd->acceptsRepeatedData() )
 		{
-			((PtDspyProgressiveInfo *)data)->acceptProgressive = 1;
+			( (PtDspyProgressiveInfo *)data )->acceptProgressive = 1;
 		}
 		else
 		{
-			((PtDspyProgressiveInfo *)data)->acceptProgressive = 0;
+			( (PtDspyProgressiveInfo *)data )->acceptProgressive = 0;
 		}
 		return PkDspyErrorNone;
 	}
@@ -301,16 +300,16 @@ PtDspyError imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int y
 	// Convert coordinates from cropped image to original image coordinates.
 	Box2i box( V2i( xMin + dataWindow.min.x, yMin + dataWindow.min.y ), V2i( xMaxPlusOne - 1 + dataWindow.min.x, yMaxPlusOne - 1 + dataWindow.min.y ) );
 	int channels = dd->channelNames().size();
-	int blockSize = (xMaxPlusOne - xMin) * (yMaxPlusOne - yMin);
+	int blockSize = ( xMaxPlusOne - xMin ) * ( yMaxPlusOne - yMin );
 	int bufferSize = channels * blockSize;
 
-	if( entrySize % sizeof(float) )
+	if( entrySize % sizeof( float ) )
 	{
 		msg( Msg::Error, "Dspy::imageData", "The entry size is not multiple of sizeof(float)!" );
 		return PkDspyErrorUnsupported;
 	}
 
-	if( entrySize == (int)(channels*sizeof(float)) )
+	if( entrySize == (int)( channels * sizeof( float ) ) )
 	{
 		try
 		{
@@ -343,12 +342,12 @@ PtDspyError imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int y
 
 PtDspyError imageClose( PtDspyImageHandle image )
 {
-	if ( !image )
+	if( !image )
 	{
 		return PkDspyErrorNone;
 	}
 
-	IECoreImage::DisplayDriver *dd = static_cast<IECoreImage::DisplayDriver*>( image );
+	IECoreImage::DisplayDriver *dd = static_cast<IECoreImage::DisplayDriver *>( image );
 	try
 	{
 		dd->imageClose();

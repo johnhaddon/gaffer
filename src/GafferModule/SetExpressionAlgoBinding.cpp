@@ -88,7 +88,6 @@ struct SetProviderWrapper : Gaffer::SetExpressionAlgo::SetProvider, wrapper<Gaff
 		this->get_override( "hash" )( setName, pythonHash );
 		h = extract<IECore::MurmurHash>( pythonHash );
 	}
-
 };
 
 IECore::PathMatcher evaluateSetExpressionWrapper( const std::string &setExpression, const Gaffer::SetExpressionAlgo::SetProvider &setProvider )
@@ -109,7 +108,7 @@ void setExpressionHashWrapper2( const std::string &setExpression, const Gaffer::
 	setExpressionHash( setExpression, setProvider, h );
 }
 
-}
+} // namespace
 
 namespace GafferModule
 {

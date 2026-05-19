@@ -74,21 +74,20 @@ struct ShadingModeCreator
 {
 
 	ShadingModeCreator( object fn )
-		:	m_fn( fn )
+		: m_fn( fn )
 	{
 	}
 
-	SceneProcessorPtr operator()()
+	SceneProcessorPtr operator () ()
 	{
 		IECorePython::ScopedGILLock gilLock;
 		SceneProcessorPtr result = extract<SceneProcessorPtr>( m_fn() );
 		return result;
 	}
 
-	private :
+private:
 
-		object m_fn;
-
+	object m_fn;
 };
 
 void registerShadingMode( const std::string &name, object creator )
@@ -118,7 +117,7 @@ void sceneViewRegisterRenderer( const std::string &name, object settingsCreator 
 		// at which point deleting a PyObject will crash.
 		[settingsCreator = new object( settingsCreator )] {
 			IECorePython::ScopedGILLock gilLock;
-			SceneProcessorPtr result = extract<SceneProcessorPtr>( (*settingsCreator)() );
+			SceneProcessorPtr result = extract<SceneProcessorPtr>( ( *settingsCreator )() );
 			return result;
 		}
 	);
@@ -172,21 +171,20 @@ struct CreatorWrapper
 {
 
 	CreatorWrapper( object fn )
-		:	m_fn( fn )
+		: m_fn( fn )
 	{
 	}
 
-	typename T::Ptr operator()()
+	typename T::Ptr operator () ()
 	{
 		ScopedGILLock gilLock;
 		typename T::Ptr result = extract<typename T::Ptr>( m_fn() );
 		return result;
 	}
 
-	private :
+private:
 
-		object m_fn;
-
+	object m_fn;
 };
 
 // Utility class for loading custom shader scenes from
@@ -204,11 +202,11 @@ struct ReferenceCreator
 {
 
 	ReferenceCreator( const std::filesystem::path &referenceFileName )
-		:	m_referenceFileName( referenceFileName )
+		: m_referenceFileName( referenceFileName )
 	{
 	}
 
-	NodePtr operator()()
+	NodePtr operator () ()
 	{
 		ScopedGILLock gilLock;
 		object gafferModule = import( "Gaffer" );
@@ -222,10 +220,9 @@ struct ReferenceCreator
 		return reference;
 	}
 
-	private :
+private:
 
-		std::filesystem::path m_referenceFileName;
-
+	std::filesystem::path m_referenceFileName;
 };
 
 void registerRenderer( const std::string &shaderPrefix, object creator )
@@ -233,7 +230,7 @@ void registerRenderer( const std::string &shaderPrefix, object creator )
 	ShaderView::registerRenderer( shaderPrefix, CreatorWrapper<InteractiveRender>( creator ) );
 }
 
-void deregisterRenderer( const std::string &shaderPrefix)
+void deregisterRenderer( const std::string &shaderPrefix )
 {
 	ShaderView::deregisterRenderer( shaderPrefix );
 }
@@ -263,7 +260,7 @@ boost::python::list registeredScenes( const IECore::InternedString &shaderPrefix
 
 struct SceneChangedSlotCaller
 {
-	void operator()( boost::python::object slot, ShaderViewPtr v )
+	void operator () ( boost::python::object slot, ShaderViewPtr v )
 	{
 		try
 		{
@@ -293,7 +290,7 @@ void setPaused( UVView &v, bool paused )
 
 struct UVViewSlotCaller
 {
-	void operator()( boost::python::object slot, UVViewPtr g )
+	void operator () ( boost::python::object slot, UVViewPtr g )
 	{
 		try
 		{
@@ -328,13 +325,12 @@ void GafferSceneUIModule::bindViews()
 		.def( "registerShadingMode", &registerShadingMode )
 		.staticmethod( "registerShadingMode" )
 		.def( "registeredShadingModes", &registeredShadingModes )
-		.staticmethod( "registeredShadingModes" )
-	;
+		.staticmethod( "registeredShadingModes" );
 
 	GafferBindings::NodeClass<ShaderView>( nullptr, no_init )
 		.def( init<ScriptNodePtr>() )
 		.def( "shaderPrefix", &ShaderView::shaderPrefix )
-		.def( "scene", (Gaffer::Node *(ShaderView::*)())&ShaderView::scene, return_value_policy<CastToIntrusivePtr>() )
+		.def( "scene", ( Gaffer::Node * (ShaderView::*)() ) & ShaderView::scene, return_value_policy<CastToIntrusivePtr>() )
 		.def( "sceneChangedSignal", &ShaderView::sceneChangedSignal, return_internal_reference<1>() )
 		.def( "registerRenderer", &registerRenderer )
 		.staticmethod( "registerRenderer" )
@@ -344,27 +340,23 @@ void GafferSceneUIModule::bindViews()
 		.def( "registerScene", &registerReferenceScene )
 		.staticmethod( "registerScene" )
 		.def( "registeredScenes", &registeredScenes )
-		.staticmethod( "registeredScenes" )
-	;
+		.staticmethod( "registeredScenes" );
 
 	SignalClass<ShaderView::SceneChangedSignal, DefaultSignalCaller<ShaderView::SceneChangedSignal>, SceneChangedSlotCaller>( "SceneChangedSignal" );
 
 	{
 		scope s = GafferBindings::NodeClass<UVView>( nullptr, no_init )
-			.def( init<ScriptNodePtr>() )
-			.def( "setPaused", &setPaused )
-			.def( "getPaused", &UVView::getPaused )
-			.def( "state", &UVView::state )
-			.def( "stateChangedSignal", &UVView::stateChangedSignal, return_internal_reference<1>() )
-		;
+					  .def( init<ScriptNodePtr>() )
+					  .def( "setPaused", &setPaused )
+					  .def( "getPaused", &UVView::getPaused )
+					  .def( "state", &UVView::state )
+					  .def( "stateChangedSignal", &UVView::stateChangedSignal, return_internal_reference<1>() );
 
 		enum_<UVView::State>( "State" )
 			.value( "Paused", UVView::Paused )
 			.value( "Running", UVView::Running )
-			.value( "Complete", UVView::Complete )
-		;
+			.value( "Complete", UVView::Complete );
 
 		SignalClass<UVView::UVViewSignal, DefaultSignalCaller<UVView::UVViewSignal>, UVViewSlotCaller>( "UVViewSignal" );
 	}
-
 }

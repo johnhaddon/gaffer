@@ -47,14 +47,14 @@ GAFFER_NODE_DEFINE_TYPE( SceneProcessor );
 size_t SceneProcessor::g_firstPlugIndex = 0;
 
 SceneProcessor::SceneProcessor( const std::string &name )
-	:	SceneNode( name )
+	: SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Gaffer::Plug::In ) );
 }
 
 SceneProcessor::SceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	SceneNode( name )
+	: SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild(
@@ -104,7 +104,7 @@ const Gaffer::ArrayPlug *SceneProcessor::inPlugs() const
 
 Plug *SceneProcessor::correspondingInput( const Plug *output )
 {
-	if ( output == outPlug() )
+	if( output == outPlug() )
 	{
 		return inPlug();
 	}
@@ -114,7 +114,7 @@ Plug *SceneProcessor::correspondingInput( const Plug *output )
 
 const Plug *SceneProcessor::correspondingInput( const Plug *output ) const
 {
-	if ( output == outPlug() )
+	if( output == outPlug() )
 	{
 		return inPlug();
 	}

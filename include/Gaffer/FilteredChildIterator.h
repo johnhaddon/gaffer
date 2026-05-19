@@ -48,7 +48,7 @@ struct TypePredicate
 {
 	using ChildType = T;
 
-	bool operator()( const GraphComponentPtr &g ) const
+	bool operator () ( const GraphComponentPtr &g ) const
 	{
 		return IECore::runTimeCast<T>( g.get() );
 	}
@@ -58,99 +58,97 @@ template<typename Predicate>
 class FilteredChildIterator : public boost::filter_iterator<Predicate, GraphComponent::ChildIterator>
 {
 
-	public :
+public:
 
-		using ChildType = typename Predicate::ChildType;
-		using BaseIterator = boost::filter_iterator<Predicate, GraphComponent::ChildIterator>;
+	using ChildType = typename Predicate::ChildType;
+	using BaseIterator = boost::filter_iterator<Predicate, GraphComponent::ChildIterator>;
 
-		/// \todo It's inconvenient that our reference type
-		/// is ChildType::Ptr rather than just ChildType. It
-		/// leads to lots of ugly `it->get()` and `(*it)->`
-		/// calls. Change this for this class and also for
-		/// the RecursiveIterator classes.
-		using reference = const typename ChildType::Ptr &;
-		using pointer = const typename ChildType::Ptr *;
+	/// \todo It's inconvenient that our reference type
+	/// is ChildType::Ptr rather than just ChildType. It
+	/// leads to lots of ugly `it->get()` and `(*it)->`
+	/// calls. Change this for this class and also for
+	/// the RecursiveIterator classes.
+	using reference = const typename ChildType::Ptr &;
+	using pointer = const typename ChildType::Ptr *;
 
-		FilteredChildIterator()
-			:	BaseIterator()
-		{
-		}
+	FilteredChildIterator()
+		: BaseIterator()
+	{
+	}
 
-		FilteredChildIterator( GraphComponent::ChildIterator x, GraphComponent::ChildIterator end = GraphComponent::ChildIterator() )
-			:	BaseIterator( x, end )
-		{
-		}
+	FilteredChildIterator( GraphComponent::ChildIterator x, GraphComponent::ChildIterator end = GraphComponent::ChildIterator() )
+		: BaseIterator( x, end )
+	{
+	}
 
-		FilteredChildIterator( const GraphComponent::ChildContainer &children )
-			:	BaseIterator( children.begin(), children.end() )
+	FilteredChildIterator( const GraphComponent::ChildContainer &children )
+		: BaseIterator( children.begin(), children.end() )
 
-		{
-		}
+	{
+	}
 
-		FilteredChildIterator( const GraphComponent *parent )
-			:	BaseIterator( parent->children().begin(), parent->children().end() )
-		{
-		}
+	FilteredChildIterator( const GraphComponent *parent )
+		: BaseIterator( parent->children().begin(), parent->children().end() )
+	{
+	}
 
-		reference operator*() const
-		{
-			// cast should be safe as predicate has checked type, and the layout of
-			// a GraphComponentPtr and any other intrusive pointer should be the same.
-			return reinterpret_cast<reference>( BaseIterator::operator*() );
-		}
+	reference operator * () const
+	{
+		// cast should be safe as predicate has checked type, and the layout of
+		// a GraphComponentPtr and any other intrusive pointer should be the same.
+		return reinterpret_cast<reference>( BaseIterator::operator * () );
+	}
 
-		pointer operator->() const
-		{
-			return reinterpret_cast<pointer>( BaseIterator::operator->() );
-		}
+	pointer operator ->() const
+	{
+		return reinterpret_cast<pointer>( BaseIterator::operator ->() );
+	}
 
-		FilteredChildIterator &operator++()
-		{
-			BaseIterator::operator++();
-			return *this;
-		}
+	FilteredChildIterator &operator ++ ()
+	{
+		BaseIterator::operator ++ ();
+		return *this;
+	}
 
-		FilteredChildIterator operator++( int )
-		{
-			FilteredChildIterator r( *this );
-			BaseIterator::operator++();
-			return r;
-		}
+	FilteredChildIterator operator ++ ( int )
+	{
+		FilteredChildIterator r( *this );
+		BaseIterator::operator ++ ();
+		return r;
+	}
 
-		bool done() const
-		{
-			return BaseIterator::base() == this->end();
-		}
-
+	bool done() const
+	{
+		return BaseIterator::base() == this->end();
+	}
 };
 
 template<typename Predicate>
 class FilteredChildRange
 {
 
-	public :
+public:
 
-		FilteredChildRange( const GraphComponent &parent )
-			:	m_parent( parent )
-		{
-		}
+	FilteredChildRange( const GraphComponent &parent )
+		: m_parent( parent )
+	{
+	}
 
-		using Iterator = FilteredChildIterator<Predicate>;
+	using Iterator = FilteredChildIterator<Predicate>;
 
-		Iterator begin() const
-		{
-			return Iterator( m_parent.children().begin(), m_parent.children().end() );
-		}
+	Iterator begin() const
+	{
+		return Iterator( m_parent.children().begin(), m_parent.children().end() );
+	}
 
-		Iterator end() const
-		{
-			return Iterator( m_parent.children().end(), m_parent.children().end() );
-		}
+	Iterator end() const
+	{
+		return Iterator( m_parent.children().end(), m_parent.children().end() );
+	}
 
-	private :
+private:
 
-		const GraphComponent &m_parent;
-
+	const GraphComponent &m_parent;
 };
 
 } // namespace Gaffer

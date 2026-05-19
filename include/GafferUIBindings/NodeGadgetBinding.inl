@@ -58,7 +58,7 @@ Imath::V3f connectionTangent( T &p, const GafferUI::ConnectionCreator *creator )
 
 template<typename T, typename TWrapper>
 NodeGadgetClass<T, TWrapper>::NodeGadgetClass( const char *docString )
-	:	GadgetClass<T, TWrapper>( docString )
+	: GadgetClass<T, TWrapper>( docString )
 {
 	this->def( "nodule", &Detail::nodule<T> );
 	this->def( "connectionTangent", &Detail::connectionTangent<T> );

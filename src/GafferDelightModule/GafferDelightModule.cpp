@@ -53,5 +53,4 @@ BOOST_PYTHON_MODULE( _GafferDelight )
 
 	DependencyNodeClass<DelightAttributes>();
 	DependencyNodeClass<DelightOptions>();
-
 }

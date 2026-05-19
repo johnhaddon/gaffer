@@ -44,7 +44,7 @@ template<typename I>
 size_t StandardSet::add( I first, I last )
 {
 	size_t numAdded = 0;
-	for( I it=first; it!=last; it++ )
+	for( I it = first; it != last; it++ )
 	{
 		numAdded += add( *it );
 	}
@@ -55,7 +55,7 @@ template<typename I>
 size_t StandardSet::remove( I first, I last )
 {
 	size_t numRemoved = 0;
-	for( I it=first; it!=last; it++ )
+	for( I it = first; it != last; it++ )
 	{
 		numRemoved += remove( *it );
 	}

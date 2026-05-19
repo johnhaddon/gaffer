@@ -58,7 +58,6 @@ OptionTweaks::OptionTweaks( const std::string &name ) : GlobalsProcessor( name )
 
 OptionTweaks::~OptionTweaks()
 {
-
 }
 
 Gaffer::BoolPlug *OptionTweaks::ignoreMissingPlug()
@@ -121,12 +120,10 @@ IECore::ConstCompoundObjectPtr OptionTweaks::computeProcessedGlobals(
 	result->members() = inputGlobals->members();
 
 	tweaksPlug->applyTweaks(
-		[&result]( const std::string &valueName, const bool withFallback )
-		{
+		[&result]( const std::string &valueName, const bool withFallback ) {
 			return result->member<Data>( g_namePrefix + valueName );
 		},
-		[&result]( const std::string &valueName, DataPtr newData )
-		{
+		[&result]( const std::string &valueName, DataPtr newData ) {
 			if( newData == nullptr )
 			{
 				return result->members().erase( g_namePrefix + valueName ) > 0;

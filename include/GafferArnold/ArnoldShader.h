@@ -48,32 +48,32 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldShader : public GafferScene::Shader
 {
 
-	public :
+public:
 
-		explicit ArnoldShader( const std::string &name=defaultName<ArnoldShader>() );
-		~ArnoldShader() override;
+	explicit ArnoldShader( const std::string &name = defaultName<ArnoldShader>() );
+	~ArnoldShader() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldShader, ArnoldShaderTypeId, GafferScene::Shader );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldShader, ArnoldShaderTypeId, GafferScene::Shader );
 
-		/// Implemented for outPlug(), returning the parameter named in the "primaryInput"
-		/// shader annotation if it has been specified.
-		Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
-		const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
+	/// Implemented for outPlug(), returning the parameter named in the "primaryInput"
+	/// shader annotation if it has been specified.
+	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
+	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-		void loadShader( const std::string &shaderName, bool keepExistingValues=false ) override;
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-	protected :
+protected:
 
-		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-	private :
+private:
 
-		// Shader metadata is stored in a "shader" member of the result and
-		// parameter metadata is stored indexed by name inside a
-		// "parameter" member of the result.
-		const IECore::CompoundData *metadata() const;
+	// Shader metadata is stored in a "shader" member of the result and
+	// parameter metadata is stored indexed by name inside a
+	// "parameter" member of the result.
+	const IECore::CompoundData *metadata() const;
 
-		mutable IECore::ConstCompoundDataPtr m_metadata;
+	mutable IECore::ConstCompoundDataPtr m_metadata;
 };
 
 IE_CORE_DECLAREPTR( ArnoldShader )

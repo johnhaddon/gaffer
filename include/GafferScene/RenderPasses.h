@@ -46,27 +46,26 @@ namespace GafferScene
 class GAFFERSCENE_API RenderPasses : public GlobalsProcessor
 {
 
-	public :
+public:
 
-		explicit RenderPasses( const std::string &name=defaultName<RenderPasses>() );
-		~RenderPasses() override;
+	explicit RenderPasses( const std::string &name = defaultName<RenderPasses>() );
+	~RenderPasses() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::RenderPasses, RenderPassesTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::RenderPasses, RenderPassesTypeId, GlobalsProcessor );
 
-		Gaffer::StringVectorDataPlug *namesPlug();
-		const Gaffer::StringVectorDataPlug *namesPlug() const;
+	Gaffer::StringVectorDataPlug *namesPlug();
+	const Gaffer::StringVectorDataPlug *namesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( RenderPasses );

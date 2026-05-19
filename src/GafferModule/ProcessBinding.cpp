@@ -74,7 +74,5 @@ void GafferModule::bindProcess()
 	IECorePython::ExceptionClass<ProcessException>( "ProcessException", PyExc_RuntimeError )
 		.def( "plug", &processExceptionPlug )
 		.def( "context", &processExceptionContext )
-		.def( "processType", &processExceptionProcessType )
-	;
-
+		.def( "processType", &processExceptionProcessType );
 }

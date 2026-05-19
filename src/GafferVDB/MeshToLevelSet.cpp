@@ -66,10 +66,10 @@ namespace
 struct CortexMeshAdapter
 {
 	CortexMeshAdapter( const MeshPrimitive *mesh )
-		:	m_numFaces( mesh->numFaces() ),
-			m_numVertices( mesh->variableSize( PrimitiveVariable::Vertex ) ),
-			m_verticesPerFace( mesh->verticesPerFace()->readable() ),
-			m_vertexIds( mesh->vertexIds()->readable() )
+		: m_numFaces( mesh->numFaces() ),
+		  m_numVertices( mesh->variableSize( PrimitiveVariable::Vertex ) ),
+		  m_verticesPerFace( mesh->verticesPerFace()->readable() ),
+		  m_vertexIds( mesh->vertexIds()->readable() )
 	{
 		size_t offset = 0;
 		m_faceOffsets.reserve( m_numFaces );
@@ -109,18 +109,18 @@ struct CortexMeshAdapter
 	// Return position pos in local grid index space for polygon n and vertex v
 	void getIndexSpacePoint( size_t polygonIndex, size_t polygonVertexIndex, openvdb::Vec3d &pos ) const
 	{
-		const V3f &p = (*m_points)[ m_vertexIds[ m_faceOffsets[polygonIndex] + polygonVertexIndex ] ];
+		const V3f &p = ( *m_points )[m_vertexIds[m_faceOffsets[polygonIndex] + polygonVertexIndex]];
 		pos = openvdb::math::Vec3s( p.x, p.y, p.z );
 	}
 
-	private :
+private:
 
-		const size_t m_numFaces;
-		const size_t m_numVertices;
-		const vector<int> &m_verticesPerFace;
-		const vector<int> &m_vertexIds;
-		vector<int> m_faceOffsets;
-		const vector<V3f> *m_points;
+	const size_t m_numFaces;
+	const size_t m_numVertices;
+	const vector<int> &m_verticesPerFace;
+	const vector<int> &m_vertexIds;
+	vector<int> m_faceOffsets;
+	const vector<V3f> *m_points;
 };
 
 } // namespace
@@ -134,11 +134,11 @@ GAFFER_NODE_DEFINE_TYPE( MeshToLevelSet );
 size_t MeshToLevelSet::g_firstPlugIndex = 0;
 
 MeshToLevelSet::MeshToLevelSet( const std::string &name )
-	:	MergeObjects( name, "${scene:path}" )
+	: MergeObjects( name, "${scene:path}" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild( new StringPlug( "grid", Plug::In, "surface") );
+	addChild( new StringPlug( "grid", Plug::In, "surface" ) );
 	addChild( new FloatPlug( "voxelSize", Plug::In, 0.1f, 0.0001f ) );
 	addChild( new FloatPlug( "exteriorBandwidth", Plug::In, 3.0f, 0.0001f ) );
 	addChild( new FloatPlug( "interiorBandwidth", Plug::In, 3.0f, 0.0001f ) );
@@ -190,13 +190,11 @@ const FloatPlug *MeshToLevelSet::interiorBandwidthPlug() const
 
 bool MeshToLevelSet::affectsMergedObject( const Gaffer::Plug *input ) const
 {
-	return
-		MergeObjects::affectsMergedObject( input ) ||
+	return MergeObjects::affectsMergedObject( input ) ||
 		input == gridPlug() ||
 		input == voxelSizePlug() ||
 		input == exteriorBandwidthPlug() ||
-		input == interiorBandwidthPlug()
-	;
+		input == interiorBandwidthPlug();
 }
 
 void MeshToLevelSet::hashMergedObject(
@@ -207,14 +205,14 @@ void MeshToLevelSet::hashMergedObject(
 
 	gridPlug()->hash( h );
 	voxelSizePlug()->hash( h );
-	exteriorBandwidthPlug()->hash ( h );
-	interiorBandwidthPlug()->hash ( h );
+	exteriorBandwidthPlug()->hash( h );
+	interiorBandwidthPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MeshToLevelSet::computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MeshToLevelSet::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
 {
-	std::vector< IECoreScene::MeshPrimitivePtr > meshStorage;
-	std::vector< std::pair< const IECoreScene::Primitive *, Imath::M44f > > meshes;
+	std::vector<IECoreScene::MeshPrimitivePtr> meshStorage;
+	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> meshes;
 
 	const float voxelSize = voxelSizePlug()->getValue();
 
@@ -224,7 +222,7 @@ IECore::ConstObjectPtr MeshToLevelSet::computeMergedObject( const std::vector< s
 
 	for( const auto &[object, transform] : sources )
 	{
-		const IECoreScene::MeshPrimitive * m = IECore::runTimeCast< const IECoreScene::MeshPrimitive >( object.get() );
+		const IECoreScene::MeshPrimitive *m = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( object.get() );
 		if( !m )
 		{
 			// Just skip anything that's not a mesh
@@ -238,7 +236,7 @@ IECore::ConstObjectPtr MeshToLevelSet::computeMergedObject( const std::vector< s
 		simpleMesh->setTopologyUnchecked(
 			m->verticesPerFace(), m->vertexIds(), m->variableSize( PrimitiveVariable::Interpolation::Vertex )
 		);
-		simpleMesh->variables["P"] = m->variables.at("P");
+		simpleMesh->variables["P"] = m->variables.at( "P" );
 		meshStorage.push_back( simpleMesh );
 
 		meshes.push_back( std::make_pair( simpleMesh.get(), transform * worldToIndex ) );

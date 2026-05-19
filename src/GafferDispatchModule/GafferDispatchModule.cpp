@@ -47,5 +47,4 @@ BOOST_PYTHON_MODULE( _GafferDispatch )
 
 	bindTaskNode();
 	bindDispatcher();
-
 }

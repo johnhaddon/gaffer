@@ -46,7 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteAttributes );
 size_t DeleteAttributes::g_firstPlugIndex = 0;
 
 DeleteAttributes::DeleteAttributes( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );
@@ -103,7 +103,7 @@ void DeleteAttributes::affects( const Gaffer::Plug *input, AffectedPlugsContaine
 
 DeleteAttributes::Operation DeleteAttributes::operation( const Gaffer::Context *context, std::string &names, bool &invertNames ) const
 {
-	if( !(filterValue( context ) & PathMatcher::ExactMatch) )
+	if( !( filterValue( context ) & PathMatcher::ExactMatch ) )
 	{
 		return Operation::PassThrough;
 	}

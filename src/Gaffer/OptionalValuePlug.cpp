@@ -43,7 +43,7 @@ using namespace Gaffer;
 GAFFER_PLUG_DEFINE_TYPE( OptionalValuePlug );
 
 OptionalValuePlug::OptionalValuePlug( IECore::InternedString name, const Gaffer::ValuePlugPtr &valuePlug, bool enabledPlugDefaultValue, Direction direction, unsigned flags )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	addChild( new BoolPlug( "enabled", direction, enabledPlugDefaultValue ) );
 	setChild( "value", valuePlug );

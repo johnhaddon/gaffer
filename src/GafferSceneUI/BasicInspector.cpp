@@ -61,17 +61,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
 	{
 	}
 
-	bool operator==( const HistoryCacheKey &rhs ) const
+	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return
-			plug == rhs.plug &&
+		return plug == rhs.plug &&
 			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount
-		;
+			dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -92,7 +90,7 @@ using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History
 
 HistoryCache g_historyCache(
 	// Getter
-	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		const ScenePlug::ScenePath *path = Context::current()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
@@ -101,13 +99,13 @@ HistoryCache g_historyCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// Histories contain PlugPtrs, which could potentially be the sole
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -165,7 +163,7 @@ Gaffer::ValuePlugPtr BasicInspector::source( const GafferScene::SceneAlgo::Histo
 		{
 			previousValue = value( history->predecessors.front().get() );
 		}
-		if( (bool)v != bool(previousValue) || (v && !v->isEqualTo( previousValue.get() )) )
+		if( (bool)v != bool( previousValue ) || ( v && !v->isEqualTo( previousValue.get() ) ) )
 		{
 			return history->scene->getChild<ValuePlug>( m_plug->getName() );
 		}

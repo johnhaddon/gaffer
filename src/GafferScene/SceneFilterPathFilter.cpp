@@ -48,7 +48,7 @@ using namespace boost::placeholders;
 using namespace GafferScene;
 
 SceneFilterPathFilter::SceneFilterPathFilter( FilterPtr sceneFilter, IECore::CompoundDataPtr userData )
-	:	PathFilter( userData ), m_sceneFilter( sceneFilter )
+	: PathFilter( userData ), m_sceneFilter( sceneFilter )
 {
 	m_plugDirtiedConnection = sceneFilter->plugDirtiedSignal().connect(
 		boost::bind( &SceneFilterPathFilter::plugDirtied, this, ::_1 )
@@ -63,11 +63,11 @@ struct SceneFilterPathFilter::Remove
 {
 
 	Remove( const Filter *filter )
-		:	m_filter( filter )
+		: m_filter( filter )
 	{
 	}
 
-	bool operator () ( const  Gaffer::PathPtr &path )
+	bool operator () ( const Gaffer::PathPtr &path )
 	{
 		const ScenePath *scenePath = IECore::runTimeCast<const ScenePath>( path.get() );
 		if( !scenePath )
@@ -95,12 +95,11 @@ struct SceneFilterPathFilter::Remove
 		return !( m_filter->outPlug()->getValue() & ( IECore::PathMatcher::DescendantMatch | IECore::PathMatcher::ExactMatch ) );
 	}
 
-	private :
+private:
 
-		const Filter *m_filter;
-		Gaffer::ConstContextPtr m_baseContext;
-		Gaffer::ContextPtr m_context;
-
+	const Filter *m_filter;
+	Gaffer::ConstContextPtr m_baseContext;
+	Gaffer::ContextPtr m_context;
 };
 
 void SceneFilterPathFilter::doFilter( std::vector<Gaffer::PathPtr> &paths, const IECore::Canceller *canceller ) const

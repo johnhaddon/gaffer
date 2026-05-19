@@ -81,7 +81,7 @@ const InternedString g_noChannelName( "" );
 
 const InternedString idChannelName( const std::vector<std::string> &channelNames, bool instance )
 {
-	if( instance  )
+	if( instance )
 	{
 		if( ImageAlgo::channelExists( channelNames, g_instanceIDChannelName ) )
 		{
@@ -112,7 +112,7 @@ const InternedString g_isRenderingMetadataName = "gaffer:isRendering";
 static IECore::InternedString g_dragOverlayName( "__imageSelectionToolDragOverlay" );
 
 // Logic copied from ImageGadget, in order to avoid exposing a plane normal in the API
-std::tuple< bool, Imath::V2f, Imath::V2f > effectiveWipePlane( const ImageGadget *imageGadget )
+std::tuple<bool, Imath::V2f, Imath::V2f> effectiveWipePlane( const ImageGadget *imageGadget )
 {
 	if( !imageGadget->getWipeEnabled() )
 	{
@@ -128,88 +128,87 @@ std::tuple< bool, Imath::V2f, Imath::V2f > effectiveWipePlane( const ImageGadget
 class ImageSelectionTool::DragOverlay : public GafferUI::Gadget
 {
 
-	public :
+public:
 
-		DragOverlay()
-			: Gadget()
+	DragOverlay()
+		: Gadget()
+	{
+	}
+
+	Imath::Box3f bound() const override
+	{
+		// we draw in raster space so don't have a sensible bound
+		return Box3f();
+	}
+
+	void setStartPosition( const V3f &p )
+	{
+		if( m_startPosition == p )
 		{
+			return;
+		}
+		m_startPosition = p;
+		dirty( DirtyType::Render );
+	}
+
+	const V3f &getStartPosition() const
+	{
+		return m_startPosition;
+	}
+
+	void setEndPosition( const V3f &p )
+	{
+		if( m_endPosition == p )
+		{
+			return;
+		}
+		m_endPosition = p;
+		dirty( DirtyType::Render );
+	}
+
+	const V3f &getEndPosition() const
+	{
+		return m_endPosition;
+	}
+
+protected:
+
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+	{
+		assert( layer == Layer::MidFront );
+
+		if( isSelectionRender( reason ) )
+		{
+			return;
 		}
 
-		Imath::Box3f bound() const override
-		{
-			// we draw in raster space so don't have a sensible bound
-			return Box3f();
-		}
+		const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+		ViewportGadget::RasterScope rasterScope( viewportGadget );
 
-		void setStartPosition( const V3f &p )
-		{
-			if( m_startPosition == p )
-			{
-				return;
-			}
-			m_startPosition = p;
-			dirty( DirtyType::Render );
-		}
+		Box2f b;
+		b.extendBy( viewportGadget->gadgetToRasterSpace( m_startPosition, this ) );
+		b.extendBy( viewportGadget->gadgetToRasterSpace( m_endPosition, this ) );
 
-		const V3f &getStartPosition() const
-		{
-			return m_startPosition;
-		}
+		style->renderSelectionBox( b );
+	}
 
-		void setEndPosition( const V3f &p )
-		{
-			if( m_endPosition == p )
-			{
-				return;
-			}
-			m_endPosition = p;
-			dirty( DirtyType::Render );
-		}
+	unsigned layerMask() const override
+	{
+		return (unsigned)Layer::MidFront;
+	}
 
-		const V3f &getEndPosition() const
-		{
-			return m_endPosition;
-		}
+	Imath::Box3f renderBound() const override
+	{
+		// we draw in raster space so don't have a sensible bound
+		Box3f b;
+		b.makeInfinite();
+		return b;
+	}
 
-	protected :
+private:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
-		{
-			assert( layer == Layer::MidFront );
-
-			if( isSelectionRender( reason ) )
-			{
-				return;
-			}
-
-			const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
-			ViewportGadget::RasterScope rasterScope( viewportGadget );
-
-			Box2f b;
-			b.extendBy( viewportGadget->gadgetToRasterSpace( m_startPosition, this ) );
-			b.extendBy( viewportGadget->gadgetToRasterSpace( m_endPosition, this ) );
-
-			style->renderSelectionBox( b );
-		}
-
-		unsigned layerMask() const override
-		{
-			return (unsigned)Layer::MidFront;
-		}
-
-		Imath::Box3f renderBound() const override
-		{
-			// we draw in raster space so don't have a sensible bound
-			Box3f b;
-			b.makeInfinite();
-			return b;
-		}
-
-	private :
-
-		Imath::V3f m_startPosition;
-		Imath::V3f m_endPosition;
-
+	Imath::V3f m_startPosition;
+	Imath::V3f m_endPosition;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -222,7 +221,7 @@ size_t ImageSelectionTool::g_firstPlugIndex = 0;
 ImageSelectionTool::ToolDescription<ImageSelectionTool, ImageView> ImageSelectionTool::g_imageToolDescription;
 
 ImageSelectionTool::ImageSelectionTool( View *view, const std::string &name )
-	:	Tool( view, name ), m_manifestDirty( true )
+	: Tool( view, name ), m_manifestDirty( true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "selectMode", Plug::In, "standard" ) );
@@ -378,7 +377,7 @@ void ImageSelectionTool::updateRenderManifest()
 	{
 		// Const cast is safe here since source scene only needs a non-const input in order to return a non-const
 		// result, and we treat the result as const.
-		const ScenePlug *scenePlug = SceneAlgo::sourceScene( const_cast<ImagePlug*>( image ) );
+		const ScenePlug *scenePlug = SceneAlgo::sourceScene( const_cast<ImagePlug *>( image ) );
 
 		if( scenePlug )
 		{
@@ -449,7 +448,6 @@ void ImageSelectionTool::plugDirtied( const Gaffer::Plug *plug )
 	{
 		statusChangedSignal()( *this );
 	}
-
 }
 
 IECore::PathMatcher ImageSelectionTool::pathsForIDs( const std::vector<uint32_t> &ids )
@@ -485,7 +483,7 @@ void ImageSelectionTool::idsForPaths( const IECore::PathMatcher &paths, std::vec
 
 std::optional<uint32_t> ImageSelectionTool::pixelID( const Imath::V2i &pixel, bool instance )
 {
-	const auto [ wipeEnabled, wipePosition, wipeDirection ] = effectiveWipePlane( imageGadget() );
+	const auto [wipeEnabled, wipePosition, wipeDirection] = effectiveWipePlane( imageGadget() );
 
 	if( wipeEnabled && ( Imath::V2f( pixel ) + Imath::V2f( 0.5f ) - wipePosition ).dot( wipeDirection ) > 0 )
 	{
@@ -542,7 +540,7 @@ std::unordered_set<uint32_t> ImageSelectionTool::rectIDs( const Imath::Box2i &re
 		return result;
 	}
 
-	const auto [ wipeEnabled, wipePosition, wipeDirection ] = effectiveWipePlane( imageGadget() );
+	const auto [wipeEnabled, wipePosition, wipeDirection] = effectiveWipePlane( imageGadget() );
 
 	try
 	{
@@ -561,8 +559,7 @@ std::unordered_set<uint32_t> ImageSelectionTool::rectIDs( const Imath::Box2i &re
 		// structured bindings until C++20
 		sampler.visitPixels(
 			validRect,
-			[&result, &prevIntValue, &wipeEnabled = wipeEnabled, &wipePosition = wipePosition, &wipeDirection = wipeDirection, &instance] ( float value, int x, int y )
-			{
+			[&result, &prevIntValue, &wipeEnabled = wipeEnabled, &wipePosition = wipePosition, &wipeDirection = wipeDirection, &instance]( float value, int x, int y ) {
 				if( wipeEnabled && ( Imath::V2f( x, y ) + Imath::V2f( 0.5f ) - wipePosition ).dot( wipeDirection ) > 0 )
 				{
 					return;
@@ -879,7 +876,7 @@ bool ImageSelectionTool::dragEnd( const GafferUI::DragDropEvent &event )
 		if( event.modifiers & DragDropEvent::Control )
 		{
 			m_selectedIDs.erase(
-				std::remove_if( m_selectedIDs.begin(), m_selectedIDs.end(), [ &idsSet ]( uint32_t id ){ return idsSet.count( id ); } ),
+				std::remove_if( m_selectedIDs.begin(), m_selectedIDs.end(), [&idsSet]( uint32_t id ) { return idsSet.count( id ); } ),
 				m_selectedIDs.end()
 			);
 		}

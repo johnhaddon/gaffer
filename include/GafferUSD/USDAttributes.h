@@ -47,13 +47,12 @@ namespace GafferUSD
 class GAFFERUSD_API USDAttributes : public GafferScene::Attributes
 {
 
-	public :
+public:
 
-		explicit USDAttributes( const std::string &name=defaultName<USDAttributes>() );
-		~USDAttributes() override;
+	explicit USDAttributes( const std::string &name = defaultName<USDAttributes>() );
+	~USDAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDAttributes, USDAttributesTypeId, GafferScene::Attributes );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDAttributes, USDAttributesTypeId, GafferScene::Attributes );
 };
 
 IE_CORE_DECLAREPTR( USDAttributes )

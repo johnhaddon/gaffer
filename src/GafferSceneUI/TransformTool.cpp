@@ -144,56 +144,54 @@ GraphComponent *editTargetOrNull( const TransformTool::Selection &selection )
 class HandlesGadget : public Gadget
 {
 
-	public :
+public:
 
-		HandlesGadget( const std::string &name="HandlesGadget" )
-			:	Gadget( name )
+	HandlesGadget( const std::string &name = "HandlesGadget" )
+		: Gadget( name )
+	{
+	}
+
+protected:
+
+	Imath::Box3f renderBound() const override
+	{
+		// We need `renderLayer()` to be called any time it will
+		// be called for one of our children. Our children claim
+		// infinite bounds to account for their raster scale, so
+		// we must too.
+		Box3f b;
+		b.makeInfinite();
+		return b;
+	}
+
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+	{
+		if( layer != Layer::MidFront )
 		{
+			return;
 		}
 
-	protected :
+		// Clear the depth buffer so that the handles render
+		// over the top of the SceneGadget. Otherwise they are
+		// unusable when the object is larger than the handles.
+		/// \todo Can we really justify this approach? Does it
+		/// play well with new Gadgets we'll add over time? If
+		/// so, then we should probably move the depth clearing
+		/// to `Gadget::render()`, in between each layer. If
+		/// not we'll need to come up with something else, perhaps
+		/// going back to punching a hole in the depth buffer using
+		/// `glDepthFunc( GL_GREATER )`. Or maybe an option to
+		/// render gadgets in an offscreen buffer before compositing
+		/// them over the current framebuffer?
+		glClearDepth( 1.0f );
+		glClear( GL_DEPTH_BUFFER_BIT );
+		glEnable( GL_DEPTH_TEST );
+	}
 
-		Imath::Box3f renderBound() const override
-		{
-			// We need `renderLayer()` to be called any time it will
-			// be called for one of our children. Our children claim
-			// infinite bounds to account for their raster scale, so
-			// we must too.
-			Box3f b;
-			b.makeInfinite();
-			return b;
-		}
-
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
-		{
-			if( layer != Layer::MidFront )
-			{
-				return;
-			}
-
-			// Clear the depth buffer so that the handles render
-			// over the top of the SceneGadget. Otherwise they are
-			// unusable when the object is larger than the handles.
-			/// \todo Can we really justify this approach? Does it
-			/// play well with new Gadgets we'll add over time? If
-			/// so, then we should probably move the depth clearing
-			/// to `Gadget::render()`, in between each layer. If
-			/// not we'll need to come up with something else, perhaps
-			/// going back to punching a hole in the depth buffer using
-			/// `glDepthFunc( GL_GREATER )`. Or maybe an option to
-			/// render gadgets in an offscreen buffer before compositing
-			/// them over the current framebuffer?
-			glClearDepth( 1.0f );
-			glClear( GL_DEPTH_BUFFER_BIT );
-			glEnable( GL_DEPTH_TEST );
-
-		}
-
-		unsigned layerMask() const override
-		{
-			return (unsigned)Layer::MidFront;
-		}
-
+	unsigned layerMask() const override
+	{
+		return (unsigned)Layer::MidFront;
+	}
 };
 
 } // namespace
@@ -208,7 +206,7 @@ class HandlesGadget : public Gadget
 /// that the message is out of date.
 
 TransformTool::Selection::Selection()
-	:	m_editable( false )
+	: m_editable( false )
 {
 }
 
@@ -218,7 +216,7 @@ TransformTool::Selection::Selection(
 	const Gaffer::ConstContextPtr &context,
 	const Gaffer::EditScopePtr &editScope
 )
-	:	m_scene( scene ), m_path( path ), m_context( context ), m_editable( false ), m_editScope( editScope ), m_aimConstraint( false )
+	: m_scene( scene ), m_path( path ), m_context( context ), m_editable( false ), m_editScope( editScope ), m_aimConstraint( false )
 {
 	Context::Scope scopedContext( context.get() );
 	if( path.empty() )
@@ -744,7 +742,8 @@ Imath::M44f TransformTool::Selection::sceneToTransformSpace() const
 		}
 		else if( path().size() )
 		{
-			ScenePlug::ScenePath parentPath = path(); parentPath.pop_back();
+			ScenePlug::ScenePath parentPath = path();
+			parentPath.pop_back();
 			downstreamMatrix = scene()->fullTransform( parentPath );
 		}
 	}
@@ -758,7 +757,8 @@ Imath::M44f TransformTool::Selection::sceneToTransformSpace() const
 		}
 		else if( upstreamPath().size() )
 		{
-			ScenePlug::ScenePath upstreamParentPath = upstreamPath(); upstreamParentPath.pop_back();
+			ScenePlug::ScenePath upstreamParentPath = upstreamPath();
+			upstreamParentPath.pop_back();
 			upstreamMatrix = upstreamScene()->fullTransform( upstreamParentPath );
 		}
 	}
@@ -844,13 +844,13 @@ GAFFER_NODE_DEFINE_TYPE( TransformTool );
 size_t TransformTool::g_firstPlugIndex = 0;
 
 TransformTool::TransformTool( SceneView *view, const std::string &name )
-	:	SelectionTool( view, name ),
-		m_handles( new HandlesGadget() ),
-		m_handlesDirty( true ),
-		m_selectionDirty( true ),
-		m_priorityPathsDirty( true ),
-		m_dragging( false ),
-		m_mergeGroupId( 0 )
+	: SelectionTool( view, name ),
+	  m_handles( new HandlesGadget() ),
+	  m_handlesDirty( true ),
+	  m_selectionDirty( true ),
+	  m_priorityPathsDirty( true ),
+	  m_dragging( false ),
+	  m_mergeGroupId( 0 )
 {
 	view->viewportGadget()->addChild( m_handles );
 	m_handles->setVisible( false );
@@ -1133,8 +1133,7 @@ void TransformTool::updateSelection() const
 
 	std::sort(
 		m_selection.begin(), m_selection.end(),
-		[&lastSelectedPath]( const Selection &a, const Selection &b )
-		{
+		[&lastSelectedPath]( const Selection &a, const Selection &b ) {
 			const auto ta = editTargetOrNull( a );
 			const auto tb = editTargetOrNull( b );
 			if( ta < tb )
@@ -1154,16 +1153,13 @@ void TransformTool::updateSelection() const
 
 	auto last = std::unique(
 		m_selection.begin(), m_selection.end(),
-		[]( const Selection &a, const Selection &b )
-		{
+		[]( const Selection &a, const Selection &b ) {
 			const auto ta = editTargetOrNull( a );
 			const auto tb = editTargetOrNull( b );
-			return
-				ta && tb &&
+			return ta && tb &&
 				ta != a.editScope() &&
 				tb != b.editScope() &&
-				ta == tb
-			;
+				ta == tb;
 		}
 	);
 	m_selection.erase( last, m_selection.end() );
@@ -1172,8 +1168,7 @@ void TransformTool::updateSelection() const
 
 	auto lastSelectedIt = std::find_if(
 		m_selection.begin(), m_selection.end(),
-		[&lastSelectedPath]( const Selection &x )
-		{
+		[&lastSelectedPath]( const Selection &x ) {
 			return x.path() == lastSelectedPath;
 		}
 	);
@@ -1271,7 +1266,7 @@ bool TransformTool::keyPress( const GafferUI::KeyEvent &event )
 					if( Animation::canAnimate( plug.get() ) )
 					{
 						const float value = plug->getValue();
-						Animation::CurvePlug* const curve = Animation::acquire( plug.get() );
+						Animation::CurvePlug *const curve = Animation::acquire( plug.get() );
 						curve->insertKey( s.context()->getTime(), value );
 					}
 				}

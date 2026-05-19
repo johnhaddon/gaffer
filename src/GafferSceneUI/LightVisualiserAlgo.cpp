@@ -57,7 +57,12 @@ using namespace GafferSceneUI::Private::LightVisualiserAlgo;
 namespace
 {
 
-enum Axis { X, Y, Z };
+enum Axis
+{
+	X,
+	Y,
+	Z
+};
 
 const Color3f g_lightWireframeColor = Color3f( 1.0f, 0.835f, 0.07f );
 const Color4f g_lightWireframeColor4 = Color4f( g_lightWireframeColor.x, g_lightWireframeColor.y, g_lightWireframeColor.z, 1.0f );
@@ -69,7 +74,7 @@ void addCircle( Axis axis, const V3f &center, float radius, std::vector<int> &ve
 	const int numDivisions = 100;
 	for( int i = 0; i < numDivisions; ++i )
 	{
-		const float angle = 2 * M_PI * (float)i/(float)(numDivisions-1);
+		const float angle = 2 * M_PI * (float)i / (float)( numDivisions - 1 );
 		if( axis == Axis::Z )
 		{
 			p.push_back( center + radius * V3f( cos( angle ), sin( angle ), 0 ) );
@@ -89,24 +94,26 @@ void addCircle( Axis axis, const V3f &center, float radius, std::vector<int> &ve
 void addSolidArc( Axis axis, const V3f &center, float majorRadius, float minorRadius, float startFraction, float stopFraction, std::vector<int> &vertsPerPoly, std::vector<int> &vertIds, std::vector<V3f> &p )
 {
 	const int numSegmentsForCircle = 100;
-	int numSegments = std::max( 1, (int)ceil( (stopFraction - startFraction) * numSegmentsForCircle ) );
+	int numSegments = std::max( 1, (int)ceil( ( stopFraction - startFraction ) * numSegmentsForCircle ) );
 
 	int start = p.size();
 	for( int i = 0; i < numSegments + 1; ++i )
 	{
-		const float angle = 2 * M_PI * ( startFraction + (stopFraction - startFraction) * (float)i/(float)(numSegments) );
+		const float angle = 2 * M_PI * ( startFraction + ( stopFraction - startFraction ) * (float)i / (float)( numSegments ) );
 		V3f dir( -sin( angle ), cos( angle ), 0 );
-		if( axis == Axis::X ) dir = V3f( 0, dir[1], -dir[0] );
-		else if( axis == Axis::Y ) dir = V3f( dir[1], 0, dir[0] );
+		if( axis == Axis::X )
+			dir = V3f( 0, dir[1], -dir[0] );
+		else if( axis == Axis::Y )
+			dir = V3f( dir[1], 0, dir[0] );
 		p.push_back( center + majorRadius * dir );
 		p.push_back( center + minorRadius * dir );
 	}
 	for( int i = 0; i < numSegments; ++i )
 	{
 		vertIds.push_back( start + i * 2 );
-		vertIds.push_back( start + i * 2  + 1);
-		vertIds.push_back( start + i * 2  + 3);
-		vertIds.push_back( start + i * 2  + 2);
+		vertIds.push_back( start + i * 2 + 1 );
+		vertIds.push_back( start + i * 2 + 3 );
+		vertIds.push_back( start + i * 2 + 2 );
 		vertsPerPoly.push_back( 4 );
 	}
 }
@@ -150,13 +157,12 @@ void addRoundedRectangle( const V2f &size, const V2f &radii, std::vector<V3f> &p
 	const V3f halfSize( size.x * 0.5f - radii.x, size.y * 0.5f - radii.y, 0.f );
 
 	for(
-		const auto &[startIndex, quadrantMult] : std::array<std::tuple<int, V3f>, 4> {
-			std::tuple<int, V3f>{ 0, V3f( 1.f, 1.f, 0.f ) },  // Top-right
-			std::tuple<int, V3f>{ numDivisions / 4, V3f( -1.f, 1.f, 0.f ) },  // Top-left
-			std::tuple<int, V3f>{ numDivisions / 2, V3f( -1.f, -1.f, 0.f ) },  // Bottom-left
-			std::tuple<int, V3f>{ ( numDivisions * 3 ) / 4, V3f( 1.f, -1.f, 0.f ) }  // Bottom-right
-		}
-	)
+		const auto &[startIndex, quadrantMult] : std::array<std::tuple<int, V3f>, 4>{
+			std::tuple<int, V3f>{ 0, V3f( 1.f, 1.f, 0.f ) }, // Top-right
+			std::tuple<int, V3f>{ numDivisions / 4, V3f( -1.f, 1.f, 0.f ) }, // Top-left
+			std::tuple<int, V3f>{ numDivisions / 2, V3f( -1.f, -1.f, 0.f ) }, // Bottom-left
+			std::tuple<int, V3f>{ ( numDivisions * 3 ) / 4, V3f( 1.f, -1.f, 0.f ) } // Bottom-right
+		} )
 	{
 		for( int i = startIndex, eI = startIndex + ( numDivisions / 4 ); i <= eI; ++i )
 		{
@@ -171,52 +177,48 @@ void addRoundedRectangle( const V2f &size, const V2f &radii, std::vector<V3f> &p
 
 const char *constantFragSource()
 {
-	return
-		"#version 120\n"
-		""
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"#include \"IECoreGL/ColorAlgo.h\"\n"
-		""
-		"in vec3 fragmentCs;"
-		""
-		"uniform vec3 tint;"
-		""
-		"void main()"
-		"{"
-		"	gl_FragColor = vec4( fragmentCs * tint, 1 );"
-		"}"
-	;
+	return "#version 120\n"
+		   ""
+		   "#if __VERSION__ <= 120\n"
+		   "#define in varying\n"
+		   "#endif\n"
+		   ""
+		   "#include \"IECoreGL/ColorAlgo.h\"\n"
+		   ""
+		   "in vec3 fragmentCs;"
+		   ""
+		   "uniform vec3 tint;"
+		   ""
+		   "void main()"
+		   "{"
+		   "	gl_FragColor = vec4( fragmentCs * tint, 1 );"
+		   "}";
 }
 
 const char *texturedConstantFragSource()
 {
-	return
-		"#version 120\n"
-		""
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"#include \"IECoreGL/ColorAlgo.h\"\n"
-		""
-		"in vec2 fragmentuv;"
-		"uniform sampler2D texture;"
-		"uniform vec3 tint;"
-		"uniform float saturation;"
-		"uniform vec3 gamma;"
-		""
-		"void main()"
-		"{"
-			"vec3 c = texture2D( texture, fragmentuv ).xyz;"
-			"c = pow( c, gamma );"
-			"c = ieAdjustSaturation( c, saturation );"
-			"c *= tint;"
-			"gl_FragColor = vec4( c, 1.0 );"
-		"}"
-	;
+	return "#version 120\n"
+		   ""
+		   "#if __VERSION__ <= 120\n"
+		   "#define in varying\n"
+		   "#endif\n"
+		   ""
+		   "#include \"IECoreGL/ColorAlgo.h\"\n"
+		   ""
+		   "in vec2 fragmentuv;"
+		   "uniform sampler2D texture;"
+		   "uniform vec3 tint;"
+		   "uniform float saturation;"
+		   "uniform vec3 gamma;"
+		   ""
+		   "void main()"
+		   "{"
+		   "vec3 c = texture2D( texture, fragmentuv ).xyz;"
+		   "c = pow( c, gamma );"
+		   "c = ieAdjustSaturation( c, saturation );"
+		   "c *= tint;"
+		   "gl_FragColor = vec4( c, 1.0 );"
+		   "}";
 }
 
 const char *faceCameraVertexSource()
@@ -297,7 +299,7 @@ const char *faceCameraVertexSource()
 		"	fragmentCs = geometryCs;"
 		"}"
 
-	;
+		;
 }
 
 // Shader state helpers
@@ -335,30 +337,30 @@ void addTexturedConstantShader(
 // Customized IECoreGL primitive supporting `uvOrientation`
 class UVOrientedQuadPrimitive : public IECoreGL::QuadPrimitive
 {
-	public :
-		UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation ) : IECoreGL::QuadPrimitive( width, height )
-		{
-			V2fVectorDataPtr uvData = new V2fVectorData;
+public:
 
-			std::vector<V2f> &uvVector = uvData->writable();
+	UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation ) : IECoreGL::QuadPrimitive( width, height )
+	{
+		V2fVectorDataPtr uvData = new V2fVectorData;
 
-			uvVector.push_back( V2f( -0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
-			uvVector.push_back( V2f( 0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
-			uvVector.push_back( V2f( 0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
-			uvVector.push_back( V2f( -0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		std::vector<V2f> &uvVector = uvData->writable();
 
-			addVertexAttribute( "uv", uvData );
-		}
+		uvVector.push_back( V2f( -0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		uvVector.push_back( V2f( 0.5f, -0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		uvVector.push_back( V2f( 0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
+		uvVector.push_back( V2f( -0.5f, 0.5f ) * uvOrientation + V2f( 0.5f, 0.5f ) );
 
-		~UVOrientedQuadPrimitive() override
-		{
+		addVertexAttribute( "uv", uvData );
+	}
 
-		}
+	~UVOrientedQuadPrimitive() override
+	{
+	}
 };
 
 IE_CORE_DECLAREPTR( UVOrientedQuadPrimitive );
 
-}  // namespace
+} // namespace
 
 namespace GafferSceneUI::Private::LightVisualiserAlgo
 {
@@ -394,7 +396,7 @@ IECoreGL::ConstRenderablePtr pointRays( float radius, bool muted )
 	const int numRays = 8;
 	for( int i = 0; i < numRays; ++i )
 	{
-		const float angle = M_PI * 2.0f * float(i)/(float)numRays;
+		const float angle = M_PI * 2.0f * float( i ) / (float)numRays;
 		const V3f dir( 0.0, sin( angle ), -cos( angle ) );
 		addRay( dir * ( 0.2f + radius ), dir * ( 0.6f + radius ), vertsPerCurve->writable(), p->writable(), 0.1f );
 	}
@@ -517,10 +519,10 @@ IECoreGL::ConstRenderablePtr roundedQuadWireframe( const V2f &size, const V2f &r
 
 	if( radii == V2f( 0.f ) )
 	{
-		p.push_back( V3f( -size.x/2, -size.y/2, 0  ) );
-		p.push_back( V3f( size.x/2, -size.y/2, 0  ) );
-		p.push_back( V3f( size.x/2, size.y/2, 0  ) );
-		p.push_back( V3f( -size.x/2, size.y/2, 0  ) );
+		p.push_back( V3f( -size.x / 2, -size.y / 2, 0 ) );
+		p.push_back( V3f( size.x / 2, -size.y / 2, 0 ) );
+		p.push_back( V3f( size.x / 2, size.y / 2, 0 ) );
+		p.push_back( V3f( -size.x / 2, size.y / 2, 0 ) );
 	}
 	else
 	{
@@ -569,10 +571,10 @@ IECoreGL::ConstRenderablePtr roundedQuadSurface(
 
 		// Add inner corner points for the center of the corner radii
 		const V2f halfSize = size * 0.5f;
-		p.push_back( V3f( halfSize.x - radii.x, halfSize.y - radii.y, 0.f ) );  // Top-right
-		p.push_back( V3f( -halfSize.x + radii.x, halfSize.y - radii.y, 0.f ) );  // Top-left
-		p.push_back( V3f( -halfSize.x + radii.x, -halfSize.y + radii.y, 0.f ) );  // Bottom-left
-		p.push_back( V3f( halfSize.x - radii.x, -halfSize.y + radii.y, 0.f ) );  // Bottom-right
+		p.push_back( V3f( halfSize.x - radii.x, halfSize.y - radii.y, 0.f ) ); // Top-right
+		p.push_back( V3f( -halfSize.x + radii.x, halfSize.y - radii.y, 0.f ) ); // Top-left
+		p.push_back( V3f( -halfSize.x + radii.x, -halfSize.y + radii.y, 0.f ) ); // Bottom-left
+		p.push_back( V3f( halfSize.x - radii.x, -halfSize.y + radii.y, 0.f ) ); // Bottom-right
 
 		// Add the radii points
 		addRoundedRectangle( size, radii, p );
@@ -585,17 +587,16 @@ IECoreGL::ConstRenderablePtr roundedQuadSurface(
 		bool isCircle = radii.x == 0 && radii.y == 0;
 
 		// Triangles for each corner radius fan, plus 2 per each of 4 sides, plus 2 for the center rectangle
-		IntVectorDataPtr vertsPerPolyData = new IntVectorData( std::vector<int>( numCornerTriangles + ( 10 * (int)(!isCircle) ), 3 ));
+		IntVectorDataPtr vertsPerPolyData = new IntVectorData( std::vector<int>( numCornerTriangles + ( 10 * (int)( !isCircle ) ), 3 ) );
 
 		using CornerIndices = std::tuple<int, int, int, int>;
 		for(
-			const auto &[startIndex, innerCornerId, nextInnerCornerId, nextOuterRadiusId] : std::array<CornerIndices, 4> {
-				CornerIndices{ 4,                                     0, 1, 4 + ( numCornerRadiusPoints / 4 ) },  // Top-right
-				CornerIndices{ 4 + ( numCornerRadiusPoints / 4 ),     1, 2, 4 + ( numCornerRadiusPoints / 2 ) },  // Top-left
-				CornerIndices{ 4 + ( numCornerRadiusPoints / 2 ),     2, 3, 4 + ( numCornerRadiusPoints * 3 / 4 ) },  // Bottom-left
-				CornerIndices{ 4 + ( numCornerRadiusPoints * 3 / 4 ), 3, 0, 4 }  // Bottom-right
-			}
-		)
+			const auto &[startIndex, innerCornerId, nextInnerCornerId, nextOuterRadiusId] : std::array<CornerIndices, 4>{
+				CornerIndices{ 4, 0, 1, 4 + ( numCornerRadiusPoints / 4 ) }, // Top-right
+				CornerIndices{ 4 + ( numCornerRadiusPoints / 4 ), 1, 2, 4 + ( numCornerRadiusPoints / 2 ) }, // Top-left
+				CornerIndices{ 4 + ( numCornerRadiusPoints / 2 ), 2, 3, 4 + ( numCornerRadiusPoints * 3 / 4 ) }, // Bottom-left
+				CornerIndices{ 4 + ( numCornerRadiusPoints * 3 / 4 ), 3, 0, 4 } // Bottom-right
+			} )
 		{
 			// Using the top-right as an example :
 			// To simplify, take `p.size() = 16`
@@ -627,7 +628,7 @@ IECoreGL::ConstRenderablePtr roundedQuadSurface(
 			{
 				// Create the straight edge segment to the next corner
 				vertIds.push_back( innerCornerId );
-				vertIds.push_back( startIndex + ( numCornerTriangles / 4) );
+				vertIds.push_back( startIndex + ( numCornerTriangles / 4 ) );
 				vertIds.push_back( nextOuterRadiusId );
 
 				vertIds.push_back( innerCornerId );
@@ -654,8 +655,7 @@ IECoreGL::ConstRenderablePtr roundedQuadSurface(
 		std::transform(
 			p.begin(), p.end(),
 			uv.begin(),
-			[&halfSize, &size, &uvOrientation]( const V3f &p )
-			{
+			[&halfSize, &size, &uvOrientation]( const V3f &p ) {
 				return V2f( ( p.x + halfSize.x ) / size.x, ( p.y + halfSize.y ) / size.y ) * uvOrientation;
 			}
 		);
@@ -690,10 +690,10 @@ IECoreGL::ConstRenderablePtr quadPortal( const V2f &size, float hatchingScale, b
 	// Basic outline of the portal area
 
 	vertsPerCurve.push_back( 4 );
-	p.push_back( V3f( -size.x/2, -size.y/2, 0 ) );
-	p.push_back( V3f( size.x/2, -size.y/2, 0 ) );
-	p.push_back( V3f( size.x/2, size.y/2, 0 ) );
-	p.push_back( V3f( -size.x/2, size.y/2, 0 ) );
+	p.push_back( V3f( -size.x / 2, -size.y / 2, 0 ) );
+	p.push_back( V3f( size.x / 2, -size.y / 2, 0 ) );
+	p.push_back( V3f( size.x / 2, size.y / 2, 0 ) );
+	p.push_back( V3f( -size.x / 2, size.y / 2, 0 ) );
 
 	// 45 degree hatch outside the portal area (when centered at the origin)
 
@@ -706,7 +706,7 @@ IECoreGL::ConstRenderablePtr quadPortal( const V2f &size, float hatchingScale, b
 	const float dh = size.y + ( 2.0f * fw );
 
 	// Working with a bottom left origin makes the maths easier for the lines
-	const V3f origin( -(size.x/2)-fw, -(size.y/2)-fw, 0 );
+	const V3f origin( -( size.x / 2 ) - fw, -( size.y / 2 ) - fw, 0 );
 	// Alternating line lengths creates a softer edge
 	bool alt = true;
 
@@ -723,8 +723,8 @@ IECoreGL::ConstRenderablePtr quadPortal( const V2f &size, float hatchingScale, b
 		{
 			// A single line will do near the origin as we don't intersect the portal
 			vertsPerCurve.push_back( 2 );
-			p.push_back( origin + V3f( -e, o+e, 0 ) );
-			p.push_back( origin + V3f( o+e, -e, 0 ) );
+			p.push_back( origin + V3f( -e, o + e, 0 ) );
+			p.push_back( origin + V3f( o + e, -e, 0 ) );
 		}
 		else if( o <= oMax - fw * 2.0f )
 		{
@@ -737,38 +737,38 @@ IECoreGL::ConstRenderablePtr quadPortal( const V2f &size, float hatchingScale, b
 			{
 				// Left edge-to-frame
 				vertsPerCurve.push_back( 2 );
-				p.push_back( origin + V3f( -e, o+e, 0 ) );
-				p.push_back( origin + V3f( fw, o-fw, 0 ) );
+				p.push_back( origin + V3f( -e, o + e, 0 ) );
+				p.push_back( origin + V3f( fw, o - fw, 0 ) );
 			}
 			else if( o <= dh + size.x )
 			{
 				// Top edge-to-frame
 				vertsPerCurve.push_back( 2 );
-				p.push_back( origin + V3f( o-dh-e, dh+e, 0 ) );
-				p.push_back( origin + V3f( o-dh+fw, dh-fw, 0 ) );
+				p.push_back( origin + V3f( o - dh - e, dh + e, 0 ) );
+				p.push_back( origin + V3f( o - dh + fw, dh - fw, 0 ) );
 			}
 
 			if( o <= dw )
 			{
 				// Bottom frame-to-edge
 				vertsPerCurve.push_back( 2 );
-				p.push_back( origin + V3f( o-fw, fw, 0 ) );
-				p.push_back( origin + V3f( o+e, -e, 0 ) );
+				p.push_back( origin + V3f( o - fw, fw, 0 ) );
+				p.push_back( origin + V3f( o + e, -e, 0 ) );
 			}
 			else if( o <= dw + size.y )
 			{
 				// Right frame-to-edge
 				vertsPerCurve.push_back( 2 );
-				p.push_back( origin + V3f( dw-fw, o-dw+fw, 0 ) );
-				p.push_back( origin + V3f( dw+e, o-dw-e, 0 ) );
+				p.push_back( origin + V3f( dw - fw, o - dw + fw, 0 ) );
+				p.push_back( origin + V3f( dw + e, o - dw - e, 0 ) );
 			}
 		}
 		else
 		{
 			// Single line at top-right corner
 			vertsPerCurve.push_back( 2 );
-			p.push_back( origin + V3f( o-dh-e, dh+e, 0 ) );
-			p.push_back( origin + V3f( dw+e, dh-oMax+o-e, 0 ) );
+			p.push_back( origin + V3f( o - dh - e, dh + e, 0 ) );
+			p.push_back( origin + V3f( dw + e, dh - oMax + o - e, 0 ) );
 		}
 	}
 
@@ -789,15 +789,15 @@ IECoreGL::ConstRenderablePtr sphereWireframe( float radius, const Vec3<bool> &ax
 
 	if( axisRings.x )
 	{
-		addCircle( Axis::X,  center, radius, vertsPerCurve->writable(), p->writable() );
+		addCircle( Axis::X, center, radius, vertsPerCurve->writable(), p->writable() );
 	}
 	if( axisRings.y )
 	{
-		addCircle( Axis::Y,  center, radius, vertsPerCurve->writable(), p->writable() );
+		addCircle( Axis::Y, center, radius, vertsPerCurve->writable(), p->writable() );
 	}
 	if( axisRings.z )
 	{
-		addCircle( Axis::Z,  center, radius, vertsPerCurve->writable(), p->writable() );
+		addCircle( Axis::Z, center, radius, vertsPerCurve->writable(), p->writable() );
 	}
 
 	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
@@ -905,7 +905,7 @@ IECoreGL::ConstRenderablePtr cylinderRays( float radius, bool muted )
 		IECoreGL::GroupPtr rayGroup = new IECoreGL::Group;
 		rayGroup->addChild( boost::const_pointer_cast<IECoreGL::Renderable>( ray( muted ) ) );
 
-		const float angle = M_PI * 2.0f * float(i)/(float)numRays;
+		const float angle = M_PI * 2.0f * float( i ) / (float)numRays;
 		M44f m;
 		m.rotate( V3f( angle, 0, 0 ) );
 		m.translate( V3f( 0, 0, -radius ) );
@@ -1070,4 +1070,4 @@ void addConstantShader( IECoreGL::Group *group, const Color3f &tint, int aimType
 	);
 }
 
-}  // namespace GafferSceneUI::Private::LightVisualiserAlgo
+} // namespace GafferSceneUI::Private::LightVisualiserAlgo

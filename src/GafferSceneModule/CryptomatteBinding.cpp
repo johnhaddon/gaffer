@@ -57,7 +57,6 @@ void GafferSceneModule::bindCryptomatte()
 			.value( "None", Cryptomatte::ManifestSource::None )
 			.value( "None_", Cryptomatte::ManifestSource::None )
 			.value( "Metadata", Cryptomatte::ManifestSource::Metadata )
-			.value( "Sidecar", Cryptomatte::ManifestSource::Sidecar )
-		;
+			.value( "Sidecar", Cryptomatte::ManifestSource::Sidecar );
 	}
 }

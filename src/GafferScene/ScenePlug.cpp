@@ -68,7 +68,7 @@ static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
 );
 
 ScenePlug::ScenePlug( const std::string &name, Direction direction, unsigned flags )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
 
@@ -170,7 +170,6 @@ ScenePlug::ScenePlug( const std::string &name, Direction direction, unsigned fla
 			childFlags
 		)
 	);
-
 }
 
 ScenePlug::~ScenePlug()
@@ -316,24 +315,24 @@ const Gaffer::InternedStringVectorDataPlug *ScenePlug::sortedChildNamesPlug() co
 }
 
 ScenePlug::PathScope::PathScope( const Gaffer::Context *context )
-	:	EditableScope( context )
+	: EditableScope( context )
 {
 	remove( ScenePlug::setNameContextName );
 }
 
 ScenePlug::PathScope::PathScope( const Gaffer::Context *context, const ScenePath *scenePath )
-	:	PathScope( context )
+	: PathScope( context )
 {
 	setPath( scenePath );
 }
 
 ScenePlug::PathScope::PathScope( const Gaffer::ThreadState &threadState )
-	:	EditableScope( threadState )
+	: EditableScope( threadState )
 {
 }
 
 ScenePlug::PathScope::PathScope( const Gaffer::ThreadState &threadState, const ScenePath *scenePath )
-	:	EditableScope( threadState )
+	: EditableScope( threadState )
 {
 	setPath( scenePath );
 }
@@ -344,14 +343,14 @@ void ScenePlug::PathScope::setPath( const ScenePath *scenePath )
 }
 
 ScenePlug::SetScope::SetScope( const Gaffer::Context *context )
-	:	EditableScope( context )
+	: EditableScope( context )
 {
 	remove( Filter::inputSceneContextName );
 	remove( ScenePlug::scenePathContextName );
 }
 
 ScenePlug::SetScope::SetScope( const Gaffer::Context *context, const IECore::InternedString *setName )
-	:	EditableScope( context )
+	: EditableScope( context )
 {
 	remove( Filter::inputSceneContextName );
 	remove( ScenePlug::scenePathContextName );
@@ -359,14 +358,14 @@ ScenePlug::SetScope::SetScope( const Gaffer::Context *context, const IECore::Int
 }
 
 ScenePlug::SetScope::SetScope( const Gaffer::ThreadState &threadState )
-	:	EditableScope( threadState )
+	: EditableScope( threadState )
 {
 	remove( Filter::inputSceneContextName );
 	remove( ScenePlug::scenePathContextName );
 }
 
 ScenePlug::SetScope::SetScope( const Gaffer::ThreadState &threadState, const IECore::InternedString *setName )
-	:	EditableScope( threadState )
+	: EditableScope( threadState )
 {
 	remove( Filter::inputSceneContextName );
 	remove( ScenePlug::scenePathContextName );
@@ -379,7 +378,7 @@ void ScenePlug::SetScope::setSetName( const IECore::InternedString *setName )
 }
 
 ScenePlug::GlobalScope::GlobalScope( const Gaffer::Context *context )
-	:	EditableScope( context )
+	: EditableScope( context )
 {
 	remove( Filter::inputSceneContextName );
 	remove( scenePathContextName );
@@ -387,7 +386,7 @@ ScenePlug::GlobalScope::GlobalScope( const Gaffer::Context *context )
 }
 
 ScenePlug::GlobalScope::GlobalScope( const Gaffer::ThreadState &threadState )
-	:	EditableScope( threadState )
+	: EditableScope( threadState )
 {
 	remove( Filter::inputSceneContextName );
 	remove( scenePathContextName );
@@ -613,7 +612,7 @@ void ScenePlug::stringToPath( const std::string &s, ScenePlug::ScenePath &path )
 		index = index == std::string::npos ? size : index;
 		if( index > prevIndex )
 		{
-			if( index == prevIndex + 2 && s[prevIndex] == '.' && s[prevIndex+1] == '.' )
+			if( index == prevIndex + 2 && s[prevIndex] == '.' && s[prevIndex + 1] == '.' )
 			{
 				// ".."
 				if( path.size() )

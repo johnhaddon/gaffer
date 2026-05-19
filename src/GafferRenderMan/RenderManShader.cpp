@@ -70,7 +70,7 @@ using namespace GafferRenderMan;
 IE_CORE_DEFINERUNTIMETYPED( RenderManShader );
 
 RenderManShader::RenderManShader( const std::string &name )
-	:	GafferScene::Shader( name )
+	: GafferScene::Shader( name )
 {
 	/// \todo It would be better if the Shader base class added this
 	/// output plug, but that means changing ArnoldShader.
@@ -99,24 +99,22 @@ using ParameterSet = unordered_set<string>;
 const unordered_map<string, ParameterSet> g_omittedParameters = {
 	{
 		"PxrPortalLight",
-		{
-			// These shouldn't be exposed because we are going to
-			// derive the values from the dome light and other parameters
-			// like `intensityMult`.
-			"domeColorMap", "lightColor", "intensity", "exposure", "portalToDome",
-			"portalName",
-			// These shouldn't be exposed because we are going to inherit the
-			// values from the dome light.
-			/// \todo We could instead load these as `OptionalValuePlugs` to
-			/// allow a portal to override a value from the dome.
-			"colorMapGamma", "colorMapSaturation", "enableTemperature",
-			"temperature", "specular", "diffuse", "enableShadows",
-			"shadowColor", "shadowDistance", "shadowFalloff", "shadowFalloffGamma",
-			"shadowSubset", "shadowExcludeSubset", "traceLightPaths", "thinShadow",
-			"visibleInRefractionPath", "cheapCaustics", "cheapCausticsExcludeGroup",
-			"fixedSampleCount", "lightGroup", "importanceMultiplier", "msApprox",
-			"msApproxBleed", "msApproxContribution"
-		},
+		{ // These shouldn't be exposed because we are going to
+		  // derive the values from the dome light and other parameters
+		  // like `intensityMult`.
+		  "domeColorMap", "lightColor", "intensity", "exposure", "portalToDome",
+		  "portalName",
+		  // These shouldn't be exposed because we are going to inherit the
+		  // values from the dome light.
+		  /// \todo We could instead load these as `OptionalValuePlugs` to
+		  /// allow a portal to override a value from the dome.
+		  "colorMapGamma", "colorMapSaturation", "enableTemperature",
+		  "temperature", "specular", "diffuse", "enableShadows",
+		  "shadowColor", "shadowDistance", "shadowFalloff", "shadowFalloffGamma",
+		  "shadowSubset", "shadowExcludeSubset", "traceLightPaths", "thinShadow",
+		  "visibleInRefractionPath", "cheapCaustics", "cheapCausticsExcludeGroup",
+		  "fixedSampleCount", "lightGroup", "importanceMultiplier", "msApprox",
+		  "msApproxBleed", "msApproxContribution" },
 	}
 };
 
@@ -348,8 +346,8 @@ Gaffer::Plug *loadParameter( const boost::property_tree::ptree &parameter, Plug 
 }
 
 PlugPtr findRampPlugFromPositionsParameter(
-	const std::string& positionName, const boost::property_tree::ptree &positionsParameter,
-	const std::map< std::string, const boost::property_tree::ptree* > &parameters, Plug::Direction direction, std::unordered_set<const boost::property_tree::ptree*> &parametersAlreadyProcessed
+	const std::string &positionName, const boost::property_tree::ptree &positionsParameter,
+	const std::map<std::string, const boost::property_tree::ptree *> &parameters, Plug::Direction direction, std::unordered_set<const boost::property_tree::ptree *> &parametersAlreadyProcessed
 )
 {
 	static const std::string positionsSuffix( "_Knots" );
@@ -374,7 +372,7 @@ PlugPtr findRampPlugFromPositionsParameter(
 
 	std::string positionsDefaultText = positionsParameter.get( "<xmlattr>.default", "" );
 	std::vector<float> positionsDefault;
-	for( std::string token : Tokenizer( positionsDefaultText, boost::char_separator<char>(" \t\n" ) ) )
+	for( std::string token : Tokenizer( positionsDefaultText, boost::char_separator<char>( " \t\n" ) ) )
 	{
 		positionsDefault.push_back( boost::lexical_cast<float>( token ) );
 	}
@@ -457,7 +455,7 @@ PlugPtr findRampPlugFromPositionsParameter(
 
 	std::vector<string> valueTokens;
 	std::string valuesDefaultText = valuesParameter.get( "<xmlattr>.default", "" );
-	for( std::string token : Tokenizer( valuesDefaultText, boost::char_separator<char>(" \t\n" ) ) )
+	for( std::string token : Tokenizer( valuesDefaultText, boost::char_separator<char>( " \t\n" ) ) )
 	{
 		valueTokens.push_back( token );
 	}
@@ -468,10 +466,8 @@ PlugPtr findRampPlugFromPositionsParameter(
 	if( positionsDefault.size() != valuesSize )
 	{
 		throw IECore::Exception(
-			fmt::format( "Sizes of spline knots and values don't match: {}:{} != {}:{}",
-				positionsName, positionsDefault.size(),
-				valuesName, valuesSize
-		) );
+			fmt::format( "Sizes of spline knots and values don't match: {}:{} != {}:{}", positionsName, positionsDefault.size(), valuesName, valuesSize )
+		);
 	}
 
 	parametersAlreadyProcessed.insert( &valuesParameter );
@@ -491,25 +487,25 @@ PlugPtr findRampPlugFromPositionsParameter(
 			);
 		}
 
-		std::vector< Imath::Color3f > values;
+		std::vector<Imath::Color3f> values;
 		for( unsigned int i = 0; i < valueTokens.size() / 3; i++ )
 		{
 			values.push_back(
 				Imath::Color3f(
-					boost::lexical_cast<float>( valueTokens[3*i] ),
-					boost::lexical_cast<float>( valueTokens[3*i + 1] ),
-					boost::lexical_cast<float>( valueTokens[3*i + 2 ] )
+					boost::lexical_cast<float>( valueTokens[3 * i] ),
+					boost::lexical_cast<float>( valueTokens[3 * i + 1] ),
+					boost::lexical_cast<float>( valueTokens[3 * i + 2] )
 				)
 			);
 		}
 
 		RampfColor3f defaultValue;
 		defaultValue.fromOSL( interpolationString, positionsDefault, values, baseName );
-		return new RampfColor3fPlug( baseName, direction, defaultValue , Plug::Default );
+		return new RampfColor3fPlug( baseName, direction, defaultValue, Plug::Default );
 	}
 	else
 	{
-		std::vector< float > values;
+		std::vector<float> values;
 		for( unsigned int i = 0; i < valueTokens.size(); i++ )
 		{
 			values.push_back( boost::lexical_cast<float>( valueTokens[i] ) );
@@ -518,7 +514,7 @@ PlugPtr findRampPlugFromPositionsParameter(
 		Rampff defaultValue;
 		defaultValue.fromOSL( interpolationString, positionsDefault, values, baseName );
 
-		return new RampffPlug( baseName, direction, defaultValue , Plug::Default );
+		return new RampffPlug( baseName, direction, defaultValue, Plug::Default );
 	}
 }
 
@@ -529,8 +525,8 @@ void loadParameters( const boost::property_tree::ptree &tree, Plug *parent, cons
 	// parameters by name. Build a map of all the parameters that we should be building plugs from
 	std::map<std::string, const boost::property_tree::ptree *> parameters;
 
-	std::unordered_set<const boost::property_tree::ptree*> parametersAlreadyProcessed;
-	std::unordered_map<const boost::property_tree::ptree*, PlugPtr > rampPlugs;
+	std::unordered_set<const boost::property_tree::ptree *> parametersAlreadyProcessed;
+	std::unordered_map<const boost::property_tree::ptree *, PlugPtr> rampPlugs;
 
 	for( const auto &child : tree )
 	{
@@ -565,7 +561,7 @@ void loadParameters( const boost::property_tree::ptree &tree, Plug *parent, cons
 
 		if( ramp )
 		{
-			rampPlugs[ param.second ] = ramp;
+			rampPlugs[param.second] = ramp;
 		}
 	}
 
@@ -777,5 +773,4 @@ void RenderManShader::loadShader( const std::string &shaderName, bool keepExisti
 	}
 
 	loadOutputs( tree.get_child( "args" ), outPlug(), shaderName, shaderType );
-
 }

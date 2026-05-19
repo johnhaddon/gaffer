@@ -43,7 +43,7 @@ using namespace GafferScene;
 GAFFER_NODE_DEFINE_TYPE( GlobalsProcessor );
 
 GlobalsProcessor::GlobalsProcessor( const std::string &name )
-	:	SceneProcessor( name )
+	: SceneProcessor( name )
 {
 	// Fast pass-throughs for everything except the globals
 	outPlug()->boundPlug()->setInput( inPlug()->boundPlug() );

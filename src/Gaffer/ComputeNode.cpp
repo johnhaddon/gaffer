@@ -44,7 +44,7 @@ using namespace Gaffer;
 GAFFER_NODE_DEFINE_TYPE( ComputeNode );
 
 ComputeNode::ComputeNode( const std::string &name )
-	:	DependencyNode( name )
+	: DependencyNode( name )
 {
 }
 

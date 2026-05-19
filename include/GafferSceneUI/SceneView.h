@@ -69,83 +69,82 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API SceneView : public GafferUI::View
 {
 
-	public :
+public:
 
-		explicit SceneView( Gaffer::ScriptNodePtr scriptNode );
-		~SceneView() override;
+	explicit SceneView( Gaffer::ScriptNodePtr scriptNode );
+	~SceneView() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::SceneView, SceneViewTypeId, GafferUI::View );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::SceneView, SceneViewTypeId, GafferUI::View );
 
-		Gaffer::IntPlug *minimumExpansionDepthPlug();
-		const Gaffer::IntPlug *minimumExpansionDepthPlug() const;
+	Gaffer::IntPlug *minimumExpansionDepthPlug();
+	const Gaffer::IntPlug *minimumExpansionDepthPlug() const;
 
-		Gaffer::ValuePlug *cameraPlug();
-		const Gaffer::ValuePlug *cameraPlug() const;
+	Gaffer::ValuePlug *cameraPlug();
+	const Gaffer::ValuePlug *cameraPlug() const;
 
-		Gaffer::ValuePlug *gnomonPlug();
-		const Gaffer::ValuePlug *gnomonPlug() const;
+	Gaffer::ValuePlug *gnomonPlug();
+	const Gaffer::ValuePlug *gnomonPlug() const;
 
-		void frame( const IECore::PathMatcher &filter, const Imath::V3f &direction = Imath::V3f( -0.64, -0.422, -0.64 ) );
-		void expandSelection( size_t depth = 1 );
-		void collapseSelection();
+	void frame( const IECore::PathMatcher &filter, const Imath::V3f &direction = Imath::V3f( -0.64, -0.422, -0.64 ) );
+	void expandSelection( size_t depth = 1 );
+	void collapseSelection();
 
-		/// If the view is locked to a particular camera,
-		/// this returns the bound of the resolution gate
-		/// in raster space - this can be useful when
-		/// drawing additional overlays. If the view is not
-		/// locked to a particular camera then returns an
-		/// empty bound.
-		const Imath::Box2f &resolutionGate() const;
+	/// If the view is locked to a particular camera,
+	/// this returns the bound of the resolution gate
+	/// in raster space - this can be useful when
+	/// drawing additional overlays. If the view is not
+	/// locked to a particular camera then returns an
+	/// empty bound.
+	const Imath::Box2f &resolutionGate() const;
 
-		using ShadingModeCreator = std::function<GafferScene::SceneProcessorPtr ()>;
+	using ShadingModeCreator = std::function<GafferScene::SceneProcessorPtr()>;
 
-		static void registerShadingMode( const std::string &name, ShadingModeCreator );
-		static void registeredShadingModes( std::vector<std::string> &names );
+	static void registerShadingMode( const std::string &name, ShadingModeCreator );
+	static void registeredShadingModes( std::vector<std::string> &names );
 
-		using RendererSettingsCreator = std::function<GafferScene::SceneProcessorPtr ()>;
-		static void registerRenderer( const std::string &name, const RendererSettingsCreator &settingsCreator );
-		static std::vector<std::string> registeredRenderers();
+	using RendererSettingsCreator = std::function<GafferScene::SceneProcessorPtr()>;
+	static void registerRenderer( const std::string &name, const RendererSettingsCreator &settingsCreator );
+	static std::vector<std::string> registeredRenderers();
 
-	private :
+private:
 
-		// The filter for a preprocessing node used to hide things.
-		GafferScene::PathFilter *deleteObjectFilter();
-		const GafferScene::PathFilter *deleteObjectFilter() const;
+	// The filter for a preprocessing node used to hide things.
+	GafferScene::PathFilter *deleteObjectFilter();
+	const GafferScene::PathFilter *deleteObjectFilter() const;
 
-		Imath::Box3f framingBound() const;
+	Imath::Box3f framingBound() const;
 
-		void contextChanged();
-		void selectedPathsChanged();
-		void visibleSetChanged();
-		bool keyPress( GafferUI::GadgetPtr gadget, const GafferUI::KeyEvent &event );
-		void plugSet( Gaffer::Plug *plug );
+	void contextChanged();
+	void selectedPathsChanged();
+	void visibleSetChanged();
+	bool keyPress( GafferUI::GadgetPtr gadget, const GafferUI::KeyEvent &event );
+	void plugSet( Gaffer::Plug *plug );
 
-		SceneGadgetPtr m_sceneGadget;
+	SceneGadgetPtr m_sceneGadget;
 
-		/// \todo Refactor all these bolt-on classes to follow the model of
-		/// `View::DisplayTransform` and `SceneView::Grid` :
-		///
-		/// - Derive from `Node`, and add child plugs to provide settings.
-		/// - Parent under the `View` and promote settings plugs to the view.
-		class Renderer;
-		std::unique_ptr<Renderer> m_renderer;
-		class SelectionMask;
-		std::unique_ptr<SelectionMask> m_selectionMask;
-		class DrawingMode;
-		std::unique_ptr<DrawingMode> m_drawingMode;
-		class ShadingMode;
-		std::unique_ptr<ShadingMode> m_shadingMode;
-		class Camera;
-		std::unique_ptr<Camera> m_camera;
-		class Grid;
-		class Gnomon;
-		std::unique_ptr<Gnomon> m_gnomon;
-		class FPS;
-		std::unique_ptr<FPS> m_fps;
+	/// \todo Refactor all these bolt-on classes to follow the model of
+	/// `View::DisplayTransform` and `SceneView::Grid` :
+	///
+	/// - Derive from `Node`, and add child plugs to provide settings.
+	/// - Parent under the `View` and promote settings plugs to the view.
+	class Renderer;
+	std::unique_ptr<Renderer> m_renderer;
+	class SelectionMask;
+	std::unique_ptr<SelectionMask> m_selectionMask;
+	class DrawingMode;
+	std::unique_ptr<DrawingMode> m_drawingMode;
+	class ShadingMode;
+	std::unique_ptr<ShadingMode> m_shadingMode;
+	class Camera;
+	std::unique_ptr<Camera> m_camera;
+	class Grid;
+	class Gnomon;
+	std::unique_ptr<Gnomon> m_gnomon;
+	class FPS;
+	std::unique_ptr<FPS> m_fps;
 
-		static size_t g_firstPlugIndex;
-		static ViewDescription<SceneView> g_viewDescription;
-
+	static size_t g_firstPlugIndex;
+	static ViewDescription<SceneView> g_viewDescription;
 };
 
 IE_CORE_DECLAREPTR( SceneView );

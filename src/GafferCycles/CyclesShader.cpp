@@ -84,7 +84,7 @@ ShaderTweakProxy::ShaderLoaderDescription<CyclesShader> g_cyclesShaderTweakProxy
 IE_CORE_DEFINERUNTIMETYPED( CyclesShader );
 
 CyclesShader::CyclesShader( const std::string &name )
-	:	GafferScene::Shader( name )
+	: GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Gaffer::Plug::Out ) );
 }
@@ -156,7 +156,6 @@ void CyclesShader::loadShader( const std::string &shaderName, bool keepExistingV
 		// have changed.
 		Metadata::plugValueChangedSignal()( staticTypeId(), "out", "nodule:type", outPlug() );
 	}
-
 }
 
 IECore::ConstCompoundObjectPtr CyclesShader::attributes( const Gaffer::Plug *output ) const

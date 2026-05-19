@@ -56,5 +56,4 @@ void GafferImageModule::bindChannelDataProcessor()
 	DependencyNodeClass<Clamp>();
 	DependencyNodeClass<Premultiply>();
 	DependencyNodeClass<Unpremultiply>();
-
 }

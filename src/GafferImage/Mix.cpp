@@ -57,19 +57,19 @@ namespace
 
 const ConstStringVectorDataPtr g_emptyChannelNames( new StringVectorData() );
 
-}
+} // namespace
 
 size_t Mix::g_firstPlugIndex = 0;
 
 Mix::Mix( const std::string &name )
-	:	ImageProcessor( name, 2, 2 )
+	: ImageProcessor( name, 2, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "mask", Gaffer::Plug::In ) );
 
 	addChild( new FloatPlug( "mix", Plug::In, 1.0f, 0.0f, 1.0f ) );
 
-	addChild( new StringPlug( "maskChannel", Plug::In, "A") );
+	addChild( new StringPlug( "maskChannel", Plug::In, "A" ) );
 
 	// We don't ever want to change these, so we make pass-through connections.
 	outPlug()->viewNamesPlug()->setInput( inPlug()->viewNamesPlug() );
@@ -164,14 +164,14 @@ void Mix::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Co
 	const float mix = mixPlug()->getValue();
 	if( mix == 0.0f )
 	{
-		h = inPlugs()->getChild< ImagePlug>( 0 )->dataWindowPlug()->hash();
+		h = inPlugs()->getChild<ImagePlug>( 0 )->dataWindowPlug()->hash();
 		return;
 	}
 	else if( mix == 1.0f && !maskPlug()->getInput<ValuePlug>() )
 	{
-		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 		{
-			h = inPlugs()->getChild< ImagePlug >( 1 )->dataWindowPlug()->hash();
+			h = inPlugs()->getChild<ImagePlug>( 1 )->dataWindowPlug()->hash();
 			return;
 		}
 	}
@@ -180,9 +180,9 @@ void Mix::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Co
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			(*it)->dataWindowPlug()->hash( h );
+			( *it )->dataWindowPlug()->hash( h );
 		}
 	}
 }
@@ -192,13 +192,13 @@ Imath::Box2i Mix::computeDataWindow( const Gaffer::Context *context, const Image
 	const float mix = mixPlug()->getValue();
 	if( mix == 0.0f )
 	{
-		return inPlugs()->getChild< ImagePlug>( 0 )->dataWindowPlug()->getValue();
+		return inPlugs()->getChild<ImagePlug>( 0 )->dataWindowPlug()->getValue();
 	}
 	else if( mix == 1.0f && !maskPlug()->getInput<ValuePlug>() )
 	{
-		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 		{
-			return inPlugs()->getChild< ImagePlug >( 1 )->dataWindowPlug()->getValue();
+			return inPlugs()->getChild<ImagePlug>( 1 )->dataWindowPlug()->getValue();
 		}
 		// Otherwise, if we're mixing entirely to a view that doesn't exist, we'll use the default path which will
 		// yield the dataWindow of the first input
@@ -207,10 +207,10 @@ Imath::Box2i Mix::computeDataWindow( const Gaffer::Context *context, const Image
 	Imath::Box2i dataWindow;
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
 			// We don't need to check that the plug is connected here as unconnected plugs don't have data windows.
-			dataWindow.extendBy( (*it)->dataWindowPlug()->getValue() );
+			dataWindow.extendBy( ( *it )->dataWindowPlug()->getValue() );
 		}
 	}
 
@@ -223,14 +223,14 @@ void Mix::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::
 	const float mix = mixPlug()->getValue();
 	if( mix == 0.0f )
 	{
-		h = inPlugs()->getChild< ImagePlug>( 0 )->channelNamesPlug()->hash();
+		h = inPlugs()->getChild<ImagePlug>( 0 )->channelNamesPlug()->hash();
 		return;
 	}
 	else if( mix == 1.0f && !maskPlug()->getInput<ValuePlug>() )
 	{
-		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 		{
-			h = inPlugs()->getChild< ImagePlug >( 1 )->channelNamesPlug()->hash();
+			h = inPlugs()->getChild<ImagePlug>( 1 )->channelNamesPlug()->hash();
 		}
 		else
 		{
@@ -244,9 +244,9 @@ void Mix::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( (*it)->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ( *it )->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			(*it)->channelNamesPlug()->hash( h );
+			( *it )->channelNamesPlug()->hash( h );
 		}
 	}
 }
@@ -256,13 +256,13 @@ IECore::ConstStringVectorDataPtr Mix::computeChannelNames( const Gaffer::Context
 	const float mix = mixPlug()->getValue();
 	if( mix == 0.0f )
 	{
-		return inPlugs()->getChild< ImagePlug>( 0 )->channelNamesPlug()->getValue();
+		return inPlugs()->getChild<ImagePlug>( 0 )->channelNamesPlug()->getValue();
 	}
 	else if( mix == 1.0f && !maskPlug()->getInput<ValuePlug>() )
 	{
-		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+		if( ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 		{
-			return inPlugs()->getChild< ImagePlug >( 1 )->channelNamesPlug()->getValue();
+			return inPlugs()->getChild<ImagePlug>( 1 )->channelNamesPlug()->getValue();
 		}
 		else
 		{
@@ -275,13 +275,13 @@ IECore::ConstStringVectorDataPtr Mix::computeChannelNames( const Gaffer::Context
 
 	for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 	{
-		if( (*it)->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+		if( ( *it )->getInput<ValuePlug>() && ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 		{
-			IECore::ConstStringVectorDataPtr inChannelStrVectorData((*it)->channelNamesPlug()->getValue() );
+			IECore::ConstStringVectorDataPtr inChannelStrVectorData( ( *it )->channelNamesPlug()->getValue() );
 			const std::vector<std::string> &inChannels( inChannelStrVectorData->readable() );
-			for ( std::vector<std::string>::const_iterator cIt( inChannels.begin() ); cIt != inChannels.end(); ++cIt )
+			for( std::vector<std::string>::const_iterator cIt( inChannels.begin() ); cIt != inChannels.end(); ++cIt )
 			{
-				if ( std::find( outChannels.begin(), outChannels.end(), *cIt ) == outChannels.end() )
+				if( std::find( outChannels.begin(), outChannels.end(), *cIt ) == outChannels.end() )
 				{
 					outChannels.push_back( *cIt );
 				}
@@ -289,7 +289,7 @@ IECore::ConstStringVectorDataPtr Mix::computeChannelNames( const Gaffer::Context
 		}
 	}
 
-	if ( !outChannels.empty() )
+	if( !outChannels.empty() )
 	{
 		return outChannelStrVectorData;
 	}
@@ -301,7 +301,7 @@ void Mix::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::C
 {
 	const float mix = mixPlug()->getValue();
 
-	const ImagePlug *inputs[2] = { inPlugs()->getChild< ImagePlug>( 0 ), inPlugs()->getChild< ImagePlug >( 1 ) };
+	const ImagePlug *inputs[2] = { inPlugs()->getChild<ImagePlug>( 0 ), inPlugs()->getChild<ImagePlug>( 1 ) };
 
 	if( mix == 0.0f )
 	{
@@ -386,7 +386,7 @@ void Mix::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::C
 	ConstFloatVectorDataPtr maskData = nullptr;
 	if( !BufferAlgo::empty( maskValidBound ) )
 	{
-		h.append(  maskPlug()->channelDataHash( maskChannel, tileOrigin ) );
+		h.append( maskPlug()->channelDataHash( maskChannel, tileOrigin ) );
 	}
 
 	for( int i = 0; i < 2; i++ )
@@ -403,17 +403,17 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 
 	const float mix = mixPlug()->getValue();
 
-	const ImagePlug *inputs[2] = { inPlugs()->getChild< ImagePlug>( 0 ), inPlugs()->getChild< ImagePlug >( 1 ) };
+	const ImagePlug *inputs[2] = { inPlugs()->getChild<ImagePlug>( 0 ), inPlugs()->getChild<ImagePlug>( 1 ) };
 
 	if( mix == 0.0f )
 	{
-		return inputs[ 0 ]->channelDataPlug()->getValue();
+		return inputs[0]->channelDataPlug()->getValue();
 	}
 	else if( mix == 1.0f && !maskPlug()->getInput<ValuePlug>() )
 	{
 		if( ImageAlgo::viewIsValid( context, inputs[1]->viewNames()->readable() ) )
 		{
-			return inputs[ 1 ]->channelDataPlug()->getValue();
+			return inputs[1]->channelDataPlug()->getValue();
 		}
 		else
 		{
@@ -475,7 +475,7 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 					// If the whole tile is within the input data window, we can just pass through
 					// the input. Otherwise, we need to hit the slower path below to trim out the
 					// part of the input which is outside the input's data window.
-					return inputs[ 0 ]->channelData( channelName, tileOrigin );
+					return inputs[0]->channelData( channelName, tileOrigin );
 				}
 			}
 		}
@@ -546,7 +546,10 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 				{
 					float m = mix * std::max( 0.0f, std::min( 1.0f, *M ) );
 					*R = *A * ( 1 - m ) + *B * m;
-					++R; ++A; ++B; ++M;
+					++R;
+					++A;
+					++B;
+					++M;
 				}
 			}
 			else if( A )
@@ -555,7 +558,9 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 				{
 					float m = mix * std::max( 0.0f, std::min( 1.0f, *M ) );
 					*R = *A * ( 1 - m );
-					++R; ++A; ++M;
+					++R;
+					++A;
+					++M;
 				}
 			}
 			else if( B )
@@ -564,7 +569,9 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 				{
 					float m = mix * std::max( 0.0f, std::min( 1.0f, *M ) );
 					*R = *B * m;
-					++R; ++B; ++M;
+					++R;
+					++B;
+					++M;
 				}
 			}
 		}
@@ -575,7 +582,9 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 				for( int j = 0; j < resultSize; j++ )
 				{
 					*R = *A * ( 1 - mix ) + *B * mix;
-					++R; ++A; ++B;
+					++R;
+					++A;
+					++B;
 				}
 			}
 			else if( A )
@@ -583,7 +592,8 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 				for( int j = 0; j < resultSize; j++ )
 				{
 					*R = *A * ( 1 - mix );
-					++R; ++A;
+					++R;
+					++A;
 				}
 			}
 			else if( B )
@@ -591,7 +601,8 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 				for( int j = 0; j < resultSize; j++ )
 				{
 					*R = *B * mix;
-					++R; ++B;
+					++R;
+					++B;
 				}
 			}
 		}
@@ -630,7 +641,9 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 
 				*R = a * ( 1 - m ) + b * m;
 
-				++R; ++A; ++B;
+				++R;
+				++A;
+				++B;
 			}
 		}
 	}
@@ -658,29 +671,34 @@ IECore::ConstFloatVectorDataPtr Mix::computeChannelData( const std::string &chan
 				{
 					for( int j = prevOffset; j < offset; j++ )
 					{
-						*R = (*A) * ( 1 - m ) + (*B) * m;
-						++R; ++A; ++B;
+						*R = ( *A ) * ( 1 - m ) + ( *B ) * m;
+						++R;
+						++A;
+						++B;
 					}
 				}
 				else if( A )
 				{
 					for( int j = prevOffset; j < offset; j++ )
 					{
-						*R = (*A) * ( 1 - m );
-						++R; ++A;
+						*R = ( *A ) * ( 1 - m );
+						++R;
+						++A;
 					}
 				}
 				else if( B )
 				{
 					for( int j = prevOffset; j < offset; j++ )
 					{
-						*R = (*B) * m;
-						++R; ++B;
+						*R = ( *B ) * m;
+						++R;
+						++B;
 					}
 				}
 
 				prevOffset = offset;
-				++M; ++S;
+				++M;
+				++S;
 			}
 		}
 	}
@@ -692,18 +710,18 @@ void Mix::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context 
 {
 	ImageProcessor::hashDeep( parent, context, h );
 
-	inPlugs()->getChild< ImagePlug >( 0 )->deepPlug()->hash( h );
-	if( ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+	inPlugs()->getChild<ImagePlug>( 0 )->deepPlug()->hash( h );
+	if( ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 	{
-		inPlugs()->getChild< ImagePlug >( 1 )->deepPlug()->hash( h );
+		inPlugs()->getChild<ImagePlug>( 1 )->deepPlug()->hash( h );
 	}
 }
 
 bool Mix::computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	int deepA = inPlugs()->getChild< ImagePlug >( 0 )->deepPlug()->getValue();
+	int deepA = inPlugs()->getChild<ImagePlug>( 0 )->deepPlug()->getValue();
 
-	if( !ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+	if( !ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 	{
 		if( deepA )
 		{
@@ -715,7 +733,7 @@ bool Mix::computeDeep( const Gaffer::Context *context, const ImagePlug *parent )
 		}
 	}
 
-	int deepB = inPlugs()->getChild< ImagePlug >( 1 )->deepPlug()->getValue();
+	int deepB = inPlugs()->getChild<ImagePlug>( 1 )->deepPlug()->getValue();
 	if( deepA != deepB )
 	{
 		throw IECore::Exception( "Cannot mix between deep and flat image." );
@@ -727,18 +745,18 @@ void Mix::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer:
 {
 	ImageProcessor::hashSampleOffsets( parent, context, h );
 
-	inPlugs()->getChild< ImagePlug >( 0 )->sampleOffsetsPlug()->hash( h );
+	inPlugs()->getChild<ImagePlug>( 0 )->sampleOffsetsPlug()->hash( h );
 
-	if( ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+	if( ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 	{
-		inPlugs()->getChild< ImagePlug >( 1 )->sampleOffsetsPlug()->hash( h );
+		inPlugs()->getChild<ImagePlug>( 1 )->sampleOffsetsPlug()->hash( h );
 	}
 }
 
 IECore::ConstIntVectorDataPtr Mix::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
 {
-	IECore::ConstIntVectorDataPtr sampleOffsetsDataA = inPlugs()->getChild< ImagePlug >( 0 )->sampleOffsetsPlug()->getValue();
-	if( !ImageAlgo::viewIsValid( context, inPlugs()->getChild< ImagePlug >( 1 )->viewNames()->readable() ) )
+	IECore::ConstIntVectorDataPtr sampleOffsetsDataA = inPlugs()->getChild<ImagePlug>( 0 )->sampleOffsetsPlug()->getValue();
+	if( !ImageAlgo::viewIsValid( context, inPlugs()->getChild<ImagePlug>( 1 )->viewNames()->readable() ) )
 	{
 		if( sampleOffsetsDataA->readable() == ImagePlug::flatTileSampleOffsets()->readable() )
 		{
@@ -749,7 +767,7 @@ IECore::ConstIntVectorDataPtr Mix::computeSampleOffsets( const Imath::V2i &tileO
 			throw IECore::Exception( "Cannot mix between deep image and non-existent view." );
 		}
 	}
-	IECore::ConstIntVectorDataPtr sampleOffsetsDataB = inPlugs()->getChild< ImagePlug >( 1 )->sampleOffsetsPlug()->getValue();
+	IECore::ConstIntVectorDataPtr sampleOffsetsDataB = inPlugs()->getChild<ImagePlug>( 1 )->sampleOffsetsPlug()->getValue();
 
 	ImageAlgo::throwIfSampleOffsetsMismatch( sampleOffsetsDataA.get(), sampleOffsetsDataB.get(), tileOrigin, "SampleOffsets on inputs to Mix must match." );
 

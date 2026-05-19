@@ -49,24 +49,23 @@ namespace IECoreArnold
 class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 {
 
-	public :
+public:
 
-		/// Ensures that the Arnold API is initialised and that all plugins and
-		/// metadata files on the ARNOLD_PLUGIN_PATH have been loaded.
-		/// Constructs with a uniquely owned universe if `writable == true`, and
-		/// a potentially shared universe otherwise. The latter is useful for
-		/// making queries via the `AiNodeEntry` API.
-		explicit UniverseBlock( bool writable );
-		/// Releases the universe created by the constructor.
-		~UniverseBlock();
+	/// Ensures that the Arnold API is initialised and that all plugins and
+	/// metadata files on the ARNOLD_PLUGIN_PATH have been loaded.
+	/// Constructs with a uniquely owned universe if `writable == true`, and
+	/// a potentially shared universe otherwise. The latter is useful for
+	/// making queries via the `AiNodeEntry` API.
+	explicit UniverseBlock( bool writable );
+	/// Releases the universe created by the constructor.
+	~UniverseBlock();
 
-		AtUniverse *universe() { return m_universe; }
+	AtUniverse *universe() { return m_universe; }
 
-	private :
+private:
 
-		const bool m_writable;
-		AtUniverse *m_universe;
-
+	const bool m_writable;
+	AtUniverse *m_universe;
 };
 
 } // namespace IECoreArnold

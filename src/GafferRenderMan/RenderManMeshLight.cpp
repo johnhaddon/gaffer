@@ -49,23 +49,21 @@ namespace
 {
 
 const ConstCompoundObjectPtr g_hiddenVisibilityAttributes = [] {
-
 	const CompoundObjectPtr result = new CompoundObject;
 	result->members()["ri:visibility:indirect"] = new BoolData( false );
 	result->members()["ri:visibility:transmission"] = new BoolData( false );
 	return result;
-
-} ();
+}();
 
 } // namespace
 
 GAFFER_NODE_DEFINE_TYPE( RenderManMeshLight );
 
 RenderManMeshLight::RenderManMeshLight( const std::string &name )
-	:	GafferScene::MeshLight(
-			name,
-			[] { RenderManShaderPtr shader = new RenderManShader; shader->loadShader( "PxrMeshLight" ); return shader; } ()
-		)
+	: GafferScene::MeshLight(
+		  name,
+		  [] { RenderManShaderPtr shader = new RenderManShader; shader->loadShader( "PxrMeshLight" ); return shader; }()
+	  )
 {
 
 	// Hide the objects to everything except camera rays, since that seems a

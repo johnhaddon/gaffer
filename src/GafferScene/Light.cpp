@@ -93,7 +93,7 @@ GAFFER_NODE_DEFINE_TYPE( Light );
 size_t Light::g_firstPlugIndex = 0;
 
 Light::Light( const std::string &name, const ShaderPtr &shader )
-	:	ObjectSource( name, "light" )
+	: ObjectSource( name, "light" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "attributes" ) );
@@ -119,7 +119,7 @@ Light::Light( const std::string &name, const ShaderPtr &shader )
 	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:light:lookThroughAperture", new IECore::FloatData( 2.0f ), false, "lookThroughAperture" ) );
 	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:light:lookThroughClippingPlanes", new IECore::V2fData( Imath::V2f( -100000, 100000 ) ), false, "lookThroughClippingPlanes" ) );
 
-	addChild( visualiserAttr  );
+	addChild( visualiserAttr );
 
 	setChild( "__shader", shader );
 	shaderNode()->parametersPlug()->setFlags( Plug::Flags::AcceptsInputs, true );
@@ -216,11 +216,9 @@ void Light::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	ObjectSource::affects( input, outputs );
 
 	if(
-		input == shaderInPlug()
-		|| attributesPlug()->isAncestorOf( input )
-		|| visualiserAttributesPlug()->isAncestorOf( input )
-		|| mutePlug()->isAncestorOf( input )
-	) {
+		input == shaderInPlug() || attributesPlug()->isAncestorOf( input ) || visualiserAttributesPlug()->isAncestorOf( input ) || mutePlug()->isAncestorOf( input )
+	)
+	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
 

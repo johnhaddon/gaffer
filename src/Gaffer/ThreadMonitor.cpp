@@ -50,12 +50,12 @@ ThreadMonitor::ProcessesPerThread g_emptyStatistics;
 } // namespace
 
 ThreadMonitor::ThreadData::ThreadData()
-	:	id( thisThreadId() )
+	: id( thisThreadId() )
 {
 }
 
 ThreadMonitor::ThreadMonitor( const std::vector<IECore::InternedString> &processMask )
-	:	m_processMask( processMask )
+	: m_processMask( processMask )
 {
 }
 

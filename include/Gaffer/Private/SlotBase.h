@@ -83,7 +83,7 @@ struct SlotBase : private boost::noncopyable
 
 	// Inserts slot after `previous`.
 	SlotBase( Ptr &prev )
-		:	previous( &prev ), next( prev ), m_referenceCount( 0 ), blocked( false ), calling( false )
+		: previous( &prev ), next( prev ), m_referenceCount( 0 ), blocked( false ), calling( false )
 	{
 		*previous = this;
 		if( next )
@@ -146,7 +146,6 @@ struct SlotBase : private boost::noncopyable
 	// True when currently in `Slot::operator()`. Used to defer destruction
 	// of self-disconnecting functions.
 	bool calling;
-
 };
 
 inline void intrusive_ptr_add_ref( SlotBase *r )
@@ -171,4 +170,4 @@ namespace GafferModule
 
 void bindSignals();
 
-};
+}; // namespace GafferModule

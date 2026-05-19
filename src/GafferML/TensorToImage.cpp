@@ -92,14 +92,14 @@ ImageShape imageShape( const Tensor *tensor, bool interleavedChannels )
 	if( interleavedChannels )
 	{
 		return {
-			Box2i( V2i( 0 ), V2i( (int)shape[i+1], (int)shape[i] ) ),
-			(size_t)shape[i+2]
+			Box2i( V2i( 0 ), V2i( (int)shape[i + 1], (int)shape[i] ) ),
+			(size_t)shape[i + 2]
 		};
 	}
 	else
 	{
 		return {
-			Box2i( V2i( 0 ), V2i( (int)shape[i+2], (int)shape[i+1] ) ),
+			Box2i( V2i( 0 ), V2i( (int)shape[i + 2], (int)shape[i + 1] ) ),
 			(size_t)shape[i]
 		};
 	}
@@ -136,7 +136,7 @@ GAFFER_NODE_DEFINE_TYPE( TensorToImage );
 size_t TensorToImage::g_firstPlugIndex = 0;
 
 TensorToImage::TensorToImage( const std::string &name )
-	:	FlatImageSource( name )
+	: FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new TensorPlug( "tensor" ) );
@@ -263,7 +263,7 @@ IECore::ConstStringVectorDataPtr TensorToImage::computeChannelNames( const Gaffe
 		std::remove_if(
 			result->writable().begin(),
 			result->writable().end(),
-			[] ( const string &channelName ) {
+			[]( const string &channelName ) {
 				return channelName.empty();
 			}
 		),
@@ -315,7 +315,7 @@ IECore::ConstFloatVectorDataPtr TensorToImage::computeChannelData( const std::st
 
 	dispatchTensorData(
 		tensorData->value(),
-		[&] ( const auto *sourceData ) {
+		[&]( const auto *sourceData ) {
 			outData = new FloatVectorData;
 			vector<float> &out = outData->writable();
 
@@ -337,7 +337,7 @@ IECore::ConstFloatVectorDataPtr TensorToImage::computeChannelData( const std::st
 			}
 			float *dstData = out.data();
 
-			for( V2i p = validTileBound.min; p.y < validTileBound.max.y ; ++p.y )
+			for( V2i p = validTileBound.min; p.y < validTileBound.max.y; ++p.y )
 			{
 				size_t srcIndex = BufferAlgo::index( V2i( p.x, dataWindow.max.y - p.y - 1 ), dataWindow ) * sourceStride;
 				size_t dstIndex = BufferAlgo::index( p, tileBound );

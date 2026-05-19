@@ -49,7 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( ExternalProcedural );
 size_t ExternalProcedural::g_firstPlugIndex = 0;
 
 ExternalProcedural::ExternalProcedural( const std::string &name )
-	:	ObjectSource( name, "procedural" )
+	: ObjectSource( name, "procedural" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );

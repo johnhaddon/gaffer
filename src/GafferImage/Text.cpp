@@ -154,8 +154,8 @@ FT_Matrix transform( const M33f &transform, FT_Vector &delta )
 	matrix.yx = (FT_Fixed)( transform[0][1] * 0x10000L );
 	matrix.yy = (FT_Fixed)( transform[1][1] * 0x10000L );
 
-	delta.x = (FT_Pos)(transform.translation()[0] * 64); // FT_Set_Transform expects delta
-	delta.y = (FT_Pos)(transform.translation()[1] * 64); // to be in 1/64ths of a pixel.
+	delta.x = (FT_Pos)( transform.translation()[0] * 64 ); // FT_Set_Transform expects delta
+	delta.y = (FT_Pos)( transform.translation()[1] * 64 ); // to be in 1/64ths of a pixel.
 
 	return matrix;
 }
@@ -184,7 +184,7 @@ int width( const u32string &word, FT_FaceRec *face )
 struct Word
 {
 	Word( const u32string &text, int x )
-		:	text( text ), x( x )
+		: text( text ), x( x )
 	{
 	}
 
@@ -215,7 +215,7 @@ GAFFER_NODE_DEFINE_TYPE( Text );
 size_t Text::g_firstPlugIndex = 0;
 
 Text::Text( const std::string &name )
-	:	Shape( name )
+	: Shape( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "text", Plug::In, "Hello World" ) );
@@ -349,8 +349,7 @@ void Text::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 
 bool Text::affectsLayout( const Gaffer::Plug *input ) const
 {
-	return
-		input == textPlug() ||
+	return input == textPlug() ||
 		input == fontPlug() ||
 		input->parent<V2iPlug>() == sizePlug() ||
 		areaPlug()->isAncestorOf( input ) ||
@@ -393,7 +392,8 @@ IECore::ConstCompoundObjectPtr Text::computeLayout( const Gaffer::Context *conte
 		area = inPlug()->formatPlug()->getValue().getDisplayWindow();
 	}
 
-	area.min *= 64; area.max *= 64;
+	area.min *= 64;
+	area.max *= 64;
 	V2i pen = V2i( area.min.x, area.max.y - face->size->metrics.ascender );
 
 	vector<Line> lines;
@@ -403,7 +403,7 @@ IECore::ConstCompoundObjectPtr Text::computeLayout( const Gaffer::Context *conte
 
 	const std::string text = textPlug()->getValue();
 	/// \todo Does tokenization/wrapping need to be unicode aware?
-	using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
+	using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
 	boost::char_separator<char> separator( "", " \n\t" );
 	Tokenizer tokenizer( text, separator );
 	for( Tokenizer::iterator it = tokenizer.begin(), eIt = tokenizer.end(); it != eIt; ++it )
@@ -421,7 +421,7 @@ IECore::ConstCompoundObjectPtr Text::computeLayout( const Gaffer::Context *conte
 			pen.y -= face->size->metrics.height;
 			lines.push_back( Line( pen.y ) );
 		}
-		else if( *it == " " || *it =="\t" )
+		else if( *it == " " || *it == "\t" )
 		{
 			pen.x += ::width( fromUTF8( *it ), face.get() );
 		}
@@ -481,11 +481,11 @@ IECore::ConstCompoundObjectPtr Text::computeLayout( const Gaffer::Context *conte
 	float yOffset = 0;
 	if( verticalAlignment == Bottom )
 	{
-		yOffset = (float)(area.min.y - (pen.y + face->size->metrics.descender) ) / 64.0f;
+		yOffset = (float)( area.min.y - ( pen.y + face->size->metrics.descender ) ) / 64.0f;
 	}
 	else if( verticalAlignment == VerticalCenter )
 	{
-		yOffset = (float)(area.min.y - (pen.y + face->size->metrics.descender) ) / (64.0f * 2.0f);
+		yOffset = (float)( area.min.y - ( pen.y + face->size->metrics.descender ) ) / ( 64.0f * 2.0f );
 	}
 
 	FT_GlyphSlot slot = face->glyph;
@@ -495,11 +495,11 @@ IECore::ConstCompoundObjectPtr Text::computeLayout( const Gaffer::Context *conte
 		float xOffset = 0;
 		if( horizontalAlignment == Right )
 		{
-			xOffset = (float)(area.size().x - lIt->width) / 64.0f;
+			xOffset = (float)( area.size().x - lIt->width ) / 64.0f;
 		}
 		else if( horizontalAlignment == HorizontalCenter )
 		{
-			xOffset = (float)(area.size().x - lIt->width) / (64.0f * 2.0f);
+			xOffset = (float)( area.size().x - lIt->width ) / ( 64.0f * 2.0f );
 		}
 
 		for( vector<Word>::const_iterator wIt = lIt->words.begin(), weIt = lIt->words.end(); wIt != weIt; ++wIt )
@@ -590,7 +590,7 @@ void Text::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Con
 	h.append( tileOrigin );
 }
 
-IECore::ConstFloatVectorDataPtr Text::computeShapeChannelData(  const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const
+IECore::ConstFloatVectorDataPtr Text::computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const
 {
 	ConstCompoundObjectPtr layout;
 	{

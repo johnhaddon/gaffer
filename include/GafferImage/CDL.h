@@ -47,38 +47,37 @@ namespace GafferImage
 class GAFFERIMAGE_API CDL : public OpenColorIOTransform
 {
 
-	public :
+public:
 
-		explicit CDL( const std::string &name=defaultName<CDL>() );
-		~CDL() override;
+	explicit CDL( const std::string &name = defaultName<CDL>() );
+	~CDL() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::CDL, CDLTypeId, OpenColorIOTransform );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::CDL, CDLTypeId, OpenColorIOTransform );
 
-		Gaffer::Color3fPlug *slopePlug();
-		const Gaffer::Color3fPlug *slopePlug() const;
+	Gaffer::Color3fPlug *slopePlug();
+	const Gaffer::Color3fPlug *slopePlug() const;
 
-		Gaffer::Color3fPlug *offsetPlug();
-		const Gaffer::Color3fPlug *offsetPlug() const;
+	Gaffer::Color3fPlug *offsetPlug();
+	const Gaffer::Color3fPlug *offsetPlug() const;
 
-		Gaffer::Color3fPlug *powerPlug();
-		const Gaffer::Color3fPlug *powerPlug() const;
+	Gaffer::Color3fPlug *powerPlug();
+	const Gaffer::Color3fPlug *powerPlug() const;
 
-		Gaffer::FloatPlug *saturationPlug();
-		const Gaffer::FloatPlug *saturationPlug() const;
+	Gaffer::FloatPlug *saturationPlug();
+	const Gaffer::FloatPlug *saturationPlug() const;
 
-		Gaffer::IntPlug *directionPlug();
-		const Gaffer::IntPlug *directionPlug() const;
+	Gaffer::IntPlug *directionPlug();
+	const Gaffer::IntPlug *directionPlug() const;
 
-	protected :
+protected:
 
-		bool affectsTransform( const Gaffer::Plug *input ) const override;
-		void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
+	bool affectsTransform( const Gaffer::Plug *input ) const override;
+	void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CDL )

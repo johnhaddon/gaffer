@@ -45,12 +45,12 @@ using namespace GafferImage;
 GAFFER_NODE_DEFINE_TYPE( FlatImageProcessor );
 
 FlatImageProcessor::FlatImageProcessor( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 }
 
 FlatImageProcessor::FlatImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	ImageProcessor( name, minInputs, maxInputs )
+	: ImageProcessor( name, minInputs, maxInputs )
 {
 }
 
@@ -93,11 +93,11 @@ void FlatImageProcessor::hashDeep( const GafferImage::ImagePlug *parent, const G
 		{
 			// We ignore unconnected inputs when determining the hash - this is the correct
 			// behaviour for merge, and hopefully any other deep nodes that use inPlugs()
-			if( (*it)->getInput<ValuePlug>() )
+			if( ( *it )->getInput<ValuePlug>() )
 			{
-				if( ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) )
+				if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) )
 				{
-					h.append( (*it)->deepPlug()->hash() );
+					h.append( ( *it )->deepPlug()->hash() );
 				}
 			}
 		}
@@ -121,8 +121,8 @@ bool FlatImageProcessor::computeDeep( const Gaffer::Context *context, const Imag
 		for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 		{
 			if(
-				ImageAlgo::viewIsValid( context, (*it)->viewNames()->readable() ) &&
-				(*it)->deepPlug()->getValue()
+				ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) &&
+				( *it )->deepPlug()->getValue()
 			)
 			{
 				badInput = it->get();

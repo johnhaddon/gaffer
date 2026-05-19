@@ -44,28 +44,28 @@ namespace GafferDispatch
 class GAFFERDISPATCH_API TaskList : public TaskNode
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferDispatch::TaskList, TaskListTypeId, TaskNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferDispatch::TaskList, TaskListTypeId, TaskNode );
 
-		explicit TaskList( const std::string &name=defaultName<TaskList>() );
-		~TaskList() override;
+	explicit TaskList( const std::string &name = defaultName<TaskList>() );
+	~TaskList() override;
 
-		Gaffer::BoolPlug *sequencePlug();
-		const Gaffer::BoolPlug *sequencePlug() const;
+	Gaffer::BoolPlug *sequencePlug();
+	const Gaffer::BoolPlug *sequencePlug() const;
 
-	protected :
+protected:
 
-		IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
-		void execute() const override;
-		bool requiresSequenceExecution() const override;
+	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
+	void execute() const override;
+	bool requiresSequenceExecution() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 
-		// Friendship for the bindings
-		friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
+	// Friendship for the bindings
+	friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
 };
 
 } // namespace GafferDispatch

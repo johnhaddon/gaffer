@@ -129,7 +129,6 @@ class SetupBasedNodeSerialiser : public NodeSerialiser
 
 		return result;
 	}
-
 };
 
 NameValuePlugPtr addQuery(
@@ -173,20 +172,19 @@ const ValuePlugPtr valuePlugFromQueryPlug( Gaffer::ContextQuery &q, const NameVa
 
 class ContextQuerySerialiser : public NodeSerialiser
 {
-	std::string postConstructor( const GraphComponent* component, const std::string& identifier, Serialisation& serialisation ) const override
+	std::string postConstructor( const GraphComponent *component, const std::string &identifier, Serialisation &serialisation ) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( component, identifier, serialisation );
 
-		const Gaffer::ContextQuery* const query = IECore::runTimeCast< const Gaffer::ContextQuery >( component );
+		const Gaffer::ContextQuery *const query = IECore::runTimeCast<const Gaffer::ContextQuery>( component );
 
 		for( const auto &queryPlug : NameValuePlug::Range( *query->queriesPlug() ) )
 		{
-			const Serialisation::Serialiser* serialiser = Serialisation::acquireSerialiser( queryPlug->valuePlug() );
+			const Serialisation::Serialiser *serialiser = Serialisation::acquireSerialiser( queryPlug->valuePlug() );
 			result +=
 				identifier + ".addQuery( " +
 				serialiser->constructor( queryPlug->valuePlug(), serialisation ) +
-				" )\n"
-			;
+				" )\n";
 		}
 
 		return result;
@@ -200,13 +198,11 @@ void GafferModule::bindContextProcessor()
 
 	DependencyNodeClass<Loop>()
 		.def( "setup", &setupLoop )
-		.def( "previousIteration", &previousIterationWrapper )
-	;
+		.def( "previousIteration", &previousIterationWrapper );
 
 	DependencyNodeClass<ContextProcessor>()
 		.def( "setup", &setupContextProcessor )
-		.def( "inPlugContext", &inPlugContext )
-	;
+		.def( "inPlugContext", &inPlugContext );
 
 	DependencyNodeClass<TimeWarp>();
 	DependencyNodeClass<ContextVariables>();
@@ -216,14 +212,12 @@ void GafferModule::bindContextProcessor()
 	Serialisation::registerSerialiser( Loop::staticTypeId(), new SetupBasedNodeSerialiser );
 	Serialisation::registerSerialiser( ContextProcessor::staticTypeId(), new SetupBasedNodeSerialiser );
 
-	DependencyNodeClass< Gaffer::ContextQuery >()
+	DependencyNodeClass<Gaffer::ContextQuery>()
 		.def( "addQuery", &addQuery, ( arg( "plug" ), arg( "variable" ) = "" ) )
 		.def( "removeQuery", &removeQuery )
 		.def( "outPlugFromQueryPlug", &outPlugFromQueryPlug )
 		.def( "queryPlugFromOutPlug", &queryPlugFromOutPlug )
 		.def( "existsPlugFromQueryPlug", &existsPlugFromQueryPlug )
-		.def( "valuePlugFromQueryPlug", &valuePlugFromQueryPlug )
-	;
+		.def( "valuePlugFromQueryPlug", &valuePlugFromQueryPlug );
 	Serialisation::registerSerialiser( Gaffer::ContextQuery::staticTypeId(), new ContextQuerySerialiser() );
-
 }

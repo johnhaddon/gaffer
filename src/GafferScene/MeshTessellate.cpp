@@ -52,7 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshTessellate );
 size_t MeshTessellate::g_firstPlugIndex = 0;
 
 MeshTessellate::MeshTessellate( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -63,7 +63,6 @@ MeshTessellate::MeshTessellate( const std::string &name )
 	addChild( new StringPlug( "interpolateBoundary", Plug::In, "" ) );
 	addChild( new StringPlug( "faceVaryingLinearInterpolation", Plug::In, "" ) );
 	addChild( new StringPlug( "triangleSubdivisionRule", Plug::In, "" ) );
-
 }
 
 MeshTessellate::~MeshTessellate()
@@ -72,12 +71,12 @@ MeshTessellate::~MeshTessellate()
 
 Gaffer::IntPlug *MeshTessellate::divisionsPlug()
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 0);
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 0 );
 }
 
 const Gaffer::IntPlug *MeshTessellate::divisionsPlug() const
 {
-	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 0);
+	return getChild<Gaffer::IntPlug>( g_firstPlugIndex + 0 );
 }
 
 Gaffer::BoolPlug *MeshTessellate::calculateNormalsPlug()
@@ -142,8 +141,7 @@ const Gaffer::StringPlug *MeshTessellate::triangleSubdivisionRulePlug() const
 
 bool MeshTessellate::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == divisionsPlug() ||
 		input == calculateNormalsPlug() ||
 		input == schemePlug() ||
@@ -152,7 +150,6 @@ bool MeshTessellate::affectsProcessedObject( const Gaffer::Plug *input ) const
 		input == faceVaryingLinearInterpolationPlug() ||
 		input == triangleSubdivisionRulePlug();
 }
-
 
 
 void MeshTessellate::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

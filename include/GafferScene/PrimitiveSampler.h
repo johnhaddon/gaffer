@@ -50,80 +50,79 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveSampler : public Deformer
 {
 
-	public :
+public:
 
-		~PrimitiveSampler() override;
+	~PrimitiveSampler() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveSampler, PrimitiveSamplerTypeId, Deformer );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveSampler, PrimitiveSamplerTypeId, Deformer );
 
-		ScenePlug *sourcePlug();
-		const ScenePlug *sourcePlug() const;
+	ScenePlug *sourcePlug();
+	const ScenePlug *sourcePlug() const;
 
-		Gaffer::StringPlug *sourceLocationPlug();
-		const Gaffer::StringPlug *sourceLocationPlug() const;
+	Gaffer::StringPlug *sourceLocationPlug();
+	const Gaffer::StringPlug *sourceLocationPlug() const;
 
-		Gaffer::StringPlug *primitiveVariablesPlug();
-		const Gaffer::StringPlug *primitiveVariablesPlug() const;
+	Gaffer::StringPlug *primitiveVariablesPlug();
+	const Gaffer::StringPlug *primitiveVariablesPlug() const;
 
-		Gaffer::StringPlug *prefixPlug();
-		const Gaffer::StringPlug *prefixPlug() const;
+	Gaffer::StringPlug *prefixPlug();
+	const Gaffer::StringPlug *prefixPlug() const;
 
-		Gaffer::StringPlug *statusPlug();
-		const Gaffer::StringPlug *statusPlug() const;
+	Gaffer::StringPlug *statusPlug();
+	const Gaffer::StringPlug *statusPlug() const;
 
-	protected :
+protected:
 
-		explicit PrimitiveSampler( const std::string &name = defaultName<PrimitiveSampler>() );
+	explicit PrimitiveSampler( const std::string &name = defaultName<PrimitiveSampler>() );
 
-		/// SamplingFunction
-		/// ================
-		///
-		/// Derived classes are responsible for generating a `SamplingFunction`, which
-		/// performs an `IECoreScene::PrimitiveEvaluator` query for a single index within the
-		/// destination primitive. The base class takes care of everything else.
+	/// SamplingFunction
+	/// ================
+	///
+	/// Derived classes are responsible for generating a `SamplingFunction`, which
+	/// performs an `IECoreScene::PrimitiveEvaluator` query for a single index within the
+	/// destination primitive. The base class takes care of everything else.
 
-		using SamplingFunction = std::function<bool (
-			/// The PrimitiveEvaluator to use for sampling
-			/// the source primitive.
-			const IECoreScene::PrimitiveEvaluator &evaluator,
-			/// The index within the destination primitive to
-			/// sample for.
-			size_t index,
-			/// A transform that must be applied to any geometric
-			/// data before querying the `evaluator`. This converts
-			/// from the object space of the destination primitive into
-			/// the object space of the source primitive.
-			const Imath::M44f &transform,
-			/// The destination for the result of the `evaluator`
-			/// query.
-			IECoreScene::PrimitiveEvaluator::Result &result
-		)>;
+	using SamplingFunction = std::function<bool(
+		/// The PrimitiveEvaluator to use for sampling
+		/// the source primitive.
+		const IECoreScene::PrimitiveEvaluator &evaluator,
+		/// The index within the destination primitive to
+		/// sample for.
+		size_t index,
+		/// A transform that must be applied to any geometric
+		/// data before querying the `evaluator`. This converts
+		/// from the object space of the destination primitive into
+		/// the object space of the source primitive.
+		const Imath::M44f &transform,
+		/// The destination for the result of the `evaluator`
+		/// query.
+		IECoreScene::PrimitiveEvaluator::Result &result
+	)>;
 
-		/// Must be implemented to return true if the specified plug affects the
-		/// generation of the `SamplingFunction`. All implementations should call
-		/// the base implementation first, and return `true` if it does.
-		virtual bool affectsSamplingFunction( const Gaffer::Plug *input ) const = 0;
-		/// Must be implemented to hash all plugs that are used in `computeSamplingFunction()`.
-		/// All implementation should call the base class implementation first.
-		virtual void hashSamplingFunction( IECore::MurmurHash &h ) const = 0;
-		/// Must be implemented to return a `SamplingFunction` that will perform queries
-		/// on behalf of the destination primitive. The `interpolation` output parameter
-		/// must be filled with the interpolation of the primitive variables to be added
-		/// to the destination primitive. The sampling function will then be queried with
-		/// `index` values in the interval `[ 0, destinationPrimitive->variableSize( interpolation ) )`.
-		virtual SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const = 0;
+	/// Must be implemented to return true if the specified plug affects the
+	/// generation of the `SamplingFunction`. All implementations should call
+	/// the base implementation first, and return `true` if it does.
+	virtual bool affectsSamplingFunction( const Gaffer::Plug *input ) const = 0;
+	/// Must be implemented to hash all plugs that are used in `computeSamplingFunction()`.
+	/// All implementation should call the base class implementation first.
+	virtual void hashSamplingFunction( IECore::MurmurHash &h ) const = 0;
+	/// Must be implemented to return a `SamplingFunction` that will perform queries
+	/// on behalf of the destination primitive. The `interpolation` output parameter
+	/// must be filled with the interpolation of the primitive variables to be added
+	/// to the destination primitive. The sampling function will then be queried with
+	/// `index` values in the interval `[ 0, destinationPrimitive->variableSize( interpolation ) )`.
+	virtual SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const = 0;
 
-	private :
+private:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const final;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const final;
-		Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const final;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const final;
+	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
 
-		bool adjustBounds() const final;
+	bool adjustBounds() const final;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( PrimitiveSampler )

@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveVariableProcessor );
 size_t PrimitiveVariableProcessor::g_firstPlugIndex = 0;
 
 PrimitiveVariableProcessor::PrimitiveVariableProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
-	:	SceneElementProcessor( name, filterDefault )
+	: SceneElementProcessor( name, filterDefault )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );

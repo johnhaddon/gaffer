@@ -110,208 +110,207 @@ struct VStructConditionalExpression
 		return result;
 	}
 
-	private :
+private:
 
-		vector<InternedString> m_tokens;
+	vector<InternedString> m_tokens;
 
-		using TokenSpan = boost::span<const InternedString>;
+	using TokenSpan = boost::span<const InternedString>;
 
-		static Action evaluateAction( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+	static Action evaluateAction( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+	{
+		Action result;
+		if( tokens.empty() )
 		{
-			Action result;
-			if( tokens.empty() )
-			{
-				result.type = Action::Type::Connect;
-				return result;
-			}
-
-			const InternedString t = takeToken( tokens );
-			if( t == g_connectToken )
-			{
-				result.type = Action::Type::Connect;
-			}
-			else if( t == g_setToken )
-			{
-				result.type = IECoreRenderMan::ShaderNetworkAlgo::VStructAction::Type::Set;
-				result.value = evaluateValue( tokens );
-			}
-			else
-			{
-				throw std::runtime_error( "Expected `connect` or `set`" );
-			}
-
-			if( !tokens.size() )
-			{
-				return result;
-			}
-
-			takeExpectedToken( tokens, g_ifToken );
-
-			const bool b = evaluateBooleanExpression( tokens, valueFunction, isConnectedFunction );
-			Action elseAction;
-			if( tokens.size() )
-			{
-				takeExpectedToken( tokens, g_elseToken );
-				elseAction = evaluateAction( tokens, valueFunction, isConnectedFunction );
-			}
-
-			return b ? result : elseAction;
+			result.type = Action::Type::Connect;
+			return result;
 		}
 
-		// Note : this doesn't currently give any thought to operator precedence, but
-		// is still sufficient to deal with all expressions in `Pxr*` shaders.
-		static bool evaluateBooleanExpression( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+		const InternedString t = takeToken( tokens );
+		if( t == g_connectToken )
 		{
-			bool operand1;
-			if( tokens.size() && tokens[0] == g_openParenthesisToken )
+			result.type = Action::Type::Connect;
+		}
+		else if( t == g_setToken )
+		{
+			result.type = IECoreRenderMan::ShaderNetworkAlgo::VStructAction::Type::Set;
+			result.value = evaluateValue( tokens );
+		}
+		else
+		{
+			throw std::runtime_error( "Expected `connect` or `set`" );
+		}
+
+		if( !tokens.size() )
+		{
+			return result;
+		}
+
+		takeExpectedToken( tokens, g_ifToken );
+
+		const bool b = evaluateBooleanExpression( tokens, valueFunction, isConnectedFunction );
+		Action elseAction;
+		if( tokens.size() )
+		{
+			takeExpectedToken( tokens, g_elseToken );
+			elseAction = evaluateAction( tokens, valueFunction, isConnectedFunction );
+		}
+
+		return b ? result : elseAction;
+	}
+
+	// Note : this doesn't currently give any thought to operator precedence, but
+	// is still sufficient to deal with all expressions in `Pxr*` shaders.
+	static bool evaluateBooleanExpression( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+	{
+		bool operand1;
+		if( tokens.size() && tokens[0] == g_openParenthesisToken )
+		{
+			int balance = 0;
+			size_t i = 0;
+			while( true )
 			{
-				int balance = 0;
-				size_t i = 0;
-				while( true )
+				if( tokens[i] == g_openParenthesisToken )
 				{
-					if( tokens[i] == g_openParenthesisToken )
-					{
-						balance++;
-					}
-					else if( tokens[i] == g_closeParenthesisToken )
-					{
-						balance--;
-					}
-					if( balance == 0 )
-					{
-						break;
-					}
-					i++;
-					if( i >= tokens.size() )
-					{
-						throw runtime_error( "Unbalanced parentheses" );
-					}
+					balance++;
 				}
-				TokenSpan parenthesisedTokens = tokens.subspan( 1, i - 1 );
-				tokens = tokens.subspan( i + 1 );
-				operand1 = evaluateBooleanExpression( parenthesisedTokens, valueFunction, isConnectedFunction );
-			}
-			else
-			{
-				operand1 = evaluateParameterComparison( tokens, valueFunction, isConnectedFunction );
-			}
-
-			if( !tokens.size() || ( tokens[0] != g_orToken && tokens[0] != g_andToken ) )
-			{
-				return operand1;
-			}
-
-			const InternedString op = takeToken( tokens );
-			const bool operand2 = evaluateBooleanExpression( tokens, valueFunction, isConnectedFunction );
-
-			if( op == g_orToken )
-			{
-				return operand1 || operand2;
-			}
-			else
-			{
-				return operand1 && operand2;
-			}
-		}
-
-		static bool evaluateParameterComparison( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
-		{
-			const InternedString parameter = takeToken( tokens );
-			const InternedString op = takeToken( tokens );
-
-			if( op == g_isToken )
-			{
-				takeExpectedToken( tokens, g_connectedToken );
-				return isConnectedFunction( parameter );
-			}
-
-			if( op == g_equalToken )
-			{
-				const double v1 = evaluateValue( tokens );
-				double v2 = toDouble( valueFunction( parameter ).get() );
-				return v1 == v2;
-			}
-			else
-			{
-				throw std::runtime_error( fmt::format( "Expected operator, not {}", op ) );
-			}
-		}
-
-		// We use doubles to represent values, although for the expressions we
-		// actually care about I think even a bool would be sufficient.
-		static double evaluateValue( TokenSpan &tokens )
-		{
-			const InternedString t = takeToken( tokens );
-			size_t s;
-			try
-			{
-				const double result = std::stod( t.string(), &s );
-				if( s == t.string().size() )
+				else if( tokens[i] == g_closeParenthesisToken )
 				{
-					return result;
+					balance--;
+				}
+				if( balance == 0 )
+				{
+					break;
+				}
+				i++;
+				if( i >= tokens.size() )
+				{
+					throw runtime_error( "Unbalanced parentheses" );
 				}
 			}
-			catch( ... )
-			{
-				// Fall through
-			}
-			throw runtime_error( fmt::format( "Bad value \"{}\"", t.string() ) );
+			TokenSpan parenthesisedTokens = tokens.subspan( 1, i - 1 );
+			tokens = tokens.subspan( i + 1 );
+			operand1 = evaluateBooleanExpression( parenthesisedTokens, valueFunction, isConnectedFunction );
+		}
+		else
+		{
+			operand1 = evaluateParameterComparison( tokens, valueFunction, isConnectedFunction );
 		}
 
-		static double toDouble( const IECore::Data *data )
+		if( !tokens.size() || ( tokens[0] != g_orToken && tokens[0] != g_andToken ) )
 		{
-			if( !data )
+			return operand1;
+		}
+
+		const InternedString op = takeToken( tokens );
+		const bool operand2 = evaluateBooleanExpression( tokens, valueFunction, isConnectedFunction );
+
+		if( op == g_orToken )
+		{
+			return operand1 || operand2;
+		}
+		else
+		{
+			return operand1 && operand2;
+		}
+	}
+
+	static bool evaluateParameterComparison( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+	{
+		const InternedString parameter = takeToken( tokens );
+		const InternedString op = takeToken( tokens );
+
+		if( op == g_isToken )
+		{
+			takeExpectedToken( tokens, g_connectedToken );
+			return isConnectedFunction( parameter );
+		}
+
+		if( op == g_equalToken )
+		{
+			const double v1 = evaluateValue( tokens );
+			double v2 = toDouble( valueFunction( parameter ).get() );
+			return v1 == v2;
+		}
+		else
+		{
+			throw std::runtime_error( fmt::format( "Expected operator, not {}", op ) );
+		}
+	}
+
+	// We use doubles to represent values, although for the expressions we
+	// actually care about I think even a bool would be sufficient.
+	static double evaluateValue( TokenSpan &tokens )
+	{
+		const InternedString t = takeToken( tokens );
+		size_t s;
+		try
+		{
+			const double result = std::stod( t.string(), &s );
+			if( s == t.string().size() )
 			{
+				return result;
+			}
+		}
+		catch( ... )
+		{
+			// Fall through
+		}
+		throw runtime_error( fmt::format( "Bad value \"{}\"", t.string() ) );
+	}
+
+	static double toDouble( const IECore::Data *data )
+	{
+		if( !data )
+		{
+			return 0;
+		}
+
+		switch( data->typeId() )
+		{
+			case BoolDataTypeId :
+				return static_cast<const BoolData *>( data )->readable();
+			case IntDataTypeId :
+				return static_cast<const IntData *>( data )->readable();
+			case FloatDataTypeId :
+				return static_cast<const FloatData *>( data )->readable();
+			default :
+				IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "VStruct expression referenced unsupported value type \"{}\"", data->typeName() ) );
 				return 0;
-			}
-
-			switch( data->typeId() )
-			{
-				case BoolDataTypeId :
-					return static_cast<const BoolData *>( data )->readable();
-				case IntDataTypeId :
-					return static_cast<const IntData *>( data )->readable();
-				case FloatDataTypeId :
-					return static_cast<const FloatData *>( data )->readable();
-				default :
-					IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "VStruct expression referenced unsupported value type \"{}\"", data->typeName() ) );
-					return 0;
-			}
 		}
+	}
 
-		static InternedString takeToken( TokenSpan &tokens )
+	static InternedString takeToken( TokenSpan &tokens )
+	{
+		if( tokens.empty() )
 		{
-			if( tokens.empty() )
-			{
-				throw runtime_error( "Expression ended unexpectedly" );
-			}
-
-			InternedString r = tokens[0];
-			tokens = tokens.subspan( 1 );
-			return r;
+			throw runtime_error( "Expression ended unexpectedly" );
 		}
 
-		static InternedString takeExpectedToken( TokenSpan &tokens, InternedString expectedToken )
+		InternedString r = tokens[0];
+		tokens = tokens.subspan( 1 );
+		return r;
+	}
+
+	static InternedString takeExpectedToken( TokenSpan &tokens, InternedString expectedToken )
+	{
+		if( tokens.empty() || takeToken( tokens ) != expectedToken )
 		{
-			if( tokens.empty() || takeToken( tokens ) != expectedToken )
-			{
-				throw runtime_error( fmt::format( "Expected \"{}\"", expectedToken.string() ) );
-			}
-			return expectedToken;
+			throw runtime_error( fmt::format( "Expected \"{}\"", expectedToken.string() ) );
 		}
+		return expectedToken;
+	}
 
-		static const InternedString g_andToken;
-		static const InternedString g_orToken;
-		static const InternedString g_equalToken;
-		static const InternedString g_ifToken;
-		static const InternedString g_elseToken;
-		static const InternedString g_openParenthesisToken;
-		static const InternedString g_closeParenthesisToken;
-		static const InternedString g_connectToken;
-		static const InternedString g_setToken;
-		static const InternedString g_isToken;
-		static const InternedString g_connectedToken;
-
+	static const InternedString g_andToken;
+	static const InternedString g_orToken;
+	static const InternedString g_equalToken;
+	static const InternedString g_ifToken;
+	static const InternedString g_elseToken;
+	static const InternedString g_openParenthesisToken;
+	static const InternedString g_closeParenthesisToken;
+	static const InternedString g_connectToken;
+	static const InternedString g_setToken;
+	static const InternedString g_isToken;
+	static const InternedString g_connectedToken;
 };
 
 const InternedString VStructConditionalExpression::g_andToken( "and" );
@@ -630,7 +629,6 @@ using ShaderInfoCache = IECore::LRUCache<string, ConstShaderInfoPtr>;
 ShaderInfoCache g_shaderInfoCache(
 
 	[]( const std::string &shaderName, size_t &cost ) -> ConstShaderInfoPtr {
-
 		cost = 1;
 
 		const char *rixPluginPath = getenv( "RMAN_RIXPLUGINPATH" );
@@ -811,7 +809,7 @@ T parameterValue( const Shader *shader, InternedString parameterName, const T &d
 		return d->readable();
 	}
 
-	if constexpr( is_same_v<remove_cv_t<T>, Color3f > )
+	if constexpr( is_same_v<remove_cv_t<T>, Color3f> )
 	{
 		// Correction for USD files which author `float3` instead of `color3f`.
 		// See `ShaderNetworkAlgoTest.testConvertUSDFloat3ToColor3f()`.
@@ -827,7 +825,7 @@ T parameterValue( const Shader *shader, InternedString parameterName, const T &d
 			return Color3f( c[0], c[1], c[2] );
 		}
 	}
-	else if constexpr( is_same_v<remove_cv_t<T>, V3f > )
+	else if constexpr( is_same_v<remove_cv_t<T>, V3f> )
 	{
 		// Conversion of V2f to V3f, for cases like converting `UsdPrimvarReader_float2.fallback`
 		// to `PxrPrimvar.defaultFloat3`
@@ -955,23 +953,20 @@ struct DataTraits
 {
 
 	using DataType = IECore::TypedData<T>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec2<T> >
+struct DataTraits<Vec2<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec2<T>>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec3<T> >
+struct DataTraits<Vec3<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec3<T>>;
-
 };
 
 template<typename T>
@@ -1007,7 +1002,7 @@ const InternedString g_defaultIntParameter( "defaultInt" );
 const InternedString g_diffuseParameter( "diffuse" );
 const InternedString g_diffuseColorParameter( "diffuseColor" );
 const InternedString g_diffuseDoubleSidedParameter( "diffuseDoubleSided" );
-const InternedString g_diffuseGainParameter( "diffuseGain") ;
+const InternedString g_diffuseGainParameter( "diffuseGain" );
 const InternedString g_emissionFocusParameter( "emissionFocus" );
 const InternedString g_emissionFocusTintParameter( "emissionFocusTint" );
 const InternedString g_enableColorTemperatureParameter( "enableColorTemperature" );
@@ -1044,7 +1039,7 @@ const InternedString g_shadowDistanceUSDParameter( "shadow:distance" );
 const InternedString g_shadowEnableParameter( "shadow:enable" );
 const InternedString g_shadowFalloffParameter( "shadowFalloff" );
 const InternedString g_shadowFalloffUSDParameter( "shadow:falloff" );
-const InternedString g_shadowFalloffGammaParameter( "shadowFalloffGamma");
+const InternedString g_shadowFalloffGammaParameter( "shadowFalloffGamma" );
 const InternedString g_shadowFalloffGammaUSDParameter( "shadow:falloffGamma" );
 const InternedString g_shapingConeAngleParameter( "shaping:cone:angle" );
 const InternedString g_shapingConeSoftnessParameter( "shaping:cone:softness" );
@@ -1122,7 +1117,7 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	{
 		if( boost::starts_with( name.string(), g_renderManLightNamespace ) )
 		{
-			shader->parameters()[name.string().substr(g_renderManLightNamespace.size())] = value;
+			shader->parameters()[name.string().substr( g_renderManLightNamespace.size() )] = value;
 		}
 	}
 }
@@ -1316,8 +1311,7 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			newShader->parameters()[g_typeParameter] = new StringData( typeName );
 			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_varnameParameter, string() );
 			std::visit(
-				[&shaderNetwork, &handle=handle, &shader=shader, &newShader, &defaultParameter=defaultParameter]( auto &&v )
-				{
+				[&shaderNetwork, &handle = handle, &shader = shader, &newShader, &defaultParameter = defaultParameter]( auto &&v ) {
 					transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), defaultParameter, v );
 				},
 				defaultValue
@@ -1344,8 +1338,7 @@ M44f IECoreRenderMan::ShaderNetworkAlgo::usdLightTransform( const Shader *lightS
 	{
 		const float radius = !parameterValue( lightShader, g_treatAsPointParameter, false ) ?
 			parameterValue( lightShader, g_radiusParameter, 0.5f ) :
-			0.001f
-		;
+			0.001f;
 		return M44f().scale( V3f( radius * 2.f ) );
 	}
 	else if( lightShader->getName() == "DiskLight" )
@@ -1364,8 +1357,7 @@ M44f IECoreRenderMan::ShaderNetworkAlgo::usdLightTransform( const Shader *lightS
 		const float length = parameterValue( lightShader, g_lengthParameter, 1.f );
 		const float radius = !parameterValue( lightShader, g_treatAsLineParameter, false ) ?
 			parameterValue( lightShader, g_radiusParameter, 0.5f ) :
-			0.001f
-		;
+			0.001f;
 
 		return M44f().scale( V3f( length, radius * 2.f, radius * 2.f ) );
 	}
@@ -1449,7 +1441,7 @@ void resolveVStructsWalk( IECoreScene::ShaderNetwork *shaderNetwork, InternedStr
 
 			const IECoreRenderMan::ShaderNetworkAlgo::VStructAction action = sourceMemberIt->second.conditionalExpression.evaluate(
 				// ParameterValueFunction
-				[&] ( InternedString parameterName ) -> ConstDataPtr {
+				[&]( InternedString parameterName ) -> ConstDataPtr {
 					if( auto d = sourceShader->parametersData()->member( parameterName ) )
 					{
 						return d;
@@ -1466,7 +1458,7 @@ void resolveVStructsWalk( IECoreScene::ShaderNetwork *shaderNetwork, InternedStr
 					return nullptr;
 				},
 				// IsConnectedFunction
-				[&] ( InternedString parameterName ) -> bool {
+				[&]( InternedString parameterName ) -> bool {
 					return shaderNetwork->input( { connection.source.shader, parameterName } );
 				}
 			);
@@ -1527,7 +1519,6 @@ void resolveVStructsWalk( IECoreScene::ShaderNetwork *shaderNetwork, InternedStr
 	{
 		shaderNetwork->setShader( shaderHandle, std::move( modifiedShader ) );
 	}
-
 }
 
 } // namespace
@@ -1543,5 +1534,4 @@ void IECoreRenderMan::ShaderNetworkAlgo::resolveVStructs( IECoreScene::ShaderNet
 	{
 		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", e.what() );
 	}
-
 }

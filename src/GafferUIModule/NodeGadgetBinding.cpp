@@ -66,7 +66,7 @@ namespace
 
 struct NoduleSlotCaller
 {
-	void operator()( boost::python::object slot, NodeGadget *nodeGadget, Nodule *nodule )
+	void operator () ( boost::python::object slot, NodeGadget *nodeGadget, Nodule *nodule )
 	{
 		try
 		{
@@ -82,21 +82,20 @@ struct NoduleSlotCaller
 struct NodeGadgetCreator
 {
 	NodeGadgetCreator( object fn )
-		:	m_fn( fn )
+		: m_fn( fn )
 	{
 	}
 
-	NodeGadgetPtr operator()( Gaffer::NodePtr node )
+	NodeGadgetPtr operator () ( Gaffer::NodePtr node )
 	{
 		IECorePython::ScopedGILLock gilLock;
 		NodeGadgetPtr result = extract<NodeGadgetPtr>( m_fn( node ) );
 		return result;
 	}
 
-	private :
+private:
 
-		object m_fn;
-
+	object m_fn;
 };
 
 void registerNodeGadget1( IECore::TypeId nodeType, object creator )
@@ -112,13 +111,12 @@ void registerNodeGadget2( const std::string &nodeGadgetType, object creator, IEC
 class StandardNodeGadgetWrapper : public NodeGadgetWrapper<StandardNodeGadget>
 {
 
-	public :
+public:
 
-		StandardNodeGadgetWrapper( PyObject *self, Gaffer::NodePtr node )
-			:	NodeGadgetWrapper<StandardNodeGadget>( self, node )
-		{
-		}
-
+	StandardNodeGadgetWrapper( PyObject *self, Gaffer::NodePtr node )
+		: NodeGadgetWrapper<StandardNodeGadget>( self, node )
+	{
+	}
 };
 
 GadgetPtr getContents( StandardNodeGadget &g )
@@ -173,38 +171,30 @@ void GafferUIModule::bindNodeGadget()
 	using Wrapper = NodeGadgetWrapper<NodeGadget>;
 
 	NodeGadgetClass<NodeGadget, Wrapper>()
-		.def( "node", (Gaffer::Node *(NodeGadget::*)())&NodeGadget::node, return_value_policy<CastToIntrusivePtr>() )
+		.def( "node", ( Gaffer::Node * (NodeGadget::*)() ) & NodeGadget::node, return_value_policy<CastToIntrusivePtr>() )
 		.def( "noduleAddedSignal", &NodeGadget::noduleAddedSignal, return_internal_reference<1>() )
 		.def( "noduleRemovedSignal", &NodeGadget::noduleRemovedSignal, return_internal_reference<1>() )
-		.def( "create", &NodeGadget::create ).staticmethod( "create" )
+		.def( "create", &NodeGadget::create )
+		.staticmethod( "create" )
 		.def( "registerNodeGadget", &registerNodeGadget1 )
-		.def( "registerNodeGadget", &registerNodeGadget2,
-			(
-				arg( "nodeGadgetType" ),
-				arg( "creator" ),
-				arg( "nodeType" ) = IECore::InvalidTypeId
-			)
-		)
-		.staticmethod( "registerNodeGadget" )
-	;
+		.def( "registerNodeGadget", &registerNodeGadget2, ( arg( "nodeGadgetType" ), arg( "creator" ), arg( "nodeType" ) = IECore::InvalidTypeId ) )
+		.staticmethod( "registerNodeGadget" );
 
-	SignalClass<NodeGadget::NoduleSignal, DefaultSignalCaller<NodeGadget::NoduleSignal>, NoduleSlotCaller >( "NoduleSignal" );
+	SignalClass<NodeGadget::NoduleSignal, DefaultSignalCaller<NodeGadget::NoduleSignal>, NoduleSlotCaller>( "NoduleSignal" );
 
 	{
 		scope s = NodeGadgetClass<StandardNodeGadget, StandardNodeGadgetWrapper>()
-			.def( init<Gaffer::NodePtr>( arg( "node" ) ) )
-			.def( "setContents", &StandardNodeGadget::setContents )
-			.def( "getContents", &getContents )
-			.def( "setEdgeGadget", &StandardNodeGadget::setEdgeGadget )
-			.def( "getEdgeGadget", &getEdgeGadget )
-		;
+					  .def( init<Gaffer::NodePtr>( arg( "node" ) ) )
+					  .def( "setContents", &StandardNodeGadget::setContents )
+					  .def( "getContents", &getContents )
+					  .def( "setEdgeGadget", &StandardNodeGadget::setEdgeGadget )
+					  .def( "getEdgeGadget", &getEdgeGadget );
 
 		enum_<StandardNodeGadget::Edge>( "Edge" )
 			.value( "TopEdge", StandardNodeGadget::TopEdge )
 			.value( "BottomEdge", StandardNodeGadget::BottomEdge )
 			.value( "LeftEdge", StandardNodeGadget::LeftEdge )
-			.value( "RightEdge", StandardNodeGadget::RightEdge )
-		;
+			.value( "RightEdge", StandardNodeGadget::RightEdge );
 	}
 
 	NodeGadgetClass<BackdropNodeGadget>()
@@ -212,15 +202,11 @@ void GafferUIModule::bindNodeGadget()
 		.def( "setBound", &setBound )
 		.def( "getBound", &getBound )
 		.def( "frame", &frame )
-		.def( "framed", &framed )
-	;
+		.def( "framed", &framed );
 
 	NodeGadgetClass<DotNodeGadget>()
-		.def( init<Gaffer::NodePtr>() )
-	;
+		.def( init<Gaffer::NodePtr>() );
 
 	NodeGadgetClass<AuxiliaryNodeGadget>()
-		.def( init<Gaffer::NodePtr>() )
-	;
-
+		.def( init<Gaffer::NodePtr>() );
 }

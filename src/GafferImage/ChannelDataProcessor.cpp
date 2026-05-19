@@ -49,7 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( ChannelDataProcessor );
 size_t ChannelDataProcessor::g_firstPlugIndex = 0;
 
 ChannelDataProcessor::ChannelDataProcessor( const std::string &name, bool hasUnpremultPlug )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -213,7 +213,6 @@ IECore::ConstFloatVectorDataPtr ChannelDataProcessor::computeChannelData( const 
 			A++;
 			O++;
 		}
-
 	}
 	processChannelData( context, parent, channelName, outData );
 	if( unpremult && postAlphaData )
@@ -227,7 +226,7 @@ IECore::ConstFloatVectorDataPtr ChannelDataProcessor::computeChannelData( const 
 			const float *preA = &alphaData->readable().front();
 			for( int j = 0; j < size; j++ )
 			{
-				if( ! ( *A == 0 && *preA == 0 ) )
+				if( !( *A == 0 && *preA == 0 ) )
 				{
 					*O *= *A;
 				}
@@ -248,7 +247,6 @@ IECore::ConstFloatVectorDataPtr ChannelDataProcessor::computeChannelData( const 
 				O++;
 			}
 		}
-
 	}
 	return outData;
 }

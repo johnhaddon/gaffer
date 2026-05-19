@@ -46,49 +46,48 @@ namespace GafferScene
 class GAFFERSCENE_API Transform : public SceneElementProcessor
 {
 
-	public :
+public:
 
-		explicit Transform( const std::string &name=defaultName<Transform>() );
-		~Transform() override;
+	explicit Transform( const std::string &name = defaultName<Transform>() );
+	~Transform() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Transform, TransformTypeId, SceneElementProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Transform, TransformTypeId, SceneElementProcessor );
 
-		enum Space
-		{
-			Local,
-			Parent,
-			World,
-			ResetLocal,
-			ResetWorld
-		};
+	enum Space
+	{
+		Local,
+		Parent,
+		World,
+		ResetLocal,
+		ResetWorld
+	};
 
-		Gaffer::IntPlug *spacePlug();
-		const Gaffer::IntPlug *spacePlug() const;
+	Gaffer::IntPlug *spacePlug();
+	const Gaffer::IntPlug *spacePlug() const;
 
-		Gaffer::TransformPlug *transformPlug();
-		const Gaffer::TransformPlug *transformPlug() const;
+	Gaffer::TransformPlug *transformPlug();
+	const Gaffer::TransformPlug *transformPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		bool processesTransform() const override;
-		void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const override;
+	bool processesTransform() const override;
+	void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const override;
 
-	private :
+private:
 
-		Imath::M44f fullParentTransform( const ScenePath &path ) const;
-		IECore::MurmurHash fullParentTransformHash( const ScenePath &path ) const;
-		// Returns the transform of the parent of path, either relative to an ancestor matched
-		// by the filter or to the root if no matching ancestor is found. This is useful for
-		// the world reset mode because when a matching ancestor is found we know what its output
-		// transform will be already.
-		Imath::M44f relativeParentTransform( const ScenePath &path, const Gaffer::Context *context, bool &matchingAncestorFound ) const;
-		IECore::MurmurHash relativeParentTransformHash( const ScenePath &path, const Gaffer::Context *context ) const;
+	Imath::M44f fullParentTransform( const ScenePath &path ) const;
+	IECore::MurmurHash fullParentTransformHash( const ScenePath &path ) const;
+	// Returns the transform of the parent of path, either relative to an ancestor matched
+	// by the filter or to the root if no matching ancestor is found. This is useful for
+	// the world reset mode because when a matching ancestor is found we know what its output
+	// transform will be already.
+	Imath::M44f relativeParentTransform( const ScenePath &path, const Gaffer::Context *context, bool &matchingAncestorFound ) const;
+	IECore::MurmurHash relativeParentTransformHash( const ScenePath &path, const Gaffer::Context *context ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Transform )

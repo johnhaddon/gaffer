@@ -57,17 +57,18 @@ ConstStringDataPtr g_locationVisibleTransparentIcon = new StringData( "locationV
 ConstStringDataPtr g_locationInvisibleTransparentIcon = new StringData( "locationInvisibleTransparent.png" );
 ConstStringDataPtr g_locationInvisibleConflictIcon = new StringData( "locationInvisibleConflict.png" );
 
-}
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // VisibilityColumn
 //////////////////////////////////////////////////////////////////////////
 
 VisibilityColumn::VisibilityColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope )
-	:	InspectorColumn(
-			new GafferSceneUI::Private::AttributeInspector( scene, editScope, "scene:visible" ),
-			CellData( /* value = */ nullptr, /* icon = */ g_locationVisibleIcon, /* background = */ nullptr, /* tooltip = */ new StringData( "Scene Visibility" ) )
-		), m_scene( scene )
+	: InspectorColumn(
+		  new GafferSceneUI::Private::AttributeInspector( scene, editScope, "scene:visible" ),
+		  CellData( /* value = */ nullptr, /* icon = */ g_locationVisibleIcon, /* background = */ nullptr, /* tooltip = */ new StringData( "Scene Visibility" ) )
+	  ),
+	  m_scene( scene )
 {
 }
 
@@ -104,8 +105,8 @@ InspectorColumn::CellData VisibilityColumn::cellData( const Gaffer::Path &path, 
 	else if( !visible && visibilityValue && visibilityValue->readable() )
 	{
 		result.icon = g_locationInvisibleConflictIcon;
-		toolTip = "Location invisible by inheritance. It will not be rendered, and neither will its descendants.\n\n" \
-			"A local scene:visible attribute exists, but is ignored as one or more ancestors are invisible.";
+		toolTip = "Location invisible by inheritance. It will not be rendered, and neither will its descendants.\n\n"
+				  "A local scene:visible attribute exists, but is ignored as one or more ancestors are invisible.";
 	}
 	else
 	{

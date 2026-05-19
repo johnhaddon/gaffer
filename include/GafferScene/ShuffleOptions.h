@@ -46,27 +46,26 @@ namespace GafferScene
 class GAFFERSCENE_API ShuffleOptions : public GafferScene::GlobalsProcessor
 {
 
-	public :
+public:
 
-		explicit ShuffleOptions( const std::string &name=defaultName<ShuffleOptions>() );
-		~ShuffleOptions() override;
+	explicit ShuffleOptions( const std::string &name = defaultName<ShuffleOptions>() );
+	~ShuffleOptions() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ShuffleOptions, ShuffleOptionsTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ShuffleOptions, ShuffleOptionsTypeId, GlobalsProcessor );
 
-		Gaffer::ShufflesPlug *shufflesPlug();
-		const Gaffer::ShufflesPlug *shufflesPlug() const;
+	Gaffer::ShufflesPlug *shufflesPlug();
+	const Gaffer::ShufflesPlug *shufflesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ShuffleOptions )

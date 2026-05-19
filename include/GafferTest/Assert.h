@@ -58,7 +58,7 @@ namespace GafferTest
 		if( xx != yy ) \
 		{ \
 			throw IECore::Exception( \
-				fmt::format( "Failed assertion \"{} == {}\" : {} line {}", (xx), (yy), __FILE__, __LINE__ ) \
+				fmt::format( "Failed assertion \"{} == {}\" : {} line {}", ( xx ), ( yy ), __FILE__, __LINE__ ) \
 			); \
 		} \
 	}

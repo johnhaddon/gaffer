@@ -91,23 +91,21 @@ template<typename T>
 class ConverterDescription
 {
 
-	public :
+public:
 
-		/// Type-specific conversion function.
-		using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
-		using TypedConverter = ccl::Geometry *(*)( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, size_t, ccl::Scene * );
+	/// Type-specific conversion function.
+	using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
+	using TypedConverter = ccl::Geometry *(*)( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, size_t, ccl::Scene * );
 
-		ConverterDescription( TypedConverter converter )
-		{
-			registerConverter(
-				T::staticTypeId(),
-				[converter] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene )
-				{
-					return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, primarySampleIndex, scene );
-				}
-			);
-		}
-
+	ConverterDescription( TypedConverter converter )
+	{
+		registerConverter(
+			T::staticTypeId(),
+			[converter]( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene ) {
+				return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, primarySampleIndex, scene );
+			}
+		);
+	}
 };
 
 } // namespace GeometryAlgo

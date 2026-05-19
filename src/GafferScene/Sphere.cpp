@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( Sphere );
 size_t Sphere::g_firstPlugIndex = 0;
 
 Sphere::Sphere( const std::string &name )
-	:	ObjectSource( name, "sphere" )
+	: ObjectSource( name, "sphere" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "type", Plug::In, Sphere::Mesh, Sphere::Primitive, Sphere::Mesh ) );
@@ -129,12 +129,12 @@ void Sphere::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ObjectSource::affects( input, outputs );
 
-	if ( input == typePlug() || input == radiusPlug() || input == zMinPlug() || input == zMaxPlug() || input == thetaMaxPlug() )
+	if( input == typePlug() || input == radiusPlug() || input == zMinPlug() || input == zMaxPlug() || input == thetaMaxPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}
 	// divisions affects regardless of type because we don't want to call typePlug()->getValue()
-	else if ( input->parent<V2iPlug>() == divisionsPlug() )
+	else if( input->parent<V2iPlug>() == divisionsPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -159,7 +159,7 @@ IECore::ConstObjectPtr Sphere::computeSource( const Context *context ) const
 	float zMin = std::min( tmp, zMax );
 	zMax = std::max( tmp, zMax );
 
-	if ( typePlug()->getValue() == Sphere::Primitive )
+	if( typePlug()->getValue() == Sphere::Primitive )
 	{
 		return new SpherePrimitive( radius, zMin, zMax, thetaMax );
 	}

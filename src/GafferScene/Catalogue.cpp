@@ -94,72 +94,72 @@ IMATH_INTERNAL_NAMESPACE_HEADER_EXIT
 
 namespace
 {
-	// Used by imageIndexMapPlug()
-	struct ImageIndexMapData : public IECore::Data
+// Used by imageIndexMapPlug()
+struct ImageIndexMapData : public IECore::Data
+{
+	using Map = std::unordered_map<std::string, int>;
+	Map map;
+};
+IE_CORE_DECLAREPTR( ImageIndexMapData )
+
+IECore::InternedString g_isRenderingMetadataName = "gaffer:isRendering";
+std::string g_emptyString( "" );
+std::string g_outputPrefix( "output:" );
+IECore::InternedString g_imageNameContextName( "catalogue:imageName" );
+
+
+std::shared_ptr<const GafferScene::RenderManifest> findRenderManifest( const GafferImage::ImagePlug *imagePlug, bool onlyIfCurrentlyRendering )
+{
+	const ScriptNode *scriptNode = imagePlug->node()->scriptNode();
+	if( !scriptNode )
 	{
-		using Map = std::unordered_map< std::string, int >;
-		Map map;
-	};
-	IE_CORE_DECLAREPTR( ImageIndexMapData )
-
-	IECore::InternedString g_isRenderingMetadataName = "gaffer:isRendering";
-	std::string g_emptyString( "" );
-	std::string g_outputPrefix( "output:" );
-	IECore::InternedString g_imageNameContextName( "catalogue:imageName" );
-
-
-	std::shared_ptr<const GafferScene::RenderManifest> findRenderManifest( const GafferImage::ImagePlug* imagePlug, bool onlyIfCurrentlyRendering )
-	{
-		const ScriptNode *scriptNode = imagePlug->node()->scriptNode();
-		if( !scriptNode )
-		{
-			return nullptr;
-		}
-
-		ConstContextPtr context = scriptNode->context();
-
-		const GafferScene::ScenePlug *scenePlug = nullptr;
-		try
-		{
-			Context::Scope scopedContext( context.get() );
-			if( onlyIfCurrentlyRendering )
-			{
-				// When doing a copyFrom, we don't need to do the copy unless we're currently rendering
-				// ( if the image has already been saved, we'll just point to the same manifest it's already
-				// written ). But during driverClosed(), we always want to find the manifest, since we know
-				// we were just rendering and the manifest hasn't been saved yet, so we skip this check.
-				ConstBoolDataPtr isRenderingData = imagePlug->metadata()->member<BoolData>( g_isRenderingMetadataName );
-				if( !( isRenderingData && isRenderingData->readable() ) )
-				{
-					return nullptr;
-				}
-			}
-
-			// Const cast is safe here since source scene only needs a non-const input in order to:
-			// return a non-const result, and we treat the result as const.
-			scenePlug = GafferScene::SceneAlgo::sourceScene( const_cast<GafferImage::ImagePlug*>( imagePlug ) );
-		}
-		catch( const std::exception & )
-		{
-			// If we can't even evaluate the metadata of the image plug without erroring, then it's not
-			// an image coming from a valid render, and it's reasonable to just leave the source scene null.
-			// I don't think it's necessary to warn in this case, there should be other indications that the
-			// current catalogue image is invalid.
-		}
-
-		const GafferScene::InteractiveRender *interactiveRenderNode = nullptr;
-		if( scenePlug )
-		{
-			interactiveRenderNode = IECore::runTimeCast<const GafferScene::InteractiveRender>( scenePlug->node() );
-			if( interactiveRenderNode )
-			{
-				return interactiveRenderNode->renderManifest();
-			}
-		}
-
 		return nullptr;
 	}
+
+	ConstContextPtr context = scriptNode->context();
+
+	const GafferScene::ScenePlug *scenePlug = nullptr;
+	try
+	{
+		Context::Scope scopedContext( context.get() );
+		if( onlyIfCurrentlyRendering )
+		{
+			// When doing a copyFrom, we don't need to do the copy unless we're currently rendering
+			// ( if the image has already been saved, we'll just point to the same manifest it's already
+			// written ). But during driverClosed(), we always want to find the manifest, since we know
+			// we were just rendering and the manifest hasn't been saved yet, so we skip this check.
+			ConstBoolDataPtr isRenderingData = imagePlug->metadata()->member<BoolData>( g_isRenderingMetadataName );
+			if( !( isRenderingData && isRenderingData->readable() ) )
+			{
+				return nullptr;
+			}
+		}
+
+		// Const cast is safe here since source scene only needs a non-const input in order to:
+		// return a non-const result, and we treat the result as const.
+		scenePlug = GafferScene::SceneAlgo::sourceScene( const_cast<GafferImage::ImagePlug *>( imagePlug ) );
+	}
+	catch( const std::exception & )
+	{
+		// If we can't even evaluate the metadata of the image plug without erroring, then it's not
+		// an image coming from a valid render, and it's reasonable to just leave the source scene null.
+		// I don't think it's necessary to warn in this case, there should be other indications that the
+		// current catalogue image is invalid.
+	}
+
+	const GafferScene::InteractiveRender *interactiveRenderNode = nullptr;
+	if( scenePlug )
+	{
+		interactiveRenderNode = IECore::runTimeCast<const GafferScene::InteractiveRender>( scenePlug->node() );
+		if( interactiveRenderNode )
+		{
+			return interactiveRenderNode->renderManifest();
+		}
+	}
+
+	return nullptr;
 }
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // InternalImage.
@@ -170,618 +170,613 @@ namespace
 class Catalogue::InternalImage : public ImageNode
 {
 
-	public :
+public:
 
-		InternalImage( const std::string &name = "InternalImage" )
-			:	ImageNode( name )
+	InternalImage( const std::string &name = "InternalImage" )
+		: ImageNode( name )
+	{
+		storeIndexOfNextChild( g_firstChildIndex );
+
+		addChild( new StringPlug( "fileName" ) );
+		addChild( new StringPlug( "description" ) );
+
+		// Used to load an image from disk, according to
+		// the fileName plug.
+		addChild( new GafferImage::ImageReader() );
+		imageReader()->fileNamePlug()->setInput( fileNamePlug() );
+
+		// Used to merge all channels from multiple
+		// incoming Display nodes.
+		addChild( new GafferImage::CopyChannels() );
+		copyChannels()->channelsPlug()->setValue( "*" );
+
+		// Used to overlay a "Saving..." message
+		// while displays are being saved to disk in
+		// the background.
+		addChild( new GafferImage::Text() );
+		text()->inPlug()->setInput( copyChannels()->outPlug() );
+		text()->colorPlug()->setValue( Imath::Color4f( 1, 1, 1, 0.75 ) );
+		text()->textPlug()->setValue( "Saving..." );
+		text()->horizontalAlignmentPlug()->setValue( GafferImage::Text::HorizontalCenter );
+		text()->verticalAlignmentPlug()->setValue( GafferImage::Text::VerticalCenter );
+		text()->shadowPlug()->setValue( true );
+		text()->shadowColorPlug()->setValue( Imath::Color4f( 0, 0, 0, 0.75 ) );
+		text()->shadowOffsetPlug()->setValue( Imath::V2f( 3.5, -3.5 ) );
+		text()->shadowBlurPlug()->setValue( 5 );
+		text()->enabledPlug()->setValue( false );
+
+		// Switches between the loaded image and the
+		// live Displays.
+		addChild( new Switch() );
+		imageSwitch()->setup( outPlug() );
+		imageSwitch()->inPlugs()->getChild<GafferImage::ImagePlug>( 0 )->setInput( imageReader()->outPlug() );
+		imageSwitch()->inPlugs()->getChild<GafferImage::ImagePlug>( 1 )->setInput( text()->outPlug() );
+
+		// Adds on a description to the output
+		addChild( new GafferImage::ImageMetadata() );
+		imageMetadata()->inPlug()->setInput( imageSwitch()->outPlug() );
+
+		NameValuePlugPtr descriptionMeta = new NameValuePlug( "ImageDescription", new StringData(), true, "imageDescription" );
+		imageMetadata()->metadataPlug()->addChild( descriptionMeta );
+		descriptionMeta->valuePlug()->setInput( descriptionPlug() );
+		descriptionMeta->enabledPlug()->setInput( descriptionPlug() ); // Enable only for non-empty strings
+
+		NameValuePlugPtr isRenderingMeta = new NameValuePlug( g_isRenderingMetadataName, new BoolData( true ), true, "isRendering" );
+		imageMetadata()->metadataPlug()->addChild( isRenderingMeta );
+
+		outPlug()->setInput( imageMetadata()->outPlug() );
+
+		isRendering( false );
+	}
+
+	~InternalImage() override
+	{
+		if( m_saver )
 		{
-			storeIndexOfNextChild( g_firstChildIndex );
+			m_saver->deregisterClient( this );
+		}
+	}
 
-			addChild( new StringPlug( "fileName" ) );
-			addChild( new StringPlug( "description" ) );
+	StringPlug *fileNamePlug()
+	{
+		return getChild<StringPlug>( g_firstChildIndex );
+	}
 
-			// Used to load an image from disk, according to
-			// the fileName plug.
-			addChild( new GafferImage::ImageReader() );
-			imageReader()->fileNamePlug()->setInput( fileNamePlug() );
+	const StringPlug *fileNamePlug() const
+	{
+		return getChild<StringPlug>( g_firstChildIndex );
+	}
 
-			// Used to merge all channels from multiple
-			// incoming Display nodes.
-			addChild( new GafferImage::CopyChannels() );
-			copyChannels()->channelsPlug()->setValue( "*" );
+	StringPlug *descriptionPlug()
+	{
+		return getChild<StringPlug>( g_firstChildIndex + 1 );
+	}
 
-			// Used to overlay a "Saving..." message
-			// while displays are being saved to disk in
-			// the background.
-			addChild( new GafferImage::Text() );
-			text()->inPlug()->setInput( copyChannels()->outPlug() );
-			text()->colorPlug()->setValue( Imath::Color4f( 1, 1, 1, 0.75 ) );
-			text()->textPlug()->setValue( "Saving..." );
-			text()->horizontalAlignmentPlug()->setValue( GafferImage::Text::HorizontalCenter );
-			text()->verticalAlignmentPlug()->setValue( GafferImage::Text::VerticalCenter );
-			text()->shadowPlug()->setValue( true );
-			text()->shadowColorPlug()->setValue( Imath::Color4f( 0, 0, 0, 0.75 ) );
-			text()->shadowOffsetPlug()->setValue( Imath::V2f( 3.5, -3.5 ) );
-			text()->shadowBlurPlug()->setValue( 5 );
-			text()->enabledPlug()->setValue( false );
+	const StringPlug *descriptionPlug() const
+	{
+		return getChild<StringPlug>( g_firstChildIndex + 1 );
+	}
 
-			// Switches between the loaded image and the
-			// live Displays.
-			addChild( new Switch() );
-			imageSwitch()->setup( outPlug() );
-			imageSwitch()->inPlugs()->getChild<GafferImage::ImagePlug>( 0 )->setInput( imageReader()->outPlug() );
-			imageSwitch()->inPlugs()->getChild<GafferImage::ImagePlug>( 1 )->setInput( text()->outPlug() );
+	void copyFrom( const InternalImage *other )
+	{
+		descriptionPlug()->source<StringPlug>()->setValue( other->descriptionPlug()->getValue() );
+		fileNamePlug()->source<StringPlug>()->setValue( other->fileNamePlug()->getValue() );
+		imageSwitch()->indexPlug()->setValue( other->imageSwitch()->indexPlug()->getValue() );
+		text()->enabledPlug()->setValue( other->text()->enabledPlug()->getValue() );
 
-			// Adds on a description to the output
-			addChild( new GafferImage::ImageMetadata() );
-			imageMetadata()->inPlug()->setInput( imageSwitch()->outPlug() );
-
-			NameValuePlugPtr descriptionMeta = new NameValuePlug( "ImageDescription", new StringData(), true, "imageDescription" );
-			imageMetadata()->metadataPlug()->addChild( descriptionMeta );
-			descriptionMeta->valuePlug()->setInput( descriptionPlug() );
-			descriptionMeta->enabledPlug()->setInput( descriptionPlug() ); // Enable only for non-empty strings
-
-			NameValuePlugPtr isRenderingMeta = new NameValuePlug( g_isRenderingMetadataName, new BoolData( true ), true, "isRendering" );
-			imageMetadata()->metadataPlug()->addChild( isRenderingMeta );
-
-			outPlug()->setInput( imageMetadata()->outPlug() );
-
-			isRendering( false );
+		removeDisplays();
+		size_t numDisplays = 0;
+		for( Display::Iterator it( other ); !it.done(); ++it )
+		{
+			Display *display = it->get();
+			DisplayPtr displayCopy = new Display;
+			displayCopy->setDriver( display->getDriver(), /* copy = */ true );
+			addChild( displayCopy );
+			copyChannels()->inPlugs()->getChild<Plug>( numDisplays++ )->setInput( displayCopy->outPlug() );
 		}
 
-		~InternalImage() override
+		isRendering( false );
+
+		m_saver = nullptr;
+		if( other->m_saver )
 		{
-			if( m_saver )
+			m_saver = other->m_saver;
+			m_saver->registerClient( this );
+		}
+		else if( numDisplays )
+		{
+			m_saver = AsynchronousSaver::create( this, findRenderManifest( other->outPlug(), true ) );
+		}
+
+		m_renderID = "invalid"; // Make sure `insertDriver()` will reject new drivers
+	}
+
+	void save( const std::filesystem::path &fileName ) const
+	{
+		GafferImage::DeleteImageMetadataPtr deleteMetadata = new GafferImage::DeleteImageMetadata();
+		deleteMetadata->inPlug()->setInput( const_cast<GafferImage::ImagePlug *>( outPlug() ) );
+		deleteMetadata->namesPlug()->setValue( g_isRenderingMetadataName );
+		GafferImage::ImageWriterPtr imageWriter = new GafferImage::ImageWriter;
+		imageWriter->inPlug()->setInput( deleteMetadata->outPlug() );
+		imageWriter->fileNamePlug()->setValue( fileName );
+		imageWriter->taskPlug()->execute();
+	}
+
+	bool insertDriver( IECoreImage::DisplayDriverPtr driver, const IECore::CompoundData *parameters )
+	{
+		// If we represent a disk-based image, we can't accept
+		// a render.
+		if( fileNamePlug()->getValue() != "" )
+		{
+			return false;
+		}
+
+		// If we already represent a render, we can't accept a driver from a
+		// different one. Gaffer provides a `gaffer:renderID` parameter for
+		// this purpose, and if that isn't available we fall back to the
+		// `clientPID` parameter provided by `IECoreImage::ClientDisplayDriver`.
+		const StringData *renderIDData = parameters->member<StringData>( "gaffer:renderID" );
+		const IntData *clientPIDData = parameters->member<IntData>( "clientPID" );
+		const string renderID = renderIDData ? renderIDData->readable() : ( clientPIDData ? to_string( clientPIDData->readable() ) : "unknown" );
+		if( !m_renderID.empty() && m_renderID != renderID )
+		{
+			return false;
+		}
+
+		// The DisplayDriver API doesn't allow the crop window or channel
+		// names to be changed on the fly, so we'll always receive a new
+		// driver if they change. In these cases we want to replace the
+		// existing driver rather than insert a new one. We can only find
+		// the driver to replace if we have a unique identifier for the
+		// output, which Gaffer provides via the `gaffer:outputID`
+		// parameter.
+		const StringData *outputIDData = parameters->member<StringData>( "gaffer:outputID" );
+		string outputID;
+		if( outputIDData )
+		{
+			outputID = outputIDData->readable();
+		}
+		else
+		{
+			// We don't have a foolproof way of knowing when we can replace
+			// an existing driver. So reject any driver that conflicts with
+			// the existing channel names.
+			ConstStringVectorDataPtr existingChannelsData = copyChannels()->outPlug()->channelNamesPlug()->getValue();
+			const vector<string> &existingChannels = existingChannelsData->readable();
+			for( const auto &channel : driver->channelNames() )
 			{
-				m_saver->deregisterClient( this );
+				if( find( existingChannels.begin(), existingChannels.end(), channel ) != existingChannels.end() )
+				{
+					return false;
+				}
+			}
+			outputID = boost::algorithm::join( driver->channelNames(), ", " );
+		}
+
+		// Insert the driver by hosting it in a Display node, reusing an
+		// existing node if we have one.
+
+		DisplayPtr &display = m_displays[outputID];
+		if( !display )
+		{
+			display = new Display;
+			addChild( display );
+			ArrayPlug *a = copyChannels()->inPlugs();
+			size_t nextIndex = a->children().size() - 1;
+			if( nextIndex == 1 && !a->getChild<GafferImage::ImagePlug>( 0 )->getInput() )
+			{
+				// CopyChannels starts with two input plugs, and we must use
+				// the first one to make sure the format etc is passed through.
+				nextIndex = 0;
+			}
+			a->getChild<GafferImage::ImagePlug>( nextIndex )->setInput( display->outPlug() );
+			imageSwitch()->indexPlug()->setValue( 1 );
+		}
+		display->setDriver( driver );
+
+		m_renderID = renderID;
+
+		if( auto nameData = parameters->member<StringData>( "catalogue:imageName" ) )
+		{
+			if( Plug *p = fileNamePlug()->getInput() )
+			{
+				if( Image *image = p->source()->parent<Image>() )
+				{
+					/// \todo GraphComponent or GraphComponentAlgo really should have
+					/// a utility for sanitising names and/or we should loosen the naming
+					/// restrictions anyway.
+					const std::string name = boost::regex_replace(
+						nameData->readable(),
+						boost::regex( "(^[0-9])|([^0-9a-zA-Z_]+)" ),
+						"_"
+					);
+					image->setName( name );
+				}
 			}
 		}
 
-		StringPlug *fileNamePlug()
+		updateImageFlags( Plug::Serialisable, false ); // Don't serialise in-progress renders
+		isRendering( true );
+
+		return true;
+	}
+
+	void driverClosed()
+	{
+		if( m_saver )
 		{
-			return getChild<StringPlug>( g_firstChildIndex );
+			return;
 		}
 
-		const StringPlug *fileNamePlug() const
+		for( const auto &[outputID, display] : m_displays )
 		{
-			return getChild<StringPlug>( g_firstChildIndex );
+			if( !display->driverClosed() )
+			{
+				return;
+			}
 		}
 
-		StringPlug *descriptionPlug()
+		if( InteractiveRender::renderIsActive( m_renderID ) )
 		{
-			return getChild<StringPlug>( g_firstChildIndex + 1 );
+			// Render is still active. Assume drivers were just closed
+			// in preparation for creating new drivers (with a new
+			// data window or header data for example).
+			return;
 		}
 
-		const StringPlug *descriptionPlug() const
+		// All our drivers have been closed, so the render has completed.
+		// Save the image to disk. We do this in the background because
+		// saving large images with many AOVs takes several seconds.
+
+		m_renderID = "invalid";
+		isRendering( false );
+		m_saver = AsynchronousSaver::create( this, findRenderManifest( outPlug(), false ) );
+	}
+
+protected:
+
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override
+	{
+		assert( m_saver );
+		AsynchronousSaver::ChannelDataHashes::const_iterator it = m_saver->channelDataHashes.find(
+			AsynchronousSaver::TileIndex(
+				context->get<string>( GafferImage::ImagePlug::channelNameContextName ),
+				context->get<Imath::V2i>( GafferImage::ImagePlug::tileOriginContextName )
+			)
+		);
+		if( it != m_saver->channelDataHashes.end() )
 		{
-			return getChild<StringPlug>( g_firstChildIndex + 1 );
+			h = it->second;
 		}
-
-		void copyFrom( const InternalImage *other )
+		else
 		{
-			descriptionPlug()->source<StringPlug>()->setValue( other->descriptionPlug()->getValue() );
-			fileNamePlug()->source<StringPlug>()->setValue( other->fileNamePlug()->getValue() );
-			imageSwitch()->indexPlug()->setValue( other->imageSwitch()->indexPlug()->getValue() );
-			text()->enabledPlug()->setValue( other->text()->enabledPlug()->getValue() );
+			h = imageReader()->outPlug()->channelDataPlug()->hash();
+		}
+	}
 
-			removeDisplays();
-			size_t numDisplays = 0;
-			for( Display::Iterator it( other ); !it.done(); ++it )
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override
+	{
+		return imageReader()->outPlug()->channelDataPlug()->getValue();
+	}
+
+private:
+
+	void isRendering( bool rendering )
+	{
+		NameValuePlug *isRendering = static_cast<NameValuePlug *>( imageMetadata()->metadataPlug()->getChild( "isRendering" ) );
+		static_cast<BoolPlug *>( isRendering->enabledPlug() )->setValue( rendering );
+	}
+
+	void updateImageFlags( unsigned flags, bool enable )
+	{
+		Plug *p = fileNamePlug()->getInput();
+		if( !p )
+		{
+			return;
+		}
+		for( Image *i = p->parent<Image>(); i; i = i->getInput<Image>() )
+		{
+			i->setFlags( flags, enable );
+		}
+	}
+
+	void removeDisplays()
+	{
+		for( auto &[outputID, display] : m_displays )
+		{
+			removeChild( display );
+		}
+		m_displays.clear();
+	}
+
+	GafferImage::ImageReader *imageReader()
+	{
+		return getChild<GafferImage::ImageReader>( g_firstChildIndex + 2 );
+	}
+
+	const GafferImage::ImageReader *imageReader() const
+	{
+		return getChild<GafferImage::ImageReader>( g_firstChildIndex + 2 );
+	}
+
+	GafferImage::CopyChannels *copyChannels()
+	{
+		return getChild<GafferImage::CopyChannels>( g_firstChildIndex + 3 );
+	}
+
+	const GafferImage::CopyChannels *copyChannels() const
+	{
+		return getChild<GafferImage::CopyChannels>( g_firstChildIndex + 3 );
+	}
+
+	GafferImage::Text *text()
+	{
+		return getChild<GafferImage::Text>( g_firstChildIndex + 4 );
+	}
+
+	const GafferImage::Text *text() const
+	{
+		return getChild<GafferImage::Text>( g_firstChildIndex + 4 );
+	}
+
+	Switch *imageSwitch()
+	{
+		return getChild<Switch>( g_firstChildIndex + 5 );
+	}
+
+	const Switch *imageSwitch() const
+	{
+		return getChild<Switch>( g_firstChildIndex + 5 );
+	}
+
+	GafferImage::ImageMetadata *imageMetadata()
+	{
+		return getChild<GafferImage::ImageMetadata>( g_firstChildIndex + 6 );
+	}
+
+	const GafferImage::ImageMetadata *imageMetadata() const
+	{
+		return getChild<GafferImage::ImageMetadata>( g_firstChildIndex + 6 );
+	}
+
+	struct AsynchronousSaver
+	{
+
+		using Ptr = std::shared_ptr<AsynchronousSaver>;
+		using WeakPtr = std::weak_ptr<AsynchronousSaver>;
+
+		static Ptr create( InternalImage *client, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest )
+		{
+			// We use a copy of the image to do the saving, because the original
+			// might be modified on the main thread while we save in the background.
+
+			InternalImagePtr imageCopy = new InternalImage;
+
+			size_t i = 0;
+			for( Display::Iterator it( client ); !it.done(); ++it )
 			{
 				Display *display = it->get();
 				DisplayPtr displayCopy = new Display;
 				displayCopy->setDriver( display->getDriver(), /* copy = */ true );
-				addChild( displayCopy );
-				copyChannels()->inPlugs()->getChild<Plug>( numDisplays++ )->setInput( displayCopy->outPlug() );
+				imageCopy->addChild( displayCopy );
+				imageCopy->copyChannels()->inPlugs()->getChild<Plug>( i++ )->setInput( displayCopy->outPlug() );
 			}
+			imageCopy->imageSwitch()->indexPlug()->setValue( 1 );
 
-			isRendering( false );
-
-			m_saver = nullptr;
-			if( other->m_saver )
+			// If there's nowhere to save, then a saver is useless, so return null.
+			const std::filesystem::path fileName = client->parent<Catalogue>()->generateFileName( imageCopy->outPlug() );
+			if( fileName.empty() )
 			{
-				m_saver = other->m_saver;
-				m_saver->registerClient( this );
-			}
-			else if( numDisplays )
-			{
-				m_saver = AsynchronousSaver::create( this, findRenderManifest( other->outPlug(), true ) );
-
+				return nullptr;
 			}
 
-			m_renderID = "invalid"; // Make sure `insertDriver()` will reject new drivers
+			// Otherwise, make a saver and schedule its background execution.
+			Ptr saver = Ptr( new AsynchronousSaver( imageCopy, fileName, renderManifest ) );
+			saver->registerClient( client );
+
+			// Note that the background thread doesn't own a reference to the saver -
+			// see ~AsychronousSaver for details.
+			std::thread thread( boost::bind( &AsynchronousSaver::save, saver.get(), WeakPtr( saver ) ) );
+			saver->m_thread.swap( thread );
+			return saver;
 		}
 
-		void save( const std::filesystem::path &fileName ) const
+		virtual ~AsynchronousSaver()
 		{
-			GafferImage::DeleteImageMetadataPtr deleteMetadata = new GafferImage::DeleteImageMetadata();
-			deleteMetadata->inPlug()->setInput( const_cast<GafferImage::ImagePlug *>( outPlug() ) );
-			deleteMetadata->namesPlug()->setValue( g_isRenderingMetadataName );
-			GafferImage::ImageWriterPtr imageWriter = new GafferImage::ImageWriter;
-			imageWriter->inPlug()->setInput( deleteMetadata->outPlug() );
-			imageWriter->fileNamePlug()->setValue( fileName );
-			imageWriter->taskPlug()->execute();
+			// Wait for our background thread to complete. This achieves
+			// two things :
+			//
+			// - Makes sure our member data is not deleted until the background
+			//   thread has finished using it.
+			// - Ensures that the background thread finishes before program shutdown
+			//   reaches the stage of calling static destructors, at which point
+			//   it would crash as the libraries it relies on are torn down around it.
+			//
+			// Note that for this to work, the background thread must _not_ own a
+			// reference to `this`, as that would prevent destruction on the main
+			// thread and never give us an opportunity to wait for the background
+			// thread.
+			m_thread.join();
 		}
 
-		bool insertDriver( IECoreImage::DisplayDriverPtr driver, const IECore::CompoundData *parameters )
+		void registerClient( InternalImage *client )
 		{
-			// If we represent a disk-based image, we can't accept
-			// a render.
-			if( fileNamePlug()->getValue() != "" )
+			if( m_imageCopy )
 			{
-				return false;
-			}
-
-			// If we already represent a render, we can't accept a driver from a
-			// different one. Gaffer provides a `gaffer:renderID` parameter for
-			// this purpose, and if that isn't available we fall back to the
-			// `clientPID` parameter provided by `IECoreImage::ClientDisplayDriver`.
-			const StringData *renderIDData = parameters->member<StringData>( "gaffer:renderID" );
-			const IntData *clientPIDData = parameters->member<IntData>( "clientPID" );
-			const string renderID = renderIDData ? renderIDData->readable() : ( clientPIDData ? to_string( clientPIDData->readable() ) : "unknown" );
-			if( !m_renderID.empty() && m_renderID != renderID )
-			{
-				return false;
-			}
-
-			// The DisplayDriver API doesn't allow the crop window or channel
-			// names to be changed on the fly, so we'll always receive a new
-			// driver if they change. In these cases we want to replace the
-			// existing driver rather than insert a new one. We can only find
-			// the driver to replace if we have a unique identifier for the
-			// output, which Gaffer provides via the `gaffer:outputID`
-			// parameter.
-			const StringData *outputIDData = parameters->member<StringData>( "gaffer:outputID" );
-			string outputID;
-			if( outputIDData )
-			{
-				outputID = outputIDData->readable();
+				// Still in the process of saving
+				m_clients.insert( client );
+				client->text()->enabledPlug()->setValue( true );
 			}
 			else
 			{
-				// We don't have a foolproof way of knowing when we can replace
-				// an existing driver. So reject any driver that conflicts with
-				// the existing channel names.
-				ConstStringVectorDataPtr existingChannelsData = copyChannels()->outPlug()->channelNamesPlug()->getValue();
-				const vector<string> &existingChannels = existingChannelsData->readable();
-				for( const auto &channel : driver->channelNames() )
-				{
-					if( find( existingChannels.begin(), existingChannels.end(), channel ) != existingChannels.end() )
-					{
-						return false;
-					}
-				}
-				outputID = boost::algorithm::join( driver->channelNames(), ", " );
+				// Saving already completed
+				DirtyPropagationScope dirtyPropagationScope;
+				wrapUpClient( client );
 			}
-
-			// Insert the driver by hosting it in a Display node, reusing an
-			// existing node if we have one.
-
-			DisplayPtr &display = m_displays[outputID];
-			if( !display )
-			{
-				display = new Display;
-				addChild( display );
-				ArrayPlug *a = copyChannels()->inPlugs();
-				size_t nextIndex = a->children().size() - 1;
-				if( nextIndex == 1 && !a->getChild<GafferImage::ImagePlug>( 0 )->getInput() )
-				{
-					// CopyChannels starts with two input plugs, and we must use
-					// the first one to make sure the format etc is passed through.
-					nextIndex = 0;
-				}
-				a->getChild<GafferImage::ImagePlug>( nextIndex )->setInput( display->outPlug() );
-				imageSwitch()->indexPlug()->setValue( 1 );
-			}
-			display->setDriver( driver );
-
-			m_renderID = renderID;
-
-			if( auto nameData = parameters->member<StringData>( "catalogue:imageName" ) )
-			{
-				if( Plug *p = fileNamePlug()->getInput() )
-				{
-					if( Image *image = p->source()->parent<Image>() )
-					{
-						/// \todo GraphComponent or GraphComponentAlgo really should have
-						/// a utility for sanitising names and/or we should loosen the naming
-						/// restrictions anyway.
-						const std::string name = boost::regex_replace(
-							nameData->readable(),
-							boost::regex( "(^[0-9])|([^0-9a-zA-Z_]+)" ),
-							"_"
-						);
-						image->setName( name );
-					}
-				}
-			}
-
-			updateImageFlags( Plug::Serialisable, false ); // Don't serialise in-progress renders
-			isRendering( true );
-
-			return true;
 		}
 
-		void driverClosed()
+		void deregisterClient( InternalImage *client )
 		{
-			if( m_saver )
-			{
-				return;
-			}
-
-			for( const auto &[outputID, display] : m_displays )
-			{
-				if( !display->driverClosed() )
-				{
-					return;
-				}
-			}
-
-			if( InteractiveRender::renderIsActive( m_renderID ) )
-			{
-				// Render is still active. Assume drivers were just closed
-				// in preparation for creating new drivers (with a new
-				// data window or header data for example).
-				return;
-			}
-
-			// All our drivers have been closed, so the render has completed.
-			// Save the image to disk. We do this in the background because
-			// saving large images with many AOVs takes several seconds.
-
-			m_renderID = "invalid";
-			isRendering( false );
-			m_saver = AsynchronousSaver::create( this, findRenderManifest( outPlug(), false ) );
+			m_clients.erase( client );
 		}
 
-	protected :
+		using TileIndex = std::pair<std::string, Imath::V2i>;
+		using ChannelDataHashes = boost::unordered_map<TileIndex, IECore::MurmurHash>;
+		ChannelDataHashes channelDataHashes;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override
+	private:
+
+		AsynchronousSaver( InternalImagePtr imageCopy, const std::filesystem::path &filePath, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest )
+			: m_imageCopy( imageCopy )
 		{
-			assert( m_saver );
-			AsynchronousSaver::ChannelDataHashes::const_iterator it = m_saver->channelDataHashes.find(
-				AsynchronousSaver::TileIndex(
-					context->get<string>( GafferImage::ImagePlug::channelNameContextName ),
-					context->get<Imath::V2i>( GafferImage::ImagePlug::tileOriginContextName )
-				)
+			// Set up an ImageWriter to do the actual saving.
+			// We do all graph construction here in the main thread
+			// so that the background thread only does execution.
+
+			m_modifyMetadata = new GafferImage::ImageMetadata;
+			m_modifyMetadata->inPlug()->setInput( m_imageCopy->outPlug() );
+
+			m_writer = new GafferImage::ImageWriter;
+			m_writer->inPlug()->setInput( m_modifyMetadata->outPlug() );
+			m_writer->fileNamePlug()->setValue( filePath );
+
+			// Set up a spreadsheet that will set the data type to full 32 bit floats when storing the
+			// "id" or "instanceID" channel. We are currently using integers bitcast to floats for ids
+			// ... converting these to 16 bit floats completely destroys the data.
+			StringPlug *dataTypePlug = m_writer->fileFormatSettingsPlug( "openexr" )->getChild<StringPlug>( "dataType" );
+
+			Gaffer::SpreadsheetPtr spreadsheet = new Gaffer::Spreadsheet();
+			m_writer->addChild( spreadsheet );
+			spreadsheet->selectorPlug()->setValue( "${imageWriter:channelName}" );
+			spreadsheet->rowsPlug()->addColumn( new Gaffer::StringPlug( "dataType", Gaffer::Plug::Direction::In, "half" ) );
+			Spreadsheet::RowPlug *row = spreadsheet->rowsPlug()->addRow();
+			row->namePlug()->setValue( "id instanceID" );
+			row->cellsPlug()->getChild<Spreadsheet::CellPlug>( 0 )->valuePlug<StringPlug>()->setValue( "float" );
+
+			dataTypePlug->setInput( spreadsheet->outPlug()->getChild<Plug>( 0 ) );
+
+			if( renderManifest )
+			{
+				// Add manifest suffix
+				std::string manifestFilename = filePath.stem().generic_string() + "_manifest.exr";
+
+				m_manifestDest = filePath;
+				m_manifestDest.replace_filename( manifestFilename );
+
+				m_modifyMetadata->metadataPlug()->addChild(
+					new NameValuePlug(
+						"gaffer:renderManifestFilePath", new StringData( manifestFilename )
+					)
+				);
+
+				// We don't make a copy of this in the foreground thread to avoid the delay.
+				// RenderManifest is thread-safe in the sense that it uses a mutex to prevent
+				// simultaneous read/writes - so the manifest will be valid. There is a risk
+				// that the manifest may not correspond exactly to the manifest when the image
+				// was snapshotted, but it would likely just contain some extra ids if new
+				// objects are being added to the scene while the write occurs - this shouldn't
+				// cause any actual problems, and the slight weirdness is probably acceptable in
+				// exchange for performance?
+				m_renderManifest = renderManifest;
+			}
+		}
+
+		void save( WeakPtr forWrapUp )
+		{
+			if( m_renderManifest )
+			{
+				// Make sure the directory exists to write the exr manifest to.
+				std::filesystem::create_directories( std::filesystem::path( m_manifestDest ).parent_path() );
+
+				m_renderManifest->writeEXRManifest( m_manifestDest );
+			}
+
+			GafferImage::ImageAlgo::parallelGatherTiles(
+				m_imageCopy->copyChannels()->outPlug(),
+				m_imageCopy->copyChannels()->outPlug()->channelNamesPlug()->getValue()->readable(),
+				// Tile
+				[]( const GafferImage::ImagePlug *imagePlug, const string &channelName, const Imath::V2i &tileOrigin ) {
+					return imagePlug->channelDataPlug()->hash();
+				},
+				// Gather
+				[this]( const GafferImage::ImagePlug *imagePlug, const string &channelName, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
+					channelDataHashes[TileIndex( channelName, tileOrigin )] = tileHash;
+				}
 			);
-			if( it != m_saver->channelDataHashes.end() )
+
+			try
 			{
-				h = it->second;
+				m_writer->taskPlug()->execute();
 			}
-			else
+			catch( const std::exception &e )
 			{
-				h = imageReader()->outPlug()->channelDataPlug()->hash();
-			}
-		}
-
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override
-		{
-			return imageReader()->outPlug()->channelDataPlug()->getValue();
-		}
-
-	private :
-
-		void isRendering( bool rendering )
-		{
-			NameValuePlug *isRendering = static_cast<NameValuePlug *>( imageMetadata()->metadataPlug()->getChild( "isRendering" ) );
-			static_cast<BoolPlug *>( isRendering->enabledPlug() )->setValue( rendering );
-		}
-
-		void updateImageFlags( unsigned flags, bool enable )
-		{
-			Plug *p = fileNamePlug()->getInput();
-			if( !p )
-			{
-				return;
-			}
-			for( Image *i = p->parent<Image>(); i; i = i->getInput<Image>() )
-			{
-				i->setFlags( flags, enable );
-			}
-		}
-
-		void removeDisplays()
-		{
-			for( auto &[outputID, display] : m_displays )
-			{
-				removeChild( display );
-			}
-			m_displays.clear();
-		}
-
-		GafferImage::ImageReader *imageReader()
-		{
-			return getChild<GafferImage::ImageReader>( g_firstChildIndex + 2 );
-		}
-
-		const GafferImage::ImageReader *imageReader() const
-		{
-			return getChild<GafferImage::ImageReader>( g_firstChildIndex + 2 );
-		}
-
-		GafferImage::CopyChannels *copyChannels()
-		{
-			return getChild<GafferImage::CopyChannels>( g_firstChildIndex + 3 );
-		}
-
-		const GafferImage::CopyChannels *copyChannels() const
-		{
-			return getChild<GafferImage::CopyChannels>( g_firstChildIndex + 3 );
-		}
-
-		GafferImage::Text *text()
-		{
-			return getChild<GafferImage::Text>( g_firstChildIndex + 4 );
-		}
-
-		const GafferImage::Text *text() const
-		{
-			return getChild<GafferImage::Text>( g_firstChildIndex + 4 );
-		}
-
-		Switch *imageSwitch()
-		{
-			return getChild<Switch>( g_firstChildIndex + 5 );
-		}
-
-		const Switch *imageSwitch() const
-		{
-			return getChild<Switch>( g_firstChildIndex + 5 );
-		}
-
-		GafferImage::ImageMetadata *imageMetadata()
-		{
-			return getChild<GafferImage::ImageMetadata>( g_firstChildIndex + 6 );
-		}
-
-		const GafferImage::ImageMetadata *imageMetadata() const
-		{
-			return getChild<GafferImage::ImageMetadata>( g_firstChildIndex + 6 );
-		}
-
-		struct AsynchronousSaver
-		{
-
-			using Ptr = std::shared_ptr<AsynchronousSaver>;
-			using WeakPtr = std::weak_ptr<AsynchronousSaver>;
-
-			static Ptr create( InternalImage *client, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest )
-			{
-				// We use a copy of the image to do the saving, because the original
-				// might be modified on the main thread while we save in the background.
-
-				InternalImagePtr imageCopy = new InternalImage;
-
-				size_t i = 0;
-				for( Display::Iterator it( client ); !it.done(); ++it )
-				{
-					Display *display = it->get();
-					DisplayPtr displayCopy = new Display;
-					displayCopy->setDriver( display->getDriver(), /* copy = */ true );
-					imageCopy->addChild( displayCopy );
-					imageCopy->copyChannels()->inPlugs()->getChild<Plug>( i++ )->setInput( displayCopy->outPlug() );
-				}
-				imageCopy->imageSwitch()->indexPlug()->setValue( 1 );
-
-				// If there's nowhere to save, then a saver is useless, so return null.
-				const std::filesystem::path fileName = client->parent<Catalogue>()->generateFileName( imageCopy->outPlug() );
-				if( fileName.empty() )
-				{
-					return nullptr;
-				}
-
-				// Otherwise, make a saver and schedule its background execution.
-				Ptr saver = Ptr( new AsynchronousSaver( imageCopy, fileName, renderManifest ) );
-				saver->registerClient( client );
-
-				// Note that the background thread doesn't own a reference to the saver -
-				// see ~AsychronousSaver for details.
-				std::thread thread( boost::bind( &AsynchronousSaver::save, saver.get(), WeakPtr( saver ) ) );
-				saver->m_thread.swap( thread );
-				return saver;
+				IECore::msg( IECore::Msg::Error, "Saving Catalogue image", e.what() );
 			}
 
-			virtual ~AsynchronousSaver()
-			{
-				// Wait for our background thread to complete. This achieves
-				// two things :
-				//
-				// - Makes sure our member data is not deleted until the background
-				//   thread has finished using it.
-				// - Ensures that the background thread finishes before program shutdown
-				//   reaches the stage of calling static destructors, at which point
-				//   it would crash as the libraries it relies on are torn down around it.
-				//
-				// Note that for this to work, the background thread must _not_ own a
-				// reference to `this`, as that would prevent destruction on the main
-				// thread and never give us an opportunity to wait for the background
-				// thread.
-				m_thread.join();
-			}
-
-			void registerClient( InternalImage *client )
-			{
-				if( m_imageCopy )
-				{
-					// Still in the process of saving
-					m_clients.insert( client );
-					client->text()->enabledPlug()->setValue( true );
-				}
-				else
-				{
-					// Saving already completed
-					DirtyPropagationScope dirtyPropagationScope;
-					wrapUpClient( client );
-				}
-			}
-
-			void deregisterClient( InternalImage *client )
-			{
-				m_clients.erase( client );
-			}
-
-			using TileIndex = std::pair<std::string, Imath::V2i>;
-			using ChannelDataHashes = boost::unordered_map<TileIndex, IECore::MurmurHash>;
-			ChannelDataHashes channelDataHashes;
-
-			private :
-
-				AsynchronousSaver( InternalImagePtr imageCopy, const std::filesystem::path &filePath, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest )
-					:	m_imageCopy( imageCopy )
-				{
-					// Set up an ImageWriter to do the actual saving.
-					// We do all graph construction here in the main thread
-					// so that the background thread only does execution.
-
-					m_modifyMetadata = new GafferImage::ImageMetadata;
-					m_modifyMetadata->inPlug()->setInput( m_imageCopy->outPlug() );
-
-					m_writer = new GafferImage::ImageWriter;
-					m_writer->inPlug()->setInput( m_modifyMetadata->outPlug() );
-					m_writer->fileNamePlug()->setValue( filePath );
-
-					// Set up a spreadsheet that will set the data type to full 32 bit floats when storing the
-					// "id" or "instanceID" channel. We are currently using integers bitcast to floats for ids
-					// ... converting these to 16 bit floats completely destroys the data.
-					StringPlug *dataTypePlug = m_writer->fileFormatSettingsPlug( "openexr" )->getChild<StringPlug>( "dataType" );
-
-					Gaffer::SpreadsheetPtr spreadsheet = new Gaffer::Spreadsheet();
-					m_writer->addChild( spreadsheet );
-					spreadsheet->selectorPlug()->setValue( "${imageWriter:channelName}" );
-					spreadsheet->rowsPlug()->addColumn( new Gaffer::StringPlug( "dataType", Gaffer::Plug::Direction::In, "half" ) );
-					Spreadsheet::RowPlug *row = spreadsheet->rowsPlug()->addRow();
-					row->namePlug()->setValue( "id instanceID" );
-					row->cellsPlug()->getChild<Spreadsheet::CellPlug>(0)->valuePlug<StringPlug>()->setValue( "float" );
-
-					dataTypePlug->setInput( spreadsheet->outPlug()->getChild<Plug>( 0 ) );
-
-					if( renderManifest )
+			// Schedule execution of wrapUp() on the UI thread,
+			// to make our results visible to the user. Note that
+			// we absolutely _must not_ create a Ptr here on the
+			// background thread - ownership must be managed on
+			// the UI thread only (see ~AsynchronousSaver).
+			ParallelAlgo::callOnUIThread(
+				[forWrapUp] {
+					if( Ptr that = forWrapUp.lock() )
 					{
-						// Add manifest suffix
-						std::string manifestFilename = filePath.stem().generic_string() + "_manifest.exr";
-
-						m_manifestDest = filePath;
-						m_manifestDest.replace_filename( manifestFilename );
-
-						m_modifyMetadata->metadataPlug()->addChild(
-							new NameValuePlug(
-								"gaffer:renderManifestFilePath", new StringData( manifestFilename )
-							)
-						);
-
-						// We don't make a copy of this in the foreground thread to avoid the delay.
-						// RenderManifest is thread-safe in the sense that it uses a mutex to prevent
-						// simultaneous read/writes - so the manifest will be valid. There is a risk
-						// that the manifest may not correspond exactly to the manifest when the image
-						// was snapshotted, but it would likely just contain some extra ids if new
-						// objects are being added to the scene while the write occurs - this shouldn't
-						// cause any actual problems, and the slight weirdness is probably acceptable in
-						// exchange for performance?
-						m_renderManifest = renderManifest;
+						that->wrapUp();
 					}
 				}
+			);
+		}
 
-				void save( WeakPtr forWrapUp )
-				{
-					if( m_renderManifest )
-					{
-						// Make sure the directory exists to write the exr manifest to.
-						std::filesystem::create_directories( std::filesystem::path( m_manifestDest ).parent_path() );
+		void wrapUp()
+		{
+			DirtyPropagationScope dirtyPropagationScope;
 
-						m_renderManifest->writeEXRManifest( m_manifestDest );
-					}
+			for( set<InternalImage *>::const_iterator it = m_clients.begin(), eIt = m_clients.end(); it != eIt; ++it )
+			{
+				wrapUpClient( *it );
+			}
 
-					GafferImage::ImageAlgo::parallelGatherTiles(
-						m_imageCopy->copyChannels()->outPlug(),
-						m_imageCopy->copyChannels()->outPlug()->channelNamesPlug()->getValue()->readable(),
-						// Tile
-						[] ( const GafferImage::ImagePlug *imagePlug, const string &channelName, const Imath::V2i &tileOrigin )
-						{
-							return imagePlug->channelDataPlug()->hash();
-						},
-						// Gather
-						[ this ] ( const GafferImage::ImagePlug *imagePlug, const string &channelName, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash )
-						{
-							channelDataHashes[TileIndex(channelName, tileOrigin)] = tileHash;
-						}
-					);
+			// Destroy the image to release the memory used by the copied display drivers.
+			m_imageCopy = nullptr;
+		}
 
-					try
-					{
-						m_writer->taskPlug()->execute();
-					}
-					catch( const std::exception &e )
-					{
-						IECore::msg( IECore::Msg::Error, "Saving Catalogue image", e.what() );
-					}
+		void wrapUpClient( InternalImage *client )
+		{
+			// Set up the client to read from the saved image
+			client->text()->enabledPlug()->setValue( false );
+			client->fileNamePlug()->source<StringPlug>()->setValue( m_writer->fileNamePlug()->getValue() );
+			client->imageSwitch()->indexPlug()->setValue( 0 );
+			// But force hashChannelData and computeChannelData to be called
+			// so that we can reuse the cache entries created by the original
+			// Display nodes, rather than force an immediate load of the image
+			// from disk, which would be slow.
+			client->outPlug()->channelDataPlug()->setInput( nullptr );
 
-					// Schedule execution of wrapUp() on the UI thread,
-					// to make our results visible to the user. Note that
-					// we absolutely _must not_ create a Ptr here on the
-					// background thread - ownership must be managed on
-					// the UI thread only (see ~AsynchronousSaver).
-					ParallelAlgo::callOnUIThread(
-						[forWrapUp] {
-							if( Ptr that = forWrapUp.lock() )
-							{
-								that->wrapUp();
-							}
-						}
-					);
-				}
+			client->removeDisplays();
+			client->updateImageFlags( Plug::Serialisable, true );
+		}
 
-				void wrapUp()
-				{
-					DirtyPropagationScope dirtyPropagationScope;
-
-					for( set<InternalImage *>::const_iterator it = m_clients.begin(), eIt = m_clients.end(); it != eIt; ++it )
-					{
-						wrapUpClient( *it );
-					}
-
-					// Destroy the image to release the memory used by the copied display drivers.
-					m_imageCopy = nullptr;
-				}
-
-				void wrapUpClient( InternalImage *client )
-				{
-					// Set up the client to read from the saved image
-					client->text()->enabledPlug()->setValue( false );
-					client->fileNamePlug()->source<StringPlug>()->setValue( m_writer->fileNamePlug()->getValue() );
-					client->imageSwitch()->indexPlug()->setValue( 0 );
-					// But force hashChannelData and computeChannelData to be called
-					// so that we can reuse the cache entries created by the original
-					// Display nodes, rather than force an immediate load of the image
-					// from disk, which would be slow.
-					client->outPlug()->channelDataPlug()->setInput( nullptr );
-
-					client->removeDisplays();
-					client->updateImageFlags( Plug::Serialisable, true );
-				}
-
-				InternalImagePtr m_imageCopy;
-				GafferImage::ImageMetadataPtr m_modifyMetadata;
-				GafferImage::ImageWriterPtr m_writer;
+		InternalImagePtr m_imageCopy;
+		GafferImage::ImageMetadataPtr m_modifyMetadata;
+		GafferImage::ImageWriterPtr m_writer;
 
 
-				std::shared_ptr<const GafferScene::RenderManifest> m_renderManifest;
-				std::filesystem::path m_manifestDest;
+		std::shared_ptr<const GafferScene::RenderManifest> m_renderManifest;
+		std::filesystem::path m_manifestDest;
 
-				std::thread m_thread;
-				set<InternalImage *> m_clients;
+		std::thread m_thread;
+		set<InternalImage *> m_clients;
+	};
 
-		};
+	string m_renderID;
 
-		string m_renderID;
+	using DisplayMap = unordered_map<string, DisplayPtr>;
+	DisplayMap m_displays;
 
-		using DisplayMap = unordered_map<string, DisplayPtr>;
-		DisplayMap m_displays;
+	AsynchronousSaver::Ptr m_saver;
 
-		AsynchronousSaver::Ptr m_saver;
-
-		static size_t g_firstChildIndex;
-
+	static size_t g_firstChildIndex;
 };
 
 size_t Catalogue::InternalImage::g_firstChildIndex = 0;
@@ -793,7 +788,7 @@ size_t Catalogue::InternalImage::g_firstChildIndex = 0;
 GAFFER_PLUG_DEFINE_TYPE( Catalogue::Image );
 
 Catalogue::Image::Image( const std::string &name, Direction direction, unsigned flags )
-	:	Plug( name, direction, flags )
+	: Plug( name, direction, flags )
 {
 	addChild( new StringPlug( "fileName" ) );
 	addChild( new StringPlug( "description" ) );
@@ -856,7 +851,7 @@ Catalogue::Image::Ptr Catalogue::Image::load( const std::filesystem::path &fileN
 	std::string name = fileName.stem().string();
 	std::replace_if(
 		name.begin(), name.end(),
-		[] ( char c ) {
+		[]( char c ) {
 			return !std::isalnum( c, std::locale::classic() );
 		},
 		'_'
@@ -938,7 +933,7 @@ GAFFER_NODE_DEFINE_TYPE( Catalogue );
 size_t Catalogue::g_firstPlugIndex = 0;
 
 Catalogue::Catalogue( const std::string &name )
-	:   ImageNode( name )
+	: ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -957,7 +952,6 @@ Catalogue::Catalogue( const std::string &name )
 	imageSwitch()->indexPlug()->setInput( internalImageIndexPlug() );
 
 
-
 	GafferImage::TextPtr errorText = new GafferImage::Text( "__errorText" );
 	addChild( errorText );
 	errorText->textPlug()->setInput( invalidImageTextPlug() );
@@ -970,7 +964,7 @@ Catalogue::Catalogue( const std::string &name )
 	textFormatQuery->imagePlug()->setInput( errorText->outPlug() );
 	errorText->areaPlug()->setInput( textFormatQuery->formatPlug()->displayWindowPlug() );
 
-	imageSwitch()->inPlugs()->getChild< Plug >( 0 )->setInput( errorText->outPlug() );
+	imageSwitch()->inPlugs()->getChild<Plug>( 0 )->setInput( errorText->outPlug() );
 
 
 	// Switch and constant used to implement disabled output
@@ -1395,7 +1389,7 @@ void Catalogue::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 		{
 			outputs.push_back( imageIndexMapPlug() );
 		}
-		if( input== image->namePlug() )
+		if( input == image->namePlug() )
 		{
 			outputs.push_back( imageNamesPlug() );
 		}
@@ -1489,11 +1483,11 @@ void Catalogue::compute( ValuePlug *output, const Context *context ) const
 		int childIndex = 0;
 		for( const auto &image : Image::Range( *imagesPlug() ) )
 		{
-			result->map[ image->namePlug()->getValue() ] = childIndex;
+			result->map[image->namePlug()->getValue()] = childIndex;
 			int outputIndex = image->outputIndexPlug()->getValue();
 			if( outputIndex > 0 )
 			{
-				result->map[ "output:" + std::to_string( outputIndex ) ] = childIndex;
+				result->map["output:" + std::to_string( outputIndex )] = childIndex;
 			}
 			childIndex++;
 		}
@@ -1534,7 +1528,6 @@ void Catalogue::compute( ValuePlug *output, const Context *context ) const
 	{
 		ImageNode::compute( output, context );
 	}
-
 }
 
 const std::type_info &Catalogue::internalImageTypeInfo()

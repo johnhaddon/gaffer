@@ -47,7 +47,7 @@ namespace
 
 const IECore::InternedString g_defaultValue( "defaultValue" );
 const std::string g_metadataTargets(
-	"attribute:scene:visible attribute:doubleSided attribute:render:* attribute:gaffer:* " \
+	"attribute:scene:visible attribute:doubleSided attribute:render:* attribute:gaffer:* "
 	"attribute:linkedLights attribute:shadowedLights attribute:filteredLights"
 );
 
@@ -56,7 +56,7 @@ const std::string g_metadataTargets(
 GAFFER_NODE_DEFINE_TYPE( StandardAttributes );
 
 StandardAttributes::StandardAttributes( const std::string &name )
-	:	Attributes( name )
+	: Attributes( name )
 {
 
 	for( const auto &target : Metadata::targetsWithMetadata( g_metadataTargets, g_defaultValue ) )
@@ -68,7 +68,6 @@ StandardAttributes::StandardAttributes( const std::string &name )
 			attributesPlug()->addChild( attributePlug );
 		}
 	}
-
 }
 
 StandardAttributes::~StandardAttributes()

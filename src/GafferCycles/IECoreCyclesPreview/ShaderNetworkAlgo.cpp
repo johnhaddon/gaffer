@@ -100,14 +100,22 @@ ShaderSearchPathCache g_shaderSearchPathCache( shaderCacheGetter, 10000 );
 
 ccl::SocketType::Type getSocketType( const std::string &name )
 {
-	if( name == "float" ) return ccl::SocketType::Type::FLOAT;
-	if( name == "int" ) return ccl::SocketType::Type::INT;
-	if( name == "color" ) return ccl::SocketType::Type::COLOR;
-	if( name == "vector" ) return ccl::SocketType::Type::VECTOR;
-	if( name == "point" ) return ccl::SocketType::Type::POINT;
-	if( name == "normal" ) return ccl::SocketType::Type::NORMAL;
-	if( name == "closure" ) return ccl::SocketType::Type::CLOSURE;
-	if( name == "string" ) return ccl::SocketType::Type::STRING;
+	if( name == "float" )
+		return ccl::SocketType::Type::FLOAT;
+	if( name == "int" )
+		return ccl::SocketType::Type::INT;
+	if( name == "color" )
+		return ccl::SocketType::Type::COLOR;
+	if( name == "vector" )
+		return ccl::SocketType::Type::VECTOR;
+	if( name == "point" )
+		return ccl::SocketType::Type::POINT;
+	if( name == "normal" )
+		return ccl::SocketType::Type::NORMAL;
+	if( name == "closure" )
+		return ccl::SocketType::Type::CLOSURE;
+	if( name == "string" )
+		return ccl::SocketType::Type::STRING;
 	return ccl::SocketType::Type::UNDEFINED;
 }
 
@@ -209,7 +217,7 @@ ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, c
 				string pathFileName( stringData->readable() );
 				string fileName = ccl::path_filename( pathFileName );
 				size_t offset = fileName.find( "<UDIM>" );
-				ccl::ImageTextureNode *imgTexNode = (ccl::ImageTextureNode*)node;
+				ccl::ImageTextureNode *imgTexNode = (ccl::ImageTextureNode *)node;
 				if( offset != string::npos )
 				{
 					// Workaround to find all available tiles
@@ -231,7 +239,7 @@ ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, c
 					ccl::array<int> tiles;
 					for( string file : files )
 					{
-						tiles.push_back_slow( atoi( file.substr( offset, offset+3 ).c_str() ) );
+						tiles.push_back_slow( atoi( file.substr( offset, offset + 3 ).c_str() ) );
 					}
 					imgTexNode->set_tiles( tiles );
 				}
@@ -314,11 +322,9 @@ const bool g_useLegacyLights = []() -> bool {
 // intensity, color, exposure.
 bool contributesToLightStrength( InternedString parameterName )
 {
-	return
-		parameterName == "intensity" ||
+	return parameterName == "intensity" ||
 		parameterName == "color" ||
-		parameterName == "exposure"
-	;
+		parameterName == "exposure";
 }
 
 Imath::Color3f constantLightStrength( const IECoreScene::ShaderNetwork *light )
@@ -342,12 +348,10 @@ Imath::Color3f constantLightStrength( const IECoreScene::ShaderNetwork *light )
 
 	if(
 		!g_useLegacyLights &&
-		(
-			lightShader->getName() == "disk_light" ||
-			lightShader->getName() == "point_light" ||
-			lightShader->getName() == "quad_light" ||
-			lightShader->getName() == "spot_light"
-		)
+		( lightShader->getName() == "disk_light" ||
+		  lightShader->getName() == "point_light" ||
+		  lightShader->getName() == "quad_light" ||
+		  lightShader->getName() == "spot_light" )
 	)
 	{
 		// Blender/hdCycles scale by `pi` to convert intensity to radiant flux.
@@ -432,11 +436,7 @@ ccl::ShaderOutput *output( ccl::ShaderNode *node, IECore::InternedString name )
 	return nullptr;
 }
 
-std::unique_ptr<ccl::ShaderGraph> convertGraph( const IECoreScene::ShaderNetwork *surfaceShader,
-								const IECoreScene::ShaderNetwork *displacementShader,
-								const IECoreScene::ShaderNetwork *volumeShader,
-								ccl::Scene *scene,
-								const std::string &namePrefix )
+std::unique_ptr<ccl::ShaderGraph> convertGraph( const IECoreScene::ShaderNetwork *surfaceShader, const IECoreScene::ShaderNetwork *displacementShader, const IECoreScene::ShaderNetwork *volumeShader, ccl::Scene *scene, const std::string &namePrefix )
 {
 	std::unique_ptr<ccl::ShaderGraph> graph = std::make_unique<ccl::ShaderGraph>();
 
@@ -504,7 +504,7 @@ void setSingleSided( ccl::ShaderGraph *graph )
 
 	ccl::OutputNode *output = graph->output();
 
-	if( ccl::ShaderInput *shaderInput = ShaderNetworkAlgo::input( (ccl::ShaderNode*)output, "surface" ) )
+	if( ccl::ShaderInput *shaderInput = ShaderNetworkAlgo::input( (ccl::ShaderNode *)output, "surface" ) )
 	{
 		ccl::ShaderOutput *shaderOutput = shaderInput->link;
 		if( shaderOutput )
@@ -719,23 +719,20 @@ struct DataTraits
 {
 
 	using DataType = IECore::TypedData<T>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec2<T> >
+struct DataTraits<Vec2<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec2<T>>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec3<T> >
+struct DataTraits<Vec3<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec3<T>>;
-
 };
 
 Color3f blackbody( float kelvins )
@@ -745,25 +742,25 @@ Color3f blackbody( float kelvins )
 	static SplinefColor3f g_spline(
 		CubicBasisf::catmullRom(),
 		{
-			{  1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
-			{  1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
-			{  1500.0f, Color3f( 1.000000f, 0.149664f, 0.000000f ) },
-			{  2000.0f, Color3f( 1.000000f, 0.256644f, 0.008095f ) },
-			{  2500.0f, Color3f( 1.000000f, 0.372033f, 0.067450f ) },
-			{  3000.0f, Color3f( 1.000000f, 0.476725f, 0.153601f ) },
-			{  3500.0f, Color3f( 1.000000f, 0.570376f, 0.259196f ) },
-			{  4000.0f, Color3f( 1.000000f, 0.653480f, 0.377155f ) },
-			{  4500.0f, Color3f( 1.000000f, 0.726878f, 0.501606f ) },
-			{  5000.0f, Color3f( 1.000000f, 0.791543f, 0.628050f ) },
-			{  5500.0f, Color3f( 1.000000f, 0.848462f, 0.753228f ) },
-			{  6000.0f, Color3f( 1.000000f, 0.898581f, 0.874905f ) },
-			{  6500.0f, Color3f( 1.000000f, 0.942771f, 0.991642f ) },
-			{  7000.0f, Color3f( 0.906947f, 0.890456f, 1.000000f ) },
-			{  7500.0f, Color3f( 0.828247f, 0.841838f, 1.000000f ) },
-			{  8000.0f, Color3f( 0.765791f, 0.801896f, 1.000000f ) },
-			{  8500.0f, Color3f( 0.715255f, 0.768579f, 1.000000f ) },
-			{  9000.0f, Color3f( 0.673683f, 0.740423f, 1.000000f ) },
-			{  9500.0f, Color3f( 0.638992f, 0.716359f, 1.000000f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
+			{ 1500.0f, Color3f( 1.000000f, 0.149664f, 0.000000f ) },
+			{ 2000.0f, Color3f( 1.000000f, 0.256644f, 0.008095f ) },
+			{ 2500.0f, Color3f( 1.000000f, 0.372033f, 0.067450f ) },
+			{ 3000.0f, Color3f( 1.000000f, 0.476725f, 0.153601f ) },
+			{ 3500.0f, Color3f( 1.000000f, 0.570376f, 0.259196f ) },
+			{ 4000.0f, Color3f( 1.000000f, 0.653480f, 0.377155f ) },
+			{ 4500.0f, Color3f( 1.000000f, 0.726878f, 0.501606f ) },
+			{ 5000.0f, Color3f( 1.000000f, 0.791543f, 0.628050f ) },
+			{ 5500.0f, Color3f( 1.000000f, 0.848462f, 0.753228f ) },
+			{ 6000.0f, Color3f( 1.000000f, 0.898581f, 0.874905f ) },
+			{ 6500.0f, Color3f( 1.000000f, 0.942771f, 0.991642f ) },
+			{ 7000.0f, Color3f( 0.906947f, 0.890456f, 1.000000f ) },
+			{ 7500.0f, Color3f( 0.828247f, 0.841838f, 1.000000f ) },
+			{ 8000.0f, Color3f( 0.765791f, 0.801896f, 1.000000f ) },
+			{ 8500.0f, Color3f( 0.715255f, 0.768579f, 1.000000f ) },
+			{ 9000.0f, Color3f( 0.673683f, 0.740423f, 1.000000f ) },
+			{ 9500.0f, Color3f( 0.638992f, 0.716359f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.609681f, 0.695588f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.609681f, 0.695588f, 1.000000f ) },
 		}
@@ -865,8 +862,8 @@ const InternedString g_occlusionParameter( "occlusion" );
 const InternedString g_opacityParameter( "opacity" );
 const InternedString g_opacityThresholdParameter( "opacityThreshold" );
 const InternedString g_parametricParameter( "parametric" );
-const InternedString g_positionParameter( "position");
-const InternedString g_projectionParameter( "projection");
+const InternedString g_positionParameter( "position" );
+const InternedString g_projectionParameter( "projection" );
 const InternedString g_rParameter( "r" );
 const InternedString g_radiusParameter( "radius" );
 const InternedString g_resultParameter( "result" );
@@ -947,7 +944,7 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	{
 		if( boost::starts_with( name.string(), g_cyclesNamespace ) )
 		{
-			shader->parameters()[name.string().substr(g_cyclesNamespace.size())] = value;
+			shader->parameters()[name.string().substr( g_cyclesNamespace.size() )] = value;
 		}
 	}
 }
@@ -1063,7 +1060,7 @@ const std::unordered_map<InternedString, InternedString> g_outputParameterMap = 
 	{ g_surfaceParameter, g_BSDFParameter },
 	{ g_rgbParameter, g_colorParameter },
 	{ g_rParameter, g_colorRParameter },
-	{ g_gParameter, g_colorGParameter},
+	{ g_gParameter, g_colorGParameter },
 	{ g_bParameter, g_colorBParameter },
 	{ g_aParameter, g_alphaParameter },
 };

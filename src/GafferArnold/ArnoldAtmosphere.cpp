@@ -41,7 +41,7 @@ using namespace GafferArnold;
 GAFFER_NODE_DEFINE_TYPE( ArnoldAtmosphere );
 
 ArnoldAtmosphere::ArnoldAtmosphere( const std::string &name )
-	:	GlobalShader( name )
+	: GlobalShader( name )
 {
 }
 

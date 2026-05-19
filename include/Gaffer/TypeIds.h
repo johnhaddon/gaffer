@@ -157,7 +157,6 @@ enum TypeId
 	Int64VectorDataPlugTypeId = 118111,
 
 	LastTypeId = 118799
-
 };
 
 } // namespace Gaffer

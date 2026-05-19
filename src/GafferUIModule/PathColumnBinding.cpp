@@ -68,95 +68,94 @@ namespace
 class PathListingWidgetAccessor : public GafferUI::PathListingWidget
 {
 
-	public :
+public:
 
-		PathListingWidgetAccessor( object widget )
-			:	m_widget(
-					boost::python::handle<>( PyWeakref_NewRef( widget.ptr(), nullptr ) )
-				)
+	PathListingWidgetAccessor( object widget )
+		: m_widget(
+			  boost::python::handle<>( PyWeakref_NewRef( widget.ptr(), nullptr ) )
+		  )
+	{
+	}
+
+	object widget() const
+	{
+		return m_widget();
+	}
+
+	void setColumns( const Columns &columns ) override
+	{
+		IECorePython::ScopedGILLock gilLock;
+		list pythonColumns;
+		for( auto &c : columns )
 		{
+			pythonColumns.append( c );
 		}
+		widget().attr( "setColumns" )( pythonColumns );
+	}
 
-		object widget() const
+	Columns getColumns() const override
+	{
+		IECorePython::ScopedGILLock gilLock;
+		object pythonColumns = widget().attr( "getColumns" )();
+		Columns columns;
+		boost::python::container_utils::extend_container( columns, pythonColumns );
+		return columns;
+	}
+
+	void setSelection( const Selection &selection ) override
+	{
+		IECorePython::ScopedGILLock gilLock;
+
+		object pythonSelection;
+		if( std::holds_alternative<IECore::PathMatcher>( selection ) )
 		{
-			return m_widget();
+			pythonSelection = object( std::get<IECore::PathMatcher>( selection ) );
 		}
-
-		void setColumns( const Columns &columns ) override
+		else
 		{
-			IECorePython::ScopedGILLock gilLock;
-			list pythonColumns;
-			for( auto & c : columns )
+			list pythonList;
+			for( const auto &c : std::get<std::vector<IECore::PathMatcher>>( selection ) )
 			{
-				pythonColumns.append( c );
+				pythonList.append( c );
 			}
-			widget().attr( "setColumns" )( pythonColumns );
+			pythonSelection = pythonList;
 		}
 
-		Columns getColumns() const override
+		widget().attr( "setSelection" )( pythonSelection );
+	}
+
+	Selection getSelection() const override
+	{
+		IECorePython::ScopedGILLock gilLock;
+		object pythonSelection = widget().attr( "getSelection" )();
+		extract<IECore::PathMatcher> e( pythonSelection );
+		if( e.check() )
 		{
-			IECorePython::ScopedGILLock gilLock;
-			object pythonColumns = widget().attr( "getColumns" )();
-			Columns columns;
-			boost::python::container_utils::extend_container( columns, pythonColumns );
-			return columns;
+			return e();
 		}
-
-		void setSelection( const Selection &selection ) override
+		else
 		{
-			IECorePython::ScopedGILLock gilLock;
-
-			object pythonSelection;
-			if( std::holds_alternative<IECore::PathMatcher>( selection ) )
-			{
-				pythonSelection = object( std::get<IECore::PathMatcher>( selection ) );
-			}
-			else
-			{
-				list pythonList;
-				for( const auto &c : std::get<std::vector<IECore::PathMatcher>>( selection ) )
-				{
-					pythonList.append( c );
-				}
-				pythonSelection = pythonList;
-			}
-
-			widget().attr( "setSelection" )( pythonSelection );
+			std::vector<IECore::PathMatcher> selection;
+			container_utils::extend_container( selection, pythonSelection );
+			return selection;
 		}
+	}
 
-		Selection getSelection() const override
-		{
-			IECorePython::ScopedGILLock gilLock;
-			object pythonSelection = widget().attr( "getSelection" )();
-			extract<IECore::PathMatcher> e( pythonSelection );
-			if( e.check() )
-			{
-				return e();
-			}
-			else
-			{
-				std::vector<IECore::PathMatcher> selection;
-				container_utils::extend_container( selection, pythonSelection );
-				return selection;
-			}
-		}
+	std::vector<std::string> visualOrder( const IECore::PathMatcher &paths ) const override
+	{
+		IECorePython::ScopedGILLock gilLock;
+		object pythonResult = m_widget.attr( "visualOrder" )( paths );
+		std::vector<std::string> result;
+		container_utils::extend_container( result, pythonResult );
+		return result;
+	}
 
-		std::vector<std::string> visualOrder( const IECore::PathMatcher &paths ) const override
-		{
-			IECorePython::ScopedGILLock gilLock;
-			object pythonResult = m_widget.attr( "visualOrder" )( paths );
-			std::vector<std::string> result;
-			container_utils::extend_container( result, pythonResult );
-			return result;
-		}
+private:
 
-	private :
-
-		// A `weakref` for the Python PathListingWidget object. We use a
-		// weak reference to avoid `PathListingWidget->Menu->MenuDefinition->PathListingWidget`
-		// reference cycles when a C++ MenuItem stores a PathListingWidgetPtr.
-		object m_widget;
-
+	// A `weakref` for the Python PathListingWidget object. We use a
+	// weak reference to avoid `PathListingWidget->Menu->MenuDefinition->PathListingWidget`
+	// reference cycles when a C++ MenuItem stores a PathListingWidgetPtr.
+	object m_widget;
 };
 
 } // namespace
@@ -172,20 +171,19 @@ struct GILReleaseMenuCommand
 {
 
 	GILReleaseMenuCommand( MenuDefinition::MenuItem::Command command )
-		:	m_command( command )
+		: m_command( command )
 	{
 	}
 
-	void operator()()
+	void operator () ()
 	{
 		IECorePython::ScopedGILRelease gilRelease;
 		m_command();
 	}
 
-	private :
+private:
 
-		MenuDefinition::MenuItem::Command m_command;
-
+	MenuDefinition::MenuItem::Command m_command;
 };
 
 // Provides a C++ interface to the functionality implemented in the Python
@@ -193,47 +191,46 @@ struct GILReleaseMenuCommand
 class MenuDefinitionAccessor : public GafferUI::MenuDefinition
 {
 
-	public :
+public:
 
-		MenuDefinitionAccessor( object menuDefinition )
-			:	m_menuDefinition( menuDefinition )
+	MenuDefinitionAccessor( object menuDefinition )
+		: m_menuDefinition( menuDefinition )
+	{
+	}
+
+	object menuDefinition()
+	{
+		return m_menuDefinition;
+	}
+
+	void append( const std::string &path, const MenuItem &item ) override
+	{
+		IECorePython::ScopedGILLock gilLock;
+
+		dict pythonItem;
+
+		if( item.command != nullptr )
 		{
+			pythonItem["command"] = make_function(
+				GILReleaseMenuCommand( item.command ),
+				boost::python::default_call_policies(),
+				boost::mpl::vector<void>()
+			);
 		}
 
-		object menuDefinition()
-		{
-			return m_menuDefinition;
-		}
+		pythonItem["description"] = item.description;
+		pythonItem["icon"] = item.icon;
+		pythonItem["shortCut"] = item.shortCut;
+		pythonItem["divider"] = item.divider;
+		pythonItem["active"] = item.active;
 
-		void append( const std::string &path, const MenuItem &item ) override
-		{
-			IECorePython::ScopedGILLock gilLock;
+		m_menuDefinition.attr( "append" )( path, pythonItem );
+	}
 
-			dict pythonItem;
+private:
 
-			if( item.command != nullptr )
-			{
-				pythonItem["command"] = make_function(
-					GILReleaseMenuCommand( item.command ),
-					boost::python::default_call_policies(),
-					boost::mpl::vector<void>()
-				);
-			}
-
-			pythonItem["description"] = item.description;
-			pythonItem["icon"] = item.icon;
-			pythonItem["shortCut"] = item.shortCut;
-			pythonItem["divider"] = item.divider;
-			pythonItem["active"] = item.active;
-
-			m_menuDefinition.attr( "append" )( path, pythonItem );
-		}
-
-	private :
-
-		// The Python MenuDefinition object.
-		object m_menuDefinition;
-
+	// The Python MenuDefinition object.
+	object m_menuDefinition;
 };
 
 } // namespace
@@ -248,60 +245,60 @@ namespace
 class PathColumnWrapper : public IECorePython::RefCountedWrapper<PathColumn>
 {
 
-	public :
+public:
 
-		PathColumnWrapper( PyObject *self, PathColumn::SizeMode sizeMode )
-			:	 IECorePython::RefCountedWrapper<PathColumn>( self, sizeMode )
-		{
-		}
+	PathColumnWrapper( PyObject *self, PathColumn::SizeMode sizeMode )
+		: IECorePython::RefCountedWrapper<PathColumn>( self, sizeMode )
+	{
+	}
 
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const override
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller = nullptr ) const override
+	{
+		if( isSubclassed() )
 		{
-			if( isSubclassed() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				object f = this->methodOverride( "cellData" );
+				if( f )
 				{
-					object f = this->methodOverride( "cellData" );
-					if( f )
-					{
-						return extract<CellData>(
-							f( PathPtr( const_cast<Path *>( &path ) ), CancellerPtr( const_cast<IECore::Canceller *>( canceller ) ) )
-						);
-					}
-				}
-				catch( const error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return extract<CellData>(
+						f( PathPtr( const_cast<Path *>( &path ) ), CancellerPtr( const_cast<IECore::Canceller *>( canceller ) ) )
+					);
 				}
 			}
-
-			throw IECore::Exception( "PathColumn::cellData() python method not defined" );
+			catch( const error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
 
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller = nullptr ) const override
+		throw IECore::Exception( "PathColumn::cellData() python method not defined" );
+	}
+
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller = nullptr ) const override
+	{
+		if( isSubclassed() )
 		{
-			if( isSubclassed() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				object f = this->methodOverride( "headerData" );
+				if( f )
 				{
-					object f = this->methodOverride( "headerData" );
-					if( f )
-					{
-						return extract<CellData>(
-							f( PathPtr( const_cast<Path *>( &rootPath ) ), CancellerPtr( const_cast<IECore::Canceller *>( canceller ) ) )
-						);
-					}
-				}
-				catch( const error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return extract<CellData>(
+						f( PathPtr( const_cast<Path *>( &rootPath ) ), CancellerPtr( const_cast<IECore::Canceller *>( canceller ) ) )
+					);
 				}
 			}
-
-			throw IECore::Exception( "PathColumn::headerData() python method not defined" );
+			catch( const error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
+
+		throw IECore::Exception( "PathColumn::headerData() python method not defined" );
+	}
 };
 
 object cellDataGetValue( PathColumn::CellData &cellData )
@@ -378,7 +375,7 @@ PathColumn::CellData headerDataWrapper( PathColumn &pathColumn, const Path &root
 
 struct ChangedSignalSlotCaller
 {
-	void operator()( boost::python::object slot, PathColumnPtr c )
+	void operator () ( boost::python::object slot, PathColumnPtr c )
 	{
 		try
 		{
@@ -405,13 +402,13 @@ struct ButtonSignalCaller
 
 struct ButtonSignalSlotCaller
 {
-	bool operator()( boost::python::object slot, Path &path, PathListingWidget &widget, const ButtonEvent &event )
+	bool operator () ( boost::python::object slot, Path &path, PathListingWidget &widget, const ButtonEvent &event )
 	{
 		try
 		{
 			// Python-based slots are passed the original Python
 			// PathListingWidget, so they have full access to everything.
-			return slot( PathPtr( &path ), static_cast<PathListingWidgetAccessor&>( widget ).widget(), event );
+			return slot( PathPtr( &path ), static_cast<PathListingWidgetAccessor &>( widget ).widget(), event );
 		}
 		catch( const error_already_set & )
 		{
@@ -433,7 +430,7 @@ struct ContextMenuSignalCaller
 
 struct ContextMenuSignalSlotCaller
 {
-	void operator()( boost::python::object slot, PathColumn &column, PathListingWidget &pathListingWidget, MenuDefinition &menuDefinition )
+	void operator () ( boost::python::object slot, PathColumn &column, PathListingWidget &pathListingWidget, MenuDefinition &menuDefinition )
 	{
 		try
 		{
@@ -463,11 +460,11 @@ struct KeySignalCaller
 
 struct KeySignalSlotCaller
 {
-	bool operator()( boost::python::object slot, PathColumn &column, PathListingWidget &widget, const KeyEvent &event )
+	bool operator () ( boost::python::object slot, PathColumn &column, PathListingWidget &widget, const KeyEvent &event )
 	{
 		try
 		{
-			return slot( PathColumnPtr( &column ), static_cast<PathListingWidgetAccessor&>( widget ).widget(), event );
+			return slot( PathColumnPtr( &column ), static_cast<PathListingWidgetAccessor &>( widget ).widget(), event );
 		}
 		catch( const boost::python::error_already_set & )
 		{
@@ -488,11 +485,11 @@ struct DragDropSignalCaller
 
 struct DragDropSignalSlotCaller
 {
-	bool operator()( boost::python::object slot, PathColumn &column, Gaffer::Path &path, PathListingWidget &widget, const DragDropEvent &event )
+	bool operator () ( boost::python::object slot, PathColumn &column, Gaffer::Path &path, PathListingWidget &widget, const DragDropEvent &event )
 	{
 		try
 		{
-			return slot( PathColumnPtr( &column ), PathPtr( &path ), static_cast<PathListingWidgetAccessor&>( widget ).widget(), event );
+			return slot( PathColumnPtr( &column ), PathPtr( &path ), static_cast<PathListingWidgetAccessor &>( widget ).widget(), event );
 		}
 		catch( const boost::python::error_already_set & )
 		{
@@ -517,8 +514,7 @@ void GafferUIModule::bindPathColumn()
 		enum_<PathColumn::SizeMode>( "SizeMode" )
 			.value( "Interactive", PathColumn::SizeMode::Interactive )
 			.value( "Stretch", PathColumn::SizeMode::Stretch )
-			.value( "Default", PathColumn::SizeMode::Default )
-		;
+			.value( "Default", PathColumn::SizeMode::Default );
 
 		class_<PathColumn::CellData>( "CellData" )
 			.def(
@@ -550,8 +546,7 @@ void GafferUIModule::bindPathColumn()
 			)
 			.add_property(
 				"foreground", &cellDataGetForeground, &cellDataSetForeground
-			)
-		;
+			);
 
 		SignalClass<PathColumn::PathColumnSignal, DefaultSignalCaller<PathColumn::PathColumnSignal>, ChangedSignalSlotCaller>( "PathColumnSignal" );
 		SignalClass<PathColumn::ButtonSignal, ButtonSignalCaller, ButtonSignalSlotCaller>( "ButtonSignal" );
@@ -576,24 +571,20 @@ void GafferUIModule::bindPathColumn()
 		.def( "dropSignal", &PathColumn::dropSignal, return_internal_reference<1>() )
 		.def( "instanceCreatedSignal", &PathColumn::instanceCreatedSignal, return_value_policy<reference_existing_object>() )
 		.staticmethod( "instanceCreatedSignal" )
-		.def( "getSizeMode", (PathColumn::SizeMode (PathColumn::*)() const )&PathColumn::getSizeMode )
-		.def( "setSizeMode", &PathColumn::setSizeMode, ( arg( "sizeMode" ) ) )
-	;
+		.def( "getSizeMode", ( PathColumn::SizeMode ( PathColumn::* )() const ) & PathColumn::getSizeMode )
+		.def( "setSizeMode", &PathColumn::setSizeMode, ( arg( "sizeMode" ) ) );
 
 	IECorePython::RefCountedClass<StandardPathColumn, PathColumn>( "StandardPathColumn" )
 		.def( init<const std::string &, IECore::InternedString, PathColumn::SizeMode>( arg( "sizeMode" ) = PathColumn::Default ) )
 		.def( init<const PathColumn::CellData &, IECore::InternedString, PathColumn::SizeMode>( arg( "sizeMode" ) = PathColumn::Default ) )
-		.def( "property", &pathColumnProperty<StandardPathColumn> )
-	;
+		.def( "property", &pathColumnProperty<StandardPathColumn> );
 
 	IECorePython::RefCountedClass<IconPathColumn, PathColumn>( "IconPathColumn" )
 		.def( init<const std::string &, const std::string &, IECore::InternedString, PathColumn::SizeMode>( arg( "sizeMode" ) = PathColumn::Default ) )
 		.def( init<const PathColumn::CellData &, const std::string &, IECore::InternedString, PathColumn::SizeMode>( arg( "sizeMode" ) = PathColumn::Default ) )
 		.def( "prefix", &IconPathColumn::prefix, return_value_policy<copy_const_reference>() )
-		.def( "property", &pathColumnProperty<IconPathColumn> )
-	;
+		.def( "property", &pathColumnProperty<IconPathColumn> );
 
 	IECorePython::RefCountedClass<FileIconPathColumn, PathColumn>( "FileIconPathColumn" )
-		.def( init<PathColumn::SizeMode>( arg( "sizeMode" ) = PathColumn::Default ) )
-	;
+		.def( init<PathColumn::SizeMode>( arg( "sizeMode" ) = PathColumn::Default ) );
 }

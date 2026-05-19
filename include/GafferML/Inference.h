@@ -50,44 +50,43 @@ namespace GafferML
 class GAFFERML_API Inference : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit Inference( const std::string &name=defaultName<Inference>() );
-		~Inference() override;
+	explicit Inference( const std::string &name = defaultName<Inference>() );
+	~Inference() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferML::Inference, InferenceTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferML::Inference, InferenceTypeId, Gaffer::ComputeNode );
 
-		void loadModel();
+	void loadModel();
 
-		Gaffer::StringPlug *modelPlug();
-		const Gaffer::StringPlug *modelPlug() const;
+	Gaffer::StringPlug *modelPlug();
+	const Gaffer::StringPlug *modelPlug() const;
 
-		Gaffer::ArrayPlug *inPlug();
-		const Gaffer::ArrayPlug *inPlug() const;
+	Gaffer::ArrayPlug *inPlug();
+	const Gaffer::ArrayPlug *inPlug() const;
 
-		Gaffer::ArrayPlug *outPlug();
-		const Gaffer::ArrayPlug *outPlug() const;
+	Gaffer::ArrayPlug *outPlug();
+	const Gaffer::ArrayPlug *outPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		// We assume that if a model has multiple outputs, then it is more
-		// efficient to compute them all at once. We do that and cache it
-		// on this plug, then dole out individual results from the children
-		// of `outPlug()`.
-		/// \todo Verify the assumption.
-		Gaffer::CompoundObjectPlug *inferencePlug();
-		const Gaffer::CompoundObjectPlug *inferencePlug() const;
+	// We assume that if a model has multiple outputs, then it is more
+	// efficient to compute them all at once. We do that and cache it
+	// on this plug, then dole out individual results from the children
+	// of `outPlug()`.
+	/// \todo Verify the assumption.
+	Gaffer::CompoundObjectPlug *inferencePlug();
+	const Gaffer::CompoundObjectPlug *inferencePlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Inference )

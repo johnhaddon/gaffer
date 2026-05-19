@@ -56,47 +56,46 @@ namespace GafferScene
 class GAFFERSCENE_API SceneProcessor : public SceneNode
 {
 
-	public :
+public:
 
-		/// Constructs with a single input ScenePlug named "in". Use inPlug()
-		/// to access this plug.
-		explicit SceneProcessor( const std::string &name=defaultName<SceneProcessor>() );
-		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
-		/// convenience for accessing the first child in the array, and use
-		/// inPlugs() to access the array itself.
-		SceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
+	/// Constructs with a single input ScenePlug named "in". Use inPlug()
+	/// to access this plug.
+	explicit SceneProcessor( const std::string &name = defaultName<SceneProcessor>() );
+	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
+	/// convenience for accessing the first child in the array, and use
+	/// inPlugs() to access the array itself.
+	SceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
 
-		~SceneProcessor() override;
+	~SceneProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::SceneProcessor, SceneProcessorTypeId, SceneNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::SceneProcessor, SceneProcessorTypeId, SceneNode );
 
-		/// Returns the primary scene input. For nodes with multiple inputs
-		/// this will be the first child of the inPlugs() array. For nodes
-		/// with a single input, it will be a plug parented directly to the
-		/// node. If the node is disabled via enabledPlug(), then the inPlug()
-		/// is automatically passed through directly to the outPlug().
-		ScenePlug *inPlug();
-		const ScenePlug *inPlug() const;
+	/// Returns the primary scene input. For nodes with multiple inputs
+	/// this will be the first child of the inPlugs() array. For nodes
+	/// with a single input, it will be a plug parented directly to the
+	/// node. If the node is disabled via enabledPlug(), then the inPlug()
+	/// is automatically passed through directly to the outPlug().
+	ScenePlug *inPlug();
+	const ScenePlug *inPlug() const;
 
-		/// For nodes with multiple inputs, returns the ArrayPlug which
-		/// hosts them. For single input nodes, returns nullptr;
-		Gaffer::ArrayPlug *inPlugs();
-		const Gaffer::ArrayPlug *inPlugs() const;
+	/// For nodes with multiple inputs, returns the ArrayPlug which
+	/// hosts them. For single input nodes, returns nullptr;
+	Gaffer::ArrayPlug *inPlugs();
+	const Gaffer::ArrayPlug *inPlugs() const;
 
-		Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
-		const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
+	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
+	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-	protected :
+protected:
 
-		/// Reimplemented from SceneNode to pass through the inPlug() hashes when the node is disabled.
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		/// Reimplemented from SceneNode to pass through the inPlug() computations when the node is disabled.
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	/// Reimplemented from SceneNode to pass through the inPlug() hashes when the node is disabled.
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	/// Reimplemented from SceneNode to pass through the inPlug() computations when the node is disabled.
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( SceneProcessor )

@@ -59,28 +59,28 @@ const Gaffer::ValuePlug *correspondingPlug(
 	const Gaffer::ValuePlug *other
 )
 {
-	boost::container::small_vector< const Gaffer::ValuePlug*, 4 > path;
+	boost::container::small_vector<const Gaffer::ValuePlug *, 4> path;
 
 	const Gaffer::ValuePlug *plug = child;
 
 	while( plug != parent )
 	{
 		path.push_back( plug );
-		plug = plug->parent< Gaffer::ValuePlug >();
+		plug = plug->parent<Gaffer::ValuePlug>();
 	}
 
 	plug = other;
 
-	while( ! path.empty() )
+	while( !path.empty() )
 	{
-		plug = plug->getChild< Gaffer::ValuePlug >( path.back()->getName() );
+		plug = plug->getChild<Gaffer::ValuePlug>( path.back()->getName() );
 		path.pop_back();
 	}
 
 	return plug;
 }
 
-void addChildPlugsToAffectedOutputs( const Gaffer::Plug* plug, Gaffer::DependencyNode::AffectedPlugsContainer& outputs )
+void addChildPlugsToAffectedOutputs( const Gaffer::Plug *plug, Gaffer::DependencyNode::AffectedPlugsContainer &outputs )
 {
 	if( plug->children().empty() )
 	{
@@ -88,7 +88,7 @@ void addChildPlugsToAffectedOutputs( const Gaffer::Plug* plug, Gaffer::Dependenc
 	}
 	else
 	{
-		for( const Gaffer::PlugPtr& child : Gaffer::Plug::OutputRange( *plug ) )
+		for( const Gaffer::PlugPtr &child : Gaffer::Plug::OutputRange( *plug ) )
 		{
 			addChildPlugsToAffectedOutputs( child.get(), outputs );
 		}
@@ -119,7 +119,7 @@ size_t getChildIndex( const Gaffer::Plug *parentPlug, const Gaffer::ValuePlug *d
 	throw IECore::Exception( "OptionQuery : Plug not in hierarchy." );
 }
 
-}  // namespace
+} // namespace
 
 namespace GafferScene
 {
@@ -213,7 +213,7 @@ void OptionQuery::removeQuery( Gaffer::NameValuePlug *plug )
 	outPlug()->removeChild( const_cast<ValuePlug *>( oPlug ) );
 }
 
-void OptionQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs) const
+void OptionQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 
@@ -280,7 +280,8 @@ void OptionQuery::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 				valuePlugFromQuery( childQueryPlug ),
 				output,
 				static_cast<const ValuePlug *>( childQueryPlug->valuePlug() )
-			)->hash( h );
+			)
+				->hash( h );
 		}
 	}
 }
@@ -342,7 +343,6 @@ void OptionQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 	}
 
 	ComputeNode::compute( output, context );
-
 }
 
 const Gaffer::BoolPlug *OptionQuery::existsPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const
@@ -374,7 +374,7 @@ const Gaffer::ValuePlug *OptionQuery::outPlugFromQuery( const Gaffer::NameValueP
 		const ValuePlug *oPlug = outPlug()->getChild<const ValuePlug>( childIndex );
 		if( oPlug != nullptr && oPlug->typeId() != Gaffer::ValuePlug::staticTypeId() )
 		{
-			throw IECore::Exception( "OptionQuery : \"outPlug\" must be a `ValuePlug`."  );
+			throw IECore::Exception( "OptionQuery : \"outPlug\" must be a `ValuePlug`." );
 		}
 		return outPlug()->getChild<ValuePlug>( childIndex );
 	}
@@ -396,8 +396,7 @@ const Gaffer::NameValuePlug *OptionQuery::queryPlug( const Gaffer::ValuePlug *ou
 		return childQueryPlug;
 	}
 
-	throw IECore::Exception( "OptionQuery::queryPlug : Queries must be a \"NameValuePlug\".");
-
+	throw IECore::Exception( "OptionQuery::queryPlug : Queries must be a \"NameValuePlug\"." );
 }
 
 const Gaffer::ValuePlug *OptionQuery::outPlug( const Gaffer::ValuePlug *outputPlug ) const
@@ -409,7 +408,7 @@ const Gaffer::ValuePlug *OptionQuery::outPlug( const Gaffer::ValuePlug *outputPl
 		return result;
 	}
 
-	throw IECore::Exception( "OptionQuery : \"out\" plug is missing or of the wrong type.");
+	throw IECore::Exception( "OptionQuery : \"out\" plug is missing or of the wrong type." );
 }
 
-}  // namespace GafferScene
+} // namespace GafferScene

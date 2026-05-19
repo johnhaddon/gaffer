@@ -58,18 +58,18 @@ GAFFER_NODE_DEFINE_TYPE( AttributeProcessor );
 size_t AttributeProcessor::g_firstPlugIndex = 0;
 
 AttributeProcessor::AttributeProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
-	:	FilteredSceneProcessor( name, filterDefault )
+	: FilteredSceneProcessor( name, filterDefault )
 {
 	init();
 }
 
 AttributeProcessor::AttributeProcessor( const std::string &name )
-	:	AttributeProcessor( name, PathMatcher::NoMatch )
+	: AttributeProcessor( name, PathMatcher::NoMatch )
 {
 }
 
 AttributeProcessor::AttributeProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	FilteredSceneProcessor( name, minInputs, maxInputs )
+	: FilteredSceneProcessor( name, minInputs, maxInputs )
 {
 	init();
 }
@@ -224,7 +224,7 @@ IECore::ConstCompoundObjectPtr AttributeProcessor::computeGlobals( const Gaffer:
 	{
 		if( boost::starts_with( name.string(), g_attributePrefix ) )
 		{
-			attributesToProcess->members()[name.string().substr( g_attributePrefix.size())] = value;
+			attributesToProcess->members()[name.string().substr( g_attributePrefix.size() )] = value;
 		}
 		else
 		{
@@ -235,7 +235,7 @@ IECore::ConstCompoundObjectPtr AttributeProcessor::computeGlobals( const Gaffer:
 	IECore::ConstCompoundObjectPtr processedAttributes = computeProcessedAttributes( context, attributesToProcess.get() );
 	for( const auto &[name, value] : processedAttributes->members() )
 	{
-		result->members()[g_attributePrefix+name.string()] = value;
+		result->members()[g_attributePrefix + name.string()] = value;
 	}
 
 	return result;

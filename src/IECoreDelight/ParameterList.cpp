@@ -81,7 +81,7 @@ ParameterList::ParameterList()
 }
 
 ParameterList::ParameterList( std::initializer_list<NSIParam_t> parameters )
-	:	m_params( parameters )
+	: m_params( parameters )
 {
 }
 
@@ -150,14 +150,13 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 		NSITypeInvalid,
 		0, // array length
 		0, // count
-		0  // flags
+		0 // flags
 	};
 
 	switch( value->typeId() )
 	{
 		// Simple
-		case BoolDataTypeId :
-		{
+		case BoolDataTypeId : {
 			result.type = NSITypeInteger;
 			int *intPtr = allocate<int>();
 			*intPtr = static_cast<const BoolData *>( value )->readable();
@@ -204,8 +203,7 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 			result.data = static_cast<const Color4fData *>( value )->baseReadable();
 			result.count = 1;
 			break;
-		case StringDataTypeId :
-		{
+		case StringDataTypeId : {
 			result.type = NSITypeString;
 			const char **charPtr = allocate<const char *>();
 			*charPtr = static_cast<const StringData *>( value )->readable().c_str();
@@ -219,8 +217,7 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 			result.count = 1;
 			break;
 		// Vector
-		case IntVectorDataTypeId :
-		{
+		case IntVectorDataTypeId : {
 			const vector<int> &v = static_cast<const IntVectorData *>( value )->readable();
 			result.type = NSITypeInteger;
 			result.arraylength = isSingleArray ? v.size() : 1;
@@ -229,8 +226,7 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 			result.count = isSingleArray ? 1 : v.size();
 			break;
 		}
-		case FloatVectorDataTypeId :
-		{
+		case FloatVectorDataTypeId : {
 			const vector<float> &v = static_cast<const FloatVectorData *>( value )->readable();
 			result.type = NSITypeFloat;
 			result.arraylength = isSingleArray ? v.size() : 1;
@@ -239,8 +235,7 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 			result.count = isSingleArray ? 1 : v.size();
 			break;
 		}
-		case V2fVectorDataTypeId :
-		{
+		case V2fVectorDataTypeId : {
 			if( isSingleArray )
 			{
 				msg( Msg::Warning, "ParameterList", fmt::format( "Attribute \"{}\" cannot be converted to an array of V2f parameters.", name ) );
@@ -254,8 +249,7 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 			result.count = v.size();
 			break;
 		}
-		case V3fVectorDataTypeId :
-		{
+		case V3fVectorDataTypeId : {
 			const vector<V3f> &v = static_cast<const V3fVectorData *>( value )->readable();
 			result.type = type( static_cast<const V3fVectorData *>( value )->getInterpretation() );
 			result.arraylength = isSingleArray ? v.size() : 1;
@@ -264,8 +258,7 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 			result.count = isSingleArray ? 1 : v.size();
 			break;
 		}
-		case Color3fVectorDataTypeId :
-		{
+		case Color3fVectorDataTypeId : {
 			const vector<Color3f> &v = static_cast<const Color3fVectorData *>( value )->readable();
 			result.type = NSITypeColor;
 			result.arraylength = isSingleArray ? v.size() : 1;

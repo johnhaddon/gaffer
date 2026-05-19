@@ -47,10 +47,10 @@ using namespace IECoreArnold;
 namespace
 {
 
-const AtString g_sphereArnoldString("sphere");
-const AtString g_radiusArnoldString("radius");
-const AtString g_motionStartArnoldString("motion_start");
-const AtString g_motionEndArnoldString("motion_end");
+const AtString g_sphereArnoldString( "sphere" );
+const AtString g_radiusArnoldString( "radius" );
+const AtString g_motionStartArnoldString( "motion_start" );
+const AtString g_motionEndArnoldString( "motion_end" );
 
 void warnIfUnsupported( const IECoreScene::SpherePrimitive *sphere )
 {

@@ -65,229 +65,230 @@ namespace
 class OSLObjectPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		OSLObjectPlugAdder( GraphComponentPtr plugsParent )
-			:   m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
+	OSLObjectPlugAdder( GraphComponentPtr plugsParent )
+		: m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
+	{
+		if( !m_plugsParent )
 		{
-			if( ! m_plugsParent )
-			{
-				throw IECore::Exception( "OSLObjectUI::PlugAdder constructor must be passed plug" );
-			}
-			buttonReleaseSignal().connect( boost::bind( &OSLObjectPlugAdder::buttonRelease, this, ::_2 ) );
+			throw IECore::Exception( "OSLObjectUI::PlugAdder constructor must be passed plug" );
+		}
+		buttonReleaseSignal().connect( boost::bind( &OSLObjectPlugAdder::buttonRelease, this, ::_2 ) );
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		if( !PlugAdder::canCreateConnection( endpoint ) )
+		{
+			return false;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		if( MetadataAlgo::readOnly( m_plugsParent.get() ) )
 		{
-			if( !PlugAdder::canCreateConnection( endpoint ) )
-			{
-				return false;
-			}
-
-			if( MetadataAlgo::readOnly( m_plugsParent.get() ) )
-			{
-				return false;
-			}
-
-			IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
-			return !availablePrimVars( plugAdderOptions.get(), endpoint ).empty();
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		return !availablePrimVars( plugAdderOptions.get(), endpoint ).empty();
+	}
+
+	void createConnection( Plug *endpoint ) override
+	{
+		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		vector<std::string> names = availablePrimVars( plugAdderOptions.get(), endpoint );
+
+		std::string picked = menuSignal()( "Connect To", names );
+		if( !picked.size() )
 		{
-			IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
-			vector<std::string> names = availablePrimVars( plugAdderOptions.get(), endpoint );
-
-			std::string picked = menuSignal()( "Connect To", names );
-			if( !picked.size() )
-			{
-				return;
-			}
-
-			NameValuePlug *newPlug = addPlug( picked, plugAdderOptions->member<IECore::Data>( picked ) );
-			newPlug->valuePlug()->setInput( endpoint );
+			return;
 		}
 
-	private :
-		std::set<std::string> usedNames() const
+		NameValuePlug *newPlug = addPlug( picked, plugAdderOptions->member<IECore::Data>( picked ) );
+		newPlug->valuePlug()->setInput( endpoint );
+	}
+
+private:
+
+	std::set<std::string> usedNames() const
+	{
+		std::set<std::string> used;
+		for( const auto &plug : NameValuePlug::Range( *m_plugsParent ) )
 		{
-			std::set<std::string> used;
-			for( const auto &plug : NameValuePlug::Range( *m_plugsParent ) )
+			if( !PlugAlgo::dependsOnCompute( plug->namePlug() ) )
 			{
-				if( !PlugAlgo::dependsOnCompute( plug->namePlug() ) )
+				used.insert( plug->namePlug()->getValue() );
+			}
+		}
+		return used;
+	}
+
+	NameValuePlug *addPlug( std::string primVarName, const IECore::Data *defaultData )
+	{
+		std::set<std::string> used = usedNames();
+
+		std::string plugName = "primitiveVariable";
+		PlugPtr valuePlug;
+		if( defaultData )
+		{
+			if( used.find( primVarName ) != used.end() )
+			{
+				std::string newName;
+				for( int i = 2;; i++ )
 				{
-					used.insert( plug->namePlug()->getValue() );
-				}
-			}
-			return used;
-		}
-
-		NameValuePlug* addPlug( std::string primVarName, const IECore::Data *defaultData )
-		{
-			std::set<std::string> used = usedNames();
-
-			std::string plugName = "primitiveVariable";
-			PlugPtr valuePlug;
-			if( defaultData )
-			{
-				if( used.find( primVarName ) != used.end() )
-				{
-					std::string newName;
-					for( int i = 2; ; i++ )
+					newName = primVarName + std::to_string( i );
+					if( used.find( newName ) == used.end() )
 					{
-						newName = primVarName + std::to_string( i );
-						if( used.find( newName ) == used.end() )
-						{
-							break;
-						}
+						break;
 					}
-					primVarName = newName;
 				}
-				valuePlug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic, defaultData );
+				primVarName = newName;
+			}
+			valuePlug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic, defaultData );
+		}
+		else
+		{
+			valuePlug = new GafferOSL::ClosurePlug( "value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic );
+			plugName = "closure";
+			primVarName = "";
+		}
+
+		UndoScope undoScope( m_plugsParent->ancestor<ScriptNode>() );
+
+		NameValuePlugPtr created = new Gaffer::NameValuePlug( primVarName, valuePlug, true, plugName );
+		m_plugsParent->addChild( created );
+		return created.get();
+	}
+
+	bool buttonRelease( const ButtonEvent &event )
+	{
+		if( MetadataAlgo::readOnly( m_plugsParent.get() ) )
+		{
+			return false;
+		}
+
+		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		vector<std::string> origNames = availablePrimVars( plugAdderOptions.get() );
+		map<std::string, std::string> nameMapping;
+		vector<std::string> standardMenuNames;
+		vector<std::string> customMenuNames;
+		vector<std::string> advancedMenuNames;
+		for( auto &n : origNames )
+		{
+			std::string menuName;
+			if( n.substr( 0, 6 ) == "custom" )
+			{
+				menuName = "Custom/" + n.substr( 6 );
+				customMenuNames.push_back( menuName );
+			}
+			else if( n == "closure" )
+			{
+				menuName = "Advanced/Closure";
+				advancedMenuNames.push_back( menuName );
 			}
 			else
 			{
-				valuePlug = new GafferOSL::ClosurePlug( "value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic );
-				plugName = "closure";
-				primVarName = "";
+				menuName = "Standard/" + n;
+				standardMenuNames.push_back( menuName );
 			}
-
-			UndoScope undoScope( m_plugsParent->ancestor<ScriptNode>() );
-
-			NameValuePlugPtr created = new Gaffer::NameValuePlug( primVarName, valuePlug, true, plugName );
-			m_plugsParent->addChild( created );
-			return created.get();
+			nameMapping[menuName] = n;
 		}
 
-		bool buttonRelease( const ButtonEvent &event )
+		vector<std::string> menuNames;
+		menuNames.insert( menuNames.end(), standardMenuNames.begin(), standardMenuNames.end() );
+		menuNames.insert( menuNames.end(), customMenuNames.begin(), customMenuNames.end() );
+		menuNames.insert( menuNames.end(), advancedMenuNames.begin(), advancedMenuNames.end() );
+		std::string picked = menuSignal()( "Add Input", menuNames );
+		if( !picked.size() )
 		{
-			if( MetadataAlgo::readOnly( m_plugsParent.get() ) )
+			return false;
+		}
+
+		std::string origName = nameMapping[picked];
+		addPlug( origName, plugAdderOptions->member<IECore::Data>( origName ) );
+
+		return true;
+	}
+
+	// Which prim vars are available that haven't already been used, and that match the input plug if provided
+	vector<std::string> availablePrimVars( const IECore::CompoundData *plugAdderOptions, const Plug *input = nullptr ) const
+	{
+		if( !plugAdderOptions )
+		{
+			throw IECore::Exception( "OSLObjectUI::PlugAdder requires plugAdderOptions metadata" );
+		}
+
+		IECore::DataPtr matchingDataType;
+		const ValuePlug *valueInput = IECore::runTimeCast<const ValuePlug>( input );
+		if( valueInput )
+		{
+			try
 			{
-				return false;
+				matchingDataType = PlugAlgo::getValueAsData( valueInput );
+			}
+			catch( ... )
+			{
+				// If we can't extract data, then it doesn't match any of our accepted plug types
+			}
+		}
+
+		vector<std::string> result;
+		std::set<std::string> used = usedNames();
+		for( auto it = plugAdderOptions->readable().begin(); it != plugAdderOptions->readable().end(); it++ )
+		{
+			std::string name = it->first;
+			// For plugs that aren't closures or custom, we need to check if we've already
+			// used the primitive variable name
+			if( it->second && name.substr( 0, 6 ) != "custom" && used.find( name ) != used.end() )
+			{
+				// Already added
+				continue;
 			}
 
-			IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
-			vector<std::string> origNames = availablePrimVars( plugAdderOptions.get() );
-			map<std::string, std::string> nameMapping;
-			vector<std::string> standardMenuNames;
-			vector<std::string> customMenuNames;
-			vector<std::string> advancedMenuNames;
-			for( auto &n : origNames )
+			if( input )
 			{
-				std::string menuName;
-				if( n.substr( 0, 6 ) == "custom" )
+				if( input->typeId() == GafferOSL::ClosurePlug::staticTypeId() )
 				{
-					menuName = "Custom/" + n.substr( 6 );
-					customMenuNames.push_back( menuName );
-				}
-				else if( n == "closure" )
-				{
-					menuName = "Advanced/Closure";
-					advancedMenuNames.push_back( menuName );
+					if( it->second )
+					{
+						continue;
+					}
 				}
 				else
 				{
-					menuName = "Standard/" + n;
-					standardMenuNames.push_back( menuName );
-				}
-				nameMapping[ menuName ] = n;
-			}
-
-			vector<std::string> menuNames;
-			menuNames.insert( menuNames.end(), standardMenuNames.begin(), standardMenuNames.end() );
-			menuNames.insert( menuNames.end(), customMenuNames.begin(), customMenuNames.end() );
-			menuNames.insert( menuNames.end(), advancedMenuNames.begin(), advancedMenuNames.end() );
-			std::string picked = menuSignal()( "Add Input", menuNames );
-			if( !picked.size() )
-			{
-				return false;
-			}
-
-			std::string origName = nameMapping[picked];
-			addPlug( origName, plugAdderOptions->member<IECore::Data>(origName) );
-
-			return true;
-		}
-
-		// Which prim vars are available that haven't already been used, and that match the input plug if provided
-		vector<std::string> availablePrimVars( const IECore::CompoundData* plugAdderOptions, const Plug *input = nullptr ) const
-		{
-			if( !plugAdderOptions )
-			{
-				throw IECore::Exception( "OSLObjectUI::PlugAdder requires plugAdderOptions metadata" );
-			}
-
-			IECore::DataPtr matchingDataType;
-			const ValuePlug *valueInput = IECore::runTimeCast< const ValuePlug >( input );
-			if( valueInput )
-			{
-				try
-				{
-					matchingDataType = PlugAlgo::getValueAsData( valueInput );
-				}
-				catch( ... )
-				{
-					// If we can't extract data, then it doesn't match any of our accepted plug types
-				}
-			}
-
-			vector<std::string> result;
-			std::set<std::string> used = usedNames();
-			for( auto it=plugAdderOptions->readable().begin(); it!=plugAdderOptions->readable().end(); it++ )
-			{
-				std::string name = it->first;
-				// For plugs that aren't closures or custom, we need to check if we've already
-				// used the primitive variable name
-				if( it->second && name.substr( 0, 6 ) != "custom" && used.find( name ) != used.end() )
-				{
-					// Already added
-					continue;
-				}
-
-				if( input )
-				{
-					if( input->typeId() == GafferOSL::ClosurePlug::staticTypeId() )
+					if( !matchingDataType || !it->second || matchingDataType->typeId() != it->second->typeId() )
 					{
-						if( it->second )
-						{
-							continue;
-						}
-					}
-					else
-					{
-						if( !matchingDataType || !it->second || matchingDataType->typeId() != it->second->typeId() )
-						{
-							continue;
-						}
+						continue;
 					}
 				}
-
-				result.push_back( name );
 			}
 
-			std::sort( result.begin(), result.end() );
-
-			return result;
+			result.push_back( name );
 		}
 
-		PlugPtr m_plugsParent;
+		std::sort( result.begin(), result.end() );
+
+		return result;
+	}
+
+	PlugPtr m_plugsParent;
 };
 
 struct Registration
 {
-		Registration()
-		{
-			NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLObjectUI.PlugAdder", &create );
-		}
+	Registration()
+	{
+		NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLObjectUI.PlugAdder", &create );
+	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
-		{
-			return new OSLObjectPlugAdder( parent );
-		}
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		return new OSLObjectPlugAdder( parent );
+	}
 };
 
 Registration g_registration;

@@ -46,7 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( TimeWarp );
 size_t TimeWarp::g_firstPlugIndex;
 
 TimeWarp::TimeWarp( const std::string &name )
-	:	ContextProcessor( name )
+	: ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FloatPlug( "speed", Plug::In, 1.0f ) );

@@ -69,56 +69,54 @@ const ScenePlug::ScenePath g_root;
 class Parent::ParentScope : public ScenePlug::GlobalScope
 {
 
-	public :
+public:
 
-		ParentScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const Context *context )
-			:	ScenePlug::GlobalScope( context )
+	ParentScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const Context *context )
+		: ScenePlug::GlobalScope( context )
+	{
+		const string parentVariable = parent->parentVariablePlug()->getValue();
+		if( !parentVariable.empty() )
 		{
-			const string parentVariable = parent->parentVariablePlug()->getValue();
-			if( !parentVariable.empty() )
-			{
-				ScenePlug::pathToString( sourcePath, m_sourceString );
-				set( parentVariable, &m_sourceString );
-			}
+			ScenePlug::pathToString( sourcePath, m_sourceString );
+			set( parentVariable, &m_sourceString );
 		}
+	}
 
-	private :
+private:
 
-		std::string m_sourceString;
-
+	std::string m_sourceString;
 };
 
 // Context scope used for evaluating the `children` plugs.
 class Parent::SourceScope : public ParentScope
 {
 
-	public :
+public:
 
-		SourceScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath, const Context *context )
-			:	ParentScope( parent, sourcePath, context )
-		{
-			Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( parent->mappingPlug()->getValue() );
+	SourceScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath, const Context *context )
+		: ParentScope( parent, sourcePath, context )
+	{
+		Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( parent->mappingPlug()->getValue() );
 
-			const Private::ChildNamesMap::Input &input = mapping->input( branchPath[0] );
-			m_sourcePlug = parent->childrenPlug()->getChild<ScenePlug>( input.index );
+		const Private::ChildNamesMap::Input &input = mapping->input( branchPath[0] );
+		m_sourcePlug = parent->childrenPlug()->getChild<ScenePlug>( input.index );
 
-			m_sourcePath.reserve( branchPath.size() );
-			m_sourcePath.push_back( input.name );
-			m_sourcePath.insert( m_sourcePath.end(), branchPath.begin() + 1, branchPath.end() );
+		m_sourcePath.reserve( branchPath.size() );
+		m_sourcePath.push_back( input.name );
+		m_sourcePath.insert( m_sourcePath.end(), branchPath.begin() + 1, branchPath.end() );
 
-			set( ScenePlug::scenePathContextName, &m_sourcePath );
-		}
+		set( ScenePlug::scenePathContextName, &m_sourcePath );
+	}
 
-		const ScenePlug *sourcePlug() const
-		{
-			return m_sourcePlug;
-		}
+	const ScenePlug *sourcePlug() const
+	{
+		return m_sourcePlug;
+	}
 
-	private :
+private:
 
-		const ScenePlug *m_sourcePlug;
-		ScenePlug::ScenePath m_sourcePath;
-
+	const ScenePlug *m_sourcePlug;
+	ScenePlug::ScenePath m_sourcePath;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -130,7 +128,7 @@ GAFFER_NODE_DEFINE_TYPE( Parent );
 size_t Parent::g_firstPlugIndex = 0;
 
 Parent::Parent( const std::string &name )
-	:	BranchCreator( name )
+	: BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ArrayPlug( "children", Plug::In, new ScenePlug( "child0" ) ) );
@@ -430,7 +428,8 @@ IECore::ConstPathMatcherDataPtr Parent::computeBranchSet( const ScenePath &sourc
 	ParentScope s( this, sourcePath, context );
 	s.set( ScenePlug::setNameContextName, &setName );
 
-	vector<ConstPathMatcherDataPtr> inputSets; inputSets.reserve( childrenPlug()->children().size() );
+	vector<ConstPathMatcherDataPtr> inputSets;
+	inputSets.reserve( childrenPlug()->children().size() );
 	for( auto &p : ScenePlug::Range( *childrenPlug() ) )
 	{
 		inputSets.push_back( p->setPlug()->getValue() );

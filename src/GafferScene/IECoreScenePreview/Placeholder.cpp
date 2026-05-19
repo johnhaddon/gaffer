@@ -47,7 +47,7 @@ const unsigned int Placeholder::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Placeholder );
 
 Placeholder::Placeholder( const Imath::Box3f &bound, const Placeholder::Mode mode )
-	:	 m_mode( mode ), m_bound( bound )
+	: m_mode( mode ), m_bound( bound )
 {
 }
 

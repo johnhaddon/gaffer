@@ -63,19 +63,18 @@ namespace
 class ImageProcessorSerialiser : public GafferBindings::NodeSerialiser
 {
 
-	public :
+public:
 
-		bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		auto imageProcessor = static_cast<const ImageProcessor *>( child->parent() );
+		if( child == imageProcessor->outPlug() )
 		{
-			auto imageProcessor = static_cast<const ImageProcessor *>( child->parent() );
-			if( child == imageProcessor->outPlug() )
-			{
-				return false;
-			}
-
-			return NodeSerialiser::childNeedsSerialisation( child, serialisation );
+			return false;
 		}
 
+		return NodeSerialiser::childNeedsSerialisation( child, serialisation );
+	}
 };
 
 } // namespace
@@ -85,15 +84,7 @@ void GafferImageModule::bindImageProcessor()
 
 	using ImageProcessorWrapper = ComputeNodeWrapper<ImageProcessor>;
 	GafferBindings::DependencyNodeClass<ImageProcessor, ImageProcessorWrapper>()
-		.def( init<const std::string &, size_t, size_t>(
-				(
-					arg( "name" ) = GraphComponent::defaultName<ImageProcessor>(),
-					arg( "minInputs" ),
-					arg( "maxInputs" ) = std::numeric_limits<size_t>::max()
-				)
-			)
-		)
-	;
+		.def( init<const std::string &, size_t, size_t>( ( arg( "name" ) = GraphComponent::defaultName<ImageProcessor>(), arg( "minInputs" ), arg( "maxInputs" ) = std::numeric_limits<size_t>::max() ) ) );
 
 	Serialisation::registerSerialiser( ImageProcessor::staticTypeId(), new ImageProcessorSerialiser );
 
@@ -108,8 +99,7 @@ void GafferImageModule::bindImageProcessor()
 
 		enum_<DeleteChannels::Mode>( "Mode" )
 			.value( "Keep", DeleteChannels::Keep )
-			.value( "Delete", DeleteChannels::Delete )
-		;
+			.value( "Delete", DeleteChannels::Delete );
 	}
 
 	{
@@ -129,8 +119,7 @@ void GafferImageModule::bindImageProcessor()
 			.value( "Difference", Merge::Difference )
 			.value( "Under", Merge::Under )
 			.value( "Min", Merge::Min )
-			.value( "Max", Merge::Max )
-		;
+			.value( "Max", Merge::Max );
 	}
 
 	{
@@ -139,8 +128,6 @@ void GafferImageModule::bindImageProcessor()
 		enum_<Shuffle::MissingSourceMode>( "MissingSourceMode" )
 			.value( "Ignore", Shuffle::MissingSourceMode::Ignore )
 			.value( "Error", Shuffle::MissingSourceMode::Error )
-			.value( "Black", Shuffle::MissingSourceMode::Black )
-		;
+			.value( "Black", Shuffle::MissingSourceMode::Black );
 	}
-
 }

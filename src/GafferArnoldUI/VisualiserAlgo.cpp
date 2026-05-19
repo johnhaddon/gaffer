@@ -135,18 +135,18 @@ void remapInputConnections( const InternedString &shader, const InternedString &
 
 // Sets outName in outParams if inName is set in inParams.
 // Arnold data types not representable in OSL will be converted accordingly
-void copyAndConvertIfSet( const InternedString &inName,  const CompoundDataMap &inParams, const InternedString &outName, CompoundDataMap &outParams )
+void copyAndConvertIfSet( const InternedString &inName, const CompoundDataMap &inParams, const InternedString &outName, CompoundDataMap &outParams )
 {
 	const auto &it = inParams.find( inName );
 	if( it != inParams.end() )
 	{
 		if( const BoolData *boolData = dynamic_cast<const BoolData *>( it->second.get() ) )
 		{
-			outParams[ outName ] = new IntData( 1 ? boolData->readable() : 0 );
+			outParams[outName] = new IntData( 1 ? boolData->readable() : 0 );
 		}
 		else
 		{
-			outParams[ outName ] = it->second;
+			outParams[outName] = it->second;
 		}
 	};
 }
@@ -212,7 +212,7 @@ bool substituteWithOSL( const IECore::InternedString &handle, ShaderNetwork *net
 	return true;
 }
 
-} // anon namespace
+} // namespace
 
 IECoreScene::ShaderNetworkPtr GafferArnoldUI::Private::VisualiserAlgo::conformToOSLNetwork( const IECoreScene::ShaderNetwork::Parameter &output, const IECoreScene::ShaderNetwork *shaderNetwork )
 {

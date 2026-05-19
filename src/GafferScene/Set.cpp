@@ -59,7 +59,7 @@ struct PathMatcherScope : public ScenePlug::GlobalScope
 {
 
 	PathMatcherScope( const Context *context, const string &setVariable, const InternedString &setName )
-		:	ScenePlug::GlobalScope( context ), m_setName( setName )
+		: ScenePlug::GlobalScope( context ), m_setName( setName )
 	{
 		if( !setVariable.empty() )
 		{
@@ -70,10 +70,9 @@ struct PathMatcherScope : public ScenePlug::GlobalScope
 		}
 	}
 
-	private :
+private:
 
-		const InternedString m_setName;
-
+	const InternedString m_setName;
 };
 
 InternedString g_ellipsis( "..." );
@@ -89,7 +88,7 @@ GAFFER_NODE_DEFINE_TYPE( Set );
 size_t Set::g_firstPlugIndex = 0;
 
 Set::Set( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Gaffer::IntPlug( "mode", Gaffer::Plug::In, Create, Create, Remove ) );
@@ -318,7 +317,7 @@ IECore::ConstInternedStringVectorDataPtr Set::computeSetNames( const Gaffer::Con
 	result.reserve( result.size() + tokenizedNames.size() );
 	std::copy_if(
 		tokenizedNames.begin(), tokenizedNames.end(), std::back_inserter( result ),
-		[] ( const InternedString &s ) {
+		[]( const InternedString &s ) {
 			return !StringAlgo::hasWildcards( s.string() );
 		}
 	);

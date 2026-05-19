@@ -53,13 +53,13 @@ using namespace IECoreScene;
 using namespace Gaffer;
 using namespace GafferScene;
 
-namespace {
+namespace
+{
 
 // Copied from Instancer.cpp - maybe should be shared somehow if it gets reused?
 struct IdData
 {
-	IdData() :
-		intElements( nullptr ), int64Elements( nullptr )
+	IdData() : intElements( nullptr ), int64Elements( nullptr )
 	{
 	}
 
@@ -99,17 +99,16 @@ struct IdData
 	{
 		if( intElements )
 		{
-			return (*intElements)[i];
+			return ( *intElements )[i];
 		}
 		else
 		{
-			return (*int64Elements)[i];
+			return ( *int64Elements )[i];
 		}
 	}
 
 	const std::vector<int> *intElements;
 	const std::vector<int64_t> *int64Elements;
-
 };
 
 } // namespace
@@ -119,11 +118,11 @@ GAFFER_NODE_DEFINE_TYPE( DeletePoints );
 size_t DeletePoints::g_firstPlugIndex = 0;
 
 DeletePoints::DeletePoints( const std::string &name )
-	:	Deformer( name )
+	: Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild(new IntPlug(
+	addChild( new IntPlug(
 		"selectionMode", Plug::In,
 		(int)SelectionMode::VertexPrimitiveVariable, (int)SelectionMode::VertexPrimitiveVariable, (int)SelectionMode::IdList
 	) );
@@ -212,16 +211,14 @@ const Gaffer::BoolPlug *DeletePoints::ignoreMissingVariablePlug() const
 
 bool DeletePoints::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		Deformer::affectsProcessedObject( input ) ||
+	return Deformer::affectsProcessedObject( input ) ||
 		input == selectionModePlug() ||
 		input == pointsPlug() ||
 		input == idListVariablePlug() ||
 		input == idListPlug() ||
 		input == idPlug() ||
 		input == invertPlug() ||
-		input == ignoreMissingVariablePlug()
-	;
+		input == ignoreMissingVariablePlug();
 }
 
 void DeletePoints::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -272,7 +269,6 @@ IECore::ConstObjectPtr DeletePoints::computeProcessedObject( const ScenePath &pa
 	}
 
 
-
 	if( selectionMode == SelectionMode::IdListPrimitiveVariable || selectionMode == SelectionMode::IdList )
 	{
 		IdData idList;
@@ -309,19 +305,18 @@ IECore::ConstObjectPtr DeletePoints::computeProcessedObject( const ScenePath &pa
 
 		if( ids.size() )
 		{
-			std::unordered_set< int64_t > idSet;
+			std::unordered_set<int64_t> idSet;
 
 			for( size_t i = 0; i < numIds; i++ )
 			{
 				idSet.insert( idList.element( i ) );
-
 			}
 
 			for( size_t j = 0; j < numPoints; j++ )
 			{
 				if( idSet.count( ids.element( j ) ) )
 				{
-					inactive[ j ] = true;
+					inactive[j] = true;
 				}
 			}
 		}
@@ -329,7 +324,7 @@ IECore::ConstObjectPtr DeletePoints::computeProcessedObject( const ScenePath &pa
 		{
 			for( size_t i = 0; i < numIds; i++ )
 			{
-				inactive[ idList.element(i) ] = true;
+				inactive[idList.element( i )] = true;
 			}
 		}
 

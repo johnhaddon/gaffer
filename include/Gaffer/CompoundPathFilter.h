@@ -48,41 +48,40 @@ namespace Gaffer
 class GAFFER_API CompoundPathFilter : public Gaffer::PathFilter
 {
 
-	public :
+public:
 
-		using Filters = std::vector<PathFilterPtr>;
+	using Filters = std::vector<PathFilterPtr>;
 
-		explicit CompoundPathFilter( IECore::CompoundDataPtr userData = nullptr );
-		~CompoundPathFilter() override;
+	explicit CompoundPathFilter( IECore::CompoundDataPtr userData = nullptr );
+	~CompoundPathFilter() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::CompoundPathFilter, CompoundPathFilterTypeId, PathFilter );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::CompoundPathFilter, CompoundPathFilterTypeId, PathFilter );
 
-		void addFilter( PathFilterPtr filter );
-		void removeFilter( PathFilter *filter );
+	void addFilter( PathFilterPtr filter );
+	void removeFilter( PathFilter *filter );
 
-		void setFilters( const Filters &filters );
-		void getFilters( Filters &filters ) const;
+	void setFilters( const Filters &filters );
+	void getFilters( Filters &filters ) const;
 
-	protected :
+protected:
 
-		void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
+	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-	private :
+private:
 
-		// Doesn't emit changed signal.
-		void addFilterInternal( PathFilterPtr filter );
-		void filterChanged();
+	// Doesn't emit changed signal.
+	void addFilterInternal( PathFilterPtr filter );
+	void filterChanged();
 
-		struct Filter
-		{
-			PathFilterPtr filter;
-			Signals::ScopedConnection filterChangedConnection;
-		};
+	struct Filter
+	{
+		PathFilterPtr filter;
+		Signals::ScopedConnection filterChangedConnection;
+	};
 
-		// Using a list rather than a vector, because
-		// scoped_connections can't be copy constructed.
-		std::list<Filter> m_filters;
-
+	// Using a list rather than a vector, because
+	// scoped_connections can't be copy constructed.
+	std::list<Filter> m_filters;
 };
 
 IE_CORE_DECLAREPTR( CompoundPathFilter )

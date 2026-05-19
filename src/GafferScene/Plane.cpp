@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( Plane );
 size_t Plane::g_firstPlugIndex = 0;
 
 Plane::Plane( const std::string &name )
-	:	ObjectSource( name, "plane" )
+	: ObjectSource( name, "plane" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V2fPlug( "dimensions", Plug::In, V2f( 1.0f ), V2f( 0.0f ) ) );
@@ -85,7 +85,7 @@ void Plane::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ObjectSource::affects( input, outputs );
 
-	if ( input->parent<V2fPlug>() == dimensionsPlug() || input->parent<V2iPlug>() == divisionsPlug() )
+	if( input->parent<V2fPlug>() == dimensionsPlug() || input->parent<V2iPlug>() == divisionsPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}

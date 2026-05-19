@@ -56,50 +56,49 @@ namespace GafferImage
 class GAFFERIMAGE_API Checkerboard : public FlatImageSource
 {
 
-	public :
+public:
 
-		explicit Checkerboard( const std::string &name=defaultName<Checkerboard>() );
-		~Checkerboard() override;
+	explicit Checkerboard( const std::string &name = defaultName<Checkerboard>() );
+	~Checkerboard() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Checkerboard, CheckerboardTypeId, FlatImageSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Checkerboard, CheckerboardTypeId, FlatImageSource );
 
-		GafferImage::FormatPlug *formatPlug();
-		const GafferImage::FormatPlug *formatPlug() const;
+	GafferImage::FormatPlug *formatPlug();
+	const GafferImage::FormatPlug *formatPlug() const;
 
-		Gaffer::Color4fPlug *colorAPlug();
-		const Gaffer::Color4fPlug *colorAPlug() const;
+	Gaffer::Color4fPlug *colorAPlug();
+	const Gaffer::Color4fPlug *colorAPlug() const;
 
-		Gaffer::Color4fPlug *colorBPlug();
-		const Gaffer::Color4fPlug *colorBPlug() const;
+	Gaffer::Color4fPlug *colorBPlug();
+	const Gaffer::Color4fPlug *colorBPlug() const;
 
-		Gaffer::V2fPlug *sizePlug();
-		const Gaffer::V2fPlug *sizePlug() const;
+	Gaffer::V2fPlug *sizePlug();
+	const Gaffer::V2fPlug *sizePlug() const;
 
-		Gaffer::StringPlug *layerPlug();
-		const Gaffer::StringPlug *layerPlug() const;
+	Gaffer::StringPlug *layerPlug();
+	const Gaffer::StringPlug *layerPlug() const;
 
-		Gaffer::Transform2DPlug *transformPlug();
-		const Gaffer::Transform2DPlug *transformPlug() const;
+	Gaffer::Transform2DPlug *transformPlug();
+	const Gaffer::Transform2DPlug *transformPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Checkerboard )

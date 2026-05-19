@@ -42,7 +42,7 @@
 // GafferImageTest, or including headers for linking to it. the GAFFERIMAGETEST_API
 // macro is the one that is used in the class definitions.
 #ifdef GafferImageTest_EXPORTS
-	#define GAFFERIMAGETEST_API IECORE_EXPORT
+#define GAFFERIMAGETEST_API IECORE_EXPORT
 #else
-	#define GAFFERIMAGETEST_API IECORE_IMPORT
+#define GAFFERIMAGETEST_API IECORE_IMPORT
 #endif

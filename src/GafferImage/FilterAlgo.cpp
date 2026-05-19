@@ -62,52 +62,51 @@ namespace
 class SmoothGaussian2D : public OIIO::Filter2D
 {
 
-	public :
+public:
 
-		SmoothGaussian2D( float width, float height )
-			: Filter2D( width, height ), m_radiusInverse( 2.0f / width, 2.0f / height )
-		{
-		}
+	SmoothGaussian2D( float width, float height )
+		: Filter2D( width, height ), m_radiusInverse( 2.0f / width, 2.0f / height )
+	{
+	}
 
-		~SmoothGaussian2D() override
-		{
-		}
+	~SmoothGaussian2D() override
+	{
+	}
 
-		float operator()( float x, float y ) const override
-		{
-			return gauss1d( x * m_radiusInverse.x ) * gauss1d( y * m_radiusInverse.y );
-		}
+	float operator () ( float x, float y ) const override
+	{
+		return gauss1d( x * m_radiusInverse.x ) * gauss1d( y * m_radiusInverse.y );
+	}
 
-		bool separable() const override
-		{
-			return true;
-		}
+	bool separable() const override
+	{
+		return true;
+	}
 
-		float xfilt( float x ) const override
-		{
-			return gauss1d( x * m_radiusInverse.x );
-		}
+	float xfilt( float x ) const override
+	{
+		return gauss1d( x * m_radiusInverse.x );
+	}
 
-		float yfilt( float y ) const override
-		{
-			return gauss1d( y * m_radiusInverse.y );
-		}
+	float yfilt( float y ) const override
+	{
+		return gauss1d( y * m_radiusInverse.y );
+	}
 
-		OIIO::string_view name() const override
-		{
-			return "smoothGaussian";
-		}
+	OIIO::string_view name() const override
+	{
+		return "smoothGaussian";
+	}
 
-	private :
+private:
 
-		static float gauss1d( float x )
-		{
-			x = fabsf( x );
-			return ( x < 1.0f ) ? OIIO::fast_exp( -5.0f * ( x * x ) ) : 0.0f;
-		}
+	static float gauss1d( float x )
+	{
+		x = fabsf( x );
+		return ( x < 1.0f ) ? OIIO::fast_exp( -5.0f * ( x * x ) ) : 0.0f;
+	}
 
-		V2f m_radiusInverse;
-
+	V2f m_radiusInverse;
 };
 
 // OIIO's default cubic is a general one with a protected m_a member that can be
@@ -117,55 +116,58 @@ class SmoothGaussian2D : public OIIO::Filter2D
 
 class FilterCubicSimple2D : public OIIO::Filter2D
 {
-	public:
-		FilterCubicSimple2D( float width, float height )
-			: Filter2D( width, height ),
-			m_wrad_inv( 2.0f/width ), m_hrad_inv( 2.0f/height )
+public:
+
+	FilterCubicSimple2D( float width, float height )
+		: Filter2D( width, height ),
+		  m_wrad_inv( 2.0f / width ),
+		  m_hrad_inv( 2.0f / height )
+	{
+	}
+
+	~FilterCubicSimple2D( void ) override
+	{
+	}
+
+	float operator () ( float x, float y ) const override
+	{
+		return cubicSimple( x * m_wrad_inv ) * cubicSimple( y * m_hrad_inv );
+	}
+
+	bool separable() const override
+	{
+		return true;
+	}
+
+	float xfilt( float x ) const override
+	{
+		return cubicSimple( x * m_wrad_inv );
+	}
+
+	float yfilt( float y ) const override
+	{
+		return cubicSimple( y * m_hrad_inv );
+	}
+
+	OIIO::string_view name() const override
+	{
+		return "cubic";
+	}
+
+protected:
+
+	static float cubicSimple( float x )
+	{
+		x = fabsf( x );
+		if( x > 1.0f )
 		{
+			return 0.0f;
 		}
 
-		~FilterCubicSimple2D( void ) override
-		{
-		}
+		return x * x * ( 2.0f * x - 3.0f ) + 1.0f;
+	}
 
-		float operator()( float x, float y ) const override
-		{
-			return cubicSimple( x * m_wrad_inv ) * cubicSimple( y * m_hrad_inv );
-		}
-
-		bool separable() const override
-		{
-			return true;
-		}
-
-		float xfilt( float x ) const override
-		{
-			return cubicSimple( x * m_wrad_inv );
-		}
-
-		float yfilt( float y ) const override
-		{
-			return cubicSimple( y * m_hrad_inv );
-		}
-
-		OIIO::string_view name() const override
-		{
-			return "cubic";
-		}
-	protected:
-
-		static float cubicSimple( float x )
-		{
-			x = fabsf (x);
-			if (x > 1.0f)
-			{
-				return 0.0f;
-			}
-
-			return x*x*(2.0f * x - 3.0f) + 1.0f;
-		}
-
-		float m_wrad_inv, m_hrad_inv;
+	float m_wrad_inv, m_hrad_inv;
 };
 
 
@@ -236,8 +238,8 @@ tbb::spin_rw_mutex g_filtersInitMutex;
 
 std::vector<FilterPair> getAllFilters()
 {
-	std::vector< FilterPair > filters;
-	for( int i = 0, e = OIIO::Filter2D::num_filters();  i < e;  ++i )
+	std::vector<FilterPair> filters;
+	for( int i = 0, e = OIIO::Filter2D::num_filters(); i < e; ++i )
 	{
 		OIIO::FilterDesc fd;
 		OIIO::Filter2D::get_filterdesc( i, &fd );
@@ -255,12 +257,12 @@ std::vector<FilterPair> getAllFilters()
 			filters.push_back( FilterPair( fd.name, OIIO::Filter2D::create( fd.name, width, width ) ) );
 		}
 	}
-	filters.push_back( FilterPair("smoothGaussian", new SmoothGaussian2D( 3.0f, 3.0f ) ) );
+	filters.push_back( FilterPair( "smoothGaussian", new SmoothGaussian2D( 3.0f, 3.0f ) ) );
 
 	return filters;
 }
 
-}
+} // namespace
 
 const std::vector<std::string> &GafferImage::FilterAlgo::filterNames()
 {
@@ -273,7 +275,7 @@ const std::vector<std::string> &GafferImage::FilterAlgo::filterNames()
 			if( lock.upgrade_to_writer() )
 			{
 				std::vector<FilterPair> filters = getAllFilters();
-				for( unsigned int i = 0;  i < filters.size();  ++i )
+				for( unsigned int i = 0; i < filters.size(); ++i )
 				{
 					names.push_back( filters[i].first );
 				}
@@ -296,9 +298,9 @@ const OIIO::Filter2D *GafferImage::FilterAlgo::acquireFilter( const std::string 
 			if( lock.upgrade_to_writer() )
 			{
 				std::vector<FilterPair> filters = getAllFilters();
-				for( unsigned int i = 0;  i < filters.size();  ++i )
+				for( unsigned int i = 0; i < filters.size(); ++i )
 				{
-					filterMap[ filters[i].first ] = filters[i].second;
+					filterMap[filters[i].first] = filters[i].second;
 				}
 			}
 		}
@@ -335,7 +337,8 @@ float GafferImage::FilterAlgo::sampleParallelogram( Sampler &sampler, const V2f 
 	// the corner min bound is below the pixel center
 	Box2i pixelBounds(
 		V2i( (int)ceilf( cornerBounds.min.x - 0.5 ), (int)ceilf( cornerBounds.min.y - 0.5 ) ),
-		V2i( (int)floorf( cornerBounds.max.x - 0.5 ) + 1, (int)floorf( cornerBounds.max.y - 0.5 ) + 1 ) );
+		V2i( (int)floorf( cornerBounds.max.x - 0.5 ) + 1, (int)floorf( cornerBounds.max.y - 0.5 ) + 1 )
+	);
 
 	// Invert the 2x2 Matrix formed by the derivative vectors so we can go
 	// from source pixels into the filter's coordinate system
@@ -353,7 +356,7 @@ float GafferImage::FilterAlgo::sampleParallelogram( Sampler &sampler, const V2f 
 			V2f offset = V2f( x + 0.5f, y + 0.5f ) - p;
 			V2f filterPos = offset[0] * xstep + offset[1] * ystep;
 
-			float w = (*filter)( filterPos.x, filterPos.y );
+			float w = ( *filter )( filterPos.x, filterPos.y );
 
 			// \todo : I can't think of any way to keep this around cleanly for testing, since
 			// it's right down in this inner loop, but replacing the filter with one value for
@@ -388,7 +391,8 @@ float GafferImage::FilterAlgo::sampleBox( Sampler &sampler, const V2f &p, float 
 	// the corner min bound is below the pixel center
 	Box2i pixelBounds(
 		V2i( (int)ceilf( bounds.min.x - 0.5 ), (int)ceilf( bounds.min.y - 0.5 ) ),
-		V2i( (int)floorf( bounds.max.x - 0.5 ) + 1, (int)floorf( bounds.max.y - 0.5 ) + 1 ) );
+		V2i( (int)floorf( bounds.max.x - 0.5 ) + 1, (int)floorf( bounds.max.y - 0.5 ) + 1 )
+	);
 
 	float totalW = 0.0f;
 	float v = 0.0f;
@@ -405,7 +409,7 @@ float GafferImage::FilterAlgo::sampleBox( Sampler &sampler, const V2f &p, float 
 		for( int i = 0; i < xWidth; i++ )
 		{
 			// Use the scratch memory passed in to hold a row of filter weights
-			scratchMemory[i] = filter->xfilt( ( (pixelBounds.min.x + i) + 0.5f - p.x ) * xscale );
+			scratchMemory[i] = filter->xfilt( ( ( pixelBounds.min.x + i ) + 0.5f - p.x ) * xscale );
 		}
 
 		Imath::Box2i visitBounds = pixelBounds;
@@ -416,9 +420,8 @@ float GafferImage::FilterAlgo::sampleBox( Sampler &sampler, const V2f &p, float 
 			float yFilterWeight = filter->yfilt( ( y + 0.5f - p.y ) * yscale );
 			sampler.visitPixels(
 				visitBounds,
-				[ &totalW, &v, &pixelBounds, &scratchMemory, &yFilterWeight ] ( float value, int x, int y )
-				{
-					float w = scratchMemory[ x - pixelBounds.min.x ] * yFilterWeight;
+				[&totalW, &v, &pixelBounds, &scratchMemory, &yFilterWeight]( float value, int x, int y ) {
+					float w = scratchMemory[x - pixelBounds.min.x] * yFilterWeight;
 
 					// \todo : I can't think of any way to keep this around cleanly for testing, since
 					// it's right down in this inner loop, but replacing the filter with one value for
@@ -434,14 +437,11 @@ float GafferImage::FilterAlgo::sampleBox( Sampler &sampler, const V2f &p, float 
 	}
 	else
 	{
-		sampler.visitPixels( pixelBounds,
-			[ &totalW, &v, &p, &xscale, &yscale, &filter ] ( float value, int x, int y )
-			{
-				float w = (*filter)( ( x + 0.5f - p.x ) * xscale, ( y + 0.5f - p.y ) * yscale );
-				totalW += w;
-				v += w * value;
-			}
-		);
+		sampler.visitPixels( pixelBounds, [&totalW, &v, &p, &xscale, &yscale, &filter]( float value, int x, int y ) {
+			float w = ( *filter )( ( x + 0.5f - p.x ) * xscale, ( y + 0.5f - p.y ) * yscale );
+			totalW += w;
+			v += w * value;
+		} );
 	}
 
 	if( totalW != 0.0f )

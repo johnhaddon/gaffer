@@ -57,79 +57,78 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API ImageSelectionTool : public GafferUI::Tool
 {
 
-	public :
+public:
 
-		explicit ImageSelectionTool( GafferUI::View *view, const std::string &name = defaultName<ImageSelectionTool>() );
+	explicit ImageSelectionTool( GafferUI::View *view, const std::string &name = defaultName<ImageSelectionTool>() );
 
-		~ImageSelectionTool() override;
+	~ImageSelectionTool() override;
 
-		std::string status() const;
+	std::string status() const;
 
-		using StatusChangedSignal = Gaffer::Signals::Signal<void (ImageSelectionTool &)>;
-		StatusChangedSignal &statusChangedSignal();
+	using StatusChangedSignal = Gaffer::Signals::Signal<void( ImageSelectionTool & )>;
+	StatusChangedSignal &statusChangedSignal();
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::ImageSelectionTool, ImageSelectionToolTypeId, GafferUI::Tool );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::ImageSelectionTool, ImageSelectionToolTypeId, GafferUI::Tool );
 
-		Gaffer::StringPlug *selectModePlug();
-		const Gaffer::StringPlug *selectModePlug() const;
+	Gaffer::StringPlug *selectModePlug();
+	const Gaffer::StringPlug *selectModePlug() const;
 
-	private :
+private:
 
-		IE_CORE_FORWARDDECLARE( Rectangle );
+	IE_CORE_FORWARDDECLARE( Rectangle );
 
-		// We connect view->inPlug() as the input to this, so
-		// we'll get notified via plugDirtiedSignal() when the
-		// image changes.
-		GafferImage::ImagePlug *imagePlug();
-		const GafferImage::ImagePlug *imagePlug() const;
+	// We connect view->inPlug() as the input to this, so
+	// we'll get notified via plugDirtiedSignal() when the
+	// image changes.
+	GafferImage::ImagePlug *imagePlug();
+	const GafferImage::ImagePlug *imagePlug() const;
 
-		GafferImageUI::ImageGadget *imageGadget();
+	GafferImageUI::ImageGadget *imageGadget();
 
-		void updateRenderManifest();
+	void updateRenderManifest();
 
-		void plugDirtied( const Gaffer::Plug *plug );
+	void plugDirtied( const Gaffer::Plug *plug );
 
-		IECore::PathMatcher pathsForIDs( const std::vector<uint32_t> &ids );
-		void idsForPaths( const IECore::PathMatcher &paths, std::vector<uint32_t> &result );
+	IECore::PathMatcher pathsForIDs( const std::vector<uint32_t> &ids );
+	void idsForPaths( const IECore::PathMatcher &paths, std::vector<uint32_t> &result );
 
-		std::optional<uint32_t> pixelID( const Imath::V2i &pixel, bool instance );
-		std::unordered_set<uint32_t> rectIDs( const Imath::Box2i &rect, bool instance );
+	std::optional<uint32_t> pixelID( const Imath::V2i &pixel, bool instance );
+	std::unordered_set<uint32_t> rectIDs( const Imath::Box2i &rect, bool instance );
 
-		void selectedPathsChanged();
+	void selectedPathsChanged();
 
-		void updateSelectedIDs();
+	void updateSelectedIDs();
 
-		void preRender();
+	void preRender();
 
-		bool keyPress( const GafferUI::KeyEvent &event );
-		bool buttonPress( const GafferUI::ButtonEvent &event );
-		bool buttonRelease( const GafferUI::ButtonEvent &event );
-		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool dragMove( const GafferUI::DragDropEvent &event );
-		bool dragEnd( const GafferUI::DragDropEvent &event );
-		bool mouseMove( const GafferUI::ButtonEvent &event );
-		bool leave( const GafferUI::ButtonEvent &event );
+	bool keyPress( const GafferUI::KeyEvent &event );
+	bool buttonPress( const GafferUI::ButtonEvent &event );
+	bool buttonRelease( const GafferUI::ButtonEvent &event );
+	IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool dragMove( const GafferUI::DragDropEvent &event );
+	bool dragEnd( const GafferUI::DragDropEvent &event );
+	bool mouseMove( const GafferUI::ButtonEvent &event );
+	bool leave( const GafferUI::ButtonEvent &event );
 
-		class DragOverlay;
-		DragOverlay *dragOverlay();
+	class DragOverlay;
+	DragOverlay *dragOverlay();
 
-		bool m_acceptedButtonPress = false;
-		bool m_initiatedDrag = false;
+	bool m_acceptedButtonPress = false;
+	bool m_initiatedDrag = false;
 
-		std::shared_ptr<const GafferScene::RenderManifest> m_renderManifest;
-		bool m_manifestDirty;
+	std::shared_ptr<const GafferScene::RenderManifest> m_renderManifest;
+	bool m_manifestDirty;
 
-		std::string m_manifestError;
-		std::string m_infoStatus;
-		StatusChangedSignal m_statusChangedSignal;
+	std::string m_manifestError;
+	std::string m_infoStatus;
+	StatusChangedSignal m_statusChangedSignal;
 
-		std::vector<uint32_t> m_selectedIDs;
-		Gaffer::Signals::ScopedConnection m_selectedPathsChangedConnection;
+	std::vector<uint32_t> m_selectedIDs;
+	Gaffer::Signals::ScopedConnection m_selectedPathsChangedConnection;
 
-		static size_t g_firstPlugIndex;
-		static ToolDescription<ImageSelectionTool, GafferImageUI::ImageView> g_imageToolDescription;
-
+	static size_t g_firstPlugIndex;
+	static ToolDescription<ImageSelectionTool, GafferImageUI::ImageView> g_imageToolDescription;
 };
 
 IE_CORE_DECLAREPTR( ImageSelectionTool )

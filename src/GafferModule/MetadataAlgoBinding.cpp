@@ -184,7 +184,7 @@ void copyIfWrapper( const GraphComponent &from, GraphComponent &to, object predi
 	IECorePython::ScopedGILRelease gilRelease;
 	copyIf(
 		&from, &to,
-		[&predicate] ( const GraphComponent *from, const GraphComponent *to, IECore::InternedString name ) {
+		[&predicate]( const GraphComponent *from, const GraphComponent *to, IECore::InternedString name ) {
 			IECorePython::ScopedGILLock gilLock;
 			return (bool)predicate(
 				GraphComponentPtr( const_cast<GraphComponent *>( from ) ),
@@ -250,37 +250,37 @@ void GafferModule::bindMetadataAlgo()
 	// Read only
 	// =========
 
-	def( "setReadOnly", &setReadOnlyWrapper, ( arg( "graphComponent" ), arg( "readOnly"), arg( "persistent" ) = true ) );
+	def( "setReadOnly", &setReadOnlyWrapper, ( arg( "graphComponent" ), arg( "readOnly" ), arg( "persistent" ) = true ) );
 	def( "getReadOnly", &getReadOnly );
-	def( "setChildNodesAreReadOnly", &setChildNodesAreReadOnlyWrapper, ( arg( "node" ), arg( "readOnly"), arg( "persistent" ) = true ) );
+	def( "setChildNodesAreReadOnly", &setChildNodesAreReadOnlyWrapper, ( arg( "node" ), arg( "readOnly" ), arg( "persistent" ) = true ) );
 	def( "getChildNodesAreReadOnly", &getChildNodesAreReadOnly );
 	def( "readOnly", &readOnlyWrapper );
 	def( "readOnlyReason", &readOnlyReasonWrapper );
 	def(
 		"readOnlyAffectedByChange",
-		(bool (*)( const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const IECore::InternedString &, const Gaffer::Plug * ))&readOnlyAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedNodeTypeId"), arg( "changedPlugPath" ), arg( "changedKey" ), arg( "changedPlug" ) )
+		(bool ( * )( const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const IECore::InternedString &, const Gaffer::Plug * ))&readOnlyAffectedByChange,
+		( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedKey" ), arg( "changedPlug" ) )
 	);
 	def(
 		"readOnlyAffectedByChange",
-		(bool (*)( const GraphComponent *, IECore::TypeId, const IECore::InternedString &, const Gaffer::Node * ))&readOnlyAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedNodeTypeId"), arg( "changedKey" ), arg( "changedNode" ) )
+		(bool ( * )( const GraphComponent *, IECore::TypeId, const IECore::InternedString &, const Gaffer::Node * ))&readOnlyAffectedByChange,
+		( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedKey" ), arg( "changedNode" ) )
 	);
 	def(
 		"readOnlyAffectedByChange",
-		(bool (*)( const GraphComponent *, const GraphComponent *, const IECore::InternedString & ))&readOnlyAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedGraphComponent"), arg( "changedKey" ) )
+		(bool ( * )( const GraphComponent *, const GraphComponent *, const IECore::InternedString & ))&readOnlyAffectedByChange,
+		( arg( "graphComponent" ), arg( "changedGraphComponent" ), arg( "changedKey" ) )
 	);
 	def(
 		"readOnlyAffectedByChange",
-		(bool (*)( const IECore::InternedString & ))&readOnlyAffectedByChange,
+		(bool ( * )( const IECore::InternedString & ))&readOnlyAffectedByChange,
 		( arg( "changedKey" ) )
 	);
 
 	// Bookmarks
 	// =========
 
-	def( "setBookmarked", &setBookmarkedWrapper, ( arg( "graphComponent" ), arg( "bookmarked"), arg( "persistent" ) = true ) );
+	def( "setBookmarked", &setBookmarkedWrapper, ( arg( "graphComponent" ), arg( "bookmarked" ), arg( "persistent" ) = true ) );
 	def( "getBookmarked", &getBookmarked );
 	def( "bookmarkedAffectedByChange", &bookmarkedAffectedByChange );
 	def( "bookmarks", &bookmarksWrapper );
@@ -300,8 +300,7 @@ void GafferModule::bindMetadataAlgo()
 		.def( "color", &Annotation::color, return_value_policy<copy_const_reference>() )
 		.def( self == self )
 		.def( self != self )
-		.def( !self )
-	;
+		.def( !self );
 
 	def( "addAnnotation", &addAnnotationWrapper, ( arg( "node" ), arg( "name" ), arg( "annotation" ), arg( "persistent" ) = true ) );
 	def( "getAnnotation", &getAnnotationWrapper, ( arg( "node" ), arg( "name" ), arg( "inheritTemplate" ) = false ) );
@@ -320,36 +319,36 @@ void GafferModule::bindMetadataAlgo()
 
 	def(
 		"affectedByChange",
-		(bool (*)( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Plug * ))&affectedByChange,
-		( arg( "plug" ), arg( "changedNodeTypeId"), arg( "changedPlugPath" ), arg( "changedPlug" ) )
+		(bool ( * )( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Plug * ))&affectedByChange,
+		( arg( "plug" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) )
 	);
 	def(
 		"affectedByChange",
-		(bool (*)( const Node *node, IECore::TypeId changedNodeTypeId, const Node *changedNode ))&affectedByChange,
-		( arg( "node" ), arg( "changedNodeTypeId"), arg( "changedNode" ) )
+		(bool ( * )( const Node *node, IECore::TypeId changedNodeTypeId, const Node *changedNode ))&affectedByChange,
+		( arg( "node" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) )
 	);
 
 	def(
 		"childAffectedByChange",
-		(bool (*)( const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug * ))&childAffectedByChange,
-		( arg( "parent" ), arg( "changedNodeTypeId"), arg( "changedPlugPath" ), arg( "changedPlug" ) )
+		(bool ( * )( const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug * ))&childAffectedByChange,
+		( arg( "parent" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) )
 	);
 	def(
 		"childAffectedByChange",
-		(bool (*)( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&childAffectedByChange,
-		( arg( "parent" ), arg( "changedNodeTypeId"), arg( "changedNode" ) )
+		(bool ( * )( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&childAffectedByChange,
+		( arg( "parent" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) )
 	);
 
 	def(
 		"ancestorAffectedByChange",
-		(bool (*)( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug * ))&ancestorAffectedByChange,
-		( arg( "plug" ), arg( "changedNodeTypeId"), arg( "changedPlugPath" ), arg( "changedPlug" ) )
+		(bool ( * )( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug * ))&ancestorAffectedByChange,
+		( arg( "plug" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) )
 	);
 
 	def(
 		"ancestorAffectedByChange",
-		(bool (*)( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&ancestorAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedNodeTypeId"), arg( "changedNode" ) )
+		(bool ( * )( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&ancestorAffectedByChange,
+		( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) )
 	);
 
 	// Copying
@@ -359,7 +358,7 @@ void GafferModule::bindMetadataAlgo()
 	def( "copy", &copyWrapper, ( arg( "from" ), arg( "to" ), arg( "persistent" ) ) );
 	def( "copyIf", &copyIfWrapper, ( arg( "from" ), arg( "to" ), arg( "predicate" ), arg( "persistent" ) = true ) );
 
-	def( "copyColors", &copyColorsWrapper,  (arg( "srcPlug" ), arg( "dstPlug" ), arg( "overwrite") ));
+	def( "copyColors", &copyColorsWrapper, ( arg( "srcPlug" ), arg( "dstPlug" ), arg( "overwrite" ) ) );
 
 	// Promotability
 	// =============
@@ -381,5 +380,4 @@ void GafferModule::bindMetadataAlgo()
 
 	def( "firstViewableAncestor", &firstViewableAncestorWrapper );
 	def( "firstViewableNode", &firstViewableNodeWrapper );
-
 }

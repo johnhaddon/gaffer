@@ -50,28 +50,27 @@ IE_CORE_FORWARDDECLARE( NoduleLayout );
 class GAFFERUI_API CompoundNodule : public Nodule
 {
 
-	public :
+public:
 
-		explicit CompoundNodule( Gaffer::PlugPtr plug );
-		~CompoundNodule() override;
+	explicit CompoundNodule( Gaffer::PlugPtr plug );
+	~CompoundNodule() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::CompoundNodule, CompoundNoduleTypeId, Nodule );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::CompoundNodule, CompoundNoduleTypeId, Nodule );
 
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
 
-		Nodule *nodule( const Gaffer::Plug *plug ) override;
-		const Nodule *nodule( const Gaffer::Plug *plug ) const override;
+	Nodule *nodule( const Gaffer::Plug *plug ) override;
+	const Nodule *nodule( const Gaffer::Plug *plug ) const override;
 
-		bool canCreateConnection( const Gaffer::Plug *endpoint ) const override;
-		void createConnection( Gaffer::Plug *endpoint ) override;
+	bool canCreateConnection( const Gaffer::Plug *endpoint ) const override;
+	void createConnection( Gaffer::Plug *endpoint ) override;
 
-	private :
+private:
 
-		NoduleLayout *noduleLayout();
-		const NoduleLayout *noduleLayout() const;
+	NoduleLayout *noduleLayout();
+	const NoduleLayout *noduleLayout() const;
 
-		static NoduleTypeDescription<CompoundNodule> g_noduleTypeDescription;
-
+	static NoduleTypeDescription<CompoundNodule> g_noduleTypeDescription;
 };
 
 IE_CORE_DECLAREPTR( CompoundNodule );

@@ -45,7 +45,7 @@ using namespace GafferScene;
 GAFFER_NODE_DEFINE_TYPE( UnionFilter );
 
 UnionFilter::UnionFilter( const std::string &name )
-	:	FilterProcessor( name, 1 )
+	: FilterProcessor( name, 1 )
 {
 }
 
@@ -67,7 +67,7 @@ void UnionFilter::hashMatch( const ScenePlug *scene, const Gaffer::Context *cont
 {
 	for( IntPlug::InputIterator it( inPlugs() ); !it.done(); ++it )
 	{
-		(*it)->hash( h );
+		( *it )->hash( h );
 	}
 }
 
@@ -76,7 +76,7 @@ unsigned UnionFilter::computeMatch( const ScenePlug *scene, const Gaffer::Contex
 	unsigned result = IECore::PathMatcher::NoMatch;
 	for( IntPlug::InputIterator it( inPlugs() ); !it.done(); ++it )
 	{
-		result |= (*it)->getValue();
+		result |= ( *it )->getValue();
 	}
 	return result;
 }

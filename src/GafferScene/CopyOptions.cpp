@@ -48,11 +48,11 @@ GAFFER_NODE_DEFINE_TYPE( CopyOptions );
 size_t CopyOptions::g_firstPlugIndex = 0;
 
 CopyOptions::CopyOptions( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "source", Plug::In ) );
-	addChild( new StringPlug( "options" , Plug::In, "" ) );
+	addChild( new StringPlug( "options", Plug::In, "" ) );
 
 	// Fast pass-throughs for things we don't modify
 	outPlug()->childNamesPlug()->setInput( inPlug()->childNamesPlug() );

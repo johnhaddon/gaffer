@@ -45,24 +45,24 @@ namespace Private
 
 /// Assigns a value to something, reassigning the original value when it goes out of scope.
 /// T must be copy constructable and assignable
-template< typename T >
+template<typename T>
 struct ScopedAssignment : private boost::noncopyable
 {
-	ScopedAssignment( T& variable, const T& value )
-	: m_value( variable )
-	, m_variable( variable = value )
-	{}
+	ScopedAssignment( T &variable, const T &value )
+		: m_value( variable ), m_variable( variable = value )
+	{
+	}
 
 	~ScopedAssignment()
 	{
 		m_variable = m_value;
 	}
 
-private :
+private:
 
 	T const m_value;
-	T& m_variable;
+	T &m_variable;
 };
 
-} // Private
-} // Gaffer
+} // namespace Private
+} // namespace Gaffer

@@ -143,7 +143,7 @@ ccl::Mesh *convertPrimary( const IECoreScene::MeshPrimitive *mesh, ccl::Scene *s
 		for( size_t i = 0; i < vertsPerFace.size(); i++ )
 		{
 			cmesh->add_subd_face(
-				const_cast<int*>(&vertexIds[indexOffset]), vertsPerFace[i],
+				const_cast<int *>( &vertexIds[indexOffset] ), vertsPerFace[i],
 				/* shader = */ 0, /* smooth = */ true
 			);
 			indexOffset += vertsPerFace[i];
@@ -168,7 +168,7 @@ ccl::Mesh *convertPrimary( const IECoreScene::MeshPrimitive *mesh, ccl::Scene *s
 				{
 					int v0 = *id++;
 					int v1 = *id;
-					float weight = (*sharpness) * 0.1f;
+					float weight = ( *sharpness ) * 0.1f;
 					cmesh->add_edge_crease( v0, v1, weight );
 				}
 				id++;
@@ -178,7 +178,7 @@ ccl::Mesh *convertPrimary( const IECoreScene::MeshPrimitive *mesh, ccl::Scene *s
 			sharpness = mesh->cornerSharpnesses()->readable().begin();
 			for( int cornerId : mesh->cornerIds()->readable() )
 			{
-				cmesh->add_vertex_crease( cornerId, (*sharpness) * 0.1f );
+				cmesh->add_vertex_crease( cornerId, ( *sharpness ) * 0.1f );
 				sharpness++;
 			}
 		}
@@ -186,10 +186,10 @@ ccl::Mesh *convertPrimary( const IECoreScene::MeshPrimitive *mesh, ccl::Scene *s
 	else
 	{
 		const bool smooth = hasSmoothNormals( mesh );
-		for( size_t i = 0; i < vertexIds.size(); i+= 3 )
+		for( size_t i = 0; i < vertexIds.size(); i += 3 )
 		{
 			cmesh->add_triangle(
-				vertexIds[i], vertexIds[i+1], vertexIds[i+2],
+				vertexIds[i], vertexIds[i + 1], vertexIds[i + 2],
 				/* shader = */ 0, /* smooth = */ smooth
 			);
 		}

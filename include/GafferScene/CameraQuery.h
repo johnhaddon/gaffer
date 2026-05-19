@@ -50,81 +50,80 @@ namespace GafferScene
 struct GAFFERSCENE_API CameraQuery : Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		enum class CameraMode
-		{
-			RenderCamera = 0,
-			Location = 1,
-		};
+	enum class CameraMode
+	{
+		RenderCamera = 0,
+		Location = 1,
+	};
 
-		enum class Source
-		{
-			None = 0,
-			Camera = 1,
-			Globals = 2,
-			Fallback = 3,
-		};
+	enum class Source
+	{
+		None = 0,
+		Camera = 1,
+		Globals = 2,
+		Fallback = 3,
+	};
 
-		explicit CameraQuery( const std::string &name = defaultName<CameraQuery>() );
-		~CameraQuery() override;
+	explicit CameraQuery( const std::string &name = defaultName<CameraQuery>() );
+	~CameraQuery() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CameraQuery, CameraQueryTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CameraQuery, CameraQueryTypeId, Gaffer::ComputeNode );
 
-		ScenePlug *scenePlug();
-		ScenePlug const *scenePlug() const;
+	ScenePlug *scenePlug();
+	ScenePlug const *scenePlug() const;
 
-		Gaffer::IntPlug *cameraModePlug();
-		Gaffer::IntPlug const *cameraModePlug() const;
+	Gaffer::IntPlug *cameraModePlug();
+	Gaffer::IntPlug const *cameraModePlug() const;
 
-		Gaffer::StringPlug *locationPlug();
-		Gaffer::StringPlug const *locationPlug() const;
+	Gaffer::StringPlug *locationPlug();
+	Gaffer::StringPlug const *locationPlug() const;
 
-		Gaffer::ArrayPlug *queriesPlug();
-		const Gaffer::ArrayPlug *queriesPlug() const;
+	Gaffer::ArrayPlug *queriesPlug();
+	const Gaffer::ArrayPlug *queriesPlug() const;
 
-		Gaffer::ArrayPlug *outPlug();
-		const Gaffer::ArrayPlug *outPlug() const;
+	Gaffer::ArrayPlug *outPlug();
+	const Gaffer::ArrayPlug *outPlug() const;
 
-		/// Adds a query for parameter, with a type specified by plug.
-		/// The returned StringPlug is parented to queriesPlug() and may be edited
-		/// subsequently to modify the parameter name. Corresponding children are added
-		/// to outPlug() to provide the output from the query.
-		Gaffer::StringPlug *addQuery(
-			const Gaffer::ValuePlug *plug,
-			const std::string &parameter = ""
-		);
-		/// Removes a query. Throws an Exception if the query or corresponding children
-		/// of `outPlug()` can not be deleted.
-		void removeQuery( Gaffer::StringPlug *plug );
+	/// Adds a query for parameter, with a type specified by plug.
+	/// The returned StringPlug is parented to queriesPlug() and may be edited
+	/// subsequently to modify the parameter name. Corresponding children are added
+	/// to outPlug() to provide the output from the query.
+	Gaffer::StringPlug *addQuery(
+		const Gaffer::ValuePlug *plug,
+		const std::string &parameter = ""
+	);
+	/// Removes a query. Throws an Exception if the query or corresponding children
+	/// of `outPlug()` can not be deleted.
+	void removeQuery( Gaffer::StringPlug *plug );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		/// Returns the `source`, `value` or child of `out` corresponding to the specified
-		/// query plug. Throws an exception if the query does not exist or the corresponding output
-		/// plug does not exist or is the wrong type.
-		const Gaffer::IntPlug *sourcePlugFromQuery( const Gaffer::StringPlug *queryPlug ) const;
-		const Gaffer::ValuePlug *valuePlugFromQuery( const Gaffer::StringPlug *queryPlug ) const;
-		const Gaffer::ValuePlug *outPlugFromQuery( const Gaffer::StringPlug *queryPlug ) const;
+	/// Returns the `source`, `value` or child of `out` corresponding to the specified
+	/// query plug. Throws an exception if the query does not exist or the corresponding output
+	/// plug does not exist or is the wrong type.
+	const Gaffer::IntPlug *sourcePlugFromQuery( const Gaffer::StringPlug *queryPlug ) const;
+	const Gaffer::ValuePlug *valuePlugFromQuery( const Gaffer::StringPlug *queryPlug ) const;
+	const Gaffer::ValuePlug *outPlugFromQuery( const Gaffer::StringPlug *queryPlug ) const;
 
-		/// Returns the child of `queriesPlug` or `outPlug` corresponding to the `outputPlug`.
-		/// `outputPlug` can be any descendant of the desired ancestor.
-		/// Throws an exception if there is no corresponding query or the result is the wrong type.
-		const Gaffer::StringPlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
-		const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
+	/// Returns the child of `queriesPlug` or `outPlug` corresponding to the `outputPlug`.
+	/// `outputPlug` can be any descendant of the desired ancestor.
+	/// Throws an exception if there is no corresponding query or the result is the wrong type.
+	const Gaffer::StringPlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
+	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-	protected :
+protected:
 
-		void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
+	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
-	private :
+private:
 
-		Gaffer::AtomicCompoundDataPlug *internalParametersPlug();
-		const Gaffer::AtomicCompoundDataPlug *internalParametersPlug() const;
+	Gaffer::AtomicCompoundDataPlug *internalParametersPlug();
+	const Gaffer::AtomicCompoundDataPlug *internalParametersPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CameraQuery )

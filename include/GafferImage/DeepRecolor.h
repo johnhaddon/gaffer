@@ -46,36 +46,35 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepRecolor : public ImageProcessor
 {
 
-	public :
+public:
 
-		explicit DeepRecolor( const std::string &name=defaultName<DeepRecolor>() );
-		~DeepRecolor() override;
+	explicit DeepRecolor( const std::string &name = defaultName<DeepRecolor>() );
+	~DeepRecolor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepRecolor, DeepRecolorTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepRecolor, DeepRecolorTypeId, ImageProcessor );
 
-		GafferImage::ImagePlug *colorSourcePlug();
-		const GafferImage::ImagePlug *colorSourcePlug() const;
+	GafferImage::ImagePlug *colorSourcePlug();
+	const GafferImage::ImagePlug *colorSourcePlug() const;
 
-		Gaffer::BoolPlug *useColorSourceAlphaPlug();
-		const Gaffer::BoolPlug *useColorSourceAlphaPlug() const;
+	Gaffer::BoolPlug *useColorSourceAlphaPlug();
+	const Gaffer::BoolPlug *useColorSourceAlphaPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeepRecolor );

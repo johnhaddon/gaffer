@@ -46,7 +46,7 @@ float floatSpline( float positions[], float values[], string basis, float x )
 	// robust if we swap to a linear basis in this case, so we only approach the
 	// edges when the X value is actually near the edge.
 	string inversebasis = basis != "constant" ? basis : "linear";
-	float t = splineinverse( inversebasis, x, positions  );
+	float t = splineinverse( inversebasis, x, positions );
 	return spline( basis, t, values );
 }
 
@@ -54,7 +54,7 @@ color colorSpline( float positions[], color values[], string basis, float x )
 {
 	// As above
 	string inversebasis = basis != "constant" ? basis : "linear";
-	float t = splineinverse( inversebasis, x, positions  );
+	float t = splineinverse( inversebasis, x, positions );
 	return spline( basis, t, values );
 }
 

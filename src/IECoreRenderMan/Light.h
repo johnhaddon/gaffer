@@ -52,47 +52,46 @@ namespace IECoreRenderMan
 class Light : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public :
+public:
 
-		Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session );
-		~Light() override;
+	Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session );
+	~Light() override;
 
-		// ObjectInterface overrides
-		// =========================
+	// ObjectInterface overrides
+	// =========================
 
-		void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
-		bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-		void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
-		void assignID( uint32_t id ) override;
-		void assignInstanceID( uint32_t id ) override;
+	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
+	bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
+	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
+	void assignID( uint32_t id ) override;
+	void assignInstanceID( uint32_t id ) override;
 
-		// Interface used by LightLinker
-		// =============================
+	// Interface used by LightLinker
+	// =============================
 
-		void updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &lightFilterShader );
-		void updateLinking( RtUString memberships, RtUString shadowSubset );
+	void updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &lightFilterShader );
+	void updateLinking( RtUString memberships, RtUString shadowSubset );
 
-	private :
+private:
 
-		ConstLightShaderPtr acquireLightShader( const Attributes *attributes ) const;
+	ConstLightShaderPtr acquireLightShader( const Attributes *attributes ) const;
 
-		MaterialCache *m_materialCache;
-		Session *m_session;
-		LightLinker *m_lightLinker;
-		ConstLightShaderPtr m_lightShader;
-		riley::LightInstanceId m_lightInstance;
-		Imath::M44f m_preTransform;
-		/// Used to keep material etc alive as long as we need it.
-		ConstAttributesPtr m_attributes;
-		/// Used to keep geometry prototype alive as long as we need it.
-		ConstGeometryPrototypePtr m_geometryPrototype;
-		/// Combination of `m_attributes->instanceAttributes()` and
-		/// "grouping:membership" attribute used to implement light linking.
-		RtParamList m_allAttributes;
-		IECoreScene::ConstShaderNetworkPtr m_lightFilterShader;
-		IECoreScenePreview::Renderer::ConstObjectSetPtr m_linkedFilters;
-		RtUString m_shadowSubset;
-
+	MaterialCache *m_materialCache;
+	Session *m_session;
+	LightLinker *m_lightLinker;
+	ConstLightShaderPtr m_lightShader;
+	riley::LightInstanceId m_lightInstance;
+	Imath::M44f m_preTransform;
+	/// Used to keep material etc alive as long as we need it.
+	ConstAttributesPtr m_attributes;
+	/// Used to keep geometry prototype alive as long as we need it.
+	ConstGeometryPrototypePtr m_geometryPrototype;
+	/// Combination of `m_attributes->instanceAttributes()` and
+	/// "grouping:membership" attribute used to implement light linking.
+	RtParamList m_allAttributes;
+	IECoreScene::ConstShaderNetworkPtr m_lightFilterShader;
+	IECoreScenePreview::Renderer::ConstObjectSetPtr m_linkedFilters;
+	RtUString m_shadowSubset;
 };
 
 } // namespace IECoreRenderMan

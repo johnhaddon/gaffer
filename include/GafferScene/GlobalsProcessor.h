@@ -47,27 +47,26 @@ namespace GafferScene
 class GAFFERSCENE_API GlobalsProcessor : public SceneProcessor
 {
 
-	public :
+public:
 
-		explicit GlobalsProcessor( const std::string &name=defaultName<GlobalsProcessor>() );
-		~GlobalsProcessor() override;
+	explicit GlobalsProcessor( const std::string &name = defaultName<GlobalsProcessor>() );
+	~GlobalsProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::GlobalsProcessor, GlobalsProcessorTypeId, SceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::GlobalsProcessor, GlobalsProcessorTypeId, SceneProcessor );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Implemented to call hashProcessedGlobals().
-		void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		/// Implemented to call computeProcessedGlobals().
-		IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	/// Implemented to call hashProcessedGlobals().
+	void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	/// Implemented to call computeProcessedGlobals().
+	IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		/// Must be implemented by derived classes to compute the hash for the work done in processGlobals().
-		virtual void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
-		/// Must be implemented by derived classes to process the incoming globals.
-		virtual IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const = 0;
-
+	/// Must be implemented by derived classes to compute the hash for the work done in processGlobals().
+	virtual void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
+	/// Must be implemented by derived classes to process the incoming globals.
+	virtual IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const = 0;
 };
 
 IE_CORE_DECLAREPTR( GlobalsProcessor )

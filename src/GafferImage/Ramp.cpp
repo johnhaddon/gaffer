@@ -54,7 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( Ramp );
 size_t Ramp::g_firstPlugIndex = 0;
 
 Ramp::Ramp( const std::string &name )
-	:	FlatImageSource( name )
+	: FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -260,18 +260,17 @@ IECore::ConstFloatVectorDataPtr Ramp::computeChannelData( const std::string &cha
 		{
 
 			// screen space pixel coordinates
-			V2f p( tileOrigin.x + x + .5f, tileOrigin.y + y + .5f);
+			V2f p( tileOrigin.x + x + .5f, tileOrigin.y + y + .5f );
 			p *= inverseTransform;
 
 			V3f p3f( p.x, p.y, 0 );
 			closest = line.closestPointTo( p3f );
 
-			pos = (closest - startPosition3f).length() / line.length();
+			pos = ( closest - startPosition3f ).length() / line.length();
 			color = ramp( pos );
 
 			result.push_back( color[channelIndex] );
 		}
-
 	}
 
 	return resultData;

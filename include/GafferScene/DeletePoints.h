@@ -52,51 +52,50 @@ namespace GafferScene
 class GAFFERSCENE_API DeletePoints : public Deformer
 {
 
-	public :
+public:
 
-		enum class SelectionMode
-		{
-			VertexPrimitiveVariable,
-			IdListPrimitiveVariable,
-			IdList
-		};
+	enum class SelectionMode
+	{
+		VertexPrimitiveVariable,
+		IdListPrimitiveVariable,
+		IdList
+	};
 
-		explicit DeletePoints( const std::string &name = defaultName<DeletePoints>() );
-		~DeletePoints() override;
+	explicit DeletePoints( const std::string &name = defaultName<DeletePoints>() );
+	~DeletePoints() override;
 
-		Gaffer::IntPlug *selectionModePlug();
-		const Gaffer::IntPlug *selectionModePlug() const;
+	Gaffer::IntPlug *selectionModePlug();
+	const Gaffer::IntPlug *selectionModePlug() const;
 
-		Gaffer::StringPlug *pointsPlug();
-		const Gaffer::StringPlug *pointsPlug() const;
+	Gaffer::StringPlug *pointsPlug();
+	const Gaffer::StringPlug *pointsPlug() const;
 
-		Gaffer::StringPlug *idListVariablePlug();
-		const Gaffer::StringPlug *idListVariablePlug() const;
+	Gaffer::StringPlug *idListVariablePlug();
+	const Gaffer::StringPlug *idListVariablePlug() const;
 
-		Gaffer::Int64VectorDataPlug *idListPlug();
-		const Gaffer::Int64VectorDataPlug *idListPlug() const;
+	Gaffer::Int64VectorDataPlug *idListPlug();
+	const Gaffer::Int64VectorDataPlug *idListPlug() const;
 
-		Gaffer::StringPlug *idPlug();
-		const Gaffer::StringPlug *idPlug() const;
+	Gaffer::StringPlug *idPlug();
+	const Gaffer::StringPlug *idPlug() const;
 
-		Gaffer::BoolPlug *invertPlug();
-		const Gaffer::BoolPlug *invertPlug() const;
+	Gaffer::BoolPlug *invertPlug();
+	const Gaffer::BoolPlug *invertPlug() const;
 
-		Gaffer::BoolPlug *ignoreMissingVariablePlug();
-		const Gaffer::BoolPlug *ignoreMissingVariablePlug() const;
+	Gaffer::BoolPlug *ignoreMissingVariablePlug();
+	const Gaffer::BoolPlug *ignoreMissingVariablePlug() const;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::DeletePoints, DeletePointsTypeId, Deformer );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeletePoints, DeletePointsTypeId, Deformer );
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeletePoints )

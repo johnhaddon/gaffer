@@ -55,7 +55,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteFaces );
 size_t DeleteFaces::g_firstPlugIndex = 0;
 
 DeleteFaces::DeleteFaces( const std::string &name )
-	:	Deformer( name )
+	: Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -80,12 +80,12 @@ const Gaffer::StringPlug *DeleteFaces::facesPlug() const
 
 Gaffer::BoolPlug *DeleteFaces::invertPlug()
 {
-	return getChild<BoolPlug>( g_firstPlugIndex + 1);
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::BoolPlug *DeleteFaces::invertPlug() const
 {
-	return getChild<BoolPlug>( g_firstPlugIndex + 1);
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::BoolPlug *DeleteFaces::ignoreMissingVariablePlug()
@@ -100,12 +100,10 @@ const Gaffer::BoolPlug *DeleteFaces::ignoreMissingVariablePlug() const
 
 bool DeleteFaces::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		Deformer::affectsProcessedObject( input ) ||
+	return Deformer::affectsProcessedObject( input ) ||
 		input == facesPlug() ||
 		input == invertPlug() ||
-		input == ignoreMissingVariablePlug()
-	;
+		input == ignoreMissingVariablePlug();
 }
 
 void DeleteFaces::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

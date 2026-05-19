@@ -51,34 +51,33 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldCameraShaders : public GafferScene::Shader
 {
 
-	public :
+public:
 
-		explicit ArnoldCameraShaders( const std::string &name=defaultName<ArnoldCameraShaders>() );
-		~ArnoldCameraShaders() override;
+	explicit ArnoldCameraShaders( const std::string &name = defaultName<ArnoldCameraShaders>() );
+	~ArnoldCameraShaders() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldCameraShaders, ArnoldCameraShadersTypeId, GafferScene::Shader );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldCameraShaders, ArnoldCameraShadersTypeId, GafferScene::Shader );
 
-		GafferScene::ShaderPlug *filterMapPlug();
-		const GafferScene::ShaderPlug *filterMapPlug() const;
+	GafferScene::ShaderPlug *filterMapPlug();
+	const GafferScene::ShaderPlug *filterMapPlug() const;
 
-		GafferScene::ShaderPlug *uvRemapPlug();
-		const GafferScene::ShaderPlug *uvRemapPlug() const;
+	GafferScene::ShaderPlug *uvRemapPlug();
+	const GafferScene::ShaderPlug *uvRemapPlug() const;
 
-		Gaffer::Plug *outPlug();
-		const Gaffer::Plug *outPlug() const;
+	Gaffer::Plug *outPlug();
+	const Gaffer::Plug *outPlug() const;
 
-	protected :
+protected:
 
-		bool affectsAttributes( const Gaffer::Plug *input ) const override;
-		void attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
+	bool affectsAttributes( const Gaffer::Plug *input ) const override;
+	void attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
 
-		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ArnoldCameraShaders )

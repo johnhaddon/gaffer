@@ -60,7 +60,7 @@ GAFFER_NODE_DEFINE_TYPE( LightFilter );
 size_t LightFilter::g_firstPlugIndex = 0;
 
 LightFilter::LightFilter( GafferScene::ShaderPtr shader, const std::string &name )
-	:	ObjectSource( name, "lightFilter" )
+	: ObjectSource( name, "lightFilter" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 

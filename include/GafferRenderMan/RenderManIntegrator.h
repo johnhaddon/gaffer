@@ -47,25 +47,24 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManIntegrator : public GafferScene::GlobalShader
 {
 
-	public :
+public:
 
-		RenderManIntegrator( const std::string &name=defaultName<RenderManIntegrator>() );
-		~RenderManIntegrator() override;
+	RenderManIntegrator( const std::string &name = defaultName<RenderManIntegrator>() );
+	~RenderManIntegrator() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManIntegrator, RenderManIntegratorTypeId, GafferScene::GlobalShader );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManIntegrator, RenderManIntegratorTypeId, GafferScene::GlobalShader );
 
-	protected :
+protected:
 
-		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-		bool affectsOptionName( const Gaffer::Plug *input ) const override;
-		void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		std::string computeOptionName( const Gaffer::Context *context ) const override;
+	bool affectsOptionName( const Gaffer::Plug *input ) const override;
+	void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	std::string computeOptionName( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( RenderManIntegrator )

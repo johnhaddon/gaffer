@@ -54,55 +54,54 @@ IE_CORE_FORWARDDECLARE( FilterPlug )
 class GAFFERIMAGE_API ImageSampler : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit ImageSampler( const std::string &name=defaultName<ImageSampler>() );
-		~ImageSampler() override;
+	explicit ImageSampler( const std::string &name = defaultName<ImageSampler>() );
+	~ImageSampler() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageSampler, ImageSamplerTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageSampler, ImageSamplerTypeId, ComputeNode );
 
-		ImagePlug *imagePlug();
-		const ImagePlug *imagePlug() const;
+	ImagePlug *imagePlug();
+	const ImagePlug *imagePlug() const;
 
-		Gaffer::StringPlug *viewPlug();
-		const Gaffer::StringPlug *viewPlug() const;
+	Gaffer::StringPlug *viewPlug();
+	const Gaffer::StringPlug *viewPlug() const;
 
-		Gaffer::StringVectorDataPlug *channelsPlug();
-		const Gaffer::StringVectorDataPlug *channelsPlug() const;
+	Gaffer::StringVectorDataPlug *channelsPlug();
+	const Gaffer::StringVectorDataPlug *channelsPlug() const;
 
-		Gaffer::V2fPlug *pixelPlug();
-		const Gaffer::V2fPlug *pixelPlug() const;
+	Gaffer::V2fPlug *pixelPlug();
+	const Gaffer::V2fPlug *pixelPlug() const;
 
-		Gaffer::BoolPlug *interpolatePlug();
-		const Gaffer::BoolPlug *interpolatePlug() const;
+	Gaffer::BoolPlug *interpolatePlug();
+	const Gaffer::BoolPlug *interpolatePlug() const;
 
-		Gaffer::Color4fPlug *colorPlug();
-		const Gaffer::Color4fPlug *colorPlug() const;
+	Gaffer::Color4fPlug *colorPlug();
+	const Gaffer::Color4fPlug *colorPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		// Returns the channel to be read for the specified child of colorPlug(),
-		// returning the empty string if the channel doesn't exist.
-		std::string channelName( const Gaffer::ValuePlug *output ) const;
+	// Returns the channel to be read for the specified child of colorPlug(),
+	// returning the empty string if the channel doesn't exist.
+	std::string channelName( const Gaffer::ValuePlug *output ) const;
 
-		// Input plug to receive the flattened image from the internal
-		// deepState plug.
-		ImagePlug *flattenedInPlug();
-		const ImagePlug *flattenedInPlug() const;
+	// Input plug to receive the flattened image from the internal
+	// deepState plug.
+	ImagePlug *flattenedInPlug();
+	const ImagePlug *flattenedInPlug() const;
 
-		// The internal DeepState node.
-		GafferImage::DeepState *deepState();
-		const GafferImage::DeepState *deepState() const;
+	// The internal DeepState node.
+	GafferImage::DeepState *deepState();
+	const GafferImage::DeepState *deepState() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ImageSampler )

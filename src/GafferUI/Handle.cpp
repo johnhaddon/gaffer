@@ -59,7 +59,7 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace GafferUI;
 
-const float g_planarToLinearDragThreshold = 0.15f;  // Approx. 9 degrees from perpendicular
+const float g_planarToLinearDragThreshold = 0.15f; // Approx. 9 degrees from perpendicular
 constexpr float g_planarRotationScaleFactor = 5.f / M_PI;
 
 namespace
@@ -96,7 +96,7 @@ void worldGadgetDragData(
 	);
 }
 
-}  // namespace
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Handle
@@ -105,7 +105,7 @@ void worldGadgetDragData(
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Handle );
 
 Handle::Handle( const std::string &name )
-	:	Gadget( name ), m_hovering( false ), m_rasterScale( 0.0f ), m_visibleOnHover( false )
+	: Gadget( name ), m_hovering( false ), m_rasterScale( 0.0f ), m_visibleOnHover( false )
 {
 	enterSignal().connect( boost::bind( &Handle::enter, this ) );
 	leaveSignal().connect( boost::bind( &Handle::leave, this ) );
@@ -163,7 +163,7 @@ void Handle::renderLayer( Layer layer, const Style *style, RenderReason reason )
 {
 	if( m_visibleOnHover )
 	{
-		if( !enabled() || (!m_hovering && !isSelectionRender( reason ) ) )
+		if( !enabled() || ( !m_hovering && !isSelectionRender( reason ) ) )
 		{
 			return;
 		}
@@ -263,19 +263,19 @@ bool Handle::dragEnter( const DragDropEvent &event )
 //////////////////////////////////////////////////////////////////////////
 
 Handle::LinearDrag::LinearDrag( bool processModifiers )
-	:	m_gadget( nullptr ),
-		m_worldLine( V3f( 0 ), V3f( 1, 0, 0 ) ),
-		m_dragBeginPosition( 0 ),
-		m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false ),
-		m_preciseMotionOrigin( 0 )
+	: m_gadget( nullptr ),
+	  m_worldLine( V3f( 0 ), V3f( 1, 0, 0 ) ),
+	  m_dragBeginPosition( 0 ),
+	  m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false ),
+	  m_preciseMotionOrigin( 0 )
 {
 }
 
 Handle::LinearDrag::LinearDrag( const Gadget *gadget, const Imath::V2f &line, const DragDropEvent &dragBeginEvent, bool processModifiers )
-	:   m_gadget( gadget ),
-		m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false )
+	: m_gadget( gadget ),
+	  m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false )
 {
 	// We need an axis in world space, derived from the supplied camera space
 	// line, normalized in gadget space...(!)
@@ -291,7 +291,7 @@ Handle::LinearDrag::LinearDrag( const Gadget *gadget, const Imath::V2f &line, co
 	V3f worldAxis;
 	gadgetTransform.multDirMatrix( gadgetAxis, worldAxis );
 
-	const V3f worldOrigin =  V3f( 0 ) * gadgetTransform;
+	const V3f worldOrigin = V3f( 0 ) * gadgetTransform;
 	m_worldLine = LineSegment3f( worldOrigin, worldOrigin + worldAxis );
 
 	m_dragBeginPosition = updatedPosition( dragBeginEvent );
@@ -301,13 +301,13 @@ Handle::LinearDrag::LinearDrag( const Gadget *gadget, const Imath::V2f &line, co
 }
 
 Handle::LinearDrag::LinearDrag( const Gadget *gadget, const IECore::LineSegment3f &line, const DragDropEvent &dragBeginEvent, bool processModifiers )
-	:	m_gadget( gadget ),
-		m_worldLine(
-			line.p0 * m_gadget->fullTransform(),
-			line.p1 * m_gadget->fullTransform()
-		),
-		m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false )
+	: m_gadget( gadget ),
+	  m_worldLine(
+		  line.p0 * m_gadget->fullTransform(),
+		  line.p1 * m_gadget->fullTransform()
+	  ),
+	  m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false )
 {
 	m_dragBeginPosition = updatedPosition( dragBeginEvent );
 
@@ -352,9 +352,7 @@ float Handle::LinearDrag::updatedPosition( const DragDropEvent &event )
 	const LineSegment3f worldClosestLine = viewport->rasterToWorldSpace( V2f( rasterClosestPoint.x, rasterClosestPoint.y ) );
 
 	const V3f worldClosestPoint =
-		Line3f( m_worldLine.p0, m_worldLine.p1 ).closestPointTo(
-			Line3f( worldClosestLine.p0, worldClosestLine.p1 )
-		);
+		Line3f( m_worldLine.p0, m_worldLine.p1 ).closestPointTo( Line3f( worldClosestLine.p0, worldClosestLine.p1 ) );
 
 	float position = m_worldLine.direction().dot( worldClosestPoint - m_worldLine.p0 ) / m_worldLine.length2();
 
@@ -388,16 +386,16 @@ float Handle::LinearDrag::updatedPosition( const DragDropEvent &event )
 //////////////////////////////////////////////////////////////////////////
 
 Handle::PlanarDrag::PlanarDrag( bool processModifiers )
-	:	m_gadget( nullptr ),
-		m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false ),
-		m_preciseMotionOrigin( 0 )
+	: m_gadget( nullptr ),
+	  m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false ),
+	  m_preciseMotionOrigin( 0 )
 {
 }
 
 Handle::PlanarDrag::PlanarDrag( const Gadget *gadget, const DragDropEvent &dragBeginEvent, bool processModifiers )
-	:	m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false )
+	: m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false )
 {
 	const ViewportGadget *viewport = gadget->ancestor<ViewportGadget>();
 	const M44f cameraTransform = viewport->getCameraTransform();
@@ -421,8 +419,8 @@ Handle::PlanarDrag::PlanarDrag( const Gadget *gadget, const DragDropEvent &dragB
 }
 
 Handle::PlanarDrag::PlanarDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent, bool processModifiers )
-	:	m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false )
+	: m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false )
 {
 	init( gadget, origin, axis0, axis1, dragBeginEvent );
 }
@@ -507,7 +505,7 @@ void Handle::PlanarDrag::init( const Gadget *gadget, const Imath::V3f &origin, c
 	{
 		bool useAxis0 = abs( m_worldAxis0.dot( dragData.worldLine.dir ) ) < abs( m_worldAxis1.dot( dragData.worldLine.dir ) );
 
-		m_linearDragAxisMask = V2f( (float)useAxis0, (float)!useAxis0);
+		m_linearDragAxisMask = V2f( (float)useAxis0, (float)!useAxis0 );
 
 		m_linearDrag = LinearDrag(
 			m_gadget,
@@ -529,22 +527,22 @@ void Handle::PlanarDrag::init( const Gadget *gadget, const Imath::V3f &origin, c
 //////////////////////////////////////////////////////////////////////////
 
 Handle::AngularDrag::AngularDrag( bool processModifiers )
-	:	m_gadget( nullptr ),
-		m_rotation( 0.0f ),
-		m_dragBeginRotation( 0.0f ),
-		m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false )
+	: m_gadget( nullptr ),
+	  m_rotation( 0.0f ),
+	  m_dragBeginRotation( 0.0f ),
+	  m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false )
 {
 	m_drag = PlanarDrag( false );
 }
 
 Handle::AngularDrag::AngularDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &normal, const Imath::V3f &axis0, const DragDropEvent &dragBeginEvent, bool processModifiers )
-	:	m_gadget( gadget ),
-		m_rotation( 0.0f ),
-		m_normal( normal ),
-		m_axis0( axis0 ),
-		m_processModifiers( processModifiers ),
-		m_preciseMotionEnabled( false )
+	: m_gadget( gadget ),
+	  m_rotation( 0.0f ),
+	  m_normal( normal ),
+	  m_axis0( axis0 ),
+	  m_processModifiers( processModifiers ),
+	  m_preciseMotionEnabled( false )
 {
 	V3f axis90 = normal.cross( axis0 );
 
@@ -563,10 +561,8 @@ Handle::AngularDrag::AngularDrag( const Gadget *gadget, const Imath::V3f &origin
 		// Convert to raster space
 		const ViewportGadget *viewport = gadget->ancestor<ViewportGadget>();
 		V2f rasterRotationDirection =
-			( viewport->worldToRasterSpace( worldRotationDirection + dragData.worldOrigin )
-			- viewport->worldToRasterSpace( dragData.worldOrigin ) ).normalized()
-			* V2f( 1.f, -1.f ) // Y is positive down in raster space, flip the Y direction
-		;
+			( viewport->worldToRasterSpace( worldRotationDirection + dragData.worldOrigin ) - viewport->worldToRasterSpace( dragData.worldOrigin ) ).normalized() * V2f( 1.f, -1.f ) // Y is positive down in raster space, flip the Y direction
+			;
 
 		m_drag = LinearDrag(
 			gadget,

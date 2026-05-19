@@ -45,7 +45,7 @@ using namespace GafferRenderMan;
 GAFFER_NODE_DEFINE_TYPE( RenderManLightFilter );
 
 RenderManLightFilter::RenderManLightFilter( const std::string &name )
-	:	GafferScene::LightFilter( new RenderManShader(), name )
+	: GafferScene::LightFilter( new RenderManShader(), name )
 {
 }
 

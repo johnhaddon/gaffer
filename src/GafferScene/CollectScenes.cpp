@@ -68,115 +68,113 @@ namespace
 class RootTree : public IECore::Data
 {
 
-	public :
+public:
 
-		struct Location;
-		using LocationPtr = std::unique_ptr<Location>;
-		using ChildMap = boost::container::flat_map<IECore::InternedString, LocationPtr>;
+	struct Location;
+	using LocationPtr = std::unique_ptr<Location>;
+	using ChildMap = boost::container::flat_map<IECore::InternedString, LocationPtr>;
 
-		struct Location
+	struct Location
+	{
+
+		Location( size_t depth )
+			: depth( depth ), childNames( new InternedStringVectorData() )
 		{
-
-			Location( size_t depth )
-				:	depth( depth ), childNames( new InternedStringVectorData() )
-			{
-			}
-
-			bool isRoot() const
-			{
-				return !rootVariableValue.empty();
-			}
-
-			// The path to this location, but exactly as the user spelled
-			// it in `rootNamesPlug()` (may or may not have a leading or
-			// trailing '/'). Empty if not a collection root.
-			string rootVariableValue;
-			size_t depth;
-			ChildMap children;
-			InternedStringVectorDataPtr childNames;
-
-		};
-
-		RootTree( const IECore::StringVectorData *roots, const IECore::Canceller *canceller )
-			:	m_treeRoot( new Location( 0 ) )
-		{
-			ScenePlug::ScenePath path;
-			for( const auto &root : roots->readable() )
-			{
-				IECore::Canceller::check( canceller );
-
-				ScenePlug::stringToPath( root, path );
-				if( path.empty() )
-				{
-					continue;
-				}
-
-				Location *location = m_treeRoot.get();
-				for( const auto &name : path )
-				{
-					const auto inserted = location->children.insert( ChildMap::value_type( name, LocationPtr() ) );
-					if( inserted.second )
-					{
-						if( location->isRoot() )
-						{
-							throw IECore::Exception( fmt::format( "\"{}\" contains nested roots", location->rootVariableValue ) );
-						}
-						inserted.first->second.reset( new Location( location->depth + 1 ) );
-						location->childNames->writable().push_back( name );
-					}
-					location = inserted.first->second.get();
-				}
-
-				if( location->isRoot() )
-				{
-					// Duplicate found - skip.
-					continue;
-				}
-
-				if( !location->children.empty() )
-				{
-					throw IECore::Exception( fmt::format( "\"{}\" contains nested roots", root ) );
-				}
-
-				location->rootVariableValue = root;
-				m_roots.push_back( root );
-			}
 		}
 
-		const Location *locationOrAncestor( const ScenePlug::ScenePath &path ) const
+		bool isRoot() const
 		{
-			const Location *result = m_treeRoot.get();
+			return !rootVariableValue.empty();
+		}
+
+		// The path to this location, but exactly as the user spelled
+		// it in `rootNamesPlug()` (may or may not have a leading or
+		// trailing '/'). Empty if not a collection root.
+		string rootVariableValue;
+		size_t depth;
+		ChildMap children;
+		InternedStringVectorDataPtr childNames;
+	};
+
+	RootTree( const IECore::StringVectorData *roots, const IECore::Canceller *canceller )
+		: m_treeRoot( new Location( 0 ) )
+	{
+		ScenePlug::ScenePath path;
+		for( const auto &root : roots->readable() )
+		{
+			IECore::Canceller::check( canceller );
+
+			ScenePlug::stringToPath( root, path );
+			if( path.empty() )
+			{
+				continue;
+			}
+
+			Location *location = m_treeRoot.get();
 			for( const auto &name : path )
 			{
-				const auto it = result->children.find( name );
-				if( it != result->children.end() )
+				const auto inserted = location->children.insert( ChildMap::value_type( name, LocationPtr() ) );
+				if( inserted.second )
 				{
-					result = it->second.get();
+					if( location->isRoot() )
+					{
+						throw IECore::Exception( fmt::format( "\"{}\" contains nested roots", location->rootVariableValue ) );
+					}
+					inserted.first->second.reset( new Location( location->depth + 1 ) );
+					location->childNames->writable().push_back( name );
 				}
-				else
-				{
-					break;
-				}
+				location = inserted.first->second.get();
 			}
-			return result;
-		}
 
-		const vector<string> &roots() const
+			if( location->isRoot() )
+			{
+				// Duplicate found - skip.
+				continue;
+			}
+
+			if( !location->children.empty() )
+			{
+				throw IECore::Exception( fmt::format( "\"{}\" contains nested roots", root ) );
+			}
+
+			location->rootVariableValue = root;
+			m_roots.push_back( root );
+		}
+	}
+
+	const Location *locationOrAncestor( const ScenePlug::ScenePath &path ) const
+	{
+		const Location *result = m_treeRoot.get();
+		for( const auto &name : path )
 		{
-			return m_roots;
+			const auto it = result->children.find( name );
+			if( it != result->children.end() )
+			{
+				result = it->second.get();
+			}
+			else
+			{
+				break;
+			}
 		}
+		return result;
+	}
 
-		using RootRange = tbb::blocked_range<vector<string>::const_iterator>;
-		RootRange rootRange() const
-		{
-			return RootRange( m_roots.begin(), m_roots.end() );
-		}
+	const vector<string> &roots() const
+	{
+		return m_roots;
+	}
 
-	private :
+	using RootRange = tbb::blocked_range<vector<string>::const_iterator>;
+	RootRange rootRange() const
+	{
+		return RootRange( m_roots.begin(), m_roots.end() );
+	}
 
-		LocationPtr m_treeRoot;
-		vector<string> m_roots;
+private:
 
+	LocationPtr m_treeRoot;
+	vector<string> m_roots;
 };
 
 IE_CORE_DECLAREPTR( RootTree )
@@ -190,80 +188,76 @@ IE_CORE_DECLAREPTR( RootTree )
 class CollectScenes::SourceScope : public Context::EditableScope
 {
 
-	public :
+public:
 
-		SourceScope( const Context *context, const InternedString &rootVariable )
-			:	EditableScope( context ), m_rootVariable( rootVariable )
+	SourceScope( const Context *context, const InternedString &rootVariable )
+		: EditableScope( context ), m_rootVariable( rootVariable )
+	{
+	}
+
+	SourceScope( const ThreadState &threadState, const InternedString &rootVariable )
+		: EditableScope( threadState ), m_rootVariable( rootVariable )
+	{
+	}
+
+	void setRoot( const std::string *root )
+	{
+		if( !m_rootVariable.string().empty() )
 		{
+			set( m_rootVariable, root );
 		}
+	}
 
-		SourceScope( const ThreadState &threadState, const InternedString &rootVariable )
-			:	EditableScope( threadState ), m_rootVariable( rootVariable )
-		{
-		}
+private:
 
-		void setRoot( const std::string *root )
-		{
-			if( !m_rootVariable.string().empty() )
-			{
-				set( m_rootVariable, root );
-			}
-		}
-
-	private :
-
-		InternedString m_rootVariable;
-
+	InternedString m_rootVariable;
 };
 
 class CollectScenes::SourcePathScope : public SourceScope
 {
 
-	public :
+public:
 
-		SourcePathScope( const Context *context, const CollectScenes *collectScenes, const ScenePlug::ScenePath &downstreamPath )
-			:	SourceScope( context, collectScenes->rootNameVariablePlug()->getValue() )
+	SourcePathScope( const Context *context, const CollectScenes *collectScenes, const ScenePlug::ScenePath &downstreamPath )
+		: SourceScope( context, collectScenes->rootNameVariablePlug()->getValue() )
+	{
+		// Evaluate RootTree in global scope.
+		remove( ScenePlug::scenePathContextName );
+		m_rootTree = boost::static_pointer_cast<const RootTree>( collectScenes->rootTreePlug()->getValue() );
+		m_rootTreeLocation = m_rootTree->locationOrAncestor( downstreamPath );
+		if( m_rootTreeLocation->isRoot() )
 		{
-			// Evaluate RootTree in global scope.
-			remove( ScenePlug::scenePathContextName );
-			m_rootTree = boost::static_pointer_cast<const RootTree>( collectScenes->rootTreePlug()->getValue() );
-			m_rootTreeLocation = m_rootTree->locationOrAncestor( downstreamPath );
-			if( m_rootTreeLocation->isRoot() )
-			{
-				setRoot( &m_rootTreeLocation->rootVariableValue );
-				// We evaluate the sourceRootPlug _after_ setting the root name,
-				// so that users can use the root name in expressions and
-				// substitutions.
-				ScenePlug::stringToPath( collectScenes->sourceRootPlug()->getValue(), m_upstreamPath );
-				m_upstreamPath.insert( m_upstreamPath.end(), downstreamPath.begin() + m_rootTreeLocation->depth, downstreamPath.end() );
-				set( ScenePlug::scenePathContextName, &m_upstreamPath );
-			}
-			else
-			{
-				set( ScenePlug::scenePathContextName, &downstreamPath );
-			}
+			setRoot( &m_rootTreeLocation->rootVariableValue );
+			// We evaluate the sourceRootPlug _after_ setting the root name,
+			// so that users can use the root name in expressions and
+			// substitutions.
+			ScenePlug::stringToPath( collectScenes->sourceRootPlug()->getValue(), m_upstreamPath );
+			m_upstreamPath.insert( m_upstreamPath.end(), downstreamPath.begin() + m_rootTreeLocation->depth, downstreamPath.end() );
+			set( ScenePlug::scenePathContextName, &m_upstreamPath );
 		}
-
-		const RootTree::Location *rootTreeLocation() const
+		else
 		{
-			return m_rootTreeLocation;
+			set( ScenePlug::scenePathContextName, &downstreamPath );
 		}
+	}
 
-		static bool affectedBy( const CollectScenes *collectScenes, const Plug *input )
-		{
-			return
-				input == collectScenes->rootNameVariablePlug() ||
-				input == collectScenes->rootTreePlug() ||
-				input == collectScenes->sourceRootPlug()
-			;
-		}
+	const RootTree::Location *rootTreeLocation() const
+	{
+		return m_rootTreeLocation;
+	}
 
-	private :
+	static bool affectedBy( const CollectScenes *collectScenes, const Plug *input )
+	{
+		return input == collectScenes->rootNameVariablePlug() ||
+			input == collectScenes->rootTreePlug() ||
+			input == collectScenes->sourceRootPlug();
+	}
 
-		ScenePlug::ScenePath m_upstreamPath;
-		ConstRootTreePtr m_rootTree;
-		const RootTree::Location *m_rootTreeLocation;
+private:
 
+	ScenePlug::ScenePath m_upstreamPath;
+	ConstRootTreePtr m_rootTree;
+	const RootTree::Location *m_rootTreeLocation;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -275,7 +269,7 @@ GAFFER_NODE_DEFINE_TYPE( CollectScenes );
 size_t CollectScenes::g_firstPlugIndex = 0;
 
 CollectScenes::CollectScenes( const std::string &name )
-	:	SceneProcessor( name )
+	: SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -723,8 +717,7 @@ void CollectScenes::hashSet( const IECore::InternedString &setName, const Gaffer
 
 		IECore::MurmurHash(),
 
-		[&] ( const RootTree::RootRange &range, const MurmurHash &x ) {
-
+		[&]( const RootTree::RootRange &range, const MurmurHash &x ) {
 			SourceScope sourceScope( threadState, rootNameVariable );
 
 			MurmurHash result = x;
@@ -737,11 +730,9 @@ void CollectScenes::hashSet( const IECore::InternedString &setName, const Gaffer
 				result.append( root );
 			}
 			return result;
-
 		},
 
-		[] ( const MurmurHash &x, const MurmurHash &y ) {
-
+		[]( const MurmurHash &x, const MurmurHash &y ) {
 			MurmurHash result = x;
 			result.append( y );
 			return result;
@@ -775,8 +766,7 @@ IECore::ConstPathMatcherDataPtr CollectScenes::computeSet( const IECore::Interne
 
 		PathMatcher(),
 
-		[&] ( const RootTree::RootRange &range, const IECore::PathMatcher &x ) {
-
+		[&]( const RootTree::RootRange &range, const IECore::PathMatcher &x ) {
 			SourceScope sourceScope( threadState, rootNameVariable );
 
 			PathMatcher result = x;
@@ -802,11 +792,9 @@ IECore::ConstPathMatcherDataPtr CollectScenes::computeSet( const IECore::Interne
 				}
 			}
 			return result;
-
 		},
 
-		[] ( const PathMatcher &x, const PathMatcher &y ) {
-
+		[]( const PathMatcher &x, const PathMatcher &y ) {
 			PathMatcher result = x;
 			result.addPaths( y );
 			return result;

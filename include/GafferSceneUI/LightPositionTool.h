@@ -55,146 +55,144 @@ IE_CORE_FORWARDDECLARE( SceneView );
 class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 {
 
-	public :
+public:
 
-		LightPositionTool( SceneView *view, const std::string &name = defaultName<LightPositionTool>() );
-		~LightPositionTool() override;
+	LightPositionTool( SceneView *view, const std::string &name = defaultName<LightPositionTool>() );
+	~LightPositionTool() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::LightPositionTool, LightPositionToolTypeId, TransformTool );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::LightPositionTool, LightPositionToolTypeId, TransformTool );
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		// Positions the current selection to cast a shadow from `shadowPivot` to `shadowTarget`,
-		// with the light `targetDistance` from the pivot. All coordinates are in world space.
-		void positionShadow( const Imath::V3f &shadowPivot, const Imath::V3f &shadowTarget, const float targetDistance );
+	// Positions the current selection to cast a shadow from `shadowPivot` to `shadowTarget`,
+	// with the light `targetDistance` from the pivot. All coordinates are in world space.
+	void positionShadow( const Imath::V3f &shadowPivot, const Imath::V3f &shadowTarget, const float targetDistance );
 
-		// Positions the current selection to be along the ray that is the reflection of the line
-		// from `viewpoint` to `highlightTarget` about `normal`, `targetDistance` from `highlightTarget`.
-		// All coordinates are in world space.
-		void positionHighlight(
-			const Imath::V3f &highlightTarget,
-			const Imath::V3f &viewpoint,
-			const Imath::V3f &normal,
-			const float targetDistance
-		);
+	// Positions the current selection to be along the ray that is the reflection of the line
+	// from `viewpoint` to `highlightTarget` about `normal`, `targetDistance` from `highlightTarget`.
+	// All coordinates are in world space.
+	void positionHighlight(
+		const Imath::V3f &highlightTarget,
+		const Imath::V3f &viewpoint,
+		const Imath::V3f &normal,
+		const float targetDistance
+	);
 
-		// Positions the current selection to be `distance` away from `target`, along `normal`.
-		void positionAlongNormal( const Imath::V3f &target, const Imath::V3f &normal, const float targetDistance );
+	// Positions the current selection to be `distance` away from `target`, along `normal`.
+	void positionAlongNormal( const Imath::V3f &target, const Imath::V3f &normal, const float targetDistance );
 
-		enum class Mode
-		{
-			Shadow,
-			Highlight,
-			Diffuse,
+	enum class Mode
+	{
+		Shadow,
+		Highlight,
+		Diffuse,
 
-			First = Shadow,
-			Last = Diffuse
-		};
+		First = Shadow,
+		Last = Diffuse
+	};
 
-	protected :
+protected:
 
-		bool affectsHandles( const Gaffer::Plug *input ) const override;
-		void updateHandles( float rasterScale ) override;
+	bool affectsHandles( const Gaffer::Plug *input ) const override;
+	void updateHandles( float rasterScale ) override;
 
-	private :
+private:
 
-		struct TranslationRotation
-		{
+	struct TranslationRotation
+	{
 
-			TranslationRotation( const Selection &selection, Orientation orientation );
+		TranslationRotation( const Selection &selection, Orientation orientation );
 
-			bool canApplyTranslation() const;
-			bool canApplyRotation( const Imath::V3i &axisMask, const bool maintainRoll ) const;
-			void applyTranslation( const Imath::V3f &translation );
-			void applyRotation( const Imath::Eulerf &rotation, const bool maintainRoll );
+		bool canApplyTranslation() const;
+		bool canApplyRotation( const Imath::V3i &axisMask, const bool maintainRoll ) const;
+		void applyTranslation( const Imath::V3f &translation );
+		void applyRotation( const Imath::Eulerf &rotation, const bool maintainRoll );
 
-			private :
+	private:
 
-				Imath::V3f updatedRotateValue( const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll, Imath::V3f *currentValue = nullptr ) const;
+		Imath::V3f updatedRotateValue( const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll, Imath::V3f *currentValue = nullptr ) const;
 
-				const Selection &m_selection;
-				Imath::M44f m_gadgetToTranslationXform;
-				Imath::M44f m_gadgetToRotationXform;
+		const Selection &m_selection;
+		Imath::M44f m_gadgetToTranslationXform;
+		Imath::M44f m_gadgetToRotationXform;
 
-				mutable std::optional<Imath::V3f> m_originalTranslation;
-				mutable std::optional<Imath::Eulerf> m_originalRotation;  // Radians
+		mutable std::optional<Imath::V3f> m_originalTranslation;
+		mutable std::optional<Imath::Eulerf> m_originalRotation; // Radians
+	};
 
-		};
+	IECore::RunTimeTypedPtr handleDragBegin( GafferUI::Gadget *gadget );
+	bool handleDragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool handleDragEnd();
+	bool handleEnter( const GafferUI::ButtonEvent &event );
+	void handleLeave();
 
-		IECore::RunTimeTypedPtr handleDragBegin( GafferUI::Gadget *gadget );
-		bool handleDragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool handleDragEnd();
-		bool handleEnter( const GafferUI::ButtonEvent &event );
-		void handleLeave();
+	IECore::RunTimeTypedPtr sceneGadgetDragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool sceneGadgetDragEnter( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool sceneGadgetDragMove( const GafferUI::DragDropEvent &event );
+	bool sceneGadgetDragEnd();
 
-		IECore::RunTimeTypedPtr sceneGadgetDragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool sceneGadgetDragEnter( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool sceneGadgetDragMove( const GafferUI::DragDropEvent &event );
-		bool sceneGadgetDragEnd();
+	bool keyPress( const GafferUI::KeyEvent &event );
+	bool keyRelease( const GafferUI::KeyEvent &event );
+	void viewportGadgetLeave( const GafferUI::ButtonEvent &event );
+	void visibilityChanged( GafferUI::Gadget *gadget );
 
-		bool keyPress( const GafferUI::KeyEvent &event );
-		bool keyRelease( const GafferUI::KeyEvent &event );
-		void viewportGadgetLeave( const GafferUI::ButtonEvent &event );
-		void visibilityChanged( GafferUI::Gadget *gadget );
+	void plugSet( Gaffer::Plug *plug );
 
-		void plugSet( Gaffer::Plug *plug );
+	bool buttonPress( const GafferUI::ButtonEvent &event );
+	bool buttonRelease( const GafferUI::ButtonEvent &event );
 
-		bool buttonPress( const GafferUI::ButtonEvent &event );
-		bool buttonRelease( const GafferUI::ButtonEvent &event );
+	bool placeTarget( const IECore::LineSegment3f &eventLine );
 
-		bool placeTarget( const IECore::LineSegment3f &eventLine );
+	void translateAndOrient(
+		const Selection &s,
+		const Imath::M44f &localTransform,
+		const Imath::V3f &newPosition,
+		const Imath::M44f &newOrientation
+	) const;
 
-		void translateAndOrient(
-			const Selection &s,
-			const Imath::M44f &localTransform,
-			const Imath::V3f &newPosition,
-			const Imath::M44f &newOrientation
-		) const;
+	enum class TargetMode
+	{
+		None,
+		Pivot,
+		Target,
+	};
 
-		enum class TargetMode
-		{
-			None,
-			Pivot,
-			Target,
-		};
+	void setTargetMode( TargetMode mode );
+	TargetMode getTargetMode() const { return m_targetMode; }
+	void updatePointer() const;
 
-		void setTargetMode( TargetMode mode );
-		TargetMode getTargetMode() const { return m_targetMode; }
-		void updatePointer() const;
+	void setPivot( const Imath::V3f &p, Gaffer::ScriptNodePtr scriptNode );
+	std::optional<Imath::V3f> getPivot() const;
+	void setTarget( const Imath::V3f &p, Gaffer::ScriptNodePtr scriptNode );
+	std::optional<Imath::V3f> getTarget() const;
+	void setPivotDistance( const float d );
+	std::optional<float> getPivotDistance() const;
 
-		void setPivot( const Imath::V3f &p, Gaffer::ScriptNodePtr scriptNode );
-		std::optional<Imath::V3f> getPivot() const;
-		void setTarget( const Imath::V3f &p, Gaffer::ScriptNodePtr scriptNode );
-		std::optional<Imath::V3f> getTarget() const;
-		void setPivotDistance( const float d );
-		std::optional<float> getPivotDistance() const;
+	TargetMode m_targetMode;
 
-		TargetMode m_targetMode;
+	std::optional<TranslationRotation> m_drag;
+	float m_startPivotDistance;
 
-		std::optional<TranslationRotation> m_drag;
-		float m_startPivotDistance;
+	GafferUI::HandlePtr m_distanceHandle;
+	GafferUI::RotateHandlePtr m_rotateHandle;
 
-		GafferUI::HandlePtr m_distanceHandle;
-		GafferUI::RotateHandlePtr m_rotateHandle;
+	Gaffer::Signals::ScopedConnection m_contextChangedConnection;
 
-		Gaffer::Signals::ScopedConnection m_contextChangedConnection;
+	// Pivots and targets are stored in transform space - the world space transform
+	// of the scene in which the transform will be applied.
+	// See `TransformTool::transformSpace()` for details.
+	std::unordered_map<std::string, std::optional<Imath::V3f>> m_pivotMap;
+	std::unordered_map<std::string, std::optional<Imath::V3f>> m_targetMap;
 
-		// Pivots and targets are stored in transform space - the world space transform
-		// of the scene in which the transform will be applied.
-		// See `TransformTool::transformSpace()` for details.
-		std::unordered_map<std::string, std::optional<Imath::V3f>> m_pivotMap;
-		std::unordered_map<std::string, std::optional<Imath::V3f>> m_targetMap;
+	std::unordered_map<std::string, std::optional<float>> m_pivotDistanceMap;
 
-		std::unordered_map<std::string, std::optional<float>> m_pivotDistanceMap;
+	bool m_draggingTarget;
 
-		bool m_draggingTarget;
-
-		static ToolDescription<LightPositionTool, SceneView> g_toolDescription;
-		static size_t g_firstPlugIndex;
-
+	static ToolDescription<LightPositionTool, SceneView> g_toolDescription;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( LightPositionTool )
 
-}  // namespace GafferSceneUI
+} // namespace GafferSceneUI

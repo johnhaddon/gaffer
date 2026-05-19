@@ -40,7 +40,7 @@
 using namespace Gaffer;
 
 template<typename T>
-const IECore::RunTimeTyped::TypeDescription<CompoundNumericPlug<T> > CompoundNumericPlug<T>::g_typeDescription;
+const IECore::RunTimeTyped::TypeDescription<CompoundNumericPlug<T>> CompoundNumericPlug<T>::g_typeDescription;
 
 template<typename T>
 CompoundNumericPlug<T>::CompoundNumericPlug(
@@ -52,11 +52,11 @@ CompoundNumericPlug<T>::CompoundNumericPlug(
 	unsigned flags,
 	IECore::GeometricData::Interpretation interpretation
 )
-	:	ValuePlug( name, direction, flags ), m_interpretation( interpretation )
+	: ValuePlug( name, direction, flags ), m_interpretation( interpretation )
 {
 	const char **n = childNames();
 	unsigned childFlags = flags & ~Dynamic;
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		typename ChildType::Ptr p = new ChildType( *n++, direction, defaultValue[i], minValue[i], maxValue[i], childFlags );
 		addChild( p );
@@ -96,7 +96,7 @@ template<typename T>
 T CompoundNumericPlug<T>::defaultValue() const
 {
 	T result;
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		result[i] = getChild( i )->defaultValue();
 	}
@@ -106,7 +106,7 @@ T CompoundNumericPlug<T>::defaultValue() const
 template<typename T>
 bool CompoundNumericPlug<T>::hasMinValue() const
 {
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		if( getChild( i )->hasMinValue() )
 		{
@@ -119,7 +119,7 @@ bool CompoundNumericPlug<T>::hasMinValue() const
 template<typename T>
 bool CompoundNumericPlug<T>::hasMaxValue() const
 {
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		if( getChild( i )->hasMaxValue() )
 		{
@@ -133,7 +133,7 @@ template<typename T>
 T CompoundNumericPlug<T>::minValue() const
 {
 	T result;
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		result[i] = getChild( i )->minValue();
 	}
@@ -144,7 +144,7 @@ template<typename T>
 T CompoundNumericPlug<T>::maxValue() const
 {
 	T result;
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		result[i] = getChild( i )->maxValue();
 	}
@@ -154,7 +154,7 @@ T CompoundNumericPlug<T>::maxValue() const
 template<typename T>
 void CompoundNumericPlug<T>::setValue( const T &value )
 {
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		getChild( i )->setValue( value[i] );
 	}
@@ -164,7 +164,7 @@ template<typename T>
 T CompoundNumericPlug<T>::getValue() const
 {
 	T result;
-	for( unsigned i=0; i<T::dimensions(); i++ )
+	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
 		result[i] = getChild( i )->getValue();
 	}
@@ -294,4 +294,4 @@ template class CompoundNumericPlug<Imath::V3i>;
 template class CompoundNumericPlug<Imath::Color3f>;
 template class CompoundNumericPlug<Imath::Color4f>;
 
-}
+} // namespace Gaffer

@@ -48,32 +48,31 @@ namespace GafferImage
 class GAFFERIMAGE_API FlatImageProcessor : public ImageProcessor
 {
 
-	public :
+public:
 
-		/// Constructs with a single input ImagePlug named "in". Use inPlug()
-		/// to access this plug.
-		explicit FlatImageProcessor( const std::string &name=defaultName<FlatImageProcessor>() );
+	/// Constructs with a single input ImagePlug named "in". Use inPlug()
+	/// to access this plug.
+	explicit FlatImageProcessor( const std::string &name = defaultName<FlatImageProcessor>() );
 
-		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
-		/// convenience for accessing the first child in the array, and use
-		/// inPlugs() to access the array itself.
-		FlatImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
-		~FlatImageProcessor() override;
+	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
+	/// convenience for accessing the first child in the array, and use
+	/// inPlugs() to access the array itself.
+	FlatImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
+	~FlatImageProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::FlatImageProcessor, FlatImageProcessorTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::FlatImageProcessor, FlatImageProcessorTypeId, ImageProcessor );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
-
+	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 };
 
 IE_CORE_DECLAREPTR( FlatImageProcessor )

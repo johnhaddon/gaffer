@@ -60,117 +60,116 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 {
 
-	public :
+public:
 
-		RenderController( const ConstScenePlugPtr &scene, const Gaffer::ConstContextPtr &context, const IECoreScenePreview::RendererPtr &renderer );
-		~RenderController() override;
+	RenderController( const ConstScenePlugPtr &scene, const Gaffer::ConstContextPtr &context, const IECoreScenePreview::RendererPtr &renderer );
+	~RenderController() override;
 
-		// Renderer, scene and expansion
-		// =============================
+	// Renderer, scene and expansion
+	// =============================
 
-		IECoreScenePreview::Renderer *renderer();
+	IECoreScenePreview::Renderer *renderer();
 
-		void setScene( const ConstScenePlugPtr &scene );
-		const ScenePlug *getScene() const;
+	void setScene( const ConstScenePlugPtr &scene );
+	const ScenePlug *getScene() const;
 
-		void setContext( const Gaffer::ConstContextPtr &context );
-		const Gaffer::Context *getContext() const;
+	void setContext( const Gaffer::ConstContextPtr &context );
+	const Gaffer::Context *getContext() const;
 
-		void setVisibleSet( const GafferScene::VisibleSet &visibleSet );
-		const GafferScene::VisibleSet &getVisibleSet() const;
+	void setVisibleSet( const GafferScene::VisibleSet &visibleSet );
+	const GafferScene::VisibleSet &getVisibleSet() const;
 
-		void setMinimumExpansionDepth( size_t depth );
-		size_t getMinimumExpansionDepth() const;
+	void setMinimumExpansionDepth( size_t depth );
+	size_t getMinimumExpansionDepth() const;
 
-		// Update
-		// ======
+	// Update
+	// ======
 
-		using UpdateRequiredSignal = Gaffer::Signals::Signal<void ( RenderController & )>;
-		UpdateRequiredSignal &updateRequiredSignal();
+	using UpdateRequiredSignal = Gaffer::Signals::Signal<void( RenderController & )>;
+	UpdateRequiredSignal &updateRequiredSignal();
 
-		bool updateRequired() const;
+	bool updateRequired() const;
 
-		using ProgressCallback = std::function<void (Gaffer::BackgroundTask::Status)>;
+	using ProgressCallback = std::function<void( Gaffer::BackgroundTask::Status )>;
 
-		void update( const ProgressCallback &callback = ProgressCallback() );
-		std::shared_ptr<Gaffer::BackgroundTask> updateInBackground( const ProgressCallback &callback = ProgressCallback(), const IECore::PathMatcher &priorityPaths = IECore::PathMatcher()  );
+	void update( const ProgressCallback &callback = ProgressCallback() );
+	std::shared_ptr<Gaffer::BackgroundTask> updateInBackground( const ProgressCallback &callback = ProgressCallback(), const IECore::PathMatcher &priorityPaths = IECore::PathMatcher() );
 
-		void updateMatchingPaths( const IECore::PathMatcher &pathsToUpdate, const ProgressCallback &callback = ProgressCallback() );
+	void updateMatchingPaths( const IECore::PathMatcher &pathsToUpdate, const ProgressCallback &callback = ProgressCallback() );
 
-		// Manifest
-		// ========
-		//
-		// Allows IDs acquired from a standard `id` AOV to be mapped
-		// back to the scene paths they came from.
-		std::shared_ptr<RenderManifest> renderManifest();
-		std::shared_ptr<const RenderManifest> renderManifest() const;
+	// Manifest
+	// ========
+	//
+	// Allows IDs acquired from a standard `id` AOV to be mapped
+	// back to the scene paths they came from.
+	std::shared_ptr<RenderManifest> renderManifest();
+	std::shared_ptr<const RenderManifest> renderManifest() const;
 
-		// Controls if a manifest is needed even without any id Outputs.
-		// ( Needed by SceneView which creates Outputs itself without the controller knowing )
-		void setManifestRequired( bool manifestRequired );
-		bool getManifestRequired();
-
-
-	private :
-
-		enum GlobalComponents
-		{
-			NoGlobalComponent = 0,
-			GlobalsGlobalComponent = 1,
-			SetsGlobalComponent = 2,
-			RenderSetsGlobalComponent = 4,
-			CameraOptionsGlobalComponent = 8,
-			TransformBlurGlobalComponent = 16,
-			DeformationBlurGlobalComponent = 32,
-			CameraShutterGlobalComponent = 64,
-			IncludedPurposesGlobalComponent = 128,
-			IDGlobalComponent = 256,
-			CapsuleAffectingGlobalComponents = TransformBlurGlobalComponent | DeformationBlurGlobalComponent | IncludedPurposesGlobalComponent,
-			AllGlobalComponents = GlobalsGlobalComponent | SetsGlobalComponent | RenderSetsGlobalComponent | CameraOptionsGlobalComponent | TransformBlurGlobalComponent | DeformationBlurGlobalComponent | IncludedPurposesGlobalComponent | IDGlobalComponent
-		};
-
-		void plugDirtied( const Gaffer::Plug *plug );
-		void contextChanged( const IECore::InternedString &name );
-		void requestUpdate();
-		void dirtyGlobals( unsigned components );
-		void dirtySceneGraphs( unsigned components );
-
-		void updateInternal( const ProgressCallback &callback = ProgressCallback(), const IECore::PathMatcher *pathsToUpdate = nullptr, bool signalCompletion = true );
-		void updateDefaultCamera();
-		void cancelBackgroundTask();
-
-		class SceneGraph;
-
-		ConstScenePlugPtr m_scene;
-		Gaffer::ConstContextPtr m_context;
-		IECoreScenePreview::RendererPtr m_renderer;
+	// Controls if a manifest is needed even without any id Outputs.
+	// ( Needed by SceneView which creates Outputs itself without the controller knowing )
+	void setManifestRequired( bool manifestRequired );
+	bool getManifestRequired();
 
 
-		GafferScene::VisibleSet m_visibleSet;
-		size_t m_minimumExpansionDepth;
+private:
 
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
-		Gaffer::Signals::ScopedConnection m_contextChangedConnection;
+	enum GlobalComponents
+	{
+		NoGlobalComponent = 0,
+		GlobalsGlobalComponent = 1,
+		SetsGlobalComponent = 2,
+		RenderSetsGlobalComponent = 4,
+		CameraOptionsGlobalComponent = 8,
+		TransformBlurGlobalComponent = 16,
+		DeformationBlurGlobalComponent = 32,
+		CameraShutterGlobalComponent = 64,
+		IncludedPurposesGlobalComponent = 128,
+		IDGlobalComponent = 256,
+		CapsuleAffectingGlobalComponents = TransformBlurGlobalComponent | DeformationBlurGlobalComponent | IncludedPurposesGlobalComponent,
+		AllGlobalComponents = GlobalsGlobalComponent | SetsGlobalComponent | RenderSetsGlobalComponent | CameraOptionsGlobalComponent | TransformBlurGlobalComponent | DeformationBlurGlobalComponent | IncludedPurposesGlobalComponent | IDGlobalComponent
+	};
 
-		UpdateRequiredSignal m_updateRequiredSignal;
-		bool m_updateRequired;
-		bool m_updateRequested;
-		std::atomic<uint64_t> m_failedAttributeEdits;
+	void plugDirtied( const Gaffer::Plug *plug );
+	void contextChanged( const IECore::InternedString &name );
+	void requestUpdate();
+	void dirtyGlobals( unsigned components );
+	void dirtySceneGraphs( unsigned components );
 
-		std::vector<std::unique_ptr<SceneGraph> > m_sceneGraphs;
-		unsigned m_dirtyGlobalComponents;
-		unsigned m_changedGlobalComponents;
-		Private::RendererAlgo::RenderOptions m_renderOptions;
-		Private::RendererAlgo::RenderSets m_renderSets;
-		std::unique_ptr<Private::RendererAlgo::LightLinks> m_lightLinks;
-		IECoreScenePreview::Renderer::ObjectInterfacePtr m_defaultCamera;
-		IECoreScenePreview::Renderer::AttributesInterfacePtr m_defaultAttributes;
+	void updateInternal( const ProgressCallback &callback = ProgressCallback(), const IECore::PathMatcher *pathsToUpdate = nullptr, bool signalCompletion = true );
+	void updateDefaultCamera();
+	void cancelBackgroundTask();
 
-		std::shared_ptr<Gaffer::BackgroundTask> m_backgroundTask;
+	class SceneGraph;
 
-		bool m_manifestRequired;
-		std::shared_ptr<RenderManifest> m_renderManifest;
+	ConstScenePlugPtr m_scene;
+	Gaffer::ConstContextPtr m_context;
+	IECoreScenePreview::RendererPtr m_renderer;
 
+
+	GafferScene::VisibleSet m_visibleSet;
+	size_t m_minimumExpansionDepth;
+
+	Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
+	Gaffer::Signals::ScopedConnection m_contextChangedConnection;
+
+	UpdateRequiredSignal m_updateRequiredSignal;
+	bool m_updateRequired;
+	bool m_updateRequested;
+	std::atomic<uint64_t> m_failedAttributeEdits;
+
+	std::vector<std::unique_ptr<SceneGraph>> m_sceneGraphs;
+	unsigned m_dirtyGlobalComponents;
+	unsigned m_changedGlobalComponents;
+	Private::RendererAlgo::RenderOptions m_renderOptions;
+	Private::RendererAlgo::RenderSets m_renderSets;
+	std::unique_ptr<Private::RendererAlgo::LightLinks> m_lightLinks;
+	IECoreScenePreview::Renderer::ObjectInterfacePtr m_defaultCamera;
+	IECoreScenePreview::Renderer::AttributesInterfacePtr m_defaultAttributes;
+
+	std::shared_ptr<Gaffer::BackgroundTask> m_backgroundTask;
+
+	bool m_manifestRequired;
+	std::shared_ptr<RenderManifest> m_renderManifest;
 };
 
 } // namespace GafferScene

@@ -50,6 +50,5 @@ using namespace GafferUI;
 void GafferUIModule::bindNameGadget()
 {
 	GadgetClass<NameGadget>()
-		.def( init<Gaffer::GraphComponentPtr>() )
-	;
+		.def( init<Gaffer::GraphComponentPtr>() );
 }

@@ -62,7 +62,7 @@ IECOREDELIGHT_API bool convert( const IECoreScenePreview::Renderer::ObjectSample
 
 /// Signature of a function which can convert `IECore::Object` samples into an
 /// NSI node.
-using Converter = std::function<bool ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle )>;
+using Converter = std::function<bool( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle )>;
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -75,23 +75,21 @@ template<typename T>
 class ConverterDescription
 {
 
-	public :
+public:
 
-		/// Type-specific conversion functions.
-		using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
-		using TypedConverter = bool (*)( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, NSIContext_t, const char * );
+	/// Type-specific conversion functions.
+	using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
+	using TypedConverter = bool ( * )( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, NSIContext_t, const char * );
 
-		ConverterDescription( TypedConverter converter )
-		{
-			registerConverter(
-				T::staticTypeId(),
-				[converter] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle )
-				{
-					return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, context, handle );
-				}
-			);
-		}
-
+	ConverterDescription( TypedConverter converter )
+	{
+		registerConverter(
+			T::staticTypeId(),
+			[converter]( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle ) {
+				return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, context, handle );
+			}
+		);
+	}
 };
 
 /// Adds all static PrimitiveVariables into a ParameterList for use with

@@ -61,34 +61,36 @@ using namespace IECoreScenePreview;
 namespace OSDF = OpenSubdiv::Far;
 namespace OSDB = OpenSubdiv::Bfr;
 
-namespace {
+namespace
+{
 
 template<class F, typename... Args>
-typename std::invoke_result_t<F, Data *, Args&&...> dispatchVectorData( const IECore::Data *data, F &&functor, Args&&... args )
+typename std::invoke_result_t<F, Data *, Args &&...> dispatchVectorData( const IECore::Data *data, F &&functor, Args &&...args )
 {
-	IECore::dispatch( data,
-		[&]( const auto *typedData )
+	IECore::dispatch( data, [&]( const auto *typedData ) {
+		using DataType = typename std::remove_cv_t<std::remove_pointer_t<decltype( typedData )>>;
+		if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
 		{
-			using DataType = typename std::remove_cv_t< std::remove_pointer_t< decltype( typedData ) > >;
-			if constexpr ( TypeTraits::IsVectorTypedData<DataType>::value )
-			{
-				return functor( typedData, std::forward<Args>( args )... );
-			}
-
-			throw IECore::Exception( "Invalid primitive variable type, this message should never be seen because we earlier check isPrimitiveVariableValid" );
+			return functor( typedData, std::forward<Args>( args )... );
 		}
-	);
+
+		throw IECore::Exception( "Invalid primitive variable type, this message should never be seen because we earlier check isPrimitiveVariableValid" );
+	} );
 }
 
 // is_specialization_of pasted from C++ standards proposal WG21 P2098R0
 
-template< class T, template<class...> class Primary >
-struct is_specialization_of : std::false_type{};
+template<class T, template<class...> class Primary>
+struct is_specialization_of : std::false_type
+{
+};
 
-template< template<class...> class Primary, class... Args >
-struct is_specialization_of< Primary<Args...>, Primary> : std::true_type{};
+template<template<class...> class Primary, class... Args>
+struct is_specialization_of<Primary<Args...>, Primary> : std::true_type
+{
+};
 
-template< class T , template<class...> class Primary >
+template<class T, template<class...> class Primary>
 inline constexpr bool is_specialization_of_v = is_specialization_of<T, Primary>::value;
 
 
@@ -98,20 +100,30 @@ inline constexpr bool is_specialization_of_v = is_specialization_of<T, Primary>:
 // this way avoids undefined behaviour, and gives reasonable results for corner cases like doubles
 // or ints.
 
-template< class T >
+template<class T>
 constexpr int numFloatsForType()
 {
-	if constexpr( std::is_arithmetic_v< T > ) return 1;
-	else if constexpr( std::is_same_v< T, Imath::half > ) return 1;
-	else if constexpr( is_specialization_of_v< T, Imath::Vec2 > ) return 2;
-	else if constexpr( is_specialization_of_v< T, Imath::Vec3 > ) return 3;
-	else if constexpr( is_specialization_of_v< T, Imath::Color3 > ) return 3;
-	else if constexpr( is_specialization_of_v< T, Imath::Color4 > ) return 4;
-	else if constexpr( is_specialization_of_v< T, Imath::Quat > ) return 4;
-	else if constexpr( is_specialization_of_v< T, Imath::Box > ) return 2 * numFloatsForType< decltype(T::min) >();
-	else if constexpr( is_specialization_of_v< T, Imath::Matrix33 > ) return 9;
-	else if constexpr( is_specialization_of_v< T, Imath::Matrix44 > ) return 16;
-	else if constexpr( std::is_same_v< T, std::string > || std::is_same_v< T, IECore::InternedString > )
+	if constexpr( std::is_arithmetic_v<T> )
+		return 1;
+	else if constexpr( std::is_same_v<T, Imath::half> )
+		return 1;
+	else if constexpr( is_specialization_of_v<T, Imath::Vec2> )
+		return 2;
+	else if constexpr( is_specialization_of_v<T, Imath::Vec3> )
+		return 3;
+	else if constexpr( is_specialization_of_v<T, Imath::Color3> )
+		return 3;
+	else if constexpr( is_specialization_of_v<T, Imath::Color4> )
+		return 4;
+	else if constexpr( is_specialization_of_v<T, Imath::Quat> )
+		return 4;
+	else if constexpr( is_specialization_of_v<T, Imath::Box> )
+		return 2 * numFloatsForType<decltype( T::min )>();
+	else if constexpr( is_specialization_of_v<T, Imath::Matrix33> )
+		return 9;
+	else if constexpr( is_specialization_of_v<T, Imath::Matrix44> )
+		return 16;
+	else if constexpr( std::is_same_v<T, std::string> || std::is_same_v<T, IECore::InternedString> )
 	{
 		// Trying to interpolate strings is weird enough that I guess I'm OK with just returning
 		// empty strings - the user can probably figure out that this means that tessellating varying strings
@@ -121,55 +133,55 @@ constexpr int numFloatsForType()
 	}
 }
 
-template< class T >
-void toFloats( const T& src, float *v )
+template<class T>
+void toFloats( const T &src, float *v )
 {
-	if constexpr( std::is_arithmetic_v< T > )
+	if constexpr( std::is_arithmetic_v<T> )
 	{
 		v[0] = src;
 	}
-	else if constexpr( std::is_same_v< T, Imath::half > )
+	else if constexpr( std::is_same_v<T, Imath::half> )
 	{
 		v[0] = src;
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Vec2 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Vec2> )
 	{
 		v[0] = src.x;
 		v[1] = src.y;
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Vec3 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Vec3> )
 	{
 		v[0] = src.x;
 		v[1] = src.y;
 		v[2] = src.z;
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Color3 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Color3> )
 	{
 		v[0] = src.x;
 		v[1] = src.y;
 		v[2] = src.z;
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Color4 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Color4> )
 	{
 		v[0] = src.r;
 		v[1] = src.g;
 		v[2] = src.b;
 		v[3] = src.a;
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Quat > )
+	else if constexpr( is_specialization_of_v<T, Imath::Quat> )
 	{
 		v[0] = src.r;
 		v[1] = src.v.x;
 		v[2] = src.v.y;
 		v[3] = src.v.z;
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Box > )
+	else if constexpr( is_specialization_of_v<T, Imath::Box> )
 	{
-		using VT = decltype(T::min);
+		using VT = decltype( T::min );
 		toFloats<VT>( src.min, v );
 		toFloats<VT>( src.max, v + numFloatsForType<VT>() );
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Matrix33 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Matrix33> )
 	{
 		v[0] = src[0][0];
 		v[1] = src[0][1];
@@ -181,18 +193,18 @@ void toFloats( const T& src, float *v )
 		v[7] = src[2][1];
 		v[8] = src[2][2];
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Matrix44 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Matrix44> )
 	{
-		v[0]  = src[0][0];
-		v[1]  = src[0][1];
-		v[2]  = src[0][2];
-		v[3]  = src[0][3];
-		v[4]  = src[1][0];
-		v[5]  = src[1][1];
-		v[6]  = src[1][2];
-		v[7]  = src[1][3];
-		v[8]  = src[2][0];
-		v[9]  = src[2][1];
+		v[0] = src[0][0];
+		v[1] = src[0][1];
+		v[2] = src[0][2];
+		v[3] = src[0][3];
+		v[4] = src[1][0];
+		v[5] = src[1][1];
+		v[6] = src[1][2];
+		v[7] = src[1][3];
+		v[8] = src[2][0];
+		v[9] = src[2][1];
 		v[10] = src[2][2];
 		v[11] = src[2][3];
 		v[12] = src[3][0];
@@ -200,38 +212,46 @@ void toFloats( const T& src, float *v )
 		v[14] = src[3][2];
 		v[15] = src[3][3];
 	}
-	else if constexpr( std::is_same_v< T, std::string > || std::is_same_v< T, IECore::InternedString > )
+	else if constexpr( std::is_same_v<T, std::string> || std::is_same_v<T, IECore::InternedString> )
 	{
 		// Ignore strings
 	}
 }
 
-template< class T >
+template<class T>
 T fromFloats( float *v )
 {
 	// Special case for integers to get more accuracy by rounding.
-	if constexpr( std::is_integral_v< T > ) return T( std::round( *v ) );
-	else if constexpr( std::is_arithmetic_v< T > ) return T( *v );
-	else if constexpr( std::is_same_v< T, Imath::half > ) return T( *v );
-	else if constexpr( is_specialization_of_v< T, Imath::Vec2 > ) return T( v[0], v[1] );
-	else if constexpr( is_specialization_of_v< T, Imath::Vec3 > ) return T( v[0], v[1], v[2] );
-	else if constexpr( is_specialization_of_v< T, Imath::Color3 > ) return T( v[0], v[1], v[2] );
-	else if constexpr( is_specialization_of_v< T, Imath::Color4 > ) return T( v[0], v[1], v[2], v[3] );
-	else if constexpr( is_specialization_of_v< T, Imath::Quat > ) return T( v[0], v[1], v[2], v[3] );
-	else if constexpr( is_specialization_of_v< T, Imath::Box > )
+	if constexpr( std::is_integral_v<T> )
+		return T( std::round( *v ) );
+	else if constexpr( std::is_arithmetic_v<T> )
+		return T( *v );
+	else if constexpr( std::is_same_v<T, Imath::half> )
+		return T( *v );
+	else if constexpr( is_specialization_of_v<T, Imath::Vec2> )
+		return T( v[0], v[1] );
+	else if constexpr( is_specialization_of_v<T, Imath::Vec3> )
+		return T( v[0], v[1], v[2] );
+	else if constexpr( is_specialization_of_v<T, Imath::Color3> )
+		return T( v[0], v[1], v[2] );
+	else if constexpr( is_specialization_of_v<T, Imath::Color4> )
+		return T( v[0], v[1], v[2], v[3] );
+	else if constexpr( is_specialization_of_v<T, Imath::Quat> )
+		return T( v[0], v[1], v[2], v[3] );
+	else if constexpr( is_specialization_of_v<T, Imath::Box> )
 	{
-		using VT = decltype(T::min);
+		using VT = decltype( T::min );
 		return T( fromFloats<VT>( v ), fromFloats<VT>( v + numFloatsForType<VT>() ) );
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Matrix33 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Matrix33> )
 	{
 		return T( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8] );
 	}
-	else if constexpr( is_specialization_of_v< T, Imath::Matrix44 > )
+	else if constexpr( is_specialization_of_v<T, Imath::Matrix44> )
 	{
 		return T( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15] );
 	}
-	else if constexpr( std::is_same_v< T, std::string > || std::is_same_v< T, IECore::InternedString > )
+	else if constexpr( std::is_same_v<T, std::string> || std::is_same_v<T, IECore::InternedString> )
 	{
 		return T();
 	}
@@ -305,12 +325,11 @@ void setTopologyCreasesAndCorners( OSDF::TopologyDescriptor &desc, const IECoreS
 // This is used to deduplicated any facevarying indices that belong to different vertices.
 struct FaceVaryingMatch
 {
-	FaceVaryingMatch( int vi, int fvi ) :
-		vertexIndex( vi ), faceVaryingIndex( fvi )
+	FaceVaryingMatch( int vi, int fvi ) : vertexIndex( vi ), faceVaryingIndex( fvi )
 	{
 	}
 
-	bool operator==( const FaceVaryingMatch &other ) const
+	bool operator == ( const FaceVaryingMatch &other ) const
 	{
 		return vertexIndex == other.vertexIndex && faceVaryingIndex == other.faceVaryingIndex;
 	}
@@ -322,10 +341,10 @@ struct FaceVaryingMatch
 // Hash function for above
 struct FaceVaryingMatchHash
 {
-	std::size_t operator()( const FaceVaryingMatch& k ) const
+	std::size_t operator () ( const FaceVaryingMatch &k ) const
 	{
 		std::size_t seed = k.vertexIndex;
-		seed += ((size_t)k.faceVaryingIndex) << 32;
+		seed += ( (size_t)k.faceVaryingIndex ) << 32;
 		return seed;
 	}
 };
@@ -371,8 +390,8 @@ struct PrimvarSetup
 			// at each UV. Neither our code or OpenSubdiv like this very much. We assume in this case that
 			// the desired result is to make a copy of the UV for each independent vertex in space that uses it.
 			const int numBaseElements = IECore::size( var.data.get() );
-			std::vector< int > firstVertexForFaceVarying( numBaseElements, -1 );
-			std::unordered_map< FaceVaryingMatch, int, FaceVaryingMatchHash > faceVaryingMatches;
+			std::vector<int> firstVertexForFaceVarying( numBaseElements, -1 );
+			std::unordered_map<FaceVaryingMatch, int, FaceVaryingMatchHash> faceVaryingMatches;
 
 			const std::vector<int> &fvIndices = var.indices->readable();
 
@@ -386,11 +405,11 @@ struct PrimvarSetup
 				// will get a single vertex, and we will never have to put anything in the more expensive
 				// faceVaryingMatches map.
 
-				if( firstVertexForFaceVarying[ faceVaryingIndex ] == -1 )
+				if( firstVertexForFaceVarying[faceVaryingIndex] == -1 )
 				{
-					firstVertexForFaceVarying[ faceVaryingIndex ] = (*vertexIds)[i];
+					firstVertexForFaceVarying[faceVaryingIndex] = ( *vertexIds )[i];
 				}
-				else if( firstVertexForFaceVarying[ faceVaryingIndex ] != (*vertexIds)[i] )
+				else if( firstVertexForFaceVarying[faceVaryingIndex] != ( *vertexIds )[i] )
 				{
 					// We've found a faceVertex that is used with 2 different vertices. We're going to need
 					// to populate the override indices
@@ -400,7 +419,7 @@ struct PrimvarSetup
 						// If we haven't allocated the override indices yet, start by filling in all the indices
 						// we've already processed ( which didn't have any conflicts )
 						m_overrideFaceVaryingIndices.reserve( vertexIds->size() );
-						m_overrideFaceVaryingIndices.insert( m_overrideFaceVaryingIndices.begin(), &fvIndices[0], &fvIndices[ i ] );
+						m_overrideFaceVaryingIndices.insert( m_overrideFaceVaryingIndices.begin(), &fvIndices[0], &fvIndices[i] );
 						overriding = true;
 					}
 
@@ -411,7 +430,7 @@ struct PrimvarSetup
 					//
 					// We try the emplace - if we've already seen a version of this faceVarying index for this
 					// vertex, then we'll get that instead.
-					auto [ it, success ] = faceVaryingMatches.emplace( FaceVaryingMatch( (*vertexIds)[i], fvIndices[i] ), (int)( numBaseElements + m_deduplicatedReindex.size() ) );
+					auto [it, success] = faceVaryingMatches.emplace( FaceVaryingMatch( ( *vertexIds )[i], fvIndices[i] ), (int)( numBaseElements + m_deduplicatedReindex.size() ) );
 					if( success )
 					{
 						m_deduplicatedReindex.push_back( faceVaryingIndex );
@@ -445,9 +464,8 @@ struct PrimvarSetup
 		{
 			dispatchVectorData(
 				m_var.data.get(),
-				[&]( const auto *typedData ) -> void
-				{
-					using DataType = typename std::decay_t< decltype( *typedData ) >;
+				[&]( const auto *typedData ) -> void {
+					using DataType = typename std::decay_t<decltype( *typedData )>;
 					typename DataType::Ptr outData = new DataType();
 					outData->writable().resize( outputSize );
 					m_outWritable = &( outData->writable() );
@@ -473,18 +491,18 @@ struct PrimvarSetup
 	std::vector<int> m_deduplicatedReindex;
 
 	IECore::DataPtr m_outData;
-	void* m_outWritable;
+	void *m_outWritable;
 	IECore::IntVectorDataPtr m_outIndicesData;
-	int* m_outIndicesWritable;
+	int *m_outIndicesWritable;
 };
 
 // Create PrimvarSetup's for the variables we need to interpolate
 void setupVariables(
 	const MeshPrimitive &mesh, bool calculateNormals,
 	PrimvarSetup &posPrimvarSetup,
-	std::vector< PrimvarSetup > &vertexPrimvarSetups,
-	std::vector< PrimvarSetup > &uniformPrimvarSetups,
-	std::vector< PrimvarSetup > &faceVaryingPrimvarSetups,
+	std::vector<PrimvarSetup> &vertexPrimvarSetups,
+	std::vector<PrimvarSetup> &uniformPrimvarSetups,
+	std::vector<PrimvarSetup> &faceVaryingPrimvarSetups,
 	const IECore::Canceller *canceller
 )
 {
@@ -499,7 +517,7 @@ void setupVariables(
 			continue;
 		}
 
-		if( !mesh.isPrimitiveVariableValid( it->second) )
+		if( !mesh.isPrimitiveVariableValid( it->second ) )
 		{
 			throw Exception( "Cannot tessellate invalid primvar: \"" + it->first + "\"" );
 		}
@@ -593,8 +611,7 @@ struct EdgeOwner
 // All vertex primvars share the same topology, but each FaceVarying primvar needs its own.
 struct PrimvarTopology
 {
-	PrimvarTopology( const OSDF::TopologyLevel &meshTopology, int faceVaryingChannel = -1 ) :
-		m_mesh( meshTopology ), m_faceVaryingChannel( faceVaryingChannel )
+	PrimvarTopology( const OSDF::TopologyLevel &meshTopology, int faceVaryingChannel = -1 ) : m_mesh( meshTopology ), m_faceVaryingChannel( faceVaryingChannel )
 	{
 		m_facePointOffsets.resize( m_mesh.GetNumFaces() );
 		m_vertexOwners.resize(
@@ -641,7 +658,7 @@ struct PrimvarTopology
 				// adjacent faces at this vertex
 				for( int j = 0; j < adjFaces.size(); j++ )
 				{
-					if( fvarValues[i] == m_mesh.GetFaceFVarValues( adjFaces[j], m_faceVaryingChannel )[ adjFaceLocalIndices[j] ] )
+					if( fvarValues[i] == m_mesh.GetFaceFVarValues( adjFaces[j], m_faceVaryingChannel )[adjFaceLocalIndices[j]] )
 					{
 						if( !m_mesh.IsFaceHole( adjFaces[j] ) )
 						{
@@ -697,20 +714,20 @@ struct PrimvarTopology
 				{
 					m_edgeOwners[edgeIndex].face = faceIndex;
 					m_edgeOwners[edgeIndex].offset = ownedBoundaryPoints;
-					m_edgeOwners[edgeIndex].direction = fVerts[ ( i + 1 ) % fVerts.size() ] > vertIndex;
+					m_edgeOwners[edgeIndex].direction = fVerts[( i + 1 ) % fVerts.size()] > vertIndex;
 					ownedBoundaryPoints += pointsPerEdge;
 				}
 			}
 		}
 
 		const int unownedBoundaryPoints = tessPattern.GetNumBoundaryCoords() - ownedBoundaryPoints;
-		m_facePointOffsets[ faceIndex ] = tessPattern.GetNumCoords() - unownedBoundaryPoints;
+		m_facePointOffsets[faceIndex] = tessPattern.GetNumCoords() - unownedBoundaryPoints;
 	}
 
 	// Record a face that doesn't correspond to any output facets
 	inline void addHole( int faceIndex )
 	{
-		m_facePointOffsets[ faceIndex ] = 0;
+		m_facePointOffsets[faceIndex] = 0;
 	}
 
 	// Must be called after all faces have had their points counted during the first parallel loop,
@@ -729,7 +746,7 @@ struct PrimvarTopology
 };
 
 // Call OpenSubdiv's Evaluate function, and store the result in one of our types
-template < class T >
+template<class T>
 void evaluateSurface(
 	const OSDB::Surface<float> &surface, const float *patchPointData, const float *uv,
 	int outIndex, std::vector<T> &out, T *outNormals = nullptr
@@ -748,9 +765,9 @@ void evaluateSurface(
 
 		// We know that we only pass outNormals for P, which is required to be V3f, so it's not a problem
 		// that other types don't define cross or normalized
-		if constexpr( std::is_same_v< T, Imath::V3f > )
+		if constexpr( std::is_same_v<T, Imath::V3f> )
 		{
-			outNormals[ outIndex ] = fromFloats<T>( du ).cross( fromFloats<T>( dv ) ).normalized();
+			outNormals[outIndex] = fromFloats<T>( du ).cross( fromFloats<T>( dv ) ).normalized();
 		}
 	}
 	else
@@ -758,7 +775,7 @@ void evaluateSurface(
 		surface.Evaluate( uv, patchPointData, typeSize, buffer );
 	}
 
-	out[ outIndex ] = fromFloats<T>( buffer );
+	out[outIndex] = fromFloats<T>( buffer );
 }
 
 // Data that is only needed while tessellating a face, but can then be discarded. We don't want to reallocate
@@ -782,11 +799,11 @@ struct TessellationTempBuffers
 // structures, and also to handle non-manifold geo, and also to
 // output triangles when OpenSubdiv emits a triangle, rather than
 // degenerate quads.
-template <class T>
+template<class T>
 void tessellateVariable(
 	const OSDB::Surface<float> &surface, int faceIndex,
 	const OSDF::ConstIndexArray &fVerts, const OSDF::ConstIndexArray &fEdges,
-	int tessUniformRate, const OSDB::Tessellation &tessPattern, const std::vector< Imath::V2f > &coords,
+	int tessUniformRate, const OSDB::Tessellation &tessPattern, const std::vector<Imath::V2f> &coords,
 	const PrimvarTopology &primvarTopology,
 	TessellationTempBuffers &buffers,
 	PrimvarSetup &setup,
@@ -794,7 +811,7 @@ void tessellateVariable(
 	int outIndicesIndex, int *outVerticesPerFace = nullptr, T *outNormals = nullptr
 )
 {
-	std::vector<T> &out = *(std::vector<T>*)(setup.m_outWritable);
+	std::vector<T> &out = *(std::vector<T> *)( setup.m_outWritable );
 	const int typeSize = numFloatsForType<T>();
 	buffers.patchPointIndices.resize( surface.GetNumControlPoints() );
 	buffers.patchPoints.resize( surface.GetNumPatchPoints() * typeSize );
@@ -811,21 +828,21 @@ void tessellateVariable(
 		// Use the IndexedView to get correct value for the control points whether or not they are indexed.
 		for( unsigned int i = 0; i < buffers.patchPointIndices.size(); i++ )
 		{
-			toFloats<T>( indexedView[ buffers.patchPointIndices[i] ], &buffers.patchPoints[i * typeSize] );
+			toFloats<T>( indexedView[buffers.patchPointIndices[i]], &buffers.patchPoints[i * typeSize] );
 		}
 	}
 	else
 	{
 		// For FaceVarying primitive variables, any indices are handled by OSD's topology, so we need
 		// to not apply the indices here.
-		const std::vector< T > &d =
-			IECore::runTimeCast< const IECore::TypedData<std::vector<T> > >( setup.m_var.data.get() )->readable();
+		const std::vector<T> &d =
+			IECore::runTimeCast<const IECore::TypedData<std::vector<T>>>( setup.m_var.data.get() )->readable();
 
 		if( !setup.m_deduplicatedReindex.size() )
 		{
 			for( unsigned int i = 0; i < buffers.patchPointIndices.size(); i++ )
 			{
-				toFloats<T>( d[ buffers.patchPointIndices[i] ], &buffers.patchPoints[i * typeSize] );
+				toFloats<T>( d[buffers.patchPointIndices[i]], &buffers.patchPoints[i * typeSize] );
 			}
 		}
 		else
@@ -837,10 +854,10 @@ void tessellateVariable(
 				int index = buffers.patchPointIndices[i];
 				if( index >= numBaseElements )
 				{
-					index = setup.m_deduplicatedReindex[ index - numBaseElements ];
+					index = setup.m_deduplicatedReindex[index - numBaseElements];
 				}
 
-				toFloats<T>( d[ index ], &buffers.patchPoints[i * typeSize] );
+				toFloats<T>( d[index], &buffers.patchPoints[i * typeSize] );
 			}
 		}
 	}
@@ -867,7 +884,7 @@ void tessellateVariable(
 
 	if( setup.m_outIndicesWritable )
 	{
-		buffers.boundaryIndices.resize(numBoundaryCoords);
+		buffers.boundaryIndices.resize( numBoundaryCoords );
 	}
 
 
@@ -888,12 +905,12 @@ void tessellateVariable(
 		// For faceVarying primitive variables, vertex ownership is stored per-faceVarying index
 		int vertOwnerIndex = primvarTopology.m_faceVaryingChannel == -1 ? fVerts[i] : fvarValues[i];
 
-		const VertexOwner &vOwner = primvarTopology.m_vertexOwners[ vertOwnerIndex ];
+		const VertexOwner &vOwner = primvarTopology.m_vertexOwners[vertOwnerIndex];
 		if( vOwner.face == faceIndex && vOwner.offset == outOffset - primvarTopology.m_facePointOffsets[faceIndex] )
 		{
 			// We are the owner - evaluate the primvar at this corner
 			evaluateSurface<T>(
-				surface, buffers.patchPoints.data(), (float*)&tessBoundaryCoords[ boundaryIndex ],
+				surface, buffers.patchPoints.data(), (float *)&tessBoundaryCoords[boundaryIndex],
 				outOffset++, out, outNormals
 			);
 		}
@@ -901,7 +918,7 @@ void tessellateVariable(
 		if( setup.m_outIndicesWritable )
 		{
 			// Output vertex index to the list of boundary indices.
-			buffers.boundaryIndices[boundaryIndex] = primvarTopology.m_facePointOffsets[ vOwner.face ] + vOwner.offset;
+			buffers.boundaryIndices[boundaryIndex] = primvarTopology.m_facePointOffsets[vOwner.face] + vOwner.offset;
 		}
 
 		boundaryIndex++;
@@ -915,17 +932,17 @@ void tessellateVariable(
 		{
 			int pointsPerEdge = edgeRate - 1;
 
-			const EdgeOwner &eOwner = primvarTopology.m_edgeOwners[ edgeIndex ];
+			const EdgeOwner &eOwner = primvarTopology.m_edgeOwners[edgeIndex];
 
 			// When the owning face is left at -1, that means the edge is split, and each adjacent face
 			// owns its own copy
 			if( eOwner.face == -1 || eOwner.face == faceIndex )
 			{
 				// We are the owner, evaluate the primvar at each point on this edge
-				for (int j = 0; j < pointsPerEdge; ++j )
+				for( int j = 0; j < pointsPerEdge; ++j )
 				{
 					evaluateSurface<T>(
-						surface, buffers.patchPoints.data(), (float*)&tessBoundaryCoords[ boundaryIndex + j ],
+						surface, buffers.patchPoints.data(), (float *)&tessBoundaryCoords[boundaryIndex + j],
 						outOffset++, out, outNormals
 					);
 				}
@@ -945,30 +962,30 @@ void tessellateVariable(
 				else
 				{
 					// Another face owns this edge - grab the index offsets from the owner.
-					edgeStart = primvarTopology.m_facePointOffsets[ eOwner.face ] + eOwner.offset;
+					edgeStart = primvarTopology.m_facePointOffsets[eOwner.face] + eOwner.offset;
 
 					// Check if we're traversing the edge in the same direction as the owner.
 					// In a manifold mesh, this is always false, since each edge is joined to 2 faces, which
 					// traverse it clockwise on different sides. But it doesn't cost much to get it right in
 					// the non-manifold case.
-					directionMatches = eOwner.direction == ( fVerts[ ( i + 1 ) % fVerts.size() ] > fVerts[i] );
+					directionMatches = eOwner.direction == ( fVerts[( i + 1 ) % fVerts.size()] > fVerts[i] );
 				}
 
 				if( directionMatches )
 				{
 					// Add the points to the boundary - this is the same whether we just wrote them, or
 					// whether this is a weird non-manifold join to an existing edge.
-					for (int j = 0; j < pointsPerEdge; ++j)
+					for( int j = 0; j < pointsPerEdge; ++j )
 					{
-						buffers.boundaryIndices[ boundaryIndex + j ] = edgeStart + j;
+						buffers.boundaryIndices[boundaryIndex + j] = edgeStart + j;
 					}
 				}
 				else
 				{
 					// Assign shared points to boundary in reverse order:
-					for (int j = 0; j < pointsPerEdge; ++j)
+					for( int j = 0; j < pointsPerEdge; ++j )
 					{
-						buffers.boundaryIndices[ boundaryIndex + j ] = edgeStart + pointsPerEdge - 1 - j;
+						buffers.boundaryIndices[boundaryIndex + j] = edgeStart + pointsPerEdge - 1 - j;
 					}
 				}
 			}
@@ -982,11 +999,11 @@ void tessellateVariable(
 	// This is easy, because interior points are never shared.
 	if( numInteriorCoords )
 	{
-		for (int i = 0; i < numInteriorCoords; ++i)
+		for( int i = 0; i < numInteriorCoords; ++i )
 		{
 			Canceller::check( canceller );
 			evaluateSurface<T>(
-				surface, buffers.patchPoints.data(), (float*)&tessInteriorCoords[ i ],
+				surface, buffers.patchPoints.data(), (float *)&tessInteriorCoords[i],
 				outOffset++, out, outNormals
 			);
 		}
@@ -1031,9 +1048,7 @@ void tessellateVariable(
 
 		// TransformFacetCoordIndices seems to incorrectly not be labelled as const, so we cheat
 		// with a const_cast
-		const_cast< OSDB::Tessellation* >( &tessPattern )->TransformFacetCoordIndices(
-			outIndices, buffers.boundaryIndices.data(), tessInteriorOffset
-		);
+		const_cast<OSDB::Tessellation *>( &tessPattern )->TransformFacetCoordIndices( outIndices, buffers.boundaryIndices.data(), tessInteriorOffset );
 
 		if( needsCollapse )
 		{
@@ -1053,7 +1068,7 @@ void tessellateVariable(
 					// no longer a quad.
 					if( outVerticesPerFace )
 					{
-						outVerticesPerFace[ i / 4 ]--;
+						outVerticesPerFace[i / 4]--;
 					}
 				}
 			}
@@ -1069,8 +1084,8 @@ void tessellateVariables(
 	std::vector<int> &outVerticesPerFace, int faceFacetOffset, int faceFacetVertexOffset,
 	const PrimvarTopology &vertexTopology, const OSDB::Surface<float> &vertexSurface,
 	PrimvarSetup &posPrimvarSetup, std::vector<Imath::V3f> &outNormals,
-	std::vector< PrimvarSetup > &vertexPrimvarSetups, std::vector< PrimvarSetup > &uniformPrimvarSetups,
-	const std::vector< PrimvarTopology > &faceVaryingTopologies, std::vector< PrimvarSetup > &faceVaryingPrimvarSetups,
+	std::vector<PrimvarSetup> &vertexPrimvarSetups, std::vector<PrimvarSetup> &uniformPrimvarSetups,
+	const std::vector<PrimvarTopology> &faceVaryingTopologies, std::vector<PrimvarSetup> &faceVaryingPrimvarSetups,
 	TessellationTempBuffers &buffers,
 	const IECore::Canceller *canceller
 )
@@ -1089,9 +1104,8 @@ void tessellateVariables(
 	{
 		dispatchVectorData(
 			setup.m_var.data.get(),
-			[&]( const auto *typedData ) -> void
-			{
-				using ElementType = typename std::remove_pointer_t< decltype( typedData ) >::ValueType::value_type;
+			[&]( const auto *typedData ) -> void {
+				using ElementType = typename std::remove_pointer_t<decltype( typedData )>::ValueType::value_type;
 
 				tessellateVariable<ElementType>(
 					vertexSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords,
@@ -1108,7 +1122,7 @@ void tessellateVariables(
 		int uniformIndex = setup.m_var.indices ? setup.m_var.indices->readable()[faceIndex] : faceIndex;
 		for( int i = 0; i < numFacets; i++ )
 		{
-			setup.m_outIndicesWritable[ faceFacetOffset + i ] = uniformIndex;
+			setup.m_outIndicesWritable[faceFacetOffset + i] = uniformIndex;
 		}
 	}
 
@@ -1121,9 +1135,8 @@ void tessellateVariables(
 
 		dispatchVectorData(
 			faceVaryingPrimvarSetups[i].m_var.data.get(),
-			[&]( const auto *typedData ) -> void
-			{
-				using ElementType = typename std::remove_pointer_t< decltype( typedData ) >::ValueType::value_type;
+			[&]( const auto *typedData ) -> void {
+				using ElementType = typename std::remove_pointer_t<decltype( typedData )>::ValueType::value_type;
 				tessellateVariable<ElementType>(
 					buffers.faceVaryingSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords,
 					faceVaryingTopologies[i],
@@ -1281,7 +1294,7 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 
 	if( osScheme == OpenSubdiv::Sdc::SCHEME_LOOP && inputMesh.maxVerticesPerFace() > 3 )
 	{
-		throw Exception( "Loop subdivision can only be applied to triangle meshes ");
+		throw Exception( "Loop subdivision can only be applied to triangle meshes " );
 	}
 
 	// Create PrimvarSetups for all the primvars we need to interpolate
@@ -1296,9 +1309,9 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 	}
 	PrimvarSetup posPrimvarSetup( "P", inputMesh.variables.at( "P" ) );
 
-	std::vector< PrimvarSetup > vertexPrimvarSetups;
-	std::vector< PrimvarSetup > uniformPrimvarSetups;
-	std::vector< PrimvarSetup > faceVaryingPrimvarSetups;
+	std::vector<PrimvarSetup> vertexPrimvarSetups;
+	std::vector<PrimvarSetup> uniformPrimvarSetups;
+	std::vector<PrimvarSetup> faceVaryingPrimvarSetups;
 	setupVariables(
 		inputMesh, calculateNormals,
 		posPrimvarSetup, vertexPrimvarSetups, uniformPrimvarSetups, faceVaryingPrimvarSetups, canceller
@@ -1357,23 +1370,23 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 
 	// Instantiate a FarTopologyRefiner from the descriptor
 	Canceller::check( canceller );
-	std::unique_ptr<OSDF::TopologyRefiner> refiner( OSDF::TopologyRefinerFactory<Descriptor>::Create(desc, OSDF::TopologyRefinerFactory<Descriptor>::Options(osScheme, options)) );
+	std::unique_ptr<OSDF::TopologyRefiner> refiner( OSDF::TopologyRefinerFactory<Descriptor>::Create( desc, OSDF::TopologyRefinerFactory<Descriptor>::Options( osScheme, options ) ) );
 
 	SurfaceFactory::Options surfaceOptions;
 
 	Canceller::check( canceller );
-	SurfaceFactory meshSurfaceFactory( *refiner, surfaceOptions);
+	SurfaceFactory meshSurfaceFactory( *refiner, surfaceOptions );
 
 	OSDB::Tessellation::Options tessOptions;
 	// We use quads except for Loop subdivision which uses tris.
 	const int tessFacetSize = osScheme != OpenSubdiv::Sdc::SCHEME_LOOP ? 4 : 3;
 	tessOptions.SetFacetSize( tessFacetSize );
-	tessOptions.PreserveQuads( tessFacetSize == 4);
+	tessOptions.PreserveQuads( tessFacetSize == 4 );
 
 	// baseLevel gives us our original mesh back, but with all the adjacency information computed that OpenSubdiv
 	// requires. Since OpenSubdiv needs the adjacency information anyway, we might as well use that when we're
 	// figuring out shared vertices.
-	OSDF::TopologyLevel const & baseLevel = refiner->GetLevel(0);
+	OSDF::TopologyLevel const &baseLevel = refiner->GetLevel( 0 );
 
 	// If we were doing adaptive tessellation, here would be the place to prepare a list of tessellation rates
 	// per edge that would be referenced below in place of tessUniformRate, to ensure consistency.
@@ -1389,7 +1402,7 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 	PrimvarTopology vertexTopology( baseLevel );
 
 	// Each FaceVarying primvar needs its own topology - we put them in a vector with matching indices.
-	std::vector< PrimvarTopology > faceVaryingTopologies;
+	std::vector<PrimvarTopology> faceVaryingTopologies;
 	faceVaryingTopologies.reserve( faceVaryingPrimvarSetups.size() );
 	for( unsigned int i = 0; i < faceVaryingPrimvarSetups.size(); i++ )
 	{
@@ -1415,8 +1428,7 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 	// an issue on reasonable quad meshes than it is on spheres.
 	tbb::parallel_for(
 		tbb::blocked_range<int>( 0, numFaces ),
-		[&]( tbb::blocked_range<int> &range )
-		{
+		[&]( tbb::blocked_range<int> &range ) {
 			OSDB::Surface<float> faceSurface;
 
 			for( int faceIndex = range.begin(); faceIndex != range.end(); ++faceIndex )
@@ -1426,8 +1438,8 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 				// holes and boundary faces in some rare cases):
 				if( !meshSurfaceFactory.InitVertexSurface( faceIndex, &faceSurface ) )
 				{
-					faceFacetOffsets[ faceIndex ] = 0;
-					faceFacetVertexOffsets[ faceIndex ] = 0;
+					faceFacetOffsets[faceIndex] = 0;
+					faceFacetVertexOffsets[faceIndex] = 0;
 					vertexTopology.addHole( faceIndex );
 					for( PrimvarTopology &t : faceVaryingTopologies )
 					{
@@ -1436,15 +1448,15 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 					continue;
 				}
 
-				OSDF::ConstIndexArray fVerts = baseLevel.GetFaceVertices(faceIndex);
-				OSDF::ConstIndexArray fEdges = baseLevel.GetFaceEdges(faceIndex);
+				OSDF::ConstIndexArray fVerts = baseLevel.GetFaceVertices( faceIndex );
+				OSDF::ConstIndexArray fEdges = baseLevel.GetFaceEdges( faceIndex );
 
 				OSDB::Tessellation tessPattern(
 					faceSurface.GetParameterization(), tessUniformRate, tessOptions
 				);
 
-				faceFacetOffsets[ faceIndex ] = tessPattern.GetNumFacets();
-				faceFacetVertexOffsets[ faceIndex ] =
+				faceFacetOffsets[faceIndex] = tessPattern.GetNumFacets();
+				faceFacetVertexOffsets[faceIndex] =
 					tessPattern.GetNumFacets() * tessFacetSize -
 					numDegenerateQuadsInTessellation( tessFacetSize, fVerts.size(), tessUniformRate );
 
@@ -1514,8 +1526,7 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 	// in the first loop to know when we're reusing data from shared vertices or edges.
 	tbb::parallel_for(
 		tbb::blocked_range<int>( 0, numFaces ),
-		[&]( tbb::blocked_range<int> &range )
-		{
+		[&]( tbb::blocked_range<int> &range ) {
 			OSDB::Surface<float> vertexSurface;
 			std::vector<Imath::V2f> tessCoords;
 
@@ -1539,7 +1550,7 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 				OSDB::Tessellation tessPattern( vertexSurface.GetParameterization(), tessUniformRate, tessOptions );
 
 				tessCoords.resize( tessPattern.GetNumCoords() );
-				tessPattern.GetCoords( (float*)tessCoords.data() );
+				tessPattern.GetCoords( (float *)tessCoords.data() );
 
 				tessellateVariables(
 					meshSurfaceFactory, tessPattern,
@@ -1551,7 +1562,6 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 					faceVaryingTopologies, faceVaryingPrimvarSetups,
 					tessellationTempBuffers, canceller
 				);
-
 			}
 		},
 		tbb::auto_partitioner(),

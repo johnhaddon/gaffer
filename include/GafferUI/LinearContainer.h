@@ -45,59 +45,57 @@ namespace GafferUI
 class GAFFERUI_API LinearContainer : public ContainerGadget
 {
 
-	public :
+public:
 
-		enum Orientation
-		{
-			InvalidOrientation,
-			X,
-			Y,
-			Z
-		};
+	enum Orientation
+	{
+		InvalidOrientation,
+		X,
+		Y,
+		Z
+	};
 
-		enum Alignment
-		{
-			InvalidAlignment,
-			Min,
-			Centre,
-			Max
-		};
+	enum Alignment
+	{
+		InvalidAlignment,
+		Min,
+		Centre,
+		Max
+	};
 
-		enum Direction
-		{
-			InvalidDirection,
-			Increasing,
-			Decreasing
-		};
+	enum Direction
+	{
+		InvalidDirection,
+		Increasing,
+		Decreasing
+	};
 
-		explicit LinearContainer( const std::string &name=defaultName<LinearContainer>(), Orientation orientation=X,
-			Alignment alignment=Centre, float spacing = 0.0f, Direction=Increasing );
+	explicit LinearContainer( const std::string &name = defaultName<LinearContainer>(), Orientation orientation = X, Alignment alignment = Centre, float spacing = 0.0f, Direction = Increasing );
 
-		~LinearContainer() override;
+	~LinearContainer() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::LinearContainer, LinearContainerTypeId, ContainerGadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::LinearContainer, LinearContainerTypeId, ContainerGadget );
 
-		void setOrientation( Orientation orientation );
-		Orientation getOrientation() const;
+	void setOrientation( Orientation orientation );
+	Orientation getOrientation() const;
 
-		void setAlignment( Alignment alignment );
-		Alignment getAlignment() const;
+	void setAlignment( Alignment alignment );
+	Alignment getAlignment() const;
 
-		void setSpacing( float spacing );
-		float getSpacing() const;
+	void setSpacing( float spacing );
+	float getSpacing() const;
 
-		void setDirection( Direction direction );
-		Direction getDirection() const;
+	void setDirection( Direction direction );
+	Direction getDirection() const;
 
-	protected :
+protected:
 
-		void updateLayout() const override;
+	void updateLayout() const override;
 
-		Orientation m_orientation;
-		Alignment m_alignment;
-		float m_spacing;
-		Direction m_direction;
-
+	Orientation m_orientation;
+	Alignment m_alignment;
+	float m_spacing;
+	Direction m_direction;
 };
 
 IE_CORE_DECLAREPTR( LinearContainer );

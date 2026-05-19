@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( ClosestPointSampler );
 size_t ClosestPointSampler::g_firstPlugIndex = 0;
 
 ClosestPointSampler::ClosestPointSampler( const std::string &name )
-	:	PrimitiveSampler( name )
+	: PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -96,7 +96,7 @@ PrimitiveSampler::SamplingFunction ClosestPointSampler::computeSamplingFunction(
 	interpolation = it->second.interpolation;
 	PrimitiveVariable::IndexedView<V3f> positionView( it->second );
 
-	return [positionView] ( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
+	return [positionView]( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
 		return evaluator.closestPoint( positionView[index] * transform, &result );
 	};
 }

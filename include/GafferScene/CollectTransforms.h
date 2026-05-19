@@ -51,43 +51,42 @@ namespace GafferScene
 class GAFFERSCENE_API CollectTransforms : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit CollectTransforms( const std::string &name=defaultName<CollectTransforms>() );
-		~CollectTransforms() override;
+	explicit CollectTransforms( const std::string &name = defaultName<CollectTransforms>() );
+	~CollectTransforms() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CollectTransforms, CollectTransformsTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CollectTransforms, CollectTransformsTypeId, AttributeProcessor );
 
-		Gaffer::StringVectorDataPlug *attributesPlug();
-		const Gaffer::StringVectorDataPlug *attributesPlug() const;
+	Gaffer::StringVectorDataPlug *attributesPlug();
+	const Gaffer::StringVectorDataPlug *attributesPlug() const;
 
-		Gaffer::StringPlug *attributeContextVariablePlug();
-		const Gaffer::StringPlug *attributeContextVariablePlug() const;
+	Gaffer::StringPlug *attributeContextVariablePlug();
+	const Gaffer::StringPlug *attributeContextVariablePlug() const;
 
-		Gaffer::IntPlug *spacePlug();
-		const Gaffer::IntPlug *spacePlug() const;
+	Gaffer::IntPlug *spacePlug();
+	const Gaffer::IntPlug *spacePlug() const;
 
-		Gaffer::BoolPlug *requireVariationPlug();
-		const Gaffer::BoolPlug *requireVariationPlug() const;
+	Gaffer::BoolPlug *requireVariationPlug();
+	const Gaffer::BoolPlug *requireVariationPlug() const;
 
-		Gaffer::CompoundObjectPlug *transformsPlug();
-		const Gaffer::CompoundObjectPlug *transformsPlug() const;
+	Gaffer::CompoundObjectPlug *transformsPlug();
+	const Gaffer::CompoundObjectPlug *transformsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CollectTransforms )

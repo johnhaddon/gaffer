@@ -52,7 +52,7 @@ namespace Gaffer::Signals
 //////////////////////////////////////////////////////////////////////////
 
 inline Connection::Connection( const Private::SlotBase::Ptr &slot )
-	:	m_slot( slot )
+	: m_slot( slot )
 {
 }
 
@@ -93,7 +93,7 @@ struct DefaultCombiner
 {
 
 	template<typename InputIterator>
-	T operator()( InputIterator first, InputIterator last ) const
+	T operator () ( InputIterator first, InputIterator last ) const
 	{
 		if constexpr( std::is_void_v<T> )
 		{
@@ -114,7 +114,6 @@ struct DefaultCombiner
 			return r;
 		}
 	}
-
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -123,7 +122,7 @@ struct DefaultCombiner
 
 template<typename Result, typename... Args, typename Combiner>
 Signal<Result( Args... ), Combiner>::Signal( const Combiner &combiner )
-	:	m_lastSlotAndCombiner( nullptr, combiner )
+	: m_lastSlotAndCombiner( nullptr, combiner )
 {
 }
 
@@ -158,7 +157,7 @@ Connection Signal<Result( Args... ), Combiner>::connectInternal( const SlotFunct
 	}
 
 	Private::SlotBase::Ptr s = new Slot(
-		front ? m_firstSlot : *(lastSlot()->previous), slot
+		front ? m_firstSlot : *( lastSlot()->previous ), slot
 	);
 
 	const Connection result = Connection( s );
@@ -167,7 +166,7 @@ Connection Signal<Result( Args... ), Combiner>::connectInternal( const SlotFunct
 }
 
 template<typename Result, typename... Args, typename Combiner>
-Result Signal<Result( Args... ), Combiner>::operator() ( Args... args ) const
+Result Signal<Result( Args... ), Combiner>::operator () ( Args... args ) const
 {
 	ArgsTuple argsTuple( args... ); /// \todo : Capture by reference? Or forward_as_tuple?
 	return combiner()(
@@ -234,7 +233,7 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 	using FunctionType = std::function<Result( Args... )>;
 
 	Slot( Private::SlotBase::Ptr &previous, const FunctionType &function = FunctionType() )
-		: 	SlotBase( previous ), function( function )
+		: SlotBase( previous ), function( function )
 	{
 	}
 
@@ -256,7 +255,7 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 		}
 	}
 
-	Result operator()( Args... args )
+	Result operator () ( Args... args )
 	{
 		CallScope callScope( *this );
 		return function( args... );
@@ -265,7 +264,7 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 	struct CallScope : private boost::noncopyable
 	{
 		CallScope( Slot &slot )
-			:	slot( slot )
+			: slot( slot )
 		{
 			// Slot can't be called if not connected
 			assert( slot.previous );
@@ -286,7 +285,6 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 	};
 
 	FunctionType function;
-
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -295,79 +293,77 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 
 template<typename Result, typename... Args, typename Combiner>
 class Signal<Result( Args... ), Combiner>::SlotCallIterator : public boost::iterator_facade<
-	SlotCallIterator,
-	SlotCallIteratorValueType,
-	boost::single_pass_traversal_tag
->
+																  SlotCallIterator,
+																  SlotCallIteratorValueType,
+																  boost::single_pass_traversal_tag>
 {
 
-	public :
+public:
 
-		SlotCallIterator( const Private::SlotBase::Ptr &slot, const ArgsTuple &args )
-			:	m_slot( slot ), m_args( args )
+	SlotCallIterator( const Private::SlotBase::Ptr &slot, const ArgsTuple &args )
+		: m_slot( slot ), m_args( args )
+	{
+		skipBlocked();
+	}
+
+private:
+
+	friend class boost::iterator_core_access;
+
+	SlotCallIteratorValueType &dereference() const
+	{
+		if( !m_value )
 		{
-			skipBlocked();
-		}
-
-	private :
-
-		friend class boost::iterator_core_access;
-
-		SlotCallIteratorValueType &dereference() const
-		{
-			if( !m_value )
+			if constexpr( std::is_void_v<Result> )
 			{
-				if constexpr( std::is_void_v<Result> )
-				{
-					std::apply( static_cast<Slot &>( *m_slot ), m_args );
-					m_value = true;
-				}
-				else
-				{
-					m_value = std::apply( static_cast<Slot &>( *m_slot ), m_args );
-				}
-			}
-			return *m_value;
-		}
-
-		void increment()
-		{
-			assert( !atEnd() );
-			m_slot = m_slot->next;
-			m_value.reset();
-			skipBlocked();
-		}
-
-		bool atEnd() const
-		{
-			return !m_slot || !m_slot->next;
-		}
-
-		bool equal( const SlotCallIterator &other ) const
-		{
-			if( atEnd() )
-			{
-				return other.atEnd();
+				std::apply( static_cast<Slot &>( *m_slot ), m_args );
+				m_value = true;
 			}
 			else
 			{
-				return m_slot == other.m_slot;
+				m_value = std::apply( static_cast<Slot &>( *m_slot ), m_args );
 			}
 		}
+		return *m_value;
+	}
 
-		void skipBlocked()
+	void increment()
+	{
+		assert( !atEnd() );
+		m_slot = m_slot->next;
+		m_value.reset();
+		skipBlocked();
+	}
+
+	bool atEnd() const
+	{
+		return !m_slot || !m_slot->next;
+	}
+
+	bool equal( const SlotCallIterator &other ) const
+	{
+		if( atEnd() )
 		{
-			while( !atEnd() && static_cast<Slot *>( m_slot.get() )->blocked )
-			{
-				m_slot = m_slot->next;
-			}
+			return other.atEnd();
 		}
+		else
+		{
+			return m_slot == other.m_slot;
+		}
+	}
 
-		Private::SlotBase::Ptr m_slot;
-		const ArgsTuple &m_args;
+	void skipBlocked()
+	{
+		while( !atEnd() && static_cast<Slot *>( m_slot.get() )->blocked )
+		{
+			m_slot = m_slot->next;
+		}
+	}
 
-		mutable std::optional<SlotCallIteratorValueType> m_value;
+	Private::SlotBase::Ptr m_slot;
+	const ArgsTuple &m_args;
 
+	mutable std::optional<SlotCallIteratorValueType> m_value;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -379,7 +375,7 @@ struct CatchingCombiner
 {
 
 	template<typename InputIterator>
-	T operator()( InputIterator first, InputIterator last ) const
+	T operator () ( InputIterator first, InputIterator last ) const
 	{
 		if constexpr( std::is_void_v<T> )
 		{
@@ -422,7 +418,6 @@ struct CatchingCombiner
 			return r;
 		}
 	}
-
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -440,7 +435,7 @@ struct Trackable::TrackableVisitor
 	TrackableVisitor( const Connection &connection ) : connection( connection ) {}
 
 	template<typename T>
-	void operator()( T &x ) const
+	void operator () ( T &x ) const
 	{
 		if constexpr( std::is_base_of_v<Trackable, T> )
 		{
@@ -453,12 +448,11 @@ struct Trackable::TrackableVisitor
 		}
 		else if constexpr( std::is_pointer_v<T> )
 		{
-			this->operator()( *x );
+			this->operator () ( *x );
 		}
 	}
 
 	const Connection &connection;
-
 };
 
 template<typename SlotFunctor>
@@ -498,14 +492,14 @@ inline void Trackable::disconnectTrackedConnections()
 //////////////////////////////////////////////////////////////////////////
 
 inline ScopedConnection::ScopedConnection( const Connection &connection )
-	:	Connection( connection )
+	: Connection( connection )
 {
 }
 
 inline ScopedConnection::ScopedConnection( ScopedConnection &&scopedConnection )
-	:	Connection( scopedConnection )
+	: Connection( scopedConnection )
 {
-	scopedConnection.Connection::operator=( Connection() );
+	scopedConnection.Connection::operator = ( Connection() );
 }
 
 inline ScopedConnection::~ScopedConnection()
@@ -513,18 +507,18 @@ inline ScopedConnection::~ScopedConnection()
 	disconnect();
 }
 
-inline ScopedConnection &ScopedConnection::operator=( const Connection &connection )
+inline ScopedConnection &ScopedConnection::operator = ( const Connection &connection )
 {
 	disconnect();
-	Connection::operator=( connection );
+	Connection::operator = ( connection );
 	return *this;
 }
 
-inline ScopedConnection &ScopedConnection::operator=( ScopedConnection &&scopedConnection )
+inline ScopedConnection &ScopedConnection::operator = ( ScopedConnection &&scopedConnection )
 {
 	disconnect();
-	Connection::operator=( scopedConnection );
-	scopedConnection.Connection::operator=( Connection() );
+	Connection::operator = ( scopedConnection );
+	scopedConnection.Connection::operator = ( Connection() );
 	return *this;
 }
 
@@ -533,7 +527,7 @@ inline ScopedConnection &ScopedConnection::operator=( ScopedConnection &&scopedC
 //////////////////////////////////////////////////////////////////////////
 
 inline BlockedConnection::BlockedConnection( Signals::Connection &connection, bool block )
-	:	m_connection( nullptr ), m_previouslyBlocked( false )
+	: m_connection( nullptr ), m_previouslyBlocked( false )
 {
 	if( block && connection.connected() )
 	{

@@ -45,54 +45,53 @@ namespace GafferUI
 class GAFFERUI_API PlugAdder : public ConnectionCreator
 {
 
-	public :
+public:
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::PlugAdder, PlugAdderTypeId, ConnectionCreator );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::PlugAdder, PlugAdderTypeId, ConnectionCreator );
 
-		PlugAdder();
-		~PlugAdder() override;
+	PlugAdder();
+	~PlugAdder() override;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-		bool canCreateConnection( const Gaffer::Plug *endpoint ) const override;
-		void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) override;
+	bool canCreateConnection( const Gaffer::Plug *endpoint ) const override;
+	void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) override;
 
-		/// When emitted, shows a menu containing the specified plugs, and returns
-		/// the chosen plug. Implemented as a signal so the menu can be implemented
-		/// externally in Python code.
-		using PlugMenuSignal = Gaffer::Signals::Signal<Gaffer::Plug *( const std::string &title, const std::vector<Gaffer::Plug *> & )>;
-		static PlugMenuSignal &plugMenuSignal();
+	/// When emitted, shows a menu containing the specified plugs, and returns
+	/// the chosen plug. Implemented as a signal so the menu can be implemented
+	/// externally in Python code.
+	using PlugMenuSignal = Gaffer::Signals::Signal<Gaffer::Plug *( const std::string &title, const std::vector<Gaffer::Plug *> & )>;
+	static PlugMenuSignal &plugMenuSignal();
 
-		/// A simpler menu that just shows a list of strings.  Should the previous form be deprecated?
-		using MenuSignal = Gaffer::Signals::Signal<std::string ( const std::string &title, const std::vector<std::string> & )>;
-		static MenuSignal &menuSignal();
+	/// A simpler menu that just shows a list of strings.  Should the previous form be deprecated?
+	using MenuSignal = Gaffer::Signals::Signal<std::string( const std::string &title, const std::vector<std::string> & )>;
+	static MenuSignal &menuSignal();
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-		void applyEdgeMetadata( Gaffer::Plug *plug, bool opposite = false ) const;
+	void applyEdgeMetadata( Gaffer::Plug *plug, bool opposite = false ) const;
 
-	private :
+private:
 
-		bool couldCreateConnection() const;
+	bool couldCreateConnection() const;
 
-		void enter( GadgetPtr gadget, const ButtonEvent &event );
-		void leave( GadgetPtr gadget, const ButtonEvent &event );
-		bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
-		IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const ButtonEvent &event );
-		bool dragEnter( const DragDropEvent &event );
-		bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragLeave( const DragDropEvent &event );
-		bool drop( const DragDropEvent &event );
-		bool dragEnd( const DragDropEvent &event );
+	void enter( GadgetPtr gadget, const ButtonEvent &event );
+	void leave( GadgetPtr gadget, const ButtonEvent &event );
+	bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
+	IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const ButtonEvent &event );
+	bool dragEnter( const DragDropEvent &event );
+	bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragLeave( const DragDropEvent &event );
+	bool drop( const DragDropEvent &event );
+	bool dragEnd( const DragDropEvent &event );
 
-		bool m_dragging;
-		Imath::V3f m_dragPosition;
-		Imath::V3f m_dragTangent;
-
+	bool m_dragging;
+	Imath::V3f m_dragPosition;
+	Imath::V3f m_dragTangent;
 };
 
 IE_CORE_DECLAREPTR( PlugAdder )

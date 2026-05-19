@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( PointConstraint );
 size_t PointConstraint::g_firstPlugIndex = 0;
 
 PointConstraint::PointConstraint( const std::string &name )
-	:	Constraint( name )
+	: Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "xEnabled", Plug::In, true ) );
@@ -102,8 +102,7 @@ const Gaffer::V3fPlug *PointConstraint::offsetPlug() const
 
 bool PointConstraint::affectsConstraint( const Gaffer::Plug *input ) const
 {
-	return
-		input == keepReferencePositionPlug() ||
+	return input == keepReferencePositionPlug() ||
 		input->parent<Plug>() == offsetPlug() ||
 		input == xEnabledPlug() ||
 		input == yEnabledPlug() ||

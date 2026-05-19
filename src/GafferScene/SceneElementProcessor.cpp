@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( SceneElementProcessor );
 size_t SceneElementProcessor::g_firstPlugIndex = 0;
 
 SceneElementProcessor::SceneElementProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
-	:	FilteredSceneProcessor( name, filterDefault )
+	: FilteredSceneProcessor( name, filterDefault )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -120,8 +120,7 @@ void SceneElementProcessor::hashBound( const ScenePath &path, const Gaffer::Cont
 			inPlug()->boundPlug()->hash( h );
 			hashProcessedBound( path, context, h );
 			break;
-		case Union :
-		{
+		case Union : {
 			ConstInternedStringVectorDataPtr childNames = inPlug()->childNamesPlug()->getValue();
 			if( childNames->readable().size() )
 			{
@@ -147,8 +146,7 @@ Imath::Box3f SceneElementProcessor::computeBound( const ScenePath &path, const G
 	{
 		case Processed :
 			return computeProcessedBound( path, context, inPlug()->boundPlug()->getValue() );
-		case Union :
-		{
+		case Union : {
 			// We want to return the union of all the transformed child bounds and the
 			// bound for the object at this location. But we want to avoid computing the
 			// object itself at all costs for obvious reasons - a bound should be a thing
@@ -340,7 +338,7 @@ SceneElementProcessor::BoundMethod SceneElementProcessor::boundMethod( const Gaf
 	if( pBound || pTransform )
 	{
 		const IECore::PathMatcher::Result f = filterValue( context );
-		if( pBound && (f & IECore::PathMatcher::ExactMatch) )
+		if( pBound && ( f & IECore::PathMatcher::ExactMatch ) )
 		{
 			return Processed;
 		}

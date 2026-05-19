@@ -55,14 +55,14 @@ namespace Gaffer
 
 class GAFFER_API ProcessMessageHandler : public IECore::FilteredMessageHandler
 {
-	public:
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( ProcessMessageHandler );
+	IE_CORE_DECLAREMEMBERPTR( ProcessMessageHandler );
 
-		ProcessMessageHandler( IECore::MessageHandlerPtr handler );
-		~ProcessMessageHandler() override;
+	ProcessMessageHandler( IECore::MessageHandlerPtr handler );
+	~ProcessMessageHandler() override;
 
-		void handle( Level level, const std::string &context, const std::string &message ) override;
+	void handle( Level level, const std::string &context, const std::string &message ) override;
 };
 
 } // namespace Gaffer

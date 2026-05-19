@@ -54,62 +54,61 @@ namespace
 class ArrayPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		ArrayPlugAdder( ArrayPlugPtr plug )
-			:	m_plug( plug )
+	ArrayPlugAdder( ArrayPlugPtr plug )
+		: m_plug( plug )
+	{
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		if( !PlugAdder::canCreateConnection( endpoint ) )
 		{
+			return false;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		if( MetadataAlgo::readOnly( m_plug.get() ) )
 		{
-			if( !PlugAdder::canCreateConnection( endpoint ) )
-			{
-				return false;
-			}
-
-			if( MetadataAlgo::readOnly( m_plug.get() ) )
-			{
-				return false;
-			}
-
-			// Assume that if the first plug wouldn't accept the input,
-			// then neither would the new one that we add.
-
-			if( !m_plug->children().size() )
-			{
-				return false;
-			}
-			else if( !m_plug->getChild<Plug>( 0 )->acceptsInput( endpoint ) )
-			{
-				return false;
-			}
-
-			return m_plug->children().size() < m_plug->maxSize();
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
-		{
-			const size_t s = m_plug->children().size();
-			m_plug->resize( s + 1 );
-			auto p = m_plug->getChild<Plug>( s );
+		// Assume that if the first plug wouldn't accept the input,
+		// then neither would the new one that we add.
 
-			if( endpoint->direction() == Plug::In )
-			{
-				endpoint->setInput( p );
-			}
-			else
-			{
-				p->setInput( endpoint );
-			}
+		if( !m_plug->children().size() )
+		{
+			return false;
+		}
+		else if( !m_plug->getChild<Plug>( 0 )->acceptsInput( endpoint ) )
+		{
+			return false;
 		}
 
-	private :
+		return m_plug->children().size() < m_plug->maxSize();
+	}
 
-		ArrayPlugPtr m_plug;
+	void createConnection( Plug *endpoint ) override
+	{
+		const size_t s = m_plug->children().size();
+		m_plug->resize( s + 1 );
+		auto p = m_plug->getChild<Plug>( s );
 
+		if( endpoint->direction() == Plug::In )
+		{
+			endpoint->setInput( p );
+		}
+		else
+		{
+			p->setInput( endpoint );
+		}
+	}
+
+private:
+
+	ArrayPlugPtr m_plug;
 };
 
 struct Registration
@@ -134,17 +133,16 @@ struct Registration
 		);
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		if( ArrayPlugPtr plug = runTimeCast<ArrayPlug>( parent ) )
 		{
-			if( ArrayPlugPtr plug = runTimeCast<ArrayPlug>( parent ) )
-			{
-				return new ArrayPlugAdder( plug );
-			}
-			throw IECore::Exception( "Expected an ArrayPlug" );
+			return new ArrayPlugAdder( plug );
 		}
-
+		throw IECore::Exception( "Expected an ArrayPlug" );
+	}
 };
 
 Registration g_registration;

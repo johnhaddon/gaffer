@@ -62,7 +62,7 @@ namespace
 
 struct InternalPointerLess
 {
-	bool operator()( const IECore::ConstStringDataPtr &lhs, const IECore::ConstStringDataPtr &rhs ) const
+	bool operator () ( const IECore::ConstStringDataPtr &lhs, const IECore::ConstStringDataPtr &rhs ) const
 	{
 		// We want copies of the same data to compare equal, but we don't want
 		// to compare string values that are potentially extremely long. Knowing
@@ -332,7 +332,7 @@ void RenderManifest::loadEXRManifest( const std::filesystem::path &filePath )
 {
 	Imf::MultiPartInputFile exrInput( filePath.generic_string().c_str() );
 	int idManifestPart = -1;
-	for( int part = 0; part < exrInput.parts (); part++ )
+	for( int part = 0; part < exrInput.parts(); part++ )
 	{
 		if( Imf::hasIDManifest( exrInput.header( part ) ) )
 		{
@@ -348,7 +348,7 @@ void RenderManifest::loadEXRManifest( const std::filesystem::path &filePath )
 
 	const Imf::Header header = exrInput.header( idManifestPart );
 
-	const Imf::CompressedIDManifest& compressedManifest = Imf::idManifest( header );
+	const Imf::CompressedIDManifest &compressedManifest = Imf::idManifest( header );
 	const Imf::IDManifest manifest( compressedManifest );
 	const Imf::IDManifest::ChannelGroupManifest &idManifest = manifest[0];
 
@@ -377,7 +377,7 @@ void RenderManifest::writeEXRManifest( const std::filesystem::path &filePath ) c
 		idManifest.insert( i.second, ScenePlug::pathToString( i.first ) );
 	}
 
-	std::vector< Imf::Header > headers( 1 );
+	std::vector<Imf::Header> headers( 1 );
 
 	Imath::Box2i window( Imath::V2i( 0 ), Imath::V2i( 30, 2 ) );
 
@@ -393,16 +393,16 @@ void RenderManifest::writeEXRManifest( const std::filesystem::path &filePath ) c
 	Imf::MultiPartOutputFile exrOutput( filePath.generic_string().c_str(), headers.data(), 1 );
 
 	float image[93] = {
-		1,1,0,0,0,1,1,0,1,1,0,0,0,1,0,0,1,1,1,0,1,1,1,0,0,1,1,0,1,1,1,
-		1,1,1,0,1,0,1,0,1,0,1,0,0,1,0,0,1,1,0,0,1,1,0,0,0,1,0,0,0,1,0,
-		1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,0,1,1,1,0,1,1,0,0,0,1,0
+		1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1,
+		1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+		1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0
 	};
 	Imf::FrameBuffer outBuf;
-	outBuf.insert (
+	outBuf.insert(
 		"id",
-		Imf::Slice (
+		Imf::Slice(
 			Imf::FLOAT,
-			(char*)image,
+			(char *)image,
 			sizeof( float ),
 			sizeof( float ) * 31
 		)

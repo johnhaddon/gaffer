@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( Transform );
 size_t Transform::g_firstPlugIndex = 0;
 
 Transform::Transform( const std::string &name )
-	:	SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
+	: SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "space", Plug::In, Local, Local, ResetWorld ) );
@@ -133,8 +133,7 @@ Imath::M44f Transform::computeProcessedTransform( const ScenePath &path, const G
 			return matrix * inputTransform;
 		case Parent :
 			return inputTransform * matrix;
-		case World :
-		{
+		case World : {
 			bool matchingAncestorFound = false;
 			const Imath::M44f parentMatrix = relativeParentTransform( path, context, matchingAncestorFound );
 			if( matchingAncestorFound )
@@ -154,8 +153,7 @@ Imath::M44f Transform::computeProcessedTransform( const ScenePath &path, const G
 		}
 		case ResetLocal :
 			return matrix;
-		case ResetWorld :
-		{
+		case ResetWorld : {
 			bool matchingAncestorFound = false;
 			const Imath::M44f parentMatrix = relativeParentTransform( path, context, matchingAncestorFound );
 			if( matchingAncestorFound )
@@ -173,7 +171,6 @@ Imath::M44f Transform::computeProcessedTransform( const ScenePath &path, const G
 				// apply the world space matrix we want.
 				return matrix * parentMatrix.inverse();
 			}
-
 		}
 		default :
 			// Should never get here.

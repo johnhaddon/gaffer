@@ -71,7 +71,7 @@ void shaderAttributesHash2( const Shader &s, IECore::MurmurHash &h )
 	s.attributesHash( h );
 }
 
-IECore::CompoundObjectPtr shaderAttributes( const Shader &s, bool copy=true )
+IECore::CompoundObjectPtr shaderAttributes( const Shader &s, bool copy = true )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	IECore::ConstCompoundObjectPtr o = s.attributes();
@@ -118,7 +118,6 @@ class ShaderSerialiser : public GafferBindings::NodeSerialiser
 
 		return defaultPC;
 	}
-
 };
 
 IECore::MurmurHash shaderPlugAttributesHash( const ShaderPlug &p )
@@ -127,7 +126,7 @@ IECore::MurmurHash shaderPlugAttributesHash( const ShaderPlug &p )
 	return p.attributesHash();
 }
 
-IECore::CompoundObjectPtr shaderPlugAttributes( const ShaderPlug &p, bool copy=true )
+IECore::CompoundObjectPtr shaderPlugAttributes( const ShaderPlug &p, bool copy = true )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	IECore::ConstCompoundObjectPtr o = p.attributes();
@@ -157,37 +156,19 @@ void GafferSceneModule::bindShader()
 		.def( "attributesHash", shaderAttributesHash2 )
 		.def( "attributes", &shaderAttributes, ( boost::python::arg_( "_copy" ) = true ) )
 		.def( "loadShader", &loadShader, ( arg_( "shaderName" ), arg_( "keepExistingValues" ) = false ) )
-		.def( "reloadShader", &reloadShader )
-	;
+		.def( "reloadShader", &reloadShader );
 
 	GafferBindings::Serialisation::registerSerialiser( Shader::staticTypeId(), new ShaderSerialiser() );
 
 	PlugClass<ShaderPlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>(
-				(
-					arg( "name" ) = Gaffer::GraphComponent::defaultName<ShaderPlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
-			)
-		)
+		.def( init<const std::string &, Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<ShaderPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) )
 		// value accessors
-		.def( "attributesHash", &shaderPlugAttributesHash  )
+		.def( "attributesHash", &shaderPlugAttributesHash )
 		.def( "attributes", &shaderPlugAttributes, ( boost::python::arg_( "_copy" ) = true ) )
-		.def( "parameterSource", &shaderPlugParameterSource )
-	;
+		.def( "parameterSource", &shaderPlugParameterSource );
 
 	GafferBindings::NodeClass<OpenGLShader>();
 
 	PlugClass<ClosurePlug>()
-		.def( init<const std::string &, Gaffer::Plug::Direction, unsigned>(
-				(
-					arg( "name" ) = Gaffer::GraphComponent::defaultName<ClosurePlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
-			)
-		)
-	;
-
+		.def( init<const std::string &, Gaffer::Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<ClosurePlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) );
 }

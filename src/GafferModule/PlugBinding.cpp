@@ -61,7 +61,7 @@ boost::python::tuple outputs( Plug &p )
 {
 	const Plug::OutputContainer &o = p.outputs();
 	boost::python::list l;
-	for( Plug::OutputContainer::const_iterator it=o.begin(); it!=o.end(); it++ )
+	for( Plug::OutputContainer::const_iterator it = o.begin(); it != o.end(); it++ )
 	{
 		l.append( PlugPtr( *it ) );
 	}
@@ -107,8 +107,7 @@ void GafferModule::bindPlug()
 		enum_<Plug::Direction>( "Direction" )
 			.value( "Invalid", Plug::Invalid )
 			.value( "In", Plug::In )
-			.value( "Out", Plug::Out )
-		;
+			.value( "Out", Plug::Out );
 		enum_<Plug::Flags>( "Flags" )
 			.value( "None", Plug::None )
 			.value( "None_", Plug::None )
@@ -118,32 +117,21 @@ void GafferModule::bindPlug()
 			.value( "Cacheable", Plug::Cacheable )
 			.value( "AcceptsDependencyCycles", Plug::AcceptsDependencyCycles )
 			.value( "Default", Plug::Default )
-			.value( "All", Plug::All )
-		;
+			.value( "All", Plug::All );
 	}
 
-	c.def(  init< const std::string &, Plug::Direction, unsigned >
-			(
-				(
-					arg( "name" ) = GraphComponent::defaultName<Plug>(),
-					arg( "direction" ) = Plug::In,
-					arg( "flags" ) = Plug::Default
-				)
-			)
-		)
+	c.def( init<const std::string &, Plug::Direction, unsigned>( ( arg( "name" ) = GraphComponent::defaultName<Plug>(), arg( "direction" ) = Plug::In, arg( "flags" ) = Plug::Default ) ) )
 		.def( "node", &node )
 		.def( "direction", &Plug::direction )
-		.def( "getFlags", (unsigned (Plug::*)() const )&Plug::getFlags )
-		.def( "getFlags", (bool (Plug::*)( unsigned ) const )&Plug::getFlags )
+		.def( "getFlags", ( unsigned ( Plug::* )() const ) & Plug::getFlags )
+		.def( "getFlags", ( bool ( Plug::* )( unsigned ) const ) & Plug::getFlags )
 		.def( "setFlags", &setFlags1 )
 		.def( "setFlags", &setFlags2 )
 		.def( "getInput", &getInput )
 		.def( "source", &source )
 		.def( "removeOutputs", &Plug::removeOutputs )
 		.def( "outputs", &outputs )
-		.def( "__repr__", &repr )
-	;
+		.def( "__repr__", &repr );
 
 	Serialisation::registerSerialiser( Gaffer::Plug::staticTypeId(), new PlugSerialiser );
-
 }

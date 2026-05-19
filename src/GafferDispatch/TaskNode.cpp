@@ -56,7 +56,7 @@ using namespace GafferDispatch;
 //////////////////////////////////////////////////////////////////////////
 
 TaskNode::Task::Task( ConstTaskPlugPtr plug, const Gaffer::Context *context )
-	:	m_plug( plug ), m_context( context )
+	: m_plug( plug ), m_context( context )
 {
 }
 
@@ -85,35 +85,34 @@ namespace
 class TaskNodeProcess : public Gaffer::Process
 {
 
-	public :
+public:
 
-		TaskNodeProcess( const IECore::InternedString &type, const TaskNode::TaskPlug *plug )
-			:	Process( type, plug->source(), plug )
+	TaskNodeProcess( const IECore::InternedString &type, const TaskNode::TaskPlug *plug )
+		: Process( type, plug->source(), plug )
+	{
+	}
+
+	const TaskNode *taskNode() const
+	{
+		const TaskNode *n = runTimeCast<const TaskNode>( plug()->node() );
+		if( !n )
 		{
+			throw IECore::Exception( fmt::format( "TaskPlug \"{}\" has no TaskNode.", plug()->fullName() ) );
 		}
+		return n;
+	}
 
-		const TaskNode *taskNode() const
-		{
-			const TaskNode *n = runTimeCast<const TaskNode>( plug()->node() );
-			if( !n )
-			{
-				throw IECore::Exception( fmt::format( "TaskPlug \"{}\" has no TaskNode.", plug()->fullName() ) );
-			}
-			return n;
-		}
+	void handleException() const
+	{
+		Gaffer::Process::handleException();
+	}
 
-		void handleException() const
-		{
-			Gaffer::Process::handleException();
-		}
-
-		static InternedString hashProcessType;
-		static InternedString executeProcessType;
-		static InternedString executeSequenceProcessType;
-		static InternedString requiresSequenceExecutionProcessType;
-		static InternedString preTasksProcessType;
-		static InternedString postTasksProcessType;
-
+	static InternedString hashProcessType;
+	static InternedString executeProcessType;
+	static InternedString executeSequenceProcessType;
+	static InternedString requiresSequenceExecutionProcessType;
+	static InternedString preTasksProcessType;
+	static InternedString postTasksProcessType;
 };
 
 InternedString TaskNodeProcess::hashProcessType( "taskNode:hash" );
@@ -128,7 +127,7 @@ InternedString TaskNodeProcess::postTasksProcessType( "taskNode:postTasks" );
 GAFFER_PLUG_DEFINE_TYPE( TaskNode::TaskPlug );
 
 TaskNode::TaskPlug::TaskPlug( const std::string &name, Direction direction, unsigned flags )
-	:	Plug( name, direction, flags )
+	: Plug( name, direction, flags )
 {
 }
 
@@ -277,7 +276,7 @@ GAFFER_NODE_DEFINE_TYPE( TaskNode )
 size_t TaskNode::g_firstPlugIndex;
 
 TaskNode::TaskNode( const std::string &name )
-	:	DependencyNode( name )
+	: DependencyNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ArrayPlug( "preTasks", Plug::In, new TaskPlug( "preTask0" ) ) );
@@ -387,7 +386,7 @@ void TaskNode::executeSequence( const std::vector<float> &frames ) const
 {
 	Context::EditableScope timeScope( Context::current() );
 
-	for ( std::vector<float>::const_iterator it = frames.begin(); it != frames.end(); ++it )
+	for( std::vector<float>::const_iterator it = frames.begin(); it != frames.end(); ++it )
 	{
 		timeScope.setFrame( *it );
 		execute();

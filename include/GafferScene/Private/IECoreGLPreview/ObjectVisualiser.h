@@ -59,40 +59,38 @@ IE_CORE_FORWARDDECLARE( ObjectVisualiser )
 class GAFFERSCENE_API ObjectVisualiser : public IECore::RefCounted
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( ObjectVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( ObjectVisualiser )
 
-		~ObjectVisualiser() override;
+	~ObjectVisualiser() override;
 
-		/// Must be implemented by derived classes to return a suitable
-		/// visualisation of the object.
-		virtual Visualisations visualise( const IECore::Object *object ) const = 0;
+	/// Must be implemented by derived classes to return a suitable
+	/// visualisation of the object.
+	virtual Visualisations visualise( const IECore::Object *object ) const = 0;
 
-		/// @name Factory
-		///////////////////////////////////////////////////////////////////
-		//@{
-		/// Acquires a visualiser for the specified Object type.
-		static const ObjectVisualiser *acquire( IECore::TypeId objectType );
-		/// Registers a visualiser to use for the specified object type.
-		static void registerVisualiser( IECore::TypeId objectType, ConstObjectVisualiserPtr visualiser );
-		//@}
+	/// @name Factory
+	///////////////////////////////////////////////////////////////////
+	//@{
+	/// Acquires a visualiser for the specified Object type.
+	static const ObjectVisualiser *acquire( IECore::TypeId objectType );
+	/// Registers a visualiser to use for the specified object type.
+	static void registerVisualiser( IECore::TypeId objectType, ConstObjectVisualiserPtr visualiser );
+	//@}
 
-	protected :
+protected:
 
-		ObjectVisualiser();
+	ObjectVisualiser();
 
-		template<typename VisualiserType>
-		struct ObjectVisualiserDescription
+	template<typename VisualiserType>
+	struct ObjectVisualiserDescription
+	{
+
+		ObjectVisualiserDescription()
 		{
-
-			ObjectVisualiserDescription()
-			{
-				registerVisualiser( VisualiserType::ObjectType::staticTypeId(), new VisualiserType );
-			}
-
-		};
-
+			registerVisualiser( VisualiserType::ObjectType::staticTypeId(), new VisualiserType );
+		}
+	};
 };
 
 } // namespace IECoreGLPreview

@@ -75,7 +75,7 @@ std::vector<Override> unpackOverrides( const CompoundDataPlug *plug )
 	for( NameValuePlug::Iterator it( plug ); !it.done(); ++it )
 	{
 		// This will fail if the member has been disabled, or has no name
-		if( ConstDataPtr plugData =  plug->memberDataAndName( it->get(), name ) )
+		if( ConstDataPtr plugData = plug->memberDataAndName( it->get(), name ) )
 		{
 			if( ConstColor3fDataPtr asColor = runTimeCast<const Color3fData>( plugData ) )
 			{
@@ -83,9 +83,7 @@ std::vector<Override> unpackOverrides( const CompoundDataPlug *plug )
 			}
 			else
 			{
-				throw IECore::Exception( fmt::format(
-					"Color Override value for \"{}\" is not a Color3f", name
-				) );
+				throw IECore::Exception( fmt::format( "Color Override value for \"{}\" is not a Color3f", name ) );
 			}
 		}
 	}
@@ -108,8 +106,8 @@ Color3f colorForSetName( const InternedString &name, const std::vector<Override>
 	// RGB generation seemed to yield many colours that were close
 	// together. HSL seems to give better distribution over smaller
 	// sample sizes... and then sometimes it doesn't.
-	color[0] = r.nextf();                     // hue
-	color[1] = 0.6f + ( r.nextf() * 0.25f );  // saturation
+	color[0] = r.nextf(); // hue
+	color[1] = 0.6f + ( r.nextf() * 0.25f ); // saturation
 	color[2] = 0.35f + ( r.nextf() * 0.25f ); // lightness
 	return hsv2rgb( color );
 }
@@ -124,24 +122,25 @@ const StringDataPtr fragmentSource()
 		"#define in varying\n"
 		"#endif\n"
 
-		"uniform vec3 colors[" + std::to_string( g_maxShaderColors ) + "];"
-		"uniform int numColors;"
-		"uniform float stripeWidth;"
+		"uniform vec3 colors[" +
+		std::to_string( g_maxShaderColors ) + "];"
+											  "uniform int numColors;"
+											  "uniform float stripeWidth;"
 
-		"in vec3 fragmentN;"
-		"in vec3 fragmentI;"
+											  "in vec3 fragmentN;"
+											  "in vec3 fragmentI;"
 
-		"void main()"
-		"{"
-		"	float f = abs( dot( normalize( fragmentI ), normalize( fragmentN ) ) );"
-		"	gl_FragColor = vec4( f, f, f, 1.0 );"
-		"	if( numColors > 0 )"
-		"	{"
-		"		float stripeIndex = floor( (gl_FragCoord.x - gl_FragCoord.y) / stripeWidth );"
-		"		stripeIndex = mod( stripeIndex, float(numColors) );"
-		"		gl_FragColor = ( gl_FragColor * 0.8 + 0.2 ) * vec4( colors[ int(stripeIndex) ], 1.0 );"
-		"	}"
-		"}"
+											  "void main()"
+											  "{"
+											  "	float f = abs( dot( normalize( fragmentI ), normalize( fragmentN ) ) );"
+											  "	gl_FragColor = vec4( f, f, f, 1.0 );"
+											  "	if( numColors > 0 )"
+											  "	{"
+											  "		float stripeIndex = floor( (gl_FragCoord.x - gl_FragCoord.y) / stripeWidth );"
+											  "		stripeIndex = mod( stripeIndex, float(numColors) );"
+											  "		gl_FragColor = ( gl_FragColor * 0.8 + 0.2 ) * vec4( colors[ int(stripeIndex) ], 1.0 );"
+											  "	}"
+											  "}"
 	);
 	return g_fragmentSource;
 }
@@ -163,7 +162,7 @@ ShaderNetworkPtr stripeShader( float stripeWidth, size_t numColorsUsed, const st
 }
 
 
-} // end anon namespace
+} // namespace
 
 
 GAFFER_NODE_DEFINE_TYPE( SetVisualiser );
@@ -326,13 +325,11 @@ void SetVisualiser::compute( Gaffer::ValuePlug *output, const Gaffer::Context *c
 
 bool SetVisualiser::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		AttributeProcessor::affectsProcessedAttributes( input ) ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) ||
 		input == includeInheritedPlug() ||
 		input == stripeWidthPlug() ||
 		input == outSetsPlug() ||
-		input == inPlug()->setPlug()
-	;
+		input == inPlug()->setPlug();
 }
 
 void SetVisualiser::hashProcessedAttributes( const Gaffer::Context *context, MurmurHash &h ) const
@@ -400,7 +397,7 @@ ConstCompoundObjectPtr SetVisualiser::computeProcessedAttributes( const Gaffer::
 		const PathMatcherData *pathMatchData = targetSets->member<const PathMatcherData>( setName );
 		if( pathMatchData->readable().match( *path ) & matchResult )
 		{
-			shaderColors.push_back( setColorsData->readable()[ index ] );
+			shaderColors.push_back( setColorsData->readable()[index] );
 		}
 		// We need to pass our colors to the shader as a fixed size array
 		if( shaderColors.size() == g_maxShaderColors )

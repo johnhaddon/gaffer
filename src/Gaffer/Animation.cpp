@@ -78,20 +78,19 @@ private:
 	friend class Tangent;
 
 	/// Implement to return interpolated value at specified normalised time
-	virtual double evaluate( const Key& keyLo, const Key& keyHi, double time, double dt ) const = 0;
+	virtual double evaluate( const Key &keyLo, const Key &keyHi, double time, double dt ) const = 0;
 
 	/// Implement to bisect the span at the specified time, should set new key's value and slope and scale of new tangents
-	virtual void bisect( const Key& keyLo, const Key& keyHi, double time, double dt,
-		Key& newKey, Tangent& newTangentLo, Tangent& newTangentHi ) const;
+	virtual void bisect( const Key &keyLo, const Key &keyHi, double time, double dt, Key &newKey, Tangent &newTangentLo, Tangent &newTangentHi ) const;
 
 	/// Implement to compute the effective slope of the specified tangent
-	virtual double effectiveSlope( const Tangent& tangent, double dt, double dv ) const;
+	virtual double effectiveSlope( const Tangent &tangent, double dt, double dv ) const;
 
 	/// Implement to compute the effective scale of the specified tangent
-	virtual double effectiveScale( const Tangent& tangent, double dt, double dv ) const;
+	virtual double effectiveScale( const Tangent &tangent, double dt, double dv ) const;
 
 	using Container = std::vector<ConstInterpolatorPtr>;
-	static const Container& get();
+	static const Container &get();
 
 	Animation::Interpolation m_interpolation;
 	unsigned m_hints;
@@ -112,24 +111,24 @@ protected:
 	explicit Extrapolator( Animation::Extrapolation extrapolation );
 
 	// evaluate curve without doing extrapolation
-	double evaluateInKeyRange( const CurvePlug& curve, double time ) const;
+	double evaluateInKeyRange( const CurvePlug &curve, double time ) const;
 
 private:
 
 	friend class CurvePlug;
 
 	/// Implement to return extrapolated value at specified time
-	virtual double evaluate( const CurvePlug& curve, Animation::Direction direction, double time ) const;
+	virtual double evaluate( const CurvePlug &curve, Animation::Direction direction, double time ) const;
 	/// Implement to extend curve to specified key
-	virtual void extend( CurvePlug& curve, Animation::Direction direction, KeyPtr key ) const;
+	virtual void extend( CurvePlug &curve, Animation::Direction direction, KeyPtr key ) const;
 
 	using Container = std::vector<ConstExtrapolatorPtr>;
-	static const Container& get();
+	static const Container &get();
 
 	Animation::Extrapolation m_extrapolation;
 };
 
-} // Gaffer
+} // namespace Gaffer
 
 namespace
 {
@@ -158,9 +157,9 @@ double clampSlope( const double slope )
 	return Imath::clamp( slope, -maxSlope, maxSlope );
 }
 
-double slopeFromPosition( const Imath::V2d& position, const Gaffer::Animation::Direction direction )
+double slopeFromPosition( const Imath::V2d &position, const Gaffer::Animation::Direction direction )
 {
-	static_assert( std::numeric_limits< double >::is_iec559, "IEEE 754 required to represent negative infinity" );
+	static_assert( std::numeric_limits<double>::is_iec559, "IEEE 754 required to represent negative infinity" );
 
 	// NOTE : when x and y are both 0 then slope is 0, otherwise if x is 0 slope is (+/-) infinity
 
@@ -171,8 +170,7 @@ double slopeFromPosition( const Imath::V2d& position, const Gaffer::Animation::D
 			return 0.0;
 		}
 
-		return std::copysign( std::numeric_limits< double >::infinity(),
-			position.y * ( direction == Gaffer::Animation::Direction::In ? -1.0 : 1.0 ) );
+		return std::copysign( std::numeric_limits<double>::infinity(), position.y * ( direction == Gaffer::Animation::Direction::In ? -1.0 : 1.0 ) );
 	}
 	else
 	{
@@ -182,15 +180,13 @@ double slopeFromPosition( const Imath::V2d& position, const Gaffer::Animation::D
 
 bool tieSlopeActive( const Gaffer::Animation::TieMode tieMode )
 {
-	return
-		( tieMode == Gaffer::Animation::TieMode::Slope ) ||
+	return ( tieMode == Gaffer::Animation::TieMode::Slope ) ||
 		( tieMode == Gaffer::Animation::TieMode::Scale );
 }
 
 bool tieScaleActive( const Gaffer::Animation::TieMode tieMode )
 {
-	return
-		( tieMode == Gaffer::Animation::TieMode::Scale );
+	return ( tieMode == Gaffer::Animation::TieMode::Scale );
 }
 
 double tieScaleRatio( const double inScale, const double outScale )
@@ -198,7 +194,7 @@ double tieScaleRatio( const double inScale, const double outScale )
 	return ( inScale == outScale ) ? 1.0 : ( ( outScale == 0.0 ) ? 0.0 : ( inScale / outScale ) );
 }
 
-double tieScaleOpposite( const Gaffer::Animation::Direction direction, const double ratio, const double oppositeSlope, double& scale )
+double tieScaleOpposite( const Gaffer::Animation::Direction direction, const double ratio, const double oppositeSlope, double &scale )
 {
 	// NOTE : to maintain proportionality the scale may need to be constrained if the opposite
 	//        tangent's scale needs to be clamped based on its slope.
@@ -232,14 +228,14 @@ double tieScaleOpposite( const Gaffer::Animation::Direction direction, const dou
 // constant interpolator
 
 struct InterpolatorConstant
-: public Gaffer::Animation::Interpolator
+	: public Gaffer::Animation::Interpolator
 {
 	InterpolatorConstant()
-	: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Constant )
-	{}
+		: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Constant )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::Key& keyLo, const Gaffer::Animation::Key& /*keyHi*/,
-		const double /*time*/, const double /*dt*/ ) const override
+	double evaluate( const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key & /*keyHi*/, const double /*time*/, const double /*dt*/ ) const override
 	{
 		return keyLo.getValue();
 	}
@@ -248,14 +244,14 @@ struct InterpolatorConstant
 // constant next interpolator
 
 struct InterpolatorConstantNext
-: public Gaffer::Animation::Interpolator
+	: public Gaffer::Animation::Interpolator
 {
 	InterpolatorConstantNext()
-	: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::ConstantNext )
-	{}
+		: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::ConstantNext )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::Key& /*keyLo*/, const Gaffer::Animation::Key& keyHi,
-		const double /*time*/, const double /*dt*/ ) const override
+	double evaluate( const Gaffer::Animation::Key & /*keyLo*/, const Gaffer::Animation::Key &keyHi, const double /*time*/, const double /*dt*/ ) const override
 	{
 		return keyHi.getValue();
 	}
@@ -264,19 +260,19 @@ struct InterpolatorConstantNext
 // linear interpolator
 
 struct InterpolatorLinear
-: public Gaffer::Animation::Interpolator
+	: public Gaffer::Animation::Interpolator
 {
 	InterpolatorLinear()
-	: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Linear )
-	{}
+		: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Linear )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::Key& keyLo, const Gaffer::Animation::Key& keyHi,
-		const double time, const double /*dt*/ ) const override
+	double evaluate( const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key &keyHi, const double time, const double /*dt*/ ) const override
 	{
 		return keyLo.getValue() * ( 1.0 - time ) + keyHi.getValue() * ( time );
 	}
 
-	double effectiveSlope( const Gaffer::Animation::Tangent& /*tangent*/, const double dt, const double dv ) const override
+	double effectiveSlope( const Gaffer::Animation::Tangent & /*tangent*/, const double dt, const double dv ) const override
 	{
 		return ( dv / dt );
 	}
@@ -285,15 +281,14 @@ struct InterpolatorLinear
 // cubic interpolator
 
 struct InterpolatorCubic
-: public Gaffer::Animation::Interpolator
+	: public Gaffer::Animation::Interpolator
 {
 	InterpolatorCubic()
-	: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Cubic,
-		Gaffer::Animation::Interpolator::Hint::UseSlope )
-	{}
+		: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Cubic, Gaffer::Animation::Interpolator::Hint::UseSlope )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::Key& keyLo, const Gaffer::Animation::Key& keyHi,
-		const double time, const double dt ) const override
+	double evaluate( const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key &keyHi, const double time, const double dt ) const override
 	{
 		double a, b, c, d;
 		computeCoeffs( keyLo, keyHi, a, b, c, d, dt );
@@ -303,9 +298,7 @@ struct InterpolatorCubic
 		return std::fma( time, std::fma( time, std::fma( time, a, b ), c ), d );
 	}
 
-	void bisect( const Gaffer::Animation::Key& keyLo, const Gaffer::Animation::Key& keyHi,
-		const double time, const double dt, Gaffer::Animation::Key& newKey,
-		Gaffer::Animation::Tangent& newTangentLo, Gaffer::Animation::Tangent& newTangentHi ) const override
+	void bisect( const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key &keyHi, const double time, const double dt, Gaffer::Animation::Key &newKey, Gaffer::Animation::Tangent &newTangentLo, Gaffer::Animation::Tangent &newTangentHi ) const override
 	{
 		double a, b, c, d;
 		computeCoeffs( keyLo, keyHi, a, b, c, d, dt );
@@ -313,8 +306,8 @@ struct InterpolatorCubic
 		// NOTE : v  =  at^3 +  bt^2 + ct + d
 		//        v' = 3at^2 + 2bt   + c
 
-		const double v = std::fma( time, std::fma( time, std::fma( time,         a,     b ), c ), d );
-		const double s =                 std::fma( time, std::fma( time, a + a + a, b + b ), c );
+		const double v = std::fma( time, std::fma( time, std::fma( time, a, b ), c ), d );
+		const double s = std::fma( time, std::fma( time, a + a + a, b + b ), c );
 
 		newKey.setValue( v );
 		const double slope = s / dt;
@@ -324,7 +317,7 @@ struct InterpolatorCubic
 		newTangentHi.setSlope( keyHi.tangentIn().getSlope() );
 	}
 
-	double effectiveScale( const Gaffer::Animation::Tangent& tangent, const double dt, const double /*dv*/ ) const override
+	double effectiveScale( const Gaffer::Animation::Tangent &tangent, const double dt, const double /*dv*/ ) const override
 	{
 		return ( 1.0 / 3.0 ) * maxScale( clampSlope( tangent.getSlope() * dt ) / dt );
 	}
@@ -332,8 +325,9 @@ struct InterpolatorCubic
 private:
 
 	void computeCoeffs(
-		const Gaffer::Animation::Key& keyLo, const Gaffer::Animation::Key& keyHi,
-		double& a, double& b, double& c, double& d, const double dt ) const
+		const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key &keyHi,
+		double &a, double &b, double &c, double &d, const double dt
+	) const
 	{
 		// NOTE : clamp slope to prevent infs and nans in interpolated values
 
@@ -351,16 +345,14 @@ private:
 // bezier interpolator
 
 struct InterpolatorBezier
-: public Gaffer::Animation::Interpolator
+	: public Gaffer::Animation::Interpolator
 {
 	InterpolatorBezier()
-	: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Bezier,
-		Gaffer::Animation::Interpolator::Hint::UseSlope |
-		Gaffer::Animation::Interpolator::Hint::UseScale )
-	{}
+		: Gaffer::Animation::Interpolator( Gaffer::Animation::Interpolation::Bezier, Gaffer::Animation::Interpolator::Hint::UseSlope | Gaffer::Animation::Interpolator::Hint::UseScale )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::Key& keyLo, const Gaffer::Animation::Key& keyHi,
-		const double time, const double dt ) const override
+	double evaluate( const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key &keyHi, const double time, const double dt ) const override
 	{
 		const Imath::V2d tl = keyLo.tangentOut().getPosition();
 		const Imath::V2d th = keyHi.tangentIn().getPosition();
@@ -374,8 +366,9 @@ struct InterpolatorBezier
 		//        specified t, first need to solve the second polynomial to determine s.
 
 		const double s = solveForTime(
-			Imath::clamp( ( tl.x - keyLo.getTime() ) / dt,       0.0, 1.0 ),
-			Imath::clamp( ( th.x - keyHi.getTime() ) / dt + 1.0, 0.0, 1.0 ), time );
+			Imath::clamp( ( tl.x - keyLo.getTime() ) / dt, 0.0, 1.0 ),
+			Imath::clamp( ( th.x - keyHi.getTime() ) / dt + 1.0, 0.0, 1.0 ), time
+		);
 
 		// compute coefficients of value polynomial
 
@@ -394,9 +387,7 @@ struct InterpolatorBezier
 		return std::fma( s, std::fma( s, std::fma( s, av, bv ), cv ), dv );
 	}
 
-	void bisect( const Gaffer::Animation::Key& keyLo, const Gaffer::Animation::Key& keyHi,
-		const double time, const double dt, Gaffer::Animation::Key& newKey,
-		Gaffer::Animation::Tangent& newTangentLo, Gaffer::Animation::Tangent& newTangentHi ) const override
+	void bisect( const Gaffer::Animation::Key &keyLo, const Gaffer::Animation::Key &keyHi, const double time, const double dt, Gaffer::Animation::Key &newKey, Gaffer::Animation::Tangent &newTangentLo, Gaffer::Animation::Tangent &newTangentHi ) const override
 	{
 		const Imath::V2d p1( keyLo.getTime(), keyLo.getValue() );
 		const Imath::V2d p2 = keyLo.tangentOut().getPosition();
@@ -404,16 +395,17 @@ struct InterpolatorBezier
 		const Imath::V2d p4( keyHi.getTime(), keyHi.getValue() );
 
 		const double s = solveForTime(
-			Imath::clamp( ( p2.x - keyLo.getTime() ) / dt,       0.0, 1.0 ),
-			Imath::clamp( ( p3.x - keyHi.getTime() ) / dt + 1.0, 0.0, 1.0 ), time );
+			Imath::clamp( ( p2.x - keyLo.getTime() ) / dt, 0.0, 1.0 ),
+			Imath::clamp( ( p3.x - keyHi.getTime() ) / dt + 1.0, 0.0, 1.0 ), time
+		);
 
 		// NOTE : simple geometric bisection
 
-		const Imath::V2d h  = Imath::lerp( p2, p3, s );
+		const Imath::V2d h = Imath::lerp( p2, p3, s );
 		const Imath::V2d l2 = Imath::lerp( p1, p2, s );
-		const Imath::V2d l3 = Imath::lerp( l2, h,  s );
+		const Imath::V2d l3 = Imath::lerp( l2, h, s );
 		const Imath::V2d r3 = Imath::lerp( p3, p4, s );
-		const Imath::V2d r2 = Imath::lerp( h,  r3, s );
+		const Imath::V2d r2 = Imath::lerp( h, r3, s );
 
 		newKey.setValue( Imath::lerp( l3.y, r2.y, s ) );
 		newTangentLo.setPosition( l2 );
@@ -453,8 +445,10 @@ private:
 
 		// simple cases
 
-		if( time <= 0.0 ) return 0.0;
-		if( time >= 1.0 ) return 1.0;
+		if( time <= 0.0 )
+			return 0.0;
+		if( time >= 1.0 )
+			return 1.0;
 
 		// root bracketed in interval [0,1]
 
@@ -474,12 +468,12 @@ private:
 			// NOTE : f   =  a(t)s^3 +  b(t)s^2 + c(t)s + d(t) - t
 			//        f'  = 3a(t)s^2 + 2b(t)s   + c(t)
 
-			const double  f = std::fma( s, std::fma( s, std::fma( s, at,  bt  ), ct ), -time );
-			const double df =              std::fma( s, std::fma( s, at3, bt2 ), ct );
+			const double f = std::fma( s, std::fma( s, std::fma( s, at, bt ), ct ), -time );
+			const double df = std::fma( s, std::fma( s, at3, bt2 ), ct );
 
 			// maintain bounds
 
-			if( std::abs( f ) < std::numeric_limits< double >::epsilon() )
+			if( std::abs( f ) < std::numeric_limits<double>::epsilon() )
 			{
 				break;
 			}
@@ -521,7 +515,7 @@ private:
 
 			// check for convergence
 
-			if( std::abs( ds ) < std::numeric_limits< double >::epsilon() )
+			if( std::abs( ds ) < std::numeric_limits<double>::epsilon() )
 			{
 				break;
 			}
@@ -534,24 +528,23 @@ private:
 // constant extrapolator
 
 struct ExtrapolatorConstant
-: public Gaffer::Animation::Extrapolator
+	: public Gaffer::Animation::Extrapolator
 {
 	ExtrapolatorConstant()
-	: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::Constant )
-	{}
+		: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::Constant )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const double /*time*/ ) const override
+	double evaluate( const Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const double /*time*/ ) const override
 	{
 		return curve.getExtrapolationKey( direction )->getValue();
 	}
 
-	void extend( Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const Gaffer::Animation::KeyPtr key ) const override
+	void extend( Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const Gaffer::Animation::KeyPtr key ) const override
 	{
 		// ensure extrapolation key has tie mode manual and protruding tangent has default slope and scale
 
-		Gaffer::Animation::Key* const ke = curve.getExtrapolationKey( direction );
+		Gaffer::Animation::Key *const ke = curve.getExtrapolationKey( direction );
 		curve.addKey( key );
 		ke->setTieMode( Gaffer::Animation::TieMode::Manual );
 		ke->tangent( direction ).setSlopeAndScale( Gaffer::Animation::defaultSlope(), Gaffer::Animation::defaultScale() );
@@ -561,28 +554,27 @@ struct ExtrapolatorConstant
 // linear extrapolator
 
 struct ExtrapolatorLinear
-: public Gaffer::Animation::Extrapolator
+	: public Gaffer::Animation::Extrapolator
 {
 	ExtrapolatorLinear()
-	: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::Linear )
-	{}
+		: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::Linear )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const double time ) const override
+	double evaluate( const Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const double time ) const override
 	{
 		// NOTE : extrapolate line with slope matching tangent in direction
 		//        of extrapolation from key in direction of extrapolation.
 
-		const Gaffer::Animation::Key* const key = curve.getExtrapolationKey( direction );
+		const Gaffer::Animation::Key *const key = curve.getExtrapolationKey( direction );
 		return std::fma( clampSlope( key->tangent( direction ).getSlope() ), ( time - key->getTime() ), key->getValue() );
 	}
 
-	void extend( Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const Gaffer::Animation::KeyPtr key ) const override
+	void extend( Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const Gaffer::Animation::KeyPtr key ) const override
 	{
 		// ensure slope of key's tangents match slope of protruding tangent and bake protruding tangent's slope
 
-		Gaffer::Animation::Tangent& pt = curve.getExtrapolationKey( direction )->tangent( direction );
+		Gaffer::Animation::Tangent &pt = curve.getExtrapolationKey( direction )->tangent( direction );
 		const double slope = pt.getSlope();
 		key->tangentIn().setSlope( slope );
 		key->tangentOut().setSlope( slope );
@@ -594,21 +586,21 @@ struct ExtrapolatorLinear
 // cycle extrapolator
 
 struct ExtrapolatorCycle
-: public Gaffer::Animation::Extrapolator
+	: public Gaffer::Animation::Extrapolator
 {
 	ExtrapolatorCycle()
-	: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::Cycle )
-	{}
+		: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::Cycle )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const double time ) const override
+	double evaluate( const Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const double time ) const override
 	{
 		// NOTE : repeat the curve indefinitely
 
-		const Gaffer::Animation::Key* const key = curve.getExtrapolationKey( direction );
-		const Gaffer::Animation::Key* const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
+		const Gaffer::Animation::Key *const key = curve.getExtrapolationKey( direction );
+		const Gaffer::Animation::Key *const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
 
-		const double dt = std::abs( static_cast< double >( key->getTime() ) - static_cast< double >( keyOpposite->getTime() ) );
+		const double dt = std::abs( static_cast<double>( key->getTime() ) - static_cast<double>( keyOpposite->getTime() ) );
 		if( dt == 0.0 )
 		{
 			return key->getValue();
@@ -618,32 +610,30 @@ struct ExtrapolatorCycle
 
 		double count;
 		const double offset = time - key->getTime();
-		const double remainder = std::modf( offset / dt, & count ) * dt;
+		const double remainder = std::modf( offset / dt, &count ) * dt;
 
-		return evaluateInKeyRange( curve, ( remainder == 0.0 )
-			? key->getTime()
-			: static_cast< float >( keyOpposite->getTime() + remainder ) );
+		return evaluateInKeyRange( curve, ( remainder == 0.0 ) ? key->getTime() : static_cast<float>( keyOpposite->getTime() + remainder ) );
 	}
 };
 
 // cycle offset extrapolator
 
 struct ExtrapolatorCycleOffset
-: public Gaffer::Animation::Extrapolator
+	: public Gaffer::Animation::Extrapolator
 {
 	ExtrapolatorCycleOffset()
-	: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::CycleOffset )
-	{}
+		: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::CycleOffset )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const double time ) const override
+	double evaluate( const Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const double time ) const override
 	{
 		// NOTE : repeat the curve indefinitely with each repetition offset to be relative in value to the last.
 
-		const Gaffer::Animation::Key* const key = curve.getExtrapolationKey( direction );
-		const Gaffer::Animation::Key* const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
+		const Gaffer::Animation::Key *const key = curve.getExtrapolationKey( direction );
+		const Gaffer::Animation::Key *const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
 
-		const double dt = std::abs( static_cast< double >( key->getTime() ) - static_cast< double >( keyOpposite->getTime() ) );
+		const double dt = std::abs( static_cast<double>( key->getTime() ) - static_cast<double>( keyOpposite->getTime() ) );
 		if( dt == 0.0 )
 		{
 			return key->getValue();
@@ -651,13 +641,11 @@ struct ExtrapolatorCycleOffset
 
 		double count;
 		const double offset = time - key->getTime();
-		const double remainder = std::modf( offset / dt, & count ) * dt;
+		const double remainder = std::modf( offset / dt, &count ) * dt;
 
-		const double value = evaluateInKeyRange( curve, ( remainder == 0.0 )
-			? key->getTime()
-			: static_cast< float >( keyOpposite->getTime() + remainder ) );
+		const double value = evaluateInKeyRange( curve, ( remainder == 0.0 ) ? key->getTime() : static_cast<float>( keyOpposite->getTime() + remainder ) );
 
-		const double dv = static_cast< double >( key->getValue() ) - static_cast< double >( keyOpposite->getValue() );
+		const double dv = static_cast<double>( key->getValue() ) - static_cast<double>( keyOpposite->getValue() );
 		return std::fma( std::abs( count ) + ( ( remainder == 0.0 ) ? 0.0 : 1.0 ), dv, value );
 	}
 };
@@ -665,21 +653,21 @@ struct ExtrapolatorCycleOffset
 // cycle flop extrapolator
 
 struct ExtrapolatorCycleFlop
-: public Gaffer::Animation::Extrapolator
+	: public Gaffer::Animation::Extrapolator
 {
 	ExtrapolatorCycleFlop()
-	: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::CycleFlop )
-	{}
+		: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::CycleFlop )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const double time ) const override
+	double evaluate( const Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const double time ) const override
 	{
 		// NOTE : mirror the curve in time indefinitely.
 
-		const Gaffer::Animation::Key* const key = curve.getExtrapolationKey( direction );
-		const Gaffer::Animation::Key* const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
+		const Gaffer::Animation::Key *const key = curve.getExtrapolationKey( direction );
+		const Gaffer::Animation::Key *const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
 
-		const double dt = std::abs( static_cast< double >( key->getTime() ) - static_cast< double >( keyOpposite->getTime() ) );
+		const double dt = std::abs( static_cast<double>( key->getTime() ) - static_cast<double>( keyOpposite->getTime() ) );
 		if( dt == 0.0 )
 		{
 			return key->getValue();
@@ -687,33 +675,31 @@ struct ExtrapolatorCycleFlop
 
 		double count;
 		const double offset = time - key->getTime();
-		const double remainder = std::modf( offset / dt, & count ) * dt;
+		const double remainder = std::modf( offset / dt, &count ) * dt;
 
-		return evaluateInKeyRange( curve, static_cast< float >( ( ( static_cast< int >( count ) % 2 ) != 0 )
-			? ( keyOpposite->getTime() + remainder )
-			: ( key->getTime() - remainder ) ) );
+		return evaluateInKeyRange( curve, static_cast<float>( ( ( static_cast<int>( count ) % 2 ) != 0 ) ? ( keyOpposite->getTime() + remainder ) : ( key->getTime() - remainder ) ) );
 	}
 };
 
 // cycle flip extrapolator
 
 struct ExtrapolatorCycleFlip
-: public Gaffer::Animation::Extrapolator
+	: public Gaffer::Animation::Extrapolator
 {
 	ExtrapolatorCycleFlip()
-	: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::CycleFlip )
-	{}
+		: Gaffer::Animation::Extrapolator( Gaffer::Animation::Extrapolation::CycleFlip )
+	{
+	}
 
-	double evaluate( const Gaffer::Animation::CurvePlug& curve,
-		const Gaffer::Animation::Direction direction, const double time ) const override
+	double evaluate( const Gaffer::Animation::CurvePlug &curve, const Gaffer::Animation::Direction direction, const double time ) const override
 	{
 		// NOTE : repeat the curve indefinitely, alternately inverting the value of the curve
 		//        with each repetition offset to be relative in value to the last.
 
-		const Gaffer::Animation::Key* const key = curve.getExtrapolationKey( direction );
-		const Gaffer::Animation::Key* const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
+		const Gaffer::Animation::Key *const key = curve.getExtrapolationKey( direction );
+		const Gaffer::Animation::Key *const keyOpposite = curve.getExtrapolationKey( Gaffer::Animation::opposite( direction ) );
 
-		const double dt = std::abs( static_cast< double >( key->getTime() ) - static_cast< double >( keyOpposite->getTime() ) );
+		const double dt = std::abs( static_cast<double>( key->getTime() ) - static_cast<double>( keyOpposite->getTime() ) );
 		if( dt == 0.0 )
 		{
 			return key->getValue();
@@ -721,14 +707,15 @@ struct ExtrapolatorCycleFlip
 
 		double count;
 		const double offset = time - key->getTime();
-		const double remainder = std::modf( offset / dt, & count ) * dt;
+		const double remainder = std::modf( offset / dt, &count ) * dt;
 
-		const double value = evaluateInKeyRange( curve, static_cast< float >( keyOpposite->getTime() + remainder ) );
+		const double value = evaluateInKeyRange( curve, static_cast<float>( keyOpposite->getTime() + remainder ) );
 
-		return ( ( static_cast< int >( count ) % 2 ) == 0 ) ? (
-				static_cast< double >( curve.getExtrapolationKey( Gaffer::Animation::Direction::Out )->getValue() ) +
-				static_cast< double >( curve.getExtrapolationKey( Gaffer::Animation::Direction::In )->getValue() ) - value )
-			: value;
+		return ( ( static_cast<int>( count ) % 2 ) == 0 ) ? (
+																static_cast<double>( curve.getExtrapolationKey( Gaffer::Animation::Direction::Out )->getValue() ) +
+																static_cast<double>( curve.getExtrapolationKey( Gaffer::Animation::Direction::In )->getValue() ) - value
+															) :
+															value;
 	}
 };
 
@@ -742,9 +729,9 @@ namespace Gaffer
 //////////////////////////////////////////////////////////////////////////
 
 Animation::Interpolator::Interpolator( const Animation::Interpolation interpolation, const unsigned hints )
-: m_interpolation( interpolation )
-, m_hints( hints )
-{}
+	: m_interpolation( interpolation ), m_hints( hints )
+{
+}
 
 Animation::Interpolation Animation::Interpolator::getInterpolation() const
 {
@@ -757,36 +744,39 @@ unsigned Animation::Interpolator::getHints() const
 }
 
 double Animation::Interpolator::evaluate(
-	const Animation::Key& /*keyLo*/, const Animation::Key& /*keyHi*/,
-	const double /*time*/, const double /*dt*/ ) const
+	const Animation::Key & /*keyLo*/, const Animation::Key & /*keyHi*/,
+	const double /*time*/, const double /*dt*/
+) const
 {
 	return 0.0;
 }
 
 void Animation::Interpolator::bisect(
-	const Animation::Key& keyLo, const Animation::Key& keyHi,
-	const double time, const double dt, Animation::Key& newKey,
-	Animation::Tangent& /*newTangentLo*/, Animation::Tangent& /*newTangentHi*/ ) const
+	const Animation::Key &keyLo, const Animation::Key &keyHi,
+	const double time, const double dt, Animation::Key &newKey,
+	Animation::Tangent & /*newTangentLo*/, Animation::Tangent & /*newTangentHi*/
+) const
 {
 	newKey.setValue( evaluate( keyLo, keyHi, time, dt ) );
 }
 
 double Animation::Interpolator::effectiveSlope(
-	const Animation::Tangent& /*tangent*/, const double /*dt*/, const double /*dv*/ ) const
+	const Animation::Tangent & /*tangent*/, const double /*dt*/, const double /*dv*/
+) const
 {
 	return 0.0;
 }
 
 double Animation::Interpolator::effectiveScale(
-	const Animation::Tangent& /*tangent*/, const double /*dt*/, const double /*dv*/ ) const
+	const Animation::Tangent & /*tangent*/, const double /*dt*/, const double /*dv*/
+) const
 {
 	return 0.0;
 }
 
-const Animation::Interpolator::Container& Animation::Interpolator::get()
+const Animation::Interpolator::Container &Animation::Interpolator::get()
 {
-	static const Container container
-	{
+	static const Container container{
 		ConstInterpolatorPtr( new InterpolatorBezier() ),
 		ConstInterpolatorPtr( new InterpolatorCubic() ),
 		ConstInterpolatorPtr( new InterpolatorLinear() ),
@@ -799,11 +789,9 @@ const Animation::Interpolator::Container& Animation::Interpolator::get()
 
 Animation::ConstInterpolatorPtr Animation::Interpolator::get( const Animation::Interpolation interpolation )
 {
-	const Container& container = Interpolator::get();
+	const Container &container = Interpolator::get();
 	const Container::const_iterator it =
-		std::find_if( container.begin(), container.end(),
-			[ interpolation ]( const ConstInterpolatorPtr& interpolator ) -> bool
-			{ return interpolator->getInterpolation() == interpolation; } );
+		std::find_if( container.begin(), container.end(), [interpolation]( const ConstInterpolatorPtr &interpolator ) -> bool { return interpolator->getInterpolation() == interpolation; } );
 	return ( it != container.end() ) ? ( *it ) : Interpolator::getDefault();
 }
 
@@ -817,35 +805,37 @@ Animation::ConstInterpolatorPtr Animation::Interpolator::getDefault()
 //////////////////////////////////////////////////////////////////////////
 
 Animation::Extrapolator::Extrapolator( const Animation::Extrapolation extrapolation )
-: m_extrapolation( extrapolation )
-{}
+	: m_extrapolation( extrapolation )
+{
+}
 
 Animation::Extrapolation Animation::Extrapolator::getExtrapolation() const
 {
 	return m_extrapolation;
 }
 
-double Animation::Extrapolator::evaluateInKeyRange( const Animation::CurvePlug& curve, const double time ) const
+double Animation::Extrapolator::evaluateInKeyRange( const Animation::CurvePlug &curve, const double time ) const
 {
 	return curve.evaluateInternal( time, /* extrapolate = */ false );
 }
 
 double Animation::Extrapolator::evaluate(
-	const Animation::CurvePlug& /*curve*/, const Animation::Direction /*direction*/, const double /*time*/ ) const
+	const Animation::CurvePlug & /*curve*/, const Animation::Direction /*direction*/, const double /*time*/
+) const
 {
 	return 0.0;
 }
 
 void Animation::Extrapolator::extend(
-	Animation::CurvePlug& curve, const Animation::Direction /*direction*/, const KeyPtr key ) const
+	Animation::CurvePlug &curve, const Animation::Direction /*direction*/, const KeyPtr key
+) const
 {
 	curve.addKey( key );
 }
 
-const Animation::Extrapolator::Container& Animation::Extrapolator::get()
+const Animation::Extrapolator::Container &Animation::Extrapolator::get()
 {
-	static const Container container
-	{
+	static const Container container{
 		ConstExtrapolatorPtr( new ExtrapolatorConstant() ),
 		ConstExtrapolatorPtr( new ExtrapolatorLinear() ),
 		ConstExtrapolatorPtr( new ExtrapolatorCycle() ),
@@ -859,11 +849,9 @@ const Animation::Extrapolator::Container& Animation::Extrapolator::get()
 
 Animation::ConstExtrapolatorPtr Animation::Extrapolator::get( const Animation::Extrapolation extrapolation )
 {
-	const Container& container = Extrapolator::get();
+	const Container &container = Extrapolator::get();
 	const Container::const_iterator it =
-		std::find_if( container.begin(), container.end(),
-			[ extrapolation ]( const ConstExtrapolatorPtr& extrapolator ) -> bool
-			{ return extrapolator->getExtrapolation() == extrapolation; } );
+		std::find_if( container.begin(), container.end(), [extrapolation]( const ConstExtrapolatorPtr &extrapolator ) -> bool { return extrapolator->getExtrapolation() == extrapolation; } );
 	return ( it != container.end() ) ? ( *it ) : Extrapolator::getDefault();
 }
 
@@ -876,25 +864,22 @@ Animation::ConstExtrapolatorPtr Animation::Extrapolator::getDefault()
 // Tangent implementation
 //////////////////////////////////////////////////////////////////////////
 
-Animation::Tangent::Tangent( Animation::Key& key, const Animation::Direction direction, const double slope, const double scale )
-: m_key( & key )
-, m_direction( direction )
-, m_dt( 0.0 )
-, m_dv( 0.0 )
-, m_slope( ensurePositiveZero( slope ) )
-, m_scale( Imath::clamp( scale, 0.0, maxScale( m_slope ) ) )
-{}
+Animation::Tangent::Tangent( Animation::Key &key, const Animation::Direction direction, const double slope, const double scale )
+	: m_key( &key ), m_direction( direction ), m_dt( 0.0 ), m_dv( 0.0 ), m_slope( ensurePositiveZero( slope ) ), m_scale( Imath::clamp( scale, 0.0, maxScale( m_slope ) ) )
+{
+}
 
 Animation::Tangent::~Tangent()
-{}
+{
+}
 
-Animation::Key& Animation::Tangent::key()
+Animation::Key &Animation::Tangent::key()
 {
 	assert( m_key );
 	return *m_key;
 }
 
-const Animation::Key& Animation::Tangent::key() const
+const Animation::Key &Animation::Tangent::key() const
 {
 	assert( m_key );
 	return *m_key;
@@ -915,7 +900,7 @@ void Animation::Tangent::setSlope( const double slope, const bool force )
 	setSlopeAndScale( slope, m_scale, force );
 }
 
-void Animation::Tangent::setSlopeFromPosition( const Imath::V2d& pos, const bool relative )
+void Animation::Tangent::setSlopeFromPosition( const Imath::V2d &pos, const bool relative )
 {
 	// when span width is zero position is constrained to parent key
 
@@ -943,7 +928,7 @@ void Animation::Tangent::setSlopeAndScale( double slope, double scale, const boo
 {
 	// check that slope is unconstrained
 
-	if( ! force && slopeIsConstrained() )
+	if( !force && slopeIsConstrained() )
 	{
 		return;
 	}
@@ -966,8 +951,8 @@ void Animation::Tangent::setSlopeAndScale( double slope, double scale, const boo
 		// set tie mode of the parent key to manual whilst we call set[Slope|Scale] on the opposite
 		// tangent to avoid ping-ponging back and forth setting each other in infinite recursion.
 
-		Private::ScopedAssignment< TieMode > tmGuard( m_key->m_tieMode, TieMode::Manual );
-		Tangent& ot = m_key->tangent( opposite( m_direction ) );
+		Private::ScopedAssignment<TieMode> tmGuard( m_key->m_tieMode, TieMode::Manual );
+		Tangent &ot = m_key->tangent( opposite( m_direction ) );
 
 		if( tsc )
 		{
@@ -976,9 +961,7 @@ void Animation::Tangent::setSlopeAndScale( double slope, double scale, const boo
 
 			const double oppositeScale = tieScaleOpposite( m_direction, m_key->m_tieScaleRatio, slope, scale );
 
-			( tsl )
-				? ot.setSlopeAndScale( slope, oppositeScale, /* force = */ true )
-				: ot.setScale( oppositeScale, /* force = */ true );
+			( tsl ) ? ot.setSlopeAndScale( slope, oppositeScale, /* force = */ true ) : ot.setScale( oppositeScale, /* force = */ true );
 		}
 		else
 		{
@@ -1003,13 +986,13 @@ void Animation::Tangent::setSlopeAndScale( double slope, double scale, const boo
 		Action::enact(
 			key->m_parent,
 			// Do
-			[ this, key, slope, scale ] {
+			[this, key, slope, scale] {
 				m_slope = slope;
 				m_scale = scale;
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
 			},
 			// Undo
-			[ this, key, previousSlope, previousScale ] {
+			[this, key, previousSlope, previousScale] {
 				m_slope = previousSlope;
 				m_scale = previousScale;
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
@@ -1027,25 +1010,19 @@ double Animation::Tangent::getSlope() const
 {
 	if( slopeIsConstrained() )
 	{
-		const Key* const kn = m_key->nextKey();
-		const Key* const kp = m_key->prevKey();
+		const Key *const kn = m_key->nextKey();
+		const Key *const kp = m_key->prevKey();
 
 		// parent key is sole use default scale
 
-		if( ! kp && ! kn )
+		if( !kp && !kn )
 		{
 			return defaultSlope();
 		}
 
 		// when tangent protrudes, slope matches sibling tangent, otherwise use interpolator effective slope
 
-		return ( m_direction == Direction::In )
-			? ( ( kp )
-				? kp->m_interpolator->effectiveSlope( *this, m_dt, m_dv )
-				: m_key->m_tangentOut.getSlope() )
-			: ( ( kn )
-				? m_key->m_interpolator->effectiveSlope( *this, m_dt, m_dv )
-				: m_key->m_tangentIn.getSlope() );
+		return ( m_direction == Direction::In ) ? ( ( kp ) ? kp->m_interpolator->effectiveSlope( *this, m_dt, m_dv ) : m_key->m_tangentOut.getSlope() ) : ( ( kn ) ? m_key->m_interpolator->effectiveSlope( *this, m_dt, m_dv ) : m_key->m_tangentIn.getSlope() );
 	}
 
 	return m_slope;
@@ -1057,7 +1034,7 @@ bool Animation::Tangent::slopeIsConstrained() const
 
 	// when unparented or inactive slope is not constrained
 
-	if( ! m_key->m_parent || ! m_key->m_active )
+	if( !m_key->m_parent || !m_key->m_active )
 	{
 		return false;
 	}
@@ -1065,10 +1042,9 @@ bool Animation::Tangent::slopeIsConstrained() const
 	// when protruding, slope is always constrained otherwise check interpolator hints
 
 	if(
-		( ( m_direction == Direction::Out ) && ( ( m_key->m_parent->finalKey() == m_key ) ||
-			! ( m_key->m_interpolator->getHints() & Interpolator::Hint::UseSlope ) ) ) ||
-		( ( m_direction == Direction::In  ) && ( ( m_key->m_parent->firstKey() == m_key ) ||
-			! ( m_key->prevKey()->m_interpolator->getHints() & Interpolator::Hint::UseSlope ) ) ) )
+		( ( m_direction == Direction::Out ) && ( ( m_key->m_parent->finalKey() == m_key ) || !( m_key->m_interpolator->getHints() & Interpolator::Hint::UseSlope ) ) ) ||
+		( ( m_direction == Direction::In ) && ( ( m_key->m_parent->firstKey() == m_key ) || !( m_key->prevKey()->m_interpolator->getHints() & Interpolator::Hint::UseSlope ) ) )
+	)
 	{
 		return true;
 	}
@@ -1081,7 +1057,7 @@ void Animation::Tangent::setScale( const double scale )
 	setScale( scale, false );
 }
 
-void Animation::Tangent::setScaleFromPosition( const Imath::V2d& pos, const bool relative )
+void Animation::Tangent::setScaleFromPosition( const Imath::V2d &pos, const bool relative )
 {
 	// when span width is zero position is constrained to parent key
 
@@ -1098,13 +1074,7 @@ void Animation::Tangent::setScaleFromPosition( const Imath::V2d& pos, const bool
 	// constrain position to quadrant based on slope and direction
 
 	const double slope = getSlope();
-	position.y = ( m_direction == Direction::In )
-		? ( ( slope > 0.0 )
-			? std::min( position.y, 0.0 )
-			: std::max( position.y, 0.0 ) )
-		: ( ( slope < 0.0 )
-			? std::min( position.y, 0.0 )
-			: std::max( position.y, 0.0 ) );
+	position.y = ( m_direction == Direction::In ) ? ( ( slope > 0.0 ) ? std::min( position.y, 0.0 ) : std::max( position.y, 0.0 ) ) : ( ( slope < 0.0 ) ? std::min( position.y, 0.0 ) : std::max( position.y, 0.0 ) );
 
 	// set scale
 
@@ -1115,7 +1085,7 @@ void Animation::Tangent::setScale( double scale, const bool force )
 {
 	// check that scale is unconstrained
 
-	if( ! force && scaleIsConstrained() )
+	if( !force && scaleIsConstrained() )
 	{
 		return;
 	}
@@ -1131,8 +1101,8 @@ void Animation::Tangent::setScale( double scale, const bool force )
 		// set tie mode of the parent key to manual whilst we call setScale on the opposite
 		// tangent to avoid ping-ponging back and forth setting each other in infinite recursion.
 
-		Private::ScopedAssignment< TieMode > tmGuard( m_key->m_tieMode, TieMode::Manual );
-		Tangent& ot = m_key->tangent( opposite( m_direction ) );
+		Private::ScopedAssignment<TieMode> tmGuard( m_key->m_tieMode, TieMode::Manual );
+		Tangent &ot = m_key->tangent( opposite( m_direction ) );
 		ot.setScale( tieScaleOpposite( m_direction, m_key->m_tieScaleRatio, ot.getSlope(), scale ), /* force = */ true );
 	}
 
@@ -1152,12 +1122,12 @@ void Animation::Tangent::setScale( double scale, const bool force )
 		Action::enact(
 			key->m_parent,
 			// Do
-			[ this, key, scale ] {
+			[this, key, scale] {
 				m_scale = scale;
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
 			},
 			// Undo
-			[ this, key, previousScale ] {
+			[this, key, previousScale] {
 				m_scale = previousScale;
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
 			}
@@ -1173,25 +1143,19 @@ double Animation::Tangent::getScale() const
 {
 	if( scaleIsConstrained() )
 	{
-		const Key* const kn = m_key->nextKey();
-		const Key* const kp = m_key->prevKey();
+		const Key *const kn = m_key->nextKey();
+		const Key *const kp = m_key->prevKey();
 
 		// parent key is sole use default scale
 
-		if( ! kp && ! kn )
+		if( !kp && !kn )
 		{
 			return defaultScale();
 		}
 
 		// when tangent protrudes, scale matches sibling tangent, otherwise use interpolator effective scale
 
-		return ( m_direction == Direction::In )
-			? ( ( kp )
-				? kp->m_interpolator->effectiveScale( *this, m_dt, m_dv )
-				: m_key->m_tangentOut.getScale() )
-			: ( ( kn )
-				? m_key->m_interpolator->effectiveScale( *this, m_dt, m_dv )
-				: m_key->m_tangentIn.getScale() );
+		return ( m_direction == Direction::In ) ? ( ( kp ) ? kp->m_interpolator->effectiveScale( *this, m_dt, m_dv ) : m_key->m_tangentOut.getScale() ) : ( ( kn ) ? m_key->m_interpolator->effectiveScale( *this, m_dt, m_dv ) : m_key->m_tangentIn.getScale() );
 	}
 
 	return m_scale;
@@ -1203,7 +1167,7 @@ bool Animation::Tangent::scaleIsConstrained() const
 
 	// when unparented or inactive scale is not constrained
 
-	if( ! m_key->m_parent || ! m_key->m_active )
+	if( !m_key->m_parent || !m_key->m_active )
 	{
 		return false;
 	}
@@ -1211,10 +1175,9 @@ bool Animation::Tangent::scaleIsConstrained() const
 	// when protruding, scale is always constrained otherwise check interpolator hints
 
 	if(
-		( ( m_direction == Direction::Out ) && ( ( m_key->m_parent->finalKey() == m_key ) ||
-			! ( m_key->m_interpolator->getHints() & Interpolator::Hint::UseScale ) ) ) ||
-		( ( m_direction == Direction::In  ) && ( ( m_key->m_parent->firstKey() == m_key ) ||
-			! ( m_key->prevKey()->m_interpolator->getHints() & Interpolator::Hint::UseScale ) ) ) )
+		( ( m_direction == Direction::Out ) && ( ( m_key->m_parent->finalKey() == m_key ) || !( m_key->m_interpolator->getHints() & Interpolator::Hint::UseScale ) ) ) ||
+		( ( m_direction == Direction::In ) && ( ( m_key->m_parent->firstKey() == m_key ) || !( m_key->prevKey()->m_interpolator->getHints() & Interpolator::Hint::UseScale ) ) )
+	)
 	{
 		return true;
 	}
@@ -1222,7 +1185,7 @@ bool Animation::Tangent::scaleIsConstrained() const
 	return false;
 }
 
-void Animation::Tangent::setPosition( const Imath::V2d& pos, const bool relative )
+void Animation::Tangent::setPosition( const Imath::V2d &pos, const bool relative )
 {
 	// when span width is zero position is constrained to parent key
 
@@ -1293,14 +1256,20 @@ Imath::V2d Animation::Tangent::getPosition( const bool relative ) const
 
 		if( m_direction == Direction::In )
 		{
-			if( p.x != 0.0 ) { p.x = -p.x; }
-			if( p.y != 0.0 ) { p.y = -p.y; }
+			if( p.x != 0.0 )
+			{
+				p.x = -p.x;
+			}
+			if( p.y != 0.0 )
+			{
+				p.y = -p.y;
+			}
 		}
 	}
 
 	// convert to absolute position
 
-	if( ! relative )
+	if( !relative )
 	{
 		p.x += m_key->m_time;
 		p.y += m_key->m_value;
@@ -1322,21 +1291,21 @@ void Animation::Tangent::update()
 	{
 		switch( m_direction )
 		{
-			case Direction::In:
-				if( const Key* const kp = m_key->prevKey() )
+			case Direction::In :
+				if( const Key *const kp = m_key->prevKey() )
 				{
 					dt = ( m_key->m_time - kp->m_time );
 					dv = ( m_key->m_value - kp->m_value );
 				}
 				break;
-			case Direction::Out:
-				if( const Key* const kn = m_key->nextKey() )
+			case Direction::Out :
+				if( const Key *const kn = m_key->nextKey() )
 				{
 					dt = ( kn->m_time - m_key->m_time );
 					dv = ( kn->m_value - m_key->m_value );
 				}
 				break;
-			default:
+			default :
 				break;
 		}
 	}
@@ -1351,13 +1320,13 @@ void Animation::Tangent::update()
 	m_dt = dt;
 }
 
-void Animation::Tangent::positionToRelative( Imath::V2d& position, const bool relative ) const
+void Animation::Tangent::positionToRelative( Imath::V2d &position, const bool relative ) const
 {
 	assert( m_dt != 0.0 );
 
 	// convert from absolute position
 
-	if( ! relative )
+	if( !relative )
 	{
 		position.x -= m_key->m_time;
 		position.y -= m_key->m_value;
@@ -1365,9 +1334,7 @@ void Animation::Tangent::positionToRelative( Imath::V2d& position, const bool re
 
 	// constrain direction of tangent
 
-	position.x = ( m_direction == Direction::In )
-		? std::min( position.x, 0.0 )
-		: std::max( position.x, 0.0 );
+	position.x = ( m_direction == Direction::In ) ? std::min( position.x, 0.0 ) : std::max( position.x, 0.0 );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1376,24 +1343,13 @@ void Animation::Tangent::positionToRelative( Imath::V2d& position, const bool re
 
 IE_CORE_DEFINERUNTIMETYPED( Gaffer::Animation::Key )
 
-Animation::Tangent Animation::Key::* const Animation::Key::m_tangents[ 2 ] =
-{
-	& Animation::Key::m_tangentIn,
-	& Animation::Key::m_tangentOut
+Animation::Tangent Animation::Key::*const Animation::Key::m_tangents[2] = {
+	&Animation::Key::m_tangentIn,
+	&Animation::Key::m_tangentOut
 };
 
-Animation::Key::Key( const float time, const float value, const Animation::Interpolation interpolation,
-	const double inSlope, const double inScale, const double outSlope, const double outScale,
-	const Animation::TieMode tieMode )
-: m_parent( nullptr )
-, m_tangentIn( *this, Direction::In, inSlope, inScale )
-, m_tangentOut( *this, Direction::Out, outSlope, outScale )
-, m_time( time )
-, m_value( value )
-, m_interpolator( Interpolator::get( interpolation ) )
-, m_tieScaleRatio( 0.0 )
-, m_tieMode( TieMode::Manual )
-, m_active( false )
+Animation::Key::Key( const float time, const float value, const Animation::Interpolation interpolation, const double inSlope, const double inScale, const double outSlope, const double outScale, const Animation::TieMode tieMode )
+	: m_parent( nullptr ), m_tangentIn( *this, Direction::In, inSlope, inScale ), m_tangentOut( *this, Direction::Out, outSlope, outScale ), m_time( time ), m_value( value ), m_interpolator( Interpolator::get( interpolation ) ), m_tieScaleRatio( 0.0 ), m_tieMode( TieMode::Manual ), m_active( false )
 {
 	// set specified tie mode which will ensure that slope and scale are consistent.
 
@@ -1407,35 +1363,36 @@ Animation::Key::~Key()
 	assert( m_parent == nullptr );
 }
 
-Animation::Tangent& Animation::Key::tangentIn()
+Animation::Tangent &Animation::Key::tangentIn()
 {
 	return m_tangentIn;
 }
 
-const Animation::Tangent& Animation::Key::tangentIn() const
+const Animation::Tangent &Animation::Key::tangentIn() const
 {
 	return m_tangentIn;
 }
 
-Animation::Tangent& Animation::Key::tangentOut()
+Animation::Tangent &Animation::Key::tangentOut()
 {
 	return m_tangentOut;
 }
 
-const Animation::Tangent& Animation::Key::tangentOut() const
+const Animation::Tangent &Animation::Key::tangentOut() const
 {
 	return m_tangentOut;
 }
 
-Animation::Tangent& Animation::Key::tangent( const Animation::Direction direction )
+Animation::Tangent &Animation::Key::tangent( const Animation::Direction direction )
 {
-	return const_cast< Tangent& >(
-		static_cast< const Key* >( this )->tangent( direction ) );
+	return const_cast<Tangent &>(
+		static_cast<const Key *>( this )->tangent( direction )
+	);
 }
 
-const Animation::Tangent& Animation::Key::tangent( const Animation::Direction direction ) const
+const Animation::Tangent &Animation::Key::tangent( const Animation::Direction direction ) const
 {
-	return this->*m_tangents[ static_cast< int >( direction ) ];
+	return this->*m_tangents[static_cast<int>( direction )];
 }
 
 Animation::TieMode Animation::Key::getTieMode() const
@@ -1456,7 +1413,7 @@ void Animation::Key::setTieMode( const Animation::TieMode tieMode )
 	//
 	// NOTE : slopes are set via setSlope() which will record any change in the undo/redo system.
 
-	if( ! tieSlopeActive( m_tieMode ) && tieSlopeActive( tieMode ) )
+	if( !tieSlopeActive( m_tieMode ) && tieSlopeActive( tieMode ) )
 	{
 		const double si = m_tangentIn.m_slope;
 		const double so = m_tangentOut.m_slope;
@@ -1471,16 +1428,16 @@ void Animation::Key::setTieMode( const Animation::TieMode tieMode )
 			const bool inConstrainedOrProtrudes = m_tangentIn.slopeIsConstrained();
 			const bool outConstrainedOrProtrudes = m_tangentOut.slopeIsConstrained();
 
-			const double s = ( inConstrainedOrProtrudes == outConstrainedOrProtrudes )
-				? std::tan(
-					std::atan( si ) * 0.5 +
-					std::atan( so ) * 0.5 )
-				: ( ( outConstrainedOrProtrudes ) ? si : so );
+			const double s = ( inConstrainedOrProtrudes == outConstrainedOrProtrudes ) ? std::tan(
+																							 std::atan( si ) * 0.5 +
+																							 std::atan( so ) * 0.5
+																						 ) :
+																						 ( ( outConstrainedOrProtrudes ) ? si : so );
 
 			// set tie mode of the parent key to manual whilst we call setSlope on the tangents
 			// to avoid ping-ponging back and forth setting each other in infinite recursion.
 
-			Private::ScopedAssignment< TieMode > tmGuard( m_tieMode, TieMode::Manual );
+			Private::ScopedAssignment<TieMode> tmGuard( m_tieMode, TieMode::Manual );
 			m_tangentIn.setSlope( s, /* force = */ true );
 			m_tangentOut.setSlope( s, /* force = */ true );
 		}
@@ -1489,9 +1446,7 @@ void Animation::Key::setTieMode( const Animation::TieMode tieMode )
 	// capture scale ratio when scale becomes tied.
 
 	const double previousTieScaleRatio = m_tieScaleRatio;
-	const double newTieScaleRatio = ( ! tieScaleActive( m_tieMode ) && tieScaleActive( tieMode ) )
-		? tieScaleRatio( m_tangentIn.m_scale, m_tangentOut.m_scale )
-		: m_tieScaleRatio;
+	const double newTieScaleRatio = ( !tieScaleActive( m_tieMode ) && tieScaleActive( tieMode ) ) ? tieScaleRatio( m_tangentIn.m_scale, m_tangentOut.m_scale ) : m_tieScaleRatio;
 
 	// make change via action
 
@@ -1502,14 +1457,14 @@ void Animation::Key::setTieMode( const Animation::TieMode tieMode )
 		Action::enact(
 			m_parent,
 			// Do
-			[ key, tieMode, newTieScaleRatio ] {
+			[key, tieMode, newTieScaleRatio] {
 				key->m_tieMode = tieMode;
 				key->m_tieScaleRatio = newTieScaleRatio;
 				key->m_parent->m_keyTieModeChangedSignal( key->m_parent, key.get() );
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
 			},
 			// Undo
-			[ key, previousTieMode, previousTieScaleRatio ] {
+			[key, previousTieMode, previousTieScaleRatio] {
 				key->m_tieMode = previousTieMode;
 				key->m_tieScaleRatio = previousTieScaleRatio;
 				key->m_parent->m_keyTieModeChangedSignal( key->m_parent, key.get() );
@@ -1559,16 +1514,15 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 		KeyPtr key = this;
 		const float previousTime = m_time;
 		const bool active = m_active;
-		CurvePlug* const curve = m_parent;
+		CurvePlug *const curve = m_parent;
 
-#		define ASSERTCONTAINSKEY( KEY, CONTAINER, RESULT ) \
-			assert( ( RESULT ) == ( std::find_if( ( CONTAINER ).begin(), ( CONTAINER ).end(), \
-				[ key = &( *( KEY ) ) ]( const Key& k ) { return key == & k; } ) != ( CONTAINER ).end() ) );
+#define ASSERTCONTAINSKEY( KEY, CONTAINER, RESULT ) \
+	assert( ( RESULT ) == ( std::find_if( ( CONTAINER ).begin(), ( CONTAINER ).end(), [key = &( *( KEY ) )]( const Key &k ) { return key == &k; } ) != ( CONTAINER ).end() ) );
 
 		Action::enact(
 			m_parent,
 			// Do
-			[ curve, time, previousTime, active, key, clashingKey, clashingInactiveKey ] {
+			[curve, time, previousTime, active, key, clashingKey, clashingInactiveKey] {
 				// check state is as expected
 				key->throwIfStateNotAsExpected( curve, active, previousTime );
 				if( clashingInactiveKey )
@@ -1588,10 +1542,10 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 				//          insert clashing key into inactive keys container
 				//        else insert key into active keys container
 				// NOTE : It is critical to the following code that the key comparison NEVER throws.
-				Key* const kpn = key->nextKey();
-				Key* const kpp = key->prevKey();
+				Key *const kpn = key->nextKey();
+				Key *const kpp = key->prevKey();
 				assert( key->m_hook.is_linked() );
-				if( ! active )
+				if( !active )
 				{
 					ASSERTCONTAINSKEY( key, curve->m_inactiveKeys, true )
 					curve->m_inactiveKeys.erase( curve->m_inactiveKeys.iterator_to( *key ) );
@@ -1615,7 +1569,7 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 					curve->m_keys.erase( curve->m_keys.iterator_to( *key ) );
 					ASSERTCONTAINSKEY( key, curve->m_keys, false )
 				}
-				assert( ! key->m_hook.is_linked() );
+				assert( !key->m_hook.is_linked() );
 				key->m_time = time;
 				key->m_active = true;
 				if( clashingKey )
@@ -1627,22 +1581,22 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 					curve->m_keys.replace_node( curve->m_keys.iterator_to( *clashingKey ), *key );
 					ASSERTCONTAINSKEY( key, curve->m_keys, true )
 					ASSERTCONTAINSKEY( clashingKey, curve->m_keys, false )
-					assert( ! clashingKey->m_hook.is_linked() );
+					assert( !clashingKey->m_hook.is_linked() );
 					curve->m_inactiveKeys.insert_before( curve->m_inactiveKeys.lower_bound( key->m_time ), *clashingKey );
 					ASSERTCONTAINSKEY( clashingKey, curve->m_inactiveKeys, true )
 					clashingKey->m_active = false;
 				}
 				else
 				{
-					assert( curve->m_keys.count( key->m_time ) == static_cast< CurvePlug::Keys::size_type >( 0 ) );
+					assert( curve->m_keys.count( key->m_time ) == static_cast<CurvePlug::Keys::size_type>( 0 ) );
 					ASSERTCONTAINSKEY( key, curve->m_keys, false )
 					curve->m_keys.insert( *key );
 					ASSERTCONTAINSKEY( key, curve->m_keys, true )
 				}
 
-				assert( ! key || ( key->m_active == true ) );
-				assert( ! clashingKey || ( clashingKey->m_active == false ) );
-				assert( ! clashingInactiveKey || ( clashingInactiveKey->m_active == true ) );
+				assert( !key || ( key->m_active == true ) );
+				assert( !clashingKey || ( clashingKey->m_active == false ) );
+				assert( !clashingInactiveKey || ( clashingInactiveKey->m_active == true ) );
 
 				// update keys
 				//
@@ -1660,22 +1614,34 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 				}
 				else
 				{
-					if( kpn ){ kpn->m_tangentIn.update(); }
-					if( kpp ){ kpp->m_tangentOut.update(); }
+					if( kpn )
+					{
+						kpn->m_tangentIn.update();
+					}
+					if( kpp )
+					{
+						kpp->m_tangentOut.update();
+					}
 				}
-				if( ! clashingKey )
+				if( !clashingKey )
 				{
-					Key* const kn = key->nextKey();
-					if( kn && ( kn != kpn || clashingInactiveKey ) ){ kn->m_tangentIn.update(); }
-					Key* const kp = key->prevKey();
-					if( kp && ( kp != kpp || clashingInactiveKey ) ){ kp->m_tangentOut.update(); }
+					Key *const kn = key->nextKey();
+					if( kn && ( kn != kpn || clashingInactiveKey ) )
+					{
+						kn->m_tangentIn.update();
+					}
+					Key *const kp = key->prevKey();
+					if( kp && ( kp != kpp || clashingInactiveKey ) )
+					{
+						kp->m_tangentOut.update();
+					}
 				}
 
 				curve->m_keyTimeChangedSignal( key->m_parent, key.get() );
 				curve->propagateDirtiness( curve->outPlug() );
 			},
 			// Undo
-			[ curve, time, previousTime, active, key, clashingKey, clashingInactiveKey ] {
+			[curve, time, previousTime, active, key, clashingKey, clashingInactiveKey] {
 				// check state is as expected
 				key->throwIfStateNotAsExpected( curve, true, time );
 				if( clashingKey )
@@ -1694,8 +1660,8 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 				//          reinsert clashing inactive key into inactive keys container
 				//        else reinsert key into active keys container
 				// NOTE : It is critical to the following code that the key comparison NEVER throws.
-				Key* const kpn = key->nextKey();
-				Key* const kpp = key->prevKey();
+				Key *const kpn = key->nextKey();
+				Key *const kpp = key->prevKey();
 				assert( key->m_hook.is_linked() );
 				if( clashingKey )
 				{
@@ -1715,10 +1681,10 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 					curve->m_keys.erase( curve->m_keys.iterator_to( *key ) );
 					ASSERTCONTAINSKEY( key, curve->m_keys, false )
 				}
-				assert( ! key->m_hook.is_linked() );
+				assert( !key->m_hook.is_linked() );
 				key->m_time = previousTime;
 				key->m_active = active;
-				if( ! key->m_active )
+				if( !key->m_active )
 				{
 					ASSERTCONTAINSKEY( key, curve->m_keys, false )
 					ASSERTCONTAINSKEY( key, curve->m_inactiveKeys, false )
@@ -1741,15 +1707,15 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 				}
 				else
 				{
-					assert( curve->m_keys.count( key->m_time ) == static_cast< CurvePlug::Keys::size_type >( 0 ) );
+					assert( curve->m_keys.count( key->m_time ) == static_cast<CurvePlug::Keys::size_type>( 0 ) );
 					ASSERTCONTAINSKEY( key, curve->m_keys, false )
 					curve->m_keys.insert( *key );
 					ASSERTCONTAINSKEY( key, curve->m_keys, true )
 				}
 
-				assert( ! key || ( key->m_active == active ) );
-				assert( ! clashingKey || ( clashingKey->m_active == true ) );
-				assert( ! clashingInactiveKey || ( clashingInactiveKey->m_active == false ) );
+				assert( !key || ( key->m_active == active ) );
+				assert( !clashingKey || ( clashingKey->m_active == true ) );
+				assert( !clashingInactiveKey || ( clashingInactiveKey->m_active == false ) );
 
 				// update keys
 				//
@@ -1771,15 +1737,27 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 				}
 				else
 				{
-					if( kpn ){ kpn->m_tangentIn.update(); }
-					if( kpp ){ kpp->m_tangentOut.update(); }
+					if( kpn )
+					{
+						kpn->m_tangentIn.update();
+					}
+					if( kpp )
+					{
+						kpp->m_tangentOut.update();
+					}
 				}
-				if( ! clashingInactiveKey )
+				if( !clashingInactiveKey )
 				{
-					Key* const kn = key->nextKey();
-					if( kn && ( kn != kpn || clashingKey ) ){ kn->m_tangentIn.update(); }
-					Key* const kp = key->prevKey();
-					if( kp && ( kp != kpp || clashingKey ) ){ kp->m_tangentOut.update(); }
+					Key *const kn = key->nextKey();
+					if( kn && ( kn != kpn || clashingKey ) )
+					{
+						kn->m_tangentIn.update();
+					}
+					Key *const kp = key->prevKey();
+					if( kp && ( kp != kpp || clashingKey ) )
+					{
+						kp->m_tangentOut.update();
+					}
 				}
 
 				curve->m_keyTimeChangedSignal( key->m_parent, key.get() );
@@ -1787,7 +1765,7 @@ Animation::KeyPtr Animation::Key::setTime( const float time )
 			}
 		);
 
-#		undef ASSERTCONTAINSKEY
+#undef ASSERTCONTAINSKEY
 	}
 	else
 	{
@@ -1818,22 +1796,34 @@ void Animation::Key::setValue( const float value )
 		Action::enact(
 			m_parent,
 			// Do
-			[ key, value ] {
+			[key, value] {
 				key->m_value = value;
 				key->m_tangentOut.update();
 				key->m_tangentIn.update();
-				if( Key* const kn = key->nextKey() ){ kn->m_tangentIn.update(); }
-				if( Key* const kp = key->prevKey() ){ kp->m_tangentOut.update(); }
+				if( Key *const kn = key->nextKey() )
+				{
+					kn->m_tangentIn.update();
+				}
+				if( Key *const kp = key->prevKey() )
+				{
+					kp->m_tangentOut.update();
+				}
 				key->m_parent->m_keyValueChangedSignal( key->m_parent, key.get() );
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
 			},
 			// Undo
-			[ key, previousValue ] {
+			[key, previousValue] {
 				key->m_value = previousValue;
 				key->m_tangentOut.update();
 				key->m_tangentIn.update();
-				if( Key* const kn = key->nextKey() ){ kn->m_tangentIn.update(); }
-				if( Key* const kp = key->prevKey() ){ kp->m_tangentOut.update(); }
+				if( Key *const kn = key->nextKey() )
+				{
+					kn->m_tangentIn.update();
+				}
+				if( Key *const kp = key->prevKey() )
+				{
+					kp->m_tangentOut.update();
+				}
 				key->m_parent->m_keyValueChangedSignal( key->m_parent, key.get() );
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
 			}
@@ -1854,7 +1844,7 @@ void Animation::Key::setInterpolation( const Animation::Interpolation interpolat
 {
 	const ConstInterpolatorPtr interpolator = Interpolator::get( interpolation );
 
-	if( ! interpolator || ( interpolator == m_interpolator ) )
+	if( !interpolator || ( interpolator == m_interpolator ) )
 	{
 		return;
 	}
@@ -1868,13 +1858,13 @@ void Animation::Key::setInterpolation( const Animation::Interpolation interpolat
 		Action::enact(
 			m_parent,
 			// Do
-			[ key, interpolator ] {
+			[key, interpolator] {
 				key->m_interpolator = interpolator;
 				key->m_parent->m_keyInterpolationChangedSignal( key->m_parent, key.get() );
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
 			},
 			// Undo
-			[ key, previousInterpolator ] {
+			[key, previousInterpolator] {
 				key->m_interpolator = previousInterpolator;
 				key->m_parent->m_keyInterpolationChangedSignal( key->m_parent, key.get() );
 				key->m_parent->propagateDirtiness( key->m_parent->outPlug() );
@@ -1894,17 +1884,17 @@ bool Animation::Key::isActive() const
 
 Animation::Key *Animation::Key::nextKey()
 {
-	return const_cast< Key* >( static_cast< const Key* >( this )->nextKey() );
+	return const_cast<Key *>( static_cast<const Key *>( this )->nextKey() );
 }
 
 Animation::Key *Animation::Key::prevKey()
 {
-	return const_cast< Key* >( static_cast< const Key* >( this )->prevKey() );
+	return const_cast<Key *>( static_cast<const Key *>( this )->prevKey() );
 }
 
 const Animation::Key *Animation::Key::nextKey() const
 {
-	const Key* k = nullptr;
+	const Key *k = nullptr;
 
 	if( m_parent && m_active )
 	{
@@ -1923,7 +1913,7 @@ const Animation::Key *Animation::Key::nextKey() const
 
 const Animation::Key *Animation::Key::prevKey() const
 {
-	const Key* k = nullptr;
+	const Key *k = nullptr;
 
 	if( m_parent && m_active )
 	{
@@ -1948,7 +1938,7 @@ const Animation::CurvePlug *Animation::Key::parent() const
 	return m_parent;
 }
 
-void Animation::Key::throwIfStateNotAsExpected( const Animation::CurvePlug* const curve, const bool active, const float time ) const
+void Animation::Key::throwIfStateNotAsExpected( const Animation::CurvePlug *const curve, const bool active, const float time ) const
 {
 	// check that state is as expected
 	//
@@ -1971,7 +1961,7 @@ void Animation::Key::throwIfStateNotAsExpected( const Animation::CurvePlug* cons
 	}
 }
 
-void Animation::Key::Dispose::operator()( Animation::Key* const key ) const
+void Animation::Key::Dispose::operator () ( Animation::Key *const key ) const
 {
 	assert( key != nullptr );
 
@@ -1986,25 +1976,13 @@ void Animation::Key::Dispose::operator()( Animation::Key* const key ) const
 
 GAFFER_PLUG_DEFINE_TYPE( Animation::CurvePlug );
 
-Animation::ConstExtrapolatorPtr Animation::CurvePlug::* const Animation::CurvePlug::m_extrapolators[ 2 ] =
-{
-	& Animation::CurvePlug::m_extrapolatorIn,
-	& Animation::CurvePlug::m_extrapolatorOut
+Animation::ConstExtrapolatorPtr Animation::CurvePlug::*const Animation::CurvePlug::m_extrapolators[2] = {
+	&Animation::CurvePlug::m_extrapolatorIn,
+	&Animation::CurvePlug::m_extrapolatorOut
 };
 
 Animation::CurvePlug::CurvePlug( const std::string &name, const Plug::Direction direction, const unsigned flags )
-: ValuePlug( name, direction, flags & ~Plug::AcceptsInputs )
-, m_keys()
-, m_inactiveKeys()
-, m_keyAddedSignal()
-, m_keyRemovedSignal()
-, m_keyTimeChangedSignal()
-, m_keyValueChangedSignal()
-, m_keyInterpolationChangedSignal()
-, m_keyTieModeChangedSignal()
-, m_extrapolationChangedSignal()
-, m_extrapolatorIn( Extrapolator::getDefault() )
-, m_extrapolatorOut( Extrapolator::getDefault() )
+	: ValuePlug( name, direction, flags & ~Plug::AcceptsInputs ), m_keys(), m_inactiveKeys(), m_keyAddedSignal(), m_keyRemovedSignal(), m_keyTimeChangedSignal(), m_keyValueChangedSignal(), m_keyInterpolationChangedSignal(), m_keyTieModeChangedSignal(), m_extrapolationChangedSignal(), m_extrapolatorIn( Extrapolator::getDefault() ), m_extrapolatorOut( Extrapolator::getDefault() )
 {
 	addChild( new FloatPlug( "out", Plug::Out ) );
 }
@@ -2015,37 +1993,37 @@ Animation::CurvePlug::~CurvePlug()
 	m_inactiveKeys.clear_and_dispose( Key::Dispose() );
 }
 
-Animation::CurvePlug::CurvePlugKeySignal& Animation::CurvePlug::keyAddedSignal()
+Animation::CurvePlug::CurvePlugKeySignal &Animation::CurvePlug::keyAddedSignal()
 {
 	return m_keyAddedSignal;
 }
 
-Animation::CurvePlug::CurvePlugKeySignal& Animation::CurvePlug::keyRemovedSignal()
+Animation::CurvePlug::CurvePlugKeySignal &Animation::CurvePlug::keyRemovedSignal()
 {
 	return m_keyRemovedSignal;
 }
 
-Animation::CurvePlug::CurvePlugKeySignal& Animation::CurvePlug::keyTimeChangedSignal()
+Animation::CurvePlug::CurvePlugKeySignal &Animation::CurvePlug::keyTimeChangedSignal()
 {
 	return m_keyTimeChangedSignal;
 }
 
-Animation::CurvePlug::CurvePlugKeySignal& Animation::CurvePlug::keyValueChangedSignal()
+Animation::CurvePlug::CurvePlugKeySignal &Animation::CurvePlug::keyValueChangedSignal()
 {
 	return m_keyValueChangedSignal;
 }
 
-Animation::CurvePlug::CurvePlugKeySignal& Animation::CurvePlug::keyInterpolationChangedSignal()
+Animation::CurvePlug::CurvePlugKeySignal &Animation::CurvePlug::keyInterpolationChangedSignal()
 {
 	return m_keyInterpolationChangedSignal;
 }
 
-Animation::CurvePlug::CurvePlugKeySignal& Animation::CurvePlug::keyTieModeChangedSignal()
+Animation::CurvePlug::CurvePlugKeySignal &Animation::CurvePlug::keyTieModeChangedSignal()
 {
 	return m_keyTieModeChangedSignal;
 }
 
-Animation::CurvePlug::CurvePlugDirectionSignal& Animation::CurvePlug::extrapolationChangedSignal()
+Animation::CurvePlug::CurvePlugDirectionSignal &Animation::CurvePlug::extrapolationChangedSignal()
 {
 	return m_extrapolationChangedSignal;
 }
@@ -2076,14 +2054,13 @@ Animation::KeyPtr Animation::CurvePlug::addKey( const Animation::KeyPtr &key, co
 
 	const float time = key->m_time;
 
-#	define ASSERTCONTAINSKEY( KEY, CONTAINER, RESULT ) \
-		assert( ( RESULT ) == ( std::find_if( ( CONTAINER ).begin(), ( CONTAINER ).end(), \
-			[ key = &( *( KEY ) ) ]( const Key& k ) { return key == & k; } ) != ( CONTAINER ).end() ) );
+#define ASSERTCONTAINSKEY( KEY, CONTAINER, RESULT ) \
+	assert( ( RESULT ) == ( std::find_if( ( CONTAINER ).begin(), ( CONTAINER ).end(), [key = &( *( KEY ) )]( const Key &k ) { return key == &k; } ) != ( CONTAINER ).end() ) );
 
 	Action::enact(
 		this,
 		// Do
-		[ this, key, clashingKey, time ] {
+		[this, key, clashingKey, time] {
 			// check state is as expected
 			key->throwIfStateNotAsExpected( nullptr, false, time );
 			if( clashingKey )
@@ -2093,7 +2070,7 @@ Animation::KeyPtr Animation::CurvePlug::addKey( const Animation::KeyPtr &key, co
 			//          insert clashing key into inactive keys container
 			//        else insert key into active keys container
 			// NOTE : It is critical to the following code that the key comparison NEVER throws.
-			assert( ! key->m_hook.is_linked() );
+			assert( !key->m_hook.is_linked() );
 			if( clashingKey )
 			{
 				assert( clashingKey->m_hook.is_linked() );
@@ -2109,13 +2086,13 @@ Animation::KeyPtr Animation::CurvePlug::addKey( const Animation::KeyPtr &key, co
 			}
 			else
 			{
-				assert( m_keys.count( key->m_time ) == static_cast< Keys::size_type >( 0 ) );
+				assert( m_keys.count( key->m_time ) == static_cast<Keys::size_type>( 0 ) );
 				ASSERTCONTAINSKEY( key, m_keys, false )
 				m_keys.insert( *key );
 				ASSERTCONTAINSKEY( key, m_keys, true )
 			}
 			key->m_parent = this; // NOTE : never throws or fails
-			key->addRef();        // NOTE : take ownership
+			key->addRef(); // NOTE : take ownership
 			key->m_active = true;
 
 			// update keys
@@ -2125,17 +2102,23 @@ Animation::KeyPtr Animation::CurvePlug::addKey( const Animation::KeyPtr &key, co
 			//        the key being added.
 			key->m_tangentIn.update();
 			key->m_tangentOut.update();
-			if( ! clashingKey )
+			if( !clashingKey )
 			{
-				if( Key* const kn = key->nextKey() ){ kn->m_tangentIn.update(); }
-				if( Key* const kp = key->prevKey() ){ kp->m_tangentOut.update(); }
+				if( Key *const kn = key->nextKey() )
+				{
+					kn->m_tangentIn.update();
+				}
+				if( Key *const kp = key->prevKey() )
+				{
+					kp->m_tangentOut.update();
+				}
 			}
 
 			m_keyAddedSignal( this, key.get() );
 			propagateDirtiness( outPlug() );
 		},
 		// Undo
-		[ this, key, clashingKey, time ] {
+		[this, key, clashingKey, time] {
 			// check state is as expected
 			key->throwIfStateNotAsExpected( this, true, time );
 			if( clashingKey )
@@ -2146,8 +2129,8 @@ Animation::KeyPtr Animation::CurvePlug::addKey( const Animation::KeyPtr &key, co
 			//        else
 			//          remove key from active keys container
 			// NOTE : It is critical to the following code that the key comparison NEVER throws.
-			Key* const kn = key->nextKey();
-			Key* const kp = key->prevKey();
+			Key *const kn = key->nextKey();
+			Key *const kp = key->prevKey();
 			assert( key->m_hook.is_linked() );
 			if( clashingKey )
 			{
@@ -2184,8 +2167,14 @@ Animation::KeyPtr Animation::CurvePlug::addKey( const Animation::KeyPtr &key, co
 			}
 			else
 			{
-				if( kn ){ kn->m_tangentIn.update(); }
-				if( kp ){ kp->m_tangentOut.update(); }
+				if( kn )
+				{
+					kn->m_tangentIn.update();
+				}
+				if( kp )
+				{
+					kp->m_tangentOut.update();
+				}
 			}
 
 			m_keyRemovedSignal( this, key.get() );
@@ -2193,7 +2182,7 @@ Animation::KeyPtr Animation::CurvePlug::addKey( const Animation::KeyPtr &key, co
 		}
 	);
 
-#	undef ASSERTCONTAINSKEY
+#undef ASSERTCONTAINSKEY
 
 	// remove the clashing key
 
@@ -2212,16 +2201,16 @@ Animation::KeyPtr Animation::CurvePlug::insertKey( const float time )
 
 Animation::KeyPtr Animation::CurvePlug::insertKey( const float time, const float value )
 {
-	return insertKeyInternal( time, & value );
+	return insertKeyInternal( time, &value );
 }
 
-Animation::KeyPtr Animation::CurvePlug::insertKeyInternal( const float time, const float* const value )
+Animation::KeyPtr Animation::CurvePlug::insertKeyInternal( const float time, const float *const value )
 {
 	// find span keys for time
 
 	KeyPtr key;
-	Key* lo = nullptr;
-	Key* hi = nullptr;
+	Key *lo = nullptr;
+	Key *hi = nullptr;
 
 	Keys::iterator hiIt = m_keys.lower_bound( time );
 	if( hiIt != m_keys.end() )
@@ -2269,7 +2258,7 @@ Animation::KeyPtr Animation::CurvePlug::insertKeyInternal( const float time, con
 		interpolator = lo->m_interpolator;
 		tieMode = lo->m_tieMode;
 	}
-	else if( const Key* const kf = firstKey() )
+	else if( const Key *const kf = firstKey() )
 	{
 		interpolator = kf->m_interpolator;
 		tieMode = kf->m_tieMode;
@@ -2280,8 +2269,7 @@ Animation::KeyPtr Animation::CurvePlug::insertKeyInternal( const float time, con
 	// create key
 
 	const float evaluatedValue = evaluate( time );
-	key.reset( new Key( time, ( value == nullptr ) ? evaluatedValue : ( *value ), interpolator->getInterpolation(),
-		defaultSlope(), defaultScale(), defaultSlope(), defaultScale(), TieMode::Manual ) );
+	key.reset( new Key( time, ( value == nullptr ) ? evaluatedValue : ( *value ), interpolator->getInterpolation(), defaultSlope(), defaultScale(), defaultSlope(), defaultScale(), TieMode::Manual ) );
 
 	// check if specified value is the same as the evaluated value of the curve.
 
@@ -2339,8 +2327,8 @@ Animation::KeyPtr Animation::CurvePlug::insertKeyInternal( const float time, con
 
 			// set new tangent slope and scale for lo and hi keys
 
-			Private::ScopedAssignment< TieMode > ltm( lo->m_tieMode, TieMode::Manual );
-			Private::ScopedAssignment< TieMode > htm( hi->m_tieMode, TieMode::Manual );
+			Private::ScopedAssignment<TieMode> ltm( lo->m_tieMode, TieMode::Manual );
+			Private::ScopedAssignment<TieMode> htm( hi->m_tieMode, TieMode::Manual );
 
 			lo->m_tangentOut.setSlopeAndScale( lfsl, lfsc );
 			hi->m_tangentIn.setSlopeAndScale( hisl, hisc );
@@ -2349,11 +2337,9 @@ Animation::KeyPtr Animation::CurvePlug::insertKeyInternal( const float time, con
 		{
 			// time is outside range of keys use extrapolator to extend curve
 
-			const Animation::Direction direction = ( lo )
-				? Animation::Direction::Out
-				: Animation::Direction::In;
+			const Animation::Direction direction = ( lo ) ? Animation::Direction::Out : Animation::Direction::In;
 
-			( this->*m_extrapolators[ static_cast< int >( direction ) ] )->extend( *this, direction, key );
+			( this->*m_extrapolators[static_cast<int>( direction )] )->extend( *this, direction, key );
 		}
 		else
 		{
@@ -2386,20 +2372,18 @@ bool Animation::CurvePlug::hasKey( const float time ) const
 
 Animation::Key *Animation::CurvePlug::getKey( const float time )
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->getKey( time ) );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->getKey( time ) );
 }
 
 const Animation::Key *Animation::CurvePlug::getKey( const float time ) const
 {
 	Keys::const_iterator it = m_keys.find( time );
-	return ( it != m_keys.end() )
-		? &( *it )
-		: nullptr;
+	return ( it != m_keys.end() ) ? &( *it ) : nullptr;
 }
 
 Animation::Key *Animation::CurvePlug::getExtrapolationKey( const Animation::Direction direction )
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->getExtrapolationKey( direction ) );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->getExtrapolationKey( direction ) );
 }
 
 const Animation::Key *Animation::CurvePlug::getExtrapolationKey( const Animation::Direction direction ) const
@@ -2436,14 +2420,13 @@ void Animation::CurvePlug::removeKey( const Animation::KeyPtr &key )
 
 	const bool active = key->m_active;
 
-#	define ASSERTCONTAINSKEY( KEY, CONTAINER, RESULT ) \
-		assert( ( RESULT ) == ( std::find_if( ( CONTAINER ).begin(), ( CONTAINER ).end(), \
-			[ key = &( *( KEY ) ) ]( const Key& k ) { return key == & k; } ) != ( CONTAINER ).end() ) );
+#define ASSERTCONTAINSKEY( KEY, CONTAINER, RESULT ) \
+	assert( ( RESULT ) == ( std::find_if( ( CONTAINER ).begin(), ( CONTAINER ).end(), [key = &( *( KEY ) )]( const Key &k ) { return key == &k; } ) != ( CONTAINER ).end() ) );
 
 	Action::enact(
 		this,
 		// Do
-		[ this, key, clashingKey, active, time ] {
+		[this, key, clashingKey, active, time] {
 			// check state is as expected
 			key->throwIfStateNotAsExpected( this, active, time );
 			if( clashingKey )
@@ -2456,10 +2439,10 @@ void Animation::CurvePlug::removeKey( const Animation::KeyPtr &key )
 			//        else
 			//          remove key from active keys container
 			// NOTE : It is critical to the following code that the key comparison NEVER throws.
-			Key* const kn = key->nextKey();
-			Key* const kp = key->prevKey();
+			Key *const kn = key->nextKey();
+			Key *const kp = key->prevKey();
 			assert( key->m_hook.is_linked() );
-			if( ! active )
+			if( !active )
 			{
 				ASSERTCONTAINSKEY( key, m_inactiveKeys, true )
 				m_inactiveKeys.erase_and_dispose( m_inactiveKeys.iterator_to( *key ), Key::Dispose() );
@@ -2499,15 +2482,21 @@ void Animation::CurvePlug::removeKey( const Animation::KeyPtr &key )
 			}
 			else
 			{
-				if( kn ){ kn->m_tangentIn.update(); }
-				if( kp ){ kp->m_tangentOut.update(); }
+				if( kn )
+				{
+					kn->m_tangentIn.update();
+				}
+				if( kp )
+				{
+					kp->m_tangentOut.update();
+				}
 			}
 
 			m_keyRemovedSignal( this, key.get() );
 			propagateDirtiness( outPlug() );
 		},
 		// Undo
-		[ this, key, clashingKey, active, time ] {
+		[this, key, clashingKey, active, time] {
 			// check state is as expected
 			key->throwIfStateNotAsExpected( nullptr, false, time );
 			if( clashingKey )
@@ -2518,8 +2507,8 @@ void Animation::CurvePlug::removeKey( const Animation::KeyPtr &key )
 			//          reinsert clashing key into inactive keys container
 			//        else reinsert key into active keys container
 			// NOTE : It is critical to the following code that the key comparison NEVER throws.
-			assert( ! key->m_hook.is_linked() );
-			if( ! active )
+			assert( !key->m_hook.is_linked() );
+			if( !active )
 			{
 				ASSERTCONTAINSKEY( key, m_keys, false )
 				ASSERTCONTAINSKEY( key, m_inactiveKeys, false )
@@ -2541,13 +2530,13 @@ void Animation::CurvePlug::removeKey( const Animation::KeyPtr &key )
 			}
 			else
 			{
-				assert( m_keys.count( key->m_time ) == static_cast< Keys::size_type >( 0 ) );
+				assert( m_keys.count( key->m_time ) == static_cast<Keys::size_type>( 0 ) );
 				ASSERTCONTAINSKEY( key, m_keys, false )
 				m_keys.insert( *key );
 				ASSERTCONTAINSKEY( key, m_keys, true )
 			}
 			key->m_parent = this; // NOTE : never throws or fails
-			key->addRef();        // NOTE : take ownership
+			key->addRef(); // NOTE : take ownership
 			key->m_active = active;
 
 			// update keys
@@ -2560,10 +2549,16 @@ void Animation::CurvePlug::removeKey( const Animation::KeyPtr &key )
 				key->m_tangentIn.update();
 				key->m_tangentOut.update();
 			}
-			if( ! clashingKey )
+			if( !clashingKey )
 			{
-				if( Key* const k = key->nextKey() ){ k->m_tangentIn.update(); }
-				if( Key* const k = key->prevKey() ){ k->m_tangentOut.update(); }
+				if( Key *const k = key->nextKey() )
+				{
+					k->m_tangentIn.update();
+				}
+				if( Key *const k = key->prevKey() )
+				{
+					k->m_tangentOut.update();
+				}
 			}
 
 			m_keyAddedSignal( this, key.get() );
@@ -2571,7 +2566,7 @@ void Animation::CurvePlug::removeKey( const Animation::KeyPtr &key )
 		}
 	);
 
-#	undef ASSERTCONTAINSKEY
+#undef ASSERTCONTAINSKEY
 }
 
 void Animation::CurvePlug::removeInactiveKeys()
@@ -2584,7 +2579,7 @@ void Animation::CurvePlug::removeInactiveKeys()
 
 Animation::Key *Animation::CurvePlug::closestKey( const float time )
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->closestKey( time ) );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->closestKey( time ) );
 }
 
 const Animation::Key *Animation::CurvePlug::closestKey( const float time ) const
@@ -2612,12 +2607,12 @@ const Animation::Key *Animation::CurvePlug::closestKey( const float time ) const
 
 Animation::Key *Animation::CurvePlug::closestKey( const float time, const float maxDistance )
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->closestKey( time, maxDistance ) );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->closestKey( time, maxDistance ) );
 }
 
 const Animation::Key *Animation::CurvePlug::closestKey( const float time, const float maxDistance ) const
 {
-	const Key* const candidate = closestKey( time );
+	const Key *const candidate = closestKey( time );
 
 	if( !candidate || ( std::fabs( candidate->m_time - time ) > maxDistance ) )
 	{
@@ -2629,45 +2624,41 @@ const Animation::Key *Animation::CurvePlug::closestKey( const float time, const 
 
 Animation::Key *Animation::CurvePlug::previousKey( const float time )
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->previousKey( time ) );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->previousKey( time ) );
 }
 
 const Animation::Key *Animation::CurvePlug::previousKey( const float time ) const
 {
 	Keys::const_iterator rightIt = m_keys.lower_bound( time );
-	return ( rightIt != m_keys.begin() )
-		? &( *( std::prev( rightIt ) ) )
-		: nullptr;
+	return ( rightIt != m_keys.begin() ) ? &( *( std::prev( rightIt ) ) ) : nullptr;
 }
 
 Animation::Key *Animation::CurvePlug::nextKey( const float time )
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->nextKey( time ) );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->nextKey( time ) );
 }
 
 const Animation::Key *Animation::CurvePlug::nextKey( const float time ) const
 {
 	Keys::const_iterator rightIt = m_keys.upper_bound( time );
-	return ( rightIt != m_keys.end() )
-		? &( *( rightIt ) )
-		: nullptr;
+	return ( rightIt != m_keys.end() ) ? &( *( rightIt ) ) : nullptr;
 }
 
 Animation::Key *Animation::CurvePlug::firstKey()
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->firstKey() );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->firstKey() );
 }
 
 Animation::Key *Animation::CurvePlug::finalKey()
 {
-	return const_cast< Key* >( static_cast< const CurvePlug* >( this )->finalKey() );
+	return const_cast<Key *>( static_cast<const CurvePlug *>( this )->finalKey() );
 }
 
 const Animation::Key *Animation::CurvePlug::firstKey() const
 {
-	const Key* k = nullptr;
+	const Key *k = nullptr;
 
-	if( ! m_keys.empty() )
+	if( !m_keys.empty() )
 	{
 		k = &( *( m_keys.cbegin() ) );
 	}
@@ -2677,9 +2668,9 @@ const Animation::Key *Animation::CurvePlug::firstKey() const
 
 const Animation::Key *Animation::CurvePlug::finalKey() const
 {
-	const Key* k = nullptr;
+	const Key *k = nullptr;
 
-	if( ! m_keys.empty() )
+	if( !m_keys.empty() )
 	{
 		k = &( *( m_keys.crbegin() ) );
 	}
@@ -2687,7 +2678,7 @@ const Animation::Key *Animation::CurvePlug::finalKey() const
 	return k;
 }
 
-Animation::CurvePlug::TimeKey::type Animation::CurvePlug::TimeKey::operator()( const Animation::Key& key ) const
+Animation::CurvePlug::TimeKey::type Animation::CurvePlug::TimeKey::operator () ( const Animation::Key &key ) const
 {
 	return key.getTime();
 }
@@ -2714,15 +2705,15 @@ Animation::ConstKeyIterator Animation::CurvePlug::end() const
 
 Animation::Extrapolation Animation::CurvePlug::getExtrapolation( const Animation::Direction direction ) const
 {
-	return ( this->*m_extrapolators[ static_cast< int >( direction ) ] )->getExtrapolation();
+	return ( this->*m_extrapolators[static_cast<int>( direction )] )->getExtrapolation();
 }
 
 void Animation::CurvePlug::setExtrapolation( const Animation::Direction direction, const Animation::Extrapolation extrapolation )
 {
 	const ConstExtrapolatorPtr extrapolator = Extrapolator::get( extrapolation );
-	const ConstExtrapolatorPtr previousExtrapolator = this->*m_extrapolators[ static_cast< int >( direction ) ];
+	const ConstExtrapolatorPtr previousExtrapolator = this->*m_extrapolators[static_cast<int>( direction )];
 
-	if( ! extrapolator || ( extrapolator == previousExtrapolator ) )
+	if( !extrapolator || ( extrapolator == previousExtrapolator ) )
 	{
 		return;
 	}
@@ -2730,14 +2721,14 @@ void Animation::CurvePlug::setExtrapolation( const Animation::Direction directio
 	Action::enact(
 		this,
 		// Do
-		[ this, extrapolator, direction ] {
-			this->*m_extrapolators[ static_cast< int >( direction ) ] = extrapolator;
+		[this, extrapolator, direction] {
+			this->*m_extrapolators[static_cast<int>( direction )] = extrapolator;
 			this->m_extrapolationChangedSignal( this, direction );
 			this->propagateDirtiness( this->outPlug() );
 		},
 		// Undo
-		[ this, previousExtrapolator, direction ] {
-			this->*m_extrapolators[ static_cast< int >( direction ) ] = previousExtrapolator;
+		[this, previousExtrapolator, direction] {
+			this->*m_extrapolators[static_cast<int>( direction )] = previousExtrapolator;
 			this->m_extrapolationChangedSignal( this, direction );
 			this->propagateDirtiness( this->outPlug() );
 		}
@@ -2764,9 +2755,7 @@ double Animation::CurvePlug::evaluateInternal( const double time, const bool ext
 	Keys::const_iterator hiIt = m_keys.lower_bound( time );
 	if( hiIt == m_keys.end() )
 	{
-		return ( extrapolate )
-			? m_extrapolatorOut->evaluate( *this, Animation::Direction::Out, time )
-			: finalKey()->getValue();
+		return ( extrapolate ) ? m_extrapolatorOut->evaluate( *this, Animation::Direction::Out, time ) : finalKey()->getValue();
 	}
 
 	const Key &hi = *( hiIt );
@@ -2778,9 +2767,7 @@ double Animation::CurvePlug::evaluateInternal( const double time, const bool ext
 
 	if( hiIt == m_keys.begin() )
 	{
-		return ( extrapolate )
-			? m_extrapolatorIn->evaluate( *this, Animation::Direction::In, time )
-			: firstKey()->getValue();
+		return ( extrapolate ) ? m_extrapolatorIn->evaluate( *this, Animation::Direction::In, time ) : firstKey()->getValue();
 	}
 
 	const Key &lo = *( std::prev( hiIt ) );
@@ -2814,7 +2801,7 @@ GAFFER_NODE_DEFINE_TYPE( Animation );
 size_t Animation::g_firstPlugIndex = 0;
 
 Animation::Animation( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -2835,7 +2822,7 @@ const Plug *Animation::curvesPlug() const
 	return getChild<Plug>( g_firstPlugIndex );
 }
 
-bool Animation::canAnimate( const ValuePlug* const plug )
+bool Animation::canAnimate( const ValuePlug *const plug )
 {
 	if( !plug->getFlags( Plug::AcceptsInputs ) )
 	{
@@ -2854,18 +2841,17 @@ bool Animation::canAnimate( const ValuePlug* const plug )
 		return false;
 	}
 
-	return
-		IECore::runTimeCast<const FloatPlug>( plug ) ||
+	return IECore::runTimeCast<const FloatPlug>( plug ) ||
 		IECore::runTimeCast<const IntPlug>( plug ) ||
 		IECore::runTimeCast<const BoolPlug>( plug );
 }
 
-bool Animation::isAnimated( const ValuePlug* const plug )
+bool Animation::isAnimated( const ValuePlug *const plug )
 {
 	return inputCurve( plug );
 }
 
-Animation::CurvePlug *Animation::acquire( ValuePlug* const plug )
+Animation::CurvePlug *Animation::acquire( ValuePlug *const plug )
 {
 	// If the plug is already driven by a curve, return it.
 	if( CurvePlug *curve = inputCurve( plug ) )
@@ -2924,7 +2910,7 @@ Animation::CurvePlug *Animation::acquire( ValuePlug* const plug )
 	return curve.get();
 }
 
-Animation::CurvePlug *Animation::inputCurve( ValuePlug* const plug )
+Animation::CurvePlug *Animation::inputCurve( ValuePlug *const plug )
 {
 	ValuePlug *source = plug->source<ValuePlug>();
 	if( source == plug ) // no input
@@ -2946,18 +2932,18 @@ Animation::CurvePlug *Animation::inputCurve( ValuePlug* const plug )
 	return nullptr;
 }
 
-const Animation::CurvePlug *Animation::inputCurve( const ValuePlug* const plug )
+const Animation::CurvePlug *Animation::inputCurve( const ValuePlug *const plug )
 {
 	// preferring cast over maintaining two near-identical methods.
 	return inputCurve( const_cast<ValuePlug *>( plug ) );
 }
 
-void Animation::affects( const Plug* const input, AffectedPlugsContainer &outputs ) const
+void Animation::affects( const Plug *const input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 }
 
-void Animation::hash( const ValuePlug* const output, const Context* const context, IECore::MurmurHash &h ) const
+void Animation::hash( const ValuePlug *const output, const Context *const context, IECore::MurmurHash &h ) const
 {
 	ComputeNode::hash( output, context, h );
 
@@ -2967,7 +2953,7 @@ void Animation::hash( const ValuePlug* const output, const Context* const contex
 	}
 }
 
-void Animation::compute( ValuePlug* const output, const Context* const context ) const
+void Animation::compute( ValuePlug *const output, const Context *const context ) const
 {
 	if( const CurvePlug *parent = output->parent<CurvePlug>() )
 	{
@@ -2978,7 +2964,7 @@ void Animation::compute( ValuePlug* const output, const Context* const context )
 	ComputeNode::compute( output, context );
 }
 
-ValuePlug::CachePolicy Animation::computeCachePolicy( const Gaffer::ValuePlug* const output ) const
+ValuePlug::CachePolicy Animation::computeCachePolicy( const Gaffer::ValuePlug *const output ) const
 {
 	if( output->parent<CurvePlug>() )
 	{
@@ -3005,7 +2991,7 @@ Animation::TieMode Animation::defaultTieMode()
 
 Animation::Direction Animation::opposite( const Animation::Direction direction )
 {
-	return static_cast< Direction >( ( static_cast< int >( direction ) + 1 ) % 2 );
+	return static_cast<Direction>( ( static_cast<int>( direction ) + 1 ) % 2 );
 }
 
 double Animation::defaultSlope()
@@ -3018,77 +3004,77 @@ double Animation::defaultScale()
 	return ( 1.0 / 3.0 );
 }
 
-const char* Animation::toString( const Animation::Interpolation interpolation )
+const char *Animation::toString( const Animation::Interpolation interpolation )
 {
 	switch( interpolation )
 	{
-		case Interpolation::Constant:
+		case Interpolation::Constant :
 			return "Constant";
-		case Interpolation::ConstantNext:
+		case Interpolation::ConstantNext :
 			return "ConstantNext";
-		case Interpolation::Linear:
+		case Interpolation::Linear :
 			return "Linear";
-		case Interpolation::Cubic:
+		case Interpolation::Cubic :
 			return "Cubic";
-		case Interpolation::Bezier:
+		case Interpolation::Bezier :
 			return "Bezier";
-		default:
+		default :
 			assert( 0 );
 			return nullptr;
 	}
 }
 
-const char* Animation::toString( const Animation::Extrapolation extrapolation )
+const char *Animation::toString( const Animation::Extrapolation extrapolation )
 {
 	switch( extrapolation )
 	{
-		case Extrapolation::Constant:
+		case Extrapolation::Constant :
 			return "Constant";
-		case Extrapolation::Linear:
+		case Extrapolation::Linear :
 			return "Linear";
-		case Extrapolation::Cycle:
+		case Extrapolation::Cycle :
 			return "Cycle";
-		case Extrapolation::CycleOffset:
+		case Extrapolation::CycleOffset :
 			return "CycleOffset";
-		case Extrapolation::CycleFlop:
+		case Extrapolation::CycleFlop :
 			return "CycleFlop";
-		case Extrapolation::CycleFlip:
+		case Extrapolation::CycleFlip :
 			return "CycleFlip";
-		default:
+		default :
 			assert( 0 );
 			return nullptr;
 	}
 }
 
-const char* Animation::toString( const Animation::Direction direction )
+const char *Animation::toString( const Animation::Direction direction )
 {
 	switch( direction )
 	{
-		case Direction::In:
+		case Direction::In :
 			return "In";
-		case Direction::Out:
+		case Direction::Out :
 			return "Out";
-		default:
+		default :
 			assert( 0 );
 			return nullptr;
 	}
 }
 
 
-const char* Animation::toString( const Animation::TieMode mode )
+const char *Animation::toString( const Animation::TieMode mode )
 {
 	switch( mode )
 	{
-		case TieMode::Manual:
+		case TieMode::Manual :
 			return "Manual";
-		case TieMode::Slope:
+		case TieMode::Slope :
 			return "Slope";
-		case TieMode::Scale:
+		case TieMode::Scale :
 			return "Scale";
-		default:
+		default :
 			assert( 0 );
 			return nullptr;
 	}
 }
 
-} // Gaffer
+} // namespace Gaffer

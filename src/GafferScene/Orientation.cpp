@@ -249,37 +249,37 @@ PrimitiveVariable inAim( const Primitive *inputPrimitive, Primitive *outputPrimi
 		M44f m;
 		if( xAxis && yAxis && zAxis )
 		{
-			m = matrixFromBasis( (*xAxis)[i], (*yAxis)[i], (*zAxis)[i], V3f( 0 ) );
+			m = matrixFromBasis( ( *xAxis )[i], ( *yAxis )[i], ( *zAxis )[i], V3f( 0 ) );
 		}
 		else if( xAxis && yAxis )
 		{
-			const V3f &x = (*xAxis)[i];
-			const V3f &y = (*yAxis)[i];
+			const V3f &x = ( *xAxis )[i];
+			const V3f &y = ( *yAxis )[i];
 			m = matrixFromBasis( x, y, x.cross( y ), V3f( 0 ) );
 		}
 		else if( xAxis && zAxis )
 		{
-			const V3f &x = (*xAxis)[i];
-			const V3f &z = (*zAxis)[i];
+			const V3f &x = ( *xAxis )[i];
+			const V3f &z = ( *zAxis )[i];
 			m = matrixFromBasis( x, z.cross( x ), z, V3f( 0 ) );
 		}
 		else if( yAxis && zAxis )
 		{
-			const V3f &y = (*yAxis)[i];
-			const V3f &z = (*zAxis)[i];
+			const V3f &y = ( *yAxis )[i];
+			const V3f &z = ( *zAxis )[i];
 			m = matrixFromBasis( y.cross( z ), y, z, V3f( 0 ) );
 		}
 		else if( xAxis )
 		{
-			m = rotationMatrixWithUpDir( V3f( 1, 0, 0 ), (*xAxis)[i], V3f( 0, 1, 0 ) );
+			m = rotationMatrixWithUpDir( V3f( 1, 0, 0 ), ( *xAxis )[i], V3f( 0, 1, 0 ) );
 		}
 		else if( yAxis )
 		{
-			m = rotationMatrixWithUpDir( V3f( 0, 1, 0 ), (*yAxis)[i], V3f( 0, 1, 0 ) );
+			m = rotationMatrixWithUpDir( V3f( 0, 1, 0 ), ( *yAxis )[i], V3f( 0, 1, 0 ) );
 		}
 		else if( zAxis )
 		{
-			m = rotationMatrixWithUpDir( V3f( 0, 0, 1 ), (*zAxis)[i], V3f( 0, 1, 0 ) );
+			m = rotationMatrixWithUpDir( V3f( 0, 0, 1 ), ( *zAxis )[i], V3f( 0, 1, 0 ) );
 		}
 
 		removeScalingAndShear( m );
@@ -464,7 +464,8 @@ void randomise( vector<Quatf> &orientations, const V3f &axis, float spreadMax, f
 
 	// For simplicity, we randomise relative to a fixed Y axis,
 	// and map `axis` to and from that on either side.
-	Quatf yToAxis; yToAxis.setRotation( V3f( 0, 1, 0 ), axis );
+	Quatf yToAxis;
+	yToAxis.setRotation( V3f( 0, 1, 0 ), axis );
 	const Quatf axisToY = yToAxis.inverse();
 
 	// We randomise in cosine space to get an equal-area distribution rather than
@@ -480,9 +481,11 @@ void randomise( vector<Quatf> &orientations, const V3f &axis, float spreadMax, f
 		const float r = random.nextf( -M_PI, M_PI );
 		const V3f spreadAxis( cos( r ), 0, sin( r ) );
 		const float s = acos( random.nextf( cosSpread, 1 ) );
-		Quatf spread; spread.setAxisAngle( spreadAxis, s );
+		Quatf spread;
+		spread.setAxisAngle( spreadAxis, s );
 		// Generate twist.
-		Quatf twist; twist.setAxisAngle( V3f( 0, 1, 0 ), random.nextf( -twistMax, twistMax ) );
+		Quatf twist;
+		twist.setAxisAngle( V3f( 0, 1, 0 ), random.nextf( -twistMax, twistMax ) );
 		// Compose with original orientation.
 		if( space == Orientation::Space::Local )
 		{
@@ -506,7 +509,7 @@ GAFFER_NODE_DEFINE_TYPE( Orientation );
 size_t Orientation::g_firstPlugIndex = 0;
 
 Orientation::Orientation( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -822,8 +825,7 @@ const Gaffer::StringPlug *Orientation::outMatrixPlug() const
 
 bool Orientation::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == inModePlug() ||
 		input == deleteInputsPlug() ||
 		input == inEulerPlug() ||
@@ -849,8 +851,7 @@ bool Orientation::affectsProcessedObject( const Gaffer::Plug *input ) const
 		input == outXAxisPlug() ||
 		input == outYAxisPlug() ||
 		input == outZAxisPlug() ||
-		input == outMatrixPlug()
-	;
+		input == outMatrixPlug();
 }
 
 void Orientation::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

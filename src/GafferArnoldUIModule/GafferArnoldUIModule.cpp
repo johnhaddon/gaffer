@@ -48,11 +48,12 @@ namespace
 ShaderNetworkPtr conformToOSLNetwork(
 	const ShaderNetwork::Parameter &output,
 	const ShaderNetwork &shaderNetwork
-) {
+)
+{
 	return VisualiserAlgo::conformToOSLNetwork( output, &shaderNetwork );
 }
 
-}
+} // namespace
 
 BOOST_PYTHON_MODULE( _GafferArnoldUI )
 {

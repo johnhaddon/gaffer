@@ -47,13 +47,12 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API TestLightFilter : public GafferScene::LightFilter
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneTest::TestLightFilter, TestLightFilterTypeId, GafferScene::LightFilter );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneTest::TestLightFilter, TestLightFilterTypeId, GafferScene::LightFilter );
 
-		TestLightFilter( const std::string &name=defaultName<TestLightFilter>() );
-		~TestLightFilter() override;
-
+	TestLightFilter( const std::string &name = defaultName<TestLightFilter>() );
+	~TestLightFilter() override;
 };
 
 IE_CORE_DECLAREPTR( TestLightFilter )

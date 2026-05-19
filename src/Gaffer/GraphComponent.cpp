@@ -80,9 +80,9 @@ bool validName( const std::string &name )
 	for( auto c : name )
 	{
 		if(
-			!(c >= 'A' && c <= 'Z') &&
-			!(c >= 'a' && c <= 'z' ) &&
-			!(c >= '0' && c <= '9' ) &&
+			!( c >= 'A' && c <= 'Z' ) &&
+			!( c >= 'a' && c <= 'z' ) &&
+			!( c >= '0' && c <= '9' ) &&
 			c != '_' && c != ':'
 		)
 		{
@@ -126,7 +126,7 @@ struct GraphComponent::MemberSignals : boost::noncopyable
 	// Utility to emit a signal if it has been created, but do nothing
 	// if it hasn't.
 	template<typename SignalMemberPointer, typename... Args>
-	static void emitLazily( MemberSignals *signals, SignalMemberPointer signalMemberPointer, Args&&... args )
+	static void emitLazily( MemberSignals *signals, SignalMemberPointer signalMemberPointer, Args &&...args )
 	{
 		if( !signals )
 		{
@@ -135,7 +135,6 @@ struct GraphComponent::MemberSignals : boost::noncopyable
 		auto &signal = signals->*signalMemberPointer;
 		signal( std::forward<Args>( args )... );
 	}
-
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -157,12 +156,12 @@ GraphComponent::~GraphComponent()
 	// notify all the children that the parent is gone.
 	// we don't call removeChild to achieve this, as that would also emit
 	// childRemoved signals for this object, which is undesirable as it's dying.
-	for( ChildContainer::iterator it=m_children.begin(); it!=m_children.end(); it++ )
+	for( ChildContainer::iterator it = m_children.begin(); it != m_children.end(); it++ )
 	{
-		(*it)->m_parent = nullptr;
-		(*it)->parentChanging( nullptr );
-		(*it)->parentChanged( nullptr );
-		MemberSignals::emitLazily( (*it)->m_signals.get(), &MemberSignals::parentChangedSignal, (*it).get(), nullptr );
+		( *it )->m_parent = nullptr;
+		( *it )->parentChanging( nullptr );
+		( *it )->parentChanged( nullptr );
+		MemberSignals::emitLazily( ( *it )->m_signals.get(), &MemberSignals::parentChangedSignal, ( *it ).get(), nullptr );
 	}
 	m_children.clear();
 }
@@ -177,9 +176,9 @@ const IECore::InternedString &GraphComponent::setName( const IECore::InternedStr
 	if( m_parent )
 	{
 		bool uniqueAlready = true;
-		for( ChildContainer::const_iterator it=m_parent->m_children.begin(), eIt=m_parent->m_children.end(); it != eIt; it++ )
+		for( ChildContainer::const_iterator it = m_parent->m_children.begin(), eIt = m_parent->m_children.end(); it != eIt; it++ )
 		{
-			if( *it != this && (*it)->m_name == newName )
+			if( *it != this && ( *it )->m_name == newName )
 			{
 				uniqueAlready = false;
 				break;
@@ -195,16 +194,16 @@ const IECore::InternedString &GraphComponent::setName( const IECore::InternedStr
 
 			// iterate over all the siblings to find the minimum value for the suffix which
 			// will be greater than any existing suffix.
-			for( ChildContainer::const_iterator it=m_parent->m_children.begin(), eIt=m_parent->m_children.end(); it != eIt; it++ )
+			for( ChildContainer::const_iterator it = m_parent->m_children.begin(), eIt = m_parent->m_children.end(); it != eIt; it++ )
 			{
 				if( *it == this )
 				{
 					continue;
 				}
-				if( (*it)->m_name.value().compare( 0, prefix.size(), prefix ) == 0 )
+				if( ( *it )->m_name.value().compare( 0, prefix.size(), prefix ) == 0 )
 				{
 					char *endPtr = nullptr;
-					long siblingSuffix = strtol( (*it)->m_name.value().c_str() + prefix.size(), &endPtr, 10 );
+					long siblingSuffix = strtol( ( *it )->m_name.value().c_str() + prefix.size(), &endPtr, 10 );
 					if( *endPtr == '\0' )
 					{
 						suffix = max( suffix, (int)siblingSuffix + 1 );
@@ -216,7 +215,7 @@ const IECore::InternedString &GraphComponent::setName( const IECore::InternedStr
 	}
 
 	// set the new name if it's different to the old
-	if( newName==m_name )
+	if( newName == m_name )
 	{
 		return m_name;
 	}
@@ -255,12 +254,12 @@ std::string GraphComponent::relativeName( const GraphComponent *ancestor ) const
 {
 	string fullName = m_name;
 	GraphComponent *c = this->m_parent;
-	while( c && c!=ancestor )
+	while( c && c != ancestor )
 	{
 		fullName = c->m_name.value() + "." + fullName;
 		c = c->m_parent;
 	}
-	if( ancestor && c!=ancestor )
+	if( ancestor && c != ancestor )
 	{
 		string what = fmt::format( "Object \"{}\" is not an ancestor of \"{}\".", ancestor->m_name.value(), m_name.value() );
 		throw Exception( what );
@@ -285,7 +284,7 @@ bool GraphComponent::acceptsParent( const GraphComponent *potentialParent ) cons
 
 void GraphComponent::addChild( GraphComponentPtr child )
 {
-	if( child->m_parent==this )
+	if( child->m_parent == this )
 	{
 		return;
 	}
@@ -403,7 +402,7 @@ void GraphComponent::addChildInternal( GraphComponentPtr child, size_t index )
 
 void GraphComponent::removeChild( GraphComponentPtr child )
 {
-	if( child->m_parent!=this )
+	if( child->m_parent != this )
 	{
 		throw Exception( "Object is not a child." );
 	}
@@ -521,7 +520,7 @@ void GraphComponent::reorderChildren( const ChildContainer &newOrder )
 	Action::enact(
 		this,
 		// Do
-		[this, indices] () {
+		[this, indices]() {
 			ChildContainer children;
 			children.reserve( indices->size() );
 			for( auto i : *indices )
@@ -533,15 +532,15 @@ void GraphComponent::reorderChildren( const ChildContainer &newOrder )
 			MemberSignals::emitLazily( m_signals.get(), &MemberSignals::childrenReorderedSignal, this, *indices );
 		},
 		// Undo
-		[this, indices] () {
+		[this, indices]() {
 			ChildContainer children;
 			children.resize( indices->size() );
 			vector<size_t> signalIndices;
 			signalIndices.resize( indices->size() );
 			for( size_t i = 0; i < indices->size(); ++i )
 			{
-				children[(*indices)[i]] = m_children[i];
-				signalIndices[(*indices)[i]] = i;
+				children[( *indices )[i]] = m_children[i];
+				signalIndices[( *indices )[i]] = i;
 			}
 			m_children = children;
 			childrenReordered( signalIndices );
@@ -554,7 +553,7 @@ void GraphComponent::clearChildren()
 {
 	// because our storage is a vector, it's a good bit quicker to remove
 	// from the back to the front.
-	for( int i = (int)(m_children.size()) - 1; i >= 0; --i )
+	for( int i = (int)( m_children.size() ) - 1; i >= 0; --i )
 	{
 		removeChild( m_children[i] );
 	}
@@ -597,7 +596,7 @@ GraphComponent *GraphComponent::commonAncestor( const GraphComponent *other, IEC
 	{
 		if( ancestor->isInstanceOf( ancestorType ) )
 		{
-			if( candidates.find( ancestor )!=candidates.end() )
+			if( candidates.find( ancestor ) != candidates.end() )
 			{
 				return ancestor;
 			}
@@ -605,7 +604,6 @@ GraphComponent *GraphComponent::commonAncestor( const GraphComponent *other, IEC
 		ancestor = ancestor->m_parent;
 	}
 	return nullptr;
-
 }
 
 const GraphComponent *GraphComponent::commonAncestor( const GraphComponent *other, IECore::TypeId ancestorType ) const
@@ -618,7 +616,7 @@ bool GraphComponent::isAncestorOf( const GraphComponent *other ) const
 	const GraphComponent *p = other;
 	while( p )
 	{
-		if( p->m_parent==this )
+		if( p->m_parent == this )
 		{
 			return true;
 		}

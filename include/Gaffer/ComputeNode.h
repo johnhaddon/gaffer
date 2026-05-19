@@ -55,39 +55,38 @@ IE_CORE_FORWARDDECLARE( Context )
 class GAFFER_API ComputeNode : public DependencyNode
 {
 
-	public :
+public:
 
-		explicit ComputeNode( const std::string &name=defaultName<ComputeNode>() );
-		~ComputeNode() override;
+	explicit ComputeNode( const std::string &name = defaultName<ComputeNode>() );
+	~ComputeNode() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::ComputeNode, ComputeNodeTypeId, DependencyNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::ComputeNode, ComputeNodeTypeId, DependencyNode );
 
-	protected :
+protected:
 
-		/// Called to compute the hashes for output Plugs. Must be implemented to call the base
-		/// class method, then call input->hash( h ) for all input plugs used in the computation
-		/// of output. Must also hash in the value of any context items that will be accessed by
-		/// the computation.
-		///
-		/// In the special case that the node will pass through a value from an input plug
-		/// unchanged, the hash for the input plug should be assigned directly to the result
-		/// (rather than appended) - this allows cache entries to be shared.
-		virtual void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const = 0;
-		/// Called to compute the values for output Plugs. Must be implemented to compute
-		/// an appropriate value and apply it using output->setValue().
-		virtual void compute( ValuePlug *output, const Context *context ) const = 0;
+	/// Called to compute the hashes for output Plugs. Must be implemented to call the base
+	/// class method, then call input->hash( h ) for all input plugs used in the computation
+	/// of output. Must also hash in the value of any context items that will be accessed by
+	/// the computation.
+	///
+	/// In the special case that the node will pass through a value from an input plug
+	/// unchanged, the hash for the input plug should be assigned directly to the result
+	/// (rather than appended) - this allows cache entries to be shared.
+	virtual void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const = 0;
+	/// Called to compute the values for output Plugs. Must be implemented to compute
+	/// an appropriate value and apply it using output->setValue().
+	virtual void compute( ValuePlug *output, const Context *context ) const = 0;
 
-		/// Called to determine how calls to `hash()` should be cached. If `hash( output )`
-		/// will spawn TBB tasks then one of the task-based policies _must_ be used.
-		virtual ValuePlug::CachePolicy hashCachePolicy( const ValuePlug *output ) const;
-		/// Called to determine how calls to `compute()` should be cached. If `compute( output )`
-		/// will spawn TBB tasks then one of the task-based policies _must_ be used.
-		virtual ValuePlug::CachePolicy computeCachePolicy( const ValuePlug *output ) const;
+	/// Called to determine how calls to `hash()` should be cached. If `hash( output )`
+	/// will spawn TBB tasks then one of the task-based policies _must_ be used.
+	virtual ValuePlug::CachePolicy hashCachePolicy( const ValuePlug *output ) const;
+	/// Called to determine how calls to `compute()` should be cached. If `compute( output )`
+	/// will spawn TBB tasks then one of the task-based policies _must_ be used.
+	virtual ValuePlug::CachePolicy computeCachePolicy( const ValuePlug *output ) const;
 
-	private :
+private:
 
-		friend class ValuePlug;
-
+	friend class ValuePlug;
 };
 
 } // namespace Gaffer

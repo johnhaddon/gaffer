@@ -54,7 +54,7 @@ const ConstIntDataPtr g_oneData = new IntData( 1 );
 IE_CORE_DEFINERUNTIMETYPED( RenderManLight );
 
 RenderManLight::RenderManLight( const std::string &name )
-	:	GafferScene::Light( name, new RenderManShader() )
+	: GafferScene::Light( name, new RenderManShader() )
 {
 	attributesPlug()->addChild(
 		new NameValuePlug( "ri:visibility:camera", g_oneData.get(), false, "ri:visibility:camera" )

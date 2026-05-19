@@ -57,67 +57,66 @@ namespace
 class BoxPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		BoxPlugAdder( BoxPtr box )
-			:	m_box( box )
+	BoxPlugAdder( BoxPtr box )
+		: m_box( box )
+	{
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		if( !PlugAdder::canCreateConnection( endpoint ) )
 		{
+			return false;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		if( endpoint->node() == m_box )
 		{
-			if( !PlugAdder::canCreateConnection( endpoint ) )
-			{
-				return false;
-			}
-
-			if( endpoint->node() == m_box )
-			{
-				return false;
-			}
-
-			if( MetadataAlgo::readOnly( m_box.get() ) )
-			{
-				return false;
-			}
-
-			return true;
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		if( MetadataAlgo::readOnly( m_box.get() ) )
 		{
-			BoxIOPtr boxIO;
-			if( endpoint->direction() == Plug::In )
-			{
-				boxIO = new BoxOut;
-			}
-			else
-			{
-				boxIO = new BoxIn;
-			}
-
-			m_box->addChild( boxIO );
-			boxIO->setup( endpoint );
-
-			if( endpoint->direction() == Plug::In )
-			{
-				endpoint->setInput( boxIO->promotedPlug() );
-			}
-			else
-			{
-				boxIO->promotedPlug()->setInput( endpoint );
-			}
-
-			applyEdgeMetadata( boxIO->promotedPlug() );
-			applyEdgeMetadata( boxIO->plug(), /* opposite = */ true );
+			return false;
 		}
 
-	private :
+		return true;
+	}
 
-		BoxPtr m_box;
+	void createConnection( Plug *endpoint ) override
+	{
+		BoxIOPtr boxIO;
+		if( endpoint->direction() == Plug::In )
+		{
+			boxIO = new BoxOut;
+		}
+		else
+		{
+			boxIO = new BoxIn;
+		}
 
+		m_box->addChild( boxIO );
+		boxIO->setup( endpoint );
+
+		if( endpoint->direction() == Plug::In )
+		{
+			endpoint->setInput( boxIO->promotedPlug() );
+		}
+		else
+		{
+			boxIO->promotedPlug()->setInput( endpoint );
+		}
+
+		applyEdgeMetadata( boxIO->promotedPlug() );
+		applyEdgeMetadata( boxIO->plug(), /* opposite = */ true );
+	}
+
+private:
+
+	BoxPtr m_box;
 };
 
 struct Registration
@@ -128,17 +127,16 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.BoxUI.PlugAdder", &create );
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		if( BoxPtr box = runTimeCast<Box>( parent ) )
 		{
-			if( BoxPtr box = runTimeCast<Box>( parent ) )
-			{
-				return new BoxPlugAdder( box );
-			}
-			throw IECore::Exception( "Expected a Box" );
+			return new BoxPlugAdder( box );
 		}
-
+		throw IECore::Exception( "Expected a Box" );
+	}
 };
 
 Registration g_registration;

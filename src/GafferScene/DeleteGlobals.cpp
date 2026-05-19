@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteGlobals );
 size_t DeleteGlobals::g_firstPlugIndex = 0;
 
 DeleteGlobals::DeleteGlobals( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );

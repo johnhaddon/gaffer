@@ -47,41 +47,40 @@ namespace GafferImage
 class GAFFERIMAGE_API DeleteChannels : public ImageProcessor
 {
 
-	public :
+public:
 
-		enum Mode
-		{
-			Delete = 0,
-			Keep = 1
-		};
+	enum Mode
+	{
+		Delete = 0,
+		Keep = 1
+	};
 
-		explicit DeleteChannels( const std::string &name=defaultName<DeleteChannels>() );
-		~DeleteChannels() override;
+	explicit DeleteChannels( const std::string &name = defaultName<DeleteChannels>() );
+	~DeleteChannels() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DeleteChannels, DeleteChannelsTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DeleteChannels, DeleteChannelsTypeId, ImageProcessor );
 
-		//! @name Plug Accessors
-		//////////////////////////////////////////////////////////////
-		//@{
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	//! @name Plug Accessors
+	//////////////////////////////////////////////////////////////
+	//@{
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::StringPlug *channelsPlug();
-		const Gaffer::StringPlug *channelsPlug() const;
-		//@}
+	Gaffer::StringPlug *channelsPlug();
+	const Gaffer::StringPlug *channelsPlug() const;
+	//@}
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		// Reimplemented to perform the deletion.
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	// Reimplemented to perform the deletion.
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteChannels );

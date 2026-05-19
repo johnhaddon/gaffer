@@ -53,44 +53,43 @@ namespace GafferImage
 class GAFFERIMAGE_API LUT : public OpenColorIOTransform
 {
 
-	public :
+public:
 
-		explicit LUT( const std::string &name=defaultName<LUT>() );
-		~LUT() override;
+	explicit LUT( const std::string &name = defaultName<LUT>() );
+	~LUT() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::LUT, LUTTypeId, OpenColorIOTransform );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::LUT, LUTTypeId, OpenColorIOTransform );
 
-		enum Interpolation
-		{
-			Best = 0,
-			Nearest,
-			Linear,
-			Tetrahedral
-		};
+	enum Interpolation
+	{
+		Best = 0,
+		Nearest,
+		Linear,
+		Tetrahedral
+	};
 
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		Gaffer::IntPlug *interpolationPlug();
-		const Gaffer::IntPlug *interpolationPlug() const;
+	Gaffer::IntPlug *interpolationPlug();
+	const Gaffer::IntPlug *interpolationPlug() const;
 
-		Gaffer::IntPlug *directionPlug();
-		const Gaffer::IntPlug *directionPlug() const;
+	Gaffer::IntPlug *directionPlug();
+	const Gaffer::IntPlug *directionPlug() const;
 
-		/// Fills the supplied vector with the supported
-		/// file extensions for the LUT node.
-		static size_t supportedExtensions( std::vector<std::string> &extensions );
+	/// Fills the supplied vector with the supported
+	/// file extensions for the LUT node.
+	static size_t supportedExtensions( std::vector<std::string> &extensions );
 
-	protected :
+protected:
 
-		bool affectsTransform( const Gaffer::Plug *input ) const override;
-		void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
+	bool affectsTransform( const Gaffer::Plug *input ) const override;
+	void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	OCIO_NAMESPACE::ConstTransformRcPtr transform() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( LUT )

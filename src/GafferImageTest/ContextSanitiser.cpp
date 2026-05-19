@@ -84,7 +84,6 @@ void ContextSanitiser::processStarted( const Gaffer::Process *process )
 				warn( *process, ImagePlug::viewNameContextName );
 			}
 		}
-
 	}
 }
 

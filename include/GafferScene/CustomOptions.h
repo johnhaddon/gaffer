@@ -46,27 +46,26 @@ namespace GafferScene
 class GAFFERSCENE_API CustomOptions : public GafferScene::Options
 {
 
-	public :
+public:
 
-		explicit CustomOptions( const std::string &name=defaultName<CustomOptions>() );
-		~CustomOptions() override;
+	explicit CustomOptions( const std::string &name = defaultName<CustomOptions>() );
+	~CustomOptions() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CustomOptions, CustomOptionsTypeId, Options );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CustomOptions, CustomOptionsTypeId, Options );
 
-		Gaffer::StringPlug *prefixPlug();
-		const Gaffer::StringPlug *prefixPlug() const;
+	Gaffer::StringPlug *prefixPlug();
+	const Gaffer::StringPlug *prefixPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashPrefix( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		std::string computePrefix( const Gaffer::Context *context ) const override;
+	void hashPrefix( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	std::string computePrefix( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CustomOptions )

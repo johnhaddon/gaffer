@@ -65,7 +65,7 @@ GAFFER_NODE_DEFINE_TYPE( MotionPath );
 size_t MotionPath::g_firstPlugIndex = 0;
 
 MotionPath::MotionPath( const std::string &name )
-	:	FilteredSceneProcessor( name, PathMatcher::NoMatch )
+	: FilteredSceneProcessor( name, PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -299,7 +299,7 @@ ConstCompoundObjectPtr MotionPath::computeAttributes( const ScenePath &path, con
 
 void MotionPath::hashObject( const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h ) const
 {
-	if( !(filterValue( context ) & PathMatcher::ExactMatch) )
+	if( !( filterValue( context ) & PathMatcher::ExactMatch ) )
 	{
 		h = inPlug()->objectPlug()->defaultHash();
 		return;
@@ -347,7 +347,7 @@ void MotionPath::hashObject( const ScenePath &path, const Context *context, cons
 
 ConstObjectPtr MotionPath::computeObject( const ScenePath &path, const Context *context, const ScenePlug *parent ) const
 {
-	if( !(filterValue( context ) & PathMatcher::ExactMatch) )
+	if( !( filterValue( context ) & PathMatcher::ExactMatch ) )
 	{
 		return inPlug()->objectPlug()->defaultValue();
 	}

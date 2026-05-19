@@ -113,14 +113,12 @@ void setDestinationWidget( DragDropEvent &d, object w )
 void GafferUIModule::bindEvent()
 {
 
-	class_<Event>( "Event" )
-	;
+	class_<Event>( "Event" );
 
 	{
-		scope s = class_<ModifiableEvent, bases<Event> >( "ModifiableEvent" )
-			.def( init<ModifiableEvent::Modifiers>() )
-			.def_readwrite( "modifiers", &ModifiableEvent::modifiers )
-		;
+		scope s = class_<ModifiableEvent, bases<Event>>( "ModifiableEvent" )
+					  .def( init<ModifiableEvent::Modifiers>() )
+					  .def_readwrite( "modifiers", &ModifiableEvent::modifiers );
 
 		enum_<ModifiableEvent::Modifiers>( "Modifiers" )
 			.value( "None", ModifiableEvent::None )
@@ -131,29 +129,26 @@ void GafferUIModule::bindEvent()
 			.value( "ShiftControl", ModifiableEvent::ShiftControl )
 			.value( "ShiftAlt", ModifiableEvent::ShiftAlt )
 			.value( "ControlAlt", ModifiableEvent::ControlAlt )
-			.value( "All", ModifiableEvent::All )
-		;
+			.value( "All", ModifiableEvent::All );
 	}
 
-	class_<KeyEvent, bases<ModifiableEvent> >( "KeyEvent" )
+	class_<KeyEvent, bases<ModifiableEvent>>( "KeyEvent" )
 		.def( init<const char *>() )
 		.def( init<const char *, ModifiableEvent::Modifiers>() )
 		.def_readwrite( "key", &KeyEvent::key )
 		.def( self == self )
-		.def( self != self )
-	;
+		.def( self != self );
 
 	{
-		scope s = class_<ButtonEvent, bases<ModifiableEvent> >( "ButtonEvent" )
-			.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons>() )
-			.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &>() )
-			.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, float>() )
-			.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, float, ModifiableEvent::Modifiers>() )
-			.def_readwrite( "button", &ButtonEvent::button )
-			.def_readwrite( "buttons", &ButtonEvent::buttons )
-			.def_readwrite( "line", &ButtonEvent::line )
-			.def_readwrite( "wheelRotation", &ButtonEvent::wheelRotation )
-		;
+		scope s = class_<ButtonEvent, bases<ModifiableEvent>>( "ButtonEvent" )
+					  .def( init<ButtonEvent::Buttons, ButtonEvent::Buttons>() )
+					  .def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &>() )
+					  .def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, float>() )
+					  .def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, float, ModifiableEvent::Modifiers>() )
+					  .def_readwrite( "button", &ButtonEvent::button )
+					  .def_readwrite( "buttons", &ButtonEvent::buttons )
+					  .def_readwrite( "line", &ButtonEvent::line )
+					  .def_readwrite( "wheelRotation", &ButtonEvent::wheelRotation );
 
 		enum_<ButtonEvent::Buttons>( "Buttons" )
 			.value( "None", ButtonEvent::None )
@@ -164,11 +159,10 @@ void GafferUIModule::bindEvent()
 			.value( "LeftMiddle", ButtonEvent::LeftMiddle )
 			.value( "RightMiddle", ButtonEvent::RightMiddle )
 			.value( "LeftRight", ButtonEvent::LeftRight )
-			.value( "All", ButtonEvent::All )
-		;
+			.value( "All", ButtonEvent::All );
 	}
 
-	class_<DragDropEvent, bases<ButtonEvent> >( "DragDropEvent" )
+	class_<DragDropEvent, bases<ButtonEvent>>( "DragDropEvent" )
 		.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons>() )
 		.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &>() )
 		.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, ModifiableEvent::Modifiers>() )
@@ -177,7 +171,5 @@ void GafferUIModule::bindEvent()
 		.add_property( "destinationGadget", &getDestinationGadget, &setDestinationGadget )
 		.add_property( "sourceWidget", &getSourceWidget, &setSourceWidget )
 		.add_property( "destinationWidget", &getDestinationWidget, &setDestinationWidget )
-		.def_readwrite( "dropResult", &DragDropEvent::dropResult )
-	;
-
+		.def_readwrite( "dropResult", &DragDropEvent::dropResult );
 }

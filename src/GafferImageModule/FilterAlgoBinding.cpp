@@ -42,30 +42,30 @@ using namespace boost::python;
 
 namespace
 {
-	float sampleBoxWrapper( GafferImage::Sampler &sampler, const Imath::V2f &p, float dx, float dy, const std::string &filter )
-	{
-		const OIIO::Filter2D *f = GafferImage::FilterAlgo::acquireFilter( filter );
-		std::vector<float> scratchMemory;
-		return GafferImage::FilterAlgo::sampleBox( sampler, p, dx, dy, f, scratchMemory );
-	}
-
-	float sampleParallelogramWrapper( GafferImage::Sampler &sampler, const Imath::V2f &p, const Imath::V2f &dpdx, const Imath::V2f &dpdy, const std::string &filter )
-	{
-		const OIIO::Filter2D *f = GafferImage::FilterAlgo::acquireFilter( filter );
-		return GafferImage::FilterAlgo::sampleParallelogram( sampler, p, dpdx, dpdy, f );
-	}
-
-	list filterNamesWrapper()
-	{
-		list result;
-		const std::vector<std::string> &filters = GafferImage::FilterAlgo::filterNames();
-		for ( unsigned i=0; i < filters.size(); i++ )
-		{
-			result.append( filters[i] );
-		}
-		return result;
-	}
+float sampleBoxWrapper( GafferImage::Sampler &sampler, const Imath::V2f &p, float dx, float dy, const std::string &filter )
+{
+	const OIIO::Filter2D *f = GafferImage::FilterAlgo::acquireFilter( filter );
+	std::vector<float> scratchMemory;
+	return GafferImage::FilterAlgo::sampleBox( sampler, p, dx, dy, f, scratchMemory );
 }
+
+float sampleParallelogramWrapper( GafferImage::Sampler &sampler, const Imath::V2f &p, const Imath::V2f &dpdx, const Imath::V2f &dpdy, const std::string &filter )
+{
+	const OIIO::Filter2D *f = GafferImage::FilterAlgo::acquireFilter( filter );
+	return GafferImage::FilterAlgo::sampleParallelogram( sampler, p, dpdx, dpdy, f );
+}
+
+list filterNamesWrapper()
+{
+	list result;
+	const std::vector<std::string> &filters = GafferImage::FilterAlgo::filterNames();
+	for( unsigned i = 0; i < filters.size(); i++ )
+	{
+		result.append( filters[i] );
+	}
+	return result;
+}
+} // namespace
 
 void GafferImageModule::bindFilterAlgo()
 {
@@ -77,5 +77,4 @@ void GafferImageModule::bindFilterAlgo()
 	def( "derivativesToAxisAligned", &GafferImage::FilterAlgo::derivativesToAxisAligned );
 	def( "sampleBox", &sampleBoxWrapper );
 	def( "sampleParallelogram", &sampleParallelogramWrapper );
-
 }

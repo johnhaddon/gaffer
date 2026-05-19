@@ -66,7 +66,7 @@ const boost::container::flat_map<IECore::InternedString, IECore::ConstDataPtr> g
 GAFFER_NODE_DEFINE_TYPE( StandardOptions );
 
 StandardOptions::StandardOptions( const std::string &name )
-	:	Options( name )
+	: Options( name )
 {
 
 	for( const auto &target : Metadata::targetsWithMetadata( "option:render:* option:sampleMotion", g_defaultValue ) )
@@ -88,7 +88,6 @@ StandardOptions::StandardOptions( const std::string &name )
 			p->valuePlug<ValuePlug>()->resetDefault();
 		}
 	}
-
 }
 
 StandardOptions::~StandardOptions()

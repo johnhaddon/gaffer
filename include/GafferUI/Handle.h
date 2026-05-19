@@ -49,182 +49,180 @@ namespace GafferUI
 class GAFFERUI_API Handle : public Gadget
 {
 
-	public :
+public:
 
-		~Handle() override;
+	~Handle() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Handle, HandleTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Handle, HandleTypeId, Gadget );
 
-		// A non-zero raster scale causes the handles to be
-		// drawn at a constant size in raster space.
-		void setRasterScale( float rasterScale );
-		float getRasterScale() const;
+	// A non-zero raster scale causes the handles to be
+	// drawn at a constant size in raster space.
+	void setRasterScale( float rasterScale );
+	float getRasterScale() const;
 
-		void setVisibleOnHover( bool visibleOnHover );
-		bool getVisibleOnHover() const;
+	void setVisibleOnHover( bool visibleOnHover );
+	bool getVisibleOnHover() const;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-	protected :
+protected:
 
-		explicit Handle( const std::string &name=defaultName<Handle>() );
+	explicit Handle( const std::string &name = defaultName<Handle>() );
 
-		// Implemented to call renderHandle() after applying
-		// the raster scale.
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	// Implemented to call renderHandle() after applying
+	// the raster scale.
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-		// Must be implemented by derived classes to draw their
-		// handle.
-		virtual void renderHandle( const Style *style, Style::State state ) const = 0;
+	// Must be implemented by derived classes to draw their
+	// handle.
+	virtual void renderHandle( const Style *style, Style::State state ) const = 0;
 
-		// Called whenever a drag on the handle is initiated.
-		// Should be implemented by derived classes to initialise
-		// any state they need to track the drag.
-		virtual void dragBegin( const DragDropEvent &event ) = 0;
+	// Called whenever a drag on the handle is initiated.
+	// Should be implemented by derived classes to initialise
+	// any state they need to track the drag.
+	virtual void dragBegin( const DragDropEvent &event ) = 0;
 
-		// Helper for performing linear drags. Should be constructed
-		// in `dragBegin()` and then `position()` should be used
-		// to measure the progress of the drag.
-		struct GAFFERUI_API LinearDrag
-		{
+	// Helper for performing linear drags. Should be constructed
+	// in `dragBegin()` and then `position()` should be used
+	// to measure the progress of the drag.
+	struct GAFFERUI_API LinearDrag
+	{
 
-			LinearDrag( bool processModifiers = true );
-			// Line is parallel to the camera plane, centered on gadget, and
-			// with unit length axes in gadget space.
-			LinearDrag( const Gadget *gadget, const Imath::V2f &line, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
-			// Line is specified in Gadget space.
-			LinearDrag( const Gadget *gadget, const IECore::LineSegment3f &line, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		LinearDrag( bool processModifiers = true );
+		// Line is parallel to the camera plane, centered on gadget, and
+		// with unit length axes in gadget space.
+		LinearDrag( const Gadget *gadget, const Imath::V2f &line, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		// Line is specified in Gadget space.
+		LinearDrag( const Gadget *gadget, const IECore::LineSegment3f &line, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
 
-			// Positions are measured from 0 at line.p0 to 1 at line.p1.
-			float startPosition() const;
-			float updatedPosition( const DragDropEvent &event );
+		// Positions are measured from 0 at line.p0 to 1 at line.p1.
+		float startPosition() const;
+		float updatedPosition( const DragDropEvent &event );
 
-			private :
+	private:
 
-				const Gadget *m_gadget;
-				// We store the line of the drag in world space so that
-				// `position()` returns consistent results even if
-				// the gadget transform or the camera changes during the drag.
-				IECore::LineSegment3f m_worldLine;
-				float m_dragBeginPosition;
+		const Gadget *m_gadget;
+		// We store the line of the drag in world space so that
+		// `position()` returns consistent results even if
+		// the gadget transform or the camera changes during the drag.
+		IECore::LineSegment3f m_worldLine;
+		float m_dragBeginPosition;
 
-				bool m_processModifiers;
+		bool m_processModifiers;
 
-				// We track the point where precision mode is enabled (hold shift)
-				// and scale movement after that point accordingly (x0.1)
-				bool m_preciseMotionEnabled;
-				float m_preciseMotionOrigin;
-		};
+		// We track the point where precision mode is enabled (hold shift)
+		// and scale movement after that point accordingly (x0.1)
+		bool m_preciseMotionEnabled;
+		float m_preciseMotionOrigin;
+	};
 
-		// Helper for performing drags in a plane.
-		struct GAFFERUI_API PlanarDrag
-		{
+	// Helper for performing drags in a plane.
+	struct GAFFERUI_API PlanarDrag
+	{
 
-			PlanarDrag( bool processModifiers = true );
-			// Plane is parallel to the camera plane, centered on gadget, and with unit
-			// length axes in gadget space.
-			PlanarDrag( const Gadget *gadget, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
-			// Origin and axes are in gadget space. Axes are assumed to be orthogonal
-			// but may have any length.
-			PlanarDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		PlanarDrag( bool processModifiers = true );
+		// Plane is parallel to the camera plane, centered on gadget, and with unit
+		// length axes in gadget space.
+		PlanarDrag( const Gadget *gadget, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		// Origin and axes are in gadget space. Axes are assumed to be orthogonal
+		// but may have any length.
+		PlanarDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
 
-			// The axes of the plane in Gadget space.
-			const Imath::V3f &axis0() const;
-			const Imath::V3f &axis1() const;
+		// The axes of the plane in Gadget space.
+		const Imath::V3f &axis0() const;
+		const Imath::V3f &axis1() const;
 
-			// X coordinate are measured from 0 at origin to 1 at `origin + axis0`
-			// Y coordinates are measured from 0 at origin to 1 at `origin + axis1`
-			Imath::V2f startPosition() const;
-			Imath::V2f updatedPosition( const DragDropEvent &event );
+		// X coordinate are measured from 0 at origin to 1 at `origin + axis0`
+		// Y coordinates are measured from 0 at origin to 1 at `origin + axis1`
+		Imath::V2f startPosition() const;
+		Imath::V2f updatedPosition( const DragDropEvent &event );
 
-			private :
+	private:
 
-				void init( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent );
+		void init( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent );
 
-				const Gadget *m_gadget;
+		const Gadget *m_gadget;
 
-				Imath::V3f m_axis0;
-				Imath::V3f m_axis1;
+		Imath::V3f m_axis0;
+		Imath::V3f m_axis1;
 
-				Imath::V3f m_worldOrigin;
-				Imath::V3f m_worldAxis0;
-				Imath::V3f m_worldAxis1;
-				Imath::V3f m_worldPlaneNormal;
-				Imath::V2f m_dragBeginPosition;
+		Imath::V3f m_worldOrigin;
+		Imath::V3f m_worldAxis0;
+		Imath::V3f m_worldAxis1;
+		Imath::V3f m_worldPlaneNormal;
+		Imath::V2f m_dragBeginPosition;
 
-				bool m_processModifiers;
+		bool m_processModifiers;
 
-				// We track the point where precision mode is enabled (hold shift)
-				// and scale movement after that point accordingly (x0.1)
-				bool m_preciseMotionEnabled;
-				Imath::V2f m_preciseMotionOrigin;
+		// We track the point where precision mode is enabled (hold shift)
+		// and scale movement after that point accordingly (x0.1)
+		bool m_preciseMotionEnabled;
+		Imath::V2f m_preciseMotionOrigin;
 
-				std::optional<LinearDrag> m_linearDrag;
-				Imath::V2f m_linearDragAxisMask;
+		std::optional<LinearDrag> m_linearDrag;
+		Imath::V2f m_linearDragAxisMask;
+	};
 
-		};
+	// Returns the current scale factor needed to keep the handles
+	// at the requested size in raster space.
+	Imath::V3f rasterScaleFactor() const;
 
-		// Returns the current scale factor needed to keep the handles
-		// at the requested size in raster space.
-		Imath::V3f rasterScaleFactor() const;
+	// Helper for performing drags around a rotation axis.
+	struct GAFFERUI_API AngularDrag
+	{
 
-		// Helper for performing drags around a rotation axis.
-		struct GAFFERUI_API AngularDrag
-		{
+		AngularDrag( bool processModifiers = true );
+		// Origin, normal and axis0 are in gadget space. Rotations will be around
+		// normal, with 0 rotation along axis0. Axes are assumed to be
+		// orthogonal, but may have any length.
+		AngularDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &normal, const Imath::V3f &axis0, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
 
-			AngularDrag( bool processModifiers = true );
-			// Origin, normal and axis0 are in gadget space. Rotations will be around
-			// normal, with 0 rotation along axis0. Axes are assumed to be
-			// orthogonal, but may have any length.
-			AngularDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &normal, const Imath::V3f &axis0, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		// The axis of rotation in Gadget space.
+		const Imath::V3f &normal() const;
+		// The direction on which zero rotation lies.
+		const Imath::V3f &axis0() const;
 
-			// The axis of rotation in Gadget space.
-			const Imath::V3f &normal() const;
-			// The direction on which zero rotation lies.
-			const Imath::V3f &axis0() const;
+		// Rotation is in radians
+		float startRotation() const;
+		float updatedRotation( const DragDropEvent &event );
 
-			// Rotation is in radians
-			float startRotation() const;
-			float updatedRotation( const DragDropEvent &event );
+		bool isLinearDrag() const;
 
-			bool isLinearDrag() const;
+	private:
 
-			private :
+		float closestRotation( const Imath::V2f &p, float targetRotation );
 
-				float closestRotation( const Imath::V2f &p, float targetRotation );
+		const Gadget *m_gadget;
 
-				const Gadget *m_gadget;
+		std::variant<std::monostate, PlanarDrag, LinearDrag> m_drag;
+		float m_rotation;
 
-				std::variant<std::monostate, PlanarDrag, LinearDrag> m_drag;
-				float m_rotation;
+		Imath::V3f m_normal;
+		Imath::V3f m_axis0;
+		float m_dragBeginRotation;
 
-				Imath::V3f m_normal;
-				Imath::V3f m_axis0;
-				float m_dragBeginRotation;
+		bool m_processModifiers;
 
-				bool m_processModifiers;
+		// AngularDrag re-implements precision so that it can be applied in
+		// angle space, to allow continuous 'winding'.
+		bool m_preciseMotionEnabled;
+		float m_preciseMotionOrigin;
+	};
 
-				// AngularDrag re-implements precision so that it can be applied in
-				// angle space, to allow continuous 'winding'.
-				bool m_preciseMotionEnabled;
-				float m_preciseMotionOrigin;
-		};
+private:
 
-	private :
+	void enter();
+	void leave();
 
-		void enter();
-		void leave();
+	bool buttonPress( const ButtonEvent &event );
+	IECore::RunTimeTypedPtr dragBeginInternal( const DragDropEvent &event );
+	bool dragEnter( const DragDropEvent &event );
 
-		bool buttonPress( const ButtonEvent &event );
-		IECore::RunTimeTypedPtr dragBeginInternal( const DragDropEvent &event );
-		bool dragEnter( const DragDropEvent &event );
-
-		bool m_hovering;
-		float m_rasterScale;
-		bool m_visibleOnHover;
-
+	bool m_hovering;
+	float m_rasterScale;
+	bool m_visibleOnHover;
 };
 
 IE_CORE_DECLAREPTR( Handle )

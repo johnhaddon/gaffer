@@ -65,7 +65,7 @@ using namespace GafferBindings;
 namespace
 {
 
-IECore::FloatVectorDataPtr channelData( const ImagePlug &plug,  const std::string &channelName, const Imath::V2i &tile, const char *viewName, bool copy )
+IECore::FloatVectorDataPtr channelData( const ImagePlug &plug, const std::string &channelName, const Imath::V2i &tile, const char *viewName, bool copy )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	std::string viewNameStr( viewName ? viewName : "" );
@@ -180,7 +180,7 @@ IECore::MurmurHash sampleOffsetsHash( const ImagePlug &plug, const Imath::V2i &t
 	return plug.sampleOffsetsHash( tile, viewName ? &viewNameStr : nullptr );
 }
 
-std::string defaultViewName( )
+std::string defaultViewName()
 {
 	return ImagePlug::defaultViewName;
 }
@@ -235,11 +235,11 @@ boost::python::list registeredFormats()
 
 std::string formatRepr( const GafferImage::Format &format )
 {
-	if ( format.getDisplayWindow().isEmpty() )
+	if( format.getDisplayWindow().isEmpty() )
 	{
 		return std::string( "GafferImage.Format()" );
 	}
-	else if ( format.getDisplayWindow().min == Imath::V2i( 0 ) )
+	else if( format.getDisplayWindow().min == Imath::V2i( 0 ) )
 	{
 		Imath::Box2i box( format.getDisplayWindow() );
 		return fmt::format(
@@ -260,15 +260,14 @@ std::string formatRepr( const GafferImage::Format &format )
 class AtomicFormatPlugSerialiser : public GafferBindings::ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
-		{
-			// Imath is needed when reloading Format values which reference Box2i.
-			ValuePlugSerialiser::moduleDependencies( graphComponent, modules, serialisation );
-			modules.insert( "imath" );
-		}
-
+	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
+	{
+		// Imath is needed when reloading Format values which reference Box2i.
+		ValuePlugSerialiser::moduleDependencies( graphComponent, modules, serialisation );
+		modules.insert( "imath" );
+	}
 };
 
 void setValue( FormatPlug *plug, const Format &value )
@@ -296,15 +295,14 @@ FormatPlugPtr acquireDefaultFormatPlugWrapper( Gaffer::ScriptNode &scriptNode )
 class FormatPlugSerialiser : public GafferBindings::ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
-		{
-			// Imath is needed when reloading Format values which reference Box2i.
-			ValuePlugSerialiser::moduleDependencies( graphComponent, modules, serialisation );
-			modules.insert( "imath" );
-		}
-
+	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
+	{
+		// Imath is needed when reloading Format values which reference Box2i.
+		ValuePlugSerialiser::moduleDependencies( graphComponent, modules, serialisation );
+		modules.insert( "imath" );
+	}
 };
 
 } // namespace
@@ -314,8 +312,7 @@ void GafferImageModule::bindCore()
 
 	PlugClass<ImagePlug>()
 		.def(
-			init< const std::string &, Gaffer::Plug::Direction, unsigned >
-			(
+			init<const std::string &, Gaffer::Plug::Direction, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<ImagePlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,
@@ -339,19 +336,29 @@ void GafferImageModule::bindCore()
 		.def( "deepHash", &deepHash, ( arg( "viewName" ) = object() ) )
 		.def( "sampleOffsets", &sampleOffsets, ( arg( "viewName" ) = object(), arg( "_copy" ) = true ) )
 		.def( "sampleOffsetsHash", &sampleOffsetsHash, ( arg( "viewName" ) = object() ) )
-		.def( "tileSize", &ImagePlug::tileSize ).staticmethod( "tileSize" )
-		.def( "tilePixels", &ImagePlug::tilePixels ).staticmethod( "tilePixels" )
-		.def( "tileIndex", &ImagePlug::tileIndex ).staticmethod( "tileIndex" )
-		.def( "tileOrigin", &ImagePlug::tileOrigin ).staticmethod( "tileOrigin" )
-		.def( "pixelIndex", &ImagePlug::pixelIndex ).staticmethod( "pixelIndex" )
+		.def( "tileSize", &ImagePlug::tileSize )
+		.staticmethod( "tileSize" )
+		.def( "tilePixels", &ImagePlug::tilePixels )
+		.staticmethod( "tilePixels" )
+		.def( "tileIndex", &ImagePlug::tileIndex )
+		.staticmethod( "tileIndex" )
+		.def( "tileOrigin", &ImagePlug::tileOrigin )
+		.staticmethod( "tileOrigin" )
+		.def( "pixelIndex", &ImagePlug::pixelIndex )
+		.staticmethod( "pixelIndex" )
 		.add_static_property( "defaultViewName", &defaultViewName )
-		.def( "defaultViewNames", &defaultViewNames, ( arg( "_copy" ) = true ) ).staticmethod( "defaultViewNames" )
-		.def( "emptyTileSampleOffsets", &emptyTileSampleOffsets, ( arg( "_copy" ) = true ) ).staticmethod( "emptyTileSampleOffsets" )
-		.def( "flatTileSampleOffsets", &flatTileSampleOffsets, ( arg( "_copy" ) = true ) ).staticmethod( "flatTileSampleOffsets" )
-		.def( "emptyTile", &emptyTile, ( arg( "_copy" ) = true ) ).staticmethod( "emptyTile" )
-		.def( "blackTile", &blackTile, ( arg( "_copy" ) = true ) ).staticmethod( "blackTile" )
-		.def( "whiteTile", &whiteTile, ( arg( "_copy" ) = true ) ).staticmethod( "whiteTile" )
-	;
+		.def( "defaultViewNames", &defaultViewNames, ( arg( "_copy" ) = true ) )
+		.staticmethod( "defaultViewNames" )
+		.def( "emptyTileSampleOffsets", &emptyTileSampleOffsets, ( arg( "_copy" ) = true ) )
+		.staticmethod( "emptyTileSampleOffsets" )
+		.def( "flatTileSampleOffsets", &flatTileSampleOffsets, ( arg( "_copy" ) = true ) )
+		.staticmethod( "flatTileSampleOffsets" )
+		.def( "emptyTile", &emptyTile, ( arg( "_copy" ) = true ) )
+		.staticmethod( "emptyTile" )
+		.def( "blackTile", &blackTile, ( arg( "_copy" ) = true ) )
+		.staticmethod( "blackTile" )
+		.def( "whiteTile", &whiteTile, ( arg( "_copy" ) = true ) )
+		.staticmethod( "whiteTile" );
 
 	using ImageNodeWrapper = ComputeNodeWrapper<ImageNode>;
 	GafferBindings::DependencyNodeClass<ImageNode, ImageNodeWrapper>();
@@ -387,37 +394,41 @@ void GafferImageModule::bindCore()
 		.def( "getDisplayWindow", &Format::getDisplayWindow, return_value_policy<copy_const_reference>() )
 		.def( "setDisplayWindow", &Format::setDisplayWindow )
 
-		.def( "fromEXRSpace", ( int (Format::*)( int ) const )&Format::fromEXRSpace )
-		.def( "fromEXRSpace", ( Imath::V2i (Format::*)( const Imath::V2i & ) const )&Format::fromEXRSpace )
-		.def( "fromEXRSpace", ( Imath::Box2i (Format::*)( const Imath::Box2i & ) const )&Format::fromEXRSpace )
+		.def( "fromEXRSpace", ( int ( Format::* )( int ) const ) & Format::fromEXRSpace )
+		.def( "fromEXRSpace", ( Imath::V2i ( Format::* )( const Imath::V2i & ) const ) & Format::fromEXRSpace )
+		.def( "fromEXRSpace", ( Imath::Box2i ( Format::* )( const Imath::Box2i & ) const ) & Format::fromEXRSpace )
 
-		.def( "toEXRSpace", ( int (Format::*)( int ) const )&Format::toEXRSpace )
-		.def( "toEXRSpace", ( Imath::V2i (Format::*)( const Imath::V2i & ) const )&Format::toEXRSpace )
-		.def( "toEXRSpace", ( Imath::Box2i (Format::*)( const Imath::Box2i & ) const )&Format::toEXRSpace )
+		.def( "toEXRSpace", ( int ( Format::* )( int ) const ) & Format::toEXRSpace )
+		.def( "toEXRSpace", ( Imath::V2i ( Format::* )( const Imath::V2i & ) const ) & Format::toEXRSpace )
+		.def( "toEXRSpace", ( Imath::Box2i ( Format::* )( const Imath::Box2i & ) const ) & Format::toEXRSpace )
 
-		.def( "__eq__", &Format::operator== )
+		.def( "__eq__", &Format::operator == )
 		.def( "__repr__", &formatRepr )
 		.def( "__str__", &boost::lexical_cast<std::string, Format> )
 
-		.def( "registerFormat", &Format::registerFormat ).staticmethod( "registerFormat" )
-		.def( "deregisterFormat", &Format::deregisterFormat ).staticmethod( "deregisterFormat" )
-		.def( "registeredFormats", &registeredFormats ).staticmethod( "registeredFormats" )
-		.def( "format", &Format::format ).staticmethod( "format" )
-		.def( "name", &Format::name ).staticmethod( "name" )
-	;
+		.def( "registerFormat", &Format::registerFormat )
+		.staticmethod( "registerFormat" )
+		.def( "deregisterFormat", &Format::deregisterFormat )
+		.staticmethod( "deregisterFormat" )
+		.def( "registeredFormats", &registeredFormats )
+		.staticmethod( "registeredFormats" )
+		.def( "format", &Format::format )
+		.staticmethod( "format" )
+		.def( "name", &Format::name )
+		.staticmethod( "name" );
 
 	IECorePython::RunTimeTypedClass<FormatData>()
 		.def( init<>() )
 		.def( init<const Format &>() )
 		.add_property( "value", make_function( &FormatData::writable, return_internal_reference<1>() ) )
-		.def( "hasBase", &FormatData::hasBase ).staticmethod( "hasBase" )
-	;
+		.def( "hasBase", &FormatData::hasBase )
+		.staticmethod( "hasBase" );
 
 	IECorePython::TypedDataFromType<FormatData>();
 
 	TypedPlugClass<AtomicFormatPlug>();
 
-	Serialisation::registerSerialiser( static_cast<IECore::TypeId>(AtomicFormatPlugTypeId), new AtomicFormatPlugSerialiser );
+	Serialisation::registerSerialiser( static_cast<IECore::TypeId>( AtomicFormatPlugTypeId ), new AtomicFormatPlugSerialiser );
 
 	PlugClass<FormatPlug>()
 		.def(
@@ -438,12 +449,11 @@ void GafferImageModule::bindCore()
 		.def( "getDefaultFormat", &FormatPlug::getDefaultFormat )
 		.staticmethod( "getDefaultFormat" )
 		.def( "acquireDefaultFormatPlug", &acquireDefaultFormatPlugWrapper )
-		.staticmethod( "acquireDefaultFormatPlug" )
-	;
+		.staticmethod( "acquireDefaultFormatPlug" );
 
 	Serialisation::registerSerialiser( FormatPlug::staticTypeId(), new FormatPlugSerialiser );
 
-		class_<Sampler> cls( "Sampler", no_init );
+	class_<Sampler> cls( "Sampler", no_init );
 
 	{
 		// Must bind the BoundingMode first, so that it can be used in the default
@@ -451,22 +461,18 @@ void GafferImageModule::bindCore()
 		scope s = cls;
 		enum_<Sampler::BoundingMode>( "BoundingMode" )
 			.value( "Black", Sampler::Black )
-			.value( "Clamp", Sampler::Clamp )
-		;
+			.value( "Clamp", Sampler::Clamp );
 	}
 
 	cls.def(
-			init<const GafferImage::ImagePlug *, const std::string &, const Imath::Box2i &, Sampler::BoundingMode>
-			(
-				(
-					arg( "boundingMode" ) = Sampler::Black
-				)
-			)
-		)
-		.def( "hash", (IECore::MurmurHash (Sampler::*)() const)&Sampler::hash )
-		.def( "hash", (void (Sampler::*)( IECore::MurmurHash & ) const)&Sampler::hash )
-		.def( "sample", (float (Sampler::*)( float, float ) )&Sampler::sample )
-		.def( "sample", (float (Sampler::*)( int, int ) )&Sampler::sample )
-	;
-
+		   init<const GafferImage::ImagePlug *, const std::string &, const Imath::Box2i &, Sampler::BoundingMode>(
+			   (
+				   arg( "boundingMode" ) = Sampler::Black
+			   )
+		   )
+	)
+		.def( "hash", ( IECore::MurmurHash ( Sampler::* )() const ) & Sampler::hash )
+		.def( "hash", ( void ( Sampler::* )( IECore::MurmurHash & ) const ) & Sampler::hash )
+		.def( "sample", (float ( Sampler::* )( float, float ))&Sampler::sample )
+		.def( "sample", (float ( Sampler::* )( int, int ))&Sampler::sample );
 }

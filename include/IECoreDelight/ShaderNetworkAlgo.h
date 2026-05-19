@@ -61,6 +61,6 @@ void updateLightGeometry( const IECoreScene::ShaderNetwork *shaderNetwork, NSICo
 /// tests.
 IECOREDELIGHT_API void convertUSDShaders( IECoreScene::ShaderNetwork *shaderNetwork );
 
-}  // namespace ShaderNetworkAlgo
+} // namespace ShaderNetworkAlgo
 
-}  // namespace IECoreDelight
+} // namespace IECoreDelight

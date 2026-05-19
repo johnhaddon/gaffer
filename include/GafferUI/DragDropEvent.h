@@ -53,12 +53,11 @@ struct GAFFERUI_API DragDropEvent : public ButtonEvent
 	explicit DragDropEvent(
 		Buttons button = None,
 		Buttons buttons = None,
-		const IECore::LineSegment3f &Line=IECore::LineSegment3f(),
+		const IECore::LineSegment3f &Line = IECore::LineSegment3f(),
 		Modifiers m = ModifiableEvent::None
 	)
-		:	ButtonEvent( button, buttons, Line, 0, m ), sourceGadget( nullptr ), data( nullptr ), destinationGadget( nullptr ), dropResult( false )
-	{
-	};
+		: ButtonEvent( button, buttons, Line, 0, m ), sourceGadget( nullptr ), data( nullptr ), destinationGadget( nullptr ), dropResult( false ) {
+		  };
 
 	/// The Widget where the drag originated. Stored as `any` to avoid
 	/// dependency on Python in `libGafferUI`, and therefore only truly
@@ -74,7 +73,6 @@ struct GAFFERUI_API DragDropEvent : public ButtonEvent
 	GafferUI::GadgetPtr destinationGadget;
 	/// The result returned from the drop signal handler on the destination.
 	bool dropResult;
-
 };
 
 } // namespace GafferUI

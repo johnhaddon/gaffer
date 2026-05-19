@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( Random );
 size_t Random::g_firstPlugIndex = 0;
 
 Random::Random( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -69,7 +69,6 @@ Random::Random( const std::string &name )
 	addChild( new FloatPlug( "saturation", Plug::In, 0.2, 0.0, 1.0 ) );
 	addChild( new FloatPlug( "value", Plug::In, 0.2, 0.0, 1.0 ) );
 	addChild( new Color3fPlug( "outColor", Plug::Out ) );
-
 }
 
 Random::~Random()

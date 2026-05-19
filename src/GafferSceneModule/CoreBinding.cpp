@@ -81,13 +81,12 @@ struct ScenePathFromInternedStringVectorData
 		{
 			if( IECore::InternedStringVectorData *data = dataExtractor() )
 			{
-				return &(data->writable());
+				return &( data->writable() );
 			}
 		}
 
 		return nullptr;
 	}
-
 };
 
 // As a convenience we also accept strings in place of ScenePaths when
@@ -117,19 +116,18 @@ struct ScenePathFromString
 
 	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
 	{
-		void *storage = (( converter::rvalue_from_python_storage<ScenePlug::ScenePath>* ) data )->storage.bytes;
-		ScenePlug::ScenePath *path = new( storage ) ScenePlug::ScenePath();
+		void *storage = ( (converter::rvalue_from_python_storage<ScenePlug::ScenePath> *)data )->storage.bytes;
+		ScenePlug::ScenePath *path = new ( storage ) ScenePlug::ScenePath();
 		data->convertible = storage;
 
 		std::string s = extract<std::string>( obj );
-		using Tokenizer = boost::tokenizer<boost::char_separator<char> >;
+		using Tokenizer = boost::tokenizer<boost::char_separator<char>>;
 		Tokenizer t( s, boost::char_separator<char>( "/" ) );
 		for( Tokenizer::const_iterator it = t.begin(), eIt = t.end(); it != eIt; it++ )
 		{
 			path->push_back( *it );
 		}
 	}
-
 };
 
 // As a convenience we also accept lists in place of ScenePaths when
@@ -159,14 +157,13 @@ struct ScenePathFromList
 
 	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
 	{
-		void *storage = (( converter::rvalue_from_python_storage<ScenePlug::ScenePath>* ) data )->storage.bytes;
-		ScenePlug::ScenePath *path = new( storage ) ScenePlug::ScenePath();
+		void *storage = ( (converter::rvalue_from_python_storage<ScenePlug::ScenePath> *)data )->storage.bytes;
+		ScenePlug::ScenePath *path = new ( storage ) ScenePlug::ScenePath();
 		data->convertible = storage;
 
 		boost::python::list l = extract<boost::python::list>( obj );
 		boost::python::container_utils::extend_container( *path, l );
 	}
-
 };
 
 Imath::Box3f boundWrapper( const ScenePlug &plug, const ScenePlug::ScenePath &scenePath )
@@ -382,7 +379,6 @@ class SceneProcessorSerialiser : public NodeSerialiser
 
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
-
 };
 
 } // namespace
@@ -391,14 +387,7 @@ void GafferSceneModule::bindCore()
 {
 
 	PlugClass<ScenePlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>(
-				(
-					arg( "name" ) = Gaffer::GraphComponent::defaultName<ScenePlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
-			)
-		)
+		.def( init<const std::string &, Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<ScenePlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) )
 		// value accessors
 		.def( "bound", &boundWrapper )
 		.def( "transform", &transformWrapper )
@@ -431,8 +420,7 @@ void GafferSceneModule::bindCore()
 		.def( "stringToPath", &stringToPathWrapper )
 		.staticmethod( "stringToPath" )
 		.def( "pathToString", &pathToStringWrapper )
-		.staticmethod( "pathToString" )
-	;
+		.staticmethod( "pathToString" );
 
 	ScenePathFromInternedStringVectorData();
 	ScenePathFromString();
@@ -443,15 +431,7 @@ void GafferSceneModule::bindCore()
 
 	using SceneProcessorWrapper = ComputeNodeWrapper<SceneProcessor>;
 	GafferBindings::DependencyNodeClass<SceneProcessor, SceneProcessorWrapper>()
-	.def( init<const std::string &, size_t, size_t>(
-				(
-					arg( "name" ) = GraphComponent::defaultName<SceneProcessor>(),
-					arg( "minInputs" ),
-					arg( "maxInputs" ) = std::numeric_limits<size_t>::max()
-				)
-			)
-		)
-	;
+		.def( init<const std::string &, size_t, size_t>( ( arg( "name" ) = GraphComponent::defaultName<SceneProcessor>(), arg( "minInputs" ), arg( "maxInputs" ) = std::numeric_limits<size_t>::max() ) ) );
 
 	Serialisation::registerSerialiser( SceneProcessor::staticTypeId(), new SceneProcessorSerialiser );
 }

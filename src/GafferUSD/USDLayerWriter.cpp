@@ -100,7 +100,6 @@ struct Filters
 		deleteAttributes.addPaths( children.deleteAttributes, localPath );
 		deleteObject.addPaths( children.deleteObject, localPath );
 	}
-
 };
 
 // Recursively builds the PathMatchers held in a Filters struct, such that :
@@ -118,8 +117,7 @@ Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene
 	return GafferScene::SceneAlgo::parallelReduceLocations(
 		baseScene,
 		Filters(),
-		[&] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> Filters
-		{
+		[&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> Filters {
 			bool attributesMatch = true;
 			bool objectsMatch = true;
 			bool canPrune = true;
@@ -177,16 +175,14 @@ Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene
 
 			return result;
 		},
-		[]( Filters &result, const Filters &childrenResult )
-		{
+		[]( Filters &result, const Filters &childrenResult ) {
 			result.mergeChildren( childrenResult );
 			if( result.fullyPruned )
 			{
 				result.prune.addPath( result.localPath );
 			}
 		},
-		[]( Filters &result, const Filters &siblingResult )
-		{
+		[]( Filters &result, const Filters &siblingResult ) {
 			result.mergeSibling( siblingResult );
 		}
 	);
@@ -195,23 +191,22 @@ Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene
 class ScopedDirectory : boost::noncopyable
 {
 
-	public :
+public:
 
-		ScopedDirectory( const std::filesystem::path &p )
-			:	m_path( p )
-		{
-			std::filesystem::create_directories( m_path );
-		}
+	ScopedDirectory( const std::filesystem::path &p )
+		: m_path( p )
+	{
+		std::filesystem::create_directories( m_path );
+	}
 
-		~ScopedDirectory()
-		{
-			std::filesystem::remove_all( m_path );
-		}
+	~ScopedDirectory()
+	{
+		std::filesystem::remove_all( m_path );
+	}
 
-	private :
+private:
 
-		std::filesystem::path m_path;
-
+	std::filesystem::path m_path;
 };
 
 void createDirectories( const std::string &fileName )
@@ -526,11 +521,14 @@ void USDLayerWriter::executeSequence( const std::vector<float> &frames ) const
 
 	Context::EditableScope context( Context::current() );
 
-	vector<string> pruneFilter; filters.prune.paths( pruneFilter );
+	vector<string> pruneFilter;
+	filters.prune.paths( pruneFilter );
 	context.set( "usdLayerWriter:pruneFilter", &pruneFilter );
-	vector<string> deleteObjectFilter; filters.deleteObject.paths( deleteObjectFilter );
+	vector<string> deleteObjectFilter;
+	filters.deleteObject.paths( deleteObjectFilter );
 	context.set( "usdLayerWriter:deleteObjectFilter", &deleteObjectFilter );
-	vector<string> deleteAttributesFilter; filters.deleteAttributes.paths( deleteAttributesFilter );
+	vector<string> deleteAttributesFilter;
+	filters.deleteAttributes.paths( deleteAttributesFilter );
 	context.set( "usdLayerWriter:deleteAttributesFilter", &deleteAttributesFilter );
 
 	// Write the complete base and layer inputs into temporary USD files. We use

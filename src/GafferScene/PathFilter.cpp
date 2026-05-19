@@ -65,7 +65,7 @@ GAFFER_NODE_DEFINE_TYPE( PathFilter );
 size_t PathFilter::g_firstPlugIndex = 0;
 
 PathFilter::PathFilter( const std::string &name )
-	:	Filter( name )
+	: Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringVectorDataPlug( "paths", Plug::In, new StringVectorData ) );

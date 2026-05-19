@@ -54,7 +54,7 @@ using namespace GafferCycles;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CyclesMeshLight );
 
 CyclesMeshLight::CyclesMeshLight( const std::string &name )
-	:	GafferScene::FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+	: GafferScene::FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 
 	// CyclesAttributesNode. This hides the objects from the majority
@@ -69,10 +69,10 @@ CyclesMeshLight::CyclesMeshLight( const std::string &name )
 	attributes->filterPlug()->setInput( filterPlug() );
 	for( NameValuePlug::Iterator it( attributes->attributesPlug() ); !it.done(); ++it )
 	{
-		if( boost::starts_with( (*it)->getName().string(), "cycles:visibility:" ) && (*it)->getName() != "cycles:visibility:camera" )
+		if( boost::starts_with( ( *it )->getName().string(), "cycles:visibility:" ) && ( *it )->getName() != "cycles:visibility:camera" )
 		{
-			(*it)->enabledPlug()->setValue( true );
-			(*it)->valuePlug<BoolPlug>()->setValue( false );
+			( *it )->enabledPlug()->setValue( true );
+			( *it )->valuePlug<BoolPlug>()->setValue( false );
 		}
 	}
 
@@ -100,10 +100,10 @@ CyclesMeshLight::CyclesMeshLight( const std::string &name )
 	addChild( parametersPlug );
 	for( Plug::Iterator srcIt( parametersPlug.get() ), dstIt( shader->parametersPlug() ); !srcIt.done(); ++srcIt, ++dstIt )
 	{
-		(*dstIt)->setInput( *srcIt );
+		( *dstIt )->setInput( *srcIt );
 		// We don't need the parameters to be dynamic, because we create the
 		// plugs in our constructor when calling `loadShader()`.
-		(*srcIt)->setFlags( Plug::Dynamic, false );
+		( *srcIt )->setFlags( Plug::Dynamic, false );
 	}
 
 	// ShaderAssignment node. This assigns the mesh_light shader

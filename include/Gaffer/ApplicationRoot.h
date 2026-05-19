@@ -50,71 +50,70 @@ IE_CORE_FORWARDDECLARE( Preferences )
 class GAFFER_API ApplicationRoot : public GraphComponent
 {
 
-	public :
+public:
 
-		explicit ApplicationRoot( const std::string &name = defaultName<ApplicationRoot>() );
-		~ApplicationRoot() override;
+	explicit ApplicationRoot( const std::string &name = defaultName<ApplicationRoot>() );
+	~ApplicationRoot() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::ApplicationRoot, ApplicationRootTypeId, GraphComponent );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::ApplicationRoot, ApplicationRootTypeId, GraphComponent );
 
-		/// Accepts no user added children.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		/// Accepts no parent.
-		bool acceptsParent( const GraphComponent *potentialParent ) const override;
+	/// Accepts no user added children.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	/// Accepts no parent.
+	bool acceptsParent( const GraphComponent *potentialParent ) const override;
 
-		ScriptContainer *scripts();
-		const ScriptContainer *scripts() const;
+	ScriptContainer *scripts();
+	const ScriptContainer *scripts() const;
 
-		//! @name Clipboard
-		/// The ApplicationRoot class holds a clipboard which is
-		/// shared by all ScriptNodes belonging to the application.
-		/// The cut, copy and paste methods of the ScriptNodes
-		/// operate using this central clipboard. The contents of the
-		/// clipboard is simply stored as an IECore::Object.
-		////////////////////////////////////////////////////////
-		//@{
-		/// Returns the clipboard contents, a copy should be taken
-		/// if it must be modified.
-		const IECore::Object *getClipboardContents() const;
-		/// Sets the clipboard contents - a copy of clip is taken.
-		void setClipboardContents( const IECore::Object *clip );
-		/// A signal emitted when the clipboard contents have changed.
-		using ClipboardSignal = Signals::Signal<void (ApplicationRoot *), Signals::CatchingCombiner<void>>;
-		ClipboardSignal &clipboardContentsChangedSignal();
-		//@}
+	//! @name Clipboard
+	/// The ApplicationRoot class holds a clipboard which is
+	/// shared by all ScriptNodes belonging to the application.
+	/// The cut, copy and paste methods of the ScriptNodes
+	/// operate using this central clipboard. The contents of the
+	/// clipboard is simply stored as an IECore::Object.
+	////////////////////////////////////////////////////////
+	//@{
+	/// Returns the clipboard contents, a copy should be taken
+	/// if it must be modified.
+	const IECore::Object *getClipboardContents() const;
+	/// Sets the clipboard contents - a copy of clip is taken.
+	void setClipboardContents( const IECore::Object *clip );
+	/// A signal emitted when the clipboard contents have changed.
+	using ClipboardSignal = Signals::Signal<void( ApplicationRoot * ), Signals::CatchingCombiner<void>>;
+	ClipboardSignal &clipboardContentsChangedSignal();
+	//@}
 
-		//! @name Preferences
-		/// User preferences are represented as Plugs on a centrally
-		/// held Node. During application startup plugs should be added
-		/// to represent all available options. The plugSetSignal() may
-		/// then be used to respond to user changes. The ApplicationRoot
-		/// class provides access to the preferences node and also functions
-		/// for saving the current preferences to disk and reloading them.
-		/// Note that saving and loading is only supported on ApplicationRoots
-		/// created from Python - this allows the main C++ library to avoid
-		/// a python dependency.
-		//@{
-		/// Returns the preferences node.
-		Preferences *preferences();
-		const Preferences *preferences() const;
-		/// Saves the current preferences to preferencesLocation()/preferences.py.
-		void savePreferences() const;
-		/// Saves the current preferences value to the specified file.
-		virtual void savePreferences( const std::filesystem::path &fileName ) const;
-		/// Returns ~/gaffer/startup/appName - the directory in which preferences are
-		/// stored, and ensures that the directory exists. Other application components
-		/// may use this location to store settings they wish to persist across invocations.
-		/// \todo Perhaps this should include a major version number in the future.
-		std::filesystem::path preferencesLocation() const;
-		//@}
+	//! @name Preferences
+	/// User preferences are represented as Plugs on a centrally
+	/// held Node. During application startup plugs should be added
+	/// to represent all available options. The plugSetSignal() may
+	/// then be used to respond to user changes. The ApplicationRoot
+	/// class provides access to the preferences node and also functions
+	/// for saving the current preferences to disk and reloading them.
+	/// Note that saving and loading is only supported on ApplicationRoots
+	/// created from Python - this allows the main C++ library to avoid
+	/// a python dependency.
+	//@{
+	/// Returns the preferences node.
+	Preferences *preferences();
+	const Preferences *preferences() const;
+	/// Saves the current preferences to preferencesLocation()/preferences.py.
+	void savePreferences() const;
+	/// Saves the current preferences value to the specified file.
+	virtual void savePreferences( const std::filesystem::path &fileName ) const;
+	/// Returns ~/gaffer/startup/appName - the directory in which preferences are
+	/// stored, and ensures that the directory exists. Other application components
+	/// may use this location to store settings they wish to persist across invocations.
+	/// \todo Perhaps this should include a major version number in the future.
+	std::filesystem::path preferencesLocation() const;
+	//@}
 
-	private :
+private:
 
-		std::filesystem::path defaultPreferencesFileName() const;
+	std::filesystem::path defaultPreferencesFileName() const;
 
-		IECore::ObjectPtr m_clipboardContents;
-		ClipboardSignal m_clipboardContentsChangedSignal;
-
+	IECore::ObjectPtr m_clipboardContents;
+	ClipboardSignal m_clipboardContentsChangedSignal;
 };
 
 IE_CORE_DECLAREPTR( ApplicationRoot );

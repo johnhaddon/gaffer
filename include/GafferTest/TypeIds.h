@@ -45,7 +45,6 @@ enum TypeId
 	MultiplyNodeTypeId = 119000,
 
 	LastTypeId = 119099
-
 };
 
 } // namespace GafferTest

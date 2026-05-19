@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshToPoints );
 size_t MeshToPoints::g_firstPlugIndex = 0;
 
 MeshToPoints::MeshToPoints( const std::string &name )
-	:	Deformer( name )
+	: Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "type", Plug::In, "particle" ) );
@@ -73,10 +73,8 @@ const Gaffer::StringPlug *MeshToPoints::typePlug() const
 
 bool MeshToPoints::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		Deformer::affectsProcessedObject( input ) ||
-		input == typePlug()
-	;
+	return Deformer::affectsProcessedObject( input ) ||
+		input == typePlug();
 }
 
 void MeshToPoints::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

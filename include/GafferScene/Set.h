@@ -55,56 +55,55 @@ namespace GafferScene
 class GAFFERSCENE_API Set : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		explicit Set( const std::string &name=defaultName<Set>() );
-		~Set() override;
+	explicit Set( const std::string &name = defaultName<Set>() );
+	~Set() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Set, SetTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Set, SetTypeId, FilteredSceneProcessor );
 
-		enum Mode
-		{
-			Create,
-			Add,
-			Remove
-		};
+	enum Mode
+	{
+		Create,
+		Add,
+		Remove
+	};
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::StringPlug *namePlug();
-		const Gaffer::StringPlug *namePlug() const;
+	Gaffer::StringPlug *namePlug();
+	const Gaffer::StringPlug *namePlug() const;
 
-		Gaffer::StringPlug *setVariablePlug();
-		const Gaffer::StringPlug *setVariablePlug() const;
+	Gaffer::StringPlug *setVariablePlug();
+	const Gaffer::StringPlug *setVariablePlug() const;
 
-		/// \deprecated
-		Gaffer::StringVectorDataPlug *pathsPlug();
-		const Gaffer::StringVectorDataPlug *pathsPlug() const;
+	/// \deprecated
+	Gaffer::StringVectorDataPlug *pathsPlug();
+	const Gaffer::StringVectorDataPlug *pathsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 
-		IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		Gaffer::PathMatcherDataPlug *filterResultsPlug();
-		const Gaffer::PathMatcherDataPlug *filterResultsPlug() const;
+	Gaffer::PathMatcherDataPlug *filterResultsPlug();
+	const Gaffer::PathMatcherDataPlug *filterResultsPlug() const;
 
-		Gaffer::PathMatcherDataPlug *pathMatcherPlug();
-		const Gaffer::PathMatcherDataPlug *pathMatcherPlug() const;
+	Gaffer::PathMatcherDataPlug *pathMatcherPlug();
+	const Gaffer::PathMatcherDataPlug *pathMatcherPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Set );

@@ -47,13 +47,12 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldAttributes : public GafferScene::Attributes
 {
 
-	public :
+public:
 
-		explicit ArnoldAttributes( const std::string &name=defaultName<ArnoldAttributes>() );
-		~ArnoldAttributes() override;
+	explicit ArnoldAttributes( const std::string &name = defaultName<ArnoldAttributes>() );
+	~ArnoldAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldAttributes, ArnoldAttributesTypeId, GafferScene::Attributes );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldAttributes, ArnoldAttributesTypeId, GafferScene::Attributes );
 };
 
 IE_CORE_DECLAREPTR( ArnoldAttributes )

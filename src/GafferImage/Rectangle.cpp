@@ -93,7 +93,7 @@ GAFFER_NODE_DEFINE_TYPE( Rectangle );
 size_t Rectangle::g_firstPlugIndex = 0;
 
 Rectangle::Rectangle( const std::string &name )
-	:	Shape( name )
+	: Shape( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Box2fPlug( "area", Plug::In, Box2f( V2f( 0 ), V2f( 100 ) ) ) );
@@ -153,11 +153,9 @@ bool Rectangle::affectsShapeDataWindow( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return
-		areaPlug()->isAncestorOf( input ) ||
+	return areaPlug()->isAncestorOf( input ) ||
 		input == lineWidthPlug() ||
-		transformPlug()->isAncestorOf( input )
-	;
+		transformPlug()->isAncestorOf( input );
 }
 
 void Rectangle::hashShapeDataWindow( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -191,12 +189,10 @@ bool Rectangle::affectsShapeChannelData( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return
-		areaPlug()->isAncestorOf( input ) ||
+	return areaPlug()->isAncestorOf( input ) ||
 		input == lineWidthPlug() ||
 		input == cornerRadiusPlug() ||
-		transformPlug()->isAncestorOf( input )
-	;
+		transformPlug()->isAncestorOf( input );
 }
 
 void Rectangle::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -210,7 +206,7 @@ void Rectangle::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer
 	transformPlug()->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr Rectangle::computeShapeChannelData(  const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const
+IECore::ConstFloatVectorDataPtr Rectangle::computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const
 {
 	// Get our inputs
 

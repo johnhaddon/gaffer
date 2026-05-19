@@ -53,47 +53,47 @@ namespace
 struct ParameterConverter
 {
 
-	void operator()( const BoolData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const BoolData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetInteger( name, data->readable() );
 	}
 
-	void operator()( const IntData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const IntData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetInteger( name, data->readable() );
 	}
 
-	void operator()( const FloatData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const FloatData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetFloat( name, data->readable() );
 	}
 
-	void operator()( const StringData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const StringData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetString( name, RtUString( data->readable().c_str() ) );
 	}
 
-	void operator()( const InternedStringData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const InternedStringData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetString( name, RtUString( data->readable().c_str() ) );
 	}
 
-	void operator()( const Color3fData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const Color3fData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetColor( name, RtColorRGB( data->readable().getValue() ) );
 	}
 
-	void operator()( const V2iData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const V2iData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetIntegerArray( name, data->readable().getValue(), 2 );
 	}
 
-	void operator()( const V2fData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const V2fData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetFloatArray( name, data->readable().getValue(), 2 );
 	}
 
-	void operator()( const V3fData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const V3fData *data, RtUString name, RtParamList &paramList ) const
 	{
 		switch( data->getInterpretation() )
 		{
@@ -108,24 +108,25 @@ struct ParameterConverter
 		}
 	}
 
-	void operator()( const M44fData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const M44fData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetMatrix( name, reinterpret_cast<const pxrcore::Matrix4x4 &>( data->readable() ) );
 	}
 
-	void operator()( const IntVectorData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const IntVectorData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetIntegerArray( name, data->readable().data(), data->readable().size() );
 	}
 
-	void operator()( const FloatVectorData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const FloatVectorData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetFloatArray( name, data->readable().data(), data->readable().size() );
 	}
 
-	void operator()( const StringVectorData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const StringVectorData *data, RtUString name, RtParamList &paramList ) const
 	{
-		std::vector<RtUString> value; value.reserve( data->readable().size() );
+		std::vector<RtUString> value;
+		value.reserve( data->readable().size() );
 		for( const auto &s : data->readable() )
 		{
 			value.push_back( RtUString( s.c_str() ) );
@@ -133,9 +134,10 @@ struct ParameterConverter
 		paramList.SetStringArray( name, value.data(), value.size() );
 	}
 
-	void operator()( const InternedStringVectorData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const InternedStringVectorData *data, RtUString name, RtParamList &paramList ) const
 	{
-		std::vector<RtUString> value; value.reserve( data->readable().size() );
+		std::vector<RtUString> value;
+		value.reserve( data->readable().size() );
 		for( const auto &s : data->readable() )
 		{
 			value.push_back( RtUString( s.c_str() ) );
@@ -143,12 +145,12 @@ struct ParameterConverter
 		paramList.SetStringArray( name, value.data(), value.size() );
 	}
 
-	void operator()( const Color3fVectorData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const Color3fVectorData *data, RtUString name, RtParamList &paramList ) const
 	{
 		paramList.SetColorArray( name, reinterpret_cast<const RtColorRGB *>( data->readable().data() ), data->readable().size() );
 	}
 
-	void operator()( const V3fVectorData *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const V3fVectorData *data, RtUString name, RtParamList &paramList ) const
 	{
 		switch( data->getInterpretation() )
 		{
@@ -163,7 +165,7 @@ struct ParameterConverter
 		}
 	}
 
-	void operator()( const Data *data, RtUString name, RtParamList &paramList ) const
+	void operator () ( const Data *data, RtUString name, RtParamList &paramList ) const
 	{
 		IECore::msg(
 			IECore::Msg::Warning,
@@ -171,7 +173,6 @@ struct ParameterConverter
 			fmt::format( "Unsupported parameter \"{}\" of type \"{}\"", name.CStr(), data->typeName() )
 		);
 	}
-
 };
 
 } // namespace

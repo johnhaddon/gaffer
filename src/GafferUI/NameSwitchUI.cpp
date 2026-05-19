@@ -54,80 +54,79 @@ namespace
 class NameSwitchPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		NameSwitchPlugAdder( ArrayPlugPtr plug )
-			:	m_plug( plug )
+	NameSwitchPlugAdder( ArrayPlugPtr plug )
+		: m_plug( plug )
+	{
+	}
+
+protected:
+
+	bool canCreateConnection( const Plug *endpoint ) const override
+	{
+		if( !PlugAdder::canCreateConnection( endpoint ) )
 		{
+			return false;
 		}
 
-	protected :
-
-		bool canCreateConnection( const Plug *endpoint ) const override
+		if( MetadataAlgo::readOnly( m_plug.get() ) )
 		{
-			if( !PlugAdder::canCreateConnection( endpoint ) )
-			{
-				return false;
-			}
-
-			if( MetadataAlgo::readOnly( m_plug.get() ) )
-			{
-				return false;
-			}
-
-			// Assume that if the first plug wouldn't accept the input,
-			// then neither would the new one that we add.
-
-			if( !m_plug->children().size() )
-			{
-				return false;
-			}
-			else if( !m_plug->getChild<NameValuePlug>( 0 )->valuePlug()->acceptsInput( endpoint ) )
-			{
-				return false;
-			}
-
-			return m_plug->children().size() < m_plug->maxSize();
+			return false;
 		}
 
-		void createConnection( Plug *endpoint ) override
+		// Assume that if the first plug wouldn't accept the input,
+		// then neither would the new one that we add.
+
+		if( !m_plug->children().size() )
 		{
-			const size_t s = m_plug->children().size();
-			m_plug->resize( s + 1 );
-			auto p = m_plug->getChild<NameValuePlug>( s );
-
-			if( endpoint->direction() == Plug::In )
-			{
-				endpoint->setInput( p->valuePlug() );
-			}
-			else
-			{
-				p->valuePlug()->setInput( endpoint );
-			}
-
-			auto nameSwitch = m_plug->parent<NameSwitch>();
-			if( !nameSwitch || m_plug != nameSwitch->inPlugs() )
-			{
-				// Not `NameSwitch.in` - most likely a promoted copy.
-				// We won't be inheriting the metadata registered for
-				// NameSwitch nodes, so must explicitly copy the
-				// right metadata onto the new plug.
-				//
-				// > Todo : Consider improvements to the Medatata registration
-				// > mechanism so that "ancestor relative" metadata can be
-				// > registered against specific GraphComponent _instances_ rather
-				// > than only against GraphComponent _types_. Also introduce
-				// > the ability to register dynamic (Metadata::PlugValueFunction)
-				// > metadata against instances, so we can properly support the
-				// > "noduleLayout:label" metadata.
-				MetadataAlgo::copy( m_plug->getChild<Plug>( s - 1 ), p );
-			}
+			return false;
+		}
+		else if( !m_plug->getChild<NameValuePlug>( 0 )->valuePlug()->acceptsInput( endpoint ) )
+		{
+			return false;
 		}
 
-	private :
+		return m_plug->children().size() < m_plug->maxSize();
+	}
 
-		ArrayPlugPtr m_plug;
+	void createConnection( Plug *endpoint ) override
+	{
+		const size_t s = m_plug->children().size();
+		m_plug->resize( s + 1 );
+		auto p = m_plug->getChild<NameValuePlug>( s );
 
+		if( endpoint->direction() == Plug::In )
+		{
+			endpoint->setInput( p->valuePlug() );
+		}
+		else
+		{
+			p->valuePlug()->setInput( endpoint );
+		}
+
+		auto nameSwitch = m_plug->parent<NameSwitch>();
+		if( !nameSwitch || m_plug != nameSwitch->inPlugs() )
+		{
+			// Not `NameSwitch.in` - most likely a promoted copy.
+			// We won't be inheriting the metadata registered for
+			// NameSwitch nodes, so must explicitly copy the
+			// right metadata onto the new plug.
+			//
+			// > Todo : Consider improvements to the Medatata registration
+			// > mechanism so that "ancestor relative" metadata can be
+			// > registered against specific GraphComponent _instances_ rather
+			// > than only against GraphComponent _types_. Also introduce
+			// > the ability to register dynamic (Metadata::PlugValueFunction)
+			// > metadata against instances, so we can properly support the
+			// > "noduleLayout:label" metadata.
+			MetadataAlgo::copy( m_plug->getChild<Plug>( s - 1 ), p );
+		}
+	}
+
+private:
+
+	ArrayPlugPtr m_plug;
 };
 
 struct Registration
@@ -138,17 +137,16 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.NameSwitchUI.PlugAdder", &create );
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		if( auto a = runTimeCast<ArrayPlug>( parent ) )
 		{
-			if( auto a = runTimeCast<ArrayPlug>( parent ) )
-			{
-				return new NameSwitchPlugAdder( a );
-			}
-			throw IECore::Exception( "Expected an ArrayPlug" );
+			return new NameSwitchPlugAdder( a );
 		}
-
+		throw IECore::Exception( "Expected an ArrayPlug" );
+	}
 };
 
 Registration g_registration;

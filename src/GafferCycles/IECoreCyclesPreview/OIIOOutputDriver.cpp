@@ -57,17 +57,12 @@ IECORE_POP_DEFAULT_VISIBILITY
 namespace
 {
 
-int interleave( float *tileData,
-				const int width, const int height,
-				const int numChannels,
-				const int numOutputChannels,
-				const int outChannelOffset,
-				float *interleavedData )
+int interleave( float *tileData, const int width, const int height, const int numChannels, const int numOutputChannels, const int outChannelOffset, float *interleavedData )
 {
 	int offset = outChannelOffset;
 	for( int c = 0; c < numChannels; c++ )
 	{
-		float *in = &(tileData[0]) + c;
+		float *in = &( tileData[0] ) + c;
 		float *out = interleavedData + offset;
 		for( int j = 0; j < height; j++ )
 		{

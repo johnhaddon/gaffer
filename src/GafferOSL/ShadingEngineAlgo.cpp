@@ -105,7 +105,7 @@ CompoundDataPtr imageShadingPoints( const V2i &resolution )
 ///
 /// Note: No checks are made to verify the correct number of pixels exist for
 /// the supplied resolution.
-CompoundDataPtr shadedPointsToImageData( const CompoundData* shadedPoints, const V2i &resolution )
+CompoundDataPtr shadedPointsToImageData( const CompoundData *shadedPoints, const V2i &resolution )
 {
 	const ConstColor3fVectorDataPtr colors = shadedPoints->member<Color3fVectorData>( "Ci" );
 	if( !colors )
@@ -115,7 +115,7 @@ CompoundDataPtr shadedPointsToImageData( const CompoundData* shadedPoints, const
 
 	CompoundDataPtr result = new CompoundData();
 
-	Box2i dataWindow( V2i( 0 ), V2i( resolution -  V2i( 1 ) ) );
+	Box2i dataWindow( V2i( 0 ), V2i( resolution - V2i( 1 ) ) );
 	Box2i displayWindow( V2i( 0 ), V2i( resolution - V2i( 1 ) ) );
 
 	result->writable()["dataWindow"] = new Box2iData( dataWindow );
@@ -152,7 +152,7 @@ CompoundDataPtr shadedPointsToImageData( const CompoundData* shadedPoints, const
 	return result;
 }
 
-} // Anon namespace
+} // namespace
 
 namespace GafferOSL
 {

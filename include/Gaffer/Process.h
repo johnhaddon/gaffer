@@ -60,83 +60,82 @@ IE_CORE_FORWARDDECLARE( Plug );
 class GAFFER_API Process : private ThreadState::Scope
 {
 
-	public :
+public:
 
-		/// The type of process being performed.
-		const IECore::InternedString type() const { return m_type; }
-		/// The plug which is the subject of the process being performed.
-		const Plug *plug() const { return m_plug; }
-		/// The plug which triggered the process. This may be the same as
-		/// `plug()` or may be a downstream plug. In either case,
-		/// `destinationPlug()->source() == plug()`.
-		const Plug *destinationPlug() const { return m_destinationPlug; }
-		/// The context in which the process is being
-		/// performed.
-		const Context *context() const { return m_threadState->m_context; }
+	/// The type of process being performed.
+	const IECore::InternedString type() const { return m_type; }
+	/// The plug which is the subject of the process being performed.
+	const Plug *plug() const { return m_plug; }
+	/// The plug which triggered the process. This may be the same as
+	/// `plug()` or may be a downstream plug. In either case,
+	/// `destinationPlug()->source() == plug()`.
+	const Plug *destinationPlug() const { return m_destinationPlug; }
+	/// The context in which the process is being
+	/// performed.
+	const Context *context() const { return m_threadState->m_context; }
 
-		/// Returns the parent process for this process - that
-		/// is, the process that invoked this one.
-		const Process *parent() const { return m_parent; }
+	/// Returns the parent process for this process - that
+	/// is, the process that invoked this one.
+	const Process *parent() const { return m_parent; }
 
-		/// Returns the Process currently being performed on
-		/// this thread, or null if there is no such process.
-		static const Process *current();
+	/// Returns the Process currently being performed on
+	/// this thread, or null if there is no such process.
+	static const Process *current();
 
-		/// Check if we must force the monitored process to run, rather than using employing caches that
-		/// may allow skipping the execution ( obviously, this is much slower than using the caches )
-		inline static bool forceMonitoring( const ThreadState &s, const Plug *plug, const IECore::InternedString &processType );
+	/// Check if we must force the monitored process to run, rather than using employing caches that
+	/// may allow skipping the execution ( obviously, this is much slower than using the caches )
+	inline static bool forceMonitoring( const ThreadState &s, const Plug *plug, const IECore::InternedString &processType );
 
-	protected :
+protected:
 
-		/// Protected constructor for use by derived classes only.
-		Process( const IECore::InternedString &type, const Plug *plug, const Plug *destinationPlug = nullptr );
-		~Process();
+	/// Protected constructor for use by derived classes only.
+	Process( const IECore::InternedString &type, const Plug *plug, const Plug *destinationPlug = nullptr );
+	~Process();
 
-		/// Derived classes should catch exceptions thrown
-		/// during processing, and call this method. It will
-		/// report the error appropriately via Node::errorSignal()
-		/// and rethrow the exception for propagation back to
-		/// the original caller.
-		[[noreturn]] void handleException() const;
+	/// Derived classes should catch exceptions thrown
+	/// during processing, and call this method. It will
+	/// report the error appropriately via Node::errorSignal()
+	/// and rethrow the exception for propagation back to
+	/// the original caller.
+	[[noreturn]] void handleException() const;
 
-		/// Searches for an in-flight process and waits for its result, collaborating
-		/// on any TBB tasks it spawns. If no such process exists, constructs one
-		/// using `args` and makes it available for collaboration by other threads,
-		/// publishing the result to a cache when the process completes.
-		///
-		/// Requirements :
-		///
-		/// - `ProcessType( args... )` constructs a process suitable for computing
-		///   the result for `cacheKey`.
-		/// - `ProcessType::ResultType` defines the result type for the process.
-		/// - `ProcessType::run()` does the work for the process and returns the
-		///   result.
-		/// - `ProcessType::g_cache` is a static LRUCache of type `ProcessType::CacheType`
-		///   to be used for the caching of the result.
-		/// - `ProcessType::cacheCostFunction()` is a static function suitable
-		///   for use with `CacheType::setIfUncached()`.
-		///
-		template<typename ProcessType, typename... ProcessArguments>
-		static typename ProcessType::ResultType acquireCollaborativeResult(
-			const typename ProcessType::CacheType::KeyType &cacheKey, ProcessArguments&&... args
-		);
+	/// Searches for an in-flight process and waits for its result, collaborating
+	/// on any TBB tasks it spawns. If no such process exists, constructs one
+	/// using `args` and makes it available for collaboration by other threads,
+	/// publishing the result to a cache when the process completes.
+	///
+	/// Requirements :
+	///
+	/// - `ProcessType( args... )` constructs a process suitable for computing
+	///   the result for `cacheKey`.
+	/// - `ProcessType::ResultType` defines the result type for the process.
+	/// - `ProcessType::run()` does the work for the process and returns the
+	///   result.
+	/// - `ProcessType::g_cache` is a static LRUCache of type `ProcessType::CacheType`
+	///   to be used for the caching of the result.
+	/// - `ProcessType::cacheCostFunction()` is a static function suitable
+	///   for use with `CacheType::setIfUncached()`.
+	///
+	template<typename ProcessType, typename... ProcessArguments>
+	static typename ProcessType::ResultType acquireCollaborativeResult(
+		const typename ProcessType::CacheType::KeyType &cacheKey, ProcessArguments &&...args
+	);
 
-	private :
+private:
 
-		class Collaboration;
-		template<typename T>
-		class TypedCollaboration;
+	class Collaboration;
+	template<typename T>
+	class TypedCollaboration;
 
-		static bool forceMonitoringInternal( const ThreadState &s, const Plug *plug, const IECore::InternedString &processType );
+	static bool forceMonitoringInternal( const ThreadState &s, const Plug *plug, const IECore::InternedString &processType );
 
-		void emitError( const std::string &error, const Plug *source = nullptr ) const;
+	void emitError( const std::string &error, const Plug *source = nullptr ) const;
 
-		IECore::InternedString m_type;
-		const Plug *m_plug;
-		const Plug *m_destinationPlug;
-		const Process *m_parent;
-		const Collaboration *m_collaboration;
-
+	IECore::InternedString m_type;
+	const Plug *m_plug;
+	const Plug *m_destinationPlug;
+	const Process *m_parent;
+	const Collaboration *m_collaboration;
 };
 
 /// Used to wrap exceptions that occur during execution of a Process,
@@ -144,33 +143,32 @@ class GAFFER_API Process : private ThreadState::Scope
 class GAFFER_API ProcessException : public std::runtime_error
 {
 
-	public :
+public:
 
-		ProcessException( const ProcessException &rhs ) = default;
+	ProcessException( const ProcessException &rhs ) = default;
 
-		const Plug *plug() const;
-		const Context *context() const;
-		IECore::InternedString processType() const;
+	const Plug *plug() const;
+	const Context *context() const;
+	IECore::InternedString processType() const;
 
-		/// Rethrows the original exception that was wrapped by `wrapCurrentException()`.
-		[[noreturn]] void rethrowUnwrapped() const;
+	/// Rethrows the original exception that was wrapped by `wrapCurrentException()`.
+	[[noreturn]] void rethrowUnwrapped() const;
 
-		/// Throws a ProcessException wrapping the current exception and storing
-		/// the specified process information.
-		[[noreturn]] static void wrapCurrentException( const Process &process );
-		[[noreturn]] static void wrapCurrentException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType );
+	/// Throws a ProcessException wrapping the current exception and storing
+	/// the specified process information.
+	[[noreturn]] static void wrapCurrentException( const Process &process );
+	[[noreturn]] static void wrapCurrentException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType );
 
-	private :
+private:
 
-		ProcessException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType, const std::exception_ptr &exception, const char *what );
+	ProcessException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType, const std::exception_ptr &exception, const char *what );
 
-		static std::string formatWhat( const Plug *plug, const char *what );
+	static std::string formatWhat( const Plug *plug, const char *what );
 
-		ConstPlugPtr m_plug;
-		ConstContextPtr m_context;
-		const IECore::InternedString m_processType;
-		std::exception_ptr m_exception;
-
+	ConstPlugPtr m_plug;
+	ConstContextPtr m_context;
+	const IECore::InternedString m_processType;
+	std::exception_ptr m_exception;
 };
 
 } // namespace Gaffer

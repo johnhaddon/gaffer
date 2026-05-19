@@ -53,80 +53,79 @@ IE_CORE_FORWARDDECLARE( Resample )
 
 class GAFFERIMAGE_API ImageTransform : public FlatImageProcessor
 {
-	public :
+public:
 
-		explicit ImageTransform( const std::string &name=defaultName<ImageTransform>() );
-		~ImageTransform() override;
+	explicit ImageTransform( const std::string &name = defaultName<ImageTransform>() );
+	~ImageTransform() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageTransform, ImageTransformTypeId, FlatImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageTransform, ImageTransformTypeId, FlatImageProcessor );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		Gaffer::Transform2DPlug *transformPlug();
-		const Gaffer::Transform2DPlug *transformPlug() const;
+	Gaffer::Transform2DPlug *transformPlug();
+	const Gaffer::Transform2DPlug *transformPlug() const;
 
-		Gaffer::StringPlug *filterPlug();
-		const Gaffer::StringPlug *filterPlug() const;
+	Gaffer::StringPlug *filterPlug();
+	const Gaffer::StringPlug *filterPlug() const;
 
-		Gaffer::BoolPlug *invertPlug();
-		const Gaffer::BoolPlug *invertPlug() const;
+	Gaffer::BoolPlug *invertPlug();
+	const Gaffer::BoolPlug *invertPlug() const;
 
-		Gaffer::BoolPlug *concatenatePlug();
-		const Gaffer::BoolPlug *concatenatePlug() const;
+	Gaffer::BoolPlug *concatenatePlug();
+	const Gaffer::BoolPlug *concatenatePlug() const;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		// Output plug to compute the matrix for the internal
-		// Resample.
-		Gaffer::M33fPlug *resampleMatrixPlug();
-		const Gaffer::M33fPlug *resampleMatrixPlug() const;
+	// Output plug to compute the matrix for the internal
+	// Resample.
+	Gaffer::M33fPlug *resampleMatrixPlug();
+	const Gaffer::M33fPlug *resampleMatrixPlug() const;
 
-		// Input plug to receive the scaled and translated image
-		// from the internal Resample.
-		ImagePlug *resampledInPlug();
-		const ImagePlug *resampledInPlug() const;
+	// Input plug to receive the scaled and translated image
+	// from the internal Resample.
+	ImagePlug *resampledInPlug();
+	const ImagePlug *resampledInPlug() const;
 
-		// The internal Resample node.
-		Resample *resample();
-		const Resample *resample() const;
+	// The internal Resample node.
+	Resample *resample();
+	const Resample *resample() const;
 
-		// Plugs used to concatenate transforms through a
-		// chain of connected ImageTransforms.
-		Gaffer::M33fPlug *inTransformPlug();
-		const Gaffer::M33fPlug *inTransformPlug() const;
-		Gaffer::M33fPlug *outTransformPlug();
-		const Gaffer::M33fPlug *outTransformPlug() const;
+	// Plugs used to concatenate transforms through a
+	// chain of connected ImageTransforms.
+	Gaffer::M33fPlug *inTransformPlug();
+	const Gaffer::M33fPlug *inTransformPlug() const;
+	Gaffer::M33fPlug *outTransformPlug();
+	const Gaffer::M33fPlug *outTransformPlug() const;
 
-		class ChainingScope;
-		class CleanScope;
+	class ChainingScope;
+	class CleanScope;
 
-		enum Operation
-		{
-			Identity = 0,
-			Scale = 1,
-			Translate = 2,
-			Rotate = 4,
-		};
+	enum Operation
+	{
+		Identity = 0,
+		Scale = 1,
+		Translate = 2,
+		Rotate = 4,
+	};
 
-		unsigned operation( Imath::M33f &matrix, Imath::M33f &resampleMatrix ) const;
-		void plugInputChanged( Gaffer::Plug *plug );
+	unsigned operation( Imath::M33f &matrix, Imath::M33f &resampleMatrix ) const;
+	void plugInputChanged( Gaffer::Plug *plug );
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ImageTransform )

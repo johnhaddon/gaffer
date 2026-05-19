@@ -44,51 +44,51 @@ namespace GafferScene
 class GAFFERSCENE_API ShaderTweakProxy : public Shader
 {
 
-	public :
+public:
 
-		ShaderTweakProxy( const std::string &name = defaultName<ShaderTweakProxy>() );
+	ShaderTweakProxy( const std::string &name = defaultName<ShaderTweakProxy>() );
 
-		~ShaderTweakProxy() override;
+	~ShaderTweakProxy() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ShaderTweakProxy, ShaderTweakProxyTypeId, Shader );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ShaderTweakProxy, ShaderTweakProxyTypeId, Shader );
 
-		// Use this to set up a proxy for a specific type of shader - for auto proxies, call setupAutoProxy
-		// instead. The shader name passed in should start with a type prefix followed by a colon, to
-		// indicate how we need to load a shader in order to find its outputs to create a proxy. For example
-		// "osl:Conversion/ColorToFloat" means we will look for an OSL shader named "Conversion/ColorToFloat",
-		// and set up a proxy with matching output plugs. keepExistingValues is ignored, because proxies have
-		// only outputs.
-		void loadShader( const std::string &shaderName, bool keepExistingValues=false ) override;
+	// Use this to set up a proxy for a specific type of shader - for auto proxies, call setupAutoProxy
+	// instead. The shader name passed in should start with a type prefix followed by a colon, to
+	// indicate how we need to load a shader in order to find its outputs to create a proxy. For example
+	// "osl:Conversion/ColorToFloat" means we will look for an OSL shader named "Conversion/ColorToFloat",
+	// and set up a proxy with matching output plugs. keepExistingValues is ignored, because proxies have
+	// only outputs.
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-		// Auto-proxies connect to the original input of whatever parameter you are tweaking on a ShaderTweaks.
-		// They use dynamic plugs to store the type of their output - the reference plug provides the type
-		// of plug to create.
-		void setupAutoProxy( const Gaffer::Plug* referencePlug );
+	// Auto-proxies connect to the original input of whatever parameter you are tweaking on a ShaderTweaks.
+	// They use dynamic plugs to store the type of their output - the reference plug provides the type
+	// of plug to create.
+	void setupAutoProxy( const Gaffer::Plug *referencePlug );
 
-		// Parse the current shader name for the type prefix and source shader name
-		void typePrefixAndSourceShaderName( std::string &typePrefix, std::string &sourceShaderName ) const;
+	// Parse the current shader name for the type prefix and source shader name
+	void typePrefixAndSourceShaderName( std::string &typePrefix, std::string &sourceShaderName ) const;
 
-		// Identify if a shader is a proxy, created by ShaderTweakProxy
-		static bool isProxy( const IECoreScene::Shader *shader );
+	// Identify if a shader is a proxy, created by ShaderTweakProxy
+	static bool isProxy( const IECoreScene::Shader *shader );
 
-		template<class T>
-		struct ShaderLoaderDescription
+	template<class T>
+	struct ShaderLoaderDescription
+	{
+		ShaderLoaderDescription( const std::string &typePrefix )
 		{
-			ShaderLoaderDescription( const std::string &typePrefix )
-			{
-				registerShaderLoader( typePrefix, []() -> GafferScene::ShaderPtr{ return new T(); } );
-			}
-		};
+			registerShaderLoader( typePrefix, []() -> GafferScene::ShaderPtr { return new T(); } );
+		}
+	};
 
-	private :
+private:
 
-		using ShaderLoaderCreator = std::function< ShaderPtr() >;
-		using ShaderLoaderCreatorMap = std::map< std::string, ShaderTweakProxy::ShaderLoaderCreator >;
-		static ShaderLoaderCreatorMap &shaderLoaderCreators();
+	using ShaderLoaderCreator = std::function<ShaderPtr()>;
+	using ShaderLoaderCreatorMap = std::map<std::string, ShaderTweakProxy::ShaderLoaderCreator>;
+	static ShaderLoaderCreatorMap &shaderLoaderCreators();
 
-		static void registerShaderLoader( const std::string &typePrefix, ShaderLoaderCreator creator );
+	static void registerShaderLoader( const std::string &typePrefix, ShaderLoaderCreator creator );
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ShaderTweakProxy )

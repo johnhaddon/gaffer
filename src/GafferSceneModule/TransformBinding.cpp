@@ -59,27 +59,13 @@ void GafferSceneModule::bindTransform()
 
 	using Wrapper = ComputeNodeWrapper<FilteredSceneProcessor>;
 	GafferBindings::DependencyNodeClass<FilteredSceneProcessor, Wrapper>()
-		.def( init<const std::string &, IECore::PathMatcher::Result>(
-				(
-					arg( "name" ) = GraphComponent::defaultName<FilteredSceneProcessor>(),
-					arg( "filterDefault" ) = IECore::PathMatcher::EveryMatch
-				)
-			)
-		)
-		.def( init<const std::string &, size_t, size_t>(
-				(
-					arg( "name" ),
-					arg( "minInputs" ),
-					arg( "maxInputs" ) = std::numeric_limits<size_t>::max()
-				)
-			)
-		)
-	;
+		.def( init<const std::string &, IECore::PathMatcher::Result>( ( arg( "name" ) = GraphComponent::defaultName<FilteredSceneProcessor>(), arg( "filterDefault" ) = IECore::PathMatcher::EveryMatch ) ) )
+		.def( init<const std::string &, size_t, size_t>( ( arg( "name" ), arg( "minInputs" ), arg( "maxInputs" ) = std::numeric_limits<size_t>::max() ) ) );
 
 	GafferBindings::DependencyNodeClass<SceneElementProcessor>();
 
 	{
-		scope s =  GafferBindings::DependencyNodeClass<Constraint>();
+		scope s = GafferBindings::DependencyNodeClass<Constraint>();
 
 		enum_<Constraint::TargetMode>( "TargetMode" )
 			.value( "Origin", Constraint::Origin )
@@ -87,8 +73,7 @@ void GafferSceneModule::bindTransform()
 			.value( "BoundMax", Constraint::BoundMax )
 			.value( "BoundCenter", Constraint::BoundCenter )
 			.value( "UV", Constraint::UV )
-			.value( "Vertex", Constraint::Vertex )
-		;
+			.value( "Vertex", Constraint::Vertex );
 	}
 
 	GafferBindings::DependencyNodeClass<AimConstraint>();
@@ -102,8 +87,7 @@ void GafferSceneModule::bindTransform()
 
 		enum_<ReflectionConstraint::DistanceMode>( "DistanceMode" )
 			.value( "Camera", ReflectionConstraint::DistanceMode::Camera )
-			.value( "Constant", ReflectionConstraint::DistanceMode::Constant )
-		;
+			.value( "Constant", ReflectionConstraint::DistanceMode::Constant );
 	}
 
 	{
@@ -114,7 +98,6 @@ void GafferSceneModule::bindTransform()
 			.value( "Parent", Transform::Parent )
 			.value( "World", Transform::World )
 			.value( "ResetLocal", Transform::ResetLocal )
-			.value( "ResetWorld", Transform::ResetWorld )
-		;
+			.value( "ResetWorld", Transform::ResetWorld );
 	}
 }

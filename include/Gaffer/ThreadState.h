@@ -75,66 +75,64 @@ IE_CORE_FORWARDDECLARE( Monitor );
 class GAFFER_API ThreadState
 {
 
-	public :
+public:
 
-		/// Constructs a default thread state, with no current Process,
-		/// no active monitors, and a default constructed Context.
-		ThreadState();
+	/// Constructs a default thread state, with no current Process,
+	/// no active monitors, and a default constructed Context.
+	ThreadState();
 
-		class GAFFER_API Scope : public boost::noncopyable
-		{
+	class GAFFER_API Scope : public boost::noncopyable
+	{
 
-			public :
+	public:
 
-				/// Scopes a copy of `state` on the current
-				/// thread. When a process spawns TBB tasks, each
-				/// task _must_ use this to transfer `ThreadState::current()`
-				/// from the calling thread to the thread executing
-				/// the task.
-				Scope( const ThreadState &state );
-				/// Pops the ThreadState that was pushed by the
-				/// constructor.
-				~Scope();
+		/// Scopes a copy of `state` on the current
+		/// thread. When a process spawns TBB tasks, each
+		/// task _must_ use this to transfer `ThreadState::current()`
+		/// from the calling thread to the thread executing
+		/// the task.
+		Scope( const ThreadState &state );
+		/// Pops the ThreadState that was pushed by the
+		/// constructor.
+		~Scope();
 
-			protected :
+	protected:
 
-				/// Pushes a copy of the current ThreadState onto
-				/// the stack for this thread. Passing `push = false`
-				/// yields a no-op.
-				Scope( bool push = true );
+		/// Pushes a copy of the current ThreadState onto
+		/// the stack for this thread. Passing `push = false`
+		/// yields a no-op.
+		Scope( bool push = true );
 
-				/// The ThreadState being managed by this scope.
-				/// Will be null if the constructor is called with
-				/// `push = false`.
-				ThreadState *m_threadState;
+		/// The ThreadState being managed by this scope.
+		/// Will be null if the constructor is called with
+		/// `push = false`.
+		ThreadState *m_threadState;
 
-			private :
+	private:
 
-				std::stack<ThreadState> *m_stack;
+		std::stack<ThreadState> *m_stack;
+	};
 
-		};
+	static const ThreadState &current();
 
-		static const ThreadState &current();
+	const Context *context() const { return m_context; }
+	const Process *process() const { return m_process; }
 
-		const Context *context() const { return m_context; }
-		const Process *process() const { return m_process; }
+private:
 
-	private :
+	friend class Process;
+	friend class Context;
+	friend class Monitor;
 
-		friend class Process;
-		friend class Context;
-		friend class Monitor;
+	using MonitorSet = boost::container::flat_set<MonitorPtr>;
 
-		using MonitorSet = boost::container::flat_set<MonitorPtr>;
+	const Context *m_context;
+	const Process *m_process;
+	const MonitorSet *m_monitors;
+	bool m_mightForceMonitoring;
 
-		const Context *m_context;
-		const Process *m_process;
-		const MonitorSet *m_monitors;
-		bool m_mightForceMonitoring;
-
-		static const MonitorSet g_defaultMonitors;
-		static const ThreadState g_defaultState;
-
+	static const MonitorSet g_defaultMonitors;
+	static const ThreadState g_defaultState;
 };
 
 } // namespace Gaffer

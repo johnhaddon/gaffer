@@ -58,7 +58,7 @@ namespace
 
 struct UnarySlotCaller
 {
-	void operator()( boost::python::object slot, StylePtr s )
+	void operator () ( boost::python::object slot, StylePtr s )
 	{
 		slot( s );
 	}
@@ -76,65 +76,62 @@ void GafferUIModule::bindStyle()
 	{
 		scope s = IECorePython::RunTimeTypedClass<Style>()
 
-			.def( "renderImage", &Style::renderImage )
-			.def( "renderLine", &Style::renderLine )
-			.def( "renderSolidRectangle", &Style::renderSolidRectangle )
-			.def( "renderRectangle", &Style::renderRectangle )
+					  .def( "renderImage", &Style::renderImage )
+					  .def( "renderLine", &Style::renderLine )
+					  .def( "renderSolidRectangle", &Style::renderSolidRectangle )
+					  .def( "renderRectangle", &Style::renderRectangle )
 
-			.def( "characterBound", &Style::characterBound )
-			.def( "textBound", &Style::textBound )
-			.def( "renderText", &Style::renderText )
-			.def( "renderWrappedText", &Style::renderWrappedText )
+					  .def( "characterBound", &Style::characterBound )
+					  .def( "textBound", &Style::textBound )
+					  .def( "renderText", &Style::renderText )
+					  .def( "renderWrappedText", &Style::renderWrappedText )
 
-			.def( "renderFrame", &Style::renderFrame )
-			.def( "renderSelectionBox", &Style::renderSelectionBox )
-			.def( "renderHorizontalRule", &Style::renderHorizontalRule )
+					  .def( "renderFrame", &Style::renderFrame )
+					  .def( "renderSelectionBox", &Style::renderSelectionBox )
+					  .def( "renderHorizontalRule", &Style::renderHorizontalRule )
 
-			.def( "renderNodeFrame", &Style::renderNodeFrame )
-			.def( "renderNodule", &Style::renderNodule )
-			.def( "renderConnection", &Style::renderConnection )
-			.def( "renderBackdrop", &Style::renderBackdrop )
+					  .def( "renderNodeFrame", &Style::renderNodeFrame )
+					  .def( "renderNodule", &Style::renderNodule )
+					  .def( "renderConnection", &Style::renderConnection )
+					  .def( "renderBackdrop", &Style::renderBackdrop )
 
-			.def( "renderTranslateHandle", &Style::renderTranslateHandle )
-			.def( "renderRotateHandle", &Style::renderRotateHandle )
-			.def( "renderScaleHandle", &Style::renderScaleHandle )
+					  .def( "renderTranslateHandle", &Style::renderTranslateHandle )
+					  .def( "renderRotateHandle", &Style::renderRotateHandle )
+					  .def( "renderScaleHandle", &Style::renderScaleHandle )
 
-			.def( "changedSignal", &Style::changedSignal, return_internal_reference<1>() )
-			.def( "getDefaultStyle", &Style::getDefaultStyle ).staticmethod( "getDefaultStyle" )
-			.def( "setDefaultStyle", &Style::getDefaultStyle ).staticmethod( "setDefaultStyle" )
+					  .def( "changedSignal", &Style::changedSignal, return_internal_reference<1>() )
+					  .def( "getDefaultStyle", &Style::getDefaultStyle )
+					  .staticmethod( "getDefaultStyle" )
+					  .def( "setDefaultStyle", &Style::getDefaultStyle )
+					  .staticmethod( "setDefaultStyle" )
 
-		;
+			;
 
 		enum_<Style::State>( "State" )
 			.value( "NormalState", Style::NormalState )
 			.value( "DisabledState", Style::DisabledState )
-			.value( "HighlightedState", Style::HighlightedState )
-		;
+			.value( "HighlightedState", Style::HighlightedState );
 
 		enum_<Style::TextType>( "TextType" )
 			.value( "LabelText", Style::LabelText )
-			.value( "BodyText", Style::BodyText )
-		;
+			.value( "BodyText", Style::BodyText );
 
 		enum_<Style::Axes>( "Axes" )
 			.value( "X", Style::X )
 			.value( "Y", Style::Y )
 			.value( "Z", Style::Z )
-			.value( "XYZ", Style::XYZ )
-		;
+			.value( "XYZ", Style::XYZ );
 
 		SignalClass<Style::UnarySignal, DefaultSignalCaller<Style::UnarySignal>, UnarySlotCaller>( "UnarySignal" );
-
 	}
 
 	{
 		scope s = IECorePython::RunTimeTypedClass<StandardStyle>()
-			.def( init<>() )
-			.def( "setColor", &StandardStyle::setColor )
-			.def( "getColor", &StandardStyle::getColor, return_value_policy<copy_const_reference>() )
-			.def( "setFont", &StandardStyle::setFont )
-			.def( "getFont", &getFont )
-		;
+					  .def( init<>() )
+					  .def( "setColor", &StandardStyle::setColor )
+					  .def( "getColor", &StandardStyle::getColor, return_value_policy<copy_const_reference>() )
+					  .def( "setFont", &StandardStyle::setFont )
+					  .def( "getFont", &getFont );
 
 		enum_<StandardStyle::Color>( "Color" )
 			.value( "BackgroundColor", StandardStyle::BackgroundColor )
@@ -145,7 +142,6 @@ void GafferUIModule::bindStyle()
 			.value( "ConnectionColor", StandardStyle::ConnectionColor )
 			.value( "AuxiliaryConnectionColor", StandardStyle::AuxiliaryConnectionColor )
 			.value( "AnimationCurveColor", StandardStyle::AnimationCurveColor )
-			.value( "LastColor", StandardStyle::LastColor )
-		;
+			.value( "LastColor", StandardStyle::LastColor );
 	}
 }

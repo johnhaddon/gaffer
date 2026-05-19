@@ -192,5 +192,4 @@ BOOST_PYTHON_MODULE( _Gaffer )
 
 	def( "isDebug", &isDebug );
 	def( "environment", &environment );
-
 }

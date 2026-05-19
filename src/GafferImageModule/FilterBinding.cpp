@@ -62,15 +62,13 @@ void GafferImageModule::bindFilters()
 		scope s = DependencyNodeClass<DiskBlur>();
 		enum_<DiskBlur::BoundingMode>( "BoundingMode" )
 			.value( "Black", DiskBlur::BoundingMode::Black )
-			.value( "Mirror", DiskBlur::BoundingMode::Mirror )
-		;
+			.value( "Mirror", DiskBlur::BoundingMode::Mirror );
 	}
 
 	{
 		scope s = DependencyNodeClass<SATBlur>();
 		enum_<SATBlur::BoundingMode>( "BoundingMode" )
 			.value( "Black", SATBlur::BoundingMode::Black )
-			.value( "Normalize", SATBlur::BoundingMode::Normalize )
-		;
+			.value( "Normalize", SATBlur::BoundingMode::Normalize );
 	}
 }

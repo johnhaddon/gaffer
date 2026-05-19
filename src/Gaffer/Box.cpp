@@ -94,7 +94,7 @@ std::unordered_set<const Node *> boxOutPassThroughSources( const Node *parent )
 GAFFER_NODE_DEFINE_TYPE( Box );
 
 Box::Box( const std::string &name )
-	:	SubGraph( name )
+	: SubGraph( name )
 {
 }
 
@@ -117,15 +117,14 @@ void Box::exportForReference( const std::filesystem::path &fileName ) const
 	StandardSetPtr toExport = new StandardSet;
 	for( ChildIterator it = children().begin(), eIt = children().end(); it != eIt; ++it )
 	{
-		if( (*it)->isInstanceOf( Node::staticTypeId() ) )
+		if( ( *it )->isInstanceOf( Node::staticTypeId() ) )
 		{
 			toExport->add( *it );
 		}
 		else if( const Plug *plug = IECore::runTimeCast<Plug>( it->get() ) )
 		{
 			if(
-				!boost::regex_match( plug->getName().c_str(), invisiblePlug )
-				&& plug != userPlug()
+				!boost::regex_match( plug->getName().c_str(), invisiblePlug ) && plug != userPlug()
 			)
 			{
 				toExport->add( *it );

@@ -54,37 +54,36 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API CompoundDataPlug : public Gaffer::ValuePlug
 {
 
-	public :
+public:
 
-		explicit CompoundDataPlug(
-			const std::string &name = defaultName<CompoundDataPlug>(),
-			Direction direction=In,
-			unsigned flags = Default
-		);
-		~CompoundDataPlug() override;
+	explicit CompoundDataPlug(
+		const std::string &name = defaultName<CompoundDataPlug>(),
+		Direction direction = In,
+		unsigned flags = Default
+	);
+	~CompoundDataPlug() override;
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::CompoundDataPlug, CompoundDataPlugTypeId, Gaffer::ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::CompoundDataPlug, CompoundDataPlugTypeId, Gaffer::ValuePlug );
 
-		/// Accepts only children that can generate values for the CompoundData.
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Accepts only children that can generate values for the CompoundData.
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		/// Adds each member from the specified CompoundData.
-		void addMembers( const IECore::CompoundData *members, bool useNameAsPlugName = false );
+	/// Adds each member from the specified CompoundData.
+	void addMembers( const IECore::CompoundData *members, bool useNameAsPlugName = false );
 
-		/// Returns the value for the member specified by the child parameterPlug, and fills name with the
-		/// name for the member. If the user has disabled the member or the name is the empty string, then
-		/// 0 is returned.
-		IECore::DataPtr memberDataAndName( const NameValuePlug *parameterPlug, std::string &name ) const;
+	/// Returns the value for the member specified by the child parameterPlug, and fills name with the
+	/// name for the member. If the user has disabled the member or the name is the empty string, then
+	/// 0 is returned.
+	IECore::DataPtr memberDataAndName( const NameValuePlug *parameterPlug, std::string &name ) const;
 
-		/// Fills the CompoundDataMap with values based on the child plugs of this node.
-		void fillCompoundData( IECore::CompoundDataMap &compoundDataMap ) const;
-		/// As above but fills a CompoundObjectMap instead.
-		void fillCompoundObject( IECore::CompoundObject::ObjectMap &compoundObjectMap ) const;
+	/// Fills the CompoundDataMap with values based on the child plugs of this node.
+	void fillCompoundData( IECore::CompoundDataMap &compoundDataMap ) const;
+	/// As above but fills a CompoundObjectMap instead.
+	void fillCompoundObject( IECore::CompoundObject::ObjectMap &compoundObjectMap ) const;
 
-		IECore::MurmurHash hash() const override;
-		void hash( IECore::MurmurHash &h ) const;
-
+	IECore::MurmurHash hash() const override;
+	void hash( IECore::MurmurHash &h ) const;
 };
 
 IE_CORE_DECLAREPTR( CompoundDataPlug );

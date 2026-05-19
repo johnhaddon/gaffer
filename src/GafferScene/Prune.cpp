@@ -48,7 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( Prune );
 size_t Prune::g_firstPlugIndex = 0;
 
 Prune::Prune( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "adjustBounds", Plug::In, false ) );
@@ -200,7 +200,7 @@ IECore::ConstInternedStringVectorDataPtr Prune::computeChildNames( const ScenePa
 {
 	const IECore::PathMatcher::Result m = filterValue( context );
 
-	if( m & IECore::PathMatcher::ExactMatch  )
+	if( m & IECore::PathMatcher::ExactMatch )
 	{
 		return inPlug()->childNamesPlug()->defaultValue();
 	}
@@ -221,7 +221,7 @@ IECore::ConstInternedStringVectorDataPtr Prune::computeChildNames( const ScenePa
 		{
 			childPath[path.size()] = *it;
 			sceneScope.set( ScenePlug::scenePathContextName, &childPath );
-			if( !(filterPlug()->getValue() & IECore::PathMatcher::ExactMatch) )
+			if( !( filterPlug()->getValue() & IECore::PathMatcher::ExactMatch ) )
 			{
 				outputChildNames.push_back( *it );
 			}
@@ -279,7 +279,7 @@ IECore::ConstPathMatcherDataPtr Prune::computeSet( const IECore::InternedString 
 
 	for( PathMatcher::RawIterator pIt = inputSet.begin(), peIt = inputSet.end(); pIt != peIt; )
 	{
-		sceneScope.set( ScenePlug::scenePathContextName, &(*pIt) );
+		sceneScope.set( ScenePlug::scenePathContextName, &( *pIt ) );
 		const int m = filterPlug()->getValue();
 		if( m & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch ) )
 		{

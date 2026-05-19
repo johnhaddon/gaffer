@@ -46,17 +46,16 @@ namespace GafferUI
 class GAFFERUI_API NameGadget : public TextGadget
 {
 
-	public :
+public:
 
-		explicit NameGadget( Gaffer::GraphComponentPtr object );
-		~NameGadget() override;
+	explicit NameGadget( Gaffer::GraphComponentPtr object );
+	~NameGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NameGadget, NameGadgetTypeId, TextGadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NameGadget, NameGadgetTypeId, TextGadget );
 
-	private :
+private:
 
-		void graphComponentNameChanged( Gaffer::GraphComponentPtr object );
-
+	void graphComponentNameChanged( Gaffer::GraphComponentPtr object );
 };
 
 IE_CORE_DECLAREPTR( NameGadget );

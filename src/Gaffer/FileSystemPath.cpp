@@ -52,14 +52,14 @@
 #include "boost/filesystem/operations.hpp"
 
 #ifndef _MSC_VER
-	#include <grp.h>
-	#include <pwd.h>
+#include <grp.h>
+#include <pwd.h>
 #else
-	#include <stdio.h>
-	#include <Windows.h>
-	#include <tchar.h>
-	#include "accctrl.h"
-	#include "aclapi.h"
+#include <stdio.h>
+#include <Windows.h>
+#include <tchar.h>
+#include "accctrl.h"
+#include "aclapi.h"
 #endif
 
 #include <regex>
@@ -100,9 +100,9 @@ std::string getFileSecurityInfo( const std::string &pathString, SECURITY_INFORMA
 		OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION,
 		&pSidOwner,
 		&pSidGroup,
-		NULL,  // Out : DACL
-		NULL,  // Out : SACL
-		NULL  // Out : Security Descriptor
+		NULL, // Out : DACL
+		NULL, // Out : SACL
+		NULL // Out : Security Descriptor
 	);
 
 	if( result == ERROR_SUCCESS && info == OWNER_SECURITY_INFORMATION )
@@ -123,25 +123,25 @@ std::string getFileSecurityInfo( const std::string &pathString, SECURITY_INFORMA
 		NULL,
 		pSid,
 		AcctName,
-		( LPDWORD )&dwAcctName,
+		(LPDWORD)&dwAcctName,
 		DomainName,
-		( LPDWORD )&dwDomainName,
+		(LPDWORD)&dwDomainName,
 		&eUse
 	);
 
 	// Reallocate memory for the buffers.
-	AcctName = ( LPTSTR )GlobalAlloc( GMEM_FIXED, dwAcctName );
+	AcctName = (LPTSTR)GlobalAlloc( GMEM_FIXED, dwAcctName );
 
 	// Check GetLastError for GlobalAlloc error condition.
-	if (AcctName == NULL)
+	if( AcctName == NULL )
 	{
 		return "";
 	}
 
-	DomainName = ( LPTSTR )GlobalAlloc( GMEM_FIXED, dwDomainName );
+	DomainName = (LPTSTR)GlobalAlloc( GMEM_FIXED, dwDomainName );
 
 	// Check GetLastError for GlobalAlloc error condition.
-	if ( DomainName == NULL )
+	if( DomainName == NULL )
 	{
 		return "";
 	}
@@ -157,7 +157,7 @@ std::string getFileSecurityInfo( const std::string &pathString, SECURITY_INFORMA
 		&eUse
 	);
 
-	if ( bRtnBool == FALSE )
+	if( bRtnBool == FALSE )
 	{
 		return "";
 	}
@@ -172,8 +172,8 @@ std::string getFileOwner( const std::string &pathString )
 	std::string value;
 #ifndef _MSC_VER
 	struct stat s;
-	stat(pathString.c_str(), &s);
-	struct passwd *pw = getpwuid(s.st_uid);
+	stat( pathString.c_str(), &s );
+	struct passwd *pw = getpwuid( s.st_uid );
 	return pw ? pw->pw_name : "";
 
 #else
@@ -181,7 +181,6 @@ std::string getFileOwner( const std::string &pathString )
 	return getFileSecurityInfo( pathString, OWNER_SECURITY_INFORMATION );
 
 #endif
-
 }
 
 std::string getFileGroup( const std::string &pathString )
@@ -189,7 +188,7 @@ std::string getFileGroup( const std::string &pathString )
 	std::string value;
 #ifndef _MSC_VER
 	struct stat s;
-	stat(pathString.c_str(), &s);
+	stat( pathString.c_str(), &s );
 	struct group *gr = getgrgid( s.st_gid );
 
 	return gr ? gr->gr_name : "";
@@ -199,10 +198,9 @@ std::string getFileGroup( const std::string &pathString )
 	return getFileSecurityInfo( pathString, GROUP_SECURITY_INFORMATION );
 
 #endif
-
 }
 
-}  // namespace
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // FileSystemPath implementation
@@ -219,24 +217,24 @@ static InternedString g_frameRangePropertyName( "fileSystem:frameRange" );
 static std::regex g_driveLetterPattern{ "[A-Za-z]:" };
 
 FileSystemPath::FileSystemPath( PathFilterPtr filter, bool includeSequences )
-	:	Path( filter ), m_includeSequences( includeSequences )
+	: Path( filter ), m_includeSequences( includeSequences )
 {
 }
 
 FileSystemPath::FileSystemPath( const std::string &path, PathFilterPtr filter, bool includeSequences )
-	:	Path( filter ), m_includeSequences( includeSequences )
+	: Path( filter ), m_includeSequences( includeSequences )
 {
 	setFromString( path );
 }
 
 FileSystemPath::FileSystemPath( const std::filesystem::path &path, PathFilterPtr filter, bool includeSequences )
-	:	Path( filter ), m_includeSequences( includeSequences )
+	: Path( filter ), m_includeSequences( includeSequences )
 {
 	setFromString( path.generic_string() );
 }
 
 FileSystemPath::FileSystemPath( const Names &names, const IECore::InternedString &root, PathFilterPtr filter, bool includeSequences )
-	:	Path( names, root, filter ), m_includeSequences( includeSequences )
+	: Path( names, root, filter ), m_includeSequences( includeSequences )
 {
 }
 
@@ -260,22 +258,23 @@ bool FileSystemPath::isValid( const IECore::Canceller *canceller ) const
 
 	std::filesystem::file_type t = std::filesystem::symlink_status( std::filesystem::path( this->string() ), e ).type();
 
-#if defined(_MSC_VER) && _MSC_VER < 1932
+#if defined( _MSC_VER ) && _MSC_VER < 1932
 
-// Fix MSVC bug preventing `symlink_status()` working with exFAT partitions, and possibly FAT.
-// Filtering to error 87 is based on experimentation and backed up by
-// https://github.com/microsoft/STL/issues/233. Using `status()` instead of `symlink_status()`
-// allows exFAT partitions to be used, and because exFAT does not support symlinks, this
-// should be a valid workaround provided filtering to error value `87` doesn't include
-// partitions that do support symlinks.
-if(
-	(
-		t == std::filesystem::file_type::none || t == std::filesystem::file_type::not_found
-	) && e.value() == 87 // "The parameter is incorrect."
-)
-{
-	t = std::filesystem::status( std::filesystem::path( this->string() ), e ).type();
-}
+	// Fix MSVC bug preventing `symlink_status()` working with exFAT partitions, and possibly FAT.
+	// Filtering to error 87 is based on experimentation and backed up by
+	// https://github.com/microsoft/STL/issues/233. Using `status()` instead of `symlink_status()`
+	// allows exFAT partitions to be used, and because exFAT does not support symlinks, this
+	// should be a valid workaround provided filtering to error value `87` doesn't include
+	// partitions that do support symlinks.
+	if(
+		(
+			t == std::filesystem::file_type::none || t == std::filesystem::file_type::not_found
+		) &&
+		e.value() == 87 // "The parameter is incorrect."
+	)
+	{
+		t = std::filesystem::status( std::filesystem::path( this->string() ), e ).type();
+	}
 
 #endif
 
@@ -359,12 +358,12 @@ IECore::ConstRunTimeTypedPtr FileSystemPath::property( const IECore::InternedStr
 
 				size_t maxCount = 0;
 				std::string mostCommon = "";
-				std::map<std::string,size_t> ownerCounter;
+				std::map<std::string, size_t> ownerCounter;
 				for( std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it )
 				{
 					IECore::Canceller::check( canceller );
 					std::string value = getFileOwner( it->c_str() );
-					std::pair<std::map<std::string,size_t>::iterator,bool> oIt = ownerCounter.insert( std::pair<std::string,size_t>( value, 0 ) );
+					std::pair<std::map<std::string, size_t>::iterator, bool> oIt = ownerCounter.insert( std::pair<std::string, size_t>( value, 0 ) );
 					oIt.first->second++;
 					if( oIt.first->second > maxCount )
 					{
@@ -394,12 +393,12 @@ IECore::ConstRunTimeTypedPtr FileSystemPath::property( const IECore::InternedStr
 
 				size_t maxCount = 0;
 				std::string mostCommon = "";
-				std::map<std::string,size_t> ownerCounter;
+				std::map<std::string, size_t> ownerCounter;
 				for( std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it )
 				{
 					IECore::Canceller::check( canceller );
 					std::string value = getFileGroup( *it );
-					std::pair<std::map<std::string,size_t>::iterator,bool> oIt = ownerCounter.insert( std::pair<std::string,size_t>( value, 0 ) );
+					std::pair<std::map<std::string, size_t>::iterator, bool> oIt = ownerCounter.insert( std::pair<std::string, size_t>( value, 0 ) );
 					oIt.first->second++;
 					if( oIt.first->second > maxCount )
 					{
@@ -521,10 +520,10 @@ void FileSystemPath::doChildren( std::vector<PathPtr> &children, const IECore::C
 		{
 			IECore::Canceller::check( canceller );
 			std::vector<FrameList::Frame> frames;
-			(*it)->getFrameList()->asList( frames );
-			if ( !is_directory( std::filesystem::path( (*it)->fileNameForFrame( frames[0] ) ) ) )
+			( *it )->getFrameList()->asList( frames );
+			if( !is_directory( std::filesystem::path( ( *it )->fileNameForFrame( frames[0] ) ) ) )
 			{
-				children.push_back( new FileSystemPath( std::filesystem::path( p / (*it)->getFileName() ).generic_string(), const_cast<PathFilter *>( getFilter() ), m_includeSequences ) );
+				children.push_back( new FileSystemPath( std::filesystem::path( p / ( *it )->getFileName() ).generic_string(), const_cast<PathFilter *>( getFilter() ), m_includeSequences ) );
 			}
 		}
 	}
@@ -585,7 +584,8 @@ PathFilterPtr FileSystemPath::createStandardFilter( const std::vector<std::strin
 
 	// User defined search filter
 
-	std::vector<std::string> searchPatterns; searchPatterns.push_back( "" );
+	std::vector<std::string> searchPatterns;
+	searchPatterns.push_back( "" );
 	MatchPatternPathFilterPtr searchFilter = new MatchPatternPathFilter( searchPatterns );
 	searchFilter->setEnabled( false );
 
@@ -600,7 +600,7 @@ PathFilterPtr FileSystemPath::createStandardFilter( const std::vector<std::strin
 
 #ifdef _MSC_VER
 
-void FileSystemPath::rootAndNames(const std::string &string, InternedString &root, Names &names ) const
+void FileSystemPath::rootAndNames( const std::string &string, InternedString &root, Names &names ) const
 {
 	std::string sanitizedString = string;
 
@@ -620,7 +620,7 @@ void FileSystemPath::rootAndNames(const std::string &string, InternedString &roo
 		// slash if so. If it's not a drive letter path, interpret it as a UNC path.
 
 		Names splitPath;
-		StringAlgo::tokenize(sanitizedString, '/', splitPath);
+		StringAlgo::tokenize( sanitizedString, '/', splitPath );
 		if( splitPath.size() )
 		{
 			const std::string firstElement = splitPath[0].string();

@@ -283,10 +283,7 @@ Plug *loadParameter( InternedString name, const SdfValueTypeName &type, Plug::Di
 				throw IECore::Exception( fmt::format( "Cannot create OptionalValuePlug for parameter `{}`", name.string() ) );
 			}
 			PlugAlgo::replacePlug(
-				parent, new OptionalValuePlug(
-					name, acquiredValuePlug, /* enabledPlugDefaultValue = */ false,
-					direction
-				)
+				parent, new OptionalValuePlug( name, acquiredValuePlug, /* enabledPlugDefaultValue = */ false, direction )
 			);
 		}
 		else
@@ -334,7 +331,7 @@ const IECore::InternedString g_displacement( "displacement" );
 GAFFER_NODE_DEFINE_TYPE( USDShader );
 
 USDShader::USDShader( const std::string &name )
-	:	GafferScene::Shader( name )
+	: GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Plug::Out ) );
 }

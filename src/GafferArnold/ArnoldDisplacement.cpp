@@ -51,10 +51,10 @@ static IECore::InternedString g_paddingAttributeName = "ai:disp_padding";
 static IECore::InternedString g_heightAttributeName = "ai:disp_height";
 static IECore::InternedString g_zeroValueAttributeName = "ai:disp_zero_value";
 static IECore::InternedString g_autoBumpAttributeName = "ai:disp_autobump";
-static IECore::InternedString g_mapInputAttributeNames[] = { "ai:surface", "osl:shader", "" } ;
+static IECore::InternedString g_mapInputAttributeNames[] = { "ai:surface", "osl:shader", "" };
 
 ArnoldDisplacement::ArnoldDisplacement( const std::string &name )
-	:	Shader( name )
+	: Shader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "map" ) );
@@ -131,14 +131,12 @@ const Gaffer::Plug *ArnoldDisplacement::outPlug() const
 
 bool ArnoldDisplacement::affectsAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		Shader::affectsAttributes( input ) ||
+	return Shader::affectsAttributes( input ) ||
 		input == mapPlug() ||
 		input == heightPlug() ||
 		input == paddingPlug() ||
 		input == zeroValuePlug() ||
-		input == autoBumpPlug()
-	;
+		input == autoBumpPlug();
 }
 
 void ArnoldDisplacement::attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const
@@ -181,7 +179,7 @@ IECore::ConstCompoundObjectPtr ArnoldDisplacement::attributes( const Gaffer::Plu
 	m[g_heightAttributeName] = new FloatData( heightPlug()->getValue() );
 	m[g_paddingAttributeName] = new FloatData( paddingPlug()->getValue() );
 	m[g_zeroValueAttributeName] = new FloatData( zeroValuePlug()->getValue() );
-	if ( !autoBumpPlug()->isSetToDefault() )
+	if( !autoBumpPlug()->isSetToDefault() )
 	{
 		m[g_autoBumpAttributeName] = new BoolData( autoBumpPlug()->getValue() );
 	}

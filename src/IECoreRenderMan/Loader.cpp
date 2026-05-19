@@ -50,8 +50,7 @@
 
 RixContext *IECoreRenderMan::Loader::context()
 {
-	static RixContext *g_context = [] () -> RixContext * {
-
+	static RixContext *g_context = []() -> RixContext * {
 		const char *rmanTree = getenv( "RMANTREE" );
 		if( !rmanTree )
 		{
@@ -104,9 +103,8 @@ RixContext *IECoreRenderMan::Loader::context()
 
 #endif
 
-		auto rixGetContext = (RixContext *(*)())symbol;
+		auto rixGetContext = ( RixContext * (*)() ) symbol;
 		return rixGetContext();
-
 	}();
 	return g_context;
 }

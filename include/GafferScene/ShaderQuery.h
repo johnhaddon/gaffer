@@ -50,72 +50,74 @@ namespace GafferScene
 
 class GAFFERSCENE_API ShaderQuery : public Gaffer::ComputeNode
 {
-	public:
-		explicit ShaderQuery( const std::string &name = defaultName<ShaderQuery>() );
-		~ShaderQuery() override;
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ShaderQuery, ShaderQueryTypeId, Gaffer::ComputeNode );
+	explicit ShaderQuery( const std::string &name = defaultName<ShaderQuery>() );
+	~ShaderQuery() override;
 
-		ScenePlug *scenePlug();
-		const ScenePlug *scenePlug() const;
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ShaderQuery, ShaderQueryTypeId, Gaffer::ComputeNode );
 
-		Gaffer::StringPlug *locationPlug();
-		const Gaffer::StringPlug *locationPlug() const;
+	ScenePlug *scenePlug();
+	const ScenePlug *scenePlug() const;
 
-		Gaffer::StringPlug *shaderPlug();
-		const Gaffer::StringPlug *shaderPlug() const;
+	Gaffer::StringPlug *locationPlug();
+	const Gaffer::StringPlug *locationPlug() const;
 
-		Gaffer::BoolPlug *inheritPlug();
-		const Gaffer::BoolPlug *inheritPlug() const;
+	Gaffer::StringPlug *shaderPlug();
+	const Gaffer::StringPlug *shaderPlug() const;
 
-		Gaffer::ArrayPlug *queriesPlug();
-		const Gaffer::ArrayPlug *queriesPlug() const;
+	Gaffer::BoolPlug *inheritPlug();
+	const Gaffer::BoolPlug *inheritPlug() const;
 
-		Gaffer::ArrayPlug *outPlug();
-		const Gaffer::ArrayPlug *outPlug() const;
+	Gaffer::ArrayPlug *queriesPlug();
+	const Gaffer::ArrayPlug *queriesPlug() const;
 
-		/// Adds a query for parameter, with a type and default value specified by plug.
-		/// The returned NameValuePlug is parented to queriesPlug() and may be edited
-		/// subsequently to modify the parameter name and default. Corresponding children
-		/// are added to existsPlug() and valuePlug() to provide the output from the query.
-		Gaffer::NameValuePlug *addQuery(
-			const Gaffer::ValuePlug *plug,
-			const std::string &parameter = ""
-		);
-		/// Removes a query. Throws an Exception if the query or corresponding children
-		/// of `valuesPlug()` and `existsPlug()` can not be deleted.
-		void removeQuery( Gaffer::NameValuePlug *plug );
+	Gaffer::ArrayPlug *outPlug();
+	const Gaffer::ArrayPlug *outPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	/// Adds a query for parameter, with a type and default value specified by plug.
+	/// The returned NameValuePlug is parented to queriesPlug() and may be edited
+	/// subsequently to modify the parameter name and default. Corresponding children
+	/// are added to existsPlug() and valuePlug() to provide the output from the query.
+	Gaffer::NameValuePlug *addQuery(
+		const Gaffer::ValuePlug *plug,
+		const std::string &parameter = ""
+	);
+	/// Removes a query. Throws an Exception if the query or corresponding children
+	/// of `valuesPlug()` and `existsPlug()` can not be deleted.
+	void removeQuery( Gaffer::NameValuePlug *plug );
 
-		/// Returns the `exists`, `value` or child of `out` corresponding to the specified
-		/// query plug. Throws an exception if the query does not exist or the corresponding output
-		/// plug does not exist or is the wrong type.
-		const Gaffer::BoolPlug *existsPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
-		const Gaffer::ValuePlug *valuePlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
-		const Gaffer::ValuePlug *outPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		/// Returns the child of `queryPlug` or `outPlug` corresponding to the `outputPlug`.
-		/// `outputPlug` can be any descendant of the desired ancestor.
-		/// Throws an exception if there is no corresponding query or the result is the wrong type.
-		const Gaffer::NameValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
-		const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
+	/// Returns the `exists`, `value` or child of `out` corresponding to the specified
+	/// query plug. Throws an exception if the query does not exist or the corresponding output
+	/// plug does not exist or is the wrong type.
+	const Gaffer::BoolPlug *existsPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
+	const Gaffer::ValuePlug *valuePlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
+	const Gaffer::ValuePlug *outPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
 
-	protected:
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context) const override;
+	/// Returns the child of `queryPlug` or `outPlug` corresponding to the `outputPlug`.
+	/// `outputPlug` can be any descendant of the desired ancestor.
+	/// Throws an exception if there is no corresponding query or the result is the wrong type.
+	const Gaffer::NameValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
+	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-	private:
+protected:
 
-		AttributeQuery *attributeQuery();
-		const AttributeQuery *attributeQuery() const;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ObjectPlug *intermediateObjectPlug();
-		const Gaffer::ObjectPlug *intermediateObjectPlug() const;
+private:
 
-		const IECore::Data *parameterData( const IECore::Object *object, const std::string &parameterName ) const;
+	AttributeQuery *attributeQuery();
+	const AttributeQuery *attributeQuery() const;
 
-		static size_t g_firstPlugIndex;
+	Gaffer::ObjectPlug *intermediateObjectPlug();
+	const Gaffer::ObjectPlug *intermediateObjectPlug() const;
+
+	const IECore::Data *parameterData( const IECore::Object *object, const std::string &parameterName ) const;
+
+	static size_t g_firstPlugIndex;
 };
 
-}  // namespace GafferScene
+} // namespace GafferScene

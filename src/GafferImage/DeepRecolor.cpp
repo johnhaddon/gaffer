@@ -49,7 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepRecolor );
 size_t DeepRecolor::g_firstPlugIndex = 0;
 
 DeepRecolor::DeepRecolor( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "colorSource" ) );
@@ -79,12 +79,12 @@ const GafferImage::ImagePlug *DeepRecolor::colorSourcePlug() const
 
 Gaffer::BoolPlug *DeepRecolor::useColorSourceAlphaPlug()
 {
-	return getChild<BoolPlug>( g_firstPlugIndex+1 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::BoolPlug *DeepRecolor::useColorSourceAlphaPlug() const
 {
-	return getChild<BoolPlug>( g_firstPlugIndex+1 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 1 );
 }
 
 void DeepRecolor::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
@@ -103,8 +103,7 @@ void DeepRecolor::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		input == colorSourcePlug()->dataWindowPlug() ||
 		input == colorSourcePlug()->channelNamesPlug() ||
 		input == colorSourcePlug()->deepPlug() ||
-		input == useColorSourceAlphaPlug()
-	)
+		input == useColorSourceAlphaPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -285,7 +284,7 @@ IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData( const std::stri
 		for( int y = boundInTile.min.y; y < boundInTile.max.y; y++ )
 		{
 			int i = y * ImagePlug::tileSize() + boundInTile.min.x;
-			int prevOffset = i > 0 ? sampleOffsets[ i - 1 ] : 0;
+			int prevOffset = i > 0 ? sampleOffsets[i - 1] : 0;
 
 			for( int j = 0; j < scanlineLength; j++ )
 			{
@@ -307,7 +306,7 @@ IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData( const std::stri
 					{
 						result[k] = deepAlpha[k];
 					}
-					result[offset-1] = 1.0f;
+					result[offset - 1] = 1.0f;
 				}
 				else if( csAlpha <= 0.0f )
 				{
@@ -364,7 +363,7 @@ IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData( const std::stri
 		for( int y = boundInTile.min.y; y < boundInTile.max.y; y++ )
 		{
 			int i = y * ImagePlug::tileSize() + boundInTile.min.x;
-			int prevOffset = i > 0 ? sampleOffsets[ i - 1 ] : 0;
+			int prevOffset = i > 0 ? sampleOffsets[i - 1] : 0;
 
 			for( int j = 0; j < scanlineLength; j++ )
 			{
@@ -403,7 +402,7 @@ IECore::ConstStringVectorDataPtr DeepRecolor::computeChannelNames( const Gaffer:
 	IECore::ConstStringVectorDataPtr inChannelsData = inPlug()->channelNamesPlug()->getValue();
 	IECore::ConstStringVectorDataPtr colorChannelsData = colorSourcePlug()->channelNamesPlug()->getValue();
 
-	const std::vector< std::string > &inChannels = inChannelsData->readable();
+	const std::vector<std::string> &inChannels = inChannelsData->readable();
 
 	IECore::StringVectorDataPtr resultData;
 	for( const std::string &c : colorChannelsData->readable() )

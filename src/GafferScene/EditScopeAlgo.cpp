@@ -143,7 +143,8 @@ bool GafferScene::EditScopeAlgo::getPruned( Gaffer::EditScope *scope, const Scen
 	}
 	auto pathsPlug = processor->getChild<StringVectorDataPlug>( "paths" );
 	ConstStringVectorDataPtr paths = pathsPlug->getValue();
-	string pathString; ScenePlug::pathToString( path, pathString );
+	string pathString;
+	ScenePlug::pathToString( path, pathString );
 	return find( paths->readable().begin(), paths->readable().end(), pathString ) != paths->readable().end();
 }
 
@@ -264,7 +265,7 @@ EditScopeAlgo::TransformEdit::TransformEdit(
 	const Gaffer::V3fPlugPtr &scale,
 	const Gaffer::V3fPlugPtr &pivot
 )
-	:	translate( translate ), rotate( rotate ), scale( scale ), pivot( pivot )
+	: translate( translate ), rotate( rotate ), scale( scale ), pivot( pivot )
 {
 }
 
@@ -281,17 +282,15 @@ Imath::M44f EditScopeAlgo::TransformEdit::matrix() const
 
 bool EditScopeAlgo::TransformEdit::operator == ( const TransformEdit &rhs ) const
 {
-	return
-		translate == rhs.translate &&
+	return translate == rhs.translate &&
 		rotate == rhs.rotate &&
 		scale == rhs.scale &&
-		pivot == rhs.pivot
-	;
+		pivot == rhs.pivot;
 }
 
 bool EditScopeAlgo::TransformEdit::operator != ( const TransformEdit &rhs ) const
 {
-	return !(*this == rhs);
+	return !( *this == rhs );
 }
 
 std::optional<GafferScene::EditScopeAlgo::TransformEdit> GafferScene::EditScopeAlgo::acquireTransformEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool createIfNecessary )
@@ -317,7 +316,7 @@ std::optional<GafferScene::EditScopeAlgo::TransformEdit> GafferScene::EditScopeA
 		row->namePlug()->setValue( pathString );
 	}
 
-	return TransformEdit {
+	return TransformEdit{
 		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_translate )->valuePlug<V3fPlug>(),
 		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_rotate )->valuePlug<V3fPlug>(),
 		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_scale )->valuePlug<V3fPlug>(),
@@ -455,7 +454,7 @@ SceneProcessor *acquireParameterProcessor( EditScope *editScope, const std::stri
 		const string name = parameterProcessorName( attribute );
 		EditScope::registerProcessor(
 			name,
-			[ attribute, name ] () {
+			[attribute, name]() {
 				return ::shaderParameterProcessor( attribute, name );
 			}
 		);
@@ -469,7 +468,8 @@ ConstObjectPtr attributeValue( const ScenePlug *scene, const ScenePlug::ScenePat
 {
 	if( !scene->exists( path ) )
 	{
-		string pathString; ScenePlug::pathToString( path, pathString );
+		string pathString;
+		ScenePlug::pathToString( path, pathString );
 		throw IECore::Exception( fmt::format( "Location \"{}\" does not exist", pathString ) );
 	}
 
@@ -742,7 +742,7 @@ SceneProcessor *acquireAttributeProcessor( EditScope *editScope, bool createIfNe
 	return editScope->acquireProcessor<SceneProcessor>( g_attributeProcessorName, createIfNecessary );
 }
 
-}  // namespace
+} // namespace
 
 
 bool GafferScene::EditScopeAlgo::hasAttributeEdit( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute )
@@ -953,7 +953,7 @@ SceneProcessorPtr setMembershipProcessor()
 
 EditScope::ProcessorRegistration g_setMembershipProcessorRegistration( "SetMembershipEdits", setMembershipProcessor );
 
-}  // namespace
+} // namespace
 
 Gaffer::ValuePlug *EditScopeAlgo::acquireSetEdits( Gaffer::EditScope *scope, const std::string &set, bool createIfNecessary )
 {
@@ -1192,7 +1192,7 @@ TweakPlug *tweakPlug( TweaksPlug *tweaks, const std::string &tweakName )
 	return nullptr;
 }
 
-}  // namespace
+} // namespace
 
 
 bool GafferScene::EditScopeAlgo::hasOptionEdit( const Gaffer::EditScope *scope, const std::string &option )
@@ -1360,7 +1360,7 @@ SceneProcessor *acquireRenderPassOptionProcessor( EditScope *editScope, bool cre
 	return editScope->acquireProcessor<SceneProcessor>( g_renderPassOptionProcessorName, createIfNecessary );
 }
 
-}  // namespace
+} // namespace
 
 bool GafferScene::EditScopeAlgo::hasRenderPassOptionEdit( const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option )
 {

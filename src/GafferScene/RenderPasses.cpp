@@ -48,7 +48,7 @@ const std::string g_passNamesOptionName = "option:renderPass:names";
 size_t RenderPasses::g_firstPlugIndex = 0;
 
 RenderPasses::RenderPasses( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringVectorDataPlug( "names" ) );
@@ -102,13 +102,12 @@ IECore::ConstCompoundObjectPtr RenderPasses::computeProcessedGlobals( const Gaff
 			std::remove_if(
 				copy->writable().begin(),
 				copy->writable().end(),
-				[&names]( const auto &elem )
-				{
+				[&names]( const auto &elem ) {
 					return std::find(
-						names.begin(),
-						names.end(),
-						elem
-					) != names.end();
+							   names.begin(),
+							   names.end(),
+							   elem
+						   ) != names.end();
 				}
 			),
 			copy->writable().end()

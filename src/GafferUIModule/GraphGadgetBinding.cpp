@@ -83,9 +83,9 @@ void setFilter( GraphGadget &graphGadget, Gaffer::SetPtr filter )
 
 struct RootChangedSlotCaller
 {
-	void operator()( boost::python::object slot, GraphGadgetPtr g, Gaffer::NodePtr n )
+	void operator () ( boost::python::object slot, GraphGadgetPtr g, Gaffer::NodePtr n )
 	{
-		slot( g , n );
+		slot( g, n );
 	}
 };
 
@@ -95,7 +95,7 @@ list connectionGadgets1( GraphGadget &graphGadget, const Gaffer::Plug *plug, con
 	graphGadget.connectionGadgets( plug, connections, excludedNodes );
 
 	boost::python::list l;
-	for( std::vector<ConnectionGadget *>::const_iterator it=connections.begin(), eIt=connections.end(); it!=eIt; ++it )
+	for( std::vector<ConnectionGadget *>::const_iterator it = connections.begin(), eIt = connections.end(); it != eIt; ++it )
 	{
 		l.append( ConnectionGadgetPtr( *it ) );
 	}
@@ -108,7 +108,7 @@ list connectionGadgets2( GraphGadget &graphGadget, const Gaffer::Node *node, con
 	graphGadget.connectionGadgets( node, connections, excludedNodes );
 
 	boost::python::list l;
-	for( std::vector<ConnectionGadget *>::const_iterator it=connections.begin(), eIt=connections.end(); it!=eIt; ++it )
+	for( std::vector<ConnectionGadget *>::const_iterator it = connections.begin(), eIt = connections.end(); it != eIt; ++it )
 	{
 		l.append( ConnectionGadgetPtr( *it ) );
 	}
@@ -121,7 +121,7 @@ list upstreamNodeGadgets( GraphGadget &graphGadget, const Gaffer::Node *node, si
 	graphGadget.upstreamNodeGadgets( node, nodeGadgets, degreesOfSeparation );
 
 	boost::python::list l;
-	for( std::vector<NodeGadget *>::const_iterator it=nodeGadgets.begin(), eIt=nodeGadgets.end(); it!=eIt; ++it )
+	for( std::vector<NodeGadget *>::const_iterator it = nodeGadgets.begin(), eIt = nodeGadgets.end(); it != eIt; ++it )
 	{
 		l.append( NodeGadgetPtr( *it ) );
 	}
@@ -134,7 +134,7 @@ list downstreamNodeGadgets( GraphGadget &graphGadget, const Gaffer::Node *node, 
 	graphGadget.downstreamNodeGadgets( node, nodeGadgets, degreesOfSeparation );
 
 	boost::python::list l;
-	for( std::vector<NodeGadget *>::const_iterator it=nodeGadgets.begin(), eIt=nodeGadgets.end(); it!=eIt; ++it )
+	for( std::vector<NodeGadget *>::const_iterator it = nodeGadgets.begin(), eIt = nodeGadgets.end(); it != eIt; ++it )
 	{
 		l.append( NodeGadgetPtr( *it ) );
 	}
@@ -147,7 +147,7 @@ list connectedNodeGadgets( GraphGadget &graphGadget, const Gaffer::Node *node, G
 	graphGadget.connectedNodeGadgets( node, nodeGadgets, direction, degreesOfSeparation );
 
 	boost::python::list l;
-	for( std::vector<NodeGadget *>::const_iterator it=nodeGadgets.begin(), eIt=nodeGadgets.end(); it!=eIt; ++it )
+	for( std::vector<NodeGadget *>::const_iterator it = nodeGadgets.begin(), eIt = nodeGadgets.end(); it != eIt; ++it )
 	{
 		l.append( NodeGadgetPtr( *it ) );
 	}
@@ -160,7 +160,7 @@ list unpositionedNodeGadgets( GraphGadget &graphGadget )
 	graphGadget.unpositionedNodeGadgets( nodeGadgets );
 
 	boost::python::list l;
-	for( std::vector<NodeGadget *>::const_iterator it=nodeGadgets.begin(), eIt=nodeGadgets.end(); it!=eIt; ++it )
+	for( std::vector<NodeGadget *>::const_iterator it = nodeGadgets.begin(), eIt = nodeGadgets.end(); it != eIt; ++it )
 	{
 		l.append( NodeGadgetPtr( *it ) );
 	}
@@ -250,7 +250,7 @@ ContextPtr targetContextWrapper( const ContextTracker &contextTracker )
 
 struct ContextTrackerSlotCaller
 {
-	void operator()( boost::python::object slot, ContextTracker &contextTracker )
+	void operator () ( boost::python::object slot, ContextTracker &contextTracker )
 	{
 		try
 		{
@@ -281,87 +281,81 @@ void GafferUIModule::bindGraphGadget()
 {
 	{
 		scope s = GadgetClass<GraphGadget>()
-			.def( init<Gaffer::NodePtr, Gaffer::SetPtr>( ( arg_( "root" ), arg_( "filter" ) = object() ) ) )
-			.def( "getRoot", (Gaffer::Node *(GraphGadget::*)())&GraphGadget::getRoot, return_value_policy<CastToIntrusivePtr>() )
-			.def( "setRoot", &setRoot, ( arg_( "root" ), arg_( "filter" ) = object() ) )
-			.def( "rootChangedSignal", &GraphGadget::rootChangedSignal, return_internal_reference<1>() )
-			.def( "getFilter", (Gaffer::Set *(GraphGadget::*)())&GraphGadget::getFilter, return_value_policy<CastToIntrusivePtr>() )
-			.def( "setFilter", &setFilter )
-			.def( "nodeGadget", (NodeGadget *(GraphGadget::*)( const Gaffer::Node * ))&GraphGadget::nodeGadget, return_value_policy<CastToIntrusivePtr>() )
-			.def( "connectionGadget", (ConnectionGadget *(GraphGadget::*)( const Gaffer::Plug * ))&GraphGadget::connectionGadget, return_value_policy<CastToIntrusivePtr>() )
-			.def( "connectionGadgets", &connectionGadgets1, ( arg_( "plug" ), arg_( "excludedNodes" ) = object() ) )
-			.def( "connectionGadgets", &connectionGadgets2, ( arg_( "node" ), arg_( "excludedNodes" ) = object() ) )
-			.def( "auxiliaryConnectionsGadget", (AuxiliaryConnectionsGadget *(GraphGadget::*)())&GraphGadget::auxiliaryConnectionsGadget, return_value_policy<CastToIntrusivePtr>() )
-			.def( "annotationsGadget",  (AnnotationsGadget *(GraphGadget::*)())&GraphGadget::annotationsGadget, return_value_policy<CastToIntrusivePtr>() )
-			.def( "upstreamNodeGadgets", &upstreamNodeGadgets, ( arg( "node" ), arg( "degreesOfSeparation" ) = std::numeric_limits<size_t>::max() ) )
-			.def( "downstreamNodeGadgets", &downstreamNodeGadgets, ( arg( "node" ), arg( "degreesOfSeparation" ) = std::numeric_limits<size_t>::max() ) )
-			.def( "connectedNodeGadgets", &connectedNodeGadgets, ( arg( "node" ), arg( "direction" ) = Gaffer::Plug::Invalid, arg( "degreesOfSeparation" ) = std::numeric_limits<size_t>::max() ) )
-			.def( "unpositionedNodeGadgets", &unpositionedNodeGadgets )
-			.def( "setNodePosition", &setNodePosition )
-			.def( "getNodePosition", &GraphGadget::getNodePosition )
-			.def( "hasNodePosition", &GraphGadget::hasNodePosition )
-			.def( "setNodeInputConnectionsMinimised", &setNodeInputConnectionsMinimised )
-			.def( "getNodeInputConnectionsMinimised", &GraphGadget::getNodeInputConnectionsMinimised )
-			.def( "setNodeOutputConnectionsMinimised", &setNodeOutputConnectionsMinimised )
-			.def( "getNodeOutputConnectionsMinimised", &GraphGadget::getNodeOutputConnectionsMinimised )
-			.def( "setLayout", &GraphGadget::setLayout )
-			.def( "getLayout", (GraphLayout *(GraphGadget::*)())&GraphGadget::getLayout, return_value_policy<CastToIntrusivePtr>() )
-			.def( "nodeGadgetAt", &GraphGadget::nodeGadgetAt, return_value_policy<CastToIntrusivePtr>() )
-			.def( "connectionGadgetAt", &GraphGadget::connectionGadgetAt, return_value_policy<CastToIntrusivePtr>() )
-		;
+					  .def( init<Gaffer::NodePtr, Gaffer::SetPtr>( ( arg_( "root" ), arg_( "filter" ) = object() ) ) )
+					  .def( "getRoot", ( Gaffer::Node * (GraphGadget::*)() ) & GraphGadget::getRoot, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "setRoot", &setRoot, ( arg_( "root" ), arg_( "filter" ) = object() ) )
+					  .def( "rootChangedSignal", &GraphGadget::rootChangedSignal, return_internal_reference<1>() )
+					  .def( "getFilter", ( Gaffer::Set * (GraphGadget::*)() ) & GraphGadget::getFilter, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "setFilter", &setFilter )
+					  .def( "nodeGadget", ( NodeGadget * (GraphGadget::*)(const Gaffer::Node *)) & GraphGadget::nodeGadget, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "connectionGadget", ( ConnectionGadget * (GraphGadget::*)(const Gaffer::Plug *)) & GraphGadget::connectionGadget, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "connectionGadgets", &connectionGadgets1, ( arg_( "plug" ), arg_( "excludedNodes" ) = object() ) )
+					  .def( "connectionGadgets", &connectionGadgets2, ( arg_( "node" ), arg_( "excludedNodes" ) = object() ) )
+					  .def( "auxiliaryConnectionsGadget", ( AuxiliaryConnectionsGadget * (GraphGadget::*)() ) & GraphGadget::auxiliaryConnectionsGadget, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "annotationsGadget", ( AnnotationsGadget * (GraphGadget::*)() ) & GraphGadget::annotationsGadget, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "upstreamNodeGadgets", &upstreamNodeGadgets, ( arg( "node" ), arg( "degreesOfSeparation" ) = std::numeric_limits<size_t>::max() ) )
+					  .def( "downstreamNodeGadgets", &downstreamNodeGadgets, ( arg( "node" ), arg( "degreesOfSeparation" ) = std::numeric_limits<size_t>::max() ) )
+					  .def( "connectedNodeGadgets", &connectedNodeGadgets, ( arg( "node" ), arg( "direction" ) = Gaffer::Plug::Invalid, arg( "degreesOfSeparation" ) = std::numeric_limits<size_t>::max() ) )
+					  .def( "unpositionedNodeGadgets", &unpositionedNodeGadgets )
+					  .def( "setNodePosition", &setNodePosition )
+					  .def( "getNodePosition", &GraphGadget::getNodePosition )
+					  .def( "hasNodePosition", &GraphGadget::hasNodePosition )
+					  .def( "setNodeInputConnectionsMinimised", &setNodeInputConnectionsMinimised )
+					  .def( "getNodeInputConnectionsMinimised", &GraphGadget::getNodeInputConnectionsMinimised )
+					  .def( "setNodeOutputConnectionsMinimised", &setNodeOutputConnectionsMinimised )
+					  .def( "getNodeOutputConnectionsMinimised", &GraphGadget::getNodeOutputConnectionsMinimised )
+					  .def( "setLayout", &GraphGadget::setLayout )
+					  .def( "getLayout", ( GraphLayout * (GraphGadget::*)() ) & GraphGadget::getLayout, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "nodeGadgetAt", &GraphGadget::nodeGadgetAt, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "connectionGadgetAt", &GraphGadget::connectionGadgetAt, return_value_policy<CastToIntrusivePtr>() );
 
 		GafferBindings::SignalClass<GraphGadget::RootChangedSignal, GafferBindings::DefaultSignalCaller<GraphGadget::RootChangedSignal>, RootChangedSlotCaller>( "RootChangedSignal" );
 	}
 
 	GadgetClass<AuxiliaryConnectionsGadget>()
-		.def( "hasConnection", (bool (AuxiliaryConnectionsGadget::*)( const Gadget *, const Gadget * ) const)&AuxiliaryConnectionsGadget::hasConnection )
-		.def( "hasConnection", (bool (AuxiliaryConnectionsGadget::*)( const Node *, const Node * ) const)&AuxiliaryConnectionsGadget::hasConnection )
-		.def( "connectionAt", &connectionAt )
-	;
+		.def( "hasConnection", ( bool ( AuxiliaryConnectionsGadget::* )( const Gadget *, const Gadget * ) const ) & AuxiliaryConnectionsGadget::hasConnection )
+		.def( "hasConnection", ( bool ( AuxiliaryConnectionsGadget::* )( const Node *, const Node * ) const ) & AuxiliaryConnectionsGadget::hasConnection )
+		.def( "connectionAt", &connectionAt );
 
 	GadgetClass<AnnotationsGadget>()
 		.def_readonly( "untemplatedAnnotations", &AnnotationsGadget::untemplatedAnnotations )
 		.def( "setVisibleAnnotations", &AnnotationsGadget::setVisibleAnnotations )
 		.def( "getVisibleAnnotations", &AnnotationsGadget::getVisibleAnnotations, return_value_policy<copy_const_reference>() )
 		.def( "annotationText", &annotationTextWrapper, return_value_policy<copy_const_reference>(), ( arg( "node" ), arg( "annotation" ) = "user" ) )
-		.def( "annotationAt", &annotationAtWrapper )
-	;
+		.def( "annotationAt", &annotationAtWrapper );
 
 	IECorePython::RunTimeTypedClass<GraphLayout>()
 		.def( "connectNode", &connectNode )
 		.def( "connectNodes", &connectNodes )
 		.def( "positionNode", &positionNode, ( arg_( "graph" ), arg_( "node" ), arg_( "fallbackPosition" ) = Imath::V2f( 0 ) ) )
 		.def( "positionNodes", &positionNodes, ( arg_( "graph" ), arg_( "nodes" ), arg_( "fallbackPosition" ) = Imath::V2f( 0 ) ) )
-		.def( "layoutNodes", &layoutNodes, ( arg_( "graph" ), arg_( "nodes" ) = object() ) )
-	;
+		.def( "layoutNodes", &layoutNodes, ( arg_( "graph" ), arg_( "nodes" ) = object() ) );
 
 	IECorePython::RunTimeTypedClass<StandardGraphLayout>()
 		.def( init<>() )
 		.def( "setConnectionScale", &StandardGraphLayout::setConnectionScale )
 		.def( "getConnectionScale", &StandardGraphLayout::getConnectionScale )
 		.def( "setNodeSeparationScale", &StandardGraphLayout::setNodeSeparationScale )
-		.def( "getNodeSeparationScale", &StandardGraphLayout::getNodeSeparationScale )
-	;
+		.def( "getNodeSeparationScale", &StandardGraphLayout::getNodeSeparationScale );
 
 	{
 		scope s = IECorePython::RefCountedClass<ContextTracker, IECore::RefCounted>( "ContextTracker" )
-			.def( init<const NodePtr &, const ContextPtr &>() )
-			.def( "acquire", &ContextTracker::acquire ).staticmethod( "acquire" )
-			.def( "acquireForFocus", &ContextTracker::acquireForFocus ).staticmethod( "acquireForFocus" )
-			.def( "targetNode", &targetNodeWrapper )
-			.def( "targetContext", &targetContextWrapper )
-			.def( "isTracked", (bool (ContextTracker::*)( const Plug *plug ) const)&ContextTracker::isTracked )
-			.def( "isTracked", (bool (ContextTracker::*)( const Node *node ) const)&ContextTracker::isTracked )
-			.def( "context", &contextWrapper1, ( arg( "node" ), arg( "_copy" ) = true ) )
-			.def( "context", &contextWrapper2, ( arg( "plug" ), arg( "_copy" ) = true ) )
-			.def( "isEnabled", &ContextTracker::isEnabled )
-			.def( "updatePending", &ContextTracker::updatePending )
-			.def( "changedSignal", (ContextTracker::Signal &(ContextTracker::*)())&ContextTracker::changedSignal, return_internal_reference<1>() )
-			.def( "changedSignal", (ContextTracker::Signal &(ContextTracker::*)( GraphComponent * ))&ContextTracker::changedSignal, return_internal_reference<1>() )
-		;
+					  .def( init<const NodePtr &, const ContextPtr &>() )
+					  .def( "acquire", &ContextTracker::acquire )
+					  .staticmethod( "acquire" )
+					  .def( "acquireForFocus", &ContextTracker::acquireForFocus )
+					  .staticmethod( "acquireForFocus" )
+					  .def( "targetNode", &targetNodeWrapper )
+					  .def( "targetContext", &targetContextWrapper )
+					  .def( "isTracked", ( bool ( ContextTracker::* )( const Plug *plug ) const ) & ContextTracker::isTracked )
+					  .def( "isTracked", ( bool ( ContextTracker::* )( const Node *node ) const ) & ContextTracker::isTracked )
+					  .def( "context", &contextWrapper1, ( arg( "node" ), arg( "_copy" ) = true ) )
+					  .def( "context", &contextWrapper2, ( arg( "plug" ), arg( "_copy" ) = true ) )
+					  .def( "isEnabled", &ContextTracker::isEnabled )
+					  .def( "updatePending", &ContextTracker::updatePending )
+					  .def( "changedSignal", ( ContextTracker::Signal & (ContextTracker::*)() ) & ContextTracker::changedSignal, return_internal_reference<1>() )
+					  .def( "changedSignal", ( ContextTracker::Signal & (ContextTracker::*)(GraphComponent *)) & ContextTracker::changedSignal, return_internal_reference<1>() );
 
 		SignalClass<ContextTracker::Signal, DefaultSignalCaller<ContextTracker::Signal>, ContextTrackerSlotCaller>( "Signal" );
-
 	}
-
 }

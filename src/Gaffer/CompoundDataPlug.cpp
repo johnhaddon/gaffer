@@ -70,7 +70,7 @@ const ValuePlug *valuePlug( const NameValuePlug *p )
 GAFFER_PLUG_DEFINE_TYPE( CompoundDataPlug )
 
 CompoundDataPlug::CompoundDataPlug( const std::string &name, Direction direction, unsigned flags )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 }
 
@@ -93,7 +93,7 @@ PlugPtr CompoundDataPlug::createCounterpart( const std::string &name, Direction 
 	CompoundDataPlugPtr result = new CompoundDataPlug( name, direction, getFlags() );
 	for( Plug::Iterator it( this ); !it.done(); ++it )
 	{
-		result->addChild( (*it)->createCounterpart( (*it)->getName(), direction ) );
+		result->addChild( ( *it )->createCounterpart( ( *it )->getName(), direction ) );
 	}
 	return result;
 }
@@ -101,7 +101,7 @@ PlugPtr CompoundDataPlug::createCounterpart( const std::string &name, Direction 
 void CompoundDataPlug::addMembers( const IECore::CompoundData *parameters, bool useNameAsPlugName )
 {
 	std::string plugName = "member1";
-	for( CompoundDataMap::const_iterator it = parameters->readable().begin(); it!=parameters->readable().end(); it++ )
+	for( CompoundDataMap::const_iterator it = parameters->readable().begin(); it != parameters->readable().end(); it++ )
 	{
 		if( useNameAsPlugName )
 		{

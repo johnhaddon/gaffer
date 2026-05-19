@@ -46,45 +46,44 @@ namespace GafferOSL
 class GAFFEROSL_API OSLCode : public OSLShader
 {
 
-	public :
+public:
 
-		explicit OSLCode( const std::string &name=defaultName<OSLCode>() );
-		~OSLCode() override;
+	explicit OSLCode( const std::string &name = defaultName<OSLCode>() );
+	~OSLCode() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLCode, OSLCodeTypeId, OSLShader );
+	GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLCode, OSLCodeTypeId, OSLShader );
 
-		Gaffer::StringPlug *codePlug();
-		const Gaffer::StringPlug *codePlug() const;
+	Gaffer::StringPlug *codePlug();
+	const Gaffer::StringPlug *codePlug() const;
 
-		/// Returns the source to a complete OSL shader created
-		/// from this node, optionally specifying a specific name
-		/// to give to it.
-		std::string source( const std::string shaderName = "" ) const;
+	/// Returns the source to a complete OSL shader created
+	/// from this node, optionally specifying a specific name
+	/// to give to it.
+	std::string source( const std::string shaderName = "" ) const;
 
-		// This is implemented to do nothing, because OSLCode node generates the shader from
-		// the plugs, and not the other way around.  We don't want to inherit the loading behaviour
-		// from OSLShader which tries to match the plugs to a shader on disk
-		void loadShader( const std::string &shaderName, bool keepExistingValues=false ) override;
+	// This is implemented to do nothing, because OSLCode node generates the shader from
+	// the plugs, and not the other way around.  We don't want to inherit the loading behaviour
+	// from OSLShader which tries to match the plugs to a shader on disk
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	private :
+private:
 
-		// We connect the output from this into our `name` plug, allowing us
-		// to generate the shader on disk "just in time", when the NetworkCreator
-		// evaluates the name.
-		Gaffer::StringPlug *shaderNamePlug();
-		const Gaffer::StringPlug *shaderNamePlug() const;
+	// We connect the output from this into our `name` plug, allowing us
+	// to generate the shader on disk "just in time", when the NetworkCreator
+	// evaluates the name.
+	Gaffer::StringPlug *shaderNamePlug();
+	const Gaffer::StringPlug *shaderNamePlug() const;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		void outputAdded();
-		void outputRemoved();
+	void outputAdded();
+	void outputRemoved();
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( OSLCode )

@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( ObjectToScene );
 size_t ObjectToScene::g_firstPlugIndex = 0;
 
 ObjectToScene::ObjectToScene( const std::string &name )
-	:	ObjectSource( name, "object" )
+	: ObjectSource( name, "object" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ObjectPlug( "object", Plug::In, IECore::NullObject::defaultNullObject() ) );

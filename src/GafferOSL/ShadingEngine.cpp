@@ -92,8 +92,8 @@ using namespace GafferOSL;
 
 
 // keyword matrix parameter macro. reference: OSL/genclosure.h
-#define CLOSURE_MATRIX_KEYPARAM(st, fld, key) \
-	{ OIIO::TypeMatrix44, (int)reckless_offsetof(st, fld), key, fieldsize(st, fld) }
+#define CLOSURE_MATRIX_KEYPARAM( st, fld, key ) \
+	{ OIIO::TypeMatrix44, (int)reckless_offsetof( st, fld ), key, fieldsize( st, fld ) }
 
 //////////////////////////////////////////////////////////////////////////
 // Conversion utilities
@@ -143,7 +143,7 @@ void initialiser( Imath::M44f &v )
 	v = Imath::M44f();
 }
 
-void initialiser( std::string& v )
+void initialiser( std::string &v )
 {
 	v = std::string();
 }
@@ -208,9 +208,9 @@ DataPtr dataFromTypeDesc( TypeDesc type, void *&basePointer )
 					return geometricVectorDataFromTypeDesc<V3fVectorData>( type, basePointer );
 			}
 		}
-		else if ( type.aggregate == TypeDesc::MATRIX44 )
+		else if( type.aggregate == TypeDesc::MATRIX44 )
 		{
-			if ( type.basetype == TypeDesc::FLOAT )
+			if( type.basetype == TypeDesc::FLOAT )
 			{
 				return vectorDataFromTypeDesc<M44fVectorData>( type, basePointer );
 			}
@@ -228,7 +228,7 @@ bool convertScalar( void *dst, TypeDesc dstType, const void *src )
 	{
 		if( typedSrc && dst )
 		{
-			*((float*)dst) = static_cast<float>( *typedSrc );
+			*( (float *)dst ) = static_cast<float>( *typedSrc );
 		}
 		return true;
 	}
@@ -236,7 +236,7 @@ bool convertScalar( void *dst, TypeDesc dstType, const void *src )
 	{
 		if( typedSrc && dst )
 		{
-			*((int*)dst) = static_cast<int>( *typedSrc );
+			*( (int *)dst ) = static_cast<int>( *typedSrc );
 		}
 		return true;
 	}
@@ -311,14 +311,14 @@ bool convertValueToOSL( void *dst, TypeDesc dstType, const void *src, TypeDesc s
 #if OSL_LIBRARY_VERSION_CODE >= 11400
 		if( g_shadingSystemBatchSize > 1 )
 		{
-			*(ustring *)dst = *(const char**)src;
+			*(ustring *)dst = *(const char **)src;
 		}
 		else
 		{
-			*(ustringhash *)dst = ustringhash( *(const char**)src );
+			*(ustringhash *)dst = ustringhash( *(const char **)src );
 		}
 #else
-		*(ustring *)dst = *(const char**)src;
+		*(ustring *)dst = *(const char **)src;
 #endif
 		return true;
 	}
@@ -340,7 +340,7 @@ ustring g_contextVariableAttributeScope( "gaffer:context" );
 ustringhash g_contextVariableAttributeScopeHash( g_contextVariableAttributeScope );
 
 #if OSL_USE_BATCHED
-template< int WidthT >
+template<int WidthT>
 void maskedDataInitWithZeroDerivs( MaskedData<WidthT> &wval )
 {
 	// This is a little weird - we need to zero out the derivatives of all the lanes we are
@@ -405,18 +405,17 @@ struct PointCloud
 				dataView.type.unarray();
 			}
 
-			m_attributes[ustringhash(primVarName.c_str())] = {
+			m_attributes[ustringhash( primVarName.c_str() )] = {
 				dataView,
 				primVar.indices ? &primVar.indices->readable() : nullptr
 			};
 		}
-
 	}
 
 #if OSL_LIBRARY_VERSION_CODE >= 11400
-		using PointIndex = int;
+	using PointIndex = int;
 #else
-		using PointIndex = size_t;
+	using PointIndex = size_t;
 #endif
 
 	int search( const OSL::Vec3 &center, float radius, int maxPoints, PointIndex *outIndices, float *outDistances ) const
@@ -478,7 +477,7 @@ struct PointCloud
 		}
 		if( attribute.indices )
 		{
-			index = (*attribute.indices)[index];
+			index = ( *attribute.indices )[index];
 		}
 
 		const char *src = static_cast<const char *>( attribute.dataView.data );
@@ -493,258 +492,253 @@ struct PointCloud
 		return 1;
 	}
 
-	private :
+private:
 
-		IECore::V3fTree m_kdTree;
-		IECore::V3fTree::Iterator m_firstPoint;
-		size_t m_size;
-		container::flat_map<ustringhash, Attribute> m_attributes;
-
+	IECore::V3fTree m_kdTree;
+	IECore::V3fTree::Iterator m_firstPoint;
+	size_t m_size;
+	container::flat_map<ustringhash, Attribute> m_attributes;
 };
 
 class RenderState
 {
 
-	public :
+public:
 
-		RenderState(
-			const IECore::CompoundData *shadingPoints,
-			const ShadingEngine::Transforms &transforms,
-			const ShadingEngine::PointClouds &pointClouds,
-			const std::vector<InternedString> &contextVariablesNeeded,
-			const Gaffer::Context *context
-		)
+	RenderState(
+		const IECore::CompoundData *shadingPoints,
+		const ShadingEngine::Transforms &transforms,
+		const ShadingEngine::PointClouds &pointClouds,
+		const std::vector<InternedString> &contextVariablesNeeded,
+		const Gaffer::Context *context
+	)
+	{
+		for(
+			CompoundDataMap::const_iterator it = shadingPoints->readable().begin(),
+											eIt = shadingPoints->readable().end();
+			it != eIt; ++it )
 		{
-			for(
-				CompoundDataMap::const_iterator it = shadingPoints->readable().begin(),
-				eIt = shadingPoints->readable().end(); it != eIt; ++it
-			)
+			UserData userData;
+			userData.dataView = IECoreImage::OpenImageIOAlgo::DataView( it->second.get() );
+			if( userData.dataView.data )
 			{
-				UserData userData;
-				userData.dataView = IECoreImage::OpenImageIOAlgo::DataView( it->second.get() );
-				if( userData.dataView.data )
+				userData.numValues = std::max( userData.dataView.type.arraylen, 1 );
+				if( userData.dataView.type.arraylen )
 				{
-					userData.numValues = std::max( userData.dataView.type.arraylen, 1 );
-					if( userData.dataView.type.arraylen )
-					{
-						// we unarray the TypeDesc so we can use it directly with
-						// convertValueToOSL() in get_userdata().
-						userData.dataView.type.unarray();
-					}
-					m_userData.insert( make_pair( ustringhash( it->first.c_str() ), userData ) );
+					// we unarray the TypeDesc so we can use it directly with
+					// convertValueToOSL() in get_userdata().
+					userData.dataView.type.unarray();
 				}
-			}
-
-			for( ShadingEngine::Transforms::const_iterator it = transforms.begin(); it != transforms.end(); it++ )
-			{
-				m_transforms[ OIIO::ustringhash( it->first.string() ) ] = it->second;
-			}
-
-			for( const auto &name : contextVariablesNeeded )
-			{
-				DataPtr contextEntryData = context->getAsData( name.string(), nullptr );
-				m_contextVariables.insert(
-					make_pair(
-						ustring( name.c_str() ),
-						ContextData{
-							IECoreImage::OpenImageIOAlgo::DataView( contextEntryData.get() ),
-							contextEntryData
-						}
-					)
-				);
-			}
-
-			for( const auto &[name, primitive] : pointClouds )
-			{
-				try
-				{
-					m_pointClouds[ustringhash(name.c_str())] = std::make_unique<PointCloud>( primitive.get(), name.string() );
-				}
-				catch( const std::exception &e )
-				{
-					IECore::msg( IECore::Msg::Warning, fmt::format( "Point cloud \"{}\"", name.c_str() ), e.what() );
-				}
+				m_userData.insert( make_pair( ustringhash( it->first.c_str() ), userData ) );
 			}
 		}
 
-		bool contextVariable( ustringhash name, TypeDesc type, void *value ) const
+		for( ShadingEngine::Transforms::const_iterator it = transforms.begin(); it != transforms.end(); it++ )
 		{
-			auto it = m_contextVariables.find( name );
-			if( it == m_contextVariables.end() )
-			{
-				return false;
-			}
-
-			return convertValueToOSL( value, type, it->second.dataView.data, it->second.dataView.type );
+			m_transforms[OIIO::ustringhash( it->first.string() )] = it->second;
 		}
 
-		bool userData( size_t pointIndex, ustringhash name, TypeDesc type, void *value ) const
+		for( const auto &name : contextVariablesNeeded )
 		{
-			if( name == g_index )
-			{
-				// if a 4 byte type has been requested then ensure we fit and cast to narrower type
-				// this way f32 reads of shading:index will succeed.
-				if( type.size() == sizeof( int ) && pointIndex <= ( (size_t) std::numeric_limits<int>::max() ) )
-				{
-					int v = (int) pointIndex;
-					return ShadingSystem::convert_value( value, type, &v, OIIO::TypeDesc( OIIO::TypeDesc::INT32 ) );
-				}
-				else
-				{
-					// OSL language doesn't define UINT64 type so we'll probably never enter this branch.
-					return ShadingSystem::convert_value( value, type, &pointIndex, OIIO::TypeDesc( OIIO::TypeDesc::UINT64 ) );
-				}
-			}
-
-			auto it = m_userData.find( name );
-			if( it == m_userData.end() )
-			{
-				return false;
-			}
-
-			const char *src = static_cast<const char *>( it->second.dataView.data );
-			src += std::min( pointIndex, it->second.numValues - 1 ) * it->second.dataView.type.elementsize();
-
-			return convertValueToOSL( value, type, src, it->second.dataView.type );
+			DataPtr contextEntryData = context->getAsData( name.string(), nullptr );
+			m_contextVariables.insert(
+				make_pair(
+					ustring( name.c_str() ),
+					ContextData{
+						IECoreImage::OpenImageIOAlgo::DataView( contextEntryData.get() ),
+						contextEntryData }
+				)
+			);
 		}
 
-#if OSL_USE_BATCHED
-		template< int WidthT >
-		Mask<WidthT> userDataWide( size_t pointIndex, ustringhash name, MaskedData<WidthT> &wval ) const
+		for( const auto &[name, primitive] : pointClouds )
 		{
-			if( name == g_index )
+			try
 			{
-				if( wval.type() == OIIO::TypeDesc( OIIO::TypeDesc::INT32 ) )
-				{
-					maskedDataInitWithZeroDerivs( wval );
-					wval.mask().foreach ([&wval, pointIndex](ActiveLane lane) -> void {
-						int i = pointIndex + lane.value();
-						wval.assign_val_lane_from_scalar( lane, &i );
-					});
-				}
-				else if( wval.type() == OIIO::TypeDesc( OIIO::TypeDesc::FLOAT ) )
-				{
-					maskedDataInitWithZeroDerivs( wval );
-					wval.mask().foreach ([&wval, pointIndex](ActiveLane lane) -> void {
-						float i = pointIndex + lane.value();
-						wval.assign_val_lane_from_scalar( lane, &i );
-					});
-				}
-				else
-				{
-					throw IECore::Exception( g_index.string() + " must be accessed as float or int. " + wval.type().c_str() + " not supported." );
-				}
-
-				return wval.mask();
+				m_pointClouds[ustringhash( name.c_str() )] = std::make_unique<PointCloud>( primitive.get(), name.string() );
 			}
-
-			auto it = m_userData.find( name );
-			if( it == m_userData.end() )
+			catch( const std::exception &e )
 			{
-				return Mask<WidthT>( false );
+				IECore::msg( IECore::Msg::Warning, fmt::format( "Point cloud \"{}\"", name.c_str() ), e.what() );
 			}
+		}
+	}
 
-			const char *src = static_cast<const char *>( it->second.dataView.data );
-			const TypeDesc &sourceType = it->second.dataView.type;
-			size_t elementSize = sourceType.elementsize();
-			size_t maxElement = it->second.numValues - 1;
-			if( it->second.dataView.type == wval.type() && wval.type().basetype != TypeDesc::STRING )
+	bool contextVariable( ustringhash name, TypeDesc type, void *value ) const
+	{
+		auto it = m_contextVariables.find( name );
+		if( it == m_contextVariables.end() )
+		{
+			return false;
+		}
+
+		return convertValueToOSL( value, type, it->second.dataView.data, it->second.dataView.type );
+	}
+
+	bool userData( size_t pointIndex, ustringhash name, TypeDesc type, void *value ) const
+	{
+		if( name == g_index )
+		{
+			// if a 4 byte type has been requested then ensure we fit and cast to narrower type
+			// this way f32 reads of shading:index will succeed.
+			if( type.size() == sizeof( int ) && pointIndex <= ( (size_t)std::numeric_limits<int>::max() ) )
 			{
-				maskedDataInitWithZeroDerivs( wval );
-				wval.mask().foreach ([&wval, pointIndex, src, elementSize, maxElement ](ActiveLane lane) -> void {
-					int i = std::min( pointIndex + lane, maxElement );
-					wval.assign_val_lane_from_scalar( lane, src + i * elementSize );
-				});
+				int v = (int)pointIndex;
+				return ShadingSystem::convert_value( value, type, &v, OIIO::TypeDesc( OIIO::TypeDesc::INT32 ) );
 			}
 			else
 			{
-				// Start by checking if this is a valid conversion
-				if( !convertValueToOSL( nullptr, wval.type(), nullptr, sourceType ) )
-				{
-					return Mask<WidthT>( false );
-				}
+				// OSL language doesn't define UINT64 type so we'll probably never enter this branch.
+				return ShadingSystem::convert_value( value, type, &pointIndex, OIIO::TypeDesc( OIIO::TypeDesc::UINT64 ) );
+			}
+		}
 
-				int neededSize = wval.type().size();
-				const int maxConvertSize = 16;
-				if( neededSize > maxConvertSize )
-				{
-					throw IECore::Exception( "Unsupported type conversion while accessing " + name.string() + ". Cannot convert " + sourceType.c_str() + " to " +  wval.type().c_str() + "." );
-				}
+		auto it = m_userData.find( name );
+		if( it == m_userData.end() )
+		{
+			return false;
+		}
 
+		const char *src = static_cast<const char *>( it->second.dataView.data );
+		src += std::min( pointIndex, it->second.numValues - 1 ) * it->second.dataView.type.elementsize();
+
+		return convertValueToOSL( value, type, src, it->second.dataView.type );
+	}
+
+#if OSL_USE_BATCHED
+	template<int WidthT>
+	Mask<WidthT> userDataWide( size_t pointIndex, ustringhash name, MaskedData<WidthT> &wval ) const
+	{
+		if( name == g_index )
+		{
+			if( wval.type() == OIIO::TypeDesc( OIIO::TypeDesc::INT32 ) )
+			{
 				maskedDataInitWithZeroDerivs( wval );
-
-				void *tempBuffer = alloca( neededSize );
-				wval.mask().foreach (
-					[&wval, pointIndex, src, elementSize, maxElement, &sourceType, &tempBuffer]
-					(ActiveLane lane) -> void
-					{
-						int i = std::min( pointIndex + lane, maxElement );
-						convertValueToOSL( tempBuffer, wval.type(), src + i * elementSize, sourceType );
-						wval.assign_val_lane_from_scalar( lane, tempBuffer );
-					}
-				);
+				wval.mask().foreach( [&wval, pointIndex]( ActiveLane lane ) -> void {
+					int i = pointIndex + lane.value();
+					wval.assign_val_lane_from_scalar( lane, &i );
+				} );
+			}
+			else if( wval.type() == OIIO::TypeDesc( OIIO::TypeDesc::FLOAT ) )
+			{
+				maskedDataInitWithZeroDerivs( wval );
+				wval.mask().foreach( [&wval, pointIndex]( ActiveLane lane ) -> void {
+					float i = pointIndex + lane.value();
+					wval.assign_val_lane_from_scalar( lane, &i );
+				} );
+			}
+			else
+			{
+				throw IECore::Exception( g_index.string() + " must be accessed as float or int. " + wval.type().c_str() + " not supported." );
 			}
 
 			return wval.mask();
 		}
+
+		auto it = m_userData.find( name );
+		if( it == m_userData.end() )
+		{
+			return Mask<WidthT>( false );
+		}
+
+		const char *src = static_cast<const char *>( it->second.dataView.data );
+		const TypeDesc &sourceType = it->second.dataView.type;
+		size_t elementSize = sourceType.elementsize();
+		size_t maxElement = it->second.numValues - 1;
+		if( it->second.dataView.type == wval.type() && wval.type().basetype != TypeDesc::STRING )
+		{
+			maskedDataInitWithZeroDerivs( wval );
+			wval.mask().foreach( [&wval, pointIndex, src, elementSize, maxElement]( ActiveLane lane ) -> void {
+				int i = std::min( pointIndex + lane, maxElement );
+				wval.assign_val_lane_from_scalar( lane, src + i * elementSize );
+			} );
+		}
+		else
+		{
+			// Start by checking if this is a valid conversion
+			if( !convertValueToOSL( nullptr, wval.type(), nullptr, sourceType ) )
+			{
+				return Mask<WidthT>( false );
+			}
+
+			int neededSize = wval.type().size();
+			const int maxConvertSize = 16;
+			if( neededSize > maxConvertSize )
+			{
+				throw IECore::Exception( "Unsupported type conversion while accessing " + name.string() + ". Cannot convert " + sourceType.c_str() + " to " + wval.type().c_str() + "." );
+			}
+
+			maskedDataInitWithZeroDerivs( wval );
+
+			void *tempBuffer = alloca( neededSize );
+			wval.mask().foreach(
+				[&wval, pointIndex, src, elementSize, maxElement, &sourceType, &tempBuffer]( ActiveLane lane ) -> void {
+					int i = std::min( pointIndex + lane, maxElement );
+					convertValueToOSL( tempBuffer, wval.type(), src + i * elementSize, sourceType );
+					wval.assign_val_lane_from_scalar( lane, tempBuffer );
+				}
+			);
+		}
+
+		return wval.mask();
+	}
 #endif
 
-		bool matrixToObject( OIIO::ustringhash name, Imath::M44f &result ) const
+	bool matrixToObject( OIIO::ustringhash name, Imath::M44f &result ) const
+	{
+		RenderStateTransforms::const_iterator i = m_transforms.find( name );
+		if( i != m_transforms.end() )
 		{
-			RenderStateTransforms::const_iterator i = m_transforms.find( name );
-			if( i != m_transforms.end() )
-			{
-				result = i->second.toObjectSpace;
-				return true;
-			}
-			return false;
+			result = i->second.toObjectSpace;
+			return true;
 		}
+		return false;
+	}
 
-		bool matrixFromObject( OIIO::ustringhash name, Imath::M44f &result ) const
+	bool matrixFromObject( OIIO::ustringhash name, Imath::M44f &result ) const
+	{
+		RenderStateTransforms::const_iterator i = m_transforms.find( name );
+		if( i != m_transforms.end() )
 		{
-			RenderStateTransforms::const_iterator i = m_transforms.find( name );
-			if( i != m_transforms.end() )
-			{
-				result = i->second.fromObjectSpace;
-				return true;
-			}
-			return false;
+			result = i->second.fromObjectSpace;
+			return true;
 		}
+		return false;
+	}
 
-		const PointCloud *pointCloud( OIIO::ustringhash filename ) const
-		{
-			auto it = m_pointClouds.find( filename );
-			return it != m_pointClouds.end() ? it->second.get() : nullptr;
-		}
+	const PointCloud *pointCloud( OIIO::ustringhash filename ) const
+	{
+		auto it = m_pointClouds.find( filename );
+		return it != m_pointClouds.end() ? it->second.get() : nullptr;
+	}
 
-	private :
+private:
 
-		using RenderStateTransforms = boost::unordered_map< OIIO::ustringhash, ShadingEngine::Transform, std::hash<ustringhash> >;
-		RenderStateTransforms m_transforms;
+	using RenderStateTransforms = boost::unordered_map<OIIO::ustringhash, ShadingEngine::Transform, std::hash<ustringhash>>;
+	RenderStateTransforms m_transforms;
 
-		struct UserData
-		{
-			IECoreImage::OpenImageIOAlgo::DataView dataView;
-			size_t numValues;
-		};
+	struct UserData
+	{
+		IECoreImage::OpenImageIOAlgo::DataView dataView;
+		size_t numValues;
+	};
 
-		struct ContextData
-		{
-			IECoreImage::OpenImageIOAlgo::DataView dataView;
-			ConstDataPtr dataStorage;
-		};
+	struct ContextData
+	{
+		IECoreImage::OpenImageIOAlgo::DataView dataView;
+		ConstDataPtr dataStorage;
+	};
 
-		container::flat_map<ustringhash, UserData> m_userData;
-		container::flat_map<ustringhash, ContextData> m_contextVariables;
-		container::flat_map<ustringhash, std::unique_ptr<PointCloud>> m_pointClouds;
-
+	container::flat_map<ustringhash, UserData> m_userData;
+	container::flat_map<ustringhash, ContextData> m_contextVariables;
+	container::flat_map<ustringhash, std::unique_ptr<PointCloud>> m_pointClouds;
 };
 
 struct ThreadRenderState
 {
-	ThreadRenderState(const RenderState& renderState) : pointIndex(0), renderState ( renderState ) {}
+	ThreadRenderState( const RenderState &renderState ) : pointIndex( 0 ), renderState( renderState ) {}
 	size_t pointIndex;
-	const RenderState& renderState;
+	const RenderState &renderState;
 };
 
 } // namespace
@@ -757,7 +751,7 @@ namespace
 {
 
 #if OSL_USE_BATCHED
-template< int WidthT >
+template<int WidthT>
 class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT>
 {
 	// This declares convenience type aliases with WidthT already substituted in,
@@ -765,468 +759,469 @@ class GafferBatchedRendererServices : public OSL::BatchedRendererServices<WidthT
 	// BatchedShaderGlobals.  Why do we need to do this when it's already done
 	// in our parent class?  I'm honestly not totally sure, but the compiler doesn't
 	// find the names unless we do it here.
-	OSL_USING_DATA_WIDTH(WidthT);
+	OSL_USING_DATA_WIDTH( WidthT );
 
-	public :
+public:
 
-		GafferBatchedRendererServices<WidthT>( OSL::TextureSystem *textureSystem )
-			:	OSL::BatchedRendererServices<WidthT>( textureSystem )
+	GafferBatchedRendererServices<WidthT>( OSL::TextureSystem *textureSystem )
+		: OSL::BatchedRendererServices<WidthT>( textureSystem )
+	{
+	}
+
+	bool is_overridden_get_inverse_matrix_WmWxWf() const override
+	{
+		return false;
+	}
+
+	bool is_overridden_get_matrix_WmWsWf() const override
+	{
+		return false;
+	}
+
+	bool is_overridden_get_inverse_matrix_WmsWf() const override
+	{
+		return true;
+	}
+
+	bool is_overridden_get_inverse_matrix_WmWsWf() const override
+	{
+		return false;
+	}
+
+	bool is_overridden_texture() const override
+	{
+		return false;
+	}
+
+	bool is_overridden_texture3d() const override
+	{
+		return false;
+	}
+
+	bool is_overridden_environment() const override
+	{
+		return false;
+	}
+
+	void pointcloud_search( BatchedShaderGlobals *sg, ustringhash filename, const void *wideCenterVoid, Wide<const float> wideRadius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+		if( !threadRenderState )
 		{
+			// See comments in the non-batched `RendererServices::pointcloud_search()`.
+			IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_search()` can not be constant folded." );
+			return;
 		}
 
-		bool is_overridden_get_inverse_matrix_WmWxWf() const override
+		const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+		if( !pointCloud || maxPoints <= 0 )
 		{
-			return false;
+			assign_all( results.wnum_points(), 0 );
+			return;
 		}
 
-		bool is_overridden_get_matrix_WmWsWf() const override
-		{
-			return false;
-		}
+		vector<PointCloud::PointIndex> tmpIndices( maxPoints );
+		tmpIndices.resize( maxPoints );
+		vector<float> tmpDistances( maxPoints );
+		tmpDistances.resize( maxPoints );
 
-		bool is_overridden_get_inverse_matrix_WmsWf() const override
-		{
-			return true;
-		}
+		auto wideIndices = results.windices();
+		auto wideNumPoints = results.wnum_points();
 
-		bool is_overridden_get_inverse_matrix_WmWsWf() const override
-		{
-			return false;
-		}
+		Wide<const OSL::Vec3> wideCenter( wideCenterVoid );
+		results.mask().foreach(
 
-		bool is_overridden_texture() const override
-		{
-			return false;
-		}
+			[&]( ActiveLane lane ) {
+				const OSL::Vec3 center = wideCenter[lane];
+				int numPoints = pointCloud->search(
+					center, wideRadius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
+				);
 
-		bool is_overridden_texture3d() const override
-		{
-			return false;
-		}
-
-		bool is_overridden_environment() const override
-		{
-			return false;
-		}
-
-		void pointcloud_search( BatchedShaderGlobals *sg, ustringhash filename, const void *wideCenterVoid, Wide<const float> wideRadius, int maxPoints, bool sort, typename OSL::BatchedRendererServices<WidthT>::PointCloudSearchResults &results ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				// See comments in the non-batched `RendererServices::pointcloud_search()`.
-				IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_search()` can not be constant folded." );
-				return;
-			}
-
-			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
-			if( !pointCloud || maxPoints <= 0 )
-			{
-				assign_all( results.wnum_points(), 0 );
-				return;
-			}
-
-			vector<PointCloud::PointIndex> tmpIndices( maxPoints ); tmpIndices.resize( maxPoints );
-			vector<float> tmpDistances( maxPoints ); tmpDistances.resize( maxPoints );
-
-			auto wideIndices = results.windices();
-			auto wideNumPoints = results.wnum_points();
-
-			Wide<const OSL::Vec3> wideCenter( wideCenterVoid );
-			results.mask().foreach(
-
-				[&] ( ActiveLane lane ) {
-
-					const OSL::Vec3 center = wideCenter[lane];
-					int numPoints = pointCloud->search(
-						center, wideRadius[lane], maxPoints, tmpIndices.data(), tmpDistances.data()
-					);
-
-					auto indices = wideIndices[lane];
-					for( int i = 0; i < numPoints; ++i )
-					{
-						indices[i] = tmpIndices[i];
-					}
-
-					if( results.has_distances() )
-					{
-						auto wideDistances = results.wdistances();
-						auto distances = wideDistances[lane];
-						for( int i = 0; i < numPoints; ++i )
-						{
-							distances[i] = tmpDistances[i];
-						}
-					}
-
-					if( results.has_distances() && results.distances_have_derivs() )
-					{
-						// We don't support outputting derivatives yet, but we at least
-						// zero them so that junk values don't get into the shader.
-						auto wideDistancesDx = results.wdistancesDx();
-						auto wideDistancesDy = results.wdistancesDy();
-						auto laneDistancesDx = wideDistancesDx[lane];
-						auto laneDistancesDy = wideDistancesDy[lane];
-						for( int i = 0; i < numPoints; ++i )
-						{
-							laneDistancesDx[i] = 0.0f;
-							laneDistancesDy[i] = 0.0f;
-						}
-					}
-
-					wideNumPoints[lane] = numPoints;
+				auto indices = wideIndices[lane];
+				for( int i = 0; i < numPoints; ++i )
+				{
+					indices[i] = tmpIndices[i];
 				}
 
-			);
-
-		}
-
-		bool is_overridden_pointcloud_search() const override
-		{
-			return true;
-		}
-
-		Mask pointcloud_get( BatchedShaderGlobals * sg, ustringhash filename, Wide<const int[]> wideIndices, Wide<const int> wideNumPoints, ustringhash attrName, MaskedData wideOutData ) override
-		{
-			Mask result( false );
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				// See comments in the non-batched `RendererServices::pointcloud_search()`.
-				IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_get()` can not be constant folded." );
-				return result;
-			}
-
-			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
-			if( !pointCloud )
-			{
-				return result;
-			}
-
-			const PointCloud::Attribute *attribute = pointCloud->attribute( attrName );
-			if( !attribute )
-			{
-				return result;
-			}
-
-			const TypeDesc attrType = wideOutData.type();
-			vector<char> tmpData( wideOutData.type().size() );
-
-			wideOutData.mask().foreach(
-
-				[&] ( ActiveLane lane ) {
-
-					const int numPoints = wideNumPoints[lane];
-					auto indices = wideIndices[lane];
-					char *outData = tmpData.data();
-					bool success = true;
-
+				if( results.has_distances() )
+				{
+					auto wideDistances = results.wdistances();
+					auto distances = wideDistances[lane];
 					for( int i = 0; i < numPoints; ++i )
 					{
-						if( !pointCloud->get( *attribute, indices[i], attrType, outData ) )
-						{
-							success = false;
-							break;
-						}
-						outData += attrType.elementsize();
-					}
-
-					wideOutData.assign_val_lane_from_scalar( lane, tmpData.data() );
-					if( success )
-					{
-						result.set_on( lane );
+						distances[i] = tmpDistances[i];
 					}
 				}
 
-			);
+				if( results.has_distances() && results.distances_have_derivs() )
+				{
+					// We don't support outputting derivatives yet, but we at least
+					// zero them so that junk values don't get into the shader.
+					auto wideDistancesDx = results.wdistancesDx();
+					auto wideDistancesDy = results.wdistancesDy();
+					auto laneDistancesDx = wideDistancesDx[lane];
+					auto laneDistancesDy = wideDistancesDy[lane];
+					for( int i = 0; i < numPoints; ++i )
+					{
+						laneDistancesDx[i] = 0.0f;
+						laneDistancesDy[i] = 0.0f;
+					}
+				}
 
+				wideNumPoints[lane] = numPoints;
+			}
+
+		);
+	}
+
+	bool is_overridden_pointcloud_search() const override
+	{
+		return true;
+	}
+
+	Mask pointcloud_get( BatchedShaderGlobals *sg, ustringhash filename, Wide<const int[]> wideIndices, Wide<const int> wideNumPoints, ustringhash attrName, MaskedData wideOutData ) override
+	{
+		Mask result( false );
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+		if( !threadRenderState )
+		{
+			// See comments in the non-batched `RendererServices::pointcloud_search()`.
+			IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_get()` can not be constant folded." );
 			return result;
 		}
 
-		bool is_overridden_pointcloud_get() const override
+		const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+		if( !pointCloud )
 		{
-			return true;
+			return result;
 		}
 
-		bool is_overridden_pointcloud_write() const override
+		const PointCloud::Attribute *attribute = pointCloud->attribute( attrName );
+		if( !attribute )
 		{
-			return false;
+			return result;
 		}
 
-		Mask get_matrix( BatchedShaderGlobals *sg, Masked<OSL::Matrix44> result, ustringhash from, Wide<const float> time ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
-			if( threadRenderState )
-			{
-				OSL::Matrix44 r;
-				if( threadRenderState->renderState.matrixToObject( from, r ) )
+		const TypeDesc attrType = wideOutData.type();
+		vector<char> tmpData( wideOutData.type().size() );
+
+		wideOutData.mask().foreach(
+
+			[&]( ActiveLane lane ) {
+				const int numPoints = wideNumPoints[lane];
+				auto indices = wideIndices[lane];
+				char *outData = tmpData.data();
+				bool success = true;
+
+				for( int i = 0; i < numPoints; ++i )
 				{
-					assign_all( result, r );
-					return Mask( true );
+					if( !pointCloud->get( *attribute, indices[i], attrType, outData ) )
+					{
+						success = false;
+						break;
+					}
+					outData += attrType.elementsize();
+				}
+
+				wideOutData.assign_val_lane_from_scalar( lane, tmpData.data() );
+				if( success )
+				{
+					result.set_on( lane );
 				}
 			}
 
+		);
+
+		return result;
+	}
+
+	bool is_overridden_pointcloud_get() const override
+	{
+		return true;
+	}
+
+	bool is_overridden_pointcloud_write() const override
+	{
+		return false;
+	}
+
+	Mask get_matrix( BatchedShaderGlobals *sg, Masked<OSL::Matrix44> result, ustringhash from, Wide<const float> time ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+		if( threadRenderState )
+		{
+			OSL::Matrix44 r;
+			if( threadRenderState->renderState.matrixToObject( from, r ) )
+			{
+				assign_all( result, r );
+				return Mask( true );
+			}
+		}
+
+		return Mask( false );
+	}
+
+	Mask get_inverse_matrix( BatchedShaderGlobals *sg, Masked<OSL::Matrix44> result, ustringhash to, Wide<const float> time ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+		if( threadRenderState )
+		{
+			OSL::Matrix44 r;
+			if( threadRenderState->renderState.matrixFromObject( to, r ) )
+			{
+				assign_all( result, r );
+				return Mask( true );
+			}
+		}
+
+		return Mask( false );
+	}
+
+	Mask get_attribute( BatchedShaderGlobals *sg, ustringhash object, ustringhash name, MaskedData wval ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+		if( !threadRenderState )
+		{
 			return Mask( false );
 		}
 
-		Mask get_inverse_matrix( BatchedShaderGlobals *sg, Masked<OSL::Matrix44> result, ustringhash to, Wide<const float> time ) override
+		if( object == g_contextVariableAttributeScopeHash )
 		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
-			if( threadRenderState )
+			int neededSize = wval.type().size();
+			const int maximumAttributeSize = 4096;
+			if( neededSize > maximumAttributeSize )
 			{
-				OSL::Matrix44 r;
-				if( threadRenderState->renderState.matrixFromObject( to, r ) )
-				{
-					assign_all( result, r );
-					return Mask( true );
-				}
+				throw IECore::Exception( "We have a max size of attribute we support for context reads, " + name.string() + " of type " + wval.type().c_str() + " is too big." );
 			}
 
+			void *tempBuffer = alloca( neededSize );
+
+			if( threadRenderState->renderState.contextVariable( name, wval.type(), tempBuffer ) )
+			{
+				wval.assign_all_from_scalar( tempBuffer );
+				return wval.mask();
+			}
+			else
+			{
+				return Mask( false );
+			}
+		}
+
+		// fall through to get_userdata - i'm not sure this is the intention of the osl spec, but how else can
+		// a shader access a primvar by name? maybe i've overlooked something.
+		return get_userdata( name, sg, wval );
+	}
+
+	Mask get_userdata( ustringhash name, BatchedShaderGlobals *sg, MaskedData wval ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
+		if( !threadRenderState )
+		{
 			return Mask( false );
 		}
 
-		Mask get_attribute( BatchedShaderGlobals *sg, ustringhash object, ustringhash name, MaskedData wval ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				return Mask( false );
-			}
-
-			if( object == g_contextVariableAttributeScopeHash )
-			{
-				int neededSize = wval.type().size();
-				const int maximumAttributeSize = 4096;
-				if( neededSize > maximumAttributeSize )
-				{
-					throw IECore::Exception( "We have a max size of attribute we support for context reads, " + name.string() + " of type " + wval.type().c_str() + " is too big." );
-				}
-
-				void *tempBuffer = alloca( neededSize );
-
-				if( threadRenderState->renderState.contextVariable( name, wval.type(), tempBuffer ) )
-				{
-					wval.assign_all_from_scalar( tempBuffer );
-					return wval.mask();
-				}
-				else
-				{
-					return Mask( false );
-				}
-			}
-
-			// fall through to get_userdata - i'm not sure this is the intention of the osl spec, but how else can
-			// a shader access a primvar by name? maybe i've overlooked something.
-			return get_userdata( name, sg, wval );
-		}
-
-		Mask get_userdata( ustringhash name, BatchedShaderGlobals *sg, MaskedData wval ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->uniform.renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				return Mask( false );
-			}
-
-			return threadRenderState->renderState.userDataWide( threadRenderState->pointIndex, name, wval );
-		}
-
+		return threadRenderState->renderState.userDataWide( threadRenderState->pointIndex, name, wval );
+	}
 };
 #endif
 
 class RendererServices : public OSL::RendererServices
 {
 
-	public :
+public:
 
-		RendererServices( OSL::TextureSystem *textureSystem )
-			:	OSL::RendererServices( textureSystem )
+	RendererServices( OSL::TextureSystem *textureSystem )
+		: OSL::RendererServices( textureSystem )
 #if OSL_USE_BATCHED
-				, m_batchedRendererServices8( textureSystem ), m_batchedRendererServices16( textureSystem )
+		  ,
+		  m_batchedRendererServices8( textureSystem ),
+		  m_batchedRendererServices16( textureSystem )
 #endif
+	{
+	}
+
+	bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, TransformationPtr xform, float time ) override
+	{
+		return false;
+	}
+
+	bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, TransformationPtr xform ) override
+	{
+		return false;
+	}
+
+	bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, ustringhash from, float time ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
+		if( threadRenderState )
 		{
+			return threadRenderState->renderState.matrixToObject( from, result );
 		}
 
-		bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, TransformationPtr xform, float time ) override
+		return false;
+	}
+
+	bool get_inverse_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, ustringhash to, float time ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
+		if( threadRenderState )
+		{
+			return threadRenderState->renderState.matrixFromObject( to, result );
+		}
+
+		return false;
+	}
+
+	bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, ustringhash from ) override
+	{
+		return false;
+	}
+
+	bool get_attribute( OSL::ShaderGlobals *sg, bool derivatives, ustringhash object, TypeDesc type, ustringhash name, void *value ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
+		if( !threadRenderState )
 		{
 			return false;
 		}
 
-		bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, TransformationPtr xform ) override
+		if( object == g_contextVariableAttributeScopeHash )
 		{
-			return false;
-		}
-
-		bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, ustringhash from, float time ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
-			if( threadRenderState )
-			{
-				return threadRenderState->renderState.matrixToObject( from, result  );
-			}
-
-			return false;
-		}
-
-		bool get_inverse_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, ustringhash to, float time ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
-			if( threadRenderState )
-			{
-				return threadRenderState->renderState.matrixFromObject( to, result  );
-			}
-
-			return false;
-		}
-
-		bool get_matrix( OSL::ShaderGlobals *sg, OSL::Matrix44 &result, ustringhash from ) override
-		{
-			return false;
-		}
-
-		bool get_attribute( OSL::ShaderGlobals *sg, bool derivatives, ustringhash object, TypeDesc type, ustringhash name, void *value ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				return false;
-			}
-
-			if( object == g_contextVariableAttributeScopeHash )
-			{
-				if( derivatives )
-				{
-					memset( (char*)value + type.size(), 0, 2 * type.size() );
-				}
-
-				return threadRenderState->renderState.contextVariable( name, type, value );
-			}
-
-			// fall through to get_userdata - i'm not sure this is the intention of the osl spec, but how else can
-			// a shader access a primvar by name? maybe i've overlooked something.
-			return get_userdata( derivatives, name, type, sg, value );
-		}
-
-		bool get_array_attribute( OSL::ShaderGlobals *sg, bool derivatives, ustringhash object, TypeDesc type, ustringhash name, int index, void *value ) override
-		{
-			return false;
-		}
-
-		bool get_userdata( bool derivatives, ustringhash name, TypeDesc type, OSL::ShaderGlobals *sg, void *value ) override
-		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				return false;
-			}
-
 			if( derivatives )
 			{
-				memset( (char*)value + type.size(), 0, 2 * type.size() );
+				memset( (char *)value + type.size(), 0, 2 * type.size() );
 			}
 
-			return threadRenderState->renderState.userData( threadRenderState->pointIndex,  name, type, value );
+			return threadRenderState->renderState.contextVariable( name, type, value );
 		}
 
-		int pointcloud_search(
-			ShaderGlobals *sg, ustringhash filename, const OSL::Vec3 &center, float radius, int maxPoints,
-			bool sort, PointCloud::PointIndex *outIndices, float *outDistances,
-			int derivsOffset
-		) override
+		// fall through to get_userdata - i'm not sure this is the intention of the osl spec, but how else can
+		// a shader access a primvar by name? maybe i've overlooked something.
+		return get_userdata( derivatives, name, type, sg, value );
+	}
+
+	bool get_array_attribute( OSL::ShaderGlobals *sg, bool derivatives, ustringhash object, TypeDesc type, ustringhash name, int index, void *value ) override
+	{
+		return false;
+	}
+
+	bool get_userdata( bool derivatives, ustringhash name, TypeDesc type, OSL::ShaderGlobals *sg, void *value ) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
+		if( !threadRenderState )
 		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				// OSL has detected that all the inputs to the `pointcloud_search()` call are constant,
-				// and is trying to constant-fold the result now, rather than perform call the function
-				// at runtime. We don't have the pointcloud now, and it might be different between different
-				// calls to `ShadingEngine::shade()`, so this whole enterprise is doomed. There is nothing
-				// in the OSL API to let us communicate this, so all we can do is emit a warning.
-				IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_search()` can not be constant folded." );
-				return 0;
-			}
-
-			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
-			if( !pointCloud || maxPoints <= 0 )
-			{
-				return 0;
-			}
-
-			const int numPoints = pointCloud->search( center, radius, maxPoints, outIndices, outDistances );
-
-			if( derivsOffset && outDistances )
-			{
-				// We don't support outputting derivatives yet, but we at least
-				// zero them so that junk values don't get into the shader.
-				float *outDistancesDx = outDistances + derivsOffset;
-				float *outDistancesDy = outDistances + derivsOffset * 2;
-				for( int i = 0; i < numPoints; ++i )
-				{
-					outDistancesDx[i] = 0;
-					outDistancesDy[i] = 0;
-				}
-			}
-
-			return numPoints;
+			return false;
 		}
+
+		if( derivatives )
+		{
+			memset( (char *)value + type.size(), 0, 2 * type.size() );
+		}
+
+		return threadRenderState->renderState.userData( threadRenderState->pointIndex, name, type, value );
+	}
+
+	int pointcloud_search(
+		ShaderGlobals *sg, ustringhash filename, const OSL::Vec3 &center, float radius, int maxPoints,
+		bool sort, PointCloud::PointIndex *outIndices, float *outDistances,
+		int derivsOffset
+	) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
+		if( !threadRenderState )
+		{
+			// OSL has detected that all the inputs to the `pointcloud_search()` call are constant,
+			// and is trying to constant-fold the result now, rather than perform call the function
+			// at runtime. We don't have the pointcloud now, and it might be different between different
+			// calls to `ShadingEngine::shade()`, so this whole enterprise is doomed. There is nothing
+			// in the OSL API to let us communicate this, so all we can do is emit a warning.
+			IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_search()` can not be constant folded." );
+			return 0;
+		}
+
+		const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+		if( !pointCloud || maxPoints <= 0 )
+		{
+			return 0;
+		}
+
+		const int numPoints = pointCloud->search( center, radius, maxPoints, outIndices, outDistances );
+
+		if( derivsOffset && outDistances )
+		{
+			// We don't support outputting derivatives yet, but we at least
+			// zero them so that junk values don't get into the shader.
+			float *outDistancesDx = outDistances + derivsOffset;
+			float *outDistancesDy = outDistances + derivsOffset * 2;
+			for( int i = 0; i < numPoints; ++i )
+			{
+				outDistancesDx[i] = 0;
+				outDistancesDy[i] = 0;
+			}
+		}
+
+		return numPoints;
+	}
 
 #if OSL_LIBRARY_VERSION_CODE >= 11400
-		using ConstPointIndex = const PointCloud::PointIndex;
+	using ConstPointIndex = const PointCloud::PointIndex;
 #else
-		using ConstPointIndex = PointCloud::PointIndex;
+	using ConstPointIndex = PointCloud::PointIndex;
 #endif
 
-		int pointcloud_get(
-			ShaderGlobals *sg, ustringhash filename, ConstPointIndex *indices, int count,
-			ustringhash attrName, TypeDesc attrType,
-			void *outData
-		) override
+	int pointcloud_get(
+		ShaderGlobals *sg, ustringhash filename, ConstPointIndex *indices, int count,
+		ustringhash attrName, TypeDesc attrType,
+		void *outData
+	) override
+	{
+		const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
+		if( !threadRenderState )
 		{
-			const ThreadRenderState *threadRenderState = sg ? static_cast<ThreadRenderState *>( sg->renderstate ) : nullptr;
-			if( !threadRenderState )
-			{
-				// See comment in `pointcloud_search()`.
-				IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_get()` can not be constant folded." );
-				return 0;
-			}
-
-			const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
-			if( !pointCloud )
-			{
-				return 0;
-			}
-
-			const PointCloud::Attribute *attribute = pointCloud->attribute( attrName );
-			if( !attribute )
-			{
-				return 0;
-			}
-
-			for( int i = 0; i < count; ++i )
-			{
-				if( !pointCloud->get( *attribute, indices[i], attrType, outData ) )
-				{
-					return 0;
-				}
-				outData = static_cast<char *>( outData ) + attrType.elementsize();
-			}
-
-			return 1;
+			// See comment in `pointcloud_search()`.
+			IECore::msg( IECore::Msg::Warning, "ShadingEngine", "Calls to `pointcloud_get()` can not be constant folded." );
+			return 0;
 		}
+
+		const PointCloud *pointCloud = threadRenderState->renderState.pointCloud( filename );
+		if( !pointCloud )
+		{
+			return 0;
+		}
+
+		const PointCloud::Attribute *attribute = pointCloud->attribute( attrName );
+		if( !attribute )
+		{
+			return 0;
+		}
+
+		for( int i = 0; i < count; ++i )
+		{
+			if( !pointCloud->get( *attribute, indices[i], attrType, outData ) )
+			{
+				return 0;
+			}
+			outData = static_cast<char *>( outData ) + attrType.elementsize();
+		}
+
+		return 1;
+	}
 
 #if OSL_USE_BATCHED
-		OSL::BatchedRendererServices<16>* batched(WidthOf<16>) override
-		{
-			return &m_batchedRendererServices16;
-		}
+	OSL::BatchedRendererServices<16> *batched( WidthOf<16> ) override
+	{
+		return &m_batchedRendererServices16;
+	}
 
-		OSL::BatchedRendererServices<8>* batched(WidthOf<8>) override
-		{
-			return &m_batchedRendererServices8;
-		}
+	OSL::BatchedRendererServices<8> *batched( WidthOf<8> ) override
+	{
+		return &m_batchedRendererServices8;
+	}
 
 private:
-		GafferBatchedRendererServices<8> m_batchedRendererServices8;
-		GafferBatchedRendererServices<16> m_batchedRendererServices16;
+
+	GafferBatchedRendererServices<8> m_batchedRendererServices8;
+	GafferBatchedRendererServices<16> m_batchedRendererServices16;
 #endif
 };
 
@@ -1278,7 +1273,7 @@ struct StringParameter
 	// Depending on whether or not we use batched shading, OSL will
 	// want to store string parameters as either `ustring` or `ustringhash`.
 	// We just use bytes for storage so we can deal with both cases.
-	std::byte storage[sizeof(ustring)];
+	std::byte storage[sizeof( ustring )];
 
 #else
 
@@ -1286,8 +1281,6 @@ struct StringParameter
 	ustring string;
 
 #endif
-
-
 };
 
 struct DebugParameters
@@ -1298,7 +1291,6 @@ struct DebugParameters
 	Color3f value;
 	M44f matrixValue;
 	StringParameter stringValue;
-
 };
 
 // Must be held in order to modify the shading system.
@@ -1351,8 +1343,8 @@ OSL::ShadingSystem *shadingSystem( int *batchSize = nullptr )
 		CLOSURE_STRING_PARAM( DebugParameters, name ),
 		CLOSURE_STRING_KEYPARAM( DebugParameters, type, "type" ),
 		CLOSURE_COLOR_KEYPARAM( DebugParameters, value, "value" ),
-		CLOSURE_MATRIX_KEYPARAM( DebugParameters, matrixValue, "matrixValue"),
-		CLOSURE_STRING_KEYPARAM( DebugParameters, stringValue, "stringValue"),
+		CLOSURE_MATRIX_KEYPARAM( DebugParameters, matrixValue, "matrixValue" ),
+		CLOSURE_STRING_KEYPARAM( DebugParameters, stringValue, "stringValue" ),
 		CLOSURE_FINISH_PARAM( DebugParameters )
 	};
 
@@ -1437,9 +1429,9 @@ OSL::ShadingSystem *shadingSystem( int *batchSize = nullptr )
 	else
 	{
 		ustring llvm_jit_target;
-		g_shadingSystem->getattribute("llvm_jit_target", llvm_jit_target);
+		g_shadingSystem->getattribute( "llvm_jit_target", llvm_jit_target );
 		int llvm_jit_fma;
-		g_shadingSystem->getattribute("llvm_jit_fma", llvm_jit_fma);
+		g_shadingSystem->getattribute( "llvm_jit_fma", llvm_jit_fma );
 
 		msg( Msg::Info, "ShadingEngine", fmt::format( "Initialized shading system with support for {}-wide batched shading. Architecture: {}, Fused-Multiply-Add: {}", g_shadingSystemBatchSize, llvm_jit_target.string(), llvm_jit_fma ? "Enabled" : "Disabled" ) );
 	}
@@ -1472,198 +1464,196 @@ OIIO::ustring g_uvType( "uv" );
 class ShadingResults
 {
 
-	public :
+public:
 
-		ShadingResults( size_t numPoints )
-			:	m_results( new CompoundData ), m_ci( nullptr )
+	ShadingResults( size_t numPoints )
+		: m_results( new CompoundData ), m_ci( nullptr )
+	{
+		Color3fVectorDataPtr ciData = new Color3fVectorData();
+		m_ci = &ciData->writable();
+		m_ci->resize( numPoints, Color3f( 0.0f ) );
+
+		CompoundDataPtr result = new CompoundData();
+		m_results->writable()["Ci"] = ciData;
+	}
+
+	/// \todo This is a lot like the UserData struct above - maybe we should
+	/// just have one type we can use for both?
+	struct DebugResult
+	{
+		DebugResult()
+			: basePointer( nullptr )
 		{
-			Color3fVectorDataPtr ciData = new Color3fVectorData();
-			m_ci = &ciData->writable();
-			m_ci->resize( numPoints, Color3f( 0.0f ) );
-
-			CompoundDataPtr result = new CompoundData();
-			m_results->writable()["Ci"] = ciData;
 		}
 
-		/// \todo This is a lot like the UserData struct above - maybe we should
-		/// just have one type we can use for both?
-		struct DebugResult
+		TypeDesc type;
+		void *basePointer;
+	};
+
+	using DebugResultsMap = container::flat_map<ustring, DebugResult, OIIO::ustringPtrIsLess>;
+
+	void addResult( size_t pointIndex, const ClosureColor *result, DebugResultsMap &threadCache )
+	{
+		addResult( pointIndex, result, Color3f( 1.0f ), threadCache );
+	}
+
+	CompoundDataPtr results()
+	{
+		return m_results;
+	}
+
+private:
+
+	void addResult( size_t pointIndex, const ClosureColor *closure, const Color3f &weight, DebugResultsMap &threadCache )
+	{
+		if( closure )
 		{
-			DebugResult()
-				:	basePointer( nullptr )
+			switch( closure->id )
 			{
-			}
-
-			TypeDesc type;
-			void *basePointer;
-		};
-
-		using DebugResultsMap = container::flat_map<ustring, DebugResult, OIIO::ustringPtrIsLess>;
-
-		void addResult( size_t pointIndex, const ClosureColor *result, DebugResultsMap &threadCache )
-		{
-			addResult( pointIndex, result, Color3f( 1.0f ), threadCache );
-		}
-
-		CompoundDataPtr results()
-		{
-			return m_results;
-		}
-
-	private :
-
-		void addResult( size_t pointIndex, const ClosureColor *closure, const Color3f &weight, DebugResultsMap &threadCache )
-		{
-			if( closure )
-			{
-				switch( closure->id )
-				{
-					case ClosureColor::MUL :
-						addResult(
-							pointIndex,
-							closure->as_mul()->closure,
-							weight * closure->as_mul()->weight,
-							threadCache
-						);
-						break;
-					case ClosureColor::ADD :
-						addResult( pointIndex, closure->as_add()->closureA, weight, threadCache );
-						addResult( pointIndex, closure->as_add()->closureB, weight, threadCache );
-						break;
-					case EmissionClosureId :
-						addEmission( pointIndex, closure->as_comp()->as<EmissionParameters>(), weight * closure->as_comp()->w );
-						break;
-					case DeformationClosureId :
-					case DebugClosureId :
-						addDebug( pointIndex, closure->as_comp()->as<DebugParameters>(), weight * closure->as_comp()->w, threadCache );
-						break;
-				}
+				case ClosureColor::MUL :
+					addResult(
+						pointIndex,
+						closure->as_mul()->closure,
+						weight * closure->as_mul()->weight,
+						threadCache
+					);
+					break;
+				case ClosureColor::ADD :
+					addResult( pointIndex, closure->as_add()->closureA, weight, threadCache );
+					addResult( pointIndex, closure->as_add()->closureB, weight, threadCache );
+					break;
+				case EmissionClosureId :
+					addEmission( pointIndex, closure->as_comp()->as<EmissionParameters>(), weight * closure->as_comp()->w );
+					break;
+				case DeformationClosureId :
+				case DebugClosureId :
+					addDebug( pointIndex, closure->as_comp()->as<DebugParameters>(), weight * closure->as_comp()->w, threadCache );
+					break;
 			}
 		}
+	}
 
-		void addEmission( size_t pointIndex, const EmissionParameters *parameters, const Color3f &weight )
+	void addEmission( size_t pointIndex, const EmissionParameters *parameters, const Color3f &weight )
+	{
+		( *m_ci )[pointIndex] += weight;
+	}
+
+	DebugResult acquireDebugResult( const DebugParameters *parameters, DebugResultsMap &threadCache )
+	{
+		// Try the per-thread cache first.
+		const ustring name = parameters->name.asUString();
+		auto it = threadCache.find( name );
+		if( it != threadCache.end() )
 		{
-			(*m_ci)[pointIndex] += weight;
+			return it->second;
 		}
 
-		DebugResult acquireDebugResult( const DebugParameters *parameters, DebugResultsMap &threadCache )
+		// If it's not there, then we need to look in `m_debugResults`,
+		// which requires locking. Start optimistically with a read lock.
+		tbb::spin_rw_mutex::scoped_lock rwScopedLock( m_resultsMutex, /* write = */ false );
+
+		it = m_debugResults.find( name );
+		if( it == m_debugResults.end() )
 		{
-			// Try the per-thread cache first.
-			const ustring name = parameters->name.asUString();
-			auto it = threadCache.find( name );
-			if( it != threadCache.end() )
-			{
-				return it->second;
-			}
-
-			// If it's not there, then we need to look in `m_debugResults`,
-			// which requires locking. Start optimistically with a read lock.
-			tbb::spin_rw_mutex::scoped_lock rwScopedLock( m_resultsMutex, /* write = */ false  );
-
+			// Need to insert the result, so need a write lock.
+			rwScopedLock.upgrade_to_writer();
+			// But another thread may have got the write lock before us
+			// and done the work itself, so check again just in case.
 			it = m_debugResults.find( name );
 			if( it == m_debugResults.end() )
 			{
-				// Need to insert the result, so need a write lock.
-				rwScopedLock.upgrade_to_writer();
-				// But another thread may have got the write lock before us
-				// and done the work itself, so check again just in case.
-				it = m_debugResults.find( name );
-				if( it == m_debugResults.end() )
+				// Create the result.
+				DebugResult result;
+				result.type = typeDescFromTypeName( parameters->type.asUString() );
+				result.type.arraylen = m_ci->size();
+
+				DataPtr data = dataFromTypeDesc( result.type, result.basePointer );
+				if( !data )
 				{
-					// Create the result.
-					DebugResult result;
-					result.type = typeDescFromTypeName( parameters->type.asUString() );
-					result.type.arraylen = m_ci->size();
-
-					DataPtr data = dataFromTypeDesc( result.type, result.basePointer );
-					if( !data )
-					{
-						throw IECore::Exception( "Unsupported type specified in debug() closure." );
-					}
-					if( parameters->type.asUString() == g_uvType )
-					{
-						static_cast<V2fVectorData *>( data.get() )->setInterpretation( GeometricData::UV );
-					}
-
-					result.type.unarray(); // so we can use convert_value
-
-					m_results->writable()[name.c_str()] = data;
-					it = m_debugResults.insert( make_pair( name, result ) ).first;
+					throw IECore::Exception( "Unsupported type specified in debug() closure." );
 				}
-			}
+				if( parameters->type.asUString() == g_uvType )
+				{
+					static_cast<V2fVectorData *>( data.get() )->setInterpretation( GeometricData::UV );
+				}
 
-			// Cache so the next lookup on this thread doesn't need a lock.
-			return threadCache.insert( *it ).first->second;
+				result.type.unarray(); // so we can use convert_value
+
+				m_results->writable()[name.c_str()] = data;
+				it = m_debugResults.insert( make_pair( name, result ) ).first;
+			}
 		}
 
-		void addDebug( size_t pointIndex, const DebugParameters *parameters, const Color3f &weight, DebugResultsMap &threadCache )
+		// Cache so the next lookup on this thread doesn't need a lock.
+		return threadCache.insert( *it ).first->second;
+	}
+
+	void addDebug( size_t pointIndex, const DebugParameters *parameters, const Color3f &weight, DebugResultsMap &threadCache )
+	{
+		DebugResult debugResult = acquireDebugResult( parameters, threadCache );
+
+		const ustring type = parameters->type.asUString();
+		if( type == g_matrixType )
 		{
-			DebugResult debugResult = acquireDebugResult( parameters, threadCache );
+			M44f value = parameters->matrixValue;
 
-			const ustring type = parameters->type.asUString();
-			if( type == g_matrixType )
-			{
-				M44f value = parameters->matrixValue;
-
-				char *dst = static_cast<char *>( debugResult.basePointer );
-				dst += pointIndex * debugResult.type.elementsize();
-				ShadingSystem::convert_value(
-					dst, debugResult.type, &value, OIIO::TypeMatrix44
-				);
-			}
-			else if( type == g_stringType )
-			{
-				std::string *dst = static_cast<std::string*>( debugResult.basePointer );
-				dst += pointIndex;
-				*dst = parameters->stringValue.asUString().string();
-			}
-			else
-			{
-				Color3f value = weight * parameters->value;
-
-				char *dst = static_cast<char *>( debugResult.basePointer );
-				dst += pointIndex * debugResult.type.elementsize();
-				convertValue(
-					dst,
-					debugResult.type,
-					&value,
-					debugResult.type.aggregate == TypeDesc::SCALAR ? OIIO::TypeFloat : OIIO::TypeColor
-				);
-			}
+			char *dst = static_cast<char *>( debugResult.basePointer );
+			dst += pointIndex * debugResult.type.elementsize();
+			ShadingSystem::convert_value(
+				dst, debugResult.type, &value, OIIO::TypeMatrix44
+			);
 		}
-
-		OIIO::TypeDesc typeDescFromTypeName( ustring type )
+		else if( type == g_stringType )
 		{
-			if( type == g_point2Type )
-			{
-				return TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::POINT );
-			}
-			else if( type == g_vector2Type || type == g_uvType )
-			{
-				return TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::VECTOR );
-			}
-			else if( type == g_normal2Type )
-			{
-				return TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::NORMAL );
-			}
+			std::string *dst = static_cast<std::string *>( debugResult.basePointer );
+			dst += pointIndex;
+			*dst = parameters->stringValue.asUString().string();
+		}
+		else
+		{
+			Color3f value = weight * parameters->value;
 
-			return type.size() ? TypeDesc( type.c_str() ) : OIIO::TypeColor;
+			char *dst = static_cast<char *>( debugResult.basePointer );
+			dst += pointIndex * debugResult.type.elementsize();
+			convertValue(
+				dst,
+				debugResult.type,
+				&value,
+				debugResult.type.aggregate == TypeDesc::SCALAR ? OIIO::TypeFloat : OIIO::TypeColor
+			);
+		}
+	}
+
+	OIIO::TypeDesc typeDescFromTypeName( ustring type )
+	{
+		if( type == g_point2Type )
+		{
+			return TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::POINT );
+		}
+		else if( type == g_vector2Type || type == g_uvType )
+		{
+			return TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::VECTOR );
+		}
+		else if( type == g_normal2Type )
+		{
+			return TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::NORMAL );
 		}
 
-		CompoundDataPtr m_results;
-		vector<Color3f> *m_ci;
-		DebugResultsMap m_debugResults;
-		tbb::spin_rw_mutex m_resultsMutex;
+		return type.size() ? TypeDesc( type.c_str() ) : OIIO::TypeColor;
+	}
 
+	CompoundDataPtr m_results;
+	vector<Color3f> *m_ci;
+	DebugResultsMap m_debugResults;
+	tbb::spin_rw_mutex m_resultsMutex;
 };
 
 // Thread specific information needed during shading - this includes both the per-thread result cache,
 // and the OSL machinery that needs to be stored per "renderer-thread"
 struct ThreadInfo
 {
-	ThreadInfo() :
-		oslThreadInfo( ::shadingSystem()->create_thread_info() ),
-		shadingContext( ::shadingSystem()->get_context( oslThreadInfo ) )
+	ThreadInfo() : oslThreadInfo( ::shadingSystem()->create_thread_info() ),
+				   shadingContext( ::shadingSystem()->get_context( oslThreadInfo ) )
 	{
 	}
 
@@ -1713,7 +1703,7 @@ void declareParameters( const CompoundDataMap &parameters, ShadingSystem *shadin
 	}
 }
 
-template <typename T>
+template<typename T>
 T uniformValue( const IECore::CompoundData *points, const char *name )
 {
 	using DataType = TypedData<T>;
@@ -1731,11 +1721,11 @@ T uniformValue( const IECore::CompoundData *points, const char *name )
 template<typename T>
 const T *varyingValue( const IECore::CompoundData *points, const char *name )
 {
-	using DataType = TypedData<vector<T> >;
+	using DataType = TypedData<vector<T>>;
 	const DataType *d = points->member<DataType>( name );
 	if( d )
 	{
-		return &(d->readable()[0]);
+		return &( d->readable()[0] );
 	}
 	else
 	{
@@ -1751,7 +1741,7 @@ ShadingEngine::ShadingEngine( const IECoreScene::ShaderNetwork *shaderNetwork ) 
 
 
 ShadingEngine::ShadingEngine( IECoreScene::ShaderNetworkPtr &&shaderNetwork )
-	:	m_hash( shaderNetwork->Object::hash() ), m_timeNeeded( false ), m_unknownAttributesNeeded( false ), m_hasDeformation( false )
+	: m_hash( shaderNetwork->Object::hash() ), m_timeNeeded( false ), m_unknownAttributesNeeded( false ), m_hasDeformation( false )
 {
 	IECoreScene::ShaderNetworkAlgo::convertToOSLConventions( shaderNetwork.get(), OSL_VERSION );
 
@@ -1764,8 +1754,7 @@ ShadingEngine::ShadingEngine( IECoreScene::ShaderNetworkPtr &&shaderNetwork )
 
 		ShaderNetworkAlgo::depthFirstTraverse(
 			shaderNetwork.get(),
-			[shadingSystem, &invalidShaders] ( const ShaderNetwork *shaderNetwork, const InternedString &handle ) {
-
+			[shadingSystem, &invalidShaders]( const ShaderNetwork *shaderNetwork, const InternedString &handle ) {
 				// Check for invalid (non-OSL) shaders. We stop declaring shaders if any
 				// have been found, but complete the traversal so that we can compile a
 				// full list of invalid shaders.
@@ -1820,7 +1809,7 @@ void ShadingEngine::queryShaderGroup()
 	if( numGlobalsNeeded )
 	{
 		ustring *globalsNames = nullptr;
-		shadingSystem->getattribute(  &shaderGroup, "globals_needed", TypeDesc::PTR, &globalsNames );
+		shadingSystem->getattribute( &shaderGroup, "globals_needed", TypeDesc::PTR, &globalsNames );
 		for( int i = 0; i < numGlobalsNeeded; ++i )
 		{
 			if( globalsNames[i] == "time" )
@@ -1835,8 +1824,8 @@ void ShadingEngine::queryShaderGroup()
 	// Attributes
 
 	int unknownAttributesNeeded = 0;
-	shadingSystem->getattribute(  &shaderGroup, "unknown_attributes_needed", unknownAttributesNeeded );
-	m_unknownAttributesNeeded = static_cast<bool> (unknownAttributesNeeded);
+	shadingSystem->getattribute( &shaderGroup, "unknown_attributes_needed", unknownAttributesNeeded );
+	m_unknownAttributesNeeded = static_cast<bool>( unknownAttributesNeeded );
 
 	int numAttributes = 0;
 	shadingSystem->getattribute( &shaderGroup, "num_attributes_needed", numAttributes );
@@ -1844,10 +1833,10 @@ void ShadingEngine::queryShaderGroup()
 	{
 		ustring *attributeNames = nullptr;
 		ustring *scopeNames = nullptr;
-		shadingSystem->getattribute(  &shaderGroup, "attributes_needed", TypeDesc::PTR, &attributeNames );
-		shadingSystem->getattribute(  &shaderGroup, "attribute_scopes", TypeDesc::PTR, &scopeNames );
+		shadingSystem->getattribute( &shaderGroup, "attributes_needed", TypeDesc::PTR, &attributeNames );
+		shadingSystem->getattribute( &shaderGroup, "attribute_scopes", TypeDesc::PTR, &scopeNames );
 
-		for (int i = 0; i < numAttributes; ++i)
+		for( int i = 0; i < numAttributes; ++i )
 		{
 			if( scopeNames[i] == g_contextVariableAttributeScope )
 			{
@@ -1855,7 +1844,7 @@ void ShadingEngine::queryShaderGroup()
 			}
 			else
 			{
-				m_attributesNeeded.insert( attributeNames[i].string()  );
+				m_attributesNeeded.insert( attributeNames[i].string() );
 			}
 		}
 	}
@@ -1863,7 +1852,7 @@ void ShadingEngine::queryShaderGroup()
 	// Closures
 
 	int unknownClosuresNeeded = 0;
-	shadingSystem->getattribute(  &shaderGroup, "unknown_closures_needed", unknownClosuresNeeded );
+	shadingSystem->getattribute( &shaderGroup, "unknown_closures_needed", unknownClosuresNeeded );
 	if( unknownClosuresNeeded )
 	{
 		m_hasDeformation = true;
@@ -1874,7 +1863,7 @@ void ShadingEngine::queryShaderGroup()
 	if( numClosures )
 	{
 		ustring *closureNames = nullptr;
-		shadingSystem->getattribute(  &shaderGroup, "closures_needed", TypeDesc::PTR, &closureNames );
+		shadingSystem->getattribute( &shaderGroup, "closures_needed", TypeDesc::PTR, &closureNames );
 		for( int i = 0; i < numClosures; ++i )
 		{
 			if( closureNames[i] == "deformation" )
@@ -1933,8 +1922,7 @@ IECore::CompoundDataPtr executeShade( const ExecuteShadeParameters &params, cons
 	ShadingResults results( params.numPoints );
 
 	// Iterate over the input points, doing the shading as we go
-	auto f = [&params, &renderState, &shaderGroup, &shadingSystem, &results]( const tbb::blocked_range<size_t> &r )
-	{
+	auto f = [&params, &renderState, &shaderGroup, &shadingSystem, &results]( const tbb::blocked_range<size_t> &r ) {
 		ThreadInfo &threadInfo = params.threadInfoCache.local();
 
 		ThreadRenderState threadRenderState( renderState );
@@ -1990,7 +1978,7 @@ IECore::CompoundDataPtr executeShade( const ExecuteShadeParameters &params, cons
 }
 
 #if OSL_USE_BATCHED
-template< int WidthT >
+template<int WidthT>
 IECore::CompoundDataPtr executeShadeBatched( const ExecuteShadeParameters &params, const RenderState &renderState, ShaderGroup &shaderGroup, ShadingSystem::BatchedExecutor<WidthT> &executor )
 {
 	// Allocate data for the result
@@ -2000,13 +1988,12 @@ IECore::CompoundDataPtr executeShadeBatched( const ExecuteShadeParameters &param
 
 	// Iterate over the input points, doing the shading as we go
 
-	auto f = [&params, &renderState, &shaderGroup, &executor, &results]( const tbb::blocked_range<size_t> &r )
-	{
+	auto f = [&params, &renderState, &shaderGroup, &executor, &results]( const tbb::blocked_range<size_t> &r ) {
 		ThreadInfo &threadInfo = params.threadInfoCache.local();
 
 		ThreadRenderState threadRenderState( renderState );
 
-		BatchedShaderGlobals< WidthT > threadShaderGlobals;
+		BatchedShaderGlobals<WidthT> threadShaderGlobals;
 		memset( (void *)&threadShaderGlobals, 0, sizeof( BatchedShaderGlobals<WidthT> ) );
 
 		OSL::assign_all( threadShaderGlobals.varying.time, params.shaderGlobals.time );
@@ -2082,7 +2069,7 @@ IECore::CompoundDataPtr executeShadeBatched( const ExecuteShadeParameters &param
 				}
 			}
 
-			OSL::assign_all( threadShaderGlobals.varying.Ci, (OSL::ClosureColor*)nullptr );
+			OSL::assign_all( threadShaderGlobals.varying.Ci, (OSL::ClosureColor *)nullptr );
 
 			threadRenderState.pointIndex = i;
 			executor.execute( *threadInfo.shadingContext, shaderGroup, batchSize, wideShadeIndex, threadShaderGlobals, nullptr, nullptr );
@@ -2127,7 +2114,7 @@ IECore::CompoundDataPtr ShadingEngine::shade( const IECore::CompoundData *points
 	if( const V3fVectorData *pData = points->member<V3fVectorData>( "P" ) )
 	{
 		shadeParameters.numPoints = pData->readable().size();
-		shadeParameters.p = reinterpret_cast<const OSL::Vec3 *>( &(pData->readable()[0]) );
+		shadeParameters.p = reinterpret_cast<const OSL::Vec3 *>( &( pData->readable()[0] ) );
 	}
 	else
 	{
@@ -2198,7 +2185,6 @@ IECore::CompoundDataPtr ShadingEngine::shade( const IECore::CompoundData *points
 #else
 	return executeShade( shadeParameters, renderState, shaderGroup, shadingSystem );
 #endif
-
 }
 
 bool ShadingEngine::needsAttribute( const std::string &name ) const
@@ -2210,7 +2196,7 @@ bool ShadingEngine::needsAttribute( const std::string &name ) const
 
 	if( name == "uv" )
 	{
-		if ( m_attributesNeeded.find( "u" ) != m_attributesNeeded.end() || m_attributesNeeded.find( "v" ) != m_attributesNeeded.end() )
+		if( m_attributesNeeded.find( "u" ) != m_attributesNeeded.end() || m_attributesNeeded.find( "v" ) != m_attributesNeeded.end() )
 		{
 			return true;
 		}
@@ -2222,7 +2208,7 @@ bool ShadingEngine::needsAttribute( const std::string &name ) const
 	}
 
 
-	return m_attributesNeeded.find(  name  ) != m_attributesNeeded.end();
+	return m_attributesNeeded.find( name ) != m_attributesNeeded.end();
 }
 
 bool ShadingEngine::hasDeformation() const

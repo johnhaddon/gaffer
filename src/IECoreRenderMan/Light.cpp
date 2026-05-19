@@ -116,9 +116,7 @@ const RtUString g_defaultShadowGroup( "defaultShadowGroup" );
 } // namespace
 
 Light::Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session )
-	:	m_materialCache( materialCache ), m_session( session ), m_lightLinker( lightLinker ),
-		m_lightInstance( riley::LightInstanceId::InvalidId() ), m_preTransform( preTransform( attributes ) ),
-		m_attributes( attributes ), m_geometryPrototype( geometryPrototype ), m_shadowSubset( g_defaultShadowGroup )
+	: m_materialCache( materialCache ), m_session( session ), m_lightLinker( lightLinker ), m_lightInstance( riley::LightInstanceId::InvalidId() ), m_preTransform( preTransform( attributes ) ), m_attributes( attributes ), m_geometryPrototype( geometryPrototype ), m_shadowSubset( g_defaultShadowGroup )
 
 {
 	m_allAttributes.SetString( Loader::strings().k_grouping_membership, g_defaultLightGroup );

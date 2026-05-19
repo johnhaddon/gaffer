@@ -44,79 +44,77 @@
 namespace GafferUIBindings
 {
 
-template<typename T, typename TWrapper=T>
+template<typename T, typename TWrapper = T>
 class NodeGadgetClass : public GadgetClass<T, TWrapper>
 {
-	public :
+public:
 
-		NodeGadgetClass( const char *docString = nullptr );
-
+	NodeGadgetClass( const char *docString = nullptr );
 };
 
 template<typename WrappedType>
 class NodeGadgetWrapper : public GadgetWrapper<WrappedType>
 {
 
-	public :
+public:
 
-		template<typename... Args>
-		NodeGadgetWrapper( PyObject *self, Args&&... args )
-			:	GadgetWrapper<WrappedType>( self, std::forward<Args>( args )... )
-		{
-		}
+	template<typename... Args>
+	NodeGadgetWrapper( PyObject *self, Args &&...args )
+		: GadgetWrapper<WrappedType>( self, std::forward<Args>( args )... )
+	{
+	}
 
-		GafferUI::Nodule *nodule( const Gaffer::Plug *plug ) override
+	GafferUI::Nodule *nodule( const Gaffer::Plug *plug ) override
+	{
+		if( this->isSubclassed() )
 		{
-			if( this->isSubclassed() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				boost::python::object f = this->methodOverride( "nodule" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "nodule" );
-					if( f )
-					{
-						return boost::python::extract<GafferUI::Nodule *>(
-							f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( plug ) ) )
-						);
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<GafferUI::Nodule *>(
+						f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( plug ) ) )
+					);
 				}
 			}
-			return WrappedType::nodule( plug );
-		}
-
-		const GafferUI::Nodule *nodule( const Gaffer::Plug *plug ) const override
-		{
-			// naughty cast is better than repeating the above logic.
-			return const_cast<NodeGadgetWrapper *>( this )->nodule( plug );
-		}
-
-		Imath::V3f connectionTangent( const GafferUI::ConnectionCreator *creator ) const override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::nodule( plug );
+	}
+
+	const GafferUI::Nodule *nodule( const Gaffer::Plug *plug ) const override
+	{
+		// naughty cast is better than repeating the above logic.
+		return const_cast<NodeGadgetWrapper *>( this )->nodule( plug );
+	}
+
+	Imath::V3f connectionTangent( const GafferUI::ConnectionCreator *creator ) const override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "connectionTangent" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "connectionTangent" );
-					if( f )
-					{
-						return boost::python::extract<Imath::V3f>(
-							f( GafferUI::ConnectionCreatorPtr( const_cast<GafferUI::ConnectionCreator *>( creator ) ) )
-						);
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<Imath::V3f>(
+						f( GafferUI::ConnectionCreatorPtr( const_cast<GafferUI::ConnectionCreator *>( creator ) ) )
+					);
 				}
 			}
-			return WrappedType::connectionTangent( creator );
+			catch( const boost::python::error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
-
+		return WrappedType::connectionTangent( creator );
+	}
 };
 
 } // namespace GafferUIBindings

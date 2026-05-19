@@ -48,17 +48,16 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API BXDFPlug : public GafferScene::ClosurePlug
 {
 
-	public :
+public:
 
-		explicit BXDFPlug( const std::string &name=defaultName<BXDFPlug>(), Direction direction=In, unsigned flags=Default );
-		~BXDFPlug() override;
+	explicit BXDFPlug( const std::string &name = defaultName<BXDFPlug>(), Direction direction = In, unsigned flags = Default );
+	~BXDFPlug() override;
 
-		GAFFER_PLUG_DECLARE_TYPE( GafferRenderMan::BXDFPlug, BXDFPlugTypeId, GafferScene::ClosurePlug );
+	GAFFER_PLUG_DECLARE_TYPE( GafferRenderMan::BXDFPlug, BXDFPlugTypeId, GafferScene::ClosurePlug );
 
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
-		bool acceptsInput( const Gaffer::Plug *input ) const override;
-
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsInput( const Gaffer::Plug *input ) const override;
 };
 
 IE_CORE_DECLAREPTR( BXDFPlug );

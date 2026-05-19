@@ -61,7 +61,7 @@ GAFFER_NODE_DEFINE_TYPE( SelectView );
 size_t SelectView::g_firstPlugIndex = 0;
 
 SelectView::SelectView( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -98,13 +98,13 @@ void SelectView::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 	}
 	else if( input->parent() == inPlug() )
 	{
-		outputs.push_back( outPlug()->getChild< Plug >( input->getName() ) );
+		outputs.push_back( outPlug()->getChild<Plug>( input->getName() ) );
 	}
 }
 
 std::string SelectView::selectViewName( const Gaffer::Context *context ) const
 {
-	ImagePlug::GlobalScope g( context  );
+	ImagePlug::GlobalScope g( context );
 	g.remove( ImagePlug::viewNameContextName );
 	return viewPlug()->getValue();
 }

@@ -50,71 +50,70 @@ namespace GafferImage
 
 class GAFFERIMAGE_API SATBlur : public ImageProcessor
 {
-	public :
+public:
 
-		// This is similar to Sampler::BoundingMode, but Normalize isn't supported by the
-		// sampler interface, and we haven't figured out yet how to unify these.
-		enum class BoundingMode
-		{
-			/// Returns 0 outside the data window
-			Black = Sampler::BoundingMode::Black,
-			/// Evenly increase all valid contributions to edge pixels that are missing contributions
-			/// from outside the data window.
-			Normalize = 10
-		};
+	// This is similar to Sampler::BoundingMode, but Normalize isn't supported by the
+	// sampler interface, and we haven't figured out yet how to unify these.
+	enum class BoundingMode
+	{
+		/// Returns 0 outside the data window
+		Black = Sampler::BoundingMode::Black,
+		/// Evenly increase all valid contributions to edge pixels that are missing contributions
+		/// from outside the data window.
+		Normalize = 10
+	};
 
-		explicit SATBlur( const std::string &name=defaultName<SATBlur>() );
-		~SATBlur() override;
+	explicit SATBlur( const std::string &name = defaultName<SATBlur>() );
+	~SATBlur() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::SATBlur, SATBlurTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::SATBlur, SATBlurTypeId, ImageProcessor );
 
-		Gaffer::V2fPlug *radiusPlug();
-		const Gaffer::V2fPlug *radiusPlug() const;
+	Gaffer::V2fPlug *radiusPlug();
+	const Gaffer::V2fPlug *radiusPlug() const;
 
-		Gaffer::StringPlug *radiusChannelPlug();
-		const Gaffer::StringPlug *radiusChannelPlug() const;
+	Gaffer::StringPlug *radiusChannelPlug();
+	const Gaffer::StringPlug *radiusChannelPlug() const;
 
-		Gaffer::FloatPlug *maxRadiusPlug();
-		const Gaffer::FloatPlug *maxRadiusPlug() const;
+	Gaffer::FloatPlug *maxRadiusPlug();
+	const Gaffer::FloatPlug *maxRadiusPlug() const;
 
-		Gaffer::IntPlug *boundingModePlug();
-		const Gaffer::IntPlug *boundingModePlug() const;
+	Gaffer::IntPlug *boundingModePlug();
+	const Gaffer::IntPlug *boundingModePlug() const;
 
-		Gaffer::StringPlug *filterPlug();
-		const Gaffer::StringPlug *filterPlug() const;
+	Gaffer::StringPlug *filterPlug();
+	const Gaffer::StringPlug *filterPlug() const;
 
-		Gaffer::IntPlug *diskRectanglesPlug();
-		const Gaffer::IntPlug *diskRectanglesPlug() const;
+	Gaffer::IntPlug *diskRectanglesPlug();
+	const Gaffer::IntPlug *diskRectanglesPlug() const;
 
 
-		Gaffer::FloatVectorDataPlug *layerBoundariesPlug();
-		const Gaffer::FloatVectorDataPlug *layerBoundariesPlug() const;
+	Gaffer::FloatVectorDataPlug *layerBoundariesPlug();
+	const Gaffer::FloatVectorDataPlug *layerBoundariesPlug() const;
 
-		Gaffer::StringPlug *depthChannelPlug();
-		const Gaffer::StringPlug *depthChannelPlug() const;
+	Gaffer::StringPlug *depthChannelPlug();
+	const Gaffer::StringPlug *depthChannelPlug() const;
 
-		Gaffer::StringPlug *depthLookupChannelPlug();
-		const Gaffer::StringPlug *depthLookupChannelPlug() const;
+	Gaffer::StringPlug *depthLookupChannelPlug();
+	const Gaffer::StringPlug *depthLookupChannelPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		Gaffer::FloatVectorDataPlug *satPlug();
-		const Gaffer::FloatVectorDataPlug *satPlug() const;
+	Gaffer::FloatVectorDataPlug *satPlug();
+	const Gaffer::FloatVectorDataPlug *satPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( SATBlur )

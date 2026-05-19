@@ -90,13 +90,12 @@ template<typename T>
 class CompoundNumericPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
-		{
-			return serialisationRepr( static_cast<const T *>( graphComponent ), &serialisation );
-		}
-
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		return serialisationRepr( static_cast<const T *>( graphComponent ), &serialisation );
+	}
 };
 
 template<typename T, typename ValueType = typename T::ValueType>
@@ -141,18 +140,7 @@ PlugClass<T> bind()
 	using V = typename T::ValueType;
 
 	PlugClass<T> cls;
-		cls.def( init<const char *, Plug::Direction, V, V, V, unsigned, IECore::GeometricData::Interpretation>(
-				(
-					boost::python::arg_( "name" )=GraphComponent::defaultName<T>(),
-					boost::python::arg_( "direction" )=Plug::In,
-					boost::python::arg_( "defaultValue" )=V( 0 ),
-					boost::python::arg_( "minValue" )=V(std::numeric_limits<typename V::BaseType>::lowest()),
-					boost::python::arg_( "maxValue" )=V(std::numeric_limits<typename V::BaseType>::max()),
-					boost::python::arg_( "flags" )=Plug::Default,
-					boost::python::arg_( "interpretation" )=IECore::GeometricData::None
-				)
-			)
-		)
+	cls.def( init<const char *, Plug::Direction, V, V, V, unsigned, IECore::GeometricData::Interpretation>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V( 0 ), boost::python::arg_( "minValue" ) = V( std::numeric_limits<typename V::BaseType>::lowest() ), boost::python::arg_( "maxValue" ) = V( std::numeric_limits<typename V::BaseType>::max() ), boost::python::arg_( "flags" ) = Plug::Default, boost::python::arg_( "interpretation" ) = IECore::GeometricData::None ) ) )
 		.def( "defaultValue", &T::defaultValue )
 		.def( "hasMinValue", &T::hasMinValue )
 		.def( "hasMaxValue", &T::hasMaxValue )
@@ -165,8 +153,7 @@ PlugClass<T> bind()
 		.def( "gang", &gang<T> )
 		.def( "isGanged", &T::isGanged )
 		.def( "ungang", &ungang<T> )
-		.def( "__repr__", &repr<T> )
-	;
+		.def( "__repr__", &repr<T> );
 
 	scope s = cls;
 
@@ -187,7 +174,6 @@ void GafferModule::bindCompoundNumericPlug()
 	bind<V2iPlug>();
 	bind<V3iPlug>();
 	bind<Color3fPlug>()
-		.def( "setValue", &setValue<Color3fPlug, Imath::V3f> )
-	;
+		.def( "setValue", &setValue<Color3fPlug, Imath::V3f> );
 	bind<Color4fPlug>();
 }

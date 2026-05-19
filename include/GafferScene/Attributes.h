@@ -48,33 +48,32 @@ namespace GafferScene
 class GAFFERSCENE_API Attributes : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit Attributes( const std::string &name=defaultName<Attributes>() );
-		~Attributes() override;
+	explicit Attributes( const std::string &name = defaultName<Attributes>() );
+	~Attributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Attributes, AttributesTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Attributes, AttributesTypeId, AttributeProcessor );
 
-		Gaffer::CompoundDataPlug *attributesPlug();
-		const Gaffer::CompoundDataPlug *attributesPlug() const;
+	Gaffer::CompoundDataPlug *attributesPlug();
+	const Gaffer::CompoundDataPlug *attributesPlug() const;
 
-		Gaffer::CompoundObjectPlug *extraAttributesPlug();
-		const Gaffer::CompoundObjectPlug *extraAttributesPlug() const;
+	Gaffer::CompoundObjectPlug *extraAttributesPlug();
+	const Gaffer::CompoundObjectPlug *extraAttributesPlug() const;
 
-	protected :
+protected:
 
-		/// Automatically adds plugs for all attributes for the specified renderer, based
-		/// on `attribute:{rendererPrefix}:*` metadata registrations.
-		Attributes( const std::string &name, const std::string &rendererPrefix );
+	/// Automatically adds plugs for all attributes for the specified renderer, based
+	/// on `attribute:{rendererPrefix}:*` metadata registrations.
+	Attributes( const std::string &name, const std::string &rendererPrefix );
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Attributes )

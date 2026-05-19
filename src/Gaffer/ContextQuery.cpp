@@ -59,28 +59,28 @@ const Gaffer::ValuePlug *correspondingPlug(
 	const Gaffer::ValuePlug *other
 )
 {
-	boost::container::small_vector< const Gaffer::ValuePlug*, 4 > path;
+	boost::container::small_vector<const Gaffer::ValuePlug *, 4> path;
 
 	const Gaffer::ValuePlug *plug = child;
 
 	while( plug != parent )
 	{
 		path.push_back( plug );
-		plug = plug->parent< Gaffer::ValuePlug >();
+		plug = plug->parent<Gaffer::ValuePlug>();
 	}
 
 	plug = other;
 
-	while( ! path.empty() )
+	while( !path.empty() )
 	{
-		plug = plug->getChild< Gaffer::ValuePlug >( path.back()->getName() );
+		plug = plug->getChild<Gaffer::ValuePlug>( path.back()->getName() );
 		path.pop_back();
 	}
 
 	return plug;
 }
 
-void addChildPlugsToAffectedOutputs( const Gaffer::Plug* plug, Gaffer::DependencyNode::AffectedPlugsContainer& outputs )
+void addChildPlugsToAffectedOutputs( const Gaffer::Plug *plug, Gaffer::DependencyNode::AffectedPlugsContainer &outputs )
 {
 	if( plug->children().empty() )
 	{
@@ -88,7 +88,7 @@ void addChildPlugsToAffectedOutputs( const Gaffer::Plug* plug, Gaffer::Dependenc
 	}
 	else
 	{
-		for( const Gaffer::PlugPtr& child : Gaffer::Plug::OutputRange( *plug ) )
+		for( const Gaffer::PlugPtr &child : Gaffer::Plug::OutputRange( *plug ) )
 		{
 			addChildPlugsToAffectedOutputs( child.get(), outputs );
 		}
@@ -112,7 +112,7 @@ const Gaffer::ValuePlug *getChildWithDescendant( const Gaffer::Plug *parentPlug,
 	throw IECore::Exception( "ContextQuery : Plug not in hierarchy." );
 }
 
-}  // namespace
+} // namespace
 
 namespace Gaffer
 {
@@ -192,7 +192,7 @@ void ContextQuery::removeQuery( Gaffer::NameValuePlug *plug )
 	outPlug()->removeChild( const_cast<ValuePlug *>( outputPlug ) );
 }
 
-void ContextQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs) const
+void ContextQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 
@@ -248,7 +248,8 @@ void ContextQuery::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 				valuePlug,
 				output,
 				static_cast<const ValuePlug *>( childQueryPlug->valuePlug() )
-			)->hash( h );
+			)
+				->hash( h );
 			h.append( context->variableHash( childQueryPlug->namePlug()->getValue() ) );
 		}
 	}
@@ -294,7 +295,6 @@ void ContextQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 	}
 
 	ComputeNode::compute( output, context );
-
 }
 
 const Gaffer::ValuePlug *ContextQuery::outPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug ) const
@@ -331,8 +331,7 @@ const Gaffer::NameValuePlug *ContextQuery::queryPlugFromOutPlug( const Gaffer::V
 		return childQueryPlug;
 	}
 
-	throw IECore::Exception( "ContextQuery::queryPlug : Queries must be a \"NameValuePlug\".");
-
+	throw IECore::Exception( "ContextQuery::queryPlug : Queries must be a \"NameValuePlug\"." );
 }
 
 Gaffer::BoolPlug *ContextQuery::existsPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug )
@@ -341,7 +340,7 @@ Gaffer::BoolPlug *ContextQuery::existsPlugFromQueryPlug( const Gaffer::NameValue
 	{
 		if( const BoolPlug *ePlug = oPlug->getChild<BoolPlug>( g_existsPlugIndex ) )
 		{
-			return const_cast<Gaffer::BoolPlug*>( ePlug );
+			return const_cast<Gaffer::BoolPlug *>( ePlug );
 		}
 	}
 
@@ -354,7 +353,7 @@ Gaffer::ValuePlug *ContextQuery::valuePlugFromQueryPlug( const Gaffer::NameValue
 	{
 		if( const ValuePlug *vPlug = oPlug->getChild<ValuePlug>( g_valuePlugIndex ) )
 		{
-			return const_cast<Gaffer::ValuePlug*>( vPlug );
+			return const_cast<Gaffer::ValuePlug *>( vPlug );
 		}
 	}
 

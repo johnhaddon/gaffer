@@ -82,7 +82,7 @@ using namespace GafferScene;
 namespace
 {
 
-const PrimitiveVariable *findVertexVariable( const IECoreScene::Primitive* primitive, const InternedString &name )
+const PrimitiveVariable *findVertexVariable( const IECoreScene::Primitive *primitive, const InternedString &name )
 {
 	PrimitiveVariableMap::const_iterator it = primitive->variables.find( name );
 	if( it == primitive->variables.end() )
@@ -92,17 +92,14 @@ const PrimitiveVariable *findVertexVariable( const IECoreScene::Primitive* primi
 
 	if(
 		it->second.interpolation == IECoreScene::PrimitiveVariable::Vertex ||
-		(
-			it->second.interpolation == IECoreScene::PrimitiveVariable::Varying &&
-			primitive->variableSize( PrimitiveVariable::Vertex ) == primitive->variableSize( PrimitiveVariable::Varying )
-		)
+		( it->second.interpolation == IECoreScene::PrimitiveVariable::Varying &&
+		  primitive->variableSize( PrimitiveVariable::Vertex ) == primitive->variableSize( PrimitiveVariable::Varying ) )
 	)
 	{
 		return &it->second;
 	}
 
 	return nullptr;
-
 }
 
 // We need to able to quantize all our basic numeric values, so we have a set of templates for this, with
@@ -110,9 +107,11 @@ const PrimitiveVariable *findVertexVariable( const IECoreScene::Primitive* primi
 //
 // We quantize by forcing a value to the closest value that is a multiple of quantize.  For vector types,
 // this is done independently for each axis.
-class QuantizeException {};
+class QuantizeException
+{
+};
 
-template <class T>
+template<class T>
 inline T quantize( const T &v, float q )
 {
 	if( q != 0.0f )
@@ -122,7 +121,7 @@ inline T quantize( const T &v, float q )
 	return v;
 }
 
-template <>
+template<>
 inline float quantize( const float &v, float q )
 {
 	if( q == 0.0f )
@@ -140,7 +139,7 @@ inline float quantize( const float &v, float q )
 	return r;
 }
 
-template <>
+template<>
 inline int quantize( const int &v, float q )
 {
 	if( q == 0.0f )
@@ -156,25 +155,25 @@ inline int quantize( const int &v, float q )
 	return intQuantize * ( ( v + halfQuantize ) / intQuantize );
 }
 
-template <class T>
+template<class T>
 inline Vec2<T> quantize( const Vec2<T> &v, float q )
 {
 	return Vec2<T>( quantize( v[0], q ), quantize( v[1], q ) );
 }
 
-template <class T>
+template<class T>
 inline Vec3<T> quantize( const Vec3<T> &v, float q )
 {
 	return Vec3<T>( quantize( v[0], q ), quantize( v[1], q ), quantize( v[2], q ) );
 }
 
-template <>
+template<>
 inline Color3f quantize( const Color3f &v, float q )
 {
 	return Color3f( quantize( v[0], q ), quantize( v[1], q ), quantize( v[2], q ) );
 }
 
-template <>
+template<>
 inline Color4f quantize( const Color4f &v, float q )
 {
 	return Color4f( quantize( v[0], q ), quantize( v[1], q ), quantize( v[2], q ), quantize( v[3], q ) );
@@ -184,13 +183,13 @@ inline Color4f quantize( const Color4f &v, float q )
 // when accessing the prototypes scene
 struct PrototypeContextVariable
 {
-	InternedString name;               // Name of context variable
-	const PrimitiveVariable *primVar;  // Primitive variable that drives it
-	float quantize;                    // The interval we quantize to
-	bool offsetMode;                   // Special mode for adding to existing variable instead of replacing
-	bool seedMode;                     // Special mode for seed context which is driven from the id
-	int numSeeds;                      // When in seedMode, the number of distinct seeds to output
-	int seedScramble;                  // A random seed that affects how seeds are generated
+	InternedString name; // Name of context variable
+	const PrimitiveVariable *primVar; // Primitive variable that drives it
+	float quantize; // The interval we quantize to
+	bool offsetMode; // Special mode for adding to existing variable instead of replacing
+	bool seedMode; // Special mode for seed context which is driven from the id
+	int numSeeds; // When in seedMode, the number of distinct seeds to output
+	int seedScramble; // A random seed that affects how seeds are generated
 };
 
 
@@ -198,15 +197,15 @@ struct PrototypeContextVariable
 // struct
 struct AccessPrototypeContextVariable
 {
-	template< class T>
-	void operator()( const TypedData<vector<T>> *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
+	template<class T>
+	void operator () ( const TypedData<vector<T>> *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
 	{
 		T raw = PrimitiveVariable::IndexedView<T>( *v.primVar )[index];
 		T value = quantize( raw, v.quantize );
 		scope.setAllocated( v.name, value );
 	}
 
-	void operator()( const TypedData<vector<float>> *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
+	void operator () ( const TypedData<vector<float>> *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
 	{
 		float raw = PrimitiveVariable::IndexedView<float>( *v.primVar )[index];
 		float value = quantize( raw, v.quantize );
@@ -221,14 +220,14 @@ struct AccessPrototypeContextVariable
 		}
 	}
 
-	void operator()( const TypedData<vector<int>> *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
+	void operator () ( const TypedData<vector<int>> *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
 	{
 		int raw = PrimitiveVariable::IndexedView<int>( *v.primVar )[index];
 		int value = quantize( raw, v.quantize );
 
 		if( v.offsetMode )
 		{
-			scope.setAllocated( v.name, float(value) + scope.context()->get<float>( v.name ) );
+			scope.setAllocated( v.name, float( value ) + scope.context()->get<float>( v.name ) );
 		}
 		else
 		{
@@ -236,7 +235,7 @@ struct AccessPrototypeContextVariable
 		}
 	}
 
-	void operator()( const Data *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
+	void operator () ( const Data *data, const PrototypeContextVariable &v, size_t index, Context::EditableScope &scope )
 	{
 		throw IECore::Exception( "Context variable prim vars must contain vector data" );
 	}
@@ -249,8 +248,8 @@ struct AccessPrototypeContextVariable
 // the same PrototypeContextVariables in the same order
 struct UniqueHashPrototypeContextVariable
 {
-	template< class T>
-	void operator()( const TypedData<vector<T>> *data, const PrototypeContextVariable &v, size_t index, MurmurHash &contextHash )
+	template<class T>
+	void operator () ( const TypedData<vector<T>> *data, const PrototypeContextVariable &v, size_t index, MurmurHash &contextHash )
 
 	{
 		T raw = PrimitiveVariable::IndexedView<T>( *v.primVar )[index];
@@ -258,7 +257,7 @@ struct UniqueHashPrototypeContextVariable
 		contextHash.append( value );
 	}
 
-	void operator()( const Data *data, const PrototypeContextVariable &v, int index, MurmurHash &contextHash )
+	void operator () ( const Data *data, const PrototypeContextVariable &v, int index, MurmurHash &contextHash )
 	{
 		throw IECore::Exception( "Context variable prim vars must contain vector data" );
 	}
@@ -269,8 +268,7 @@ ConstInternedStringVectorDataPtr g_emptyNames = new InternedStringVectorData();
 
 struct IdData
 {
-	IdData() :
-		intElements( nullptr ), int64Elements( nullptr )
+	IdData() : intElements( nullptr ), int64Elements( nullptr )
 	{
 	}
 
@@ -284,7 +282,6 @@ struct IdData
 		{
 			int64Elements = &int64Data->readable();
 		}
-
 	}
 
 	size_t size() const
@@ -307,17 +304,16 @@ struct IdData
 	{
 		if( intElements )
 		{
-			return (*intElements)[i];
+			return ( *intElements )[i];
 		}
 		else
 		{
-			return (*int64Elements)[i];
+			return ( *int64Elements )[i];
 		}
 	}
 
 	const std::vector<int> *intElements;
 	const std::vector<int64_t> *int64Elements;
-
 };
 
 // We create a seed integer that corresponds to the id by hashing the id and then modulo'ing to
@@ -362,7 +358,7 @@ int seedForPoint( size_t index, const IdData &idData, int numSeeds, int seedScra
 		}
 
 		id = int( ( double( seedHash.h1() ) / double( UINT64_MAX ) ) * double( numSeeds ) );
-		id = id % numSeeds;  // For the rare case h1 / max == 1.0, make sure we stay in range
+		id = id % numSeeds; // For the rare case h1 / max == 1.0, make sure we stay in range
 	}
 	return id;
 }
@@ -382,7 +378,7 @@ bool checkEnvFlag( const char *envVar, bool def )
 	}
 }
 
-}
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // EngineData
@@ -394,870 +390,860 @@ bool checkEnvFlag( const char *envVar, bool def )
 class Instancer::EngineData : public Data
 {
 
-	public :
+public:
 
-		EngineData(
-			ConstPrimitivePtr primitive,
-			PrototypeMode mode,
-			const std::string &prototypeIndexName,
-			const std::string &rootsVariable,
-			const StringVectorData *rootsList,
-			const std::string &idName,
-			bool omitDuplicateIds,
-			const std::string &position,
-			const std::string &orientation,
-			const std::string &scale,
-			const std::string &inactiveIds,
-			const std::string &attributes,
-			const std::string &attributePrefix,
-			const std::vector< PrototypeContextVariable > &prototypeContextVariables
-		)
-			:	m_primitive( primitive ),
-				m_numPrototypes( 0 ),
-				m_numValidPrototypes( 0 ),
-				m_prototypeIndices( nullptr ),
-				m_positions( nullptr ),
-				m_orientations( nullptr ),
-				m_scales( nullptr ),
-				m_uniformScales( nullptr ),
-				m_prototypeContextVariables( prototypeContextVariables )
+	EngineData(
+		ConstPrimitivePtr primitive,
+		PrototypeMode mode,
+		const std::string &prototypeIndexName,
+		const std::string &rootsVariable,
+		const StringVectorData *rootsList,
+		const std::string &idName,
+		bool omitDuplicateIds,
+		const std::string &position,
+		const std::string &orientation,
+		const std::string &scale,
+		const std::string &inactiveIds,
+		const std::string &attributes,
+		const std::string &attributePrefix,
+		const std::vector<PrototypeContextVariable> &prototypeContextVariables
+	)
+		: m_primitive( primitive ),
+		  m_numPrototypes( 0 ),
+		  m_numValidPrototypes( 0 ),
+		  m_prototypeIndices( nullptr ),
+		  m_positions( nullptr ),
+		  m_orientations( nullptr ),
+		  m_scales( nullptr ),
+		  m_uniformScales( nullptr ),
+		  m_prototypeContextVariables( prototypeContextVariables )
+	{
+		if( !m_primitive )
 		{
-			if( !m_primitive )
+			return;
+		}
+
+		initPrototypes( mode, prototypeIndexName, rootsVariable, rootsList );
+
+		m_ids.initialize( m_primitive.get(), idName );
+		if( m_ids.size() && m_ids.size() != numPoints() )
+		{
+			throw IECore::Exception( fmt::format( "Id primitive variable \"{}\" has incorrect size", idName ) );
+		}
+
+		if( const V3fVectorData *p = m_primitive->variableData<V3fVectorData>( position ) )
+		{
+			m_positions = &p->readable();
+			if( m_positions->size() != numPoints() )
 			{
-				return;
+				throw IECore::Exception( fmt::format( "Position primitive variable \"{}\" has incorrect size", position ) );
 			}
+		}
 
-			initPrototypes( mode, prototypeIndexName, rootsVariable, rootsList );
-
-			m_ids.initialize( m_primitive.get(), idName );
-			if( m_ids.size() && m_ids.size() != numPoints() )
+		if( const QuatfVectorData *o = m_primitive->variableData<QuatfVectorData>( orientation ) )
+		{
+			m_orientations = &o->readable();
+			if( m_orientations->size() != numPoints() )
 			{
-				throw IECore::Exception( fmt::format( "Id primitive variable \"{}\" has incorrect size", idName ) );
+				throw IECore::Exception( fmt::format( "Orientation primitive variable \"{}\" has incorrect size", orientation ) );
 			}
+		}
 
-			if( const V3fVectorData *p = m_primitive->variableData<V3fVectorData>( position ) )
+		if( const V3fVectorData *s = m_primitive->variableData<V3fVectorData>( scale ) )
+		{
+			m_scales = &s->readable();
+			if( m_scales->size() != numPoints() )
 			{
-				m_positions = &p->readable();
-				if( m_positions->size() != numPoints() )
+				throw IECore::Exception( fmt::format( "Scale primitive variable \"{}\" has incorrect size", scale ) );
+			}
+		}
+		else if( const FloatVectorData *s = m_primitive->variableData<FloatVectorData>( scale ) )
+		{
+			m_uniformScales = &s->readable();
+			if( m_uniformScales->size() != numPoints() )
+			{
+				throw IECore::Exception( fmt::format( "Uniform scale primitive variable \"{}\" has incorrect size", scale ) );
+			}
+		}
+
+		if( m_ids.size() )
+		{
+			for( size_t i = 0, e = numPoints(); i < e; ++i )
+			{
+				int64_t id = m_ids.element( i );
+				auto ins = m_idsToPointIndices.try_emplace( id, i );
+				if( !ins.second )
 				{
-					throw IECore::Exception( fmt::format( "Position primitive variable \"{}\" has incorrect size", position ) );
-				}
-			}
-
-			if( const QuatfVectorData *o = m_primitive->variableData<QuatfVectorData>( orientation ) )
-			{
-				m_orientations = &o->readable();
-				if( m_orientations->size() != numPoints() )
-				{
-					throw IECore::Exception( fmt::format( "Orientation primitive variable \"{}\" has incorrect size", orientation ) );
-				}
-			}
-
-			if( const V3fVectorData *s = m_primitive->variableData<V3fVectorData>( scale ) )
-			{
-				m_scales = &s->readable();
-				if( m_scales->size() != numPoints() )
-				{
-					throw IECore::Exception( fmt::format( "Scale primitive variable \"{}\" has incorrect size", scale ) );
-				}
-			}
-			else if( const FloatVectorData *s = m_primitive->variableData<FloatVectorData>( scale ) )
-			{
-				m_uniformScales = &s->readable();
-				if( m_uniformScales->size() != numPoints() )
-				{
-					throw IECore::Exception( fmt::format( "Uniform scale primitive variable \"{}\" has incorrect size", scale ) );
-				}
-			}
-
-			if( m_ids.size() )
-			{
-				for( size_t i = 0, e = numPoints(); i < e; ++i )
-				{
-					int64_t id = m_ids.element(i);
-					auto ins = m_idsToPointIndices.try_emplace( id, i );
-					if( !ins.second )
+					// We have multiple indices trying to use this id.
+					if( !omitDuplicateIds )
 					{
-						// We have multiple indices trying to use this id.
-						if( !omitDuplicateIds )
-						{
-							throw IECore::Exception( fmt::format( "Instance id \"{}\" is duplicated at index {} and {}. This probably indicates invalid source data, if you want to hack around it, you can set \"omitDuplicateIds\".", id, m_idsToPointIndices[id], i ) );
-						}
-
-						if( !m_indicesInactive.size() )
-						{
-							m_indicesInactive.resize( numPoints(), false );
-						}
-
-						// If we're omitting duplicate ids, then we need to omit both the current index, and
-						// the index that first tried to use this id.
-						m_indicesInactive[ i ] = true;
-						m_indicesInactive[ ins.first->second ] = true;
-					}
-				}
-			}
-
-			std::vector<std::string> inactiveIdVarNames;
-			IECore::StringAlgo::tokenize( inactiveIds, ' ', inactiveIdVarNames );
-			for( std::string &inactiveIdVarName : inactiveIdVarNames )
-			{
-				if( m_primitive->variables.find( inactiveIdVarName ) == m_primitive->variables.end() )
-				{
-					continue;
-				}
-
-				const PrimitiveVariable *vertexInactiveVar = findVertexVariable( m_primitive.get(), inactiveIdVarName );
-				if( vertexInactiveVar )
-				{
-					if( IECore::size( vertexInactiveVar->data.get() ) != numPoints() )
-					{
-						throw IECore::Exception( fmt::format( "Inactive primitive variable \"{}\" has incorrect size", inactiveIdVarName ) );
+						throw IECore::Exception( fmt::format( "Instance id \"{}\" is duplicated at index {} and {}. This probably indicates invalid source data, if you want to hack around it, you can set \"omitDuplicateIds\".", id, m_idsToPointIndices[id], i ) );
 					}
 
-					if( const auto *vertexInactiveData = IECore::runTimeCast<BoolVectorData>( vertexInactiveVar->data.get() ) )
+					if( !m_indicesInactive.size() )
 					{
-						const std::vector<bool> &vertexInactive = vertexInactiveData->readable();
+						m_indicesInactive.resize( numPoints(), false );
+					}
 
-						if( !m_indicesInactive.size() )
+					// If we're omitting duplicate ids, then we need to omit both the current index, and
+					// the index that first tried to use this id.
+					m_indicesInactive[i] = true;
+					m_indicesInactive[ins.first->second] = true;
+				}
+			}
+		}
+
+		std::vector<std::string> inactiveIdVarNames;
+		IECore::StringAlgo::tokenize( inactiveIds, ' ', inactiveIdVarNames );
+		for( std::string &inactiveIdVarName : inactiveIdVarNames )
+		{
+			if( m_primitive->variables.find( inactiveIdVarName ) == m_primitive->variables.end() )
+			{
+				continue;
+			}
+
+			const PrimitiveVariable *vertexInactiveVar = findVertexVariable( m_primitive.get(), inactiveIdVarName );
+			if( vertexInactiveVar )
+			{
+				if( IECore::size( vertexInactiveVar->data.get() ) != numPoints() )
+				{
+					throw IECore::Exception( fmt::format( "Inactive primitive variable \"{}\" has incorrect size", inactiveIdVarName ) );
+				}
+
+				if( const auto *vertexInactiveData = IECore::runTimeCast<BoolVectorData>( vertexInactiveVar->data.get() ) )
+				{
+					const std::vector<bool> &vertexInactive = vertexInactiveData->readable();
+
+					if( !m_indicesInactive.size() )
+					{
+						// If we don't already have an inactive array set up, we can just directly copy the data
+						// from a vertex primitive variable. Technically, we might not even need to do this copy,
+						// if there aren't any other inactive vars we're merging with, we could just have a
+						// separate way of storing a const pointer for this case, but given that this data is
+						// 32X smaller than any of our other per-vertex data anyway, it's probably fine to pay
+						// the cost of copying it in exchange for slightly simpler code.
+						m_indicesInactive = vertexInactive;
+					}
+					else
+					{
+						for( size_t i = 0; i < vertexInactive.size(); i++ )
 						{
-							// If we don't already have an inactive array set up, we can just directly copy the data
-							// from a vertex primitive variable. Technically, we might not even need to do this copy,
-							// if there aren't any other inactive vars we're merging with, we could just have a
-							// separate way of storing a const pointer for this case, but given that this data is
-							// 32X smaller than any of our other per-vertex data anyway, it's probably fine to pay
-							// the cost of copying it in exchange for slightly simpler code.
-							m_indicesInactive = vertexInactive;
-						}
-						else
-						{
-							for( size_t i = 0; i < vertexInactive.size(); i++ )
+							if( vertexInactive[i] )
 							{
-								if( vertexInactive[i] )
-								{
-									m_indicesInactive[ i ] = true;
-								}
+								m_indicesInactive[i] = true;
 							}
 						}
 					}
-					else if( const auto *vertexInactiveIntData = IECore::runTimeCast<IntVectorData>( vertexInactiveVar->data.get() ) )
+				}
+				else if( const auto *vertexInactiveIntData = IECore::runTimeCast<IntVectorData>( vertexInactiveVar->data.get() ) )
+				{
+					const std::vector<int> &vertexInactiveInt = vertexInactiveIntData->readable();
+
+					if( !m_indicesInactive.size() )
 					{
-						const std::vector<int> &vertexInactiveInt = vertexInactiveIntData->readable();
-
-						if( !m_indicesInactive.size() )
-						{
-							m_indicesInactive.resize( numPoints(), false );
-						}
-
-						for( size_t i = 0; i < vertexInactiveInt.size(); i++ )
-						{
-							if( vertexInactiveInt[i] )
-							{
-								m_indicesInactive[ i ] = true;
-							}
-						}
+						m_indicesInactive.resize( numPoints(), false );
 					}
 
-					continue;
-				}
-
-				IdData idData;
-				idData.initialize( m_primitive.get(), inactiveIdVarName );
-
-				size_t idSize = idData.size();
-				if( !idSize )
-				{
-					continue;
-				}
-
-				if( !m_indicesInactive.size() )
-				{
-					m_indicesInactive.resize( numPoints(), false );
-				}
-
-				if( m_idsToPointIndices.size() )
-				{
-					for( size_t i = 0; i < idSize; i++ )
+					for( size_t i = 0; i < vertexInactiveInt.size(); i++ )
 					{
-						auto it = m_idsToPointIndices.find( idData.element(i) );
-						if( it == m_idsToPointIndices.end() )
+						if( vertexInactiveInt[i] )
 						{
-							// I wish I could throw here ... it would be a really helpful clue to get an error
-							// if you've accidentally chosen a bad id. But ids might be changing over time, so
-							// we probably need to allow someone to deactivate an id even if it doesn't exist
-							// on all frames.
-							continue;
+							m_indicesInactive[i] = true;
 						}
-						m_indicesInactive[ it->second ] = true;
 					}
 				}
-				else
+
+				continue;
+			}
+
+			IdData idData;
+			idData.initialize( m_primitive.get(), inactiveIdVarName );
+
+			size_t idSize = idData.size();
+			if( !idSize )
+			{
+				continue;
+			}
+
+			if( !m_indicesInactive.size() )
+			{
+				m_indicesInactive.resize( numPoints(), false );
+			}
+
+			if( m_idsToPointIndices.size() )
+			{
+				for( size_t i = 0; i < idSize; i++ )
 				{
-					for( size_t i = 0; i < idSize; i++ )
+					auto it = m_idsToPointIndices.find( idData.element( i ) );
+					if( it == m_idsToPointIndices.end() )
 					{
-						int64_t id = idData.element(i);
-						if( id < 0 || id >= (int64_t)m_indicesInactive.size() )
-						{
-							continue;
-						}
-						m_indicesInactive[ id ] = true;
+						// I wish I could throw here ... it would be a really helpful clue to get an error
+						// if you've accidentally chosen a bad id. But ids might be changing over time, so
+						// we probably need to allow someone to deactivate an id even if it doesn't exist
+						// on all frames.
+						continue;
 					}
+					m_indicesInactive[it->second] = true;
 				}
 			}
-
-			initAttributes( attributes, attributePrefix );
-
-			for( const auto &v : m_prototypeContextVariables )
+			else
 			{
-				// We need to check if the primVars driving the context are the right size.
-				// There's not an easy way to do this on PrimitiveVariable without knowing the type,
-				// but we can check that it is valid for the primitive, and that the primitive size for that
-				// variable is correct
-				if( v.primVar && !(
-					m_primitive->isPrimitiveVariableValid( *v.primVar ) &&
-					m_primitive->variableSize( v.primVar->interpolation ) == numPoints()
-				) )
+				for( size_t i = 0; i < idSize; i++ )
 				{
-					throw IECore::Exception( fmt::format( "Context primitive variable for \"{}\" is not a correctly sized Vertex primitive variable", v.name.string() ) );
+					int64_t id = idData.element( i );
+					if( id < 0 || id >= (int64_t)m_indicesInactive.size() )
+					{
+						continue;
+					}
+					m_indicesInactive[id] = true;
 				}
 			}
 		}
 
-		size_t numPoints() const
-		{
-			return m_primitive ? m_primitive->variableSize( PrimitiveVariable::Vertex ) : 0;
-		}
+		initAttributes( attributes, attributePrefix );
 
-		int64_t instanceId( size_t pointIndex ) const
+		for( const auto &v : m_prototypeContextVariables )
 		{
-			return m_ids.size() ? m_ids.element( pointIndex ) : pointIndex;
-		}
-
-		size_t pointIndex( int64_t i ) const
-		{
-			if( !m_ids.size() )
+			// We need to check if the primVars driving the context are the right size.
+			// There's not an easy way to do this on PrimitiveVariable without knowing the type,
+			// but we can check that it is valid for the primitive, and that the primitive size for that
+			// variable is correct
+			if( v.primVar && !( m_primitive->isPrimitiveVariableValid( *v.primVar ) && m_primitive->variableSize( v.primVar->interpolation ) == numPoints() ) )
 			{
-				if( i >= (int64_t)numPoints() || i < 0 )
-				{
-					throw IECore::Exception( fmt::format( "Instance id \"{}\" is invalid, instancer produces only {} children. Topology may have changed during shutter.", i, numPoints() ) );
-				}
-				return i;
+				throw IECore::Exception( fmt::format( "Context primitive variable for \"{}\" is not a correctly sized Vertex primitive variable", v.name.string() ) );
 			}
+		}
+	}
 
-			IdsToPointIndices::const_iterator it = m_idsToPointIndices.find( i );
-			if( it == m_idsToPointIndices.end() )
+	size_t numPoints() const
+	{
+		return m_primitive ? m_primitive->variableSize( PrimitiveVariable::Vertex ) : 0;
+	}
+
+	int64_t instanceId( size_t pointIndex ) const
+	{
+		return m_ids.size() ? m_ids.element( pointIndex ) : pointIndex;
+	}
+
+	size_t pointIndex( int64_t i ) const
+	{
+		if( !m_ids.size() )
+		{
+			if( i >= (int64_t)numPoints() || i < 0 )
 			{
-				throw IECore::Exception( fmt::format( "Instance id \"{}\" is invalid. Topology may have changed during shutter.", i ) );
+				throw IECore::Exception( fmt::format( "Instance id \"{}\" is invalid, instancer produces only {} children. Topology may have changed during shutter.", i, numPoints() ) );
 			}
-
-			return it->second;
+			return i;
 		}
 
-		size_t pointIndex( const InternedString &name ) const
+		IdsToPointIndices::const_iterator it = m_idsToPointIndices.find( i );
+		if( it == m_idsToPointIndices.end() )
 		{
-			return pointIndex( boost::lexical_cast<size_t>( name ) );
+			throw IECore::Exception( fmt::format( "Instance id \"{}\" is invalid. Topology may have changed during shutter.", i ) );
 		}
 
-		size_t numValidPrototypes() const
+		return it->second;
+	}
+
+	size_t pointIndex( const InternedString &name ) const
+	{
+		return pointIndex( boost::lexical_cast<size_t>( name ) );
+	}
+
+	size_t numValidPrototypes() const
+	{
+		return m_numValidPrototypes;
+	}
+
+	int prototypeIndex( size_t pointIndex ) const
+	{
+		if( m_numPrototypes == 0 )
 		{
-			return m_numValidPrototypes;
+			return -1;
 		}
 
-		int prototypeIndex( size_t pointIndex ) const
+		if( m_indicesInactive.size() )
 		{
-			if( m_numPrototypes == 0 )
+			// If this point is tagged as inactive ( could be due to a user specified inactiveIds,
+			// or due to an id collision when omitDuplicateIds is set ), then we return -1 for
+			// the prototype, which means to omit this point.
+			if( m_indicesInactive[pointIndex] )
 			{
 				return -1;
 			}
-
-			if( m_indicesInactive.size() )
-			{
-				// If this point is tagged as inactive ( could be due to a user specified inactiveIds,
-				// or due to an id collision when omitDuplicateIds is set ), then we return -1 for
-				// the prototype, which means to omit this point.
-				if( m_indicesInactive[pointIndex] )
-				{
-					return -1;
-				}
-			}
-
-			if( m_prototypeIndices )
-			{
-				return m_prototypeIndexRemap[ (*m_prototypeIndices)[pointIndex] % m_numPrototypes ];
-			}
-			else
-			{
-				return m_prototypeIndexRemap[ 0 ];
-			}
 		}
 
-		// Return a pointer since this is for internal use only, and it helps communicate that we
-		// are responsible for holding the storage for this scene path when it gets put in the context
-		const ScenePlug::ScenePath *prototypeRoot( const InternedString &name, const ScenePlug::ScenePath &enginePath, ScenePlug::ScenePath &storage ) const
+		if( m_prototypeIndices )
 		{
-			return prototypeRoot( m_names->input( name ).index, enginePath, storage );
+			return m_prototypeIndexRemap[( *m_prototypeIndices )[pointIndex] % m_numPrototypes];
 		}
-
-		const ScenePlug::ScenePath *prototypeRoot( int prototypeId, const ScenePlug::ScenePath &enginePath, ScenePlug::ScenePath &storage ) const
+		else
 		{
-			if( m_roots[prototypeId].relative )
-			{
-				const ScenePlug::ScenePath &prototypePath = m_roots[prototypeId].path->readable();
-				storage.resize( 0 );
-				storage.reserve( enginePath.size() + prototypePath.size() );
-				storage.insert( storage.end(), enginePath.begin(), enginePath.end() );
-				storage.insert( storage.end(), prototypePath.begin(), prototypePath.end() );
-				return &storage;
-
-			}
-			else
-			{
-				return &( m_roots[prototypeId].path->readable() );
-			}
+			return m_prototypeIndexRemap[0];
 		}
+	}
 
-		const InternedStringVectorData *prototypeNames() const
+	// Return a pointer since this is for internal use only, and it helps communicate that we
+	// are responsible for holding the storage for this scene path when it gets put in the context
+	const ScenePlug::ScenePath *prototypeRoot( const InternedString &name, const ScenePlug::ScenePath &enginePath, ScenePlug::ScenePath &storage ) const
+	{
+		return prototypeRoot( m_names->input( name ).index, enginePath, storage );
+	}
+
+	const ScenePlug::ScenePath *prototypeRoot( int prototypeId, const ScenePlug::ScenePath &enginePath, ScenePlug::ScenePath &storage ) const
+	{
+		if( m_roots[prototypeId].relative )
 		{
-			return m_names ? m_names->outputChildNames() : g_emptyNames.get();
+			const ScenePlug::ScenePath &prototypePath = m_roots[prototypeId].path->readable();
+			storage.resize( 0 );
+			storage.reserve( enginePath.size() + prototypePath.size() );
+			storage.insert( storage.end(), enginePath.begin(), enginePath.end() );
+			storage.insert( storage.end(), prototypePath.begin(), prototypePath.end() );
+			return &storage;
 		}
-
-		M44f instanceTransform( size_t pointIndex ) const
+		else
 		{
-			M44f result;
-			if( m_positions )
-			{
-				result.translate( (*m_positions)[pointIndex] );
-			}
-			if( m_orientations )
-			{
-				// Using Orientation::normalizedIfNeeded avoids modifying quaternions that are already
-				// normalized. It's better for consistency to not be pointlessly changing the values
-				// slightly at the limits of floating point precision, when they're already as close to
-				// normalized as they can get, and this saves 4% runtime on InstancerTest.testBoundPerformance.
-				result = Orientation::normalizedIfNeeded((*m_orientations)[pointIndex]).toMatrix44() * result;
-			}
-			if( m_scales )
-			{
-				result.scale( (*m_scales)[pointIndex] );
-			}
-			if( m_uniformScales )
-			{
-				result.scale( V3f( (*m_uniformScales)[pointIndex] ) );
-			}
-			return result;
+			return &( m_roots[prototypeId].path->readable() );
 		}
+	}
 
-		size_t numInstanceAttributes() const
+	const InternedStringVectorData *prototypeNames() const
+	{
+		return m_names ? m_names->outputChildNames() : g_emptyNames.get();
+	}
+
+	M44f instanceTransform( size_t pointIndex ) const
+	{
+		M44f result;
+		if( m_positions )
 		{
-			return m_attributeCreators.size();
+			result.translate( ( *m_positions )[pointIndex] );
 		}
-
-		void instanceAttributesHash( size_t pointIndex, MurmurHash &h ) const
+		if( m_orientations )
 		{
-			h.append( m_attributesHash );
-			h.append( (uint64_t)pointIndex );
+			// Using Orientation::normalizedIfNeeded avoids modifying quaternions that are already
+			// normalized. It's better for consistency to not be pointlessly changing the values
+			// slightly at the limits of floating point precision, when they're already as close to
+			// normalized as they can get, and this saves 4% runtime on InstancerTest.testBoundPerformance.
+			result = Orientation::normalizedIfNeeded( ( *m_orientations )[pointIndex] ).toMatrix44() * result;
 		}
-
-		void instanceAttributes( size_t pointIndex, CompoundObject &result ) const
+		if( m_scales )
 		{
-			CompoundObject::ObjectMap &writableResult = result.members();
-			for( const auto &attributeCreator : m_attributeCreators )
+			result.scale( ( *m_scales )[pointIndex] );
+		}
+		if( m_uniformScales )
+		{
+			result.scale( V3f( ( *m_uniformScales )[pointIndex] ) );
+		}
+		return result;
+	}
+
+	size_t numInstanceAttributes() const
+	{
+		return m_attributeCreators.size();
+	}
+
+	void instanceAttributesHash( size_t pointIndex, MurmurHash &h ) const
+	{
+		h.append( m_attributesHash );
+		h.append( (uint64_t)pointIndex );
+	}
+
+	void instanceAttributes( size_t pointIndex, CompoundObject &result ) const
+	{
+		CompoundObject::ObjectMap &writableResult = result.members();
+		for( const auto &attributeCreator : m_attributeCreators )
+		{
+			writableResult[attributeCreator.first] = attributeCreator.second( pointIndex );
+		}
+	}
+
+	using PrototypeHashes = std::map<InternedString, boost::unordered_set<IECore::MurmurHash>>;
+
+	// In order to compute the number of variations, we compute a unique hash for every context we use
+	// for evaluating prototypes.  So that we can track which sources are responsible for variations,
+	// we return a map of hash sets, with a set of hashes for each variable name in
+	// m_prototypeContextVariables, plus an extra entry for "" for the combined result of all variation
+	// sources
+	std::unique_ptr<PrototypeHashes> uniquePrototypeHashes() const
+	{
+		std::vector<boost::unordered_set<IECore::MurmurHash>> variableHashAccumulate( m_prototypeContextVariables.size() );
+		boost::unordered_set<IECore::MurmurHash> totalHashAccumulate;
+
+		size_t n = numPoints();
+		for( size_t i = 0; i < n; i++ )
+		{
+			int protoIndex = prototypeIndex( i );
+			if( protoIndex == -1 )
 			{
-				writableResult[attributeCreator.first] = attributeCreator.second( pointIndex );
-			}
-		}
-
-		using PrototypeHashes = std::map<InternedString, boost::unordered_set<IECore::MurmurHash>>;
-
-		// In order to compute the number of variations, we compute a unique hash for every context we use
-		// for evaluating prototypes.  So that we can track which sources are responsible for variations,
-		// we return a map of hash sets, with a set of hashes for each variable name in
-		// m_prototypeContextVariables, plus an extra entry for "" for the combined result of all variation
-		// sources
-		std::unique_ptr<PrototypeHashes> uniquePrototypeHashes() const
-		{
-			std::vector< boost::unordered_set< IECore::MurmurHash > > variableHashAccumulate( m_prototypeContextVariables.size() );
-			boost::unordered_set< IECore::MurmurHash > totalHashAccumulate;
-
-			size_t n = numPoints();
-			for( size_t i = 0; i < n; i++ )
-			{
-				int protoIndex = prototypeIndex( i );
-				if( protoIndex == -1 )
-				{
-					continue;
-				}
-
-				IECore::MurmurHash totalHash;
-				const auto &rootPath = m_roots[ protoIndex ];
-
-				// Note that we are rehashing the root path for every point, even though they are heavily
-				// reused.  This seems suboptimal, but is simpler, and the more complex version doesn't
-				// appear to make any performance difference in practice
-				totalHash.append( &(rootPath.path->readable())[0], rootPath.path->readable().size() );
-				totalHash.append( rootPath.relative );
-				for( unsigned int j = 0; j < m_prototypeContextVariables.size(); j++ )
-				{
-					IECore::MurmurHash r; // TODO - if we're using this in inner loops, the constructor should probably be inlined?
-					hashPrototypeContextVariable( i, m_prototypeContextVariables[j], r );
-					variableHashAccumulate[j].insert( r );
-					totalHash.append( r );
-				}
-				totalHashAccumulate.insert( totalHash );
+				continue;
 			}
 
-			auto result = std::make_unique<PrototypeHashes>();
+			IECore::MurmurHash totalHash;
+			const auto &rootPath = m_roots[protoIndex];
+
+			// Note that we are rehashing the root path for every point, even though they are heavily
+			// reused.  This seems suboptimal, but is simpler, and the more complex version doesn't
+			// appear to make any performance difference in practice
+			totalHash.append( &( rootPath.path->readable() )[0], rootPath.path->readable().size() );
+			totalHash.append( rootPath.relative );
 			for( unsigned int j = 0; j < m_prototypeContextVariables.size(); j++ )
 			{
-				(*result)[ m_prototypeContextVariables[j].name ] = variableHashAccumulate[j];
+				IECore::MurmurHash r; // TODO - if we're using this in inner loops, the constructor should probably be inlined?
+				hashPrototypeContextVariable( i, m_prototypeContextVariables[j], r );
+				variableHashAccumulate[j].insert( r );
+				totalHash.append( r );
 			}
-			(*result)[ "" ] = totalHashAccumulate;
-
-			return result;
+			totalHashAccumulate.insert( totalHash );
 		}
 
-		bool hasContextVariables() const
+		auto result = std::make_unique<PrototypeHashes>();
+		for( unsigned int j = 0; j < m_prototypeContextVariables.size(); j++ )
 		{
-			return m_prototypeContextVariables.size() != 0;
+			( *result )[m_prototypeContextVariables[j].name] = variableHashAccumulate[j];
 		}
+		( *result )[""] = totalHashAccumulate;
 
-		// Set the context variables in the context for this point index, based on the m_prototypeContextVariables
-		// set up for this EngineData
-		void setPrototypeContextVariables( size_t pointIndex, Context::EditableScope &scope ) const
+		return result;
+	}
+
+	bool hasContextVariables() const
+	{
+		return m_prototypeContextVariables.size() != 0;
+	}
+
+	// Set the context variables in the context for this point index, based on the m_prototypeContextVariables
+	// set up for this EngineData
+	void setPrototypeContextVariables( size_t pointIndex, Context::EditableScope &scope ) const
+	{
+		for( unsigned int i = 0; i < m_prototypeContextVariables.size(); i++ )
 		{
-			for( unsigned int i = 0; i < m_prototypeContextVariables.size(); i++ )
-			{
-				const PrototypeContextVariable &v = m_prototypeContextVariables[i];
+			const PrototypeContextVariable &v = m_prototypeContextVariables[i];
 
-				if( v.seedMode )
-				{
-					scope.setAllocated( v.name, seedForPoint( pointIndex, m_ids, v.numSeeds, v.seedScramble ) );
-					continue;
-				}
-
-				if( !v.primVar )
-				{
-					continue;
-				}
-
-				try
-				{
-					IECore::dispatch( v.primVar->data.get(), AccessPrototypeContextVariable(), v, pointIndex, scope );
-				}
-				catch( QuantizeException & )
-				{
-					throw IECore::Exception( fmt::format( "Context variable \"{}\" : cannot quantize variable of type {}", v.name.string(), v.primVar->data->typeName() ) );
-				}
-			}
-		}
-
-	protected :
-
-		// Needs to match setPrototypeContextVariables above, except that it operates on one
-		// PrototypeContextVariable at a time instead of iterating through them
-		void hashPrototypeContextVariable( size_t pointIndex, const PrototypeContextVariable &v, IECore::MurmurHash &result ) const
-		{
 			if( v.seedMode )
 			{
-				result.append( seedForPoint( pointIndex, m_ids, v.numSeeds, v.seedScramble ) );
-				return;
+				scope.setAllocated( v.name, seedForPoint( pointIndex, m_ids, v.numSeeds, v.seedScramble ) );
+				continue;
 			}
 
 			if( !v.primVar )
 			{
-				return;
+				continue;
 			}
 
 			try
 			{
-				IECore::dispatch( v.primVar->data.get(), UniqueHashPrototypeContextVariable(), v, pointIndex, result );
+				IECore::dispatch( v.primVar->data.get(), AccessPrototypeContextVariable(), v, pointIndex, scope );
 			}
 			catch( QuantizeException & )
 			{
 				throw IECore::Exception( fmt::format( "Context variable \"{}\" : cannot quantize variable of type {}", v.name.string(), v.primVar->data->typeName() ) );
 			}
 		}
+	}
 
-		void copyFrom( const Object *other, CopyContext *context ) override
+protected:
+
+	// Needs to match setPrototypeContextVariables above, except that it operates on one
+	// PrototypeContextVariable at a time instead of iterating through them
+	void hashPrototypeContextVariable( size_t pointIndex, const PrototypeContextVariable &v, IECore::MurmurHash &result ) const
+	{
+		if( v.seedMode )
 		{
-			Data::copyFrom( other, context );
-			msg( Msg::Warning, "EngineData::copyFrom", "Not implemented" );
+			result.append( seedForPoint( pointIndex, m_ids, v.numSeeds, v.seedScramble ) );
+			return;
 		}
 
-		void save( SaveContext *context ) const override
+		if( !v.primVar )
 		{
-			Data::save( context );
-			msg( Msg::Warning, "EngineData::save", "Not implemented" );
+			return;
 		}
 
-		void load( LoadContextPtr context ) override
+		try
 		{
-			Data::load( context );
-			msg( Msg::Warning, "EngineData::load", "Not implemented" );
+			IECore::dispatch( v.primVar->data.get(), UniqueHashPrototypeContextVariable(), v, pointIndex, result );
+		}
+		catch( QuantizeException & )
+		{
+			throw IECore::Exception( fmt::format( "Context variable \"{}\" : cannot quantize variable of type {}", v.name.string(), v.primVar->data->typeName() ) );
+		}
+	}
+
+	void copyFrom( const Object *other, CopyContext *context ) override
+	{
+		Data::copyFrom( other, context );
+		msg( Msg::Warning, "EngineData::copyFrom", "Not implemented" );
+	}
+
+	void save( SaveContext *context ) const override
+	{
+		Data::save( context );
+		msg( Msg::Warning, "EngineData::save", "Not implemented" );
+	}
+
+	void load( LoadContextPtr context ) override
+	{
+		Data::load( context );
+		msg( Msg::Warning, "EngineData::load", "Not implemented" );
+	}
+
+private:
+
+	using AttributeCreator = std::function<DataPtr( size_t )>;
+
+	struct MakeAttributeCreator
+	{
+
+		template<typename T>
+		AttributeCreator operator () ( const TypedData<vector<T>> *data )
+		{
+			return std::bind( &createAttribute<T>, data->readable(), std::placeholders::_1 );
 		}
 
-	private :
-
-		using AttributeCreator = std::function<DataPtr ( size_t )>;
-
-		struct MakeAttributeCreator
+		template<typename T>
+		AttributeCreator operator () ( const GeometricTypedData<vector<T>> *data )
 		{
+			return std::bind( &createGeometricAttribute<T>, data->readable(), data->getInterpretation(), std::placeholders::_1 );
+		}
 
-			template<typename T>
-			AttributeCreator operator()( const TypedData<vector<T>> *data )
-			{
-				return std::bind( &createAttribute<T>, data->readable(), std::placeholders::_1 );
-			}
-
-			template<typename T>
-			AttributeCreator operator()( const GeometricTypedData<vector<T>> *data )
-			{
-				return std::bind( &createGeometricAttribute<T>, data->readable(), data->getInterpretation(), std::placeholders::_1 );
-			}
-
-			AttributeCreator operator()( const Data *data )
-			{
-				throw IECore::InvalidArgumentException( "Expected VectorTypedData" );
-			}
-
-			private :
-
-				template<typename T>
-				static DataPtr createAttribute( const vector<T> &values, size_t index )
-				{
-					return new TypedData<T>( values[index] );
-				}
-
-				template<typename T>
-				static DataPtr createGeometricAttribute( const vector<T> &values, GeometricData::Interpretation interpretation, size_t index )
-				{
-					return new GeometricTypedData<T>( values[index], interpretation );
-				}
-
-		};
-
-		void initAttributes( const std::string &attributes, const std::string &attributePrefix )
+		AttributeCreator operator () ( const Data *data )
 		{
-			m_attributesHash.append( attributePrefix );
+			throw IECore::InvalidArgumentException( "Expected VectorTypedData" );
+		}
 
-			for( auto &primVar : m_primitive->variables )
-			{
-				if( !(
+	private:
+
+		template<typename T>
+		static DataPtr createAttribute( const vector<T> &values, size_t index )
+		{
+			return new TypedData<T>( values[index] );
+		}
+
+		template<typename T>
+		static DataPtr createGeometricAttribute( const vector<T> &values, GeometricData::Interpretation interpretation, size_t index )
+		{
+			return new GeometricTypedData<T>( values[index], interpretation );
+		}
+	};
+
+	void initAttributes( const std::string &attributes, const std::string &attributePrefix )
+	{
+		m_attributesHash.append( attributePrefix );
+
+		for( auto &primVar : m_primitive->variables )
+		{
+			if( !(
 					primVar.second.interpolation == PrimitiveVariable::Vertex ||
-					(
-						primVar.second.interpolation == PrimitiveVariable::Varying &&
-						m_primitive->variableSize( PrimitiveVariable::Vertex ) == m_primitive->variableSize( PrimitiveVariable::Varying )
-					)
+					( primVar.second.interpolation == PrimitiveVariable::Varying &&
+					  m_primitive->variableSize( PrimitiveVariable::Vertex ) == m_primitive->variableSize( PrimitiveVariable::Varying ) )
 				) )
-				{
-					continue;
-				}
-				if( !StringAlgo::matchMultiple( primVar.first, attributes ) )
-				{
-					continue;
-				}
-				DataPtr d = primVar.second.expandedData();
-				AttributeCreator attributeCreator = dispatch( d.get(), MakeAttributeCreator() );
-				m_attributeCreators[attributePrefix + primVar.first] = attributeCreator;
-				m_attributesHash.append( primVar.first );
-				d->hash( m_attributesHash );
+			{
+				continue;
 			}
+			if( !StringAlgo::matchMultiple( primVar.first, attributes ) )
+			{
+				continue;
+			}
+			DataPtr d = primVar.second.expandedData();
+			AttributeCreator attributeCreator = dispatch( d.get(), MakeAttributeCreator() );
+			m_attributeCreators[attributePrefix + primVar.first] = attributeCreator;
+			m_attributesHash.append( primVar.first );
+			d->hash( m_attributesHash );
 		}
+	}
 
-		void initPrototypes( PrototypeMode mode, const std::string &prototypeIndex, const std::string &rootsVariable, const StringVectorData *rootsList )
+	void initPrototypes( PrototypeMode mode, const std::string &prototypeIndex, const std::string &rootsVariable, const StringVectorData *rootsList )
+	{
+		const std::vector<std::string> *rootStrings = nullptr;
+		std::vector<std::string> rootStringsAlloc;
+
+		switch( mode )
 		{
-			const std::vector<std::string> *rootStrings = nullptr;
-			std::vector<std::string> rootStringsAlloc;
-
-			switch( mode )
-			{
-				case PrototypeMode::IndexedRootsList :
+			case PrototypeMode::IndexedRootsList : {
+				if( const auto *prototypeIndices = m_primitive->variableData<IntVectorData>( prototypeIndex ) )
 				{
-					if( const auto *prototypeIndices = m_primitive->variableData<IntVectorData>( prototypeIndex ) )
+					m_prototypeIndices = &prototypeIndices->readable();
+					if( m_prototypeIndices->size() != numPoints() )
 					{
-						m_prototypeIndices = &prototypeIndices->readable();
-						if( m_prototypeIndices->size() != numPoints() )
-						{
-							throw IECore::Exception( fmt::format( "prototypeIndex primitive variable \"{}\" has incorrect size", prototypeIndex ) );
-						}
+						throw IECore::Exception( fmt::format( "prototypeIndex primitive variable \"{}\" has incorrect size", prototypeIndex ) );
 					}
-
-					rootStrings = &rootsList->readable();
-
-					break;
 				}
-				case PrototypeMode::IndexedRootsVariable :
-				{
-					if( const auto *prototypeIndices = m_primitive->variableData<IntVectorData>( prototypeIndex ) )
-					{
-						m_prototypeIndices = &prototypeIndices->readable();
-						if( m_prototypeIndices->size() != numPoints() )
-						{
-							throw IECore::Exception( fmt::format( "prototypeIndex primitive variable \"{}\" has incorrect size", prototypeIndex ) );
-						}
-					}
 
-					const auto *roots = m_primitive->variableData<StringVectorData>( rootsVariable, PrimitiveVariable::Constant );
-					if( !roots )
-					{
-						std::string message = fmt::format( "prototypeRoots primitive variable \"{}\" must be Constant StringVectorData when using IndexedRootsVariable mode", rootsVariable );
-						if( m_primitive->variables.find( rootsVariable ) == m_primitive->variables.end() )
-						{
-							message += ", but it does not exist";
-						}
-						throw IECore::Exception( message );
-					}
+				rootStrings = &rootsList->readable();
 
-					rootStrings = &roots->readable();
-					if( rootStrings->empty() )
-					{
-						throw IECore::Exception( fmt::format( "prototypeRoots primitive variable \"{}\" must specify at least one root location", rootsVariable ) );
-					}
-
-					break;
-				}
-				case PrototypeMode::RootPerVertex :
-				{
-					auto view = m_primitive->variableIndexedView<StringVectorData>( rootsVariable, PrimitiveVariable::Vertex );
-					if( !view && m_primitive->variableSize( PrimitiveVariable::Vertex ) == m_primitive->variableSize( PrimitiveVariable::Varying ))
-					{
-						view = m_primitive->variableIndexedView<StringVectorData>( rootsVariable, PrimitiveVariable::Varying );
-					}
-
-					if( !view )
-					{
-						std::string message = fmt::format( "prototypeRoots primitive variable \"{}\" must be Vertex StringVectorData when using RootPerVertex mode", rootsVariable );
-						if( m_primitive->variables.find( rootsVariable ) == m_primitive->variables.end() )
-						{
-							message += ", but it does not exist";
-						}
-						throw IECore::Exception( message );
-					}
-
-					m_prototypeIndices = view->indices();
-					rootStrings = &view->data();
-
-					if( !m_prototypeIndices )
-					{
-						std::unordered_map<std::string, int> duplicateRootMap;
-
-						m_prototypeIndicesAlloc.reserve( rootStrings->size() );
-						for( const std::string &i : *rootStrings )
-						{
-							auto insertResult = duplicateRootMap.try_emplace( i, rootStringsAlloc.size() );
-							if( insertResult.second )
-							{
-								m_prototypeIndicesAlloc.push_back( rootStringsAlloc.size() );
-								rootStringsAlloc.push_back( i );
-							}
-							else
-							{
-								m_prototypeIndicesAlloc.push_back( insertResult.first->second );
-							}
-						}
-						rootStrings = &rootStringsAlloc;
-						m_prototypeIndices = &m_prototypeIndicesAlloc;
-					}
-					break;
-				}
+				break;
 			}
-
-			std::vector<ConstInternedStringVectorDataPtr> inputNames;
-			inputNames.reserve( rootStrings->size() );
-			m_roots.reserve( rootStrings->size() );
-			m_prototypeIndexRemap.reserve( rootStrings->size() );
-
-
-			const static bool g_explicitAbsolutePaths = checkEnvFlag( "GAFFERSCENE_INSTANCER_EXPLICIT_ABSOLUTE_PATHS", false );
-
-			size_t i = 0;
-			ScenePlug::ScenePath path;
-
-			for( const auto &root : *rootStrings )
-			{
-				if( !root.size() )
+			case PrototypeMode::IndexedRootsVariable : {
+				if( const auto *prototypeIndices = m_primitive->variableData<IntVectorData>( prototypeIndex ) )
 				{
-					m_prototypeIndexRemap.emplace_back( -1 );
-					continue;
-				}
-
-				InternedStringVectorDataPtr pathData = new InternedStringVectorData();
-				ScenePlug::ScenePath &path = pathData->writable();
-
-				bool relative = false;
-				if( root[0] == '/' )
-				{
-					ScenePlug::stringToPath( root, path );
-				}
-				else if( root[0] == '.' || g_explicitAbsolutePaths )
-				{
-					if( root[0] == '.' && root.size() >= 2 && root[1] == '/' )
+					m_prototypeIndices = &prototypeIndices->readable();
+					if( m_prototypeIndices->size() != numPoints() )
 					{
-						// \todo - stringToPath should probably take a string_view to avoid this allocation
-						ScenePlug::stringToPath( root.substr( 2 ), path );
+						throw IECore::Exception( fmt::format( "prototypeIndex primitive variable \"{}\" has incorrect size", prototypeIndex ) );
 					}
-					else
+				}
+
+				const auto *roots = m_primitive->variableData<StringVectorData>( rootsVariable, PrimitiveVariable::Constant );
+				if( !roots )
+				{
+					std::string message = fmt::format( "prototypeRoots primitive variable \"{}\" must be Constant StringVectorData when using IndexedRootsVariable mode", rootsVariable );
+					if( m_primitive->variables.find( rootsVariable ) == m_primitive->variables.end() )
 					{
-						ScenePlug::stringToPath( root, path );
+						message += ", but it does not exist";
 					}
-					relative = true;
-				}
-				else
-				{
-					ScenePlug::stringToPath( root, path );
+					throw IECore::Exception( message );
 				}
 
-				if( path.empty() )
+				rootStrings = &roots->readable();
+				if( rootStrings->empty() )
 				{
-					inputNames.emplace_back( new InternedStringVectorData( { g_prototypeRootName } ) );
-				}
-				else
-				{
-					inputNames.emplace_back( new InternedStringVectorData( { path.back() } ) );
+					throw IECore::Exception( fmt::format( "prototypeRoots primitive variable \"{}\" must specify at least one root location", rootsVariable ) );
 				}
 
-				m_roots.emplace_back( relative, std::move( pathData ) );
-				m_prototypeIndexRemap.emplace_back( i++ );
+				break;
 			}
+			case PrototypeMode::RootPerVertex : {
+				auto view = m_primitive->variableIndexedView<StringVectorData>( rootsVariable, PrimitiveVariable::Vertex );
+				if( !view && m_primitive->variableSize( PrimitiveVariable::Vertex ) == m_primitive->variableSize( PrimitiveVariable::Varying ) )
+				{
+					view = m_primitive->variableIndexedView<StringVectorData>( rootsVariable, PrimitiveVariable::Varying );
+				}
 
-			m_names = new Private::ChildNamesMap( inputNames );
+				if( !view )
+				{
+					std::string message = fmt::format( "prototypeRoots primitive variable \"{}\" must be Vertex StringVectorData when using RootPerVertex mode", rootsVariable );
+					if( m_primitive->variables.find( rootsVariable ) == m_primitive->variables.end() )
+					{
+						message += ", but it does not exist";
+					}
+					throw IECore::Exception( message );
+				}
 
-			const std::vector< InternedString > outputChildNames = m_names->outputChildNames()->readable();
-			m_numPrototypes = m_prototypeIndexRemap.size();
-			m_numValidPrototypes = outputChildNames.size();
+				m_prototypeIndices = view->indices();
+				rootStrings = &view->data();
 
+				if( !m_prototypeIndices )
+				{
+					std::unordered_map<std::string, int> duplicateRootMap;
+
+					m_prototypeIndicesAlloc.reserve( rootStrings->size() );
+					for( const std::string &i : *rootStrings )
+					{
+						auto insertResult = duplicateRootMap.try_emplace( i, rootStringsAlloc.size() );
+						if( insertResult.second )
+						{
+							m_prototypeIndicesAlloc.push_back( rootStringsAlloc.size() );
+							rootStringsAlloc.push_back( i );
+						}
+						else
+						{
+							m_prototypeIndicesAlloc.push_back( insertResult.first->second );
+						}
+					}
+					rootStrings = &rootStringsAlloc;
+					m_prototypeIndices = &m_prototypeIndicesAlloc;
+				}
+				break;
+			}
 		}
 
-		IECoreScene::ConstPrimitivePtr m_primitive;
-		size_t m_numPrototypes;
-		size_t m_numValidPrototypes;
-		Private::ChildNamesMapPtr m_names;
-		struct PrototypeRoot {
-			PrototypeRoot( bool relative, ConstInternedStringVectorDataPtr path ) : relative( relative ), path( path ) {};
+		std::vector<ConstInternedStringVectorDataPtr> inputNames;
+		inputNames.reserve( rootStrings->size() );
+		m_roots.reserve( rootStrings->size() );
+		m_prototypeIndexRemap.reserve( rootStrings->size() );
 
-			bool relative;
-			ConstInternedStringVectorDataPtr path;
-		};
-		std::vector<PrototypeRoot> m_roots;
-		std::vector<int> m_prototypeIndexRemap;
-		std::vector<int> m_prototypeIndicesAlloc;
-		const std::vector<int> *m_prototypeIndices;
-		IdData m_ids;
-		const std::vector<Imath::V3f> *m_positions;
-		const std::vector<Imath::Quatf> *m_orientations;
-		const std::vector<Imath::V3f> *m_scales;
-		const std::vector<float> *m_uniformScales;
 
-		using IdsToPointIndices = std::unordered_map <int64_t, size_t>;
-		IdsToPointIndices m_idsToPointIndices;
+		const static bool g_explicitAbsolutePaths = checkEnvFlag( "GAFFERSCENE_INSTANCER_EXPLICIT_ABSOLUTE_PATHS", false );
 
-		boost::container::flat_map<InternedString, AttributeCreator> m_attributeCreators;
-		MurmurHash m_attributesHash;
+		size_t i = 0;
+		ScenePlug::ScenePath path;
 
-		const std::vector< PrototypeContextVariable > m_prototypeContextVariables;
+		for( const auto &root : *rootStrings )
+		{
+			if( !root.size() )
+			{
+				m_prototypeIndexRemap.emplace_back( -1 );
+				continue;
+			}
 
-		std::vector<bool> m_indicesInactive;
+			InternedStringVectorDataPtr pathData = new InternedStringVectorData();
+			ScenePlug::ScenePath &path = pathData->writable();
 
-		friend Instancer::EngineSplitPrototypesData;
+			bool relative = false;
+			if( root[0] == '/' )
+			{
+				ScenePlug::stringToPath( root, path );
+			}
+			else if( root[0] == '.' || g_explicitAbsolutePaths )
+			{
+				if( root[0] == '.' && root.size() >= 2 && root[1] == '/' )
+				{
+					// \todo - stringToPath should probably take a string_view to avoid this allocation
+					ScenePlug::stringToPath( root.substr( 2 ), path );
+				}
+				else
+				{
+					ScenePlug::stringToPath( root, path );
+				}
+				relative = true;
+			}
+			else
+			{
+				ScenePlug::stringToPath( root, path );
+			}
+
+			if( path.empty() )
+			{
+				inputNames.emplace_back( new InternedStringVectorData( { g_prototypeRootName } ) );
+			}
+			else
+			{
+				inputNames.emplace_back( new InternedStringVectorData( { path.back() } ) );
+			}
+
+			m_roots.emplace_back( relative, std::move( pathData ) );
+			m_prototypeIndexRemap.emplace_back( i++ );
+		}
+
+		m_names = new Private::ChildNamesMap( inputNames );
+
+		const std::vector<InternedString> outputChildNames = m_names->outputChildNames()->readable();
+		m_numPrototypes = m_prototypeIndexRemap.size();
+		m_numValidPrototypes = outputChildNames.size();
+	}
+
+	IECoreScene::ConstPrimitivePtr m_primitive;
+	size_t m_numPrototypes;
+	size_t m_numValidPrototypes;
+	Private::ChildNamesMapPtr m_names;
+	struct PrototypeRoot
+	{
+		PrototypeRoot( bool relative, ConstInternedStringVectorDataPtr path ) : relative( relative ), path( path ) {};
+
+		bool relative;
+		ConstInternedStringVectorDataPtr path;
+	};
+	std::vector<PrototypeRoot> m_roots;
+	std::vector<int> m_prototypeIndexRemap;
+	std::vector<int> m_prototypeIndicesAlloc;
+	const std::vector<int> *m_prototypeIndices;
+	IdData m_ids;
+	const std::vector<Imath::V3f> *m_positions;
+	const std::vector<Imath::Quatf> *m_orientations;
+	const std::vector<Imath::V3f> *m_scales;
+	const std::vector<float> *m_uniformScales;
+
+	using IdsToPointIndices = std::unordered_map<int64_t, size_t>;
+	IdsToPointIndices m_idsToPointIndices;
+
+	boost::container::flat_map<InternedString, AttributeCreator> m_attributeCreators;
+	MurmurHash m_attributesHash;
+
+	const std::vector<PrototypeContextVariable> m_prototypeContextVariables;
+
+	std::vector<bool> m_indicesInactive;
+
+	friend Instancer::EngineSplitPrototypesData;
 };
 
 // If we aren't encapsulating, we need to split the prototypes into groups, requiring us to do extra work
 class Instancer::EngineSplitPrototypesData : public Data
 {
 
-	public :
+public:
 
-		EngineSplitPrototypesData(
-			ConstEngineDataPtr engineData
-		)
-			:	m_engineData( engineData )
+	EngineSplitPrototypesData(
+		ConstEngineDataPtr engineData
+	)
+		: m_engineData( engineData )
+	{
+
+		if( !m_engineData->m_numValidPrototypes )
 		{
+			// We don't need to build m_pointIndicesForPrototype if we're not outputting any prototypes.
+			return;
+		}
 
-			if( !m_engineData->m_numValidPrototypes )
+		int constantPrototypeIndex = -1;
+		if( !m_engineData->m_prototypeIndices )
+		{
+			constantPrototypeIndex = m_engineData->m_prototypeIndexRemap[0];
+			if( constantPrototypeIndex == -1 )
 			{
-				// We don't need to build m_pointIndicesForPrototype if we're not outputting any prototypes.
+				// If we have no indices to specify other prototypes, and the first prototype is
+				// invalid, we're not going to output anything, and can early exit
 				return;
 			}
-
-			int constantPrototypeIndex = -1;
-			if( !m_engineData->m_prototypeIndices )
-			{
-				constantPrototypeIndex = m_engineData->m_prototypeIndexRemap[ 0 ];
-				if( constantPrototypeIndex == -1 )
-				{
-					// If we have no indices to specify other prototypes, and the first prototype is
-					// invalid, we're not going to output anything, and can early exit
-					return;
-				}
-			}
-
-			// We need a list of which point indices belong to each prototype
-			std::vector< std::vector<size_t> > pointIndicesForPrototypeIndex( m_engineData->m_numPrototypes );
-			// Pre allocate if there's just one prototype, since we know the length will just be every point
-			if( constantPrototypeIndex != -1 )
-			{
-				pointIndicesForPrototypeIndex[ constantPrototypeIndex ].reserve( m_engineData->numPoints() );
-			}
-
-			if( constantPrototypeIndex != -1 && !m_engineData->m_indicesInactive.size() )
-			{
-				// If there's a single prototype, and no indices are being omitted because they are duplicates,
-				// then the list of point indices for the prototype is just an identity map of all integers
-				// from 0 .. N - 1.
-				//
-				// It's pretty wasteful to store this, but it avoids special cases throughout this code to skip
-				// using pointIndicesForPrototypeIndex when it isn't needed
-				for( size_t i = 0, e = m_engineData->numPoints(); i < e; ++i )
-				{
-					pointIndicesForPrototypeIndex[ constantPrototypeIndex ].push_back( i );
-				}
-			}
-			else
-			{
-				// The assignment of point indices to prototypes is non-trivial, so we actually have to do
-				// a bit of work
-				for( size_t i = 0, e = m_engineData->numPoints(); i < e; ++i )
-				{
-					// Add this point index to the list for its prototype
-					int protoIndex = m_engineData->prototypeIndex( i );
-
-					if( protoIndex != -1 )
-					{
-						pointIndicesForPrototypeIndex[ protoIndex ].push_back( i );
-					}
-				}
-			}
-
-			// We've populated instancerPrototypeIndex with a list of point indices for each prototype index.
-			// When we need this, however, we need it indexed by name, so we move the vectors we've just built
-			// to m_pointIndicesForPrototype which is indexed by name.
-			const std::vector< InternedString > &outputChildNames = m_engineData->m_names->outputChildNames()->readable();
-			for( unsigned int i = 0; i < m_engineData->m_numPrototypes; i++ )
-			{
-				int prototypeIndex = m_engineData->m_prototypeIndexRemap[ i ];
-				if( prototypeIndex == -1 )
-				{
-					continue;
-				}
-
-				m_pointIndicesForPrototype.emplace( IECore::InternedString( outputChildNames[prototypeIndex] ), std::move( pointIndicesForPrototypeIndex[prototypeIndex] ) );
-			}
 		}
 
-		const EngineData *engine() const
+		// We need a list of which point indices belong to each prototype
+		std::vector<std::vector<size_t>> pointIndicesForPrototypeIndex( m_engineData->m_numPrototypes );
+		// Pre allocate if there's just one prototype, since we know the length will just be every point
+		if( constantPrototypeIndex != -1 )
 		{
-			return m_engineData.get();
+			pointIndicesForPrototypeIndex[constantPrototypeIndex].reserve( m_engineData->numPoints() );
 		}
 
-		const std::vector<size_t> & pointIndicesForPrototype( const IECore::InternedString &prototypeName ) const
+		if( constantPrototypeIndex != -1 && !m_engineData->m_indicesInactive.size() )
 		{
-			return m_pointIndicesForPrototype.at( prototypeName );
+			// If there's a single prototype, and no indices are being omitted because they are duplicates,
+			// then the list of point indices for the prototype is just an identity map of all integers
+			// from 0 .. N - 1.
+			//
+			// It's pretty wasteful to store this, but it avoids special cases throughout this code to skip
+			// using pointIndicesForPrototypeIndex when it isn't needed
+			for( size_t i = 0, e = m_engineData->numPoints(); i < e; ++i )
+			{
+				pointIndicesForPrototypeIndex[constantPrototypeIndex].push_back( i );
+			}
+		}
+		else
+		{
+			// The assignment of point indices to prototypes is non-trivial, so we actually have to do
+			// a bit of work
+			for( size_t i = 0, e = m_engineData->numPoints(); i < e; ++i )
+			{
+				// Add this point index to the list for its prototype
+				int protoIndex = m_engineData->prototypeIndex( i );
+
+				if( protoIndex != -1 )
+				{
+					pointIndicesForPrototypeIndex[protoIndex].push_back( i );
+				}
+			}
 		}
 
+		// We've populated instancerPrototypeIndex with a list of point indices for each prototype index.
+		// When we need this, however, we need it indexed by name, so we move the vectors we've just built
+		// to m_pointIndicesForPrototype which is indexed by name.
+		const std::vector<InternedString> &outputChildNames = m_engineData->m_names->outputChildNames()->readable();
+		for( unsigned int i = 0; i < m_engineData->m_numPrototypes; i++ )
+		{
+			int prototypeIndex = m_engineData->m_prototypeIndexRemap[i];
+			if( prototypeIndex == -1 )
+			{
+				continue;
+			}
 
-	protected :
+			m_pointIndicesForPrototype.emplace( IECore::InternedString( outputChildNames[prototypeIndex] ), std::move( pointIndicesForPrototypeIndex[prototypeIndex] ) );
+		}
+	}
 
-		ConstEngineDataPtr m_engineData;
-		std::unordered_map< InternedString, std::vector<size_t> > m_pointIndicesForPrototype;
+	const EngineData *engine() const
+	{
+		return m_engineData.get();
+	}
+
+	const std::vector<size_t> &pointIndicesForPrototype( const IECore::InternedString &prototypeName ) const
+	{
+		return m_pointIndicesForPrototype.at( prototypeName );
+	}
+
+
+protected:
+
+	ConstEngineDataPtr m_engineData;
+	std::unordered_map<InternedString, std::vector<size_t>> m_pointIndicesForPrototype;
 };
 
 
@@ -1270,37 +1256,37 @@ class Instancer::EngineSplitPrototypesData : public Data
 class Instancer::InstancerCapsule : public Capsule
 {
 
-	public :
+public:
 
-		InstancerCapsule()
-			: m_instancer( nullptr )
-		{
-		}
+	InstancerCapsule()
+		: m_instancer( nullptr )
+	{
+	}
 
-		InstancerCapsule(
-			const Instancer *instancer,
-			const ScenePlug::ScenePath &root,
-			const Gaffer::Context &context,
-			const IECore::MurmurHash &hash,
-			const Imath::Box3f &bound
-		)
-			: Capsule( instancer->capsuleScenePlug(), root, context, hash, bound ),
-				m_instancer( instancer )
-		{
-		}
+	InstancerCapsule(
+		const Instancer *instancer,
+		const ScenePlug::ScenePath &root,
+		const Gaffer::Context &context,
+		const IECore::MurmurHash &hash,
+		const Imath::Box3f &bound
+	)
+		: Capsule( instancer->capsuleScenePlug(), root, context, hash, bound ),
+		  m_instancer( instancer )
+	{
+	}
 
-		~InstancerCapsule() override
-		{
-		}
+	~InstancerCapsule() override
+	{
+	}
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( InstancerCapsule, GafferScene::InstancerCapsuleTypeId, GafferScene::Capsule );
+	IE_CORE_DECLAREEXTENSIONOBJECT( InstancerCapsule, GafferScene::InstancerCapsuleTypeId, GafferScene::Capsule );
 
-		// Defined at the bottom of this file, where it makes more sense
-		void render( IECoreScenePreview::Renderer *renderer ) const override;
+	// Defined at the bottom of this file, where it makes more sense
+	void render( IECoreScenePreview::Renderer *renderer ) const override;
 
-	private :
+private:
 
-		const Instancer *m_instancer;
+	const Instancer *m_instancer;
 };
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Instancer::InstancerCapsule );
@@ -1342,7 +1328,6 @@ void Instancer::InstancerCapsule::memoryUsage( IECore::Object::MemoryAccumulator
 
 	// The size of the base class is already included, so no need to duplicate that
 	accumulator.accumulate( sizeof( InstancerCapsule ) - sizeof( Capsule ) );
-
 }
 
 // Implementation of InstancerCapsule::render()
@@ -1412,7 +1397,7 @@ GAFFER_NODE_DEFINE_TYPE( Instancer );
 size_t Instancer::g_firstPlugIndex = 0;
 
 Instancer::Instancer( const std::string &name )
-	:	BranchCreator( name )
+	: BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "name", Plug::In, "instances" ) );
@@ -1816,7 +1801,8 @@ void Instancer::affects( const Plug *input, AffectedPlugsContainer &outputs ) co
 		(
 			( input->parent() == prototypesPlug() && input != prototypesPlug()->globalsPlug() ) ||
 			input == capsuleComputedHashPlug()
-		) && !encapsulatePlug()->isSetToDefault()
+		) &&
+		!encapsulatePlug()->isSetToDefault()
 	)
 	{
 		outputs.push_back( outPlug()->objectPlug() );
@@ -1921,8 +1907,7 @@ void Instancer::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *co
 		// not their order.  We can create a cheap order-independent hash by summing the hashes
 		// all of the engines
 		std::atomic<uint64_t> h1Accum( 0 ), h2Accum( 0 );
-		auto functor =[this, &h1Accum, &h2Accum]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
-		{
+		auto functor = [this, &h1Accum, &h2Accum]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path ) {
 			IECore::MurmurHash h = enginePlug()->hash();
 			h1Accum += h.h1();
 			h2Accum += h.h2();
@@ -1968,8 +1953,7 @@ void Instancer::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *co
 
 			std::atomic<uint64_t> h1Accum( 0 ), h2Accum( 0 );
 			const ThreadState &threadState = ThreadState::current();
-			tbb::parallel_for( tbb::blocked_range<size_t>( 0, pointIndicesForPrototype.size() ), [&]( const tbb::blocked_range<size_t> &r )
-				{
+			tbb::parallel_for( tbb::blocked_range<size_t>( 0, pointIndicesForPrototype.size() ), [&]( const tbb::blocked_range<size_t> &r ) {
 					Context::EditableScope scope( threadState );
 					// As part of the setCollaborate plug machinery, we put the sourcePath in the context.
 					// Need to remove it before evaluating the prototype sets
@@ -1984,15 +1968,12 @@ void Instancer::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *co
 						prototypesPlug()->setPlug()->hash( instanceH );
 						h1Accum += instanceH.h1();
 						h2Accum += instanceH.h2();
-					}
-				},
-				taskGroupContext
-			);
+					} }, taskGroupContext );
 
 			ScenePlug::ScenePath prototypeRootStorage;
 			const ScenePlug::ScenePath *prototypeRoot = engine->prototypeRoot( prototypeName, sourcePath, prototypeRootStorage );
 			h.append( prototypeName );
-			h.append( &(*prototypeRoot)[0], prototypeRoot->size() );
+			h.append( &( *prototypeRoot )[0], prototypeRoot->size() );
 			h.append( IECore::MurmurHash( h1Accum, h2Accum ) );
 		}
 	}
@@ -2028,7 +2009,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		{
 			const auto childNames = prototypesPlug()->childNames( ScenePath() );
 			StringVectorDataPtr prototypeRootsListEditableData = new StringVectorData();
-			std::vector<std::string>& prototypeRootsListEditable = prototypeRootsListEditableData->writable();
+			std::vector<std::string> &prototypeRootsListEditable = prototypeRootsListEditableData->writable();
 			prototypeRootsListEditable.reserve( childNames->readable().size() );
 			for( const IECore::InternedString &i : childNames->readable() )
 			{
@@ -2041,7 +2022,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 
 		// Prepare the list of all context variables that affect the prototype scope, in an internal
 		// struct that makes it easier to use them later
-		std::vector< PrototypeContextVariable > prototypeContextVariables;
+		std::vector<PrototypeContextVariable> prototypeContextVariables;
 
 		// Put together a list of everything that affect the contexts this engine will evaluate prototypes
 		// in
@@ -2107,15 +2088,14 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 				const PrimitiveVariable *timeOffsetPrimVar = findVertexVariable( primitive.get(), timeOffsetPlug()->namePlug()->getValue() );
 				if( timeOffsetPrimVar &&
 					timeOffsetPrimVar->data->typeId() != FloatVectorDataTypeId &&
-					timeOffsetPrimVar->data->typeId() != IntVectorDataTypeId
-				)
+					timeOffsetPrimVar->data->typeId() != IntVectorDataTypeId )
 				{
 					// \todo : Are we really OK with silently ignoring primvars of the wrong type?
 					// This feels very confusing to users, but matches other behaviour in Instancer
 					timeOffsetPrimVar = nullptr;
 				}
 
-				float quantize = IECore::runTimeCast< const FloatPlug >( timeOffsetPlug()->quantizePlug() )->getValue();
+				float quantize = IECore::runTimeCast<const FloatPlug>( timeOffsetPlug()->quantizePlug() )->getValue();
 				prototypeContextVariables.push_back( { "frame", timeOffsetPrimVar, quantize, true, false, 0, 0 } );
 			}
 		}
@@ -2154,12 +2134,11 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		// Compute the number of variations by accumulating massive lists of unique hashes from all EngineDatas
 		// and then counting the total number of uniques
 		tbb::spin_mutex locationMutex;
-		std::vector< std::unique_ptr< EngineData::PrototypeHashes > > perLocationHashes;
+		std::vector<std::unique_ptr<EngineData::PrototypeHashes>> perLocationHashes;
 
-		auto functor =[this, &locationMutex, &perLocationHashes]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
-		{
+		auto functor = [this, &locationMutex, &perLocationHashes]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path ) {
 			ConstEngineDataPtr engine = boost::static_pointer_cast<const EngineData>( enginePlug()->getValue() );
-			std::unique_ptr< EngineData::PrototypeHashes > locationHashes = engine->uniquePrototypeHashes();
+			std::unique_ptr<EngineData::PrototypeHashes> locationHashes = engine->uniquePrototypeHashes();
 
 			tbb::spin_mutex::scoped_lock lock( locationMutex );
 			perLocationHashes.push_back( std::move( locationHashes ) );
@@ -2170,7 +2149,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 
 		CompoundDataPtr result = new CompoundData;
 
-		std::vector< InternedString > outputNames;
+		std::vector<InternedString> outputNames;
 		if( perLocationHashes.size() == 0 )
 		{
 			// There is always an entry for the empty string, which contains the total variations
@@ -2203,7 +2182,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 				{
 					for( auto &var : *perLocationHashes[i] )
 					{
-						combine[ var.first ].merge( var.second );
+						combine[var.first].merge( var.second );
 					}
 				}
 				for( const auto &var : combine )
@@ -2221,7 +2200,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		const ScenePath &sourcePath = context->get<ScenePath>( ScenePlug::scenePathContextName );
 
 		ConstEngineSplitPrototypesDataPtr esp = this->engineSplitPrototypes( sourcePath, context );
-		const EngineData* engine = esp->engine();
+		const EngineData *engine = esp->engine();
 
 		PathMatcherDataPtr outputSetData = new PathMatcherData;
 		PathMatcher &outputSet = outputSetData->writable();
@@ -2242,8 +2221,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			tbb::spin_mutex instanceMutex;
 			branchPath.emplace_back( InternedString() );
 			const ThreadState &threadState = ThreadState::current();
-			tbb::parallel_for( tbb::blocked_range<size_t>( 0, pointIndicesForPrototype.size() ), [&]( const tbb::blocked_range<size_t> &r )
-				{
+			tbb::parallel_for( tbb::blocked_range<size_t>( 0, pointIndicesForPrototype.size() ), [&]( const tbb::blocked_range<size_t> &r ) {
 					Context::EditableScope scope( threadState );
 					// As part of the setCollaborate plug machinery, we put the sourcePath in the context.
 					// Need to remove it before evaluating the prototype sets
@@ -2260,10 +2238,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 						tbb::spin_mutex::scoped_lock lock( instanceMutex );
 						branchPath.back() = instanceId;
 						outputSet.addPaths( pointInstanceSet, branchPath );
-					}
-				},
-				taskGroupContext
-			);
+					} }, taskGroupContext );
 		}
 
 		static_cast<PathMatcherDataPlug *>( output )->setValue( outputSetData );
@@ -2312,8 +2287,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			const IECore::MurmurHash prototypesHash = tbb::parallel_reduce(
 				tbb::blocked_range<size_t>( 0, engineData->numValidPrototypes() ),
 				IECore::MurmurHash( 0, 0 ),
-				[&]( const tbb::blocked_range<size_t> &r, IECore::MurmurHash accum )
-				{
+				[&]( const tbb::blocked_range<size_t> &r, IECore::MurmurHash accum ) {
 					Context::EditableScope threadScope( threadState );
 
 					for( size_t i = r.begin(); i != r.end(); ++i )
@@ -2335,7 +2309,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 					}
 					return accum;
 				},
-				[] ( const IECore::MurmurHash &a, const IECore::MurmurHash &b ) {
+				[]( const IECore::MurmurHash &a, const IECore::MurmurHash &b ) {
 					return IECore::MurmurHash( a.h1() + b.h1(), a.h2() + b.h2() );
 				},
 				taskGroupContext
@@ -2346,8 +2320,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			const IECore::MurmurHash prototypeSetsHash = tbb::parallel_reduce(
 				tbb::blocked_range<size_t>( 0, prototypeSetNames.size() ),
 				IECore::MurmurHash( 0, 0 ),
-				[&]( const tbb::blocked_range<size_t> &r, IECore::MurmurHash accum )
-				{
+				[&]( const tbb::blocked_range<size_t> &r, IECore::MurmurHash accum ) {
 					ScenePlug::SetScope setScope( threadState );
 
 					for( size_t i = r.begin(); i != r.end(); ++i )
@@ -2366,7 +2339,7 @@ void Instancer::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 					}
 					return accum;
 				},
-				[] ( const IECore::MurmurHash &a, const IECore::MurmurHash &b ) {
+				[]( const IECore::MurmurHash &a, const IECore::MurmurHash &b ) {
 					return IECore::MurmurHash( a.h1() + b.h1(), a.h2() + b.h2() );
 				},
 				taskGroupContext
@@ -2415,13 +2388,11 @@ Gaffer::ValuePlug::CachePolicy Instancer::hashCachePolicy( const Gaffer::ValuePl
 
 bool Instancer::affectsBranchBound( const Gaffer::Plug *input ) const
 {
-	return
-		input == engineSplitPrototypesPlug() ||
+	return input == engineSplitPrototypesPlug() ||
 		input == namePlug() ||
 		input == prototypesPlug()->boundPlug() ||
 		input == prototypesPlug()->transformPlug() ||
-		input == outPlug()->childBoundsPlug()
-	;
+		input == outPlug()->childBoundsPlug();
 }
 
 void Instancer::hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -2490,7 +2461,7 @@ Imath::Box3f Instancer::computeBranchBound( const ScenePath &sourcePath, const S
 		return parallel_reduce(
 			tbb::blocked_range<size_t>( 0, pointIndicesForPrototype.size() ),
 			Box3f(),
-			[ pointIndicesForPrototype, &e, &childBound, &childTransform ] ( const tbb::blocked_range<size_t> &r, Box3f u ) {
+			[pointIndicesForPrototype, &e, &childBound, &childTransform]( const tbb::blocked_range<size_t> &r, Box3f u ) {
 				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
 					const size_t pointIndex = pointIndicesForPrototype[i];
@@ -2501,7 +2472,7 @@ Imath::Box3f Instancer::computeBranchBound( const ScenePath &sourcePath, const S
 				return u;
 			},
 			// Union
-			[] ( const Box3f &b0, const Box3f &b1 ) {
+			[]( const Box3f &b0, const Box3f &b1 ) {
 				Box3f u( b0 );
 				u.extendBy( b1 );
 				return u;
@@ -2521,10 +2492,8 @@ Imath::Box3f Instancer::computeBranchBound( const ScenePath &sourcePath, const S
 
 bool Instancer::affectsBranchTransform( const Gaffer::Plug *input ) const
 {
-	return
-		input == enginePlug() ||
-		input == prototypesPlug()->transformPlug()
-	;
+	return input == enginePlug() ||
+		input == prototypesPlug()->transformPlug();
 }
 
 void Instancer::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -2583,10 +2552,8 @@ Imath::M44f Instancer::computeBranchTransform( const ScenePath &sourcePath, cons
 
 bool Instancer::affectsBranchAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		input == prototypesPlug()->attributesPlug() ||
-		input == enginePlug()
-	;
+	return input == prototypesPlug()->attributesPlug() ||
+		input == enginePlug();
 }
 
 void Instancer::hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -2657,10 +2624,8 @@ bool Instancer::processesRootObject() const
 
 bool Instancer::affectsBranchObject( const Gaffer::Plug *input ) const
 {
-	return
-		input == prototypesPlug()->objectPlug() ||
-		input == enginePlug()
-	;
+	return input == prototypesPlug()->objectPlug() ||
+		input == enginePlug();
 }
 
 void Instancer::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -2739,7 +2704,7 @@ IECore::ConstObjectPtr Instancer::computeObject( const ScenePath &path, const Ga
 		{
 			return new InstancerCapsule(
 				this,
-				context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) ,
+				context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
 				*context,
 				outPlug()->objectPlug()->hash(),
 				outPlug()->boundPlug()->getValue()
@@ -2753,10 +2718,8 @@ IECore::ConstObjectPtr Instancer::computeObject( const ScenePath &path, const Ga
 
 bool Instancer::affectsBranchChildNames( const Gaffer::Plug *input ) const
 {
-	return
-		input == namePlug() ||
-		input == engineSplitPrototypesPlug()
-	;
+	return input == namePlug() ||
+		input == engineSplitPrototypesPlug();
 }
 
 void Instancer::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -2917,13 +2880,11 @@ IECore::ConstInternedStringVectorDataPtr Instancer::computeBranchSetNames( const
 
 bool Instancer::affectsBranchSet( const Gaffer::Plug *input ) const
 {
-	return
-		input == enginePlug() ||
+	return input == enginePlug() ||
 		input == engineSplitPrototypesPlug() ||
 		input == prototypesPlug()->setPlug() ||
 		input == namePlug() ||
-		input == setCollaboratePlug()
-	;
+		input == setCollaboratePlug();
 }
 
 void Instancer::hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -3056,7 +3017,7 @@ const std::type_info &Instancer::instancerCapsuleTypeInfo()
 }
 
 Instancer::PrototypeScope::PrototypeScope( const Gaffer::ObjectPlug *enginePlug, const Gaffer::Context *context, const ScenePath *sourcePath, const ScenePath *branchPath )
-	:	Gaffer::Context::EditableScope( context )
+	: Gaffer::Context::EditableScope( context )
 {
 	set( ScenePlug::scenePathContextName, sourcePath );
 
@@ -3067,7 +3028,7 @@ Instancer::PrototypeScope::PrototypeScope( const Gaffer::ObjectPlug *enginePlug,
 }
 
 Instancer::PrototypeScope::PrototypeScope( const EngineData *engine, const Gaffer::Context *context, const ScenePath *sourcePath, const ScenePath *branchPath )
-	:	Gaffer::Context::EditableScope( context )
+	: Gaffer::Context::EditableScope( context )
 {
 	setPrototype( engine, sourcePath, branchPath );
 }
@@ -3079,11 +3040,11 @@ void Instancer::PrototypeScope::setPrototype( const EngineData *engine, const Sc
 	// We pass in m_prototypePath as the storage to prototypeRoot() - it may or may not be set,
 	// becaues prototypeRoot can sometimes just return a pointer without needing to do any allocation.
 	m_prototypePath.resize( 0 );
-	const ScenePlug::ScenePath *prototypeRoot = engine->prototypeRoot( (*branchPath)[1], *sourcePath, m_prototypePath );
+	const ScenePlug::ScenePath *prototypeRoot = engine->prototypeRoot( ( *branchPath )[1], *sourcePath, m_prototypePath );
 
 	if( branchPath->size() >= 3 && engine->hasContextVariables() )
 	{
-		const size_t pointIndex = engine->pointIndex( (*branchPath)[2] );
+		const size_t pointIndex = engine->pointIndex( ( *branchPath )[2] );
 		engine->setPrototypeContextVariables( pointIndex, *this );
 	}
 
@@ -3199,7 +3160,7 @@ struct PrototypeCacheGetterKey
 	{
 	}
 
-	operator IECore::MurmurHash () const
+	operator IECore::MurmurHash() const
 	{
 		IECore::MurmurHash result = context->hash();
 		result.append( prototypeId );
@@ -3236,8 +3197,7 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 	// This is a bit of a weird convention for using a const variable with an initialization that doesn't
 	// fit in one line ... not sure how I feel about it. In this case, it's crucial that sampleTimes is
 	// const, because it is used from multiple threads simultaneously.
-	const IECoreScenePreview::Renderer::SampleTimes sampleTimes = [this, &enginePath, &renderOpts]()
-	{
+	const IECoreScenePreview::Renderer::SampleTimes sampleTimes = [this, &enginePath, &renderOpts]() {
 		IECoreScenePreview::Renderer::SampleTimes result;
 		const ConstCompoundObjectPtr sceneAttributes = m_instancer->inPlug()->fullAttributes( enginePath );
 		GafferScene::Private::RendererAlgo::transformMotionTimes( renderOpts, sceneAttributes.get(), result );
@@ -3254,7 +3214,7 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 	// Get the Engines
 	// ============================================================================
 
-	std::vector< ConstEngineDataPtr > engines( sampleTimes.size() );
+	std::vector<ConstEngineDataPtr> engines( sampleTimes.size() );
 	{
 		Context::EditableScope frameScope( context() );
 		for( unsigned int i = 0; i < sampleTimes.size(); i++ )
@@ -3286,9 +3246,7 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 		fixedPrototypes.resize( engines[0]->numValidPrototypes() );
 
 		const ThreadState &threadState = ThreadState::current();
-		tbb::parallel_for( tbb::blocked_range<size_t>( 0, fixedPrototypes.size() ),
-			[&]( const tbb::blocked_range<size_t> &r )
-			{
+		tbb::parallel_for( tbb::blocked_range<size_t>( 0, fixedPrototypes.size() ), [&]( const tbb::blocked_range<size_t> &r ) {
 				Context::EditableScope threadScope( threadState );
 
 				ScenePlug::ScenePath prototypeRootStorage;
@@ -3302,11 +3260,7 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 						!hasAttributes
 					);
 
-				}
-			},
-			taskGroupContext
-		);
-
+				} }, taskGroupContext );
 	}
 
 	const Context *defaultContext = context();
@@ -3314,12 +3268,8 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 	// If fixedPrototypes is not set, we will put prototypes in this cache whenever we first encounter
 	// a prototype using a given context.
 	IECorePreview::LRUCache<IECore::MurmurHash, ConstPrototypePtr, IECorePreview::LRUCachePolicy::Parallel, PrototypeCacheGetterKey> prototypeCache(
-		[
-			&prototypesPlug, &sampleTimes, &outerCapsuleHash, &renderOpts,
-			&renderer, &hasAttributes, &engines, &defaultContext, &enginePath
-		]
-		( const PrototypeCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller ) -> ConstPrototypePtr
-		{
+		[&prototypesPlug, &sampleTimes, &outerCapsuleHash, &renderOpts,
+		 &renderer, &hasAttributes, &engines, &defaultContext, &enginePath]( const PrototypeCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller ) -> ConstPrototypePtr {
 			cost = 1;
 			ScenePlug::ScenePath prototypeRootStorage;
 			return new Prototype(
@@ -3343,9 +3293,7 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 	// than 32 threads, which appears to help some in testing.
 	size_t grainSize = std::max( (size_t)1, engines[0]->numPoints() / 32 );
 
-	tbb::parallel_for( tbb::blocked_range<size_t>( 0, engines[0]->numPoints(), grainSize ),
-		[&]( const tbb::blocked_range<size_t> &r )
-		{
+	tbb::parallel_for( tbb::blocked_range<size_t>( 0, engines[0]->numPoints(), grainSize ), [&]( const tbb::blocked_range<size_t> &r ) {
 			Context::EditableScope prototypeScope( threadState );
 
 			IECoreScenePreview::Renderer::TransformSamples pointTransforms( sampleTimes.size() );
@@ -3469,8 +3417,5 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 					objectInterface->assignInstanceID( pointIndex + 1 );
 				}
 
-			}
-		},
-		taskGroupContext
-	);
+			} }, taskGroupContext );
 }

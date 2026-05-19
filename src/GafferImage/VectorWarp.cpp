@@ -58,16 +58,16 @@ struct VectorWarp::Engine : public Warp::Engine
 {
 
 	Engine( const Box2i &displayWindow, const Box2i &tileBound, const Box2i &validTileBound, ConstFloatVectorDataPtr xData, ConstFloatVectorDataPtr yData, ConstFloatVectorDataPtr aData, VectorMode vectorMode, VectorUnits vectorUnits )
-		:	m_displayWindow( displayWindow ),
-			m_tileBound( tileBound ),
-			m_xData( xData ),
-			m_yData( yData ),
-			m_aData( aData ),
-			m_x( xData->readable() ),
-			m_y( yData->readable() ),
-			m_a( aData->readable() ),
-			m_vectorMode( vectorMode ),
-			m_vectorUnits( vectorUnits )
+		: m_displayWindow( displayWindow ),
+		  m_tileBound( tileBound ),
+		  m_xData( xData ),
+		  m_yData( yData ),
+		  m_aData( aData ),
+		  m_x( xData->readable() ),
+		  m_y( yData->readable() ),
+		  m_a( aData->readable() ),
+		  m_vectorMode( vectorMode ),
+		  m_vectorUnits( vectorUnits )
 	{
 	}
 
@@ -96,30 +96,29 @@ struct VectorWarp::Engine : public Warp::Engine
 		}
 	}
 
-	private :
+private:
 
-		inline V2f screenToPixel( const V2f &vector ) const
-		{
-			return V2f(
-				lerp<float>( m_displayWindow.min.x, m_displayWindow.max.x, vector.x ),
-				lerp<float>( m_displayWindow.min.y, m_displayWindow.max.y, vector.y )
-			);
-		}
+	inline V2f screenToPixel( const V2f &vector ) const
+	{
+		return V2f(
+			lerp<float>( m_displayWindow.min.x, m_displayWindow.max.x, vector.x ),
+			lerp<float>( m_displayWindow.min.y, m_displayWindow.max.y, vector.y )
+		);
+	}
 
-		const Box2i m_displayWindow;
-		const Box2i m_tileBound;
+	const Box2i m_displayWindow;
+	const Box2i m_tileBound;
 
-		ConstFloatVectorDataPtr m_xData;
-		ConstFloatVectorDataPtr m_yData;
-		ConstFloatVectorDataPtr m_aData;
+	ConstFloatVectorDataPtr m_xData;
+	ConstFloatVectorDataPtr m_yData;
+	ConstFloatVectorDataPtr m_aData;
 
-		const std::vector<float> &m_x;
-		const std::vector<float> &m_y;
-		const std::vector<float> &m_a;
+	const std::vector<float> &m_x;
+	const std::vector<float> &m_y;
+	const std::vector<float> &m_a;
 
-		const VectorMode m_vectorMode;
-		const VectorUnits m_vectorUnits;
-
+	const VectorMode m_vectorMode;
+	const VectorUnits m_vectorUnits;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -131,7 +130,7 @@ GAFFER_NODE_DEFINE_TYPE( VectorWarp );
 size_t VectorWarp::g_firstPlugIndex = 0;
 
 VectorWarp::VectorWarp( const std::string &name )
-	:	Warp( name )
+	: Warp( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "vector" ) );
@@ -188,8 +187,7 @@ void VectorWarp::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 
 bool VectorWarp::affectsEngine( const Gaffer::Plug *input ) const
 {
-	return
-		Warp::affectsEngine( input ) ||
+	return Warp::affectsEngine( input ) ||
 		input == inPlug()->viewNamesPlug() ||
 		input == inPlug()->formatPlug() ||
 		input == vectorPlug()->channelNamesPlug() ||
@@ -241,7 +239,6 @@ void VectorWarp::hashEngine( const Imath::V2i &tileOrigin, const Gaffer::Context
 		channelDataScope.setChannelName( &ImageAlgo::channelNameA );
 		vectorPlug()->channelDataPlug()->hash( h );
 	}
-
 }
 
 const Warp::Engine *VectorWarp::computeEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const

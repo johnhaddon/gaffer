@@ -55,24 +55,10 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Sph
 	ParameterList parameters;
 
 	const V3f p( 0 );
-	parameters.add( {
-		"P",
-		&p,
-		NSITypePoint,
-		0,
-		1,
-		NSIParamPerVertex
-	} );
+	parameters.add( { "P", &p, NSITypePoint, 0, 1, NSIParamPerVertex } );
 
 	const float width = samples[0]->radius() * 2;
-	parameters.add( {
-		"width",
-		&width,
-		NSITypeFloat,
-		0,
-		1,
-		NSIParamPerVertex
-	} );
+	parameters.add( { "width", &width, NSITypeFloat, 0, 1, NSIParamPerVertex } );
 
 	NSISetAttribute( context, handle, parameters.size(), parameters.data() );
 	return true;

@@ -49,59 +49,58 @@ namespace GafferImage
 class GAFFERIMAGE_API OpenColorIOTransform : public ColorProcessor
 {
 
-	public :
+public:
 
-		~OpenColorIOTransform() override;
+	~OpenColorIOTransform() override;
 
-		/// Defines values for use in `direction` plugs
-		/// created by derived classes.
-		enum Direction
-		{
-			Forward = 0,
-			Inverse
-		};
+	/// Defines values for use in `direction` plugs
+	/// created by derived classes.
+	enum Direction
+	{
+		Forward = 0,
+		Inverse
+	};
 
-		/// May return null if the derived class does not
-		/// request OCIO context variable support.
-		/// \deprecated Use the OpenColorIOContext node instead.
-		Gaffer::CompoundDataPlug *contextPlug();
-		const Gaffer::CompoundDataPlug *contextPlug() const;
+	/// May return null if the derived class does not
+	/// request OCIO context variable support.
+	/// \deprecated Use the OpenColorIOContext node instead.
+	Gaffer::CompoundDataPlug *contextPlug();
+	const Gaffer::CompoundDataPlug *contextPlug() const;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::OpenColorIOTransform, OpenColorIOTransformTypeId, ColorProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::OpenColorIOTransform, OpenColorIOTransformTypeId, ColorProcessor );
 
-		/// Returns the OCIO processor for this node, taking into account
-		/// the current Gaffer context and the OCIO context specified by
-		/// `contextPlug()`. Returns nullptr if this node is a no-op.
-		OCIO_NAMESPACE::ConstProcessorRcPtr processor() const;
-		/// Returns a hash that uniquely represents the result of calling
-		/// `processor()` in the current context.
-		IECore::MurmurHash processorHash() const;
+	/// Returns the OCIO processor for this node, taking into account
+	/// the current Gaffer context and the OCIO context specified by
+	/// `contextPlug()`. Returns nullptr if this node is a no-op.
+	OCIO_NAMESPACE::ConstProcessorRcPtr processor() const;
+	/// Returns a hash that uniquely represents the result of calling
+	/// `processor()` in the current context.
+	IECore::MurmurHash processorHash() const;
 
-	protected :
+protected:
 
-		explicit OpenColorIOTransform( const std::string &name=defaultName<OpenColorIOTransform>(), bool withContextPlug=false );
+	explicit OpenColorIOTransform( const std::string &name = defaultName<OpenColorIOTransform>(), bool withContextPlug = false );
 
-		/// Derived classes must implement this to return true if the specified input
-		/// is used in transform().
-		virtual bool affectsTransform( const Gaffer::Plug *input ) const = 0;
-		/// Derived classes must implement this to compute the hash for the transform.
-		virtual void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
-		/// Derived classes must implement this to return a valid OpenColorIO
-		/// Transform which can be used by an OpenColorIO Processor or a null
-		/// pointer if no processing should take place.
-		virtual OCIO_NAMESPACE::ConstTransformRcPtr transform() const = 0;
+	/// Derived classes must implement this to return true if the specified input
+	/// is used in transform().
+	virtual bool affectsTransform( const Gaffer::Plug *input ) const = 0;
+	/// Derived classes must implement this to compute the hash for the transform.
+	virtual void hashTransform( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
+	/// Derived classes must implement this to return a valid OpenColorIO
+	/// Transform which can be used by an OpenColorIO Processor or a null
+	/// pointer if no processing should take place.
+	virtual OCIO_NAMESPACE::ConstTransformRcPtr transform() const = 0;
 
-	private :
+private:
 
-		bool affectsColorProcessor( const Gaffer::Plug *input ) const final;
-		void hashColorProcessor( const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
-		ColorProcessorFunction colorProcessor( const Gaffer::Context *context ) const final;
+	bool affectsColorProcessor( const Gaffer::Plug *input ) const final;
+	void hashColorProcessor( const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
+	ColorProcessorFunction colorProcessor( const Gaffer::Context *context ) const final;
 
-		OCIO_NAMESPACE::ConstContextRcPtr modifiedOCIOContext( OCIO_NAMESPACE::ConstContextRcPtr context ) const;
+	OCIO_NAMESPACE::ConstContextRcPtr modifiedOCIOContext( OCIO_NAMESPACE::ConstContextRcPtr context ) const;
 
-		static size_t g_firstPlugIndex;
-		bool m_hasContextPlug;
-
+	static size_t g_firstPlugIndex;
+	bool m_hasContextPlug;
 };
 
 IE_CORE_DECLAREPTR( OpenColorIOTransform )

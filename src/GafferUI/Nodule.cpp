@@ -53,7 +53,7 @@ using namespace std;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Nodule );
 
 Nodule::Nodule( Gaffer::PlugPtr plug )
-	:	ConnectionCreator( defaultName<Nodule>() ), m_plug( plug )
+	: ConnectionCreator( defaultName<Nodule>() ), m_plug( plug )
 {
 }
 
@@ -120,10 +120,10 @@ NodulePtr Nodule::create( Gaffer::PlugPtr plug )
 
 	const PlugCreatorMap &m = plugCreators();
 	IECore::TypeId t = plug->typeId();
-	while( t!=IECore::InvalidTypeId )
+	while( t != IECore::InvalidTypeId )
 	{
 		PlugCreatorMap::const_iterator it = m.find( t );
-		if( it!=m.end() )
+		if( it != m.end() )
 		{
 			return it->second( plug );
 		}

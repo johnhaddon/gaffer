@@ -48,59 +48,59 @@ namespace GafferImage
 class GAFFERIMAGE_API FlatToDeep : public ImageProcessor
 {
 
-	public :
-		enum class ZMode
-		{
-			Constant,
-			Channel,
-		};
+public:
 
-		enum class ZBackMode
-		{
-			None,
-			Thickness,
-			Channel,
-		};
+	enum class ZMode
+	{
+		Constant,
+		Channel,
+	};
 
-		explicit FlatToDeep( const std::string &name=defaultName<FlatToDeep>() );
-		~FlatToDeep() override;
+	enum class ZBackMode
+	{
+		None,
+		Thickness,
+		Channel,
+	};
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::FlatToDeep, FlatToDeepTypeId, ImageProcessor );
+	explicit FlatToDeep( const std::string &name = defaultName<FlatToDeep>() );
+	~FlatToDeep() override;
 
-		Gaffer::IntPlug *zModePlug();
-		const Gaffer::IntPlug *zModePlug() const;
-		Gaffer::FloatPlug *depthPlug();
-		const Gaffer::FloatPlug *depthPlug() const;
-		Gaffer::StringPlug *zChannelPlug();
-		const Gaffer::StringPlug *zChannelPlug() const;
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::FlatToDeep, FlatToDeepTypeId, ImageProcessor );
 
-		Gaffer::IntPlug *zBackModePlug();
-		const Gaffer::IntPlug *zBackModePlug() const;
-		Gaffer::FloatPlug *thicknessPlug();
-		const Gaffer::FloatPlug *thicknessPlug() const;
-		Gaffer::StringPlug *zBackChannelPlug();
-		const Gaffer::StringPlug *zBackChannelPlug() const;
+	Gaffer::IntPlug *zModePlug();
+	const Gaffer::IntPlug *zModePlug() const;
+	Gaffer::FloatPlug *depthPlug();
+	const Gaffer::FloatPlug *depthPlug() const;
+	Gaffer::StringPlug *zChannelPlug();
+	const Gaffer::StringPlug *zChannelPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	Gaffer::IntPlug *zBackModePlug();
+	const Gaffer::IntPlug *zBackModePlug() const;
+	Gaffer::FloatPlug *thicknessPlug();
+	const Gaffer::FloatPlug *thicknessPlug() const;
+	Gaffer::StringPlug *zBackChannelPlug();
+	const Gaffer::StringPlug *zBackChannelPlug() const;
 
-	protected :
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+protected:
 
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		static size_t g_firstPlugIndex;
+private:
 
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( FlatToDeep )

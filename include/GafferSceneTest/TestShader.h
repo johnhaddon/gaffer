@@ -47,18 +47,17 @@ namespace GafferSceneTest
 class GAFFERSCENETEST_API TestShader : public GafferScene::Shader
 {
 
-	public :
+public:
 
-		TestShader( const std::string &name=defaultName<TestShader>() );
-		~TestShader() override;
+	TestShader( const std::string &name = defaultName<TestShader>() );
+	~TestShader() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneTest::TestShader, TestShaderTypeId, GafferScene::Shader );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneTest::TestShader, TestShaderTypeId, GafferScene::Shader );
 
-		// Populates the `parameters` with plugs for different test cases. Currently
-		// supports `simpleShader` and `simpleLight`. If `shaderName` is not recognized,
-		// it will create a shader with that name and no parameters.
-		void loadShader( const std::string &shaderName, bool keepExistingValues=false ) override;
-
+	// Populates the `parameters` with plugs for different test cases. Currently
+	// supports `simpleShader` and `simpleLight`. If `shaderName` is not recognized,
+	// it will create a shader with that name and no parameters.
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 };
 
 } // namespace GafferSceneTest

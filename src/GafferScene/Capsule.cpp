@@ -53,21 +53,21 @@ using namespace GafferScene;
 
 namespace
 {
-	Gaffer::Context *capsuleContext( const Context &context )
-	{
-		Gaffer::Context *result = new Gaffer::Context( context, /* omitCanceller = */ true );
+Gaffer::Context *capsuleContext( const Context &context )
+{
+	Gaffer::Context *result = new Gaffer::Context( context, /* omitCanceller = */ true );
 
-		// We don't want to include the scenePath of the original location of the capsule
-		// as part of the context used downstream to evaluate the insides of the capsule
-		result->remove( ScenePlug::scenePathContextName );
-		return result;
-	}
+	// We don't want to include the scenePath of the original location of the capsule
+	// as part of the context used downstream to evaluate the insides of the capsule
+	result->remove( ScenePlug::scenePathContextName );
+	return result;
 }
+} // namespace
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Capsule );
 
 Capsule::Capsule()
-	:	m_scene( nullptr )
+	: m_scene( nullptr )
 {
 }
 
@@ -78,7 +78,7 @@ Capsule::Capsule(
 	const IECore::MurmurHash &hash,
 	const Imath::Box3f &bound
 )
-	:	m_hash( hash ), m_bound( bound ), m_scene( scene ), m_root( root ), m_context( capsuleContext( context ) )
+	: m_hash( hash ), m_bound( bound ), m_scene( scene ), m_root( root ), m_context( capsuleContext( context ) )
 {
 }
 

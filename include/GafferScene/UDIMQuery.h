@@ -51,42 +51,41 @@ namespace GafferScene
 class GAFFERSCENE_API UDIMQuery : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit UDIMQuery( const std::string &name=defaultName<UDIMQuery>() );
-		~UDIMQuery() override;
+	explicit UDIMQuery( const std::string &name = defaultName<UDIMQuery>() );
+	~UDIMQuery() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::UDIMQuery, UDIMQueryTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::UDIMQuery, UDIMQueryTypeId, Gaffer::ComputeNode );
 
-		GafferScene::ScenePlug *inPlug();
-		const GafferScene::ScenePlug *inPlug() const;
+	GafferScene::ScenePlug *inPlug();
+	const GafferScene::ScenePlug *inPlug() const;
 
-		Gaffer::StringPlug *uvSetPlug();
-		const Gaffer::StringPlug *uvSetPlug() const;
+	Gaffer::StringPlug *uvSetPlug();
+	const Gaffer::StringPlug *uvSetPlug() const;
 
-		Gaffer::StringPlug *attributesPlug();
-		const Gaffer::StringPlug *attributesPlug() const;
+	Gaffer::StringPlug *attributesPlug();
+	const Gaffer::StringPlug *attributesPlug() const;
 
-		GafferScene::FilterPlug *filterPlug();
-		const GafferScene::FilterPlug *filterPlug() const;
+	GafferScene::FilterPlug *filterPlug();
+	const GafferScene::FilterPlug *filterPlug() const;
 
-		Gaffer::CompoundObjectPlug *outPlug();
-		const Gaffer::CompoundObjectPlug *outPlug() const;
+	Gaffer::CompoundObjectPlug *outPlug();
+	const Gaffer::CompoundObjectPlug *outPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
-		Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( UDIMQuery );

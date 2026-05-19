@@ -64,7 +64,6 @@ AttributeTweaks::AttributeTweaks( const std::string &name ) : AttributeProcessor
 
 AttributeTweaks::~AttributeTweaks()
 {
-
 }
 
 Gaffer::BoolPlug *AttributeTweaks::localisePlug()
@@ -97,15 +96,13 @@ const Gaffer::TweaksPlug *AttributeTweaks::tweaksPlug() const
 	return getChild<Gaffer::TweaksPlug>( g_firstPlugIndex + 2 );
 }
 
-bool AttributeTweaks::affectsProcessedAttributes( const Gaffer::Plug *input) const
+bool AttributeTweaks::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		AttributeProcessor::affectsProcessedAttributes( input ) ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) ||
 		tweaksPlug()->isAncestorOf( input ) ||
 		input == localisePlug() ||
 		input == ignoreMissingPlug() ||
-		( input == inPlug()->globalsPlug() && !localisePlug()->isSetToDefault() )
-	;
+		( input == inPlug()->globalsPlug() && !localisePlug()->isSetToDefault() );
 }
 
 void AttributeTweaks::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -159,8 +156,7 @@ IECore::ConstCompoundObjectPtr AttributeTweaks::computeProcessedAttributes( cons
 	}
 
 	tweaksPlug->applyTweaks(
-		[&source]( const std::string &valueName, const bool withFallback ) -> const IECore::Data *
-		{
+		[&source]( const std::string &valueName, const bool withFallback ) -> const IECore::Data * {
 			const Data *result = source->member<Data>( valueName );
 			if( withFallback && !result && valueName == "linkedLights" )
 			{
@@ -170,8 +166,7 @@ IECore::ConstCompoundObjectPtr AttributeTweaks::computeProcessedAttributes( cons
 			}
 			return result;
 		},
-		[&result]( const std::string &valueName, DataPtr newData )
-		{
+		[&result]( const std::string &valueName, DataPtr newData ) {
 			if( newData == nullptr )
 			{
 				return result->members().erase( valueName ) > 0;

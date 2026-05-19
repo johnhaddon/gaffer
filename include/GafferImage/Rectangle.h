@@ -53,39 +53,38 @@ namespace GafferImage
 class GAFFERIMAGE_API Rectangle : public Shape
 {
 
-	public :
+public:
 
-		explicit Rectangle( const std::string &name=defaultName<Rectangle>() );
-		~Rectangle() override;
+	explicit Rectangle( const std::string &name = defaultName<Rectangle>() );
+	~Rectangle() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Rectangle, RectangleTypeId, Shape );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Rectangle, RectangleTypeId, Shape );
 
-		Gaffer::Box2fPlug *areaPlug();
-		const Gaffer::Box2fPlug *areaPlug() const;
+	Gaffer::Box2fPlug *areaPlug();
+	const Gaffer::Box2fPlug *areaPlug() const;
 
-		Gaffer::FloatPlug *lineWidthPlug();
-		const Gaffer::FloatPlug *lineWidthPlug() const;
+	Gaffer::FloatPlug *lineWidthPlug();
+	const Gaffer::FloatPlug *lineWidthPlug() const;
 
-		Gaffer::FloatPlug *cornerRadiusPlug();
-		const Gaffer::FloatPlug *cornerRadiusPlug() const;
+	Gaffer::FloatPlug *cornerRadiusPlug();
+	const Gaffer::FloatPlug *cornerRadiusPlug() const;
 
-		Gaffer::Transform2DPlug *transformPlug();
-		const Gaffer::Transform2DPlug *transformPlug() const;
+	Gaffer::Transform2DPlug *transformPlug();
+	const Gaffer::Transform2DPlug *transformPlug() const;
 
-	protected :
+protected:
 
-		bool affectsShapeDataWindow( const Gaffer::Plug *input ) const override;
-		void hashShapeDataWindow( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box2i computeShapeDataWindow( const Gaffer::Context *context ) const override;
+	bool affectsShapeDataWindow( const Gaffer::Plug *input ) const override;
+	void hashShapeDataWindow( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box2i computeShapeDataWindow( const Gaffer::Context *context ) const override;
 
-		bool affectsShapeChannelData( const Gaffer::Plug *input ) const override;
-		void hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeShapeChannelData(  const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
+	bool affectsShapeChannelData( const Gaffer::Plug *input ) const override;
+	void hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Rectangle )

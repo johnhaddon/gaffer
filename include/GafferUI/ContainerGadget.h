@@ -52,28 +52,27 @@ namespace GafferUI
 class GAFFERUI_API ContainerGadget : public Gadget
 {
 
-	public :
+public:
 
-		explicit ContainerGadget( const std::string &name=defaultName<ContainerGadget>() );
-		~ContainerGadget() override;
+	explicit ContainerGadget( const std::string &name = defaultName<ContainerGadget>() );
+	~ContainerGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ContainerGadget, ContainerGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ContainerGadget, ContainerGadgetTypeId, Gadget );
 
-		/// The padding is a region added around the contents of the children.
-		/// It is specified as the final bounding box when the child bounding
-		/// box is ( ( 0, 0, 0 ), ( 0, 0, 0 ) ). That is, padding.min is added to bound.min
-		/// and padding.max is added to bound.max.
-		void setPadding( const Imath::Box3f &padding );
-		const Imath::Box3f &getPadding() const;
+	/// The padding is a region added around the contents of the children.
+	/// It is specified as the final bounding box when the child bounding
+	/// box is ( ( 0, 0, 0 ), ( 0, 0, 0 ) ). That is, padding.min is added to bound.min
+	/// and padding.max is added to bound.max.
+	void setPadding( const Imath::Box3f &padding );
+	const Imath::Box3f &getPadding() const;
 
-		/// Applies the padding to the default union-of-children
-		/// bounding box.
-		Imath::Box3f bound() const override;
+	/// Applies the padding to the default union-of-children
+	/// bounding box.
+	Imath::Box3f bound() const override;
 
-	private :
+private:
 
-		Imath::Box3f m_padding;
-
+	Imath::Box3f m_padding;
 };
 
 IE_CORE_DECLAREPTR( ContainerGadget );

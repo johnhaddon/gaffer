@@ -97,7 +97,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageStats );
 size_t ImageStats::g_firstPlugIndex = 0;
 
 ImageStats::ImageStats( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "in", Gaffer::Plug::In ) );
@@ -119,13 +119,11 @@ ImageStats::ImageStats( const std::string &name )
 		Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() )
 	) );
 	addChild(
-		new Color4fPlug( "min", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ),
-		Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() )
-	) );
+		new Color4fPlug( "min", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ), Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() ) )
+	);
 	addChild(
-		new Color4fPlug( "max", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ),
-		Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() )
-	) );
+		new Color4fPlug( "max", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ), Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() ) )
+	);
 
 	addChild( new ObjectPlug( "__tileStats", Gaffer::Plug::Out, new IECore::V3dData() ) );
 	addChild( new ObjectPlug( "__allStats", Gaffer::Plug::Out, new IECore::V3dData() ) );
@@ -295,16 +293,16 @@ void ImageStats::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 	{
 		for( unsigned int i = 0; i < 4; ++i )
 		{
-			outputs.push_back( minPlug()->getChild(i) );
-			outputs.push_back( averagePlug()->getChild(i) );
-			outputs.push_back( maxPlug()->getChild(i) );
+			outputs.push_back( minPlug()->getChild( i ) );
+			outputs.push_back( averagePlug()->getChild( i ) );
+			outputs.push_back( maxPlug()->getChild( i ) );
 		}
 	}
 }
 
 void ImageStats::hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const
 {
-	ComputeNode::hash( output, context, h);
+	ComputeNode::hash( output, context, h );
 
 	ImagePlug::ViewScope viewScope( context );
 
@@ -344,20 +342,17 @@ void ImageStats::hash( const ValuePlug *output, const Context *context, IECore::
 		ImagePlug::GlobalScope s( viewScope.context() );
 		int areaSource = areaSourcePlug()->getValue();
 		Imath::Box2i area;
-		switch ( areaSource )
+		switch( areaSource )
 		{
-			case ImageStats::DataWindow:
-			{
+			case ImageStats::DataWindow : {
 				area = inPlug()->dataWindowPlug()->getValue();
 				break;
 			}
-			case ImageStats::DisplayWindow:
-			{
+			case ImageStats::DisplayWindow : {
 				area = inPlug()->formatPlug()->getValue().getDisplayWindow();
 				break;
 			}
-			default:
-			{
+			default : {
 				area = areaPlug()->getValue();
 				break;
 			}
@@ -365,7 +360,7 @@ void ImageStats::hash( const ValuePlug *output, const Context *context, IECore::
 		const Imath::Box2i dataWindow = flattenedInPlug()->dataWindowPlug()->getValue();
 		boundsIntersection = BufferAlgo::intersection( area, dataWindow );
 		beyondDataWindow = boundsIntersection != area;
-		areaMult = double(area.size().x) * area.size().y;
+		areaMult = double( area.size().x ) * area.size().y;
 	}
 
 	if( output == tileStatsPlug() )
@@ -396,13 +391,11 @@ void ImageStats::hash( const ValuePlug *output, const Context *context, IECore::
 		ImageAlgo::parallelGatherTiles(
 			flattenedInPlug(),
 			// Tile
-			[this] ( const ImagePlug *imageP, const Imath::V2i &tileOrigin )
-			{
+			[this]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) {
 				return tileStatsPlug()->hash();
 			},
 			// Gather
-			[ &h ] ( const ImagePlug *imageP, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash )
-			{
+			[&h]( const ImagePlug *imageP, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
 				h.append( tileHash );
 			},
 			boundsIntersection,
@@ -444,7 +437,7 @@ void ImageStats::compute( ValuePlug *output, const Context *context ) const
 		ImagePlug::ChannelDataScope s( context );
 		s.setChannelName( &channelName );
 		Imath::V3d stats = boost::static_pointer_cast<const IECore::V3dData>( allStatsPlug()->getValue() )->readable();
-		static_cast<FloatPlug *>( output )->setValue( stats[ statIndex ] );
+		static_cast<FloatPlug *>( output )->setValue( stats[statIndex] );
 		return;
 	}
 
@@ -456,20 +449,17 @@ void ImageStats::compute( ValuePlug *output, const Context *context ) const
 		ImagePlug::GlobalScope s( viewScope.context() );
 		int areaSource = areaSourcePlug()->getValue();
 		Imath::Box2i area;
-		switch ( areaSource )
+		switch( areaSource )
 		{
-			case ImageStats::DataWindow:
-			{
+			case ImageStats::DataWindow : {
 				area = inPlug()->dataWindowPlug()->getValue();
 				break;
 			}
-			case ImageStats::DisplayWindow:
-			{
+			case ImageStats::DisplayWindow : {
 				area = inPlug()->formatPlug()->getValue().getDisplayWindow();
 				break;
 			}
-			default:
-			{
+			default : {
 				area = areaPlug()->getValue();
 				break;
 			}
@@ -477,7 +467,7 @@ void ImageStats::compute( ValuePlug *output, const Context *context ) const
 		const Imath::Box2i dataWindow = flattenedInPlug()->dataWindowPlug()->getValue();
 		boundsIntersection = BufferAlgo::intersection( area, dataWindow );
 		beyondDataWindow = boundsIntersection != area;
-		areaMult = double(area.size().x) * area.size().y;
+		areaMult = double( area.size().x ) * area.size().y;
 	}
 
 	if( output == tileStatsPlug() )
@@ -499,7 +489,7 @@ void ImageStats::compute( ValuePlug *output, const Context *context ) const
 		{
 			for( int x = tileBound.min.x; x < tileBound.max.x; ++x )
 			{
-				float v = channel[ x + y * ImagePlug::tileSize() ];
+				float v = channel[x + y * ImagePlug::tileSize()];
 				min = std::min( v, min );
 				max = std::max( v, max );
 				sum += v;
@@ -530,15 +520,13 @@ void ImageStats::compute( ValuePlug *output, const Context *context ) const
 		ImageAlgo::parallelGatherTiles(
 			flattenedInPlug(),
 			// Tile
-			[this] ( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) -> Imath::V3d
-			{
+			[this]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) -> Imath::V3d {
 				return boost::static_pointer_cast<const IECore::V3dData>( tileStatsPlug()->getValue() )->readable();
 			},
 			// Gather
-			[ &min, &max, &sum ] ( const ImagePlug *imageP, const Imath::V2i &tileOrigin, const Imath::V3d &v )
-			{
-				min = std::min( float(v[0]), min );
-				max = std::max( float(v[1]), max );
+			[&min, &max, &sum]( const ImagePlug *imageP, const Imath::V2i &tileOrigin, const Imath::V3d &v ) {
+				min = std::min( float( v[0] ), min );
+				max = std::max( float( v[1] ), max );
 				sum += v[2];
 			},
 			boundsIntersection,

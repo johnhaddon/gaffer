@@ -51,30 +51,29 @@ namespace GafferScene
 class GAFFERSCENE_API Wireframe : public Deformer
 {
 
-	public :
+public:
 
-		explicit Wireframe( const std::string &name=defaultName<Wireframe>() );
-		~Wireframe() override;
+	explicit Wireframe( const std::string &name = defaultName<Wireframe>() );
+	~Wireframe() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Wireframe, WireframeTypeId, Deformer );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Wireframe, WireframeTypeId, Deformer );
 
-		Gaffer::StringPlug *positionPlug();
-		const Gaffer::StringPlug *positionPlug() const;
+	Gaffer::StringPlug *positionPlug();
+	const Gaffer::StringPlug *positionPlug() const;
 
-		Gaffer::FloatPlug *widthPlug();
-		const Gaffer::FloatPlug *widthPlug() const;
+	Gaffer::FloatPlug *widthPlug();
+	const Gaffer::FloatPlug *widthPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
-		bool adjustBounds() const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool adjustBounds() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Wireframe )

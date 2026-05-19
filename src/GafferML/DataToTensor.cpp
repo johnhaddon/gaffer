@@ -51,7 +51,7 @@ size_t DataToTensor::g_firstPlugIndex = 0;
 const IECore::InternedString DataToTensor::g_dataPlugName( "data" );
 
 DataToTensor::DataToTensor( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "shapeMode", Plug::In, (int)ShapeMode::Automatic, (int)ShapeMode::Automatic, (int)ShapeMode::Custom ) );
@@ -186,4 +186,3 @@ Gaffer::ValuePlug::CachePolicy DataToTensor::computeCachePolicy( const Gaffer::V
 	}
 	return ComputeNode::computeCachePolicy( output );
 }
-

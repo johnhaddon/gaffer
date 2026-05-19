@@ -46,64 +46,63 @@ namespace GafferScene
 class GAFFERSCENE_API ImageToPoints : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ImageToPoints, ImageToPointsTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ImageToPoints, ImageToPointsTypeId, ObjectSource );
 
-		explicit ImageToPoints( const std::string &name=defaultName<ImageToPoints>() );
-		~ImageToPoints() override;
+	explicit ImageToPoints( const std::string &name = defaultName<ImageToPoints>() );
+	~ImageToPoints() override;
 
-		GafferImage::ImagePlug *imagePlug();
-		const GafferImage::ImagePlug *imagePlug() const;
+	GafferImage::ImagePlug *imagePlug();
+	const GafferImage::ImagePlug *imagePlug() const;
 
-		Gaffer::StringPlug *viewPlug();
-		const Gaffer::StringPlug *viewPlug() const;
+	Gaffer::StringPlug *viewPlug();
+	const Gaffer::StringPlug *viewPlug() const;
 
-		Gaffer::StringVectorDataPlug *positionPlug();
-		const Gaffer::StringVectorDataPlug *positionPlug() const;
+	Gaffer::StringVectorDataPlug *positionPlug();
+	const Gaffer::StringVectorDataPlug *positionPlug() const;
 
-		Gaffer::StringPlug *primitiveVariablesPlug();
-		const Gaffer::StringPlug *primitiveVariablesPlug() const;
+	Gaffer::StringPlug *primitiveVariablesPlug();
+	const Gaffer::StringPlug *primitiveVariablesPlug() const;
 
-		Gaffer::FloatPlug *widthPlug();
-		const Gaffer::FloatPlug *widthPlug() const;
+	Gaffer::FloatPlug *widthPlug();
+	const Gaffer::FloatPlug *widthPlug() const;
 
-		Gaffer::StringPlug *widthChannelPlug();
-		const Gaffer::StringPlug *widthChannelPlug() const;
+	Gaffer::StringPlug *widthChannelPlug();
+	const Gaffer::StringPlug *widthChannelPlug() const;
 
-		Gaffer::BoolPlug *ignoreTransparentPlug();
-		const Gaffer::BoolPlug *ignoreTransparentPlug() const;
+	Gaffer::BoolPlug *ignoreTransparentPlug();
+	const Gaffer::BoolPlug *ignoreTransparentPlug() const;
 
-		Gaffer::FloatPlug *alphaThresholdPlug();
-		const Gaffer::FloatPlug *alphaThresholdPlug() const;
+	Gaffer::FloatPlug *alphaThresholdPlug();
+	const Gaffer::FloatPlug *alphaThresholdPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		struct Destination
-		{
-			std::string name;
-			IECore::TypeId type;
-			size_t offset;
-			float *data = nullptr;
-		};
+	struct Destination
+	{
+		std::string name;
+		IECore::TypeId type;
+		size_t offset;
+		float *data = nullptr;
+	};
 
-		struct ChannelMapping
-		{
-			std::string name;
-			std::vector<Destination> destinations;
-		};
+	struct ChannelMapping
+	{
+		std::string name;
+		std::vector<Destination> destinations;
+	};
 
-		std::vector<ChannelMapping> channelMappings() const;
+	std::vector<ChannelMapping> channelMappings() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ImageToPoints )

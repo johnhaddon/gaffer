@@ -46,33 +46,32 @@ namespace GafferImage
 class GAFFERIMAGE_API Mirror : public FlatImageProcessor
 {
 
-	public :
+public:
 
-		explicit Mirror( const std::string &name=defaultName<Mirror>() );
-		~Mirror() override;
+	explicit Mirror( const std::string &name = defaultName<Mirror>() );
+	~Mirror() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Mirror, MirrorTypeId, FlatImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Mirror, MirrorTypeId, FlatImageProcessor );
 
-		Gaffer::BoolPlug *horizontalPlug();
-		const Gaffer::BoolPlug *horizontalPlug() const;
+	Gaffer::BoolPlug *horizontalPlug();
+	const Gaffer::BoolPlug *horizontalPlug() const;
 
-		Gaffer::BoolPlug *verticalPlug();
-		const Gaffer::BoolPlug *verticalPlug() const;
+	Gaffer::BoolPlug *verticalPlug();
+	const Gaffer::BoolPlug *verticalPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Mirror )

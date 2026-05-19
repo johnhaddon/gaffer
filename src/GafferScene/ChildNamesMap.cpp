@@ -98,7 +98,7 @@ InternedString ChildNamesMap::uniqueName( InternedString name, const std::unorde
 }
 
 ChildNamesMap::ChildNamesMap( const std::vector<IECore::ConstInternedStringVectorDataPtr> &inputChildNames )
-	:	m_childNames( new InternedStringVectorData() )
+	: m_childNames( new InternedStringVectorData() )
 {
 	vector<InternedString> &outputChildNames = m_childNames->writable();
 

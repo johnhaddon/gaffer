@@ -61,33 +61,33 @@ using namespace GafferBindings;
 namespace
 {
 
-bool isSetup( const GafferScene::AttributeQuery& query )
+bool isSetup( const GafferScene::AttributeQuery &query )
 {
 	return query.isSetup();
 }
 
-bool canSetup( const GafferScene::AttributeQuery& query, const Gaffer::ValuePlug& plug )
+bool canSetup( const GafferScene::AttributeQuery &query, const Gaffer::ValuePlug &plug )
 {
-	return query.canSetup( & plug );
+	return query.canSetup( &plug );
 }
 
-void setup( GafferScene::AttributeQuery& query, const Gaffer::ValuePlug& plug )
+void setup( GafferScene::AttributeQuery &query, const Gaffer::ValuePlug &plug )
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	if( !( query.canSetup( & plug ) ) )
+	if( !( query.canSetup( &plug ) ) )
 	{
 		throw IECore::Exception( "AttributeQuery cannot be setup from specified plug" );
 	}
-	query.setup( & plug );
+	query.setup( &plug );
 }
 
 class AttributeQuerySerialiser : public GafferBindings::NodeSerialiser
 {
-	std::string postConstructor( const Gaffer::GraphComponent* component, const std::string& identifier, GafferBindings::Serialisation& serialisation ) const override
+	std::string postConstructor( const Gaffer::GraphComponent *component, const std::string &identifier, GafferBindings::Serialisation &serialisation ) const override
 	{
 		std::string result = GafferBindings::NodeSerialiser::postConstructor( component, identifier, serialisation );
 
-		const GafferScene::AttributeQuery* const query = IECore::assertedStaticCast< const GafferScene::AttributeQuery >( component );
+		const GafferScene::AttributeQuery *const query = IECore::assertedStaticCast<const GafferScene::AttributeQuery>( component );
 
 		if( query->isSetup() )
 		{
@@ -96,7 +96,7 @@ class AttributeQuerySerialiser : public GafferBindings::NodeSerialiser
 				result += "\n";
 			}
 
-			const GafferBindings::Serialisation::Serialiser* const serialiser = Serialisation::acquireSerialiser( query->valuePlug() );
+			const GafferBindings::Serialisation::Serialiser *const serialiser = Serialisation::acquireSerialiser( query->valuePlug() );
 			result += identifier + ".setup( " + serialiser->constructor( query->valuePlug(), serialisation ) + " )\n";
 		}
 
@@ -151,20 +151,19 @@ const ValuePlugPtr queryPlug( const T &q, const ValuePlug &p )
 template<typename T>
 class MultiQuerySerialiser : public NodeSerialiser
 {
-	std::string postConstructor( const GraphComponent* component, const std::string& identifier, Serialisation& serialisation ) const override
+	std::string postConstructor( const GraphComponent *component, const std::string &identifier, Serialisation &serialisation ) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( component, identifier, serialisation );
 
-		const T* const query = IECore::runTimeCast< const T >( component );
+		const T *const query = IECore::runTimeCast<const T>( component );
 
 		for( const auto &queryPlug : NameValuePlug::Range( *query->queriesPlug() ) )
 		{
-			const Serialisation::Serialiser* serialiser = Serialisation::acquireSerialiser( queryPlug->valuePlug() );
+			const Serialisation::Serialiser *serialiser = Serialisation::acquireSerialiser( queryPlug->valuePlug() );
 			result +=
 				identifier + ".addQuery( " +
 				serialiser->constructor( queryPlug->valuePlug(), serialisation ) +
-				" )\n"
-			;
+				" )\n";
 		}
 
 		return result;
@@ -199,8 +198,7 @@ GafferBindings::DependencyNodeClass<T> bindMultiQuery()
 		.def( "existsPlugFromQuery", &existsPlugFromQuery<T, NameValuePlug> )
 		.def( "valuePlugFromQuery", &valuePlugFromQuery<T, NameValuePlug> )
 		.def( "outPlugFromQuery", &outPlugFromQuery<T, NameValuePlug> )
-		.def( "queryPlug", &queryPlug<T, NameValuePlug> )
-	;
+		.def( "queryPlug", &queryPlug<T, NameValuePlug> );
 	Serialisation::registerSerialiser( T::staticTypeId(), new MultiQuerySerialiser<T>() );
 	return cls;
 }
@@ -219,66 +217,59 @@ const StringPlugPtr typePlugFromQuery( const GafferScene::PrimitiveVariableQuery
 
 void GafferSceneModule::bindQueries()
 {
-	GafferBindings::DependencyNodeClass< GafferScene::AttributeQuery >()
-		.def( "isSetup", & isSetup )
-		.def( "canSetup", & canSetup )
-		.def( "setup", & setup )
-	;
+	GafferBindings::DependencyNodeClass<GafferScene::AttributeQuery>()
+		.def( "isSetup", &isSetup )
+		.def( "canSetup", &canSetup )
+		.def( "setup", &setup );
 
 	GafferBindings::Serialisation::registerSerialiser( GafferScene::AttributeQuery::staticTypeId(), new AttributeQuerySerialiser() );
 
 	bindMultiQuery<GafferScene::ShaderQuery>();
 	bindMultiQuery<GafferScene::OptionQuery>();
 	bindMultiQuery<GafferScene::PrimitiveVariableQuery>()
-		.def( "interpolationPlugFromQuery", & interpolationPlugFromQuery )
-		.def( "typePlugFromQuery", & typePlugFromQuery )
-		;
+		.def( "interpolationPlugFromQuery", &interpolationPlugFromQuery )
+		.def( "typePlugFromQuery", &typePlugFromQuery );
 
 	{
-		boost::python::scope s = GafferBindings::DependencyNodeClass< GafferScene::BoundQuery >();
+		boost::python::scope s = GafferBindings::DependencyNodeClass<GafferScene::BoundQuery>();
 
-		boost::python::enum_< GafferScene::BoundQuery::Space >( "Space" )
+		boost::python::enum_<GafferScene::BoundQuery::Space>( "Space" )
 			.value( "Local", GafferScene::BoundQuery::Space::Local )
 			.value( "World", GafferScene::BoundQuery::Space::World )
-			.value( "Relative", GafferScene::BoundQuery::Space::Relative )
-		;
+			.value( "Relative", GafferScene::BoundQuery::Space::Relative );
 	}
 
 	{
 		boost::python::scope s = GafferBindings::DependencyNodeClass<GafferScene::CameraQuery>()
-			.def( "addQuery", &addQuery<GafferScene::CameraQuery>, ( arg( "plug" ), arg( "parameter" ) = "" ) )
-			.def( "removeQuery", &removeQuery<GafferScene::CameraQuery, StringPlug> )
-			.def( "sourcePlugFromQuery", &sourcePlugFromQuery<GafferScene::CameraQuery, StringPlug> )
-			.def( "valuePlugFromQuery", &valuePlugFromQuery<GafferScene::CameraQuery, StringPlug> )
-			.def( "outPlugFromQuery", &outPlugFromQuery<GafferScene::CameraQuery, StringPlug> )
-			.def( "queryPlug", &queryPlug<GafferScene::CameraQuery, StringPlug> )
-		;
+									 .def( "addQuery", &addQuery<GafferScene::CameraQuery>, ( arg( "plug" ), arg( "parameter" ) = "" ) )
+									 .def( "removeQuery", &removeQuery<GafferScene::CameraQuery, StringPlug> )
+									 .def( "sourcePlugFromQuery", &sourcePlugFromQuery<GafferScene::CameraQuery, StringPlug> )
+									 .def( "valuePlugFromQuery", &valuePlugFromQuery<GafferScene::CameraQuery, StringPlug> )
+									 .def( "outPlugFromQuery", &outPlugFromQuery<GafferScene::CameraQuery, StringPlug> )
+									 .def( "queryPlug", &queryPlug<GafferScene::CameraQuery, StringPlug> );
 		GafferBindings::Serialisation::registerSerialiser( GafferScene::CameraQuery::staticTypeId(), new CameraQuerySerialiser() );
 
 		boost::python::enum_<GafferScene::CameraQuery::CameraMode>( "CameraMode" )
 			.value( "RenderCamera", GafferScene::CameraQuery::CameraMode::RenderCamera )
-			.value( "Location", GafferScene::CameraQuery::CameraMode::Location )
-		;
+			.value( "Location", GafferScene::CameraQuery::CameraMode::Location );
 
 		boost::python::enum_<GafferScene::CameraQuery::Source>( "Source" )
 			.value( "None_", GafferScene::CameraQuery::Source::None )
 			.value( "Camera", GafferScene::CameraQuery::Source::Camera )
 			.value( "Globals", GafferScene::CameraQuery::Source::Globals )
-			.value( "Fallback", GafferScene::CameraQuery::Source::Fallback )
-		;
+			.value( "Fallback", GafferScene::CameraQuery::Source::Fallback );
 	}
 
-	GafferBindings::DependencyNodeClass< GafferScene::ExistenceQuery >();
-	GafferBindings::DependencyNodeClass< GafferScene::FilterQuery >();
+	GafferBindings::DependencyNodeClass<GafferScene::ExistenceQuery>();
+	GafferBindings::DependencyNodeClass<GafferScene::FilterQuery>();
 
 	{
-		boost::python::scope s = GafferBindings::DependencyNodeClass< GafferScene::TransformQuery >();
+		boost::python::scope s = GafferBindings::DependencyNodeClass<GafferScene::TransformQuery>();
 
-		boost::python::enum_< GafferScene::TransformQuery::Space >( "Space" )
+		boost::python::enum_<GafferScene::TransformQuery::Space>( "Space" )
 			.value( "Local", GafferScene::TransformQuery::Space::Local )
 			.value( "World", GafferScene::TransformQuery::Space::World )
-			.value( "Relative", GafferScene::TransformQuery::Space::Relative )
-		;
+			.value( "Relative", GafferScene::TransformQuery::Space::Relative );
 	}
 
 	GafferBindings::DependencyNodeClass<GafferScene::SetQuery>();

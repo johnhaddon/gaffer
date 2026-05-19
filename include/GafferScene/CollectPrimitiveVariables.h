@@ -51,36 +51,35 @@ namespace GafferScene
 class GAFFERSCENE_API CollectPrimitiveVariables : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit CollectPrimitiveVariables( const std::string &name=defaultName<CollectPrimitiveVariables>() );
-		~CollectPrimitiveVariables() override;
+	explicit CollectPrimitiveVariables( const std::string &name = defaultName<CollectPrimitiveVariables>() );
+	~CollectPrimitiveVariables() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CollectPrimitiveVariables, CollectPrimitiveVariablesTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CollectPrimitiveVariables, CollectPrimitiveVariablesTypeId, ObjectProcessor );
 
-		Gaffer::StringPlug *primitiveVariablesPlug();
-		const Gaffer::StringPlug *primitiveVariablesPlug() const;
+	Gaffer::StringPlug *primitiveVariablesPlug();
+	const Gaffer::StringPlug *primitiveVariablesPlug() const;
 
-		Gaffer::StringVectorDataPlug *suffixesPlug();
-		const Gaffer::StringVectorDataPlug *suffixesPlug() const;
+	Gaffer::StringVectorDataPlug *suffixesPlug();
+	const Gaffer::StringVectorDataPlug *suffixesPlug() const;
 
-		Gaffer::StringPlug *suffixContextVariablePlug();
-		const Gaffer::StringPlug *suffixContextVariablePlug() const;
+	Gaffer::StringPlug *suffixContextVariablePlug();
+	const Gaffer::StringPlug *suffixContextVariablePlug() const;
 
-		Gaffer::BoolPlug *requireVariationPlug();
-		const Gaffer::BoolPlug *requireVariationPlug() const;
+	Gaffer::BoolPlug *requireVariationPlug();
+	const Gaffer::BoolPlug *requireVariationPlug() const;
 
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CollectPrimitiveVariables )

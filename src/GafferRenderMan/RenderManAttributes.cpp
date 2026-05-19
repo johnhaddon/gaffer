@@ -42,7 +42,7 @@ using namespace GafferRenderMan;
 IE_CORE_DEFINERUNTIMETYPED( RenderManAttributes );
 
 RenderManAttributes::RenderManAttributes( const std::string &name )
-	:	GafferScene::Attributes( name, "ri" )
+	: GafferScene::Attributes( name, "ri" )
 {
 }
 

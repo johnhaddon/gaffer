@@ -70,28 +70,40 @@ namespace
 struct BinaryOp;
 struct Nil
 {
-	bool operator==( const Nil & ) const { return true; }
-	bool operator<( const Nil & ) const { return false; }
+	bool operator == ( const Nil & ) const { return true; }
+	bool operator < ( const Nil & ) const { return false; }
 };
 
 // Determine which Ops are supported in SetExpressions
 // and provide a way to print them for debugging.
-enum Op { Intersection, Union, Difference, In, Containing };
+enum Op
+{
+	Intersection,
+	Union,
+	Difference,
+	In,
+	Containing
+};
 
-std::ostream & operator<<( std::ostream &out, const Op &op )
+std::ostream &operator << ( std::ostream &out, const Op &op )
 {
 	switch( op )
 	{
 		case Union :
-			out << "|"; break;
+			out << "|";
+			break;
 		case Intersection :
-			out << "&"; break;
+			out << "&";
+			break;
 		case Difference :
-			out << "-"; break;
+			out << "-";
+			break;
 		case In :
-			out << "in"; break;
+			out << "in";
+			break;
 		case Containing :
-			out << "containing"; break;
+			out << "containing";
+			break;
 	}
 	return out;
 }
@@ -99,8 +111,7 @@ std::ostream & operator<<( std::ostream &out, const Op &op )
 using ExpressionAst = boost::variant<
 	Nil,
 	std::string, // identifier
-	boost::recursive_wrapper<BinaryOp>
->;
+	boost::recursive_wrapper<BinaryOp>>;
 
 struct BinaryOp
 {
@@ -115,7 +126,7 @@ struct BinaryOp
 	Op op;
 	ExpressionAst right;
 
-	bool operator==( const BinaryOp &other ) const
+	bool operator == ( const BinaryOp &other ) const
 	{
 		if( ( op == Intersection || op == Union ) && other.op == op )
 		{
@@ -123,16 +134,20 @@ struct BinaryOp
 		}
 
 		return left == other.left &&
-				op == other.op &&
-				right == other.right;
+			op == other.op &&
+			right == other.right;
 	}
-	bool operator<( const BinaryOp &other ) const
+	bool operator < ( const BinaryOp &other ) const
 	{
-		if( left < other.left ) return true;
-		if( other.left < left ) return false;
+		if( left < other.left )
+			return true;
+		if( other.left < left )
+			return false;
 
-		if( op < other.op ) return true;
-		if( other.op < op ) return false;
+		if( op < other.op )
+			return true;
+		if( other.op < op )
+			return false;
 
 		return right < other.right;
 	}
@@ -143,12 +158,11 @@ struct CreateBinaryOpImplementation
 
 	using result_type = ExpressionAst &;
 
-	ExpressionAst & operator()( ExpressionAst &lhs, Op op, ExpressionAst &rhs ) const
+	ExpressionAst &operator () ( ExpressionAst &lhs, Op op, ExpressionAst &rhs ) const
 	{
 		lhs = BinaryOp( lhs, op, rhs );
 		return lhs;
 	}
-
 };
 
 // Function that we can use as a semantic action in the parser, inserting
@@ -170,16 +184,16 @@ struct AstPrinter
 	AstPrinter( std::ostream &stream )
 		: stream( stream ) {}
 
-	void operator()( const std::string &n ) const
+	void operator () ( const std::string &n ) const
 	{
 		stream << n;
 	}
 
-	void operator()( const Nil &nil ) const
+	void operator () ( const Nil &nil ) const
 	{
 	}
 
-	void operator()( const BinaryOp &expr ) const
+	void operator () ( const BinaryOp &expr ) const
 	{
 		stream << "op:" << expr.op << "(";
 		boost::apply_visitor( *this, expr.left );
@@ -197,17 +211,17 @@ struct AstSerialiser
 {
 	using result_type = std::string;
 
-	std::string operator()( const Nil & ) const
+	std::string operator () ( const Nil & ) const
 	{
 		return "";
 	}
 
-	std::string operator()( const std::string &value ) const
+	std::string operator () ( const std::string &value ) const
 	{
 		return value;
 	}
 
-	std::string operator()( const BinaryOp &expr ) const
+	std::string operator () ( const BinaryOp &expr ) const
 	{
 		return toString( expr, std::nullopt, false );
 	}
@@ -223,7 +237,7 @@ struct AstSerialiser
 		{
 			auto info = opInfo( bin->op );
 
-			std::string left  = toString( bin->left,  bin->op, /* onRightSide = */ false );
+			std::string left = toString( bin->left, bin->op, /* onRightSide = */ false );
 			std::string right = toString( bin->right, bin->op, /* onRightSide = */ true );
 
 			bool needParens = false;
@@ -259,31 +273,31 @@ struct AstSerialiser
 		return "";
 	}
 
-	private :
+private:
 
-		struct OpInfo
-		{
-			int precedence;
-			const char *repr;
-		};
+	struct OpInfo
+	{
+		int precedence;
+		const char *repr;
+	};
 
-		OpInfo opInfo( Op op ) const
+	OpInfo opInfo( Op op ) const
+	{
+		switch( op )
 		{
-			switch( op )
-			{
-				case Difference :
-					return { 5, " - " };
-				case Intersection :
-					return { 4, " & " };
-				case Union :
-					return { 3, " " };
-				case Containing :
-					return { 2, " containing " };
-				case In :
-					return { 1, " in " };
-			}
-			return { 0, "" };
+			case Difference :
+				return { 5, " - " };
+			case Intersection :
+				return { 4, " & " };
+			case Union :
+				return { 3, " " };
+			case Containing :
+				return { 2, " containing " };
+			case In :
+				return { 1, " in " };
 		}
+		return { 0, "" };
+	}
 };
 
 void collectOperands( const ExpressionAst &ast, Op targetOp, std::vector<ExpressionAst> &result )
@@ -326,17 +340,17 @@ struct SimplifyVisitor
 {
 	using result_type = ExpressionAst;
 
-	ExpressionAst operator()(const Nil &n) const
+	ExpressionAst operator () ( const Nil &n ) const
 	{
 		return n;
 	}
 
-	ExpressionAst operator()(const std::string &s ) const
+	ExpressionAst operator () ( const std::string &s ) const
 	{
 		return s;
 	}
 
-	ExpressionAst operator()(const BinaryOp &expr ) const
+	ExpressionAst operator () ( const BinaryOp &expr ) const
 	{
 		ExpressionAst left = boost::apply_visitor( *this, expr.left );
 		ExpressionAst right = boost::apply_visitor( *this, expr.right );
@@ -446,97 +460,97 @@ struct SimplifyVisitor
 		return BinaryOp( left, expr.op, right );
 	}
 
-	private :
+private:
 
-		std::vector<ExpressionAst> uniqueOperands( std::vector<ExpressionAst> &operands ) const
+	std::vector<ExpressionAst> uniqueOperands( std::vector<ExpressionAst> &operands ) const
+	{
+		std::set<ExpressionAst> seen;
+		std::vector<ExpressionAst> result;
+		for( auto &o : operands )
 		{
-			std::set<ExpressionAst> seen;
-			std::vector<ExpressionAst> result;
-			for( auto &o : operands )
+			if( seen.insert( o ).second )
 			{
-				if( seen.insert( o ).second )
-				{
-					result.push_back( o );
-				}
+				result.push_back( o );
 			}
-			return result;
+		}
+		return result;
+	}
+
+	bool isSubsetOf( const ExpressionAst &a, const ExpressionAst &b ) const
+	{
+		if( a == b )
+		{
+			return true;
 		}
 
-		bool isSubsetOf( const ExpressionAst &a, const ExpressionAst &b ) const
+		if( const auto *binB = boost::get<BinaryOp>( &b ) )
 		{
-			if( a == b )
+			if( binB->op == Union )
 			{
-				return true;
+				return isSubsetOf( a, binB->left ) || isSubsetOf( a, binB->right );
 			}
-
-			if( const auto *binB = boost::get<BinaryOp>( &b ) )
+			if( binB->op == Intersection )
 			{
-				if( binB->op == Union )
-				{
-					return isSubsetOf( a, binB->left ) || isSubsetOf( a, binB->right );
-				}
-				if( binB->op == Intersection )
-				{
-					return isSubsetOf( a, binB->left ) && isSubsetOf( a, binB->right );
-				}
+				return isSubsetOf( a, binB->left ) && isSubsetOf( a, binB->right );
 			}
+		}
 
-			if( const auto *bin = boost::get<BinaryOp>( &a ) )
+		if( const auto *bin = boost::get<BinaryOp>( &a ) )
+		{
+			switch( bin->op )
 			{
-				switch( bin->op )
-				{
-					case Intersection :
-						return isSubsetOf( bin->left, b ) || isSubsetOf( bin->right, b );
-					case Union :
-						return isSubsetOf( bin->left, b ) && isSubsetOf( bin->right, b );
-					case In :
-					case Containing :
-					case Difference :
-						return isSubsetOf( bin->left, b );
-				}
+				case Intersection :
+					return isSubsetOf( bin->left, b ) || isSubsetOf( bin->right, b );
+				case Union :
+					return isSubsetOf( bin->left, b ) && isSubsetOf( bin->right, b );
+				case In :
+				case Containing :
+				case Difference :
+					return isSubsetOf( bin->left, b );
 			}
-
-			return false;
 		}
 
-		template<typename Predicate>
-		void removeIfAnyMatch( std::vector<ExpressionAst> &items, Predicate pred ) const
-		{
-			items.erase(
-				std::remove_if(
-					items.begin(), items.end(),
-					[&]( const ExpressionAst &a ) {
-						return std::any_of(
-							items.begin(), items.end(),
-							[&]( const ExpressionAst &b ) {
-								return &a != &b && pred( a, b );
-							}
-						);
-					}
-				),
-				items.end()
-			);
-		}
+		return false;
+	}
 
-		void removeSubsets( std::vector<ExpressionAst> &items ) const
-		{
-			removeIfAnyMatch(
-				items,
-				[&]( const ExpressionAst &a, const ExpressionAst &b ) {
-					return isSubsetOf( a, b );
+	template<typename Predicate>
+	void removeIfAnyMatch( std::vector<ExpressionAst> &items, Predicate pred ) const
+	{
+		items.erase(
+			std::remove_if(
+				items.begin(), items.end(),
+				[&]( const ExpressionAst &a ) {
+					return std::any_of(
+						items.begin(), items.end(),
+						[&]( const ExpressionAst &b ) {
+							return &a != &b && pred( a, b );
+						}
+					);
 				}
-			);
-		}
+			),
+			items.end()
+		);
+	}
 
-		void removeSupersets( std::vector<ExpressionAst> &items ) const
-		{
-			removeIfAnyMatch(
-				items,
-				[&]( const ExpressionAst &a, const ExpressionAst &b ) {
-					return isSubsetOf( b, a );
-				}
-			);
-		}
+	void removeSubsets( std::vector<ExpressionAst> &items ) const
+	{
+		removeIfAnyMatch(
+			items,
+			[&]( const ExpressionAst &a, const ExpressionAst &b ) {
+				return isSubsetOf( a, b );
+			}
+		);
+	}
+
+	void removeSupersets( std::vector<ExpressionAst> &items ) const
+	{
+		removeIfAnyMatch(
+			items,
+			[&]( const ExpressionAst &a, const ExpressionAst &b ) {
+				return isSubsetOf( b, a );
+			}
+		);
+	}
 };
 
 // Removes the ops in `removalsAst` from the visited AST.
@@ -556,17 +570,17 @@ struct RemovalVisitor
 		m_removals.insert( ops.begin(), ops.end() );
 	}
 
-	ExpressionAst operator()( const std::string &s ) const
+	ExpressionAst operator () ( const std::string &s ) const
 	{
 		return filter( s );
 	}
 
-	ExpressionAst operator()( const Nil & ) const
+	ExpressionAst operator () ( const Nil & ) const
 	{
 		return Nil{};
 	}
 
-	ExpressionAst operator()( const BinaryOp &expr ) const
+	ExpressionAst operator () ( const BinaryOp &expr ) const
 	{
 		if( m_removals.count( expr ) )
 		{
@@ -608,41 +622,40 @@ struct RemovalVisitor
 		return BinaryOp( filteredLeft, expr.op, filteredRight );
 	}
 
-	private :
+private:
 
-		ExpressionAst filter( const ExpressionAst &ast ) const
+	ExpressionAst filter( const ExpressionAst &ast ) const
+	{
+		std::vector<ExpressionAst> result;
+		std::vector<ExpressionAst> ops;
+		collectOperands( ast, Union, ops );
+		for( auto &o : ops )
 		{
-			std::vector<ExpressionAst> result;
-			std::vector<ExpressionAst> ops;
-			collectOperands( ast, Union, ops );
-			for( auto &o : ops )
+			if( !m_removals.count( o ) )
 			{
-				if( !m_removals.count( o ) )
-				{
-					result.push_back( o );
-				}
+				result.push_back( o );
 			}
-
-			return buildTree( Union, result );
 		}
 
-		ExpressionAst filter( const std::string &s ) const
-		{
-			if( m_removals.count( s ) )
-			{
-				return Nil();
-			}
+		return buildTree( Union, result );
+	}
 
-			return s;
+	ExpressionAst filter( const std::string &s ) const
+	{
+		if( m_removals.count( s ) )
+		{
+			return Nil();
 		}
 
-		boost::container::flat_set<ExpressionAst> m_removals;
+		return s;
+	}
 
+	boost::container::flat_set<ExpressionAst> m_removals;
 };
 
 #ifdef BOOST_SPIRIT_DEBUG
 // support for printing ExpressionsAst's for debugging through BOOST_SPIRIT_DEBUG
-std::ostream& operator<<( std::ostream& stream, const ExpressionAst& expr )
+std::ostream &operator << ( std::ostream &stream, const ExpressionAst &expr )
 {
 	boost::apply_visitor( AstPrinter( stream ), expr );
 	return stream;
@@ -660,7 +673,7 @@ struct AstEvaluator
 	{
 	}
 
-	result_type operator()( const std::string &identifier ) const
+	result_type operator () ( const std::string &identifier ) const
 	{
 		if( identifier[0] == '/' )
 		{
@@ -702,37 +715,33 @@ struct AstEvaluator
 		}
 	}
 
-	result_type operator()( const Nil &nil ) const
+	result_type operator () ( const Nil &nil ) const
 	{
 		PathMatcher result;
 		return result;
 	}
 
-	result_type operator()( const BinaryOp &expr ) const
+	result_type operator () ( const BinaryOp &expr ) const
 	{
 		PathMatcher left = boost::apply_visitor( *this, expr.left );
 		PathMatcher right = boost::apply_visitor( *this, expr.right );
 
 		switch( expr.op )
 		{
-			case Union :
-			{
+			case Union : {
 				PathMatcher result = PathMatcher( left );
 				result.addPaths( right );
 				return result;
 			}
-			case Intersection :
-			{
+			case Intersection : {
 				return left.intersection( right );
 			}
-			case Difference :
-			{
+			case Difference : {
 				PathMatcher result = PathMatcher( left );
 				result.removePaths( right );
 				return result;
 			}
-			case In :
-			{
+			case In : {
 				PathMatcher result;
 				for( PathMatcher::Iterator it = right.begin(), eIt = right.end(); it != eIt; ++it )
 				{
@@ -741,8 +750,7 @@ struct AstEvaluator
 				}
 				return result;
 			}
-			case Containing :
-			{
+			case Containing : {
 				PathMatcher result;
 				for( PathMatcher::Iterator it = left.begin(), eIt = left.end(); it != eIt; ++it )
 				{
@@ -759,7 +767,6 @@ struct AstEvaluator
 	}
 
 	const SetExpressionAlgo::SetProvider &m_setProvider;
-
 };
 
 // Hashing the AST
@@ -773,7 +780,7 @@ struct AstHasher
 	{
 	}
 
-	void operator()( const std::string &identifier )
+	void operator () ( const std::string &identifier )
 	{
 		if( identifier[0] == '/' )
 		{
@@ -804,32 +811,31 @@ struct AstHasher
 		}
 	}
 
-	void operator()( const BinaryOp &expr )
+	void operator () ( const BinaryOp &expr )
 	{
 		m_hash.append( expr.op );
 		boost::apply_visitor( *this, expr.left );
 		boost::apply_visitor( *this, expr.right );
 	}
 
-	void operator()( const Nil &nil )
+	void operator () ( const Nil &nil )
 	{
 	}
 
 	const SetExpressionAlgo::SetProvider &m_setProvider;
 	IECore::MurmurHash &m_hash;
-
 };
 
-template <typename Iterator>
+template<typename Iterator>
 struct ExpressionGrammar : qi::grammar<Iterator, ExpressionAst(), ascii::space_type>
 {
 	ExpressionGrammar() : ExpressionGrammar::base_type( expression )
 	{
-		using qi::_val;
+		using boost::spirit::repository::distinct;
 		using qi::_1;
+		using qi::_val;
 		using qi::char_;
 		using qi::lit;
-		using boost::spirit::repository::distinct;
 
 		/* Grammar Specification
 
@@ -847,37 +853,25 @@ struct ExpressionGrammar : qi::grammar<Iterator, ExpressionAst(), ascii::space_t
 		// grammar                                                     bindings
 		// -----------------------------------------------------------------------
 		expression =
-			inExpression                                               [_val  = _1];
+			inExpression[_val = _1];
 
 		inExpression =
-			containingExpression                                       [_val  = _1]
-			>> *(     ( inKeyword >> containingExpression              [createBinaryOp( _val, In, _1 )] )
-				);
+			containingExpression[_val = _1] >> *( ( inKeyword >> containingExpression[createBinaryOp( _val, In, _1 )] ) );
 
 		containingExpression =
-			unionExpression                                            [_val  = _1]
-			>> *(     ( containingKeyword >> unionExpression           [createBinaryOp( _val, Containing, _1 )] )
-				);
+			unionExpression[_val = _1] >> *( ( containingKeyword >> unionExpression[createBinaryOp( _val, Containing, _1 )] ) );
 
 		unionExpression =
-			intersectionExpression                                     [_val  = _1]
-			>> *(     ( '|' >> intersectionExpression                  [createBinaryOp( _val, Union, _1 )] )
-				|     ( intersectionExpression                         [createBinaryOp( _val, Union, _1 )] )
-				);
+			intersectionExpression[_val = _1] >> *( ( '|' >> intersectionExpression[createBinaryOp( _val, Union, _1 )] ) | ( intersectionExpression[createBinaryOp( _val, Union, _1 )] ) );
 
 		intersectionExpression =
-			differenceExpression                                       [_val  = _1]
-			>> *(     ( '&' >> differenceExpression                    [createBinaryOp( _val, Intersection, _1 )] )
-				);
+			differenceExpression[_val = _1] >> *( ( '&' >> differenceExpression[createBinaryOp( _val, Intersection, _1 )] ) );
 
 		differenceExpression =
-			element                                                    [_val  = _1]
-			>> *(     ( '-' >> element                                 [createBinaryOp( _val, Difference, _1 )] )
-				);
+			element[_val = _1] >> *( ( '-' >> element[createBinaryOp( _val, Difference, _1 )] ) );
 
 		element =
-			identifier                                                 [_val  = _1]
-			| lit('(') >> expression                                   [_val  = _1] >> lit(')');
+			identifier[_val = _1] | lit( '(' ) >> expression[_val = _1] >> lit( ')' );
 
 		const char *identifierCharacters = "a-zA-Z_0-9/:.*?[]!\\";
 		identifier %= !reservedWords >> +char_( identifierCharacters );
@@ -887,13 +881,13 @@ struct ExpressionGrammar : qi::grammar<Iterator, ExpressionAst(), ascii::space_t
 		reservedWords = inKeyword | containingKeyword;
 
 		// these have no effect unless BOOST_SPIRIT_DEBUG is defined
-		BOOST_SPIRIT_DEBUG_NODE(expression);
-		BOOST_SPIRIT_DEBUG_NODE(inExpression);
-		BOOST_SPIRIT_DEBUG_NODE(containingExpression);
-		BOOST_SPIRIT_DEBUG_NODE(differenceExpression);
-		BOOST_SPIRIT_DEBUG_NODE(intersectionExpression);
-		BOOST_SPIRIT_DEBUG_NODE(unionExpression);
-		BOOST_SPIRIT_DEBUG_NODE(identifier);
+		BOOST_SPIRIT_DEBUG_NODE( expression );
+		BOOST_SPIRIT_DEBUG_NODE( inExpression );
+		BOOST_SPIRIT_DEBUG_NODE( containingExpression );
+		BOOST_SPIRIT_DEBUG_NODE( differenceExpression );
+		BOOST_SPIRIT_DEBUG_NODE( intersectionExpression );
+		BOOST_SPIRIT_DEBUG_NODE( unionExpression );
+		BOOST_SPIRIT_DEBUG_NODE( identifier );
 	}
 
 	qi::rule<Iterator> inKeyword, containingKeyword, reservedWords;
@@ -901,7 +895,7 @@ struct ExpressionGrammar : qi::grammar<Iterator, ExpressionAst(), ascii::space_t
 	qi::rule<Iterator, ExpressionAst(), ascii::space_type> expression, inExpression, containingExpression, differenceExpression, intersectionExpression, unionExpression, element;
 };
 
-void expressionToAST( const std::string &setExpression, ExpressionAst &ast)
+void expressionToAST( const std::string &setExpression, ExpressionAst &ast )
 {
 	if( std::all_of( setExpression.begin(), setExpression.end(), isspace ) )
 	{
@@ -918,15 +912,15 @@ void expressionToAST( const std::string &setExpression, ExpressionAst &ast)
 
 	bool r = phrase_parse( iter, end, grammar, ascii::space, ast );
 
-	if (r && iter == end)
+	if( r && iter == end )
 	{
-		#ifdef BOOST_SPIRIT_DEBUG
+#ifdef BOOST_SPIRIT_DEBUG
 		std::cout << "-------------------------\n";
-		std::cout << "Parsing of '" << setExpression <<"' succeeded.\n";
+		std::cout << "Parsing of '" << setExpression << "' succeeded.\n";
 		std::cout << "Resulting AST:\n";
 		std::cout << ast;
 		std::cout << "\n-------------------------\n";
-		#endif
+#endif
 	}
 	else
 	{
@@ -935,11 +929,11 @@ void expressionToAST( const std::string &setExpression, ExpressionAst &ast)
 		int indicationSize = setExpression.end() - iter;
 		if( indicationSize <= 2 )
 		{
-			errorIndication += std::string( indicationSize, '|');
+			errorIndication += std::string( indicationSize, '|' );
 		}
 		else
 		{
-			errorIndication += '|' + std::string( indicationSize - 2, '-') + '|';
+			errorIndication += '|' + std::string( indicationSize - 2, '-' ) + '|';
 		}
 
 		throw IECore::Exception( fmt::format( "Syntax error in indicated part of SetExpression.\n{}\n{}\n.", setExpression, errorIndication ) );

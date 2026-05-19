@@ -49,7 +49,7 @@ using namespace GafferBindings;
 namespace
 {
 
-void setValue( StringPlug *plug, const std::string& value )
+void setValue( StringPlug *plug, const std::string &value )
 {
 	// we use a GIL release here to prevent a lock in the case where this triggers a graph
 	// evaluation which decides to go back into python on another thread:
@@ -129,13 +129,12 @@ std::string repr( const Gaffer::StringPlug *plug )
 class StringPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
-		{
-			return serialisationRepr( static_cast<const StringPlug *>( graphComponent ), &serialisation );
-		}
-
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		return serialisationRepr( static_cast<const StringPlug *>( graphComponent ), &serialisation );
+	}
 };
 
 } // namespace
@@ -144,28 +143,26 @@ void GafferModule::bindStringPlug()
 {
 
 	boost::python::scope s = PlugClass<StringPlug>()
-		.def(
-			boost::python::init<const std::string &, Gaffer::Plug::Direction, const std::string &, unsigned, unsigned>(
-				(
-					boost::python::arg_( "name" )=Gaffer::GraphComponent::defaultName<StringPlug>(),
-					boost::python::arg_( "direction" )=Gaffer::Plug::In,
-					boost::python::arg_( "defaultValue" )="",
-					boost::python::arg_( "flags" )=Gaffer::Plug::Default,
-					boost::python::arg_( "substitutions" )=IECore::StringAlgo::AllSubstitutions
-				)
-			)
-		)
-		.def( "__repr__", &repr )
-		.def( "substitutions", &StringPlug::substitutions )
-		.def( "defaultValue", &StringPlug::defaultValue, return_value_policy<boost::python::copy_const_reference>() )
-		// Must be registered before string-based `setValue()`, to give it weaker overloading precedence.
-		.def( "setValue", &setPathValue )
-		.def( "setValue", &setValue )
-		.def( "getValue", &getValue )
-	;
+								 .def(
+									 boost::python::init<const std::string &, Gaffer::Plug::Direction, const std::string &, unsigned, unsigned>(
+										 (
+											 boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<StringPlug>(),
+											 boost::python::arg_( "direction" ) = Gaffer::Plug::In,
+											 boost::python::arg_( "defaultValue" ) = "",
+											 boost::python::arg_( "flags" ) = Gaffer::Plug::Default,
+											 boost::python::arg_( "substitutions" ) = IECore::StringAlgo::AllSubstitutions
+										 )
+									 )
+								 )
+								 .def( "__repr__", &repr )
+								 .def( "substitutions", &StringPlug::substitutions )
+								 .def( "defaultValue", &StringPlug::defaultValue, return_value_policy<boost::python::copy_const_reference>() )
+								 // Must be registered before string-based `setValue()`, to give it weaker overloading precedence.
+								 .def( "setValue", &setPathValue )
+								 .def( "setValue", &setValue )
+								 .def( "getValue", &getValue );
 
 	s.attr( "ValueType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( &PyUnicode_Type ) ) );
 
 	Serialisation::registerSerialiser( StringPlug::staticTypeId(), new StringPlugSerialiser );
-
 }

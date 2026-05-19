@@ -47,53 +47,52 @@ IE_CORE_FORWARDDECLARE( Resample )
 
 class GAFFERIMAGE_API Blur : public FlatImageProcessor
 {
-	public :
+public:
 
-		explicit Blur( const std::string &name=defaultName<Blur>() );
-		~Blur() override;
+	explicit Blur( const std::string &name = defaultName<Blur>() );
+	~Blur() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Blur, BlurTypeId, FlatImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Blur, BlurTypeId, FlatImageProcessor );
 
-		Gaffer::V2fPlug *radiusPlug();
-		const Gaffer::V2fPlug *radiusPlug() const;
+	Gaffer::V2fPlug *radiusPlug();
+	const Gaffer::V2fPlug *radiusPlug() const;
 
-		Gaffer::IntPlug *boundingModePlug();
-		const Gaffer::IntPlug *boundingModePlug() const;
+	Gaffer::IntPlug *boundingModePlug();
+	const Gaffer::IntPlug *boundingModePlug() const;
 
-		Gaffer::BoolPlug *expandDataWindowPlug();
-		const Gaffer::BoolPlug *expandDataWindowPlug() const;
+	Gaffer::BoolPlug *expandDataWindowPlug();
+	const Gaffer::BoolPlug *expandDataWindowPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		// Output plug to compute the filter width for the internal Resample.
-		Gaffer::V2fPlug *filterScalePlug();
-		const Gaffer::V2fPlug *filterScalePlug() const;
+	// Output plug to compute the filter width for the internal Resample.
+	Gaffer::V2fPlug *filterScalePlug();
+	const Gaffer::V2fPlug *filterScalePlug() const;
 
-		// Input plug to receive the expanded data window from the internal Resample.
-		Gaffer::AtomicBox2iPlug *resampledDataWindowPlug();
-		const Gaffer::AtomicBox2iPlug *resampledDataWindowPlug() const;
+	// Input plug to receive the expanded data window from the internal Resample.
+	Gaffer::AtomicBox2iPlug *resampledDataWindowPlug();
+	const Gaffer::AtomicBox2iPlug *resampledDataWindowPlug() const;
 
-		// Input plug to receive the blurred channel data from the internal Resample.
-		Gaffer::FloatVectorDataPlug *resampledChannelDataPlug();
-		const Gaffer::FloatVectorDataPlug *resampledChannelDataPlug() const;
+	// Input plug to receive the blurred channel data from the internal Resample.
+	Gaffer::FloatVectorDataPlug *resampledChannelDataPlug();
+	const Gaffer::FloatVectorDataPlug *resampledChannelDataPlug() const;
 
-		// Internal resample node.
-		Resample *resample();
-		const Resample *resample() const;
+	// Internal resample node.
+	Resample *resample();
+	const Resample *resample() const;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Blur )

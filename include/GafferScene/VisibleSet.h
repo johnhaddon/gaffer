@@ -96,7 +96,6 @@ struct GAFFERSCENE_API VisibleSet
 
 	bool operator == ( const VisibleSet &rhs ) const;
 	bool operator != ( const VisibleSet &rhs ) const;
-
 };
 
 void murmurHashAppend( MurmurHash &h, const VisibleSet &data );

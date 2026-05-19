@@ -52,61 +52,60 @@ namespace
 class ContextProcessorPlugAdder : public PlugAdder
 {
 
-	public :
+public:
 
-		ContextProcessorPlugAdder( ContextProcessorPtr node )
-			:	m_node( node )
+	ContextProcessorPlugAdder( ContextProcessorPtr node )
+		: m_node( node )
+	{
+		node->childAddedSignal().connect( boost::bind( &ContextProcessorPlugAdder::childAdded, this ) );
+		node->childRemovedSignal().connect( boost::bind( &ContextProcessorPlugAdder::childRemoved, this ) );
+
+		updateVisibility();
+	}
+
+	bool canCreateConnection( const Gaffer::Plug *endpoint ) const override
+	{
+		return PlugAdder::canCreateConnection( endpoint ) && !MetadataAlgo::readOnly( m_node.get() );
+	}
+
+	void createConnection( Plug *endpoint ) override
+	{
+		m_node->setup( endpoint );
+
+		bool inOpposite = false;
+		if( endpoint->direction() == Plug::Out )
 		{
-			node->childAddedSignal().connect( boost::bind( &ContextProcessorPlugAdder::childAdded, this ) );
-			node->childRemovedSignal().connect( boost::bind( &ContextProcessorPlugAdder::childRemoved, this ) );
-
-			updateVisibility();
+			m_node->inPlug()->setInput( endpoint );
+			inOpposite = false;
+		}
+		else
+		{
+			endpoint->setInput( m_node->outPlug() );
+			inOpposite = true;
 		}
 
-		bool canCreateConnection( const Gaffer::Plug *endpoint ) const override
-		{
-			return PlugAdder::canCreateConnection( endpoint ) && !MetadataAlgo::readOnly( m_node.get() );
-		}
+		applyEdgeMetadata( m_node->inPlug(), inOpposite );
+		applyEdgeMetadata( m_node->outPlug(), !inOpposite );
+	}
 
-		void createConnection( Plug *endpoint ) override
-		{
-			m_node->setup( endpoint );
+private:
 
-			bool inOpposite = false;
-			if( endpoint->direction() == Plug::Out )
-			{
-				m_node->inPlug()->setInput( endpoint );
-				inOpposite = false;
-			}
-			else
-			{
-				endpoint->setInput( m_node->outPlug() );
-				inOpposite = true;
-			}
+	void childAdded()
+	{
+		updateVisibility();
+	}
 
-			applyEdgeMetadata( m_node->inPlug(), inOpposite );
-			applyEdgeMetadata( m_node->outPlug(), !inOpposite );
-		}
+	void childRemoved()
+	{
+		updateVisibility();
+	}
 
-	private :
+	void updateVisibility()
+	{
+		setVisible( !m_node->inPlug() );
+	}
 
-		void childAdded()
-		{
-			updateVisibility();
-		}
-
-		void childRemoved()
-		{
-			updateVisibility();
-		}
-
-		void updateVisibility()
-		{
-			setVisible( !m_node->inPlug() );
-		}
-
-		ContextProcessorPtr m_node;
-
+	ContextProcessorPtr m_node;
 };
 
 struct Registration
@@ -117,19 +116,18 @@ struct Registration
 		NoduleLayout::registerCustomGadget( "GafferUI.ContextProcessorUI.PlugAdder", &create );
 	}
 
-	private :
+private:
 
-		static GadgetPtr create( GraphComponentPtr parent )
+	static GadgetPtr create( GraphComponentPtr parent )
+	{
+		ContextProcessorPtr contextProcessor = runTimeCast<ContextProcessor>( parent );
+		if( !contextProcessor )
 		{
-			ContextProcessorPtr contextProcessor = runTimeCast<ContextProcessor>( parent );
-			if( !contextProcessor )
-			{
-				throw Exception( "ContextProcessorPlugAdder requires a ContextProcessor" );
-			}
-
-			return new ContextProcessorPlugAdder( contextProcessor );
+			throw Exception( "ContextProcessorPlugAdder requires a ContextProcessor" );
 		}
 
+		return new ContextProcessorPlugAdder( contextProcessor );
+	}
 };
 
 Registration g_registration;

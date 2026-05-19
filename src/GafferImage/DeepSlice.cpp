@@ -549,15 +549,15 @@ void DeepSlice::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	// Fill the result CompoundObject
 
 	CompoundObjectPtr result = new CompoundObject;
-	result->members()[ g_sampleOffsetsName ] = std::move( outputSampleOffsetsData );
-	result->members()[ g_inputIndicesName ] = std::move( inputIndicesData );
+	result->members()[g_sampleOffsetsName] = std::move( outputSampleOffsetsData );
+	result->members()[g_inputIndicesName] = std::move( inputIndicesData );
 	if( firstWeightsData )
 	{
-		result->members()[ g_firstWeightsName ] = std::move( firstWeightsData );
+		result->members()[g_firstWeightsName] = std::move( firstWeightsData );
 	}
 	if( lastWeightsData )
 	{
-		result->members()[ g_lastWeightsName ] = std::move( lastWeightsData );
+		result->members()[g_lastWeightsName] = std::move( lastWeightsData );
 	}
 	static_cast<CompoundObjectPlug *>( output )->setValue( result );
 }
@@ -720,7 +720,7 @@ IECore::ConstFloatVectorDataPtr DeepSlice::computeChannelData( const std::string
 	}
 	else
 	{
-		result.reserve( sliceDataSampleOffsets[ ImagePlug::tilePixels() - 1 ] );
+		result.reserve( sliceDataSampleOffsets[ImagePlug::tilePixels() - 1] );
 	}
 
 	if( channelName == ImageAlgo::channelNameZ )
@@ -798,7 +798,6 @@ IECore::ConstFloatVectorDataPtr DeepSlice::computeChannelData( const std::string
 						result.push_back( channel[curIndex] );
 					}
 				}
-
 			}
 
 			if( farClip )
@@ -871,7 +870,7 @@ IECore::ConstFloatVectorDataPtr DeepSlice::computeChannelData( const std::string
 	else if( flatten )
 	{
 		// Now the more complex general case, where we have both an alpha and a separate channel
-		const float* alpha = nullptr;
+		const float *alpha = nullptr;
 		if( alphaData )
 		{
 			alpha = &alphaData->readable()[0];

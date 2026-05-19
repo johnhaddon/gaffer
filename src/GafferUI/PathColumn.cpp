@@ -55,7 +55,7 @@ using namespace GafferUI;
 //////////////////////////////////////////////////////////////////////////
 
 PathColumn::PathColumn( SizeMode sizeMode )
-	:	m_sizeMode( sizeMode )
+	: m_sizeMode( sizeMode )
 {
 }
 
@@ -135,12 +135,12 @@ PathColumn::PathColumnSignal &PathColumn::instanceCreatedSignal()
 //////////////////////////////////////////////////////////////////////////
 
 StandardPathColumn::StandardPathColumn( const std::string &label, IECore::InternedString property, SizeMode sizeMode )
-	:	StandardPathColumn( CellData( new StringData( label ) ), property, sizeMode )
+	: StandardPathColumn( CellData( new StringData( label ) ), property, sizeMode )
 {
 }
 
 StandardPathColumn::StandardPathColumn( const CellData &headerData, IECore::InternedString property, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_headerData( headerData ), m_property( property )
+	: PathColumn( sizeMode ), m_headerData( headerData ), m_property( property )
 {
 }
 
@@ -176,12 +176,12 @@ PathColumn::CellData StandardPathColumn::headerData( const Gaffer::Path &rootPat
 //////////////////////////////////////////////////////////////////////////
 
 IconPathColumn::IconPathColumn( const std::string &label, const std::string &prefix, IECore::InternedString property, SizeMode sizeMode )
-	:	IconPathColumn( CellData( new StringData( label ) ), prefix, property, sizeMode )
+	: IconPathColumn( CellData( new StringData( label ) ), prefix, property, sizeMode )
 {
 }
 
 IconPathColumn::IconPathColumn( const CellData &headerData, const std::string &prefix, IECore::InternedString property, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_headerData( headerData ), m_prefix( prefix ), m_property( property )
+	: PathColumn( sizeMode ), m_headerData( headerData ), m_prefix( prefix ), m_property( property )
 {
 }
 
@@ -239,7 +239,7 @@ PathColumn::CellData IconPathColumn::headerData( const Gaffer::Path &rootPath, c
 //////////////////////////////////////////////////////////////////////////
 
 FileIconPathColumn::FileIconPathColumn( SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_label( new IECore::StringData( "Type" ) )
+	: PathColumn( sizeMode ), m_label( new IECore::StringData( "Type" ) )
 {
 }
 

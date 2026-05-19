@@ -79,7 +79,7 @@ void set( Context &c, const IECore::InternedString &name, const T &value )
 	c.set( name, value );
 }
 
-void setFromData( Context &c, const IECore::InternedString &name, const IECore::Data * value )
+void setFromData( Context &c, const IECore::InternedString &name, const IECore::Data *value )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	c.set( name, value );
@@ -110,7 +110,7 @@ void delItem( Context &context, const IECore::InternedString &name )
 	context.remove( name );
 }
 
-void removeMatching( Context &context, const StringAlgo::MatchPattern& pattern )
+void removeMatching( Context &context, const StringAlgo::MatchPattern &pattern )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	context.removeMatching( pattern );
@@ -131,7 +131,7 @@ list names( const Context &context )
 
 struct ChangedSlotCaller
 {
-	void operator()( boost::python::object slot, ConstContextPtr context, const IECore::InternedString &name )
+	void operator () ( boost::python::object slot, ConstContextPtr context, const IECore::InternedString &name )
 	{
 		try
 		{
@@ -207,12 +207,10 @@ void GafferModule::bindContext()
 		.def( self != self )
 		.def( "substitute", &Context::substitute, ( arg( "input" ), arg( "substitutions" ) = IECore::StringAlgo::AllSubstitutions ) )
 		.def( "canceller", &cancellerWrapper )
-		.def( "current", &current ).staticmethod( "current" )
-		;
+		.def( "current", &current )
+		.staticmethod( "current" );
 
 	SignalClass<Context::ChangedSignal, DefaultSignalCaller<Context::ChangedSignal>, ChangedSlotCaller>( "ChangedSignal" );
 
-	class_<Context::Scope, boost::noncopyable>( "_Scope", init<Context *>() )
-	;
-
+	class_<Context::Scope, boost::noncopyable>( "_Scope", init<Context *>() );
 }

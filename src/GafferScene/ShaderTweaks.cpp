@@ -84,7 +84,7 @@ std::pair<const GafferScene::Shader *, const Gaffer::Plug *> shaderOutput( const
 	return { nullptr, nullptr };
 }
 
-DataPtr castDataToType( const Data* source, const Data *target )
+DataPtr castDataToType( const Data *source, const Data *target )
 {
 	DataPtr result;
 	if( source->typeId() == target->typeId() )
@@ -92,64 +92,51 @@ DataPtr castDataToType( const Data* source, const Data *target )
 		result = source->copy();
 	}
 
-	dispatch( target,
-		[source, &result]( const auto *targetTyped )
+	dispatch( target, [source, &result]( const auto *targetTyped ) {
+		using TargetType = typename std::remove_const_t<std::remove_pointer_t<decltype( targetTyped )>>;
+		if constexpr( TypeTraits::IsSimpleTypedData<TargetType>::value )
 		{
-			using TargetType = typename std::remove_const_t<std::remove_pointer_t<decltype( targetTyped )> >;
-			if constexpr( TypeTraits::IsSimpleTypedData<TargetType>::value )
+			using TargetValueType = typename TargetType::ValueType;
+			if constexpr( std::is_arithmetic_v<TargetValueType> )
 			{
-				using TargetValueType = typename TargetType::ValueType;
-				if constexpr( std::is_arithmetic_v< TargetValueType > )
-				{
-					dispatch( source,
-						[&result]( const auto *sourceTyped )
-						{
-							using SourceType = typename std::remove_const_t<std::remove_pointer_t<decltype( sourceTyped )> >;
-							if constexpr( TypeTraits::IsNumericSimpleTypedData<SourceType>::value )
-							{
-								result = new TargetType( sourceTyped->readable() );
-							}
-						}
-					);
-					return;
-				}
-
-				if constexpr( TypeTraits::IsVec3<TargetValueType>::value || TypeTraits::IsColor<TargetValueType>::value )
-				{
-					dispatch( source,
-						[&result]( const auto *sourceTyped )
-						{
-							using SourceType = typename std::remove_const_t<std::remove_pointer_t<decltype( sourceTyped )> >;
-							if constexpr( TypeTraits::IsSimpleTypedData<SourceType>::value )
-							{
-								using SourceValueType = typename SourceType::ValueType;
-								if constexpr(
-									TypeTraits::IsVec3TypedData<SourceValueType>::value ||
-									TypeTraits::IsColor<SourceValueType>::value
-								)
-								{
-									typename TargetType::ValueType r;
-									r[0] = sourceTyped->readable()[0];
-									r[1] = sourceTyped->readable()[1];
-									r[2] = sourceTyped->readable()[2];
-									result = new TargetType( r );
-								}
-							}
-						}
-					);
-					return;
-				}
+				dispatch( source, [&result]( const auto *sourceTyped ) {
+					using SourceType = typename std::remove_const_t<std::remove_pointer_t<decltype( sourceTyped )>>;
+					if constexpr( TypeTraits::IsNumericSimpleTypedData<SourceType>::value )
+					{
+						result = new TargetType( sourceTyped->readable() );
+					}
+				} );
+				return;
 			}
 
+			if constexpr( TypeTraits::IsVec3<TargetValueType>::value || TypeTraits::IsColor<TargetValueType>::value )
+			{
+				dispatch( source, [&result]( const auto *sourceTyped ) {
+					using SourceType = typename std::remove_const_t<std::remove_pointer_t<decltype( sourceTyped )>>;
+					if constexpr( TypeTraits::IsSimpleTypedData<SourceType>::value )
+					{
+						using SourceValueType = typename SourceType::ValueType;
+						if constexpr(
+							TypeTraits::IsVec3TypedData<SourceValueType>::value ||
+							TypeTraits::IsColor<SourceValueType>::value
+						)
+						{
+							typename TargetType::ValueType r;
+							r[0] = sourceTyped->readable()[0];
+							r[1] = sourceTyped->readable()[1];
+							r[2] = sourceTyped->readable()[2];
+							result = new TargetType( r );
+						}
+					}
+				} );
+				return;
+			}
 		}
-	);
+	} );
 
 	if( !result )
 	{
-		throw IECore::Exception( fmt::format(
-			"Cannot connect auto proxy from \"{}\" tweak to shader input of type \"{}\"",
-			source->typeName(), target->typeName()
-		) );
+		throw IECore::Exception( fmt::format( "Cannot connect auto proxy from \"{}\" tweak to shader input of type \"{}\"", source->typeName(), target->typeName() ) );
 	}
 
 	return result;
@@ -175,10 +162,7 @@ void checkForCycle( const ShaderNetwork &network, const IECore::InternedString &
 
 	if( dependentShadersCache.find( sourceShader ) != dependentShadersCache.end() )
 	{
-		throw IECore::Exception( fmt::format(
-			"Cannot use \"{}\" in ShaderTweakProxy when tweaking \"{}\", this would create cycle in shader network.",
-			sourceShader.string(), destShader.string()
-		) );
+		throw IECore::Exception( fmt::format( "Cannot use \"{}\" in ShaderTweakProxy when tweaking \"{}\", this would create cycle in shader network.", sourceShader.string(), destShader.string() ) );
 	}
 }
 
@@ -193,10 +177,7 @@ bool applyTweakInternal( ShaderNetwork *shaderNetwork, unordered_map<InternedStr
 	{
 		if( missingMode != TweakPlug::MissingMode::Ignore )
 		{
-			throw IECore::Exception( fmt::format(
-				"Cannot apply tweak \"{}\" because shader \"{}\" does not exist",
-				tweakLabel, parameter.shader.string()
-			) );
+			throw IECore::Exception( fmt::format( "Cannot apply tweak \"{}\" because shader \"{}\" does not exist", tweakLabel, parameter.shader.string() ) );
 		}
 		else
 		{
@@ -232,10 +213,7 @@ bool applyTweakInternal( ShaderNetwork *shaderNetwork, unordered_map<InternedStr
 			{
 				if( missingMode != TweakPlug::MissingMode::Ignore )
 				{
-					throw IECore::Exception( fmt::format(
-						"Cannot apply tweak \"{}\" because shader \"{}\" does not have parameter \"{}\"",
-						tweakLabel, parameter.shader.string(), parameter.name.string()
-					) );
+					throw IECore::Exception( fmt::format( "Cannot apply tweak \"{}\" because shader \"{}\" does not have parameter \"{}\"", tweakLabel, parameter.shader.string(), parameter.name.string() ) );
 				}
 				else
 				{
@@ -259,7 +237,7 @@ bool applyTweakInternal( ShaderNetwork *shaderNetwork, unordered_map<InternedStr
 
 		static IECore::InternedString hasProxyNodesIdentifier( "__hasProxyNodes" );
 
-		const BoolData* hasProxyNodes = inputNetwork->blindData()->member<BoolData>( hasProxyNodesIdentifier );
+		const BoolData *hasProxyNodes = inputNetwork->blindData()->member<BoolData>( hasProxyNodesIdentifier );
 		if( hasProxyNodes && hasProxyNodes->readable() )
 		{
 			// It would be more efficient to search for and process tweak sources just in
@@ -281,7 +259,7 @@ bool applyTweakInternal( ShaderNetwork *shaderNetwork, unordered_map<InternedStr
 					continue;
 				}
 
-				const StringData* targetShaderData =
+				const StringData *targetShaderData =
 					i.second->parametersData()->member<StringData>( "targetShader" );
 				if( !targetShaderData )
 				{
@@ -320,7 +298,7 @@ bool applyTweakInternal( ShaderNetwork *shaderNetwork, unordered_map<InternedStr
 								modifiedShader = proxyConnectedShader->copy();
 							}
 
-							const IECore::Data *origDestParameter = modifiedShader->parametersData()->member(c.destination.name, /* throwExceptions = */ true );
+							const IECore::Data *origDestParameter = modifiedShader->parametersData()->member( c.destination.name, /* throwExceptions = */ true );
 							modifiedShader->parameters()[c.destination.name] = castDataToType( shader->parametersData()->member( parameter.name, /* throwExceptions = */ true ), origDestParameter );
 						}
 					}
@@ -343,11 +321,7 @@ bool applyTweakInternal( ShaderNetwork *shaderNetwork, unordered_map<InternedStr
 		{
 			if( mode != TweakPlug::Mode::Replace && mode != TweakPlug::Mode::Create && mode != TweakPlug::Mode::Remove )
 			{
-				throw IECore::Exception( fmt::format(
-					"Cannot apply tweak \"{}\" to \"{}.{}\" : \"{}\" mode is not compatible with an existing input connection.",
-					tweakLabel, parameter.shader.string(), parameter.name.string(),
-					TweakPlug::modeToString( mode )
-				) );
+				throw IECore::Exception( fmt::format( "Cannot apply tweak \"{}\" to \"{}.{}\" : \"{}\" mode is not compatible with an existing input connection.", tweakLabel, parameter.shader.string(), parameter.name.string(), TweakPlug::modeToString( mode ) ) );
 			}
 			else if( tweakPlug->valuePlug<ClosurePlug>() && mode != TweakPlug::Mode::Remove )
 			{
@@ -369,12 +343,10 @@ bool applyTweakInternal( ShaderNetwork *shaderNetwork, unordered_map<InternedStr
 		}
 
 		return tweakPlug->applyTweak(
-			[&parameter, &modifiedShader]( const std::string &valueName, const bool withFallback )
-			{
+			[&parameter, &modifiedShader]( const std::string &valueName, const bool withFallback ) {
 				return modifiedShader->parametersData()->member( parameter.name );
 			},
-			[&parameter, &modifiedShader]( const std::string &valueName, DataPtr newData )
-			{
+			[&parameter, &modifiedShader]( const std::string &valueName, DataPtr newData ) {
 				if( newData )
 				{
 					modifiedShader->parameters()[parameter.name] = newData;
@@ -399,14 +371,14 @@ IECore::InternedString regexSubMatchToInterned( const std::ssub_match &subMatch 
 
 const std::string g_optionPrefix( "option:" );
 
-}  // namespace
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( ShaderTweaks );
 
 size_t ShaderTweaks::g_firstPlugIndex = 0;
 
 ShaderTweaks::ShaderTweaks( const std::string &name )
-	:	AttributeProcessor( name )
+	: AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "shader" ) );
@@ -461,14 +433,12 @@ const Gaffer::BoolPlug *ShaderTweaks::localisePlug() const
 
 bool ShaderTweaks::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		AttributeProcessor::affectsProcessedAttributes( input ) ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) ||
 		tweaksPlug()->isAncestorOf( input ) ||
 		input == shaderPlug() ||
 		input == ignoreMissingPlug() ||
 		input == localisePlug() ||
-		( input == inPlug()->globalsPlug() && !localisePlug()->isSetToDefault() )
-	;
+		( input == inPlug()->globalsPlug() && !localisePlug()->isSetToDefault() );
 }
 
 void ShaderTweaks::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -576,7 +546,7 @@ IECore::ConstCompoundObjectPtr ShaderTweaks::computeGlobals( const Gaffer::Conte
 	{
 		if( boost::starts_with( name.string(), g_optionPrefix ) )
 		{
-			optionsToProcess->members()[name.string().substr( g_optionPrefix.size())] = value;
+			optionsToProcess->members()[name.string().substr( g_optionPrefix.size() )] = value;
 		}
 		else
 		{
@@ -587,7 +557,7 @@ IECore::ConstCompoundObjectPtr ShaderTweaks::computeGlobals( const Gaffer::Conte
 	IECore::ConstCompoundObjectPtr processedOptions = computeProcessedAttributes( context, optionsToProcess.get() );
 	for( const auto &[name, value] : processedOptions->members() )
 	{
-		result->members()[g_optionPrefix+name.string()] = value;
+		result->members()[g_optionPrefix + name.string()] = value;
 	}
 
 	return result;
@@ -639,7 +609,6 @@ bool ShaderTweaks::applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Tweak
 				static ConstShaderNetworkPtr emptyShaderNetwork = new ShaderNetwork();
 				inputNetwork = emptyShaderNetwork.get();
 			}
-
 		}
 
 		const static std::regex shaderTypeRegex( R"(([^{}]*)(\{shaderType=(.*)\})?\.(.*))" );
@@ -679,7 +648,7 @@ bool ShaderTweaks::applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Tweak
 			const static std::regex hasSyntax( R"([{}.])" );
 			if( std::regex_search( name, hasSyntax ) )
 			{
-				throw IECore::Exception( fmt::format( "Could not parse shader parameter: \"{}\"", name  ) );
+				throw IECore::Exception( fmt::format( "Could not parse shader parameter: \"{}\"", name ) );
 			}
 
 			parameter.shader = shaderNetwork->getOutput().shader;

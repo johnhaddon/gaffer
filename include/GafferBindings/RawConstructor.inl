@@ -44,7 +44,7 @@ namespace GafferBindings
 namespace Detail
 {
 
-template <class F>
+template<class F>
 struct RawConstructorDispatcher
 {
 
@@ -55,7 +55,7 @@ struct RawConstructorDispatcher
 	{
 	}
 
-	PyObject *operator()( PyObject *args, PyObject *keywords )
+	PyObject *operator () ( PyObject *args, PyObject *keywords )
 	{
 		ResultType t = m_f(
 
@@ -70,10 +70,9 @@ struct RawConstructorDispatcher
 		return boost::python::detail::none();
 	}
 
-	private:
+private:
 
-		F m_f;
-
+	F m_f;
 };
 
 } // namespace Detail
@@ -89,9 +88,9 @@ boost::python::object rawConstructor( F f )
 		boost::python::objects::py_function(
 
 			Detail::RawConstructorDispatcher<F>( f ),
-			boost::mpl::vector1<PyObject*>(),
+			boost::mpl::vector1<PyObject *>(),
 			1,
-			(std::numeric_limits<unsigned>::max)()
+			( std::numeric_limits<unsigned>::max )()
 
 		),
 

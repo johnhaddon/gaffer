@@ -56,51 +56,48 @@ namespace
 class TransformPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		// The children will be created by the constructor
+		return false;
+	}
+
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		return repr( static_cast<const TransformPlug *>( graphComponent ), &serialisation );
+	}
+
+	static std::string repr( const TransformPlug *plug, Serialisation *serialisation )
+	{
+		std::string result = "Gaffer.TransformPlug( \"" + plug->getName().string() + "\", ";
+
+		if( plug->direction() != Plug::In )
 		{
-			// The children will be created by the constructor
-			return false;
+			result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
 		}
 
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
-		{
-			return repr( static_cast<const TransformPlug *>( graphComponent ), &serialisation );
-		}
-
-		static std::string repr( const TransformPlug *plug, Serialisation *serialisation )
-		{
-			std::string result = "Gaffer.TransformPlug( \"" + plug->getName().string() + "\", ";
-
-			if( plug->direction() != Plug::In )
+		auto appendDefault = [&result]( const V3f &d, const V3f &defaultD, const char *name ) {
+			if( d != defaultD )
 			{
-				result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
+				result += fmt::format( "{} = imath.V3f( {}, {}, {} ), ", name, d.x, d.y, d.z );
 			}
+		};
+		appendDefault( plug->translatePlug()->defaultValue(), V3f( 0 ), "defaultTranslate" );
+		appendDefault( plug->rotatePlug()->defaultValue(), V3f( 0 ), "defaultRotate" );
+		appendDefault( plug->scalePlug()->defaultValue(), V3f( 1 ), "defaultScale" );
+		appendDefault( plug->pivotPlug()->defaultValue(), V3f( 0 ), "defaultPivot" );
 
-			auto appendDefault = [&result]( const V3f &d, const V3f &defaultD, const char *name )
-			{
-				if( d != defaultD )
-				{
-					result += fmt::format( "{} = imath.V3f( {}, {}, {} ), ", name, d.x, d.y, d.z );
-				}
-			};
-			appendDefault( plug->translatePlug()->defaultValue(), V3f( 0 ), "defaultTranslate" );
-			appendDefault( plug->rotatePlug()->defaultValue(), V3f( 0 ), "defaultRotate" );
-			appendDefault( plug->scalePlug()->defaultValue(), V3f( 1 ), "defaultScale" );
-			appendDefault( plug->pivotPlug()->defaultValue(), V3f( 0 ), "defaultPivot" );
-
-			const unsigned flags = plug->getFlags();
-			if( flags != Plug::Default )
-			{
-				result += "flags = " + PlugSerialiser::flagsRepr( flags ) + ", ";
-			}
-
-			result += ")";
-			return result;
+		const unsigned flags = plug->getFlags();
+		if( flags != Plug::Default )
+		{
+			result += "flags = " + PlugSerialiser::flagsRepr( flags ) + ", ";
 		}
 
-
+		result += ")";
+		return result;
+	}
 };
 
 std::string repr( const TransformPlug *plug )
@@ -115,8 +112,7 @@ void GafferModule::bindTransformPlug()
 {
 	PlugClass<TransformPlug>()
 		.def(
-			init<const std::string &, Gaffer::Plug::Direction, const V3f &, const V3f &, const V3f &, const V3f &, unsigned>
-			(
+			init<const std::string &, Gaffer::Plug::Direction, const V3f &, const V3f &, const V3f &, const V3f &, unsigned>(
 				(
 					arg( "name" ) = Gaffer::GraphComponent::defaultName<TransformPlug>(),
 					arg( "direction" ) = Gaffer::Plug::In,
@@ -129,8 +125,7 @@ void GafferModule::bindTransformPlug()
 			)
 		)
 		.def( "matrix", &TransformPlug::matrix )
-		.def( "repr", &repr )
-	;
+		.def( "repr", &repr );
 
 	Serialisation::registerSerialiser( Gaffer::TransformPlug::staticTypeId(), new TransformPlugSerialiser );
 }

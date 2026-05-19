@@ -62,42 +62,39 @@ const IECore::InternedString g_omitParentNodePlugValues( "valuePlugSerialiser:om
 class RampPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		std::string postConstructor( const Gaffer::GraphComponent *plug, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor( const Gaffer::GraphComponent *plug, const std::string &identifier, Serialisation &serialisation ) const override
+	{
+		std::string result = ValuePlugSerialiser::postConstructor( plug, identifier, serialisation );
+		if( !omitValue( plug, serialisation ) )
 		{
-			std::string result = ValuePlugSerialiser::postConstructor( plug, identifier, serialisation );
-			if( !omitValue( plug, serialisation ) )
-			{
-				// This isn't ideal, but the newly constructed ramp plug will already have child plugs representing the points for the
-				// default value. So we get rid of those so the real value can be loaded appropriately by serialising plug constructors
-				// (see below).
-				result += identifier + ".clearPoints()\n";
-			}
-			return result;
+			// This isn't ideal, but the newly constructed ramp plug will already have child plugs representing the points for the
+			// default value. So we get rid of those so the real value can be loaded appropriately by serialising plug constructors
+			// (see below).
+			result += identifier + ".clearPoints()\n";
 		}
+		return result;
+	}
 
-		bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		if( child->getName() == g_interpolation )
 		{
-			if( child->getName() == g_interpolation )
-			{
-				return ValuePlugSerialiser::childNeedsSerialisation( child, serialisation );
-			}
-			// Plug representing a point. These are added dynamically so we need to serialise them
-			// if we want to serialise the value.
-			return !omitValue( child, serialisation );
+			return ValuePlugSerialiser::childNeedsSerialisation( child, serialisation );
 		}
+		// Plug representing a point. These are added dynamically so we need to serialise them
+		// if we want to serialise the value.
+		return !omitValue( child, serialisation );
+	}
 
-	private :
+private:
 
-		bool omitValue( const Gaffer::GraphComponent *plug, const Serialisation &serialisation ) const
-		{
-			return
-				plug->ancestor<Node>() == serialisation.parent() &&
-				Context::current()->get<bool>( g_omitParentNodePlugValues, false )
-			;
-		}
-
+	bool omitValue( const Gaffer::GraphComponent *plug, const Serialisation &serialisation ) const
+	{
+		return plug->ancestor<Node>() == serialisation.parent() &&
+			Context::current()->get<bool>( g_omitParentNodePlugValues, false );
+	}
 };
 
 template<typename T>
@@ -159,15 +156,7 @@ template<typename T>
 void bind()
 {
 	PlugClass<T>()
-		.def( init<const std::string &, Plug::Direction, const typename T::ValueType &, unsigned>(
-				(
-					boost::python::arg_( "name" )=GraphComponent::defaultName<T>(),
-					boost::python::arg_( "direction" )=Plug::In,
-					boost::python::arg_( "defaultValue" )=typename T::ValueType(),
-					boost::python::arg_( "flags" )=Plug::Default
-				)
-			)
-		)
+		.def( init<const std::string &, Plug::Direction, const typename T::ValueType &, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = typename T::ValueType(), boost::python::arg_( "flags" ) = Plug::Default ) ) )
 		.def( "defaultValue", &T::defaultValue, return_value_policy<copy_const_reference>() )
 		.def( "setValue", &setValue<T> )
 		.def( "getValue", &getValue<T> )
@@ -175,13 +164,11 @@ void bind()
 		.def( "addPoint", &addPoint<T> )
 		.def( "removePoint", &removePoint<T> )
 		.def( "clearPoints", &clearPoints<T> )
-		.def( "pointPlug",  &pointPlug<T> )
+		.def( "pointPlug", &pointPlug<T> )
 		.def( "pointXPlug", &pointXPlug<T> )
-		.def( "pointYPlug", &pointYPlug<T> )
-	;
+		.def( "pointYPlug", &pointYPlug<T> );
 
 	Serialisation::registerSerialiser( T::staticTypeId(), new RampPlugSerialiser );
-
 }
 
 } // namespace

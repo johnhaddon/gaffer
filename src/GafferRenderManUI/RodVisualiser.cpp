@@ -77,19 +77,18 @@ void addWireframeCurveState( IECoreGL::Group *group )
 class RodVisualiser final : public LightFilterVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( RodVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( RodVisualiser )
 
-		RodVisualiser();
-		~RodVisualiser() override;
+	RodVisualiser();
+	~RodVisualiser() override;
 
-		Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	protected :
+protected:
 
-		static LightFilterVisualiser::LightFilterVisualiserDescription<RodVisualiser> g_visualiserDescription;
-
+	static LightFilterVisualiser::LightFilterVisualiserDescription<RodVisualiser> g_visualiserDescription;
 };
 
 IE_CORE_DECLAREPTR( RodVisualiser )
@@ -119,75 +118,67 @@ Visualisations RodVisualiser::visualise( const InternedString &attributeName, co
 	);
 
 	for(
-		const auto &[innerSize, radius, innerScale, innerOffset, falloffScale, edge, transform] : std::vector<std::tuple<V2f, float, V2f, V4f, V4f, float, M44f>> {
-			{
-				V2f( parameterOrDefault( filterParameters, "width", 1.f ) * 2.f, parameterOrDefault( filterParameters, "height", 1.f ) * 2.f ),
-				parameterOrDefault( filterParameters, "radius", 0.f ),
-				V2f(
-					parameterOrDefault( filterParameters, "scaleWidth", 1.f ),
-					parameterOrDefault( filterParameters, "scaleHeight", 1.f )
-				),
-				V4f(
-					parameterOrDefault( filterParameters, "top", 0.f ),
-					parameterOrDefault( filterParameters, "left", 0.f ),
-					parameterOrDefault( filterParameters, "bottom", 0.f ),
-					parameterOrDefault( filterParameters, "right", 0.f )
-				),
-				V4f(
-					parameterOrDefault( filterParameters, "topEdge", 1.f ),
-					parameterOrDefault( filterParameters, "leftEdge", 1.f ),
-					parameterOrDefault( filterParameters, "bottomEdge", 1.f ),
-					parameterOrDefault( filterParameters, "rightEdge", 1.f )
-				),
-				parameterOrDefault( filterParameters, "edge", 0.f ),
-				M44f()
-			},
-			{
-				V2f( parameterOrDefault( filterParameters, "width", 1.f ) * 2.f, parameterOrDefault( filterParameters, "depth", 1.f ) * 2.f ),
-				parameterOrDefault( filterParameters, "radius", 0.f ),
-				V2f(
-					parameterOrDefault( filterParameters, "scaleWidth", 1.f ),
-					parameterOrDefault( filterParameters, "scaleDepth", 1.f )
-				),
-				V4f(
-					parameterOrDefault( filterParameters, "back", 0.f ),
-					parameterOrDefault( filterParameters, "left", 0.f ),
-					parameterOrDefault( filterParameters, "front", 0.f ),
-					parameterOrDefault( filterParameters, "right", 0.f )
-				),
-				V4f(
-					parameterOrDefault( filterParameters, "backEdge", 1.f ),
-					parameterOrDefault( filterParameters, "leftEdge", 1.f ),
-					parameterOrDefault( filterParameters, "frontEdge", 1.f ),
-					parameterOrDefault( filterParameters, "rightEdge", 1.f )
-				),
-				parameterOrDefault( filterParameters, "edge", 0.f ),
-				M44f().rotate( V3f( -M_PI * 0.5f, 0.f, 0.f ) )
-			},
-			{
-				V2f( parameterOrDefault( filterParameters, "depth", 1.f ) * 2.f, parameterOrDefault( filterParameters, "height", 1.f ) * 2.f ),
-				parameterOrDefault( filterParameters, "radius", 0.f ),
-				V2f(
-					parameterOrDefault( filterParameters, "scaleDepth", 1.f ),
-					parameterOrDefault( filterParameters, "scaleHeight", 1.f )
-				),
-				V4f(
-					parameterOrDefault( filterParameters, "top", 0.f ),
-					parameterOrDefault( filterParameters, "front", 0.f ),
-					parameterOrDefault( filterParameters, "bottom", 0.f ),
-					parameterOrDefault( filterParameters, "back", 0.f )
-				),
-				V4f(
-					parameterOrDefault( filterParameters, "topEdge", 1.f ),
-					parameterOrDefault( filterParameters, "frontEdge", 1.f ),
-					parameterOrDefault( filterParameters, "bottomEdge", 1.f ),
-					parameterOrDefault( filterParameters, "backEdge", 1.f )
-				),
-				parameterOrDefault( filterParameters, "edge", 0.f ),
-				M44f().rotate( V3f( 0.f, M_PI * 0.5f, 0.f ) )
-			}
-		}
-	)
+		const auto &[innerSize, radius, innerScale, innerOffset, falloffScale, edge, transform] : std::vector<std::tuple<V2f, float, V2f, V4f, V4f, float, M44f>>{
+			{ V2f( parameterOrDefault( filterParameters, "width", 1.f ) * 2.f, parameterOrDefault( filterParameters, "height", 1.f ) * 2.f ),
+			  parameterOrDefault( filterParameters, "radius", 0.f ),
+			  V2f(
+				  parameterOrDefault( filterParameters, "scaleWidth", 1.f ),
+				  parameterOrDefault( filterParameters, "scaleHeight", 1.f )
+			  ),
+			  V4f(
+				  parameterOrDefault( filterParameters, "top", 0.f ),
+				  parameterOrDefault( filterParameters, "left", 0.f ),
+				  parameterOrDefault( filterParameters, "bottom", 0.f ),
+				  parameterOrDefault( filterParameters, "right", 0.f )
+			  ),
+			  V4f(
+				  parameterOrDefault( filterParameters, "topEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "leftEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "bottomEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "rightEdge", 1.f )
+			  ),
+			  parameterOrDefault( filterParameters, "edge", 0.f ),
+			  M44f() },
+			{ V2f( parameterOrDefault( filterParameters, "width", 1.f ) * 2.f, parameterOrDefault( filterParameters, "depth", 1.f ) * 2.f ),
+			  parameterOrDefault( filterParameters, "radius", 0.f ),
+			  V2f(
+				  parameterOrDefault( filterParameters, "scaleWidth", 1.f ),
+				  parameterOrDefault( filterParameters, "scaleDepth", 1.f )
+			  ),
+			  V4f(
+				  parameterOrDefault( filterParameters, "back", 0.f ),
+				  parameterOrDefault( filterParameters, "left", 0.f ),
+				  parameterOrDefault( filterParameters, "front", 0.f ),
+				  parameterOrDefault( filterParameters, "right", 0.f )
+			  ),
+			  V4f(
+				  parameterOrDefault( filterParameters, "backEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "leftEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "frontEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "rightEdge", 1.f )
+			  ),
+			  parameterOrDefault( filterParameters, "edge", 0.f ),
+			  M44f().rotate( V3f( -M_PI * 0.5f, 0.f, 0.f ) ) },
+			{ V2f( parameterOrDefault( filterParameters, "depth", 1.f ) * 2.f, parameterOrDefault( filterParameters, "height", 1.f ) * 2.f ),
+			  parameterOrDefault( filterParameters, "radius", 0.f ),
+			  V2f(
+				  parameterOrDefault( filterParameters, "scaleDepth", 1.f ),
+				  parameterOrDefault( filterParameters, "scaleHeight", 1.f )
+			  ),
+			  V4f(
+				  parameterOrDefault( filterParameters, "top", 0.f ),
+				  parameterOrDefault( filterParameters, "front", 0.f ),
+				  parameterOrDefault( filterParameters, "bottom", 0.f ),
+				  parameterOrDefault( filterParameters, "back", 0.f )
+			  ),
+			  V4f(
+				  parameterOrDefault( filterParameters, "topEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "frontEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "bottomEdge", 1.f ),
+				  parameterOrDefault( filterParameters, "backEdge", 1.f )
+			  ),
+			  parameterOrDefault( filterParameters, "edge", 0.f ),
+			  M44f().rotate( V3f( 0.f, M_PI * 0.5f, 0.f ) ) } } )
 	{
 		IECoreGL::GroupPtr axisGroup = GafferRenderManUI::lightFilterRectangles( innerSize, radius, innerScale, innerOffset, falloffScale, edge );
 		axisGroup->setTransform( transform );
@@ -197,4 +188,4 @@ Visualisations RodVisualiser::visualise( const InternedString &attributeName, co
 	return { Visualisation::createGeometry( result ) };
 }
 
-}  // namespace
+} // namespace

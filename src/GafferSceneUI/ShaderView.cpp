@@ -94,14 +94,14 @@ SceneCreators &sceneCreators()
 	return *sc;
 }
 
-using SceneRegistrationChangedSignal = Signals::Signal<void ( const PrefixAndName & )>;
+using SceneRegistrationChangedSignal = Signals::Signal<void( const PrefixAndName & )>;
 SceneRegistrationChangedSignal &sceneRegistrationChangedSignal()
 {
 	static SceneRegistrationChangedSignal s;
 	return s;
 }
 
-using RendererRegistrationChangedSignal = Gaffer::Signals::Signal<void ()>;
+using RendererRegistrationChangedSignal = Gaffer::Signals::Signal<void()>;
 RendererRegistrationChangedSignal &rendererRegistrationChangedSignal()
 {
 	static RendererRegistrationChangedSignal s;
@@ -132,7 +132,7 @@ GAFFER_NODE_DEFINE_TYPE( ShaderView );
 ShaderView::ViewDescription<ShaderView> ShaderView::g_viewDescription( GafferScene::Shader::staticTypeId(), "out" );
 
 ShaderView::ShaderView( Gaffer::ScriptNodePtr scriptNode )
-	:	ImageView( scriptNode ), m_framed( false )
+	: ImageView( scriptNode ), m_framed( false )
 {
 	// Create a converter to generate an image
 	// from the input shader.
@@ -488,7 +488,7 @@ void ShaderView::registerRenderer( const std::string &shaderPrefix, RendererCrea
 
 void ShaderView::deregisterRenderer( const std::string &shaderPrefix )
 {
-	renderers().erase(shaderPrefix);
+	renderers().erase( shaderPrefix );
 	rendererRegistrationChangedSignal()();
 }
 

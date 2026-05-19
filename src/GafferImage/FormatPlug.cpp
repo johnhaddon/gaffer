@@ -55,7 +55,7 @@ static const IECore::InternedString g_defaultFormatPlugName( "defaultFormat" );
 static const Format g_defaultFormatFallback( 1920, 1080 );
 
 FormatPlug::FormatPlug( const std::string &name, Direction direction, Format defaultValue, unsigned flags )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
 	addChild( new Box2iPlug( "displayWindow", direction, defaultValue.getDisplayWindow(), childFlags ) );

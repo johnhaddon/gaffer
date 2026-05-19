@@ -152,11 +152,11 @@ void updateMetadata( Plug *plug, InternedString key, const char *value )
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PlugAdder );
 
 PlugAdder::PlugAdder()
-	:	m_dragging( false )
+	: m_dragging( false )
 {
 	enterSignal().connect( boost::bind( &PlugAdder::enter, this, ::_1, ::_2 ) );
 	leaveSignal().connect( boost::bind( &PlugAdder::leave, this, ::_1, ::_2 ) );
-	buttonPressSignal().connect( boost::bind( &PlugAdder::buttonPress, this, ::_1,  ::_2 ) );
+	buttonPressSignal().connect( boost::bind( &PlugAdder::buttonPress, this, ::_1, ::_2 ) );
 	dragBeginSignal().connect( boost::bind( &PlugAdder::dragBegin, this, ::_1, ::_2 ) );
 	dragEnterSignal().connect( boost::bind( &PlugAdder::dragEnter, this, ::_2 ) );
 	dragMoveSignal().connect( boost::bind( &PlugAdder::dragMove, this, ::_1, ::_2 ) );
@@ -241,7 +241,7 @@ void PlugAdder::renderLayer( Layer layer, const Style *style, RenderReason reaso
 				style->renderImage( Box2f( V2f( -radius ), V2f( radius ) ), texture( Style::HighlightedState ) );
 			}
 			break;
-		default:
+		default :
 			break;
 	}
 }

@@ -136,7 +136,7 @@ unsigned int matchingPrefixLength( const ScenePlug::ScenePath &a, const ScenePlu
 	unsigned int matchingLength = std::min( a.size(), b.size() );
 	for( unsigned int i = 0; i < matchingLength; i++ )
 	{
-		if( a[ i ] != b[ i ] )
+		if( a[i] != b[i] )
 		{
 			matchingLength = i;
 			break;
@@ -200,256 +200,244 @@ IECore::CompoundObjectPtr attributesAfterCommonRoot(
 class BranchCreator::BranchesData : public IECore::Data
 {
 
-	public :
+public:
 
-		struct Location
-		{
-			using Ptr = std::unique_ptr<Location>;
-			using ChildMap = std::unordered_map<IECore::InternedString, Ptr>;
-			using SourcePaths = vector<ScenePlug::ScenePath>;
+	struct Location
+	{
+		using Ptr = std::unique_ptr<Location>;
+		using ChildMap = std::unordered_map<IECore::InternedString, Ptr>;
+		using SourcePaths = vector<ScenePlug::ScenePath>;
 
-			Location( size_t depth, bool exists ) : exists( exists ), depth( depth ) {}
+		Location( size_t depth, bool exists ) : exists( exists ), depth( depth ) {}
 
-			// True if this location exists in the input
-			// scene.
-			const bool exists;
-			// Depth of this location in the scene.
-			const size_t depth;
-			// Child locations.
-			ChildMap children;
-			// The source paths for this destination.
-			// Null if this is not a destination.
-			std::unique_ptr<SourcePaths> sourcePaths;
-			// Names of children which do not exist in
-			// the input scene. Null if all children
-			// exist in the input.
-			InternedStringVectorDataPtr newChildNames;
+		// True if this location exists in the input
+		// scene.
+		const bool exists;
+		// Depth of this location in the scene.
+		const size_t depth;
+		// Child locations.
+		ChildMap children;
+		// The source paths for this destination.
+		// Null if this is not a destination.
+		std::unique_ptr<SourcePaths> sourcePaths;
+		// Names of children which do not exist in
+		// the input scene. Null if all children
+		// exist in the input.
+		InternedStringVectorDataPtr newChildNames;
+	};
 
+	BranchesData( const BranchCreator *branchCreator, const Context *context )
+		: m_root( new Location( 0, true ) )
+	{
+		auto f = [this, branchCreator]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path ) {
+			addBranch( branchCreator, path );
+			return true;
 		};
+		SceneAlgo::filteredParallelTraverse( branchCreator->inPlug(), branchCreator->filterPlug(), f );
 
-		BranchesData( const BranchCreator *branchCreator, const Context *context )
-			:	m_root( new Location( 0, true ) )
+		if( !branchCreator->filterPlug()->getInput() )
 		{
-			auto f = [this, branchCreator]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
+			const auto parent = branchCreator->parentPlugPath();
+			if( parent )
 			{
-				addBranch( branchCreator, path );
-				return true;
-			};
-			SceneAlgo::filteredParallelTraverse( branchCreator->inPlug(), branchCreator->filterPlug(), f );
-
-			if( !branchCreator->filterPlug()->getInput() )
-			{
-				const auto parent = branchCreator->parentPlugPath();
-				if( parent )
-				{
-					ScenePlug::PathScope pathScope( context, &*parent );
-					addBranch( branchCreator, *parent );
-				}
-			}
-
-			// When multiple sources map to the same destination, we have no guarantees about
-			// the order they will be visited above. Sort them alphabetically so that our output
-			// is stable from run to run.
-			visitLocationsWalk(
-				[] ( const ScenePlug::ScenePath &path, Location *location ) {
-					if( location->sourcePaths )
-					{
-						std::sort(
-							location->sourcePaths->begin(), location->sourcePaths->end(),
-							[] ( const ScenePlug::ScenePath &a, const ScenePlug::ScenePath &b ) {
-								return lexicographical_compare(
-									a.begin(), a.end(), b.begin(), b.end(),
-									internedStringValueLess
-								);
-							}
-						);
-					}
-					if( location->newChildNames )
-					{
-						std::sort(
-							location->newChildNames->writable().begin(), location->newChildNames->writable().end(),
-							internedStringValueLess
-						);
-					}
-				},
-				ScenePath(),
-				m_root.get()
-			);
-
-		}
-
-		static bool affectedBy( const BranchCreator *branchCreator, const Plug *input )
-		{
-			return
-				input == branchCreator->filterPlug() ||
-				input == branchCreator->inPlug()->childNamesPlug() ||
-				input == branchCreator->parentPlug() ||
-				input == branchCreator->inPlug()->existsPlug() ||
-				input == branchCreator->destinationPlug()
-			;
-		}
-
-		static void hash( const BranchCreator *branchCreator, const Context *context, IECore::MurmurHash &h )
-		{
-			// See `SceneAlgo::matchingPathsHash()` for documentation of this hashing strategy.
-			std::atomic<uint64_t> h1( 0 ), h2( 0 );
-			auto f = [branchCreator, &h1, &h2]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
-			{
-				IECore::MurmurHash h;
-				hashBranch( branchCreator, path, h );
-				h1 += h.h1();
-				h2 += h.h2();
-				return true;
-			};
-			SceneAlgo::filteredParallelTraverse( branchCreator->inPlug(), branchCreator->filterPlug(), f );
-			h.append( MurmurHash( h1, h2 ) );
-
-			if( !branchCreator->filterPlug()->getInput() )
-			{
-				const auto parent = branchCreator->parentPlugPath();
-				if( parent )
-				{
-					ScenePlug::PathScope pathScope( context, &*parent );
-					hashBranch( branchCreator, *parent, h );
-				}
+				ScenePlug::PathScope pathScope( context, &*parent );
+				addBranch( branchCreator, *parent );
 			}
 		}
 
-		bool empty() const
-		{
-			return m_root->children.empty() && !m_root->sourcePaths;
-		}
-
-		const Location *locationOrAncestor( const ScenePlug::ScenePath &path ) const
-		{
-			const Location *result = m_root.get();
-			for( const auto &name : path )
-			{
-				const auto it = result->children.find( name );
-				if( it != result->children.end() )
+		// When multiple sources map to the same destination, we have no guarantees about
+		// the order they will be visited above. Sort them alphabetically so that our output
+		// is stable from run to run.
+		visitLocationsWalk(
+			[]( const ScenePlug::ScenePath &path, Location *location ) {
+				if( location->sourcePaths )
 				{
-					result = it->second.get();
-				}
-				else
-				{
-					break;
-				}
-			}
-			return result;
-		}
-
-		const Location::SourcePaths &sourcePaths( const ScenePlug::ScenePath &destination ) const
-		{
-			const Location *location = locationOrAncestor( destination );
-			assert( location->depth == destination.size() );
-			if( !location->sourcePaths )
-			{
-				throw IECore::Exception( fmt::format( "No source paths found for destination \"{}\"", ScenePlug::pathToString( destination ) ) );
-			}
-			return *location->sourcePaths;
-		}
-
-		template<typename F>
-		void visitDestinations( F &&f ) const
-		{
-			visitLocationsWalk(
-				[ &f ] ( const ScenePlug::ScenePath &path, const Location *location ) {
-					if( location->sourcePaths )
-					{
-						f( path, *location->sourcePaths );
-					}
-				},
-				ScenePath(),
-				m_root.get()
-			);
-		}
-
-	private :
-
-		template<typename F>
-		void visitLocationsWalk( F &&f, const ScenePlug::ScenePath &path, Location *location ) const
-		{
-			f( path, location );
-
-			ScenePlug::ScenePath childPath = path; childPath.push_back( InternedString() );
-			for( const auto &child : location->children )
-			{
-				childPath.back() = child.first;
-				visitLocationsWalk( f, childPath, child.second.get() );
-			}
-		}
-
-		static void hashBranch( const BranchCreator *branchCreator, const ScenePlug::ScenePath &path, IECore::MurmurHash &h )
-		{
-			h.append( path.data(), path.size() );
-			h.append( (uint64_t)path.size() );
-
-			const ScenePlug::ScenePath destination = ScenePlug::stringToPath( branchCreator->destinationPlug()->getValue() );
-			validateDestination( destination );
-
-			h.append( destination.data(), destination.size() );
-			h.append( (uint64_t)destination.size() );
-
-			const ScenePlug::ScenePath existing = closestExistingPath( branchCreator->inPlug(), destination );
-			h.append( existing.data(), existing.size() );
-			h.append( (uint64_t)existing.size() );
-		}
-
-		void addBranch( const BranchCreator *branchCreator, const ScenePlug::ScenePath &path )
-		{
-			const ScenePlug::ScenePath destination = ScenePlug::stringToPath( branchCreator->destinationPlug()->getValue() );
-			validateDestination( destination );
-			const ScenePlug::ScenePath existing = closestExistingPath( branchCreator->inPlug(), destination );
-
-			tbb::spin_mutex::scoped_lock lock( m_mutex );
-
-			Location *location = m_root.get();
-			for( const auto &name : destination )
-			{
-				if( !location->exists && location->sourcePaths )
-				{
-					// We don't yet support merging branch children with new locations
-					// introduced by destinations that didn't previously exist.
-					throw IECore::Exception( fmt::format(
-						"Destination \"{}\" contains a nested destination",
-						ScenePlug::pathToString( ScenePath( destination.begin(), destination.begin() + location->depth ) )
-					) );
-				}
-
-				const auto inserted = location->children.insert( Location::ChildMap::value_type( name, Location::Ptr() ) );
-				if( inserted.second )
-				{
-					const bool exists = location->depth < existing.size();
-					inserted.first->second = std::make_unique<Location>( location->depth + 1, exists );
-					if( !exists )
-					{
-						if( !location->newChildNames )
-						{
-							location->newChildNames = new InternedStringVectorData;
+					std::sort(
+						location->sourcePaths->begin(), location->sourcePaths->end(),
+						[]( const ScenePlug::ScenePath &a, const ScenePlug::ScenePath &b ) {
+							return lexicographical_compare(
+								a.begin(), a.end(), b.begin(), b.end(),
+								internedStringValueLess
+							);
 						}
-						location->newChildNames->writable().push_back( name );
-					}
+					);
 				}
-				location = inserted.first->second.get();
+				if( location->newChildNames )
+				{
+					std::sort(
+						location->newChildNames->writable().begin(), location->newChildNames->writable().end(),
+						internedStringValueLess
+					);
+				}
+			},
+			ScenePath(),
+			m_root.get()
+		);
+	}
+
+	static bool affectedBy( const BranchCreator *branchCreator, const Plug *input )
+	{
+		return input == branchCreator->filterPlug() ||
+			input == branchCreator->inPlug()->childNamesPlug() ||
+			input == branchCreator->parentPlug() ||
+			input == branchCreator->inPlug()->existsPlug() ||
+			input == branchCreator->destinationPlug();
+	}
+
+	static void hash( const BranchCreator *branchCreator, const Context *context, IECore::MurmurHash &h )
+	{
+		// See `SceneAlgo::matchingPathsHash()` for documentation of this hashing strategy.
+		std::atomic<uint64_t> h1( 0 ), h2( 0 );
+		auto f = [branchCreator, &h1, &h2]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path ) {
+			IECore::MurmurHash h;
+			hashBranch( branchCreator, path, h );
+			h1 += h.h1();
+			h2 += h.h2();
+			return true;
+		};
+		SceneAlgo::filteredParallelTraverse( branchCreator->inPlug(), branchCreator->filterPlug(), f );
+		h.append( MurmurHash( h1, h2 ) );
+
+		if( !branchCreator->filterPlug()->getInput() )
+		{
+			const auto parent = branchCreator->parentPlugPath();
+			if( parent )
+			{
+				ScenePlug::PathScope pathScope( context, &*parent );
+				hashBranch( branchCreator, *parent, h );
+			}
+		}
+	}
+
+	bool empty() const
+	{
+		return m_root->children.empty() && !m_root->sourcePaths;
+	}
+
+	const Location *locationOrAncestor( const ScenePlug::ScenePath &path ) const
+	{
+		const Location *result = m_root.get();
+		for( const auto &name : path )
+		{
+			const auto it = result->children.find( name );
+			if( it != result->children.end() )
+			{
+				result = it->second.get();
+			}
+			else
+			{
+				break;
+			}
+		}
+		return result;
+	}
+
+	const Location::SourcePaths &sourcePaths( const ScenePlug::ScenePath &destination ) const
+	{
+		const Location *location = locationOrAncestor( destination );
+		assert( location->depth == destination.size() );
+		if( !location->sourcePaths )
+		{
+			throw IECore::Exception( fmt::format( "No source paths found for destination \"{}\"", ScenePlug::pathToString( destination ) ) );
+		}
+		return *location->sourcePaths;
+	}
+
+	template<typename F>
+	void visitDestinations( F &&f ) const
+	{
+		visitLocationsWalk(
+			[&f]( const ScenePlug::ScenePath &path, const Location *location ) {
+				if( location->sourcePaths )
+				{
+					f( path, *location->sourcePaths );
+				}
+			},
+			ScenePath(),
+			m_root.get()
+		);
+	}
+
+private:
+
+	template<typename F>
+	void visitLocationsWalk( F &&f, const ScenePlug::ScenePath &path, Location *location ) const
+	{
+		f( path, location );
+
+		ScenePlug::ScenePath childPath = path;
+		childPath.push_back( InternedString() );
+		for( const auto &child : location->children )
+		{
+			childPath.back() = child.first;
+			visitLocationsWalk( f, childPath, child.second.get() );
+		}
+	}
+
+	static void hashBranch( const BranchCreator *branchCreator, const ScenePlug::ScenePath &path, IECore::MurmurHash &h )
+	{
+		h.append( path.data(), path.size() );
+		h.append( (uint64_t)path.size() );
+
+		const ScenePlug::ScenePath destination = ScenePlug::stringToPath( branchCreator->destinationPlug()->getValue() );
+		validateDestination( destination );
+
+		h.append( destination.data(), destination.size() );
+		h.append( (uint64_t)destination.size() );
+
+		const ScenePlug::ScenePath existing = closestExistingPath( branchCreator->inPlug(), destination );
+		h.append( existing.data(), existing.size() );
+		h.append( (uint64_t)existing.size() );
+	}
+
+	void addBranch( const BranchCreator *branchCreator, const ScenePlug::ScenePath &path )
+	{
+		const ScenePlug::ScenePath destination = ScenePlug::stringToPath( branchCreator->destinationPlug()->getValue() );
+		validateDestination( destination );
+		const ScenePlug::ScenePath existing = closestExistingPath( branchCreator->inPlug(), destination );
+
+		tbb::spin_mutex::scoped_lock lock( m_mutex );
+
+		Location *location = m_root.get();
+		for( const auto &name : destination )
+		{
+			if( !location->exists && location->sourcePaths )
+			{
+				// We don't yet support merging branch children with new locations
+				// introduced by destinations that didn't previously exist.
+				throw IECore::Exception( fmt::format( "Destination \"{}\" contains a nested destination", ScenePlug::pathToString( ScenePath( destination.begin(), destination.begin() + location->depth ) ) ) );
 			}
 
-			if( !location->sourcePaths )
+			const auto inserted = location->children.insert( Location::ChildMap::value_type( name, Location::Ptr() ) );
+			if( inserted.second )
 			{
-				if( !location->exists && location->children.size() )
+				const bool exists = location->depth < existing.size();
+				inserted.first->second = std::make_unique<Location>( location->depth + 1, exists );
+				if( !exists )
 				{
-					throw IECore::Exception( fmt::format(
-						"Destination \"{}\" contains a nested destination",
-						ScenePlug::pathToString( destination )
-					) );
+					if( !location->newChildNames )
+					{
+						location->newChildNames = new InternedStringVectorData;
+					}
+					location->newChildNames->writable().push_back( name );
 				}
-				location->sourcePaths.reset( new Location::SourcePaths );
 			}
-			location->sourcePaths->push_back( path );
+			location = inserted.first->second.get();
 		}
 
-		tbb::spin_mutex m_mutex;
-		Location::Ptr m_root;
+		if( !location->sourcePaths )
+		{
+			if( !location->exists && location->children.size() )
+			{
+				throw IECore::Exception( fmt::format( "Destination \"{}\" contains a nested destination", ScenePlug::pathToString( destination ) ) );
+			}
+			location->sourcePaths.reset( new Location::SourcePaths );
+		}
+		location->sourcePaths->push_back( path );
+	}
 
+	tbb::spin_mutex m_mutex;
+	Location::Ptr m_root;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -461,7 +449,7 @@ GAFFER_NODE_DEFINE_TYPE( BranchCreator );
 size_t BranchCreator::g_firstPlugIndex = 0;
 
 BranchCreator::BranchCreator( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "parent" ) );
@@ -729,7 +717,8 @@ void BranchCreator::hashTransform( const ScenePath &path, const Gaffer::Context 
 			hashBranchTransform( sourcePath, branchPath, context, h );
 			if( branchPath.size() == 1 )
 			{
-				ScenePath destinationPath = path; destinationPath.pop_back();
+				ScenePath destinationPath = path;
+				destinationPath.pop_back();
 				if( sourcePath != destinationPath )
 				{
 					h.append( inPlug()->fullTransformHash( sourcePath ) );
@@ -759,7 +748,8 @@ Imath::M44f BranchCreator::computeTransform( const ScenePath &path, const Gaffer
 			M44f result = computeBranchTransform( sourcePath, branchPath, context );
 			if( branchPath.size() == 1 )
 			{
-				ScenePath destinationPath = path; destinationPath.pop_back();
+				ScenePath destinationPath = path;
+				destinationPath.pop_back();
 				if( sourcePath != destinationPath )
 				{
 					// Account for the difference between source and destination transforms so that
@@ -793,7 +783,8 @@ void BranchCreator::hashAttributes( const ScenePath &path, const Gaffer::Context
 			hashBranchAttributes( sourcePath, branchPath, context, h );
 			if( branchPath.size() == 1 && copySourceAttributesPlug()->getValue() )
 			{
-				ScenePath destinationPath = path; destinationPath.pop_back();
+				ScenePath destinationPath = path;
+				destinationPath.pop_back();
 				if( sourcePath != destinationPath )
 				{
 					hashAttributesAfterCommonRoot( sourcePath, destinationPath, inPlug(), h );
@@ -818,12 +809,12 @@ IECore::ConstCompoundObjectPtr BranchCreator::computeAttributes( const ScenePath
 
 	switch( locationType )
 	{
-		case Branch :
-		{
+		case Branch : {
 			IECore::ConstCompoundObjectPtr result = computeBranchAttributes( sourcePath, branchPath, context );
 			if( branchPath.size() == 1 && copySourceAttributesPlug()->getValue() )
 			{
-				ScenePath destinationPath = path; destinationPath.pop_back();
+				ScenePath destinationPath = path;
+				destinationPath.pop_back();
 				if( sourcePath != destinationPath )
 				{
 					IECore::CompoundObjectPtr inherited = attributesAfterCommonRoot( sourcePath, destinationPath, inPlug() );
@@ -1009,7 +1000,7 @@ void BranchCreator::hashSetNames( const Gaffer::Context *context, const ScenePlu
 	else
 	{
 		branchesData->visitDestinations(
-			[&context, &h, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+			[&context, &h, this]( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
 				for( const auto &sourcePath : sourcePaths )
 				{
 					MurmurHash branchSetNamesHash;
@@ -1042,7 +1033,7 @@ IECore::ConstInternedStringVectorDataPtr BranchCreator::computeSetNames( const G
 	else
 	{
 		branchesData->visitDestinations(
-			[&context, &result, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+			[&context, &result, this]( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
 				for( const auto &sourcePath : sourcePaths )
 				{
 					ConstInternedStringVectorDataPtr branchSetNamesData = computeBranchSetNames( sourcePath, context );
@@ -1069,7 +1060,7 @@ void BranchCreator::hashSet( const IECore::InternedString &setName, const Gaffer
 
 	/// \todo Parallelise.
 	branches->visitDestinations(
-		[&setName, &context, &h, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+		[&setName, &context, &h, this]( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
 			for( const auto &sourcePath : sourcePaths )
 			{
 				MurmurHash branchSetHash;
@@ -1098,7 +1089,7 @@ IECore::ConstPathMatcherDataPtr BranchCreator::computeSet( const IECore::Interne
 
 	/// \todo Parallelise.
 	branches->visitDestinations(
-		[&setName, &context, &outputSet, this] ( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
+		[&setName, &context, &outputSet, this]( const ScenePath &destination, const BranchesData::Location::SourcePaths &sourcePaths ) {
 			vector<ConstPathMatcherDataPtr> branchSets = { nullptr };
 			for( const auto &sourcePath : sourcePaths )
 			{
@@ -1168,10 +1159,8 @@ BranchCreator::ConstBranchesDataPtr BranchCreator::branchesForSet( const IECore:
 
 bool BranchCreator::affectsBranchesForSet( const Gaffer::Plug *input ) const
 {
-	return
-		( constantBranchSetNames() && affectsBranchSetNames( input ) ) ||
-		input == branchesPlug()
-	;
+	return ( constantBranchSetNames() && affectsBranchSetNames( input ) ) ||
+		input == branchesPlug();
 }
 
 bool BranchCreator::affectsBranchBound( const Gaffer::Plug *input ) const
@@ -1332,7 +1321,7 @@ BranchCreator::LocationType BranchCreator::sourceAndBranchPaths( const ScenePath
 			{
 				branchPath.assign( path.begin() + location->depth, path.end() );
 				branchPath[0] = input.name;
-				sourcePath = (*location->sourcePaths)[input.index-1];
+				sourcePath = ( *location->sourcePaths )[input.index - 1];
 				return Branch;
 			}
 			else

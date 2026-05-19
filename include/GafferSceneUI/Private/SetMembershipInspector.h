@@ -52,37 +52,37 @@ namespace Private
 class GAFFERSCENEUI_API SetMembershipInspector : public Inspector
 {
 
-	public :
+public:
 
-		SetMembershipInspector(
-			const GafferScene::ScenePlugPtr &scene,
-			const Gaffer::PlugPtr &editScope,
-			IECore::InternedString setName
-		);
+	SetMembershipInspector(
+		const GafferScene::ScenePlugPtr &scene,
+		const Gaffer::PlugPtr &editScope,
+		IECore::InternedString setName
+	);
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::SetMembershipInspector, SetMembershipInspectorTypeId, Inspector );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::SetMembershipInspector, SetMembershipInspectorTypeId, Inspector );
 
-	protected :
+protected:
 
-		GafferScene::SceneAlgo::History::ConstPtr history() const override;
-		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
-		IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const override;
-		/// For the given `history`, returns either the "sets" `StringPlug` of an `ObjectSource`
-		/// node, the "name" `StringPlug` of a `Set` node, the `Spreadsheet::RowPlug` for the
-		/// appropriate row of a set membership processor spreadsheet or `nullptr` if none of
-		/// those are found.
-		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
-		AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
-		DisableEditFunctionOrFailure disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const override;
-		CanEditFunction canEditFunction( const GafferScene::SceneAlgo::History *history ) const override;
-		EditFunction editFunction( const GafferScene::SceneAlgo::History *history ) const override;
+	GafferScene::SceneAlgo::History::ConstPtr history() const override;
+	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
+	IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const override;
+	/// For the given `history`, returns either the "sets" `StringPlug` of an `ObjectSource`
+	/// node, the "name" `StringPlug` of a `Set` node, the `Spreadsheet::RowPlug` for the
+	/// appropriate row of a set membership processor spreadsheet or `nullptr` if none of
+	/// those are found.
+	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
+	AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
+	DisableEditFunctionOrFailure disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const override;
+	CanEditFunction canEditFunction( const GafferScene::SceneAlgo::History *history ) const override;
+	EditFunction editFunction( const GafferScene::SceneAlgo::History *history ) const override;
 
-	private :
+private:
 
-		const GafferScene::ScenePlugPtr m_scene;
-		const IECore::InternedString m_setName;
+	const GafferScene::ScenePlugPtr m_scene;
+	const IECore::InternedString m_setName;
 };
 
-}
+} // namespace Private
 
-}
+} // namespace GafferSceneUI

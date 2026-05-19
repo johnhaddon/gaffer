@@ -53,7 +53,7 @@ using namespace IECore;
 IE_CORE_DEFINERUNTIMETYPED( HiddenFilePathFilter );
 
 HiddenFilePathFilter::HiddenFilePathFilter( IECore::CompoundDataPtr userData )
-	:	PathFilter( userData ), m_inverted( false )
+	: PathFilter( userData ), m_inverted( false )
 {
 }
 
@@ -82,7 +82,7 @@ void HiddenFilePathFilter::doFilter( std::vector<PathPtr> &paths, const IECore::
 		std::remove_if(
 			paths.begin(),
 			paths.end(),
-			[this] ( const PathPtr &path ) { return remove( path ); }
+			[this]( const PathPtr &path ) { return remove( path ); }
 		),
 		paths.end()
 	);

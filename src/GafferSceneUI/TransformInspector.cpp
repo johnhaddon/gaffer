@@ -76,17 +76,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
 	{
 	}
 
-	bool operator==( const HistoryCacheKey &rhs ) const
+	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return
-			plug == rhs.plug &&
+		return plug == rhs.plug &&
 			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount
-		;
+			dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -107,7 +105,7 @@ using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History
 
 HistoryCache g_historyCache(
 	// Getter
-	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		return SceneAlgo::history(
@@ -117,13 +115,13 @@ HistoryCache g_historyCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// Histories contain PlugPtrs, which could potentially be the sole
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -143,8 +141,10 @@ TransformInspector::TransformInspector(
 	Space space,
 	Component component
 )
-	:	Inspector( { scene->transformPlug() }, "Transform", fmt::format( "{} {}", toString( space ), toString( component ) ), editScope ),
-		m_scene( scene ), m_space( space ), m_component( component )
+	: Inspector( { scene->transformPlug() }, "Transform", fmt::format( "{} {}", toString( space ), toString( component ) ), editScope ),
+	  m_scene( scene ),
+	  m_space( space ),
+	  m_component( component )
 {
 }
 
@@ -162,10 +162,8 @@ IECore::ConstObjectPtr TransformInspector::value( const GafferScene::SceneAlgo::
 {
 	const M44f matrix =
 		m_space == Space::Local ?
-			history->scene->transformPlug()->getValue()
-		:
-			history->scene->fullTransform( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
-	;
+		history->scene->transformPlug()->getValue() :
+		history->scene->fullTransform( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) );
 
 	if( m_component == Component::Matrix )
 	{
@@ -176,10 +174,14 @@ IECore::ConstObjectPtr TransformInspector::value( const GafferScene::SceneAlgo::
 	extractSHRT( matrix, s, h, r, t );
 	switch( m_component )
 	{
-		case Component::Translate : return new V3fData( t );
-		case Component::Rotate : return new V3fData( IECore::radiansToDegrees( r ) );
-		case Component::Scale : return new V3fData( s );
-		default : return new V3fData( h );
+		case Component::Translate :
+			return new V3fData( t );
+		case Component::Rotate :
+			return new V3fData( IECore::radiansToDegrees( r ) );
+		case Component::Scale :
+			return new V3fData( s );
+		default :
+			return new V3fData( h );
 	}
 }
 
@@ -301,10 +303,15 @@ const char *TransformInspector::toString( Component component )
 {
 	switch( component )
 	{
-		case Component::Matrix : return "Matrix";
-		case Component::Translate : return "Translate";
-		case Component::Rotate : return "Rotate";
-		case Component::Scale : return "Scale";
-		default : return "Shear";
+		case Component::Matrix :
+			return "Matrix";
+		case Component::Translate :
+			return "Translate";
+		case Component::Rotate :
+			return "Rotate";
+		case Component::Scale :
+			return "Scale";
+		default :
+			return "Shear";
 	}
 }

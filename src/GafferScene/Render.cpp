@@ -73,7 +73,7 @@ struct RenderScope : public Context::EditableScope
 {
 
 	RenderScope( const Context *context )
-		:	EditableScope( context ), m_sceneTranslationOnly( false )
+		: EditableScope( context ), m_sceneTranslationOnly( false )
 	{
 		if( const bool *d = context->getIfExists<bool>( g_sceneTranslationOnlyContextName ) )
 		{
@@ -88,10 +88,9 @@ struct RenderScope : public Context::EditableScope
 		return m_sceneTranslationOnly;
 	}
 
-	private :
+private:
 
-		bool m_sceneTranslationOnly;
-
+	bool m_sceneTranslationOnly;
 };
 
 } // namespace
@@ -104,7 +103,7 @@ static IECore::InternedString g_defaultRendererOptionName( "render:defaultRender
 GAFFER_NODE_DEFINE_TYPE( Render );
 
 Render::Render( const std::string &name )
-	:	TaskNode( name )
+	: TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in" ) );
@@ -327,7 +326,7 @@ void Render::executeInternal( bool flushCaches ) const
 
 	const Mode mode = static_cast<Mode>( modePlug()->getValue() );
 	const std::string fileName = fileNamePlug()->getValue();
-	if( mode == SceneDescriptionMode  )
+	if( mode == SceneDescriptionMode )
 	{
 		if( fileName.empty() )
 		{

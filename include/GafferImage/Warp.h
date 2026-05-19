@@ -58,73 +58,72 @@ namespace GafferImage
 ///   and return the Engine subclass.
 class GAFFERIMAGE_API Warp : public FlatImageProcessor
 {
-	public :
+public:
 
-		explicit Warp( const std::string &name=defaultName<Warp>() );
-		~Warp() override;
+	explicit Warp( const std::string &name = defaultName<Warp>() );
+	~Warp() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Warp, WarpTypeId, FlatImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Warp, WarpTypeId, FlatImageProcessor );
 
-		Gaffer::IntPlug *boundingModePlug();
-		const Gaffer::IntPlug *boundingModePlug() const;
+	Gaffer::IntPlug *boundingModePlug();
+	const Gaffer::IntPlug *boundingModePlug() const;
 
-		Gaffer::StringPlug *filterPlug();
-		const Gaffer::StringPlug *filterPlug() const;
+	Gaffer::StringPlug *filterPlug();
+	const Gaffer::StringPlug *filterPlug() const;
 
-		Gaffer::BoolPlug *useDerivativesPlug();
-		const Gaffer::BoolPlug *useDerivativesPlug() const;
+	Gaffer::BoolPlug *useDerivativesPlug();
+	const Gaffer::BoolPlug *useDerivativesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		/// Abstract base class for implementing the warp function.
-		struct Engine
-		{
+	/// Abstract base class for implementing the warp function.
+	struct Engine
+	{
 
-			virtual ~Engine();
+		virtual ~Engine();
 
-			/// Must be implemented to return the source pixel for the specified
-			/// output pixel.
-			virtual Imath::V2f inputPixel( const Imath::V2f &outputPixel ) const = 0;
+		/// Must be implemented to return the source pixel for the specified
+		/// output pixel.
+		virtual Imath::V2f inputPixel( const Imath::V2f &outputPixel ) const = 0;
 
-			/// May be returned by inputPixel() to indicate that there is no
-			/// suitable input position, and black should be output instead.
-			static const Imath::V2f black;
+		/// May be returned by inputPixel() to indicate that there is no
+		/// suitable input position, and black should be output instead.
+		static const Imath::V2f black;
+	};
 
-		};
+	/// Must be implemented to return true if the input is used
+	/// in the implementation of engine().
+	virtual bool affectsEngine( const Gaffer::Plug *input ) const = 0;
+	/// Must be implemented to call the base class implementation then
+	/// hash all the inputs used in creating an engine for the specified
+	/// tile. If the tileOrigin is not included in the hash, then the
+	/// same engine may be reused for all tiles.
+	virtual void hashEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
+	/// Must be implemented to return an Engine instance capable
+	/// of answering all queries for the specified tile.
+	virtual const Engine *computeEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const = 0;
 
-		/// Must be implemented to return true if the input is used
-		/// in the implementation of engine().
-		virtual bool affectsEngine( const Gaffer::Plug *input ) const = 0;
-		/// Must be implemented to call the base class implementation then
-		/// hash all the inputs used in creating an engine for the specified
-		/// tile. If the tileOrigin is not included in the hash, then the
-		/// same engine may be reused for all tiles.
-		virtual void hashEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
-		/// Must be implemented to return an Engine instance capable
-		/// of answering all queries for the specified tile.
-		virtual const Engine *computeEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const = 0;
+private:
 
-	private :
+	IE_CORE_FORWARDDECLARE( EngineData );
 
-		IE_CORE_FORWARDDECLARE( EngineData );
+	Gaffer::ObjectPlug *enginePlug();
+	const Gaffer::ObjectPlug *enginePlug() const;
 
-		Gaffer::ObjectPlug *enginePlug();
-		const Gaffer::ObjectPlug *enginePlug() const;
+	Gaffer::CompoundObjectPlug *sampleRegionsPlug();
+	const Gaffer::CompoundObjectPlug *sampleRegionsPlug() const;
 
-		Gaffer::CompoundObjectPlug *sampleRegionsPlug();
-		const Gaffer::CompoundObjectPlug *sampleRegionsPlug() const;
+	static float approximateDerivative( float upperPos, float center, float lower );
 
-		static float approximateDerivative( float upperPos, float center, float lower );
-
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Warp )

@@ -110,216 +110,214 @@ class TaskMutex : boost::noncopyable
 
 	using InternalMutex = tbb::spin_rw_mutex;
 
-	public :
+public:
 
-		TaskMutex()
+	TaskMutex()
+	{
+	}
+
+	/// Used to acquire a lock on the mutex and release it
+	/// automatically in an exception-safe way. Equivalent to
+	/// the `scoped_lock` of the standard TBB mutexes.
+	class ScopedLock : boost::noncopyable
+	{
+
+	public:
+
+		ScopedLock()
+			: m_mutex( nullptr ), m_writer( false )
 		{
 		}
 
-		/// Used to acquire a lock on the mutex and release it
-		/// automatically in an exception-safe way. Equivalent to
-		/// the `scoped_lock` of the standard TBB mutexes.
-		class ScopedLock : boost::noncopyable
+		ScopedLock( TaskMutex &mutex, bool write = true, bool acceptWork = true )
+			: ScopedLock()
 		{
+			acquire( mutex, write, acceptWork );
+		}
 
-			public :
-
-				ScopedLock()
-					:	m_mutex( nullptr ), m_writer( false )
-				{
-				}
-
-				ScopedLock( TaskMutex &mutex, bool write = true, bool acceptWork = true )
-					:	ScopedLock()
-				{
-					acquire( mutex, write, acceptWork );
-				}
-
-				~ScopedLock()
-				{
-					if( m_mutex )
-					{
-						release();
-					}
-				}
-
-				/// Acquires a lock on `mutex`. If `acceptWork` is true, then may perform
-				/// work on behalf of `execute()` while waiting.
-				void acquire( TaskMutex &mutex, bool write = true, bool acceptWork = true )
-				{
-#if TBB_VERSION_MAJOR < 2021
-					tbb::internal::atomic_backoff backoff;
-#else
-					tbb::detail::atomic_backoff backoff;
-#endif
-					while( !acquireOr( mutex, write, [acceptWork]( bool workAvailable ){ return acceptWork; } ) )
-					{
-						backoff.pause();
-					}
-				}
-
-				/// Upgrades a previously-acquired reader lock to a full writer
-				/// lock. Returns true if the upgrade was achieved without
-				/// temporarily releasing the lock, and false otherwise.
-				bool upgradeToWriter()
-				{
-					assert( m_mutex && !m_writer );
-					m_writer = true;
-					return m_lock.upgrade_to_writer();
-				}
-
-				/// Calls `f` in a way that allows threads waiting for the lock to perform
-				/// TBB tasks on its behalf. Should only be called by the holder of a write lock.
-				template<typename F>
-				void execute( F &&f )
-				{
-					assert( m_mutex && m_writer );
-
-					ExecutionStateMutex::scoped_lock executionStateLock( m_mutex->m_executionStateMutex );
-					assert( !m_mutex->m_executionState );
-					m_mutex->m_executionState = new ExecutionState;
-					executionStateLock.release();
-
-					// Wrap `f` to capture any exceptions it throws. If we allow
-					// `task_group::wait()` to see them, we hit a thread-safety
-					// bug in `tbb::task_group_context::reset()`.
-					std::exception_ptr exception;
-					auto fWrapper = [&f, &exception] {
-						try
-						{
-							f();
-						}
-						catch( ... )
-						{
-							exception = std::current_exception();
-						}
-					};
-
-					std::optional<tbb::task_group_status> status;
-					m_mutex->m_executionState->arena.execute(
-						[this, &fWrapper, &status] {
-							status = m_mutex->m_executionState->taskGroup.run_and_wait( fWrapper );
-						}
-					);
-
-					assert( (bool)status );
-
-					executionStateLock.acquire( m_mutex->m_executionStateMutex );
-					m_mutex->m_executionState = nullptr;
-
-					if( exception )
-					{
-						std::rethrow_exception( exception );
-					}
-					else if( status.value() == tbb::task_group_status::canceled )
-					{
-						throw IECore::Cancelled();
-					}
-				}
-
-				/// Acquires mutex or returns false. Never does TBB tasks.
-				bool tryAcquire( TaskMutex &mutex, bool write = true )
-				{
-					return acquireOr( mutex, write, []( bool workAvailable ){ return false; } );
-				}
-
-				/// Releases the lock. This will be done automatically
-				/// by ~ScopedLock, but may be called explicitly to release
-				/// the lock early.
-				void release()
-				{
-					assert( m_mutex );
-					m_lock.release();
-					m_mutex = nullptr;
-					m_writer = false;
-				}
-
-				/// Advanced API
-				/// ============
-				///
-				/// These methods provide advanced usage required by complex requirements
-				/// in Gaffer's LRUCache. They should not be considered part of the canonical
-				/// API.
-
-				/// Tries to acquire the mutex, returning true on success. On failure,
-				/// calls `workNotifier( bool workAvailable )`. If work is available and
-				/// `workNotifier` returns true, then this thread will perform TBB tasks
-				/// spawned by `execute()` until the work is complete. Returns false on
-				/// failure regardless of whether or not work is done.
-				template<typename WorkNotifier>
-				bool acquireOr( TaskMutex &mutex, bool write, WorkNotifier &&workNotifier )
-				{
-					assert( !m_mutex );
-					if( m_lock.try_acquire( mutex.m_mutex, write ) )
-					{
-						// Success!
-						m_mutex = &mutex;
-						m_writer = write;
-						return true;
-					}
-
-					// Failed to acquire the mutex by regular means. We now need to
-					// consider our interaction with any execution state introduced by a
-					// current call to `execute()`.
-
-					ExecutionStateMutex::scoped_lock executionStateLock( mutex.m_executionStateMutex );
-
-					const bool workAvailable = mutex.m_executionState.get();
-					if( !workNotifier( workAvailable ) || !workAvailable )
-					{
-						return false;
-					}
-
-					// Perform work on behalf of `execute()`.
-
-					ExecutionStatePtr executionState = mutex.m_executionState;
-					executionStateLock.release();
-
-					executionState->arena.execute(
-						[&executionState]{ executionState->taskGroup.wait(); }
-					);
-
-					return false;
-				}
-
-				bool isWriter() const
-				{
-					return m_writer;
-				}
-
-			private :
-
-				InternalMutex::scoped_lock m_lock;
-				TaskMutex *m_mutex;
-				bool m_writer;
-
-		};
-
-	private :
-
-		// The actual mutex that is held by the ScopedLock.
-		InternalMutex m_mutex;
-
-		// The mechanism we use to allow waiting threads
-		// to participate in the work done by `execute()`.
-		struct ExecutionState : public IECore::RefCounted
+		~ScopedLock()
 		{
-			// Work around https://bugs.llvm.org/show_bug.cgi?id=32978
-			~ExecutionState() noexcept( true ) override
+			if( m_mutex )
 			{
+				release();
+			}
+		}
+
+		/// Acquires a lock on `mutex`. If `acceptWork` is true, then may perform
+		/// work on behalf of `execute()` while waiting.
+		void acquire( TaskMutex &mutex, bool write = true, bool acceptWork = true )
+		{
+#if TBB_VERSION_MAJOR < 2021
+			tbb::internal::atomic_backoff backoff;
+#else
+			tbb::detail::atomic_backoff backoff;
+#endif
+			while( !acquireOr( mutex, write, [acceptWork]( bool workAvailable ) { return acceptWork; } ) )
+			{
+				backoff.pause();
+			}
+		}
+
+		/// Upgrades a previously-acquired reader lock to a full writer
+		/// lock. Returns true if the upgrade was achieved without
+		/// temporarily releasing the lock, and false otherwise.
+		bool upgradeToWriter()
+		{
+			assert( m_mutex && !m_writer );
+			m_writer = true;
+			return m_lock.upgrade_to_writer();
+		}
+
+		/// Calls `f` in a way that allows threads waiting for the lock to perform
+		/// TBB tasks on its behalf. Should only be called by the holder of a write lock.
+		template<typename F>
+		void execute( F &&f )
+		{
+			assert( m_mutex && m_writer );
+
+			ExecutionStateMutex::scoped_lock executionStateLock( m_mutex->m_executionStateMutex );
+			assert( !m_mutex->m_executionState );
+			m_mutex->m_executionState = new ExecutionState;
+			executionStateLock.release();
+
+			// Wrap `f` to capture any exceptions it throws. If we allow
+			// `task_group::wait()` to see them, we hit a thread-safety
+			// bug in `tbb::task_group_context::reset()`.
+			std::exception_ptr exception;
+			auto fWrapper = [&f, &exception] {
+				try
+				{
+					f();
+				}
+				catch( ... )
+				{
+					exception = std::current_exception();
+				}
+			};
+
+			std::optional<tbb::task_group_status> status;
+			m_mutex->m_executionState->arena.execute(
+				[this, &fWrapper, &status] {
+					status = m_mutex->m_executionState->taskGroup.run_and_wait( fWrapper );
+				}
+			);
+
+			assert( (bool)status );
+
+			executionStateLock.acquire( m_mutex->m_executionStateMutex );
+			m_mutex->m_executionState = nullptr;
+
+			if( exception )
+			{
+				std::rethrow_exception( exception );
+			}
+			else if( status.value() == tbb::task_group_status::canceled )
+			{
+				throw IECore::Cancelled();
+			}
+		}
+
+		/// Acquires mutex or returns false. Never does TBB tasks.
+		bool tryAcquire( TaskMutex &mutex, bool write = true )
+		{
+			return acquireOr( mutex, write, []( bool workAvailable ) { return false; } );
+		}
+
+		/// Releases the lock. This will be done automatically
+		/// by ~ScopedLock, but may be called explicitly to release
+		/// the lock early.
+		void release()
+		{
+			assert( m_mutex );
+			m_lock.release();
+			m_mutex = nullptr;
+			m_writer = false;
+		}
+
+		/// Advanced API
+		/// ============
+		///
+		/// These methods provide advanced usage required by complex requirements
+		/// in Gaffer's LRUCache. They should not be considered part of the canonical
+		/// API.
+
+		/// Tries to acquire the mutex, returning true on success. On failure,
+		/// calls `workNotifier( bool workAvailable )`. If work is available and
+		/// `workNotifier` returns true, then this thread will perform TBB tasks
+		/// spawned by `execute()` until the work is complete. Returns false on
+		/// failure regardless of whether or not work is done.
+		template<typename WorkNotifier>
+		bool acquireOr( TaskMutex &mutex, bool write, WorkNotifier &&workNotifier )
+		{
+			assert( !m_mutex );
+			if( m_lock.try_acquire( mutex.m_mutex, write ) )
+			{
+				// Success!
+				m_mutex = &mutex;
+				m_writer = write;
+				return true;
 			}
 
-			// Arena and task group used to allow
-			// waiting threads to participate in work.
-			tbb::task_arena arena;
-			tbb::task_group taskGroup;
-		};
-		IE_CORE_DECLAREPTR( ExecutionState );
+			// Failed to acquire the mutex by regular means. We now need to
+			// consider our interaction with any execution state introduced by a
+			// current call to `execute()`.
 
-		using ExecutionStateMutex = tbb::spin_mutex;
-		ExecutionStateMutex m_executionStateMutex; // Protects m_executionState
-		ExecutionStatePtr m_executionState;
+			ExecutionStateMutex::scoped_lock executionStateLock( mutex.m_executionStateMutex );
 
+			const bool workAvailable = mutex.m_executionState.get();
+			if( !workNotifier( workAvailable ) || !workAvailable )
+			{
+				return false;
+			}
+
+			// Perform work on behalf of `execute()`.
+
+			ExecutionStatePtr executionState = mutex.m_executionState;
+			executionStateLock.release();
+
+			executionState->arena.execute(
+				[&executionState] { executionState->taskGroup.wait(); }
+			);
+
+			return false;
+		}
+
+		bool isWriter() const
+		{
+			return m_writer;
+		}
+
+	private:
+
+		InternalMutex::scoped_lock m_lock;
+		TaskMutex *m_mutex;
+		bool m_writer;
+	};
+
+private:
+
+	// The actual mutex that is held by the ScopedLock.
+	InternalMutex m_mutex;
+
+	// The mechanism we use to allow waiting threads
+	// to participate in the work done by `execute()`.
+	struct ExecutionState : public IECore::RefCounted
+	{
+		// Work around https://bugs.llvm.org/show_bug.cgi?id=32978
+		~ExecutionState() noexcept( true ) override
+		{
+		}
+
+		// Arena and task group used to allow
+		// waiting threads to participate in work.
+		tbb::task_arena arena;
+		tbb::task_group taskGroup;
+	};
+	IE_CORE_DECLAREPTR( ExecutionState );
+
+	using ExecutionStateMutex = tbb::spin_mutex;
+	ExecutionStateMutex m_executionStateMutex; // Protects m_executionState
+	ExecutionStatePtr m_executionState;
 };
 
 } // namespace IECorePreview

@@ -100,9 +100,9 @@ void filterVectors( CompoundObject *compoundObject, const vector<unsigned char> 
 
 			IECore::dispatch(
 				static_cast<Data *>( value.get() ),
-				[&] ( auto *data ) {
+				[&]( auto *data ) {
 					using DataType = remove_pointer_t<decltype( data )>;
-					if constexpr ( TypeTraits::IsVectorTypedData<DataType>::value )
+					if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
 					{
 						filterVector( data->writable(), filter );
 					}
@@ -201,8 +201,7 @@ struct OutputTraits
 	using ObjectType = std::conditional_t<
 		IECore::TypeTraits::IsVec<typename ContainerType::value_type>::value,
 		IECore::GeometricTypedData<ContainerType>,
-		IECore::TypedData<ContainerType>
-	>;
+		IECore::TypedData<ContainerType>>;
 	using PlugType = TypedObjectPlug<ObjectType>;
 	static ContainerType &container( ObjectType &object ) { return object.writable(); }
 	static typename InputPlugType::ValueType collect( const InputPlugType *input ) { return input->getValue(); }
@@ -216,7 +215,8 @@ struct OutputTraits<TypedObjectPlug<T>>
 	using ContainerType = ObjectVector::MemberContainer;
 	using PlugType = ObjectVectorPlug;
 	static ContainerType &container( ObjectType &object ) { return object.members(); }
-	static ObjectPtr collect( const TypedObjectPlug<T> *input ) {
+	static ObjectPtr collect( const TypedObjectPlug<T> *input )
+	{
 		// Cast is OK because we're storing into a container that becomes const
 		// immediately after returning from compute. We never modify the value.
 		return boost::const_pointer_cast<T>( input->getValue() );
@@ -244,7 +244,7 @@ GAFFER_NODE_DEFINE_TYPE( Collect );
 size_t Collect::g_firstPlugIndex = 0;
 
 Collect::Collect( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -351,7 +351,7 @@ const CompoundObjectPlug *Collect::collectionPlug() const
 bool Collect::canAddInput( const ValuePlug *prototype ) const
 {
 	bool result = false;
-	dispatchPlugFunction( prototype, [&result] ( auto *plug ) { result = true; } );
+	dispatchPlugFunction( prototype, [&result]( auto *plug ) { result = true; } );
 	return result;
 }
 
@@ -359,7 +359,7 @@ ValuePlug *Collect::addInput( const ValuePlug *prototype )
 {
 	ValuePlugPtr output;
 	dispatchPlugFunction(
-		prototype, [&output] ( auto *plug ) {
+		prototype, [&output]( auto *plug ) {
 			using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
 			output = new typename OutputTraits::PlugType( plug->getName(), Plug::Out );
 		}
@@ -482,8 +482,7 @@ void Collect::hash( const ValuePlug *output, const Context *context, IECore::Mur
 			IntRange( 0, contextValues.size() ),
 			MurmurHash(),
 
-			[&] ( const IntRange &range, MurmurHash hash )
-			{
+			[&]( const IntRange &range, MurmurHash hash ) {
 				Context::EditableScope scope( threadState );
 				for( int index = range.begin(); index < range.end(); ++index )
 				{
@@ -499,7 +498,7 @@ void Collect::hash( const ValuePlug *output, const Context *context, IECore::Mur
 				return hash;
 			},
 
-			[] ( MurmurHash x, const MurmurHash &y ) {
+			[]( MurmurHash x, const MurmurHash &y ) {
 				x.append( y );
 				return x;
 			},
@@ -516,7 +515,7 @@ void Collect::hash( const ValuePlug *output, const Context *context, IECore::Mur
 	}
 }
 
-void Collect::compute( ValuePlug *output, const Context *context) const
+void Collect::compute( ValuePlug *output, const Context *context ) const
 {
 	ComputeNode::compute( output, context );
 
@@ -540,7 +539,7 @@ void Collect::compute( ValuePlug *output, const Context *context) const
 		{
 			dispatchPlugFunction(
 				input.get(),
-				[&] ( auto *plug ) {
+				[&]( auto *plug ) {
 					using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
 					typename OutputTraits::ObjectType::Ptr object = new typename OutputTraits::ObjectType;
 					OutputTraits::container( *object ).resize( contextValues.size() );
@@ -557,8 +556,7 @@ void Collect::compute( ValuePlug *output, const Context *context) const
 
 		tbb::parallel_for(
 			IntRange( 0, contextValues.size() ),
-			[&] ( const IntRange &range )
-			{
+			[&]( const IntRange &range ) {
 				Context::EditableScope scope( threadState );
 				for( int index = range.begin(); index < range.end(); ++index )
 				{
@@ -569,7 +567,7 @@ void Collect::compute( ValuePlug *output, const Context *context) const
 					{
 						dispatchPlugFunction(
 							input,
-							[&, object=object] ( auto *plug ) {
+							[&, object = object]( auto *plug ) {
 								using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
 								auto typedObject = static_cast<typename OutputTraits::ObjectType *>( object );
 								OutputTraits::container( *typedObject )[index] = OutputTraits::collect( plug );
@@ -595,8 +593,7 @@ void Collect::compute( ValuePlug *output, const Context *context) const
 
 		dispatchPlugFunction(
 			input,
-			[&] ( auto *plug ) {
-
+			[&]( auto *plug ) {
 				using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
 				auto object = collection->member<typename OutputTraits::PlugType::ValueType>( output->getName(), true );
 				static_cast<typename OutputTraits::PlugType *>( output )->setValue( object );

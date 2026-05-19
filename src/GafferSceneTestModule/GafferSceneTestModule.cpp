@@ -63,12 +63,10 @@ BOOST_PYTHON_MODULE( _GafferSceneTest )
 {
 
 	IECorePython::RefCountedClass<ContextSanitiser, Gaffer::Monitor>( "ContextSanitiser" )
-		.def( init<>() )
-	;
+		.def( init<>() );
 
 	IECorePython::RefCountedClass<GlobalsSanitiser, Gaffer::Monitor>( "GlobalsSanitiser" )
-		.def( init<>() )
-	;
+		.def( init<>() );
 
 	GafferBindings::DependencyNodeClass<CompoundObjectSource>();
 	GafferBindings::NodeClass<TestShader>();
@@ -81,5 +79,4 @@ BOOST_PYTHON_MODULE( _GafferSceneTest )
 	def( "connectTraverseSceneToPreDispatchSignal", &connectTraverseSceneToPreDispatchSignal );
 
 	def( "testManyStringToPathCalls", &testManyStringToPathCalls );
-
 }

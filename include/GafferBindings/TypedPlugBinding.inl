@@ -66,17 +66,17 @@ static typename T::ValueType getValue( const T *plug, const IECore::MurmurHash *
 
 template<typename T, typename TWrapper>
 TypedPlugClass<T, TWrapper>::TypedPlugClass( const char *docString )
-	:	PlugClass<T, TWrapper>( docString )
+	: PlugClass<T, TWrapper>( docString )
 {
 	using V = typename T::ValueType;
 
 	this->def(
 		boost::python::init<const std::string &, Gaffer::Plug::Direction, const V &, unsigned>(
 			(
-				boost::python::arg_( "name" )=Gaffer::GraphComponent::defaultName<T>(),
-				boost::python::arg_( "direction" )=Gaffer::Plug::In,
-				boost::python::arg_( "defaultValue" )=V(),
-				boost::python::arg_( "flags" )=Gaffer::Plug::Default
+				boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<T>(),
+				boost::python::arg_( "direction" ) = Gaffer::Plug::In,
+				boost::python::arg_( "defaultValue" ) = V(),
+				boost::python::arg_( "flags" ) = Gaffer::Plug::Default
 			)
 		)
 	);

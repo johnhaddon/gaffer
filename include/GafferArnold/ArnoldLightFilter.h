@@ -49,13 +49,12 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldLightFilter : public GafferScene::LightFilter
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldLightFilter, ArnoldLightFilterTypeId, GafferScene::LightFilter );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldLightFilter, ArnoldLightFilterTypeId, GafferScene::LightFilter );
 
-		explicit ArnoldLightFilter( const std::string &name=defaultName<ArnoldLightFilter>() );
-		~ArnoldLightFilter() override;
-
+	explicit ArnoldLightFilter( const std::string &name = defaultName<ArnoldLightFilter>() );
+	~ArnoldLightFilter() override;
 };
 
 IE_CORE_DECLAREPTR( ArnoldLightFilter )

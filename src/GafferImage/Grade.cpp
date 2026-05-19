@@ -46,23 +46,23 @@ using namespace GafferImage;
 
 namespace
 {
-	struct GradeParametersScope : public Gaffer::Context::EditableScope
+struct GradeParametersScope : public Gaffer::Context::EditableScope
+{
+	GradeParametersScope( const Gaffer::Context *context )
+		: EditableScope( context )
 	{
-		GradeParametersScope( const Gaffer::Context *context )
-			:   EditableScope( context )
-		{
-			remove( GafferImage::ImagePlug::tileOriginContextName );
-		}
-	};
+		remove( GafferImage::ImagePlug::tileOriginContextName );
+	}
+};
 
-}
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( Grade );
 
 size_t Grade::g_firstPlugIndex = 0;
 
 Grade::Grade( const std::string &name )
-	:	ChannelDataProcessor( name, true /* hasUnpremultPlug */ )
+	: ChannelDataProcessor( name, true /* hasUnpremultPlug */ )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Color4fPlug( "blackPoint" ) );
@@ -92,87 +92,87 @@ const Gaffer::Color4fPlug *Grade::blackPointPlug() const
 
 Gaffer::Color4fPlug *Grade::whitePointPlug()
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+1 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::Color4fPlug *Grade::whitePointPlug() const
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+1 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::Color4fPlug *Grade::liftPlug()
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+2 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 2 );
 }
 
 const Gaffer::Color4fPlug *Grade::liftPlug() const
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+2 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 2 );
 }
 
 Gaffer::Color4fPlug *Grade::gainPlug()
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+3 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 3 );
 }
 
 const Gaffer::Color4fPlug *Grade::gainPlug() const
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+3 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 3 );
 }
 
 Gaffer::Color4fPlug *Grade::multiplyPlug()
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+4 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 4 );
 }
 
 const Gaffer::Color4fPlug *Grade::multiplyPlug() const
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+4 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 4 );
 }
 
 Gaffer::Color4fPlug *Grade::offsetPlug()
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+5 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 5 );
 }
 
 const Gaffer::Color4fPlug *Grade::offsetPlug() const
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+5 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 5 );
 }
 
 Gaffer::Color4fPlug *Grade::gammaPlug()
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+6 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 6 );
 }
 
 const Gaffer::Color4fPlug *Grade::gammaPlug() const
 {
-	return getChild<Color4fPlug>( g_firstPlugIndex+6 );
+	return getChild<Color4fPlug>( g_firstPlugIndex + 6 );
 }
 
 Gaffer::BoolPlug *Grade::blackClampPlug()
 {
-	return getChild<BoolPlug>( g_firstPlugIndex+7 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 7 );
 }
 
 const Gaffer::BoolPlug *Grade::blackClampPlug() const
 {
-	return getChild<BoolPlug>( g_firstPlugIndex+7 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 7 );
 }
 
 Gaffer::BoolPlug *Grade::whiteClampPlug()
 {
-	return getChild<BoolPlug>( g_firstPlugIndex+8 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 8 );
 }
 
 const Gaffer::BoolPlug *Grade::whiteClampPlug() const
 {
-	return getChild<BoolPlug>( g_firstPlugIndex+8 );
+	return getChild<BoolPlug>( g_firstPlugIndex + 8 );
 }
 
 bool Grade::channelEnabled( const std::string &channel ) const
 {
-	if ( !ChannelDataProcessor::channelEnabled( channel ) )
+	if( !ChannelDataProcessor::channelEnabled( channel ) )
 	{
 		return false;
 	}
@@ -201,13 +201,13 @@ void Grade::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	for( unsigned int i = 0; i < 4; ++i )
 	{
 		if(
-			input == blackPointPlug()->getChild(i) ||
-			input == whitePointPlug()->getChild(i) ||
-			input == liftPlug()->getChild(i) ||
-			input == gainPlug()->getChild(i) ||
-			input == multiplyPlug()->getChild(i) ||
-			input == offsetPlug()->getChild(i) ||
-			input == gammaPlug()->getChild(i)
+			input == blackPointPlug()->getChild( i ) ||
+			input == whitePointPlug()->getChild( i ) ||
+			input == liftPlug()->getChild( i ) ||
+			input == gainPlug()->getChild( i ) ||
+			input == multiplyPlug()->getChild( i ) ||
+			input == offsetPlug()->getChild( i ) ||
+			input == gammaPlug()->getChild( i )
 		)
 		{
 			outputs.push_back( outPlug()->channelDataPlug() );
@@ -225,7 +225,6 @@ void Grade::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 		outputs.push_back( outPlug()->channelDataPlug() );
 		return;
 	}
-
 }
 
 void Grade::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -263,19 +262,21 @@ void Grade::processChannelData( const Gaffer::Context *context, const ImagePlug 
 	const float invGamma = 1. / gamma;
 
 	// Get some useful pointers.
-	float *outPtr = &(outData->writable()[0]);
+	float *outPtr = &( outData->writable()[0] );
 	const float *END = outPtr + outData->writable().size();
 
-	while (outPtr != END)
+	while( outPtr != END )
 	{
 		// Calculate the colour of the graded pixel.
-		float colour = *outPtr;	// As the input has been copied to outData, grab the input colour from there.
+		float colour = *outPtr; // As the input has been copied to outData, grab the input colour from there.
 		const float c = A * colour + B;
 		colour = ( c >= 0.f && invGamma != 1.f ? (float)pow( c, invGamma ) : c );
 
 		// Clamp the white and blacks if necessary.
-		if ( blackClamp && colour < 0.f ) colour = 0.f;
-		if ( whiteClamp && colour > 1.f ) colour = 1.f;
+		if( blackClamp && colour < 0.f )
+			colour = 0.f;
+		if( whiteClamp && colour > 1.f )
+			colour = 1.f;
 
 		// Write back the result.
 		*outPtr++ = colour;

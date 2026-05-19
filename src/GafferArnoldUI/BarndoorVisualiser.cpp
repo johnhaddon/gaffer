@@ -61,7 +61,13 @@ using namespace GafferSceneUI;
 namespace
 {
 
-enum class BarndoorLocation { Top, Right, Left, Bottom };
+enum class BarndoorLocation
+{
+	Top,
+	Right,
+	Left,
+	Bottom
+};
 
 float parameterOrDefault( const IECore::CompoundData *data, const char *key, const float def )
 {
@@ -75,19 +81,17 @@ float parameterOrDefault( const IECore::CompoundData *data, const char *key, con
 
 const char *barndoorFragSource()
 {
-	return
-		"void main()"
-		"{"
-		"if( mod( float( gl_FragCoord.x + gl_FragCoord.y ), 2.0) == 0.0 )"
-			"{"
-				"discard;"
-			"}"
-			"else"
-			"{"
-				"gl_FragColor = vec4(0, 0, 0, 1);"
-			"}"
-		"}"
-		;
+	return "void main()"
+		   "{"
+		   "if( mod( float( gl_FragCoord.x + gl_FragCoord.y ), 2.0) == 0.0 )"
+		   "{"
+		   "discard;"
+		   "}"
+		   "else"
+		   "{"
+		   "gl_FragColor = vec4(0, 0, 0, 1);"
+		   "}"
+		   "}";
 }
 
 void addBarndoor( IECoreGL::GroupPtr result, BarndoorLocation location, float cornerLeft, float cornerRight )
@@ -114,27 +118,27 @@ void addBarndoor( IECoreGL::GroupPtr result, BarndoorLocation location, float co
 
 	V3fVectorDataPtr p = new V3fVectorData;
 	std::vector<V3f> &pVec = p->writable();
-	pVec.push_back( V3f( -1, 1, 0  ) );
-	pVec.push_back( V3f( 1, 1, 0  ) );
-	pVec.push_back( V3f( 1, cornerRight, 0  ) );
-	pVec.push_back( V3f( -1, cornerLeft, 0  ) );
+	pVec.push_back( V3f( -1, 1, 0 ) );
+	pVec.push_back( V3f( 1, 1, 0 ) );
+	pVec.push_back( V3f( 1, cornerRight, 0 ) );
+	pVec.push_back( V3f( -1, cornerLeft, 0 ) );
 
 	IECoreScene::MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive( vertsPerPoly, vertIds, "linear", p );
 
 	Imath::M44f trans;
 	switch( location )
 	{
-	case BarndoorLocation::Top:
-		break;
-	case BarndoorLocation::Bottom:
-		trans.rotate( V3f( 0, 0, M_PI ) );
-		break;
-	case BarndoorLocation::Left:
-		trans.rotate( V3f( 0, 0, M_PI / 2.0 ) );
-		break;
-	case BarndoorLocation::Right:
-		trans.rotate( V3f( 0, 0, M_PI / -2.0 ) );
-		break;
+		case BarndoorLocation::Top :
+			break;
+		case BarndoorLocation::Bottom :
+			trans.rotate( V3f( 0, 0, M_PI ) );
+			break;
+		case BarndoorLocation::Left :
+			trans.rotate( V3f( 0, 0, M_PI / 2.0 ) );
+			break;
+		case BarndoorLocation::Right :
+			trans.rotate( V3f( 0, 0, M_PI / -2.0 ) );
+			break;
 	}
 
 	ToGLMeshConverterPtr meshConverter = new ToGLMeshConverter( mesh );
@@ -150,19 +154,18 @@ void addBarndoor( IECoreGL::GroupPtr result, BarndoorLocation location, float co
 class BarndoorVisualiser final : public LightFilterVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( BarndoorVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( BarndoorVisualiser )
 
-		BarndoorVisualiser();
-		~BarndoorVisualiser() override;
+	BarndoorVisualiser();
+	~BarndoorVisualiser() override;
 
-		Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	protected :
+protected:
 
-		static LightFilterVisualiser::LightFilterVisualiserDescription<BarndoorVisualiser> g_visualiserDescription;
-
+	static LightFilterVisualiser::LightFilterVisualiserDescription<BarndoorVisualiser> g_visualiserDescription;
 };
 
 IE_CORE_DECLAREPTR( BarndoorVisualiser )
@@ -218,7 +221,8 @@ Visualisations BarndoorVisualiser::visualise( const IECore::InternedString &attr
 				"",
 				"",
 				barndoorFragSource(),
-				parameters )
+				parameters
+			)
 		);
 
 		float innerAngle;
@@ -239,7 +243,6 @@ Visualisations BarndoorVisualiser::visualise( const IECore::InternedString &attr
 	}
 
 	return { Visualisation::createOrnament( result, false ) };
-
 }
 
 } // namespace

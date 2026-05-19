@@ -59,26 +59,26 @@ using namespace IECoreArnold;
 namespace
 {
 
-const AtString g_catclarkArnoldString("catclark");
-const AtString g_motionStartArnoldString("motion_start");
-const AtString g_motionEndArnoldString("motion_end");
-const AtString g_nidxsArnoldString("nidxs");
-const AtString g_nlistArnoldString("nlist");
-const AtString g_nsidesArnoldString("nsides");
-const AtString g_polymeshArnoldString("polymesh");
-const AtString g_smoothingArnoldString("smoothing");
-const AtString g_subdivTypeArnoldString("subdiv_type");
-const AtString g_uvidxsArnoldString("uvidxs");
-const AtString g_uvlistArnoldString("uvlist");
-const AtString g_vidxsArnoldString("vidxs");
-const AtString g_vlistArnoldString("vlist");
-const AtString g_creaseIdxsArnoldString("crease_idxs");
-const AtString g_creaseSharpnessArnoldString("crease_sharpness");
+const AtString g_catclarkArnoldString( "catclark" );
+const AtString g_motionStartArnoldString( "motion_start" );
+const AtString g_motionEndArnoldString( "motion_end" );
+const AtString g_nidxsArnoldString( "nidxs" );
+const AtString g_nlistArnoldString( "nlist" );
+const AtString g_nsidesArnoldString( "nsides" );
+const AtString g_polymeshArnoldString( "polymesh" );
+const AtString g_smoothingArnoldString( "smoothing" );
+const AtString g_subdivTypeArnoldString( "subdiv_type" );
+const AtString g_uvidxsArnoldString( "uvidxs" );
+const AtString g_uvlistArnoldString( "uvlist" );
+const AtString g_vidxsArnoldString( "vidxs" );
+const AtString g_vlistArnoldString( "vlist" );
+const AtString g_creaseIdxsArnoldString( "crease_idxs" );
+const AtString g_creaseSharpnessArnoldString( "crease_sharpness" );
 
 AtArray *identityIndices( size_t size )
 {
 	AtArray *result = AiArrayAllocate( size, 1, AI_TYPE_UINT );
-	for( size_t i=0; i < size; ++i )
+	for( size_t i = 0; i < size; ++i )
 	{
 		AiArraySetInt( result, i, i );
 	}
@@ -89,7 +89,7 @@ template<typename T>
 const T *variableData( const PrimitiveVariableMap &variables, const std::string &name, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Invalid )
 {
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
-	if( it==variables.end() )
+	if( it == variables.end() )
 	{
 		return NULL;
 	}
@@ -172,7 +172,7 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 		AtString uvSetName( uvSet.c_str() );
 		AiNodeDeclare( node, uvSetName, "indexed POINT2" );
 		AiNodeSetArray( node, uvSetName, uvsArray );
-		AiNodeSetArray( node, AtString( (uvSet + "idxs").c_str() ), indicesArray );
+		AiNodeSetArray( node, AtString( ( uvSet + "idxs" ).c_str() ), indicesArray );
 	}
 }
 
@@ -253,7 +253,7 @@ AtNode *convertStatic( const IECoreScene::MeshPrimitive *mesh, AtUniverse *unive
 
 	// Set subdivision
 
-	if( mesh->interpolation()=="catmullClark" )
+	if( mesh->interpolation() == "catmullClark" )
 	{
 		AiNodeSetStr( result, g_subdivTypeArnoldString, g_catclarkArnoldString );
 		AiNodeSetBool( result, g_smoothingArnoldString, true );
@@ -330,7 +330,7 @@ const V3fVectorData *normal( const IECoreScene::MeshPrimitive *mesh, PrimitiveVa
 
 void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation )
 {
-	const IECore::IntVectorData* nIndices = mesh->variables.find( "N" )->second.indices.get();
+	const IECore::IntVectorData *nIndices = mesh->variables.find( "N" )->second.indices.get();
 
 	if( interpolation == PrimitiveVariable::FaceVarying )
 	{
@@ -365,7 +365,7 @@ void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node,
 		else
 		{
 			AtArray *result = AiArrayAllocate( vertexIds.size(), 1, AI_TYPE_UINT );
-			for( size_t i=0; i < vertexIds.size(); ++i )
+			for( size_t i = 0; i < vertexIds.size(); ++i )
 			{
 				AiArraySetInt( result, i, nIndices->readable()[vertexIds[i]] );
 			}

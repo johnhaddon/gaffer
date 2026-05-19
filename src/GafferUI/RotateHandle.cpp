@@ -62,9 +62,9 @@ using namespace GafferUI;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( RotateHandle );
 
 RotateHandle::RotateHandle( Style::Axes axes )
-	:	Handle( defaultName<RotateHandle>() ),
-		m_axes( Style::X ),
-		m_preciseMotionEnabled( false )
+	: Handle( defaultName<RotateHandle>() ),
+	  m_axes( Style::X ),
+	  m_preciseMotionEnabled( false )
 {
 	setAxes( axes );
 	dragMoveSignal().connect( boost::bind( &RotateHandle::dragMove, this, ::_2 ) );
@@ -126,7 +126,8 @@ Imath::Eulerf RotateHandle::rotation( const DragDropEvent &event )
 	{
 		const LineSegment3f line = updatedLineFromEvent( event ) * fullTransform() * m_dragBeginWorldTransform.inverse();
 		const M44f m = rotationMatrix( m_dragBeginPointOnSphere, pointOnSphere( line ) );
-		Eulerf e; e.extract( m );
+		Eulerf e;
+		e.extract( m );
 
 		return e;
 	}

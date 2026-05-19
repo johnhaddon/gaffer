@@ -57,7 +57,7 @@ GAFFER_NODE_DEFINE_TYPE( FreezeTransform );
 size_t FreezeTransform::g_firstPlugIndex = 0;
 
 FreezeTransform::FreezeTransform( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new M44fPlug( "__transform", Plug::Out ) );

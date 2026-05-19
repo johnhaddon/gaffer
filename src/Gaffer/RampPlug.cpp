@@ -43,14 +43,13 @@
 using namespace Gaffer;
 
 template<typename T>
-const IECore::RunTimeTyped::TypeDescription<RampPlug<T> > RampPlug<T>::g_typeDescription;
+const IECore::RunTimeTyped::TypeDescription<RampPlug<T>> RampPlug<T>::g_typeDescription;
 
 template<typename T>
 RampPlug<T>::RampPlug( const std::string &name, Direction direction, const ValueType &defaultValue, unsigned flags )
-	:	ValuePlug( name, direction, flags ), m_defaultValue( defaultValue )
+	: ValuePlug( name, direction, flags ), m_defaultValue( defaultValue )
 {
-	addChild( new IntPlug( "interpolation", direction, (int)IECore::RampInterpolation::CatmullRom,
-		(int)IECore::RampInterpolation::Linear, (int)IECore::RampInterpolation::Constant ) );
+	addChild( new IntPlug( "interpolation", direction, (int)IECore::RampInterpolation::CatmullRom, (int)IECore::RampInterpolation::Linear, (int)IECore::RampInterpolation::Constant ) );
 
 	setToDefault();
 }
@@ -75,7 +74,7 @@ bool RampPlug<T>::acceptsChild( const GraphComponent *potentialChild ) const
 		return false;
 	}
 
-	if( c->children().size()==0 )
+	if( c->children().size() == 0 )
 	{
 		// when we're getting loaded from a serialisation, the point plugs are
 		// added before the point.x and point.y plugs are added, so we have to
@@ -83,7 +82,7 @@ bool RampPlug<T>::acceptsChild( const GraphComponent *potentialChild ) const
 		return true;
 	}
 
-	if( c->children().size()!=2 )
+	if( c->children().size() != 2 )
 	{
 		return false;
 	}
@@ -136,10 +135,10 @@ void RampPlug<T>::resetDefault()
 	const T oldDefault = m_defaultValue;
 	Action::enact(
 		this,
-		[this, newDefault] () {
+		[this, newDefault]() {
 			this->m_defaultValue = newDefault;
 		},
-		[this, oldDefault] () {
+		[this, oldDefault]() {
 			this->m_defaultValue = oldDefault;
 		}
 	);
@@ -184,7 +183,7 @@ void RampPlug<T>::setValue( const T &value )
 
 	unsigned existingPoints = numPoints();
 	unsigned i = 0;
-	for( ; it!=eIt; ++it )
+	for( ; it != eIt; ++it )
 	{
 		if( i >= existingPoints )
 		{
@@ -209,7 +208,7 @@ T RampPlug<T>::getValue() const
 	result.interpolation = (IECore::RampInterpolation)interpolationPlug()->getValue();
 
 	unsigned n = numPoints();
-	for( unsigned i=0; i<n; i++ )
+	for( unsigned i = 0; i < n; i++ )
 	{
 		result.points.insert( typename T::Point( pointXPlug( i )->getValue(), pointYPlug( i )->getValue() ) );
 	}
@@ -271,9 +270,10 @@ void RampPlug<T>::clearPoints()
 		return;
 	}
 
-	do {
+	do
+	{
 		removePoint( --i );
-	} while( i!=0 );
+	} while( i != 0 );
 }
 
 template<typename T>
@@ -350,8 +350,8 @@ GAFFER_PLUG_DEFINE_TEMPLATE_TYPE( Gaffer::RampfColor3fPlug, RampfColor3fPlugType
 GAFFER_PLUG_DEFINE_TEMPLATE_TYPE( Gaffer::RampfColor4fPlug, RampfColor4fPlugTypeId )
 
 // explicit instantiation
-template class RampPlug< IECore::Rampff >;
-template class RampPlug< IECore::RampfColor3f >;
-template class RampPlug< IECore::RampfColor4f >;
+template class RampPlug<IECore::Rampff>;
+template class RampPlug<IECore::RampfColor3f>;
+template class RampPlug<IECore::RampfColor4f>;
 
-}
+} // namespace Gaffer

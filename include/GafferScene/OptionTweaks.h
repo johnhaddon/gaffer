@@ -48,31 +48,31 @@ namespace GafferScene
 class GAFFERSCENE_API OptionTweaks : public GlobalsProcessor
 {
 
-	public :
+public:
 
-		OptionTweaks( const std::string &name=defaultName<OptionTweaks>() );
-		~OptionTweaks() override;
+	OptionTweaks( const std::string &name = defaultName<OptionTweaks>() );
+	~OptionTweaks() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::OptionTweaks, OptionTweaksTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::OptionTweaks, OptionTweaksTypeId, GlobalsProcessor );
 
-		Gaffer::BoolPlug *ignoreMissingPlug();
-		const Gaffer::BoolPlug *ignoreMissingPlug() const;
+	Gaffer::BoolPlug *ignoreMissingPlug();
+	const Gaffer::BoolPlug *ignoreMissingPlug() const;
 
-		Gaffer::TweaksPlug *tweaksPlug();
-		const Gaffer::TweaksPlug *tweaksPlug() const;
+	Gaffer::TweaksPlug *tweaksPlug();
+	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( OptionTweaks )
 
-}  // namespace GafferScene
+} // namespace GafferScene

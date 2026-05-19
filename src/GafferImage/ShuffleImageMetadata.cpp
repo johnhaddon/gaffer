@@ -45,7 +45,7 @@ GAFFER_NODE_DEFINE_TYPE( ShuffleImageMetadata );
 size_t ShuffleImageMetadata::g_firstPlugIndex = 0;
 
 ShuffleImageMetadata::ShuffleImageMetadata( const std::string &name )
-	:	MetadataProcessor( name )
+	: MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );

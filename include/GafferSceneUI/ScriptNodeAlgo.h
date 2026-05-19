@@ -65,7 +65,7 @@ namespace GafferSceneUI
 namespace ScriptNodeAlgo
 {
 
-using ChangedSignal = Gaffer::Signals::Signal<void ( Gaffer::ScriptNode * ), Gaffer::Signals::CatchingCombiner<void>>;
+using ChangedSignal = Gaffer::Signals::Signal<void( Gaffer::ScriptNode * ), Gaffer::Signals::CatchingCombiner<void>>;
 
 /// Visible Set
 /// ===========

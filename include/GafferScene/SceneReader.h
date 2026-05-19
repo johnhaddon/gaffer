@@ -56,92 +56,91 @@ namespace GafferScene
 class GAFFERSCENE_API SceneReader : public SceneNode
 {
 
-	public :
+public:
 
-		explicit SceneReader( const std::string &name=defaultName<SceneReader>() );
-		~SceneReader() override;
+	explicit SceneReader( const std::string &name = defaultName<SceneReader>() );
+	~SceneReader() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::SceneReader, SceneReaderTypeId, SceneNode )
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::SceneReader, SceneReaderTypeId, SceneNode )
 
-		/// Holds the name of the file to be loaded.
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	/// Holds the name of the file to be loaded.
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		/// Number of times the node has been refreshed.
-		Gaffer::IntPlug *refreshCountPlug();
-		const Gaffer::IntPlug *refreshCountPlug() const;
+	/// Number of times the node has been refreshed.
+	Gaffer::IntPlug *refreshCountPlug();
+	const Gaffer::IntPlug *refreshCountPlug() const;
 
-		Gaffer::StringPlug *tagsPlug();
-		const Gaffer::StringPlug *tagsPlug() const;
+	Gaffer::StringPlug *tagsPlug();
+	const Gaffer::StringPlug *tagsPlug() const;
 
-		Gaffer::TransformPlug *transformPlug();
-		const Gaffer::TransformPlug *transformPlug() const;
+	Gaffer::TransformPlug *transformPlug();
+	const Gaffer::TransformPlug *transformPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		static size_t supportedExtensions( std::vector<std::string> &extensions );
+	static size_t supportedExtensions( std::vector<std::string> &extensions );
 
-	protected :
+protected:
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		/// \todo These methods defer to SceneInterface::hash() to do most of the work, but we could go further.
-		/// Currently we still hash in fileNamePlug() and refreshCountPlug() because we don't trust the current
-		/// implementation of SceneCache::hash() - it should hash the filename and modification time, but instead
-		/// it hashes some pointer value which isn't guaranteed to be unique (see sceneHash() in IECore/SceneCache.cpp).
-		/// Additionally, we don't have a way of hashing in the tags, which we would need in hashChildNames().
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	/// \todo These methods defer to SceneInterface::hash() to do most of the work, but we could go further.
+	/// Currently we still hash in fileNamePlug() and refreshCountPlug() because we don't trust the current
+	/// implementation of SceneCache::hash() - it should hash the filename and modification time, but instead
+	/// it hashes some pointer value which isn't guaranteed to be unique (see sceneHash() in IECore/SceneCache.cpp).
+	/// Additionally, we don't have a way of hashing in the tags, which we would need in hashChildNames().
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
 
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
-		IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		void plugSet( Gaffer::Plug *plug );
+	void plugSet( Gaffer::Plug *plug );
 
-		// The typical access patterns for the SceneReader include accessing
-		// the same file repeatedly, and also the same path within the file
-		// repeatedly (to hash a value then compute it for instance, or to get
-		// the bound and then the object). We take advantage of that by storing
-		// the last accessed scene in thread local storage - we can then avoid
-		// the relatively expensive lookups necessary to find the appropriate
-		// SceneInterfacePtr for a query.
-		struct LastScene
-		{
-			std::string fileName;
-			IECoreScene::ConstSceneInterfacePtr fileNameScene;
-			ScenePlug::ScenePath path;
-			IECoreScene::ConstSceneInterfacePtr pathScene;
-		};
-		mutable tbb::enumerable_thread_specific<LastScene> m_lastScene;
-		// Returns the SceneInterface for the current filename and specified
-		// path, using `m_lastScene` to accelerate the lookups. If `refreshCount`
-		// or `tags` are provided, they are filled from `refreshCountPlug()` and
-		// `tagsPlug()` respectively.
-		IECoreScene::ConstSceneInterfacePtr scene( const ScenePath &path, const Gaffer::Context *context, int *refreshCount = nullptr, std::string *tags = nullptr ) const;
+	// The typical access patterns for the SceneReader include accessing
+	// the same file repeatedly, and also the same path within the file
+	// repeatedly (to hash a value then compute it for instance, or to get
+	// the bound and then the object). We take advantage of that by storing
+	// the last accessed scene in thread local storage - we can then avoid
+	// the relatively expensive lookups necessary to find the appropriate
+	// SceneInterfacePtr for a query.
+	struct LastScene
+	{
+		std::string fileName;
+		IECoreScene::ConstSceneInterfacePtr fileNameScene;
+		ScenePlug::ScenePath path;
+		IECoreScene::ConstSceneInterfacePtr pathScene;
+	};
+	mutable tbb::enumerable_thread_specific<LastScene> m_lastScene;
+	// Returns the SceneInterface for the current filename and specified
+	// path, using `m_lastScene` to accelerate the lookups. If `refreshCount`
+	// or `tags` are provided, they are filled from `refreshCountPlug()` and
+	// `tagsPlug()` respectively.
+	IECoreScene::ConstSceneInterfacePtr scene( const ScenePath &path, const Gaffer::Context *context, int *refreshCount = nullptr, std::string *tags = nullptr ) const;
 
-		static const double g_frameRate;
-		static size_t g_firstPlugIndex;
+	static const double g_frameRate;
+	static size_t g_firstPlugIndex;
 
-		// SceneInterface has two different APIs related to sets : the legacy tags API and the
-		// new sets API. We prefer the sets API for standard formats like Alembic and USD, but
-		// fall back to the tags API for legacy SceneInterfaces.
-		friend class SceneWriter;
-		static bool useSetsAPI( const IECoreScene::SceneInterface *scene );
-
+	// SceneInterface has two different APIs related to sets : the legacy tags API and the
+	// new sets API. We prefer the sets API for standard formats like Alembic and USD, but
+	// fall back to the tags API for legacy SceneInterfaces.
+	friend class SceneWriter;
+	static bool useSetsAPI( const IECoreScene::SceneInterface *scene );
 };
 
 IE_CORE_DECLAREPTR( SceneReader )

@@ -46,7 +46,5 @@ using namespace IECoreGLPreview;
 void GafferSceneUIModule::bindVisualisers()
 {
 
-	IECorePython::RefCountedClass<StandardLightVisualiser, LightVisualiser>( "StandardLightVisualiser" )
-	;
-
+	IECorePython::RefCountedClass<StandardLightVisualiser, LightVisualiser>( "StandardLightVisualiser" );
 }

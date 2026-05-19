@@ -76,4 +76,4 @@ IECORECYCLES_API bool openImageDenoiseSupported();
 /// Returns if OptixDenoise has been compiled in Cycles
 IECORECYCLES_API bool optixDenoiseSupported();
 
-}
+} // namespace IECoreCycles

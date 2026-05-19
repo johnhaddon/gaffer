@@ -47,23 +47,22 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldAtmosphere : public GafferScene::GlobalShader
 {
 
-	public :
+public:
 
-		explicit ArnoldAtmosphere( const std::string &name=defaultName<ArnoldAtmosphere>() );
-		~ArnoldAtmosphere() override;
+	explicit ArnoldAtmosphere( const std::string &name = defaultName<ArnoldAtmosphere>() );
+	~ArnoldAtmosphere() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldAtmosphere, ArnoldAtmosphereTypeId, GafferScene::GlobalShader );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldAtmosphere, ArnoldAtmosphereTypeId, GafferScene::GlobalShader );
 
-	protected :
+protected:
 
-		bool affectsOptionName( const Gaffer::Plug *input ) const override;
-		void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		std::string computeOptionName( const Gaffer::Context *context ) const override;
+	bool affectsOptionName( const Gaffer::Plug *input ) const override;
+	void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	std::string computeOptionName( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ArnoldAtmosphere )

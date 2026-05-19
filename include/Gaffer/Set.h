@@ -55,103 +55,103 @@ class SetIterator;
 class GAFFER_API Set : public IECore::RunTimeTyped, public Signals::Trackable
 {
 
-	public :
+public:
 
-		Set();
-		~Set() override;
+	Set();
+	~Set() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Set, SetTypeId, IECore::RunTimeTyped );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Set, SetTypeId, IECore::RunTimeTyped );
 
-		using Member = IECore::RunTimeTyped;
-		using MemberPtr = Member::Ptr;
-		using ConstMemberPtr = Member::ConstPtr;
+	using Member = IECore::RunTimeTyped;
+	using MemberPtr = Member::Ptr;
+	using ConstMemberPtr = Member::ConstPtr;
 
-		/// Returns the number of members of the set.
-		virtual size_t size() const = 0;
-		/// Returns the indexth member of the set.
-		virtual Member *member( size_t index ) = 0;
-		/// Returns the indexth member of the set.
-		virtual const Member *member( size_t index ) const = 0;
-		/// Returns true if the object is a member of the set.
-		virtual bool contains( const Member *object ) const = 0;
+	/// Returns the number of members of the set.
+	virtual size_t size() const = 0;
+	/// Returns the indexth member of the set.
+	virtual Member *member( size_t index ) = 0;
+	/// Returns the indexth member of the set.
+	virtual const Member *member( size_t index ) const = 0;
+	/// Returns true if the object is a member of the set.
+	virtual bool contains( const Member *object ) const = 0;
 
-		using MemberSignal = Signals::Signal<void ( Set *, Member * ), Signals::CatchingCombiner<void>>;
+	using MemberSignal = Signals::Signal<void( Set *, Member * ), Signals::CatchingCombiner<void>>;
 
-		/// A signal emitted when a new member is added to the Set. It is
-		/// the responsibility of derived classes to emit this when appropriate.
-		MemberSignal &memberAddedSignal();
-		/// A signal emitted when a member is removed from the Set. It is
-		/// the responsibility of derived classes to emit this when appropriate.
-		MemberSignal &memberRemovedSignal();
+	/// A signal emitted when a new member is added to the Set. It is
+	/// the responsibility of derived classes to emit this when appropriate.
+	MemberSignal &memberAddedSignal();
+	/// A signal emitted when a member is removed from the Set. It is
+	/// the responsibility of derived classes to emit this when appropriate.
+	MemberSignal &memberRemovedSignal();
 
-		using Iterator = SetIterator<Set, Member>;
-		using ConstIterator = SetIterator<Set const, Member const>;
+	using Iterator = SetIterator<Set, Member>;
+	using ConstIterator = SetIterator<Set const, Member const>;
 
-		Iterator begin();
-		ConstIterator begin() const;
-		Iterator end();
-		ConstIterator end() const;
+	Iterator begin();
+	ConstIterator begin() const;
+	Iterator end();
+	ConstIterator end() const;
 
-	private :
+private:
 
-		MemberSignal m_memberAddedSignal;
-		MemberSignal m_memberRemovedSignal;
-
+	MemberSignal m_memberAddedSignal;
+	MemberSignal m_memberRemovedSignal;
 };
 
 IE_CORE_DECLAREPTR( Set );
 
 template<typename ContainerType, typename ValueType>
-class SetIterator : public boost::iterator_facade<SetIterator<ContainerType, ValueType>, ValueType, boost::random_access_traversal_tag, ValueType&, int64_t>
+class SetIterator : public boost::iterator_facade<SetIterator<ContainerType, ValueType>, ValueType, boost::random_access_traversal_tag, ValueType &, int64_t>
 {
 
-	public :
-		SetIterator( ContainerType* set )
-			:	SetIterator( set, 0 )
-		{
-		}
+public:
 
-		SetIterator( ContainerType* set, size_t index )
-			:	m_set( set ), m_index( index )
-		{
-		}
+	SetIterator( ContainerType *set )
+		: SetIterator( set, 0 )
+	{
+	}
 
-	private :
+	SetIterator( ContainerType *set, size_t index )
+		: m_set( set ), m_index( index )
+	{
+	}
 
-		friend class boost::iterator_core_access;
+private:
 
-		void increment()
-		{
-			++m_index;
-		}
+	friend class boost::iterator_core_access;
 
-		void decrement()
-		{
-			--m_index;
-		}
+	void increment()
+	{
+		++m_index;
+	}
 
-		void advance( int64_t n )
-		{
-			m_index += n;
-		}
+	void decrement()
+	{
+		--m_index;
+	}
 
-		int64_t distance_to( SetIterator const &other ) const
-		{
-			return int64_t( m_index ) - int64_t( other.m_index );
-		}
+	void advance( int64_t n )
+	{
+		m_index += n;
+	}
 
-		bool equal( SetIterator const &other ) const
-		{
-			return m_index == other.m_index;
-		}
+	int64_t distance_to( SetIterator const &other ) const
+	{
+		return int64_t( m_index ) - int64_t( other.m_index );
+	}
 
-		ValueType& dereference() const
-		{
-			return *(m_set->member( m_index ));
-		}
+	bool equal( SetIterator const &other ) const
+	{
+		return m_index == other.m_index;
+	}
 
-		ContainerType* const m_set;
-		size_t m_index;
+	ValueType &dereference() const
+	{
+		return *( m_set->member( m_index ) );
+	}
+
+	ContainerType *const m_set;
+	size_t m_index;
 };
 
 } // namespace Gaffer

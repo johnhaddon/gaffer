@@ -47,38 +47,37 @@ namespace GafferImage
 class GAFFERIMAGE_API Premultiply : public ChannelDataProcessor
 {
 
-	public :
+public:
 
-		explicit Premultiply( const std::string &name=defaultName<Premultiply>() );
-		~Premultiply() override;
+	explicit Premultiply( const std::string &name = defaultName<Premultiply>() );
+	~Premultiply() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Premultiply, PremultiplyTypeId, ChannelDataProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Premultiply, PremultiplyTypeId, ChannelDataProcessor );
 
-		//! @name Plug Accessors
-		/// Returns a pointer to the node's plugs.
-		//////////////////////////////////////////////////////////////
-		//@{
-		Gaffer::StringPlug *alphaChannelPlug();
-		const Gaffer::StringPlug *alphaChannelPlug() const;
+	//! @name Plug Accessors
+	/// Returns a pointer to the node's plugs.
+	//////////////////////////////////////////////////////////////
+	//@{
+	Gaffer::StringPlug *alphaChannelPlug();
+	const Gaffer::StringPlug *alphaChannelPlug() const;
 
-		Gaffer::BoolPlug *ignoreMissingAlphaPlug();
-		const Gaffer::BoolPlug *ignoreMissingAlphaPlug() const;
+	Gaffer::BoolPlug *ignoreMissingAlphaPlug();
+	const Gaffer::BoolPlug *ignoreMissingAlphaPlug() const;
 
-		Gaffer::BoolPlug *useDeepVisibilityPlug();
-		const Gaffer::BoolPlug *useDeepVisibilityPlug() const;
-		//@}
+	Gaffer::BoolPlug *useDeepVisibilityPlug();
+	const Gaffer::BoolPlug *useDeepVisibilityPlug() const;
+	//@}
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelIndex, IECore::FloatVectorDataPtr outData ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelIndex, IECore::FloatVectorDataPtr outData ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Premultiply );

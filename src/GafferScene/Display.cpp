@@ -76,307 +76,307 @@ static const std::string g_headerPrefix = "header:";
 class GafferDisplayDriver : public IECoreImage::DisplayDriver
 {
 
-	public :
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::GafferDisplayDriver, GafferDisplayDriverTypeId, DisplayDriver );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::GafferDisplayDriver, GafferDisplayDriverTypeId, DisplayDriver );
 
-		GafferDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow,
-			const vector<string> &channelNames, ConstCompoundDataPtr parameters )
-			:	DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
-				m_gafferFormat( displayWindow, 1, /* fromEXRSpace = */ true ),
-				m_gafferDataWindow( m_gafferFormat.fromEXRSpace( dataWindow ) ),
-				m_closed( false )
+	GafferDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const vector<string> &channelNames, ConstCompoundDataPtr parameters )
+		: DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
+		  m_gafferFormat( displayWindow, 1, /* fromEXRSpace = */ true ),
+		  m_gafferDataWindow( m_gafferFormat.fromEXRSpace( dataWindow ) ),
+		  m_closed( false )
+	{
+		const V2i dataWindowMinTileIndex = GafferImage::ImagePlug::tileOrigin( m_gafferDataWindow.min ) / GafferImage::ImagePlug::tileSize();
+		const V2i dataWindowMaxTileIndex = GafferImage::ImagePlug::tileOrigin( m_gafferDataWindow.max - Imath::V2i( 1 ) ) / GafferImage::ImagePlug::tileSize();
+
+		m_tileRange = Box3i(
+			V3i( dataWindowMinTileIndex.x, dataWindowMinTileIndex.y, 0 ),
+			V3i( dataWindowMaxTileIndex.x + 1, dataWindowMaxTileIndex.y + 1, channelNames.size() )
+		);
+		m_tiles.resize( m_tileRange.size().x * m_tileRange.size().y * m_tileRange.size().z );
+
+		m_parameters = parameters ? parameters->copy() : CompoundDataPtr( new CompoundData );
+		CompoundDataPtr metadata = new CompoundData;
+		for( const auto &p : m_parameters->readable() )
 		{
-			const V2i dataWindowMinTileIndex = GafferImage::ImagePlug::tileOrigin( m_gafferDataWindow.min ) / GafferImage::ImagePlug::tileSize();
-			const V2i dataWindowMaxTileIndex = GafferImage::ImagePlug::tileOrigin( m_gafferDataWindow.max - Imath::V2i( 1 ) ) / GafferImage::ImagePlug::tileSize();
-
-			m_tileRange = Box3i(
-				V3i( dataWindowMinTileIndex.x, dataWindowMinTileIndex.y, 0 ),
-				V3i( dataWindowMaxTileIndex.x + 1, dataWindowMaxTileIndex.y + 1, channelNames.size() )
-			);
-			m_tiles.resize( m_tileRange.size().x * m_tileRange.size().y * m_tileRange.size().z );
-
-			m_parameters = parameters ? parameters->copy() : CompoundDataPtr( new CompoundData );
-			CompoundDataPtr metadata = new CompoundData;
-			for( const auto &p : m_parameters->readable() )
+			if( boost::starts_with( p.first.string(), g_headerPrefix ) )
 			{
-				if( boost::starts_with( p.first.string(), g_headerPrefix ) )
+				metadata->writable()[p.first.string().substr( g_headerPrefix.size() )] = p.second;
+			}
+		}
+		m_metadata = metadata;
+
+		if( const FloatData *pixelAspect = m_parameters->member<FloatData>( "pixelAspect" ) )
+		{
+			/// \todo Give IECore::Display a Format rather than just
+			/// a display window, then we won't need this workaround.
+			m_gafferFormat.setPixelAspect( pixelAspect->readable() );
+		}
+
+		// This is a bit sketchy. By creating `Ptr( this )` we're adding a reference to ourselves from within
+		// our own constructor - if that reference is dropped before we return, we'll be double deleted. We rely
+		// on the fact that callOnUIThread() will keep us alive long enough for this not to occur.
+		ParallelAlgo::callOnUIThread( boost::bind( &GafferDisplayDriver::emitDriverCreated, Ptr( this ), m_parameters ) );
+	}
+
+	GafferDisplayDriver( GafferDisplayDriver &other )
+		: DisplayDriver( other.displayWindow(), other.dataWindow(), other.channelNames(), other.parameters() ),
+		  m_gafferFormat( other.m_gafferFormat ),
+		  m_gafferDataWindow( other.m_gafferDataWindow ),
+		  m_parameters( other.m_parameters ),
+		  m_metadata( other.m_metadata ),
+		  m_closed( true )
+	{
+		m_tileRange = other.m_tileRange;
+
+		m_tiles.resize( other.m_tiles.size() );
+
+		for( unsigned int i = 0; i < other.m_tiles.size(); i++ )
+		{
+			m_tiles[i] = other.m_tiles[i];
+		}
+	}
+
+	~GafferDisplayDriver() override
+	{
+	}
+
+	const GafferImage::Format &gafferFormat() const
+	{
+		return m_gafferFormat;
+	}
+
+	const Box2i &gafferDataWindow() const
+	{
+		return m_gafferDataWindow;
+	}
+
+	const CompoundData *parameters() const
+	{
+		return m_parameters.get();
+	}
+
+	const CompoundData *metadata() const
+	{
+		return m_metadata.get();
+	}
+
+	void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) override
+	{
+		Box2i gafferBox = m_gafferFormat.fromEXRSpace( box );
+
+		const V2i boxMinTileOrigin = GafferImage::ImagePlug::tileOrigin( gafferBox.min );
+		const V2i boxMaxTileOrigin = GafferImage::ImagePlug::tileOrigin( gafferBox.max - Imath::V2i( 1 ) );
+		for( int tileOriginY = boxMinTileOrigin.y; tileOriginY <= boxMaxTileOrigin.y; tileOriginY += GafferImage::ImagePlug::tileSize() )
+		{
+			for( int tileOriginX = boxMinTileOrigin.x; tileOriginX <= boxMaxTileOrigin.x; tileOriginX += GafferImage::ImagePlug::tileSize() )
+			{
+				for( int channelIndex = 0, numChannels = channelNames().size(); channelIndex < numChannels; ++channelIndex )
 				{
-					metadata->writable()[p.first.string().substr( g_headerPrefix.size() )] = p.second;
-				}
-			}
-			m_metadata = metadata;
-
-			if( const FloatData *pixelAspect = m_parameters->member<FloatData>( "pixelAspect" ) )
-			{
-				/// \todo Give IECore::Display a Format rather than just
-				/// a display window, then we won't need this workaround.
-				m_gafferFormat.setPixelAspect( pixelAspect->readable() );
-			}
-
-			// This is a bit sketchy. By creating `Ptr( this )` we're adding a reference to ourselves from within
-			// our own constructor - if that reference is dropped before we return, we'll be double deleted. We rely
-			// on the fact that callOnUIThread() will keep us alive long enough for this not to occur.
-			ParallelAlgo::callOnUIThread( boost::bind( &GafferDisplayDriver::emitDriverCreated, Ptr( this ), m_parameters ) );
-		}
-
-		GafferDisplayDriver( GafferDisplayDriver &other )
-			:	DisplayDriver( other.displayWindow(), other.dataWindow(), other.channelNames(), other.parameters() ),
-				m_gafferFormat( other.m_gafferFormat ), m_gafferDataWindow( other.m_gafferDataWindow ),
-				m_parameters( other.m_parameters ), m_metadata( other.m_metadata ),
-				m_closed( true )
-		{
-			m_tileRange = other.m_tileRange;
-
-			m_tiles.resize( other.m_tiles.size() );
-
-			for( unsigned int i = 0; i < other.m_tiles.size(); i++ )
-			{
-				m_tiles[i] = other.m_tiles[i];
-			}
-		}
-
-		~GafferDisplayDriver() override
-		{
-		}
-
-		const GafferImage::Format &gafferFormat() const
-		{
-			return m_gafferFormat;
-		}
-
-		const Box2i &gafferDataWindow() const
-		{
-			return m_gafferDataWindow;
-		}
-
-		const CompoundData *parameters() const
-		{
-			return m_parameters.get();
-		}
-
-		const CompoundData *metadata() const
-		{
-			return m_metadata.get();
-		}
-
-		void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) override
-		{
-			Box2i gafferBox = m_gafferFormat.fromEXRSpace( box );
-
-			const V2i boxMinTileOrigin = GafferImage::ImagePlug::tileOrigin( gafferBox.min );
-			const V2i boxMaxTileOrigin = GafferImage::ImagePlug::tileOrigin( gafferBox.max - Imath::V2i( 1 ) );
-			for( int tileOriginY = boxMinTileOrigin.y; tileOriginY <= boxMaxTileOrigin.y; tileOriginY += GafferImage::ImagePlug::tileSize() )
-			{
-				for( int tileOriginX = boxMinTileOrigin.x; tileOriginX <= boxMaxTileOrigin.x; tileOriginX += GafferImage::ImagePlug::tileSize() )
-				{
-					for( int channelIndex = 0, numChannels = channelNames().size(); channelIndex < numChannels; ++channelIndex )
+					const V2i tileOrigin( tileOriginX, tileOriginY );
+					Tile *tile = getTile( tileOrigin, channelIndex );
+					if( !tile )
 					{
-						const V2i tileOrigin( tileOriginX, tileOriginY );
-						Tile * tile = getTile( tileOrigin, channelIndex );
-						if( !tile )
-						{
-							// we've been sent data outside of the data window
-							continue;
-						}
-
-						vector<float> &buffer = tile->backBuffer;
-						const Box2i tileBound( tileOrigin, tileOrigin + Imath::V2i( GafferImage::ImagePlug::tileSize() ) );
-						const Box2i transferBound = IECore::boxIntersection( tileBound, gafferBox );
-
-						for( int y = transferBound.min.y; y<transferBound.max.y; ++y )
-						{
-							int srcY = m_gafferFormat.toEXRSpace( y );
-							size_t srcIndex = ( ( srcY - box.min.y ) * ( box.size().x + 1 ) + ( transferBound.min.x - box.min.x ) ) * numChannels + channelIndex;
-							size_t dstIndex = ( y - tileBound.min.y ) * GafferImage::ImagePlug::tileSize() + transferBound.min.x - tileBound.min.x;
-							const size_t srcEndIndex = srcIndex + transferBound.size().x * numChannels;
-							while( srcIndex < srcEndIndex )
-							{
-								buffer[dstIndex] = data[srcIndex];
-								srcIndex += numChannels;
-								dstIndex++;
-							}
-						}
-
-						tile->dirty = true;
+						// we've been sent data outside of the data window
+						continue;
 					}
+
+					vector<float> &buffer = tile->backBuffer;
+					const Box2i tileBound( tileOrigin, tileOrigin + Imath::V2i( GafferImage::ImagePlug::tileSize() ) );
+					const Box2i transferBound = IECore::boxIntersection( tileBound, gafferBox );
+
+					for( int y = transferBound.min.y; y < transferBound.max.y; ++y )
+					{
+						int srcY = m_gafferFormat.toEXRSpace( y );
+						size_t srcIndex = ( ( srcY - box.min.y ) * ( box.size().x + 1 ) + ( transferBound.min.x - box.min.x ) ) * numChannels + channelIndex;
+						size_t dstIndex = ( y - tileBound.min.y ) * GafferImage::ImagePlug::tileSize() + transferBound.min.x - tileBound.min.x;
+						const size_t srcEndIndex = srcIndex + transferBound.size().x * numChannels;
+						while( srcIndex < srcEndIndex )
+						{
+							buffer[dstIndex] = data[srcIndex];
+							srcIndex += numChannels;
+							dstIndex++;
+						}
+					}
+
+					tile->dirty = true;
 				}
 			}
-
-			dataReceivedSignal()( this, box );
 		}
 
-		void imageClose() override
+		dataReceivedSignal()( this, box );
+	}
+
+	void imageClose() override
+	{
+		m_closed = true;
+		imageReceivedSignal()( this );
+	}
+
+	bool scanLineOrderOnly() const override
+	{
+		return false;
+	}
+
+	bool acceptsRepeatedData() const override
+	{
+		return true;
+	}
+
+	ConstFloatVectorDataPtr channelData( const Imath::V2i &tileOrigin, const std::string &channelName, int dataCount )
+	{
+		vector<string>::const_iterator cIt = find( channelNames().begin(), channelNames().end(), channelName );
+		if( cIt == channelNames().end() )
 		{
-			m_closed = true;
-			imageReceivedSignal()( this );
+			return GafferImage::ImagePlug::blackTile();
 		}
 
-		bool scanLineOrderOnly() const override
+		Tile *tile = getTile( tileOrigin, cIt - channelNames().begin() );
+		if( !tile )
 		{
-			return false;
+			return GafferImage::ImagePlug::blackTile();
 		}
 
-		bool acceptsRepeatedData() const override
+		tbb::spin_rw_mutex::scoped_lock tileLock( tile->mutex, /* write = */ false );
+		if( tile->cachedForDataCount == dataCount )
 		{
-			return true;
-		}
-
-		ConstFloatVectorDataPtr channelData( const Imath::V2i &tileOrigin, const std::string &channelName, int dataCount )
-		{
-			vector<string>::const_iterator cIt = find( channelNames().begin(), channelNames().end(), channelName );
-			if( cIt == channelNames().end() )
-			{
-				return GafferImage::ImagePlug::blackTile();
-			}
-
-			Tile *tile = getTile( tileOrigin, cIt - channelNames().begin() );
-			if( !tile )
-			{
-				return GafferImage::ImagePlug::blackTile();
-			}
-
-			tbb::spin_rw_mutex::scoped_lock tileLock( tile->mutex, /* write = */ false );
-			if( tile->cachedForDataCount == dataCount )
-			{
-				// In order to ensure hashes and computes are consistent, once we have
-				// bound a version of the tile for this dataCount, we don't change it,
-				// even if it has been dirtied in the meantime.
-				return tile->cachedTile;
-			}
-
-			tileLock.upgrade_to_writer();
-			// Check if another thread did the work while we were acquiring the write lock
-			if( tile->cachedForDataCount == dataCount )
-			{
-				return tile->cachedTile;
-			}
-
-			if( !tile->dirty )
-			{
-				// Remember that the tile value for this dataCount will always be the
-				// undirtied version.  If the tile is dirtied, we won't get the update
-				// until the dataCount is incremented in the dataReceived callback
-				// and we get called again
-				tile->cachedForDataCount = dataCount;
-				return tile->cachedTile;
-			}
-
-			// Copying the data from the backbuffer takes time, and holding a write lock while
-			// we do it would risk stalling the render thread.  So instead, we just copy
-			// whatever is currently in the backbuffer.  This does risk catching the
-			// backbuffer in a half written state, but in that case, we will still get
-			// some sort of data, and we should be able to process any possible floating point
-			// to produce some visual result.  In the scenario where the value we get is half
-			// written, that means imageData() is about to call dataReceivedSignal() to trigger
-			// us again, and the incorrect value will be soon overwritten with a correct one.
-			tile->cachedTile = new FloatVectorData( tile->backBuffer );
-			tile->cachedForDataCount = dataCount;
-			tile->dirty = false;
-
-			// Forcing the channel data vector to precompute the hash while we're still holding
-			// lock prevents two threads from trying to compute it at the same time.
-			// This is quite possibly a good idea performance wise, but it also avoids an error
-			// we've seen reported by the hash cache "Checked" mode that appears to relate to
-			// partially computed hashes.  This error may be fixed in Cortex in the future,
-			// but this code should probably stay for performance reasons.
-			tile->cachedTile->Object::hash();
-
+			// In order to ensure hashes and computes are consistent, once we have
+			// bound a version of the tile for this dataCount, we don't change it,
+			// even if it has been dirtied in the meantime.
 			return tile->cachedTile;
 		}
 
-		using DataReceivedSignal = Signals::Signal<void ( GafferDisplayDriver *, const Imath::Box2i & )>;
-		DataReceivedSignal &dataReceivedSignal()
+		tileLock.upgrade_to_writer();
+		// Check if another thread did the work while we were acquiring the write lock
+		if( tile->cachedForDataCount == dataCount )
 		{
-			return m_dataReceivedSignal;
+			return tile->cachedTile;
 		}
 
-		using ImageReceivedSignal = Signals::Signal<void ( GafferDisplayDriver * )>;
-		ImageReceivedSignal &imageReceivedSignal()
+		if( !tile->dirty )
 		{
-			return m_imageReceivedSignal;
+			// Remember that the tile value for this dataCount will always be the
+			// undirtied version.  If the tile is dirtied, we won't get the update
+			// until the dataCount is incremented in the dataReceived callback
+			// and we get called again
+			tile->cachedForDataCount = dataCount;
+			return tile->cachedTile;
 		}
 
-		bool closed() const
+		// Copying the data from the backbuffer takes time, and holding a write lock while
+		// we do it would risk stalling the render thread.  So instead, we just copy
+		// whatever is currently in the backbuffer.  This does risk catching the
+		// backbuffer in a half written state, but in that case, we will still get
+		// some sort of data, and we should be able to process any possible floating point
+		// to produce some visual result.  In the scenario where the value we get is half
+		// written, that means imageData() is about to call dataReceivedSignal() to trigger
+		// us again, and the incorrect value will be soon overwritten with a correct one.
+		tile->cachedTile = new FloatVectorData( tile->backBuffer );
+		tile->cachedForDataCount = dataCount;
+		tile->dirty = false;
+
+		// Forcing the channel data vector to precompute the hash while we're still holding
+		// lock prevents two threads from trying to compute it at the same time.
+		// This is quite possibly a good idea performance wise, but it also avoids an error
+		// we've seen reported by the hash cache "Checked" mode that appears to relate to
+		// partially computed hashes.  This error may be fixed in Cortex in the future,
+		// but this code should probably stay for performance reasons.
+		tile->cachedTile->Object::hash();
+
+		return tile->cachedTile;
+	}
+
+	using DataReceivedSignal = Signals::Signal<void( GafferDisplayDriver *, const Imath::Box2i & )>;
+	DataReceivedSignal &dataReceivedSignal()
+	{
+		return m_dataReceivedSignal;
+	}
+
+	using ImageReceivedSignal = Signals::Signal<void( GafferDisplayDriver * )>;
+	ImageReceivedSignal &imageReceivedSignal()
+	{
+		return m_imageReceivedSignal;
+	}
+
+	bool closed() const
+	{
+		return m_closed;
+	}
+
+private:
+
+	static const DisplayDriverDescription<GafferDisplayDriver> g_description;
+
+	static void emitDriverCreated( Ptr driver, IECore::ConstCompoundDataPtr parameters )
+	{
+		Display::driverCreatedSignal()( driver.get(), parameters.get() );
+	}
+
+	struct Tile
+	{
+		Tile() : backBuffer( GafferImage::ImagePlug::blackTile()->readable() ), dirty( false ), cachedTile( GafferImage::ImagePlug::blackTile() ), cachedForDataCount( 0 )
 		{
-			return m_closed;
 		}
 
-	private :
-
-		static const DisplayDriverDescription<GafferDisplayDriver> g_description;
-
-		static void emitDriverCreated( Ptr driver, IECore::ConstCompoundDataPtr parameters )
+		Tile( const Tile &other ) : Tile()
 		{
-			Display::driverCreatedSignal()( driver.get(), parameters.get() );
+			*this = other;
 		}
 
-		struct Tile
+		Tile &operator = ( const Tile &other )
 		{
-			Tile(): backBuffer( GafferImage::ImagePlug::blackTile()->readable() ), dirty( false ), cachedTile( GafferImage::ImagePlug::blackTile() ), cachedForDataCount( 0 )
-			{
-			}
+			// Lock to make sure we get a copy in a consistent state if the other
+			// tile is currently being written
+			tbb::spin_rw_mutex::scoped_lock tileLock( other.mutex, /* write = */ false );
 
-			Tile( const Tile& other ) : Tile()
-			{
-				*this = other;
-			}
+			memcpy( &backBuffer[0], &other.backBuffer[0], backBuffer.size() * sizeof( float ) );
+			dirty = (bool)other.dirty;
+			cachedTile = other.cachedTile;
 
-			Tile& operator=( const Tile& other )
-			{
-				// Lock to make sure we get a copy in a consistent state if the other
-				// tile is currently being written
-				tbb::spin_rw_mutex::scoped_lock tileLock( other.mutex, /* write = */ false );
-
-				memcpy( &backBuffer[0], &other.backBuffer[0], backBuffer.size() * sizeof( float ) );
-				dirty = (bool)other.dirty;
-				cachedTile = other.cachedTile;
-
-				// Tile assignment operator is used by `Display::setDriver( copy = true )`
-				// to take a snapshot of the driver in its current state. Reset the data count
-				// to force a refresh of `cachedData` on next compute. (see corresponding reset
-				// in `setDriver()`).
-				cachedForDataCount = 0;
-				return *this;
-			}
-
-			std::vector<float> backBuffer;
-			std::atomic<bool> dirty;
-			mutable tbb::spin_rw_mutex mutex;
-
-			// Use mutex to access these 2
-			ConstFloatVectorDataPtr cachedTile;
-			int cachedForDataCount;
-		};
-
-		Tile *getTile( const V2i &tileOrigin, unsigned int channelIndex )
-		{
-			V3i tileCoord( tileOrigin.x / GafferImage::ImagePlug::tileSize(), tileOrigin.y / GafferImage::ImagePlug::tileSize(), channelIndex );
-
-
-			if( !( m_tileRange.intersects( tileCoord ) && m_tileRange.intersects( tileCoord + V3i( 1 ) ) ) )
-			{
-				// outside data window
-				return nullptr;
-			}
-
-			V3i s = m_tileRange.size();
-			V3i offset = tileCoord - m_tileRange.min;
-			return &m_tiles[offset.x + offset.y * s.x + offset.z * s.x * s.y];
+			// Tile assignment operator is used by `Display::setDriver( copy = true )`
+			// to take a snapshot of the driver in its current state. Reset the data count
+			// to force a refresh of `cachedData` on next compute. (see corresponding reset
+			// in `setDriver()`).
+			cachedForDataCount = 0;
+			return *this;
 		}
 
-		// indexed by tileIndexX, tileIndexY, channelIndex, with y and then z wrapped around into a flat vector
-		Box3i m_tileRange;
-		std::vector<Tile> m_tiles;
+		std::vector<float> backBuffer;
+		std::atomic<bool> dirty;
+		mutable tbb::spin_rw_mutex mutex;
 
-		GafferImage::Format m_gafferFormat;
-		Imath::Box2i m_gafferDataWindow;
-		IECore::ConstCompoundDataPtr m_parameters;
-		IECore::ConstCompoundDataPtr m_metadata;
-		DataReceivedSignal m_dataReceivedSignal;
-		ImageReceivedSignal m_imageReceivedSignal;
-		std::atomic_bool m_closed;
+		// Use mutex to access these 2
+		ConstFloatVectorDataPtr cachedTile;
+		int cachedForDataCount;
+	};
 
+	Tile *getTile( const V2i &tileOrigin, unsigned int channelIndex )
+	{
+		V3i tileCoord( tileOrigin.x / GafferImage::ImagePlug::tileSize(), tileOrigin.y / GafferImage::ImagePlug::tileSize(), channelIndex );
+
+
+		if( !( m_tileRange.intersects( tileCoord ) && m_tileRange.intersects( tileCoord + V3i( 1 ) ) ) )
+		{
+			// outside data window
+			return nullptr;
+		}
+
+		V3i s = m_tileRange.size();
+		V3i offset = tileCoord - m_tileRange.min;
+		return &m_tiles[offset.x + offset.y * s.x + offset.z * s.x * s.y];
+	}
+
+	// indexed by tileIndexX, tileIndexY, channelIndex, with y and then z wrapped around into a flat vector
+	Box3i m_tileRange;
+	std::vector<Tile> m_tiles;
+
+	GafferImage::Format m_gafferFormat;
+	Imath::Box2i m_gafferDataWindow;
+	IECore::ConstCompoundDataPtr m_parameters;
+	IECore::ConstCompoundDataPtr m_metadata;
+	DataReceivedSignal m_dataReceivedSignal;
+	ImageReceivedSignal m_imageReceivedSignal;
+	std::atomic_bool m_closed;
 };
 
 const IECoreImage::DisplayDriver::DisplayDriverDescription<GafferDisplayDriver> GafferDisplayDriver::g_description;
@@ -387,7 +387,7 @@ IECoreImage::DisplayDriverPtr gafferDisplayDriverCreator( const Imath::Box2i &di
 {
 	return new GafferDisplayDriver( displayWindow, dataWindow, channelNames, parameters );
 }
-const int g_gafferDisplayDriverCompatibility = [](){
+const int g_gafferDisplayDriverCompatibility = []() {
 	IECoreImage::DisplayDriver::registerType( "GafferImage::GafferDisplayDriver", gafferDisplayDriverCreator );
 	return 0;
 }();
@@ -403,7 +403,7 @@ GAFFER_NODE_DEFINE_TYPE( Display );
 size_t Display::g_firstPlugIndex = 0;
 
 Display::Display( const std::string &name )
-	:	GafferImage::ImageNode( name )
+	: GafferImage::ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -569,7 +569,7 @@ void Display::hashChannelNames( const GafferImage::ImagePlug *output, const Gaff
 	if( m_driver )
 	{
 		h.append(
-			&(m_driver->channelNames()[0]),
+			&( m_driver->channelNames()[0] ),
 			m_driver->channelNames().size()
 		);
 	}
@@ -692,7 +692,6 @@ struct PendingUpdates
 
 	tbb::spin_mutex mutex;
 	PlugSetPtr plugs;
-
 };
 
 PendingUpdates &pendingUpdates()
@@ -701,7 +700,7 @@ PendingUpdates &pendingUpdates()
 	return *p;
 }
 
-};
+}; // namespace
 
 // Called on a background thread when data is received on the driver.
 // We need to increment `channelDataCountPlug()`, but all graph edits must

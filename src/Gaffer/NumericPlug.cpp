@@ -45,7 +45,7 @@ using namespace IECore;
 using namespace Gaffer;
 
 template<typename T>
-const IECore::RunTimeTyped::TypeDescription<NumericPlug<T> > NumericPlug<T>::g_typeDescription;
+const IECore::RunTimeTyped::TypeDescription<NumericPlug<T>> NumericPlug<T>::g_typeDescription;
 
 namespace Gaffer
 {
@@ -54,7 +54,7 @@ namespace Gaffer
 GAFFER_PLUG_DEFINE_TEMPLATE_TYPE( Gaffer::IntPlug, IntPlugTypeId )
 GAFFER_PLUG_DEFINE_TEMPLATE_TYPE( Gaffer::FloatPlug, FloatPlugTypeId )
 
-}
+} // namespace Gaffer
 
 template<class T>
 NumericPlug<T>::NumericPlug(
@@ -65,9 +65,9 @@ NumericPlug<T>::NumericPlug(
 	T maxValue,
 	unsigned flags
 )
-	:	ValuePlug( name, direction, new DataType( defaultValue ), flags ),
-		m_minValue( minValue ),
-		m_maxValue( maxValue )
+	: ValuePlug( name, direction, new DataType( defaultValue ), flags ),
+	  m_minValue( minValue ),
+	  m_maxValue( maxValue )
 {
 }
 
@@ -85,11 +85,9 @@ bool NumericPlug<T>::acceptsInput( const Plug *input ) const
 	}
 	if( input )
 	{
-		return
-			input->isInstanceOf( FloatPlug::staticTypeId() ) ||
+		return input->isInstanceOf( FloatPlug::staticTypeId() ) ||
 			input->isInstanceOf( IntPlug::staticTypeId() ) ||
-			input->isInstanceOf( BoolPlug::staticTypeId() )
-		;
+			input->isInstanceOf( BoolPlug::staticTypeId() );
 	}
 	return true;
 }
@@ -109,13 +107,13 @@ T NumericPlug<T>::defaultValue() const
 template<class T>
 bool NumericPlug<T>::hasMinValue() const
 {
-	return m_minValue!=std::numeric_limits<T>::lowest();
+	return m_minValue != std::numeric_limits<T>::lowest();
 }
 
 template<class T>
 bool NumericPlug<T>::hasMaxValue() const
 {
-	return m_maxValue!=std::numeric_limits<T>::max();
+	return m_maxValue != std::numeric_limits<T>::max();
 }
 
 template<class T>

@@ -93,29 +93,9 @@ void GafferSceneUIModule::bindInspectorColumn()
 	scope privateScope( privateModule );
 
 	RefCountedClass<GafferSceneUI::Private::InspectorColumn, GafferUI::PathColumn>( "InspectorColumn" )
-		.def( init<GafferSceneUI::Private::InspectorPtr, const std::string &, const std::string &, PathColumn::SizeMode>(
-			(
-				arg_( "inspector" ),
-				arg_( "label" ) = "",
-				arg_( "toolTip" ) = "",
-				arg( "sizeMode" ) = PathColumn::Default
-			)
-		) )
-		.def( init<GafferSceneUI::Private::InspectorPtr, const PathColumn::CellData &, PathColumn::SizeMode>(
-			(
-				arg_( "inspector" ),
-				arg_( "headerData" ),
-				arg_( "sizeMode" ) = PathColumn::Default
-			)
-		) )
-		.def( init<IECore::InternedString, const PathColumn::CellData &, IECore::InternedString, PathColumn::SizeMode>(
-			(
-				arg_( "inspectorProperty" ),
-				arg_( "headerData" ),
-				arg_( "contextProperty") = "inspector:context",
-				arg_( "sizeMode" ) = PathColumn::Default
-			)
-		) )
+		.def( init<GafferSceneUI::Private::InspectorPtr, const std::string &, const std::string &, PathColumn::SizeMode>( ( arg_( "inspector" ), arg_( "label" ) = "", arg_( "toolTip" ) = "", arg( "sizeMode" ) = PathColumn::Default ) ) )
+		.def( init<GafferSceneUI::Private::InspectorPtr, const PathColumn::CellData &, PathColumn::SizeMode>( ( arg_( "inspector" ), arg_( "headerData" ), arg_( "sizeMode" ) = PathColumn::Default ) ) )
+		.def( init<IECore::InternedString, const PathColumn::CellData &, IECore::InternedString, PathColumn::SizeMode>( ( arg_( "inspectorProperty" ), arg_( "headerData" ), arg_( "contextProperty" ) = "inspector:context", arg_( "sizeMode" ) = PathColumn::Default ) ) )
 		.def( "inspector", &inspectorColumnInspectorBinding, ( arg( "path" ), arg( "canceller" ) = object() ) )
 		.def( "inspect", &inspectorColumnInspectBinding, ( arg( "path" ), arg( "canceller" ) = object() ) )
 		.def( "historyPath", &inspectorColumnHistoryPathBinding, ( arg( "path" ), arg( "canceller" ) = object() ) )
@@ -125,16 +105,8 @@ void GafferSceneUIModule::bindInspectorColumn()
 		// conversion from simple types - string, int etc. Those exist for
 		// DataPtr but not ObjectPtr.
 		.def( "cellDataFromValue", &inspectorColumnCellDataFromDataValue )
-		.staticmethod( "cellDataFromValue" )
-	;
+		.staticmethod( "cellDataFromValue" );
 
 	RefCountedClass<GafferSceneUI::Private::VisibilityColumn, GafferSceneUI::Private::InspectorColumn>( "VisibilityColumn" )
-		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &>(
-			(
-				arg_( "scene" ),
-				arg_( "editScope" )
-			)
-		) )
-	;
-
+		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &>( ( arg_( "scene" ), arg_( "editScope" ) ) ) );
 }

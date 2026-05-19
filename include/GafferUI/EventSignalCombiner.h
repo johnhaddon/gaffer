@@ -49,8 +49,7 @@ struct EventSignalCombiner
 	using result_type = T;
 
 	template<typename InputIterator>
-	result_type operator()( InputIterator first, InputIterator last ) const;
-
+	result_type operator () ( InputIterator first, InputIterator last ) const;
 };
 
 } // namespace GafferUI

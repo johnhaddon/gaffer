@@ -48,50 +48,49 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Random : public ComputeNode
 {
 
-	public :
+public:
 
-		explicit Random( const std::string &name=defaultName<Random>() );
-		~Random() override;
+	explicit Random( const std::string &name = defaultName<Random>() );
+	~Random() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Random, RandomTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Random, RandomTypeId, ComputeNode );
 
-		IntPlug *seedPlug();
-		const IntPlug *seedPlug() const;
-		StringPlug *seedVariablePlug();
-		const StringPlug *seedVariablePlug() const;
+	IntPlug *seedPlug();
+	const IntPlug *seedPlug() const;
+	StringPlug *seedVariablePlug();
+	const StringPlug *seedVariablePlug() const;
 
-		V2fPlug *floatRangePlug();
-		const V2fPlug *floatRangePlug() const;
-		FloatPlug *outFloatPlug();
-		const FloatPlug *outFloatPlug() const;
+	V2fPlug *floatRangePlug();
+	const V2fPlug *floatRangePlug() const;
+	FloatPlug *outFloatPlug();
+	const FloatPlug *outFloatPlug() const;
 
-		Color3fPlug *baseColorPlug();
-		const Color3fPlug *baseColorPlug() const;
-		FloatPlug *huePlug();
-		const FloatPlug *huePlug() const;
-		FloatPlug *saturationPlug();
-		const FloatPlug *saturationPlug() const;
-		FloatPlug *valuePlug();
-		const FloatPlug *valuePlug() const;
-		Color3fPlug *outColorPlug();
-		const Color3fPlug *outColorPlug() const;
+	Color3fPlug *baseColorPlug();
+	const Color3fPlug *baseColorPlug() const;
+	FloatPlug *huePlug();
+	const FloatPlug *huePlug() const;
+	FloatPlug *saturationPlug();
+	const FloatPlug *saturationPlug() const;
+	FloatPlug *valuePlug();
+	const FloatPlug *valuePlug() const;
+	Color3fPlug *outColorPlug();
+	const Color3fPlug *outColorPlug() const;
 
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		Imath::Color3f randomColor( unsigned long int seed ) const;
+	Imath::Color3f randomColor( unsigned long int seed ) const;
 
-	protected :
+protected:
 
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-	private :
+private:
 
-		void hashSeed( const Context *context, IECore::MurmurHash &h ) const;
-		unsigned long int computeSeed( const Context *context ) const;
+	void hashSeed( const Context *context, IECore::MurmurHash &h ) const;
+	unsigned long int computeSeed( const Context *context ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Random )

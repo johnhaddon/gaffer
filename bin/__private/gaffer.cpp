@@ -64,7 +64,7 @@ namespace
 {
 
 template<typename T>
-int launchGaffer( int argc, T** argv, std::function<int( int, T** )> pyMain )
+int launchGaffer( int argc, T **argv, std::function<int( int, T ** )> pyMain )
 {
 	// Windows does not support process renaming or replacing a parent process with its child.
 	// We want all of our processes to be called `gaffer` (`gaffer.exe` on Windows) so we run
@@ -84,10 +84,9 @@ int launchGaffer( int argc, T** argv, std::function<int( int, T** )> pyMain )
 	modifiedArgv.insert( modifiedArgv.begin() + 1, script );
 
 	return pyMain( modifiedArgv.size(), modifiedArgv.data() );
-
 }
 
-}  // namespace
+} // namespace
 
 #ifdef MS_WINDOWS
 
@@ -107,7 +106,6 @@ int wmain( int argc, wchar_t **argv )
 	}
 
 	return launchGaffer<wchar_t>( argc, argv, Py_Main );
-	
 }
 #else
 int main( int argc, char **argv )

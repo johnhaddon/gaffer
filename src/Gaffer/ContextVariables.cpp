@@ -43,25 +43,26 @@
 
 using namespace Gaffer;
 
-namespace {
+namespace
+{
 
 struct SetFromReadable
 {
-	template< class T>
-	void operator()( const T *data, Gaffer::Context::EditableScope &scope, const IECore::InternedString &name )
+	template<class T>
+	void operator () ( const T *data, Gaffer::Context::EditableScope &scope, const IECore::InternedString &name )
 	{
 		scope.set( name, &data->readable() );
 	}
 };
 
-}
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( ContextVariables );
 
 size_t ContextVariables::g_firstPlugIndex;
 
 ContextVariables::ContextVariables( const std::string &name )
-	:	ContextProcessor( name )
+	: ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "variables" ) );

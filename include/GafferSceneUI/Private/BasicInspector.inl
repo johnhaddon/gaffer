@@ -45,11 +45,11 @@ BasicInspector::BasicInspector(
 	const ValueFunctionType &&valueFunction,
 	const std::string &type, const std::string &name
 )
-	: 	Inspector( { plug }, type, name, editScope ), m_plug( plug )
+	: Inspector( { plug }, type, name, editScope ), m_plug( plug )
 {
 	// Wrapper downcasts the plug to the correct type, removing the
 	// need to do that manually in the supplied lambda.
-	m_valueFunction = [f = valueFunction] ( const Gaffer::Plug *p ) {
+	m_valueFunction = [f = valueFunction]( const Gaffer::Plug *p ) {
 		// Cast is safe because `m_plug` was initialised with `PlugType`.
 		return f( static_cast<const PlugType *>( p ) );
 	};

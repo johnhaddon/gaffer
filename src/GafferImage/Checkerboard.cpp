@@ -85,7 +85,7 @@ inline float filteredStripes( float x, float period, float filterWidth )
 	// Just sticking with the old round() for now, since this isn't too important
 	float xp = x / ( period * 0.5f );
 	float nearestBoundary = round( xp );
-	float boundaryDirection = (((int)nearestBoundary) % 2 ) == 0 ? -1.0f : 1.0f;
+	float boundaryDirection = ( ( (int)nearestBoundary ) % 2 ) == 0 ? -1.0f : 1.0f;
 	return max( 0.0f, min( 1.0f, ( ( xp - nearestBoundary ) * ( period * 0.5f ) / filterWidth * boundaryDirection + 0.5f ) ) );
 }
 
@@ -100,7 +100,7 @@ GAFFER_NODE_DEFINE_TYPE( Checkerboard );
 size_t Checkerboard::g_firstPlugIndex = 0;
 
 Checkerboard::Checkerboard( const std::string &name )
-	:	FlatImageSource( name )
+	: FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -310,8 +310,8 @@ IECore::ConstFloatVectorDataPtr Checkerboard::computeChannelData( const std::str
 	if( transform[0][1] == 0 && transform[1][0] == 0 )
 	{
 		// Position of pixel <0,0>
-		float xOffset = inverseTransform[2][0] + (tileOrigin.x + .5f) * inverseTransform[0][0];
-		float yOffset = inverseTransform[2][1] + (tileOrigin.y + .5f) * inverseTransform[1][1];
+		float xOffset = inverseTransform[2][0] + ( tileOrigin.x + .5f ) * inverseTransform[0][0];
+		float yOffset = inverseTransform[2][1] + ( tileOrigin.y + .5f ) * inverseTransform[1][1];
 
 		// Use the first scanline as a buffer to store the x component of the checkerboard
 		for( int x = 0; x < ImagePlug::tileSize(); ++x )

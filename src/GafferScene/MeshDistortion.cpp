@@ -49,7 +49,7 @@ size_t MeshDistortion::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( MeshDistortion );
 
 MeshDistortion::MeshDistortion( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -116,14 +116,12 @@ const Gaffer::StringPlug *MeshDistortion::uvDistortionPlug() const
 
 bool MeshDistortion::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == positionPlug() ||
 		input == referencePositionPlug() ||
 		input == uvSetPlug() ||
 		input == distortionPlug() ||
-		input == uvDistortionPlug()
-	;
+		input == uvDistortionPlug();
 }
 
 void MeshDistortion::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

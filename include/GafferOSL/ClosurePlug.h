@@ -51,17 +51,16 @@ namespace GafferOSL
 class GAFFEROSL_API ClosurePlug : public GafferScene::ClosurePlug
 {
 
-	public :
+public:
 
-		explicit ClosurePlug( const std::string &name=defaultName<ClosurePlug>(), Direction direction=In, unsigned flags=Default );
-		~ClosurePlug() override;
+	explicit ClosurePlug( const std::string &name = defaultName<ClosurePlug>(), Direction direction = In, unsigned flags = Default );
+	~ClosurePlug() override;
 
-		GAFFER_PLUG_DECLARE_TYPE( GafferOSL::ClosurePlug, ClosurePlugTypeId, GafferScene::ClosurePlug );
+	GAFFER_PLUG_DECLARE_TYPE( GafferOSL::ClosurePlug, ClosurePlugTypeId, GafferScene::ClosurePlug );
 
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
-		bool acceptsInput( const Gaffer::Plug *input ) const override;
-
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	bool acceptsInput( const Gaffer::Plug *input ) const override;
 };
 
 IE_CORE_DECLAREPTR( ClosurePlug );

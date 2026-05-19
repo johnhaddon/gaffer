@@ -48,7 +48,7 @@ using namespace GafferUI;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ScaleHandle );
 
 ScaleHandle::ScaleHandle( Style::Axes axes )
-	:	Handle( defaultName<ScaleHandle>() ), m_axes( Style::X )
+	: Handle( defaultName<ScaleHandle>() ), m_axes( Style::X )
 {
 	setAxes( axes );
 }

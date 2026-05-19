@@ -89,170 +89,169 @@ void appendLeafPlugs( const Gaffer::Plug *p, DependencyNode::AffectedPlugsContai
 class RowsMap : public IECore::Data
 {
 
-	public :
+public:
 
-		using Selector = std::variant<const vector<InternedString> *, string>;
+	using Selector = std::variant<const vector<InternedString> *, string>;
 
-		RowsMap( const Spreadsheet::RowsPlug *rows )
-			:	m_enabledRowNames( new StringVectorData )
+	RowsMap( const Spreadsheet::RowsPlug *rows )
+		: m_enabledRowNames( new StringVectorData )
+	{
+		vector<string> &enabledRowNames = m_enabledRowNames->writable();
+
+		for( size_t i = 1, e = rows->children().size(); i < e; ++i )
 		{
-			vector<string> &enabledRowNames = m_enabledRowNames->writable();
-
-			for( size_t i = 1, e = rows->children().size(); i < e; ++i )
+			const auto *row = rows->getChild<Spreadsheet::RowPlug>( i );
+			if( !row->enabledPlug()->getValue() )
 			{
-				const auto *row = rows->getChild<Spreadsheet::RowPlug>( i );
-				if( !row->enabledPlug()->getValue() )
+				continue;
+			}
+
+			const std::string name = row->namePlug()->getValue();
+			if( name.empty() )
+			{
+				continue;
+			}
+			enabledRowNames.push_back( name );
+
+			const bool hasWildcards = StringAlgo::hasWildcards( name );
+			if( hasWildcards || name.find( ' ' ) != string::npos )
+			{
+				m_wildcardRows.push_back( { name, i } );
+			}
+			else
+			{
+				m_plainRows.insert( { name, i } );
+			}
+
+			const StringAlgo::MatchPatternPath path = StringAlgo::matchPatternPath( name );
+			if( hasWildcards || name.find( "..." ) != string::npos )
+			{
+				m_wildcardPathRows.push_back( { path, i } );
+			}
+			else
+			{
+				m_plainPathRows.insert( { path, i } );
+			}
+		}
+	}
+
+	// Hashes everything accessed by the constructor.
+	static void hash( const Spreadsheet::RowsPlug *rows, IECore::MurmurHash &h )
+	{
+		for( int i = 1, e = rows->children().size(); i < e; ++i )
+		{
+			const auto *row = rows->getChild<Spreadsheet::RowPlug>( i );
+			row->namePlug()->hash( h );
+			row->enabledPlug()->hash( h );
+		}
+	}
+
+	// Hashes the contents of the selector.
+	static void hash( const Selector &selector, IECore::MurmurHash &h )
+	{
+		if( auto s = get_if<string>( &selector ) )
+		{
+			h.append( *s );
+		}
+		else if( auto p = get_if<const vector<InternedString> *>( &selector ) )
+		{
+			h.append( ( *p )->data(), ( *p )->size() );
+		}
+	}
+
+	size_t rowIndex( const Selector &selector ) const
+	{
+		size_t result = 0;
+		if( auto s = get_if<string>( &selector ) )
+		{
+			auto it = m_plainRows.find( *s );
+			if( it != m_plainRows.end() )
+			{
+				result = it->second;
+			}
+			for( auto &row : m_wildcardRows )
+			{
+				if( result && row.index > result )
 				{
-					continue;
+					break;
 				}
 
-				const std::string name = row->namePlug()->getValue();
-				if( name.empty() )
+				if( StringAlgo::matchMultiple( *s, row.name ) )
 				{
-					continue;
-				}
-				enabledRowNames.push_back( name );
-
-				const bool hasWildcards = StringAlgo::hasWildcards( name );
-				if( hasWildcards || name.find( ' ' ) != string::npos )
-				{
-					m_wildcardRows.push_back( { name, i } );
-				}
-				else
-				{
-					m_plainRows.insert( { name, i } );
-				}
-
-				const StringAlgo::MatchPatternPath path = StringAlgo::matchPatternPath( name );
-				if( hasWildcards || name.find( "..." ) != string::npos )
-				{
-					m_wildcardPathRows.push_back( { path, i } );
-				}
-				else
-				{
-					m_plainPathRows.insert( { path, i } );
+					result = row.index;
+					break;
 				}
 			}
 		}
-
-		// Hashes everything accessed by the constructor.
-		static void hash( const Spreadsheet::RowsPlug *rows, IECore::MurmurHash &h )
+		else if( auto p = get<const vector<InternedString> *>( selector ) )
 		{
-			for( int i = 1, e = rows->children().size(); i < e; ++i )
+			auto it = m_plainPathRows.find( *p );
+			if( it != m_plainPathRows.end() )
 			{
-				const auto *row = rows->getChild<Spreadsheet::RowPlug>( i );
-				row->namePlug()->hash( h );
-				row->enabledPlug()->hash( h );
+				result = it->second;
 			}
-		}
-
-		// Hashes the contents of the selector.
-		static void hash( const Selector &selector, IECore::MurmurHash &h )
-		{
-			if( auto s = get_if<string>( &selector ) )
+			for( auto &row : m_wildcardPathRows )
 			{
-				h.append( *s );
-			}
-			else if( auto p = get_if<const vector<InternedString> *>( &selector ) )
-			{
-				h.append( (*p)->data(), (*p)->size() );
-			}
-		}
-
-		size_t rowIndex( const Selector &selector ) const
-		{
-			size_t result = 0;
-			if( auto s = get_if<string>( &selector ) )
-			{
-				auto it = m_plainRows.find( *s );
-				if( it != m_plainRows.end() )
+				if( result && row.index > result )
 				{
-					result = it->second;
+					break;
 				}
-				for( auto &row : m_wildcardRows )
-				{
-					if( result && row.index > result )
-					{
-						break;
-					}
 
-					if( StringAlgo::matchMultiple( *s, row.name ) )
-					{
-						result = row.index;
-						break;
-					}
+				if( StringAlgo::match( *p, row.path ) )
+				{
+					result = row.index;
+					break;
 				}
 			}
-			else if( auto p = get<const vector<InternedString> *>( selector ) )
-			{
-				auto it = m_plainPathRows.find( *p );
-				if( it != m_plainPathRows.end() )
-				{
-					result = it->second;
-				}
-				for( auto &row : m_wildcardPathRows )
-				{
-					if( result && row.index > result )
-					{
-						break;
-					}
-
-					if( StringAlgo::match( *p, row.path ) )
-					{
-						result = row.index;
-						break;
-					}
-				}
-			}
-			return result;
 		}
+		return result;
+	}
 
-		const StringVectorData *enabledRowNames() const
-		{
-			return m_enabledRowNames.get();
-		}
+	const StringVectorData *enabledRowNames() const
+	{
+		return m_enabledRowNames.get();
+	}
 
-	private :
+private:
 
-		// Rows without wildcards. We can look these up
-		// directly.
-		using Map = std::unordered_map<std::string, size_t>;
-		Map m_plainRows;
+	// Rows without wildcards. We can look these up
+	// directly.
+	using Map = std::unordered_map<std::string, size_t>;
+	Map m_plainRows;
 
-		// Rows with wildcards. These require a linear search.
-		struct Row
-		{
-			std::string name;
-			size_t index;
-		};
-		using Vector = std::vector<Row>;
-		Vector m_wildcardRows;
+	// Rows with wildcards. These require a linear search.
+	struct Row
+	{
+		std::string name;
+		size_t index;
+	};
+	using Vector = std::vector<Row>;
+	Vector m_wildcardRows;
 
-		// As above, but for when the selector is an InternedStringVectorData,
-		// in which case we want to use PathMatcher-style matching. We could do
-		// better here if we generalised the PathMatcher::Node data structure to
-		// allow us to store our `index` in place of the `bool terminator`. For
-		// now we assume that Spreadsheets with extreme numbers of rows will
-		// have only plain rows (as in EditScopes), and the PathMap will be
-		// sufficient. If this assumption plays out in practice, then a simpler
-		// implementation might just be to make `StringAlgo::match()` compatible
-		// with the behaviour of `*` and `...` in PathMatcher, so we can just
-		// use the original code path for everything . That would be a breaking
-		// change though.
-		using PathMap = std::map<StringAlgo::MatchPatternPath, size_t>;
-		PathMap m_plainPathRows;
+	// As above, but for when the selector is an InternedStringVectorData,
+	// in which case we want to use PathMatcher-style matching. We could do
+	// better here if we generalised the PathMatcher::Node data structure to
+	// allow us to store our `index` in place of the `bool terminator`. For
+	// now we assume that Spreadsheets with extreme numbers of rows will
+	// have only plain rows (as in EditScopes), and the PathMap will be
+	// sufficient. If this assumption plays out in practice, then a simpler
+	// implementation might just be to make `StringAlgo::match()` compatible
+	// with the behaviour of `*` and `...` in PathMatcher, so we can just
+	// use the original code path for everything . That would be a breaking
+	// change though.
+	using PathMap = std::map<StringAlgo::MatchPatternPath, size_t>;
+	PathMap m_plainPathRows;
 
-		struct PathRow
-		{
-			StringAlgo::MatchPatternPath path;
-			size_t index;
-		};
-		using PathVector = std::vector<PathRow>;
-		PathVector m_wildcardPathRows;
+	struct PathRow
+	{
+		StringAlgo::MatchPatternPath path;
+		size_t index;
+	};
+	using PathVector = std::vector<PathRow>;
+	PathVector m_wildcardPathRows;
 
-		// List of enabled row names for `enabledRowNamesPlug()`.
-		StringVectorDataPtr m_enabledRowNames;
-
+	// List of enabled row names for `enabledRowNamesPlug()`.
+	StringVectorDataPtr m_enabledRowNames;
 };
 
 IE_CORE_DECLAREPTR( RowsMap )
@@ -279,118 +278,117 @@ const InternedString g_firstMatch( "firstMatch" );
 class RowsMapScope : boost::noncopyable, public Context::SubstitutionProvider
 {
 
-	public :
+public:
 
-		RowsMapScope( const Context *context, const StringPlug *selectorPlug )
-			:	SubstitutionProvider( context ), m_context( context ), m_selectorPlug( selectorPlug )
+	RowsMapScope( const Context *context, const StringPlug *selectorPlug )
+		: SubstitutionProvider( context ), m_context( context ), m_selectorPlug( selectorPlug )
+	{
+		if( !mightContainSubstitutions( selectorPlug->source<StringPlug>() ) )
 		{
-			if( !mightContainSubstitutions( selectorPlug->source<StringPlug>() ) )
-			{
-				// We are guaranteed that the selector won't contain
-				// substitutions, so we don't need to sanitise the context.
-				// We'll initialise `m_selector` lazily in the `selector()`
-				// accessor, which allows us to avoid pulling on `selectorPlug()`
-				// at all when computing `Spreadsheet.enabledRowNames`.
-				return;
-			}
+			// We are guaranteed that the selector won't contain
+			// substitutions, so we don't need to sanitise the context.
+			// We'll initialise `m_selector` lazily in the `selector()`
+			// accessor, which allows us to avoid pulling on `selectorPlug()`
+			// at all when computing `Spreadsheet.enabledRowNames`.
+			return;
+		}
 
-			const std::string selector = selectorPlug->getValue();
-			if( selector == "${scene:path}" )
+		const std::string selector = selectorPlug->getValue();
+		if( selector == "${scene:path}" )
+		{
+			// Special case for `scene:path`, which users will expect to use PathMatcher
+			// style matching rather than `StringAlgo::match()`.
+			if( auto path = context->getIfExists<std::vector<InternedString>>( g_scenePath ) )
 			{
-				// Special case for `scene:path`, which users will expect to use PathMatcher
-				// style matching rather than `StringAlgo::match()`.
-				if( auto path = context->getIfExists< std::vector<InternedString> >( g_scenePath ) )
-				{
-					m_selector = path;
-				}
-				else
-				{
-					m_selector = "";
-				}
+				m_selector = path;
 			}
 			else
 			{
-				// (Ab)use `StringAlgo::substitute()` as a parser for
-				// variable references in the `selector`. We pass
-				// ourselves as the VariableProvider so that
-				// our `variable()` method is called once for each
-				// variable. We could instead implement our
-				// own parsing, but that would be non-trivial, particularly
-				// because `substitute()` allows recursive substitutions.
-				m_selector = IECore::StringAlgo::substitute( selector, *this );
+				m_selector = "";
 			}
 		}
-
-		// Returns the selector with Context substitutions applied.
-		const RowsMap::Selector &selector() const
+		else
 		{
-			if( !m_selector )
-			{
-				assert( !mightContainSubstitutions( m_selectorPlug->source<StringPlug>() ) );
-				m_selector = m_selectorPlug->getValue();
-			}
-			return *m_selector;
+			// (Ab)use `StringAlgo::substitute()` as a parser for
+			// variable references in the `selector`. We pass
+			// ourselves as the VariableProvider so that
+			// our `variable()` method is called once for each
+			// variable. We could instead implement our
+			// own parsing, but that would be non-trivial, particularly
+			// because `substitute()` allows recursive substitutions.
+			m_selector = IECore::StringAlgo::substitute( selector, *this );
 		}
+	}
 
-		// Methods used by `StringAlgo::substitute()`. We use
-		// these to parse variable references in `selector`.
-
-		int frame() const override
+	// Returns the selector with Context substitutions applied.
+	const RowsMap::Selector &selector() const
+	{
+		if( !m_selector )
 		{
-			return SubstitutionProvider::frame();
+			assert( !mightContainSubstitutions( m_selectorPlug->source<StringPlug>() ) );
+			m_selector = m_selectorPlug->getValue();
 		}
+		return *m_selector;
+	}
 
-		const std::string &variable( const boost::string_view &name, bool &recurse ) const override
+	// Methods used by `StringAlgo::substitute()`. We use
+	// these to parse variable references in `selector`.
+
+	int frame() const override
+	{
+		return SubstitutionProvider::frame();
+	}
+
+	const std::string &variable( const boost::string_view &name, bool &recurse ) const override
+	{
+		if( !m_scope )
 		{
-			if( !m_scope )
-			{
-				m_scope.emplace( m_context );
-			}
-			m_scope->remove( name );
-			return SubstitutionProvider::variable( name, recurse );
+			m_scope.emplace( m_context );
 		}
+		m_scope->remove( name );
+		return SubstitutionProvider::variable( name, recurse );
+	}
 
-	private :
+private:
 
-		static bool mightContainSubstitutions( const StringPlug *plug )
+	static bool mightContainSubstitutions( const StringPlug *plug )
+	{
+		if( plug->direction() == Plug::In )
 		{
-			if( plug->direction() == Plug::In )
-			{
-				// User input can contain anything.
-				return true;
-			}
-			const Node *node = plug->node();
-			if( !node )
-			{
-				// Value will come from plug's default, which again
-				// could contain anything.
-				return true;
-			}
-			if( plug->getName() == g_firstMatch && node->isInstanceOf( "GafferScene::SetQuery" ) )
-			{
-				// Value is guaranteed to be the name of a set, which will not
-				// contain substitutions. Admittedly, this is a bit of a hack :
-				// the Spreadsheet shouldn't know anything about SetQuery.
-				// Possibilities for more principled approaches include :
-				//
-				// 1. A public method on Spreadsheet for registering node/plug
-				//    combos that are guaranteed not to contain substitutions.
-				// 2. An even more general mechanism for a node to guarantee
-				//    that an output won't contain substitutions.
-				//
-				// But in the absence of other use cases, it seem reasonable to
-				// defer a decision that would commit us to additional public
-				// API.
-				return false;
-			}
+			// User input can contain anything.
 			return true;
 		}
+		const Node *node = plug->node();
+		if( !node )
+		{
+			// Value will come from plug's default, which again
+			// could contain anything.
+			return true;
+		}
+		if( plug->getName() == g_firstMatch && node->isInstanceOf( "GafferScene::SetQuery" ) )
+		{
+			// Value is guaranteed to be the name of a set, which will not
+			// contain substitutions. Admittedly, this is a bit of a hack :
+			// the Spreadsheet shouldn't know anything about SetQuery.
+			// Possibilities for more principled approaches include :
+			//
+			// 1. A public method on Spreadsheet for registering node/plug
+			//    combos that are guaranteed not to contain substitutions.
+			// 2. An even more general mechanism for a node to guarantee
+			//    that an output won't contain substitutions.
+			//
+			// But in the absence of other use cases, it seem reasonable to
+			// defer a decision that would commit us to additional public
+			// API.
+			return false;
+		}
+		return true;
+	}
 
-		const Context *m_context;
-		mutable std::optional<Context::EditableScope> m_scope;
-		const StringPlug *m_selectorPlug;
-		mutable std::optional<RowsMap::Selector> m_selector;
-
+	const Context *m_context;
+	mutable std::optional<Context::EditableScope> m_scope;
+	const StringPlug *m_selectorPlug;
+	mutable std::optional<RowsMap::Selector> m_selector;
 };
 
 struct MetadataRegistration
@@ -417,191 +415,186 @@ GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::RowsPlug );
 class Spreadsheet::RowsPlug::RowNameMap
 {
 
-	public :
+public:
 
-		RowNameMap( Spreadsheet::RowsPlug *rowsPlug )
-			:	m_rowsPlug( rowsPlug )
+	RowNameMap( Spreadsheet::RowsPlug *rowsPlug )
+		: m_rowsPlug( rowsPlug )
+	{
+		rowsPlug->childAddedSignal().connect( boost::bind( &RowNameMap::childAdded, this, ::_2 ) );
+		rowsPlug->childRemovedSignal().connect( boost::bind( &RowNameMap::childRemoved, this, ::_2 ) );
+		rowsPlug->parentChangedSignal().connect( boost::bind( &RowNameMap::parentChanged, this ) );
+	}
+
+	RowPlug *row( const string &rowName )
+	{
+		if( !m_plugSetConnection.connected() )
 		{
-			rowsPlug->childAddedSignal().connect( boost::bind( &RowNameMap::childAdded, this, ::_2 ) );
-			rowsPlug->childRemovedSignal().connect( boost::bind( &RowNameMap::childRemoved, this, ::_2 ) );
-			rowsPlug->parentChangedSignal().connect( boost::bind( &RowNameMap::parentChanged, this ) );
+			// If we can't track name changes, we must do
+			// a brute force update. This should basically never
+			// happen, so we put no effort into making something more
+			// performant.
+			updateRowNames();
 		}
 
-		RowPlug *row( const string &rowName )
+		const auto &index = m_map.get<1>();
+		auto range = index.equal_range( rowName );
+		if( range.first == index.end() )
 		{
-			if( !m_plugSetConnection.connected() )
+			return nullptr;
+		}
+		else if( range.first == range.second )
+		{
+			// Single row with the requested name.
+			// This is the common case we are optimising
+			// for.
+			return range.first->plug;
+		}
+		else
+		{
+			// Multiple rows with the requested name.
+			// We must return the first one.
+			size_t minIndex = std::numeric_limits<size_t>::max();
+			RowPlug *result = nullptr;
+			for( auto it = range.first; it != range.second; ++it )
 			{
-				// If we can't track name changes, we must do
-				// a brute force update. This should basically never
-				// happen, so we put no effort into making something more
-				// performant.
-				updateRowNames();
-			}
-
-			const auto &index = m_map.get<1>();
-			auto range = index.equal_range( rowName );
-			if( range.first == index.end() )
-			{
-				return nullptr;
-			}
-			else if( range.first == range.second )
-			{
-				// Single row with the requested name.
-				// This is the common case we are optimising
-				// for.
-				return range.first->plug;
-			}
-			else
-			{
-				// Multiple rows with the requested name.
-				// We must return the first one.
-				size_t minIndex = std::numeric_limits<size_t>::max();
-				RowPlug *result = nullptr;
-				for( auto it = range.first; it != range.second; ++it )
+				/// \todo We need GraphComponent to provide constant-time
+				/// access to a child's index.
+				const auto childIt = find( m_rowsPlug->children().begin(), m_rowsPlug->children().end(), it->plug );
+				const size_t index = childIt - m_rowsPlug->children().begin();
+				if( index < minIndex )
 				{
-					/// \todo We need GraphComponent to provide constant-time
-					/// access to a child's index.
-					const auto childIt = find( m_rowsPlug->children().begin(), m_rowsPlug->children().end(), it->plug );
-					const size_t index = childIt - m_rowsPlug->children().begin();
-					if( index < minIndex )
-					{
-						minIndex = index;
-						result = it->plug;
-					}
-				}
-				return result;
-			}
-		}
-
-	private :
-
-		string rowName( const RowPlug *row )
-		{
-			auto namePlug = row->namePlug()->source<ValuePlug>();
-			if( namePlug->direction() == Plug::Out )
-			{
-				return "__rowNameMap::computedNameSentinel__";
-			}
-			else
-			{
-				return row->namePlug()->getValue();
-			}
-		}
-
-		void childAdded( GraphComponent *child )
-		{
-			auto row = static_cast<RowPlug *>( child ); // Guaranteed by `RowsPlug::acceptsChild()`.
-			if( row != m_rowsPlug->defaultRow() )
-			{
-				m_map.insert( { row, rowName( row ) } );
-			}
-		}
-
-		void childRemoved( GraphComponent *child )
-		{
-			auto row = static_cast<RowPlug *>( child ); // Guaranteed by `RowsPlug::acceptsChild()`.
-			m_map.erase( row );
-		}
-
-		void parentChanged()
-		{
-			if( auto node = m_rowsPlug->node() )
-			{
-				m_plugSetConnection = node->plugSetSignal().connect( boost::bind( &RowNameMap::plugSet, this, ::_1 ) );
-				m_plugInputChangedConnection = node->plugInputChangedSignal().connect( boost::bind( &RowNameMap::plugInputChanged, this, ::_1 ) );
-				// While we had no parent, we couldn't track
-				// value or input changes, so we must manually
-				// update all the names.
-				updateRowNames();
-			}
-			else
-			{
-				m_plugSetConnection.disconnect();
-				m_plugInputChangedConnection.disconnect();
-			}
-		}
-
-		void plugSet( Plug *plug )
-		{
-			updateRowName( plug );
-		}
-
-		void plugInputChanged( Plug *plug )
-		{
-			updateRowName( plug );
-		}
-
-		void updateRowName( Plug *plug )
-		{
-			if( auto row = plug->parent<RowPlug>() )
-			{
-				if( plug == row->namePlug() && row->parent() == m_rowsPlug && row != m_rowsPlug->defaultRow() )
-				{
-					auto it = m_map.find( row );
-					assert( it != m_map.end() );
-					m_map.get<1>().modify_key(
-						m_map.project<1>( it ),
-						[row, this] ( string &name ) {
-							name = this->rowName( row );
-						}
-					);
+					minIndex = index;
+					result = it->plug;
 				}
 			}
+			return result;
 		}
+	}
 
-		void updateRowNames()
+private:
+
+	string rowName( const RowPlug *row )
+	{
+		auto namePlug = row->namePlug()->source<ValuePlug>();
+		if( namePlug->direction() == Plug::Out )
 		{
-			auto &index = m_map.get<1>();
+			return "__rowNameMap::computedNameSentinel__";
+		}
+		else
+		{
+			return row->namePlug()->getValue();
+		}
+	}
 
-			// `modify_key()` doesn't invalidate iterators, but it does
-			// reorder them, so to visit everything we must first grab
-			// all the iterators.
-			std::vector<Map::nth_index<1>::type::iterator> iterators;
-			for( auto it = index.begin(); it != index.end(); ++it )
-			{
-				iterators.push_back( it );
-			}
+	void childAdded( GraphComponent *child )
+	{
+		auto row = static_cast<RowPlug *>( child ); // Guaranteed by `RowsPlug::acceptsChild()`.
+		if( row != m_rowsPlug->defaultRow() )
+		{
+			m_map.insert( { row, rowName( row ) } );
+		}
+	}
 
-			for( const auto &it : iterators )
+	void childRemoved( GraphComponent *child )
+	{
+		auto row = static_cast<RowPlug *>( child ); // Guaranteed by `RowsPlug::acceptsChild()`.
+		m_map.erase( row );
+	}
+
+	void parentChanged()
+	{
+		if( auto node = m_rowsPlug->node() )
+		{
+			m_plugSetConnection = node->plugSetSignal().connect( boost::bind( &RowNameMap::plugSet, this, ::_1 ) );
+			m_plugInputChangedConnection = node->plugInputChangedSignal().connect( boost::bind( &RowNameMap::plugInputChanged, this, ::_1 ) );
+			// While we had no parent, we couldn't track
+			// value or input changes, so we must manually
+			// update all the names.
+			updateRowNames();
+		}
+		else
+		{
+			m_plugSetConnection.disconnect();
+			m_plugInputChangedConnection.disconnect();
+		}
+	}
+
+	void plugSet( Plug *plug )
+	{
+		updateRowName( plug );
+	}
+
+	void plugInputChanged( Plug *plug )
+	{
+		updateRowName( plug );
+	}
+
+	void updateRowName( Plug *plug )
+	{
+		if( auto row = plug->parent<RowPlug>() )
+		{
+			if( plug == row->namePlug() && row->parent() == m_rowsPlug && row != m_rowsPlug->defaultRow() )
 			{
-				index.modify_key(
-					it,
-					[it, this] ( string &name ) {
-						name = this->rowName( it->plug );
+				auto it = m_map.find( row );
+				assert( it != m_map.end() );
+				m_map.get<1>().modify_key(
+					m_map.project<1>( it ),
+					[row, this]( string &name ) {
+						name = this->rowName( row );
 					}
 				);
 			}
 		}
+	}
 
-		RowsPlug *m_rowsPlug;
+	void updateRowNames()
+	{
+		auto &index = m_map.get<1>();
 
-		Signals::ScopedConnection m_plugSetConnection;
-		Signals::ScopedConnection m_plugInputChangedConnection;
-
-		struct Row
+		// `modify_key()` doesn't invalidate iterators, but it does
+		// reorder them, so to visit everything we must first grab
+		// all the iterators.
+		std::vector<Map::nth_index<1>::type::iterator> iterators;
+		for( auto it = index.begin(); it != index.end(); ++it )
 		{
-			RowPlug *plug;
-			string name;
-		};
+			iterators.push_back( it );
+		}
 
-		using Map = multi_index::multi_index_container<
-			Row,
-			multi_index::indexed_by<
-				multi_index::hashed_unique<
-					multi_index::key<&Row::plug>
-				>,
-				multi_index::hashed_non_unique<
-					multi_index::key<&Row::name>
-				>
-			>
-		>;
+		for( const auto &it : iterators )
+		{
+			index.modify_key(
+				it,
+				[it, this]( string &name ) {
+					name = this->rowName( it->plug );
+				}
+			);
+		}
+	}
 
-		Map m_map;
+	RowsPlug *m_rowsPlug;
 
+	Signals::ScopedConnection m_plugSetConnection;
+	Signals::ScopedConnection m_plugInputChangedConnection;
+
+	struct Row
+	{
+		RowPlug *plug;
+		string name;
+	};
+
+	using Map = multi_index::multi_index_container<
+		Row,
+		multi_index::indexed_by<
+			multi_index::hashed_unique<
+				multi_index::key<&Row::plug>>,
+			multi_index::hashed_non_unique<
+				multi_index::key<&Row::name>>>>;
+
+	Map m_map;
 };
 
 Spreadsheet::RowsPlug::RowsPlug( const std::string &name, Direction direction, unsigned flags )
-	:	ValuePlug( name, direction, flags ), m_rowNameMap( new RowNameMap( this ) )
+	: ValuePlug( name, direction, flags ), m_rowNameMap( new RowNameMap( this ) )
 {
 	RowPlugPtr defaultRow = new RowPlug( "default" );
 	addChild( defaultRow );
@@ -779,10 +772,10 @@ Gaffer::PlugPtr Spreadsheet::RowsPlug::createCounterpart( const std::string &nam
 GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::RowPlug );
 
 Spreadsheet::RowPlug::RowPlug( const std::string &name, Plug::Direction direction, unsigned flags )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	addChild( new StringPlug( "name", direction ) );
-	addChild( new BoolPlug( "enabled",direction, true ) );
+	addChild( new BoolPlug( "enabled", direction, true ) );
 	addChild( new ValuePlug( "cells", direction ) );
 }
 
@@ -833,7 +826,7 @@ Gaffer::PlugPtr Spreadsheet::RowPlug::createCounterpart( const std::string &name
 GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::CellPlug );
 
 Spreadsheet::CellPlug::CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug, Plug::Direction direction )
-	:	ValuePlug( name, direction )
+	: ValuePlug( name, direction )
 {
 	if( adoptEnabledPlug )
 	{
@@ -888,7 +881,7 @@ size_t Spreadsheet::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( Spreadsheet );
 
 Spreadsheet::Spreadsheet( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -1049,7 +1042,7 @@ void Spreadsheet::affects( const Plug *input, DependencyNode::AffectedPlugsConta
 
 Plug *Spreadsheet::correspondingInput( const Plug *output )
 {
-	return const_cast<Plug *>( const_cast<const Spreadsheet *>( this)->correspondingInput( output ) );
+	return const_cast<Plug *>( const_cast<const Spreadsheet *>( this )->correspondingInput( output ) );
 }
 
 const Plug *Spreadsheet::correspondingInput( const Plug *output ) const

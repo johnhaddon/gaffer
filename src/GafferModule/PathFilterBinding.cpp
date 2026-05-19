@@ -70,42 +70,41 @@ template<typename WrappedType>
 class PathFilterWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 {
 
-	public :
+public:
 
-		PathFilterWrapper( PyObject *self, IECore::CompoundDataPtr userData )
-			:	IECorePython::RunTimeTypedWrapper<WrappedType>( self, userData )
-		{
-		}
+	PathFilterWrapper( PyObject *self, IECore::CompoundDataPtr userData )
+		: IECorePython::RunTimeTypedWrapper<WrappedType>( self, userData )
+	{
+	}
 
-		void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override
+	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override
+	{
+		if( this->isSubclassed() )
 		{
-			if( this->isSubclassed() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				boost::python::object f = this->methodOverride( "_filter" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "_filter" );
-					if( f )
+					list pythonPaths;
+					for( std::vector<PathPtr>::const_iterator it = paths.begin(), eIt = paths.end(); it != eIt; ++it )
 					{
-						list pythonPaths;
-						for( std::vector<PathPtr>::const_iterator it = paths.begin(), eIt = paths.end(); it != eIt; ++it )
-						{
-							pythonPaths.append( *it );
-						}
-						pythonPaths = extract<list>( f( pythonPaths, IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) ) );
-						paths.clear();
-						boost::python::container_utils::extend_container( paths, pythonPaths );
-						return;
+						pythonPaths.append( *it );
 					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					pythonPaths = extract<list>( f( pythonPaths, IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) ) );
+					paths.clear();
+					boost::python::container_utils::extend_container( paths, pythonPaths );
+					return;
 				}
 			}
-			WrappedType::doFilter( paths, canceller );
+			catch( const boost::python::error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
-
+		WrappedType::doFilter( paths, canceller );
+	}
 };
 
 list filter( PathFilter &f, list pythonPaths, const IECore::Canceller *canceller )
@@ -124,7 +123,7 @@ list filter( PathFilter &f, list pythonPaths, const IECore::Canceller *canceller
 
 struct ChangedSlotCaller
 {
-	void operator()( boost::python::object slot, PathFilterPtr f )
+	void operator () ( boost::python::object slot, PathFilterPtr f )
 	{
 		slot( f );
 	}
@@ -204,13 +203,12 @@ void GafferModule::bindPathFilter()
 
 	{
 		scope s = RunTimeTypedClass<PathFilter, Wrapper>()
-			.def( init<IECore::CompoundDataPtr>( ( arg( "userData" ) = object() ) ) )
-			.def( "userData", &PathFilter::userData, return_value_policy<CastToIntrusivePtr>() )
-			.def( "setEnabled", &PathFilter::setEnabled )
-			.def( "getEnabled", &PathFilter::getEnabled )
-			.def( "filter", &filter, ( ( args( "paths" ), arg( "canceller" ) = object() ) ) )
-			.def( "changedSignal", &PathFilter::changedSignal, return_internal_reference<1>() )
-		;
+					  .def( init<IECore::CompoundDataPtr>( ( arg( "userData" ) = object() ) ) )
+					  .def( "userData", &PathFilter::userData, return_value_policy<CastToIntrusivePtr>() )
+					  .def( "setEnabled", &PathFilter::setEnabled )
+					  .def( "getEnabled", &PathFilter::getEnabled )
+					  .def( "filter", &filter, ( ( args( "paths" ), arg( "canceller" ) = object() ) ) )
+					  .def( "changedSignal", &PathFilter::changedSignal, return_internal_reference<1>() );
 
 		SignalClass<PathFilter::ChangedSignal, DefaultSignalCaller<PathFilter::ChangedSignal>, ChangedSlotCaller>( "PathChangedSignal" );
 	}
@@ -218,27 +216,18 @@ void GafferModule::bindPathFilter()
 	// MatchPatternPathFilter
 
 	RunTimeTypedClass<MatchPatternPathFilter>()
-		.def( "__init__", make_constructor( constructMatchPatternPathFilter, default_call_policies(),
-				(
-					boost::python::arg_( "patterns" ),
-					boost::python::arg_( "propertyName" ) = "name",
-					boost::python::arg_( "leafOnly" ) = true
-				)
-			)
-		)
+		.def( "__init__", make_constructor( constructMatchPatternPathFilter, default_call_policies(), ( boost::python::arg_( "patterns" ), boost::python::arg_( "propertyName" ) = "name", boost::python::arg_( "leafOnly" ) = true ) ) )
 		.def( "setMatchPatterns", &setMatchPatterns )
 		.def( "getMatchPatterns", &getMatchPatterns )
 		.def( "setPropertyName", &MatchPatternPathFilter::setPropertyName )
 		.def( "getPropertyName", &getPropertyName )
 		.def( "setInverted", &MatchPatternPathFilter::setInverted )
-		.def( "getInverted", &MatchPatternPathFilter::getInverted )
-	;
+		.def( "getInverted", &MatchPatternPathFilter::getInverted );
 
 	// LeafPathFilter
 
 	RunTimeTypedClass<LeafPathFilter>()
-		.def( init<CompoundDataPtr>( ( arg( "userData" ) = object() ) ) )
-	;
+		.def( init<CompoundDataPtr>( ( arg( "userData" ) = object() ) ) );
 
 	// FileSequencePathFilter
 
@@ -252,43 +241,27 @@ void GafferModule::bindPathFilter()
 			.value( "Sequences", FileSequencePathFilter::Sequences )
 			.value( "Concise", FileSequencePathFilter::Concise )
 			.value( "Verbose", FileSequencePathFilter::Verbose )
-			.value( "All", FileSequencePathFilter::All )
-		;
+			.value( "All", FileSequencePathFilter::All );
 	}
 
 	filterClass
-		.def( init<FileSequencePathFilter::Keep, CompoundDataPtr>(
-			(
-				arg( "mode" ) = FileSequencePathFilter::Concise,
-				arg( "userData" ) = object()
-			)
-		) )
+		.def( init<FileSequencePathFilter::Keep, CompoundDataPtr>( ( arg( "mode" ) = FileSequencePathFilter::Concise, arg( "userData" ) = object() ) ) )
 		.def( "getMode", &FileSequencePathFilter::getMode )
-		.def( "setMode", &FileSequencePathFilter::setMode )
-	;
+		.def( "setMode", &FileSequencePathFilter::setMode );
 
 	// CompoundPathFilter
 
 	RunTimeTypedClass<CompoundPathFilter>()
-		.def( "__init__", make_constructor( &constructCompoundPathFilter, default_call_policies(),
-				(
-					arg( "filters" ) = list(),
-					arg( "userData" ) = object()
-				)
-			)
-		)
+		.def( "__init__", make_constructor( &constructCompoundPathFilter, default_call_policies(), ( arg( "filters" ) = list(), arg( "userData" ) = object() ) ) )
 		.def( "addFilter", &CompoundPathFilter::addFilter )
 		.def( "removeFilter", &CompoundPathFilter::removeFilter )
 		.def( "setFilters", &setFilters )
-		.def( "getFilters", &getFilters )
-	;
+		.def( "getFilters", &getFilters );
 
 	// HiddenFilePathFilter
 
 	RunTimeTypedClass<HiddenFilePathFilter>()
 		.def( init<CompoundDataPtr>( ( arg( "userData" ) = object() ) ) )
 		.def( "setInverted", &HiddenFilePathFilter::setInverted )
-		.def( "getInverted", &HiddenFilePathFilter::getInverted )
-	;
-
+		.def( "getInverted", &HiddenFilePathFilter::getInverted );
 }

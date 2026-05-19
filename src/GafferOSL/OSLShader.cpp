@@ -106,12 +106,12 @@ struct ShadingEngineCacheGetterKey
 {
 
 	ShadingEngineCacheGetterKey()
-		:	shader( nullptr )
+		: shader( nullptr )
 	{
 	}
 
 	ShadingEngineCacheGetterKey( const OSLShader *s, const CompoundObject *substitutions )
-		:	shader( s ), substitutions( substitutions )
+		: shader( s ), substitutions( substitutions )
 	{
 		hash = s->attributesHash();
 		if( substitutions )
@@ -125,7 +125,7 @@ struct ShadingEngineCacheGetterKey
 		}
 	}
 
-	operator const IECore::MurmurHash & () const
+	operator const IECore::MurmurHash &() const
 	{
 		return hash;
 	}
@@ -186,7 +186,7 @@ using QueryCache = IECorePreview::LRUCache<string, OSLQueryPtr, IECorePreview::L
 QueryCache &queryCache()
 {
 	static QueryCache g_cache(
-		[] ( const std::string &shaderName, size_t &cost, const IECore::Canceller *canceller ) {
+		[]( const std::string &shaderName, size_t &cost, const IECore::Canceller *canceller ) {
 			const char *searchPath = getenv( "OSL_SHADER_PATHS" );
 			OSLQueryPtr query = make_shared<OSLQuery>();
 			if( !query->open( shaderName, searchPath ? searchPath : "" ) )
@@ -225,7 +225,7 @@ boost::container::flat_map<string, string> g_typeOverrides = {
 GAFFER_NODE_DEFINE_TYPE( OSLShader );
 
 OSLShader::OSLShader( const std::string &name )
-	:	GafferScene::Shader( name )
+	: GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Plug::Out ) );
 }
@@ -322,8 +322,7 @@ bool is3DelightSplineValueParameter( const OSLQuery::Parameter *parameter )
 	auto widgetIt = std::find_if(
 		parameter->metadata.begin(),
 		parameter->metadata.end(),
-		[]( const OSLQuery::Parameter &m )
-		{
+		[]( const OSLQuery::Parameter &m ) {
 			return m.name == "widget";
 		}
 	);
@@ -339,8 +338,7 @@ bool is3DelightSplineNonValueParameter( const OSLQuery::Parameter *parameter )
 	auto relatedWidgetIt = std::find_if(
 		parameter->metadata.begin(),
 		parameter->metadata.end(),
-		[]( const OSLQuery::Parameter &m )
-		{
+		[]( const OSLQuery::Parameter &m ) {
 			return m.name == "related_to_widget";
 		}
 	);
@@ -355,16 +353,16 @@ bool find3DelightSplineParametersFromPositions(
 	const OSLQuery &query,
 	const OSLQuery::Parameter *positionsParameter,
 	std::string &nameWithoutSuffix,
-	const OSLQuery::Parameter * &valuesParameter,
-	const OSLQuery::Parameter * &basisParameter
+	const OSLQuery::Parameter *&valuesParameter,
+	const OSLQuery::Parameter *&basisParameter
 )
 {
 	if( !(
-		positionsParameter->type.is_array() &&
-		positionsParameter->type.basetype == TypeDesc::FLOAT &&
-		positionsParameter->type.aggregate == TypeDesc::SCALAR &&
-		is3DelightSplineNonValueParameter( positionsParameter )
-	) )
+			positionsParameter->type.is_array() &&
+			positionsParameter->type.basetype == TypeDesc::FLOAT &&
+			positionsParameter->type.aggregate == TypeDesc::SCALAR &&
+			is3DelightSplineNonValueParameter( positionsParameter )
+		) )
 	{
 		return false;
 	}
@@ -433,7 +431,6 @@ bool find3DelightSplineParametersFromPositions(
 }
 
 
-
 //////////////////////////////////////////////////////////////////////////
 // Shader loading code
 //////////////////////////////////////////////////////////////////////////
@@ -450,7 +447,7 @@ Plug *loadStringParameter( const OSLQuery::Parameter *parameter, const InternedS
 	}
 
 	StringPlug *existingPlug = parent->getChild<StringPlug>( name );
-	if(	existingPlug && existingPlug->defaultValue() == defaultValue )
+	if( existingPlug && existingPlug->defaultValue() == defaultValue )
 	{
 		return existingPlug;
 	}
@@ -486,7 +483,7 @@ Plug *loadStringArrayParameter( const OSLQuery::Parameter *parameter, const Inte
 	}
 
 	StringVectorDataPlug *existingPlug = parent->getChild<StringVectorDataPlug>( name );
-	if(	existingPlug && *existingPlug->defaultValue() == *defaultValueData )
+	if( existingPlug && *existingPlug->defaultValue() == *defaultValueData )
 	{
 		return existingPlug;
 	}
@@ -524,8 +521,8 @@ Plug *loadNumericParameter( const OSLQuery::Parameter *parameter, const Interned
 	ValueType maxValue( std::numeric_limits<ValueType>::max() );
 	if( metadata )
 	{
-		const TypedData<ValueType> *minMeta = metadata->member< TypedData<ValueType> >( "min" );
-		const TypedData<ValueType> *maxMeta = metadata->member< TypedData<ValueType> >( "max" );
+		const TypedData<ValueType> *minMeta = metadata->member<TypedData<ValueType>>( "min" );
+		const TypedData<ValueType> *maxMeta = metadata->member<TypedData<ValueType>>( "max" );
 		if( minMeta )
 		{
 			minValue = minMeta->readable();
@@ -610,7 +607,7 @@ Plug *loadNumericArrayParameter( const OSLQuery::Parameter *parameter, const Int
 	return plug.get();
 }
 
-template <typename PlugType>
+template<typename PlugType>
 Plug *loadCompoundNumericParameter( const OSLQuery::Parameter *parameter, const InternedString &name, Gaffer::Plug *parent, const CompoundData *metadata )
 {
 	using ValueType = typename PlugType::ValueType;
@@ -637,8 +634,8 @@ Plug *loadCompoundNumericParameter( const OSLQuery::Parameter *parameter, const 
 	ValueType maxValue( std::numeric_limits<BaseType>::max() );
 	if( metadata )
 	{
-		const TypedData<ValueType> *minMeta = metadata->member< TypedData<ValueType> >( "min" );
-		const TypedData<ValueType> *maxMeta = metadata->member< TypedData<ValueType> >( "max" );
+		const TypedData<ValueType> *minMeta = metadata->member<TypedData<ValueType>>( "min" );
+		const TypedData<ValueType> *maxMeta = metadata->member<TypedData<ValueType>>( "max" );
 		if( minMeta )
 		{
 			minValue = minMeta->readable();
@@ -669,7 +666,7 @@ Plug *loadCompoundNumericParameter( const OSLQuery::Parameter *parameter, const 
 		return existingPlug;
 	}
 
-	typename PlugType::Ptr plug = new PlugType( name, parent->direction(), defaultValue, minValue, maxValue, Plug::Default , interpretation );
+	typename PlugType::Ptr plug = new PlugType( name, parent->direction(), defaultValue, minValue, maxValue, Plug::Default, interpretation );
 
 	if( existingPlug )
 	{
@@ -683,7 +680,7 @@ Plug *loadCompoundNumericParameter( const OSLQuery::Parameter *parameter, const 
 	return plug.get();
 }
 
-template <typename PlugType>
+template<typename PlugType>
 Plug *loadCompoundNumericArrayParameter( const OSLQuery::Parameter *parameter, const InternedString &name, Gaffer::Plug *parent, const CompoundData *metadata )
 {
 	using DataType = typename PlugType::ValueType;
@@ -700,7 +697,7 @@ Plug *loadCompoundNumericArrayParameter( const OSLQuery::Parameter *parameter, c
 		{
 			for( size_t i = 0; i < ElementType::dimensions(); ++i )
 			{
-				defaultValueDataWritable[j][i] = BaseType( parameter->idefault[ j * ElementType::dimensions() + i] );
+				defaultValueDataWritable[j][i] = BaseType( parameter->idefault[j * ElementType::dimensions() + i] );
 			}
 		}
 	}
@@ -711,11 +708,10 @@ Plug *loadCompoundNumericArrayParameter( const OSLQuery::Parameter *parameter, c
 		{
 			for( size_t i = 0; i < ElementType::dimensions(); ++i )
 			{
-				defaultValueDataWritable[j][i] = BaseType( parameter->fdefault[ j * ElementType::dimensions() + i] );
+				defaultValueDataWritable[j][i] = BaseType( parameter->fdefault[j * ElementType::dimensions() + i] );
 			}
 		}
 	}
-
 
 
 	PlugType *existingPlug = parent->getChild<PlugType>( name );
@@ -783,10 +779,11 @@ Plug *loadMatrixArrayParameter( const OSLQuery::Parameter *parameter, const Inte
 		for( size_t i = 0; i < defaultValueDataWritable.size(); i++ )
 		{
 			defaultValueDataWritable[i] = M44f(
-				d[i*16+0], d[i*16+1], d[i*16+2], d[i*16+3],
-				d[i*16+4], d[i*16+5], d[i*16+6], d[i*16+7],
-				d[i*16+8], d[i*16+9], d[i*16+10], d[i*16+11],
-				d[i*16+12], d[i*16+13], d[i*16+14], d[i*16+15] );
+				d[i * 16 + 0], d[i * 16 + 1], d[i * 16 + 2], d[i * 16 + 3],
+				d[i * 16 + 4], d[i * 16 + 5], d[i * 16 + 6], d[i * 16 + 7],
+				d[i * 16 + 8], d[i * 16 + 9], d[i * 16 + 10], d[i * 16 + 11],
+				d[i * 16 + 12], d[i * 16 + 13], d[i * 16 + 14], d[i * 16 + 15]
+			);
 		}
 	}
 
@@ -837,20 +834,24 @@ std::string basisStringFrom3DelightInt( int basis )
 {
 	switch( basis )
 	{
-		case 0 : return "constant";
-		case 1 : return "linear";
-		case 2 : return "monotonecubic";
-		default : return "catmullrom";
+		case 0 :
+			return "constant";
+		case 1 :
+			return "linear";
+		case 2 :
+			return "monotonecubic";
+		default :
+			return "catmullrom";
 	}
 }
 
 struct RampPlugArguments
 {
 	std::string name;
-	std::variant< Rampff, RampfColor3f > defaultValue;
+	std::variant<Rampff, RampfColor3f> defaultValue;
 };
 
-template <typename RampType>
+template<typename RampType>
 RampType loadRampDefault( const OSLQuery::Parameter *positionsParameter, const OSLQuery::Parameter *valuesParameter, const OSLQuery::Parameter *basisParameter, const OSLQuery::Parameter *countParameter, const std::string &name )
 {
 	RampType defaultValue;
@@ -876,15 +877,15 @@ RampType loadRampDefault( const OSLQuery::Parameter *positionsParameter, const O
 		maxSize = countParameter->idefault.front();
 	}
 
-	if constexpr( std::is_same_v< typename RampType::YType, Color3f > )
+	if constexpr( std::is_same_v<typename RampType::YType, Color3f> )
 	{
-		for( size_t i = 0; i < rawPositions.size() && i*3+2 < rawValues.size() && i < maxSize; ++i )
+		for( size_t i = 0; i < rawPositions.size() && i * 3 + 2 < rawValues.size() && i < maxSize; ++i )
 		{
 			values.push_back(
 				Color3f(
-					rawValues[i*3],
-					rawValues[i*3+1],
-					rawValues[i*3+2]
+					rawValues[i * 3],
+					rawValues[i * 3 + 1],
+					rawValues[i * 3 + 2]
 				)
 			);
 		}
@@ -907,7 +908,7 @@ RampType loadRampDefault( const OSLQuery::Parameter *positionsParameter, const O
 	return defaultValue;
 }
 
-bool findGafferSplineParametersFromPositions( const OSLQuery &query, const OSLQuery::Parameter *positionsParameter, std::string &nameWithoutSuffix, const OSLQuery::Parameter * &valuesParameter, const OSLQuery::Parameter * &basisParameter )
+bool findGafferSplineParametersFromPositions( const OSLQuery &query, const OSLQuery::Parameter *positionsParameter, std::string &nameWithoutSuffix, const OSLQuery::Parameter *&valuesParameter, const OSLQuery::Parameter *&basisParameter )
 {
 	static const std::string positionsSuffix( "Positions" );
 	static const std::string valuesSuffix( "Values" );
@@ -949,7 +950,7 @@ bool findGafferSplineParametersFromPositions( const OSLQuery &query, const OSLQu
 	return true;
 }
 
-bool findPRManSplineParametersFromPositions( const OSLQuery &query, const OSLQuery::Parameter *positionsParameter, std::string &nameWithoutSuffix, const OSLQuery::Parameter * &valuesParameter, const OSLQuery::Parameter * &basisParameter, const OSLQuery::Parameter * &countParameter )
+bool findPRManSplineParametersFromPositions( const OSLQuery &query, const OSLQuery::Parameter *positionsParameter, std::string &nameWithoutSuffix, const OSLQuery::Parameter *&valuesParameter, const OSLQuery::Parameter *&basisParameter, const OSLQuery::Parameter *&countParameter )
 {
 	static const std::string positionsSuffix( "_Knots" );
 	static const std::string valuesColorSuffix( "_Colors" );
@@ -1008,13 +1009,13 @@ bool findPRManSplineParametersFromPositions( const OSLQuery &query, const OSLQue
 }
 
 
-bool findSplineParametersFromPositions( const std::string &shaderName, const OSLQuery &query, const OSLQuery::Parameter *positionsParameter, std::string &nameWithoutSuffix, const OSLQuery::Parameter * &valuesParameter, const OSLQuery::Parameter * &basisParameter, const OSLQuery::Parameter * &countParameter, std::unordered_set<const OSLQuery::Parameter *> &parametersAlreadyProcessed )
+bool findSplineParametersFromPositions( const std::string &shaderName, const OSLQuery &query, const OSLQuery::Parameter *positionsParameter, std::string &nameWithoutSuffix, const OSLQuery::Parameter *&valuesParameter, const OSLQuery::Parameter *&basisParameter, const OSLQuery::Parameter *&countParameter, std::unordered_set<const OSLQuery::Parameter *> &parametersAlreadyProcessed )
 {
 	bool success = false;
 	// Note that this will fail if the shader is loaded from an explicit path ( in which case the shaderName
 	// will be prefixed with a file path ). We've concluded this isn't an issue, because shaders should be found
 	// using search paths instead.
-	if( boost::starts_with( shaderName, "Pxr" ) ||  boost::starts_with( shaderName, "Lama" ) )
+	if( boost::starts_with( shaderName, "Pxr" ) || boost::starts_with( shaderName, "Lama" ) )
 	{
 		success = findPRManSplineParametersFromPositions( query, positionsParameter, nameWithoutSuffix, valuesParameter, basisParameter, countParameter );
 	}
@@ -1069,7 +1070,7 @@ std::optional<RampPlugArguments> rampPlugArgumentsFromPositions( const std::stri
 }
 
 // Forward declaration so loadStructParameter() can call it.
-void loadShaderParameters( const std::string& shaderName, const OSLQuery &query, Gaffer::Plug *parent, const CompoundData *metadata, const std::string &prefix = "" );
+void loadShaderParameters( const std::string &shaderName, const OSLQuery &query, Gaffer::Plug *parent, const CompoundData *metadata, const std::string &prefix = "" );
 
 Plug *loadStructParameter( const std::string &shaderName, const OSLQuery &query, const OSLQuery::Parameter *parameter, const InternedString &name, Gaffer::Plug *parent )
 {
@@ -1228,7 +1229,7 @@ Plug *loadShaderParameter( const std::string shaderName, const OSLQuery &query, 
 	return result;
 }
 
-template <typename PlugType>
+template<typename PlugType>
 Gaffer::Plug *loadRampParameterFromDefault( const InternedString &name, const typename PlugType::ValueType &defaultValue, Gaffer::Plug *parent )
 {
 	PlugType *existingPlug = parent->getChild<PlugType>( name );
@@ -1263,7 +1264,7 @@ void loadShaderParameters( const std::string &shaderName, const OSLQuery &query,
 	// processed as part of a ramp.
 
 	std::unordered_set<const OSLQuery::Parameter *> parametersAlreadyProcessed;
-	std::unordered_map<const OSLQuery::Parameter *, RampPlugArguments > rampPlugArguments;
+	std::unordered_map<const OSLQuery::Parameter *, RampPlugArguments> rampPlugArguments;
 
 	for( size_t i = 0; i < query.nparams(); ++i )
 	{
@@ -1331,7 +1332,7 @@ void loadShaderParameters( const std::string &shaderName, const OSLQuery &query,
 			// This is the key parameter for the ramp, time to output this ramp
 			// ( We need to wait until now to output the ramp so it gets interleaved in proper
 			// order with the non-ramp parameters )
-			if( std::holds_alternative< RampfColor3f >( rampIt->second.defaultValue ) )
+			if( std::holds_alternative<RampfColor3f>( rampIt->second.defaultValue ) )
 			{
 				plug = loadRampParameterFromDefault<RampfColor3fPlug>( rampIt->second.name, std::get<RampfColor3f>( rampIt->second.defaultValue ), parent );
 			}
@@ -1367,7 +1368,6 @@ void loadShaderParameters( const std::string &shaderName, const OSLQuery &query,
 			parent->removeChild( child );
 		}
 	}
-
 }
 
 } // namespace
@@ -1405,8 +1405,8 @@ void OSLShader::loadShader( const std::string &shaderName, bool keepExistingValu
 	auto typeIt = g_typeOverrides.find( std::filesystem::path( shaderName ).stem().string() );
 	typePlug->source<StringPlug>()->setValue(
 		typeIt != g_typeOverrides.end() ?
-		typeIt->second :
-		std::string( "osl:" ) + ( query->shadertype().string() )
+			typeIt->second :
+			std::string( "osl:" ) + ( query->shadertype().string() )
 	);
 
 	const IECore::CompoundData *metadata = OSLShader::metadata();
@@ -1455,28 +1455,16 @@ IECore::DataPtr convertMetadata( const OSLQuery::Parameter &metadata )
 		{
 			if( metadata.type.vecsemantics == TypeDesc::COLOR )
 			{
-				return new IECore::Color3fData( Imath::Color3f(
-					metadata.fdefault[0],
-					metadata.fdefault[1],
-					metadata.fdefault[2]
-				) );
+				return new IECore::Color3fData( Imath::Color3f( metadata.fdefault[0], metadata.fdefault[1], metadata.fdefault[2] ) );
 			}
 			else
 			{
-				return new IECore::V3fData( Imath::V3f(
-					metadata.fdefault[0],
-					metadata.fdefault[1],
-					metadata.fdefault[2]
-				) );
+				return new IECore::V3fData( Imath::V3f( metadata.fdefault[0], metadata.fdefault[1], metadata.fdefault[2] ) );
 			}
 		}
 		else
 		{
-			return new IECore::V3iData( Imath::V3i(
-				metadata.idefault[0],
-				metadata.idefault[1],
-				metadata.idefault[2]
-			) );
+			return new IECore::V3iData( Imath::V3i( metadata.idefault[0], metadata.idefault[1], metadata.idefault[2] ) );
 		}
 	}
 	else if( metadata.type.arraylen > 0 )

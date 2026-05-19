@@ -60,12 +60,12 @@ static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
 );
 
 FilterPlug::FilterPlug( const std::string &name, Direction direction, unsigned flags )
-	:	IntPlug( name, direction, IECore::PathMatcher::NoMatch, IECore::PathMatcher::NoMatch, IECore::PathMatcher::EveryMatch, flags )
+	: IntPlug( name, direction, IECore::PathMatcher::NoMatch, IECore::PathMatcher::NoMatch, IECore::PathMatcher::EveryMatch, flags )
 {
 }
 
 FilterPlug::FilterPlug( const std::string &name, Direction direction, int defaultValue, int minValue, int maxValue, unsigned flags )
-	:	IntPlug( name, direction, defaultValue, minValue, maxValue, flags )
+	: IntPlug( name, direction, defaultValue, minValue, maxValue, flags )
 {
 }
 
@@ -149,7 +149,7 @@ void FilterPlug::sceneAffects( const Gaffer::Plug *scenePlugChild, Gaffer::Depen
 			// relevant.
 			for( FilterPlug::InputIterator it( switchNode->inPlugs() ); !it.done(); ++it )
 			{
-				(*it)->sceneAffects( scenePlugChild, outputs );
+				( *it )->sceneAffects( scenePlugChild, outputs );
 			}
 		}
 	}
@@ -162,8 +162,8 @@ unsigned FilterPlug::match( const ScenePlug *scene ) const
 }
 
 FilterPlug::SceneScope::SceneScope( const Gaffer::Context *context, const ScenePlug *scenePlug )
-	:	EditableScope( context )
+	: EditableScope( context )
 {
 	m_scenePlug = scenePlug;
-	set<uint64_t>( inputSceneContextName, (uint64_t*)&m_scenePlug );
+	set<uint64_t>( inputSceneContextName, (uint64_t *)&m_scenePlug );
 }

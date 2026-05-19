@@ -54,16 +54,15 @@ namespace
 struct ProcessorProcess : public Process
 {
 
-	public :
+public:
 
-		ProcessorProcess( InternedString type, const OpenColorIOTransform *node )
-			:	Process( type, node->outPlug() )
-		{
-		}
+	ProcessorProcess( InternedString type, const OpenColorIOTransform *node )
+		: Process( type, node->outPlug() )
+	{
+	}
 
-		static InternedString processorProcessType;
-		static InternedString processorHashProcessType;
-
+	static InternedString processorProcessType;
+	static InternedString processorHashProcessType;
 };
 
 InternedString ProcessorProcess::processorProcessType( "openColorIOTransform:processor" );
@@ -75,8 +74,8 @@ GAFFER_NODE_DEFINE_TYPE( OpenColorIOTransform );
 
 size_t OpenColorIOTransform::g_firstPlugIndex = 0;
 
-OpenColorIOTransform::OpenColorIOTransform( const std::string &name , bool withContextPlug )
-	:	ColorProcessor( name ), m_hasContextPlug( withContextPlug )
+OpenColorIOTransform::OpenColorIOTransform( const std::string &name, bool withContextPlug )
+	: ColorProcessor( name ), m_hasContextPlug( withContextPlug )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	if( m_hasContextPlug )
@@ -182,7 +181,7 @@ OCIO_NAMESPACE::ConstContextRcPtr OpenColorIOTransform::modifiedOCIOContext( OCI
 			StringDataPtr data = runTimeCast<StringData>( d );
 			if( !data )
 			{
-				throw( Exception(  "OpenColorIOTransform: Failed to convert context value to string." ) );
+				throw( Exception( "OpenColorIOTransform: Failed to convert context value to string." ) );
 			}
 			value = data->readable();
 			if( !name.empty() && !value.empty() )
@@ -191,7 +190,7 @@ OCIO_NAMESPACE::ConstContextRcPtr OpenColorIOTransform::modifiedOCIOContext( OCI
 				{
 					mutableContext = context->createEditableCopy();
 				}
-				mutableContext->setStringVar(name.c_str(), value.c_str() );
+				mutableContext->setStringVar( name.c_str(), value.c_str() );
 			}
 		}
 	}
@@ -209,8 +208,7 @@ ColorProcessor::ColorProcessorFunction OpenColorIOTransform::colorProcessor( con
 
 	OCIO_NAMESPACE::ConstCPUProcessorRcPtr cpuProcessor = processor->getDefaultCPUProcessor();
 
-	return [cpuProcessor] ( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b ) {
-
+	return [cpuProcessor]( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b ) {
 		if( !r->readable().size() )
 		{
 			// Deep image with no samples. OCIO will throw if we give it an empty

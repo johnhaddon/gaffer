@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( GlobalShader );
 size_t GlobalShader::g_firstPlugIndex = 0;
 
 GlobalShader::GlobalShader( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "shader" ) );

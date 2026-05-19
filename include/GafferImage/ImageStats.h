@@ -52,71 +52,70 @@ namespace GafferImage
 class GAFFERIMAGE_API ImageStats : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit ImageStats( const std::string &name=defaultName<ImageStats>() );
-		~ImageStats() override;
+	explicit ImageStats( const std::string &name = defaultName<ImageStats>() );
+	~ImageStats() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageStats, ImageStatsTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageStats, ImageStatsTypeId, Gaffer::ComputeNode );
 
-		enum AreaSource
-		{
-			Area = 0,
-			DataWindow = 1,
-			DisplayWindow = 2,
-		};
+	enum AreaSource
+	{
+		Area = 0,
+		DataWindow = 1,
+		DisplayWindow = 2,
+	};
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		GafferImage::ImagePlug *inPlug();
-		const GafferImage::ImagePlug *inPlug() const;
+	GafferImage::ImagePlug *inPlug();
+	const GafferImage::ImagePlug *inPlug() const;
 
-		Gaffer::StringPlug *viewPlug();
-		const Gaffer::StringPlug *viewPlug() const;
+	Gaffer::StringPlug *viewPlug();
+	const Gaffer::StringPlug *viewPlug() const;
 
-		Gaffer::StringVectorDataPlug *channelsPlug();
-		const Gaffer::StringVectorDataPlug *channelsPlug() const;
+	Gaffer::StringVectorDataPlug *channelsPlug();
+	const Gaffer::StringVectorDataPlug *channelsPlug() const;
 
-		Gaffer::IntPlug *areaSourcePlug();
-		const Gaffer::IntPlug *areaSourcePlug() const;
+	Gaffer::IntPlug *areaSourcePlug();
+	const Gaffer::IntPlug *areaSourcePlug() const;
 
-		Gaffer::Box2iPlug *areaPlug();
-		const Gaffer::Box2iPlug *areaPlug() const;
+	Gaffer::Box2iPlug *areaPlug();
+	const Gaffer::Box2iPlug *areaPlug() const;
 
-		Gaffer::Color4fPlug *averagePlug();
-		const Gaffer::Color4fPlug *averagePlug() const;
+	Gaffer::Color4fPlug *averagePlug();
+	const Gaffer::Color4fPlug *averagePlug() const;
 
-		Gaffer::Color4fPlug *minPlug();
-		const Gaffer::Color4fPlug *minPlug() const;
+	Gaffer::Color4fPlug *minPlug();
+	const Gaffer::Color4fPlug *minPlug() const;
 
-		Gaffer::Color4fPlug *maxPlug();
-		const Gaffer::Color4fPlug *maxPlug() const;
+	Gaffer::Color4fPlug *maxPlug();
+	const Gaffer::Color4fPlug *maxPlug() const;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
-		Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
 
-	private :
+private:
 
-		// Stats for individual tiles
-		Gaffer::ObjectPlug *tileStatsPlug();
-		const Gaffer::ObjectPlug *tileStatsPlug() const;
+	// Stats for individual tiles
+	Gaffer::ObjectPlug *tileStatsPlug();
+	const Gaffer::ObjectPlug *tileStatsPlug() const;
 
-		// Combined stats, before they get broken out into 3 seperate plugs
-		Gaffer::ObjectPlug *allStatsPlug();
-		const Gaffer::ObjectPlug *allStatsPlug() const;
+	// Combined stats, before they get broken out into 3 seperate plugs
+	Gaffer::ObjectPlug *allStatsPlug();
+	const Gaffer::ObjectPlug *allStatsPlug() const;
 
-		// Input plug to receive the flattened image from the internal
-		// DeepState plug.
-		ImagePlug *flattenedInPlug();
-		const ImagePlug *flattenedInPlug() const;
+	// Input plug to receive the flattened image from the internal
+	// DeepState plug.
+	ImagePlug *flattenedInPlug();
+	const ImagePlug *flattenedInPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ImageStats );

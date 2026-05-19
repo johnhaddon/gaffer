@@ -85,16 +85,12 @@ void ProcessMessageHandler::handle( Level level, const string &context, const st
 			ss << ", frame: " << *frame;
 		}
 
-		if( auto path = p->context()->getIfExists< std::vector<IECore::InternedString> >( g_scenePath ) )
+		if( auto path = p->context()->getIfExists<std::vector<IECore::InternedString>>( g_scenePath ) )
 		{
-			std::string strPath = std::string("/") + join(
-				*path | transformed(
-					[]( const IECore::InternedString &s )
-					{
-						return s.string();
-					}
-				), "/"
-			);
+			std::string strPath = std::string( "/" ) + join( *path | transformed( []( const IECore::InternedString &s ) {
+									  return s.string();
+								  } ),
+															 "/" );
 			ss << ", path: '" << strPath << "'";
 		}
 

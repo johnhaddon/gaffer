@@ -47,40 +47,39 @@ namespace GafferScene
 class GAFFERSCENE_API MeshNormals : public ObjectProcessor
 {
 
-	public :
+public:
 
-		MeshNormals( const std::string &name=defaultName<MeshNormals>() );
-		~MeshNormals() override;
+	MeshNormals( const std::string &name = defaultName<MeshNormals>() );
+	~MeshNormals() override;
 
-		Gaffer::IntPlug *interpolationPlug();
-		const Gaffer::IntPlug *interpolationPlug() const;
+	Gaffer::IntPlug *interpolationPlug();
+	const Gaffer::IntPlug *interpolationPlug() const;
 
-		Gaffer::IntPlug *weightingPlug();
-		const Gaffer::IntPlug *weightingPlug() const;
+	Gaffer::IntPlug *weightingPlug();
+	const Gaffer::IntPlug *weightingPlug() const;
 
-		Gaffer::FloatPlug *thresholdAnglePlug();
-		const Gaffer::FloatPlug *thresholdAnglePlug() const;
+	Gaffer::FloatPlug *thresholdAnglePlug();
+	const Gaffer::FloatPlug *thresholdAnglePlug() const;
 
-		Gaffer::StringPlug *positionPlug();
-		const Gaffer::StringPlug *positionPlug() const;
+	Gaffer::StringPlug *positionPlug();
+	const Gaffer::StringPlug *positionPlug() const;
 
-		Gaffer::StringPlug *normalPlug();
-		const Gaffer::StringPlug *normalPlug() const;
+	Gaffer::StringPlug *normalPlug();
+	const Gaffer::StringPlug *normalPlug() const;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshNormals, MeshNormalsTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshNormals, MeshNormalsTypeId, ObjectProcessor );
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
+	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshNormals )

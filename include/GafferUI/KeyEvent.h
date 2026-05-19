@@ -54,13 +54,11 @@ struct GAFFERUI_API KeyEvent : public ModifiableEvent
 		const char *k = "a",
 		Modifiers m = ModifiableEvent::None
 	)
-		:	ModifiableEvent( m ), key( k )
-	{
-	};
+		: ModifiableEvent( m ), key( k ) {
+		  };
 
 	/// The key pressed.
 	std::string key;
-
 };
 
 inline bool operator == ( const KeyEvent &lhs, const KeyEvent &rhs )
@@ -70,7 +68,7 @@ inline bool operator == ( const KeyEvent &lhs, const KeyEvent &rhs )
 
 inline bool operator != ( const KeyEvent &lhs, const KeyEvent &rhs )
 {
-	return !(lhs == rhs);
+	return !( lhs == rhs );
 }
 
 } // namespace GafferUI

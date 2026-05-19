@@ -79,7 +79,6 @@ class BoxSerialiser : public NodeSerialiser
 		}
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
-
 };
 
 BoxPtr createWrapper( Node *parent, const Set *childNodes )
@@ -122,8 +121,7 @@ class BoxIOSerialiser : public NodeSerialiser
 		}
 
 		// Only serialise a call to setup() when we need to construct this node
-		if( !Serialisation::acquireSerialiser( graphComponent->parent() )->childNeedsConstruction(
-			graphComponent, serialisation ) )
+		if( !Serialisation::acquireSerialiser( graphComponent->parent() )->childNeedsConstruction( graphComponent, serialisation ) )
 		{
 			return result;
 		}
@@ -176,7 +174,6 @@ class BoxIOSerialiser : public NodeSerialiser
 
 		return result;
 	}
-
 };
 
 } // namespace GafferModule
@@ -267,7 +264,7 @@ namespace
 
 struct ReferenceLoadedSlotCaller
 {
-	void operator()( boost::python::object slot, ReferencePtr r )
+	void operator () ( boost::python::object slot, ReferencePtr r )
 	{
 		try
 		{
@@ -295,7 +292,6 @@ class ReferenceSerialiser : public NodeSerialiser
 
 		return identifier + ".load( \"" + fileName.generic_string() + "\" )\n";
 	}
-
 };
 
 void load( Reference &r, const std::filesystem::path &f )
@@ -316,8 +312,7 @@ void GafferModule::bindSubGraph()
 	DependencyNodeClass<Box, BoxWrapper>()
 		.def( "exportForReference", &Box::exportForReference )
 		.def( "create", &createWrapper )
-		.staticmethod( "create" )
-	;
+		.staticmethod( "create" );
 
 	Serialisation::registerSerialiser( Box::staticTypeId(), new BoxSerialiser );
 
@@ -331,8 +326,7 @@ void GafferModule::bindSubGraph()
 		.def( "insert", &insert )
 		.staticmethod( "insert" )
 		.def( "canInsert", &BoxIO::canInsert )
-		.staticmethod( "canInsert" )
-	;
+		.staticmethod( "canInsert" );
 
 	Serialisation::registerSerialiser( BoxIO::staticTypeId(), new BoxIOSerialiser );
 
@@ -344,10 +338,9 @@ void GafferModule::bindSubGraph()
 		.def( "fileName", &Reference::fileName, return_value_policy<copy_const_reference>() )
 		.def( "referenceLoadedSignal", &Reference::referenceLoadedSignal, return_internal_reference<1>() )
 		.def( "hasMetadataEdit", &Reference::hasMetadataEdit )
-		.def( "isChildEdit", &Reference::isChildEdit )
-	;
+		.def( "isChildEdit", &Reference::isChildEdit );
 
-	SignalClass<Reference::ReferenceLoadedSignal, DefaultSignalCaller<Reference::ReferenceLoadedSignal>, ReferenceLoadedSlotCaller >( "ReferenceLoadedSignal" );
+	SignalClass<Reference::ReferenceLoadedSignal, DefaultSignalCaller<Reference::ReferenceLoadedSignal>, ReferenceLoadedSlotCaller>( "ReferenceLoadedSignal" );
 
 	Serialisation::registerSerialiser( Reference::staticTypeId(), new ReferenceSerialiser );
 
@@ -360,7 +353,5 @@ void GafferModule::bindSubGraph()
 		.def( "deregisterProcessor", &EditScope::deregisterProcessor )
 		.staticmethod( "deregisterProcessor" )
 		.def( "registeredProcessors", &registeredProcessors )
-		.staticmethod( "registeredProcessors" )
-	;
-
+		.staticmethod( "registeredProcessors" );
 }

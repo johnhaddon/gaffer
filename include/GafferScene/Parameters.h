@@ -46,26 +46,25 @@ namespace GafferScene
 class GAFFERSCENE_API Parameters : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit Parameters( const std::string &name=defaultName<Parameters>() );
-		~Parameters() override;
+	explicit Parameters( const std::string &name = defaultName<Parameters>() );
+	~Parameters() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Parameters, ParametersTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Parameters, ParametersTypeId, ObjectProcessor );
 
-		Gaffer::CompoundDataPlug *parametersPlug();
-		const Gaffer::CompoundDataPlug *parametersPlug() const;
+	Gaffer::CompoundDataPlug *parametersPlug();
+	const Gaffer::CompoundDataPlug *parametersPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Parameters )

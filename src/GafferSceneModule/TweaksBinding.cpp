@@ -63,6 +63,5 @@ void GafferSceneModule::bindTweaks()
 	DependencyNodeClass<OptionTweaks>();
 
 	DependencyNodeClass<ShaderTweakProxy>()
-		.def( "setupAutoProxy", &ShaderTweakProxy::setupAutoProxy )
-	;
+		.def( "setupAutoProxy", &ShaderTweakProxy::setupAutoProxy );
 }

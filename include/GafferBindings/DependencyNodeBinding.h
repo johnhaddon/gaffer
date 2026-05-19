@@ -54,130 +54,127 @@
 namespace GafferBindings
 {
 
-template<typename T, typename TWrapper=T>
+template<typename T, typename TWrapper = T>
 class DependencyNodeClass : public NodeClass<T, TWrapper>
 {
-	public :
+public:
 
-		DependencyNodeClass( const char *docString = nullptr );
-		DependencyNodeClass( const char *docString, boost::python::no_init_t );
-
+	DependencyNodeClass( const char *docString = nullptr );
+	DependencyNodeClass( const char *docString, boost::python::no_init_t );
 };
 
 class GAFFERBINDINGS_API DependencyNodeWrapperBase
 {
 
-	protected :
+protected:
 
-		DependencyNodeWrapperBase() : m_initialised( false ) {};
-		// Returns `true` once the Python `__init__()` method has
-		// completed.
-		bool initialised() const { return m_initialised; };
+	DependencyNodeWrapperBase() : m_initialised( false ) {};
+	// Returns `true` once the Python `__init__()` method has
+	// completed.
+	bool initialised() const { return m_initialised; };
 
-	private :
+private:
 
-		// Friendship with the metaclass so it can set `m_initialised` for us.
-		friend PyObject *dependencyNodeMetaclassCall( PyObject *self, PyObject *args, PyObject *kw );
-		bool m_initialised;
-
+	// Friendship with the metaclass so it can set `m_initialised` for us.
+	friend PyObject *dependencyNodeMetaclassCall( PyObject *self, PyObject *args, PyObject *kw );
+	bool m_initialised;
 };
 
 template<typename WrappedType>
 class DependencyNodeWrapper : public NodeWrapper<WrappedType>, public DependencyNodeWrapperBase
 {
-	public :
+public:
 
-		template<typename... Args>
-		DependencyNodeWrapper( PyObject *self, Args&&... args )
-			:	NodeWrapper<WrappedType>( self, std::forward<Args>( args )... )
-		{
-		}
+	template<typename... Args>
+	DependencyNodeWrapper( PyObject *self, Args &&...args )
+		: NodeWrapper<WrappedType>( self, std::forward<Args>( args )... )
+	{
+	}
 
-		void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override
+	void affects( const Gaffer::Plug *input, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const override
+	{
+		if( this->isSubclassed() && this->initialised() )
 		{
-			if( this->isSubclassed() && this->initialised() )
+			IECorePython::ScopedGILLock gilLock;
+			try
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				boost::python::object f = this->methodOverride( "affects" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "affects" );
-					if( f )
+					boost::python::object r = f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( input ) ) );
+					boost::python::list pythonOutputs = boost::python::extract<boost::python::list>( r );
+					for( boost::python::ssize_t i = 0, e = boost::python::len( pythonOutputs ); i < e; ++i )
 					{
-						boost::python::object r = f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( input ) ) );
-						boost::python::list pythonOutputs = boost::python::extract<boost::python::list>( r );
-						for( boost::python::ssize_t i = 0, e = boost::python::len( pythonOutputs ); i < e; ++i )
-						{
-							const Gaffer::Plug &p = boost::python::extract<const Gaffer::Plug &>( pythonOutputs[i] );
-							outputs.push_back( &p );
-						}
-						return;
+						const Gaffer::Plug &p = boost::python::extract<const Gaffer::Plug &>( pythonOutputs[i] );
+						outputs.push_back( &p );
 					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return;
 				}
 			}
-			WrappedType::affects( input, outputs );
-		}
-
-		Gaffer::BoolPlug *enabledPlug() override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		WrappedType::affects( input, outputs );
+	}
+
+	Gaffer::BoolPlug *enabledPlug() override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "enabledPlug" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "enabledPlug" );
-					if( f )
-					{
-						return boost::python::extract<Gaffer::BoolPlug *>( f() );
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					return boost::python::extract<Gaffer::BoolPlug *>( f() );
 				}
 			}
-			return WrappedType::enabledPlug();
-		}
-
-		const Gaffer::BoolPlug *enabledPlug() const override
-		{
-			// Better to make an ugly cast than repeat the implementation of the non-const version.
-			return const_cast<DependencyNodeWrapper *>( this )->enabledPlug();
-		}
-
-		Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override
-		{
-			if( this->isSubclassed() )
+			catch( const boost::python::error_already_set & )
 			{
-				IECorePython::ScopedGILLock gilLock;
-				try
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+		}
+		return WrappedType::enabledPlug();
+	}
+
+	const Gaffer::BoolPlug *enabledPlug() const override
+	{
+		// Better to make an ugly cast than repeat the implementation of the non-const version.
+		return const_cast<DependencyNodeWrapper *>( this )->enabledPlug();
+	}
+
+	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override
+	{
+		if( this->isSubclassed() )
+		{
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				boost::python::object f = this->methodOverride( "correspondingInput" );
+				if( f )
 				{
-					boost::python::object f = this->methodOverride( "correspondingInput" );
-					if( f )
-					{
-						Gaffer::PlugPtr value = boost::python::extract<Gaffer::PlugPtr>(
-							f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( output ) ) )
-						);
-						return value.get();
-					}
-				}
-				catch( const boost::python::error_already_set & )
-				{
-					IECorePython::ExceptionAlgo::translatePythonException();
+					Gaffer::PlugPtr value = boost::python::extract<Gaffer::PlugPtr>(
+						f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( output ) ) )
+					);
+					return value.get();
 				}
 			}
-			return WrappedType::correspondingInput( output );
+			catch( const boost::python::error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
 		}
+		return WrappedType::correspondingInput( output );
+	}
 
-		const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override
-		{
-			// Better to make an ugly cast than repeat the implementation of the non-const version.
-			return const_cast<DependencyNodeWrapper *>( this )->correspondingInput( output );
-		}
-
+	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override
+	{
+		// Better to make an ugly cast than repeat the implementation of the non-const version.
+		return const_cast<DependencyNodeWrapper *>( this )->correspondingInput( output );
+	}
 };
 
 } // namespace GafferBindings

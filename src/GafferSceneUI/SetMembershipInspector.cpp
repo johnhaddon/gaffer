@@ -72,17 +72,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
 	{
 	}
 
-	bool operator==( const HistoryCacheKey &rhs ) const
+	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return
-			plug == rhs.plug &&
+		return plug == rhs.plug &&
 			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount
-		;
+			dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -103,7 +101,7 @@ using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History
 
 HistoryCache g_historyCache(
 	// Getter
-	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		return SceneAlgo::history(
@@ -113,13 +111,13 @@ HistoryCache g_historyCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// Histories contain PlugPtrs, which could potentially be the sole
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -225,15 +223,16 @@ std::string nonDisableableReason( const Gaffer::Plug *plug, const std::string &s
 	return "";
 }
 
-}  // namespace
+} // namespace
 
 SetMembershipInspector::SetMembershipInspector(
 	const GafferScene::ScenePlugPtr &scene,
 	const Gaffer::PlugPtr &editScope,
 	IECore::InternedString setName
 )
-	:	Inspector( { scene->setPlug() }, "setMembership", setName.string(), editScope ),
-		m_scene( scene ), m_setName( setName )
+	: Inspector( { scene->setPlug() }, "setMembership", setName.string(), editScope ),
+	  m_scene( scene ),
+	  m_setName( setName )
 {
 }
 
@@ -355,11 +354,9 @@ Inspector::AcquireEditFunctionOrFailure SetMembershipInspector::acquireEditFunct
 	else
 	{
 		InternedString setName = m_setName;
-		return [
-			editScope = editScope,
-			setName,
-			context = history->context
-		] ( bool createIfNecessary ) {
+		return [editScope = editScope,
+				setName,
+				context = history->context]( bool createIfNecessary ) {
 			Context::Scope scope( context.get() );
 			return EditScopeAlgo::acquireSetEdits( editScope, setName, createIfNecessary );
 		};
@@ -368,16 +365,14 @@ Inspector::AcquireEditFunctionOrFailure SetMembershipInspector::acquireEditFunct
 
 Inspector::CanEditFunction SetMembershipInspector::canEditFunction( const GafferScene::SceneAlgo::History *history ) const
 {
-	return [] ( const Gaffer::Plug *plug, const IECore::Object *value, std::string &failureReason ) { return ::canEdit( plug, value, failureReason ); };
+	return []( const Gaffer::Plug *plug, const IECore::Object *value, std::string &failureReason ) { return ::canEdit( plug, value, failureReason ); };
 }
 
 Inspector::EditFunction SetMembershipInspector::editFunction( const GafferScene::SceneAlgo::History *history ) const
 {
 	const auto path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
-	return [
-		setName = m_setName,
-		path
-	] ( Gaffer::Plug *plug, const IECore::Object *value ) {
+	return [setName = m_setName,
+			path]( Gaffer::Plug *plug, const IECore::Object *value ) {
 		if( const auto boolValue = runTimeCast<const IECore::BoolData>( value ) )
 		{
 			return ::editSetMembership( plug, setName.string(), path, boolValue->readable() ? EditScopeAlgo::SetMembership::Added : EditScopeAlgo::SetMembership::Removed );
@@ -399,11 +394,9 @@ Inspector::DisableEditFunctionOrFailure SetMembershipInspector::disableEditFunct
 	}
 	else
 	{
-		return [
-			plug = PlugPtr( plug ),
-			setName = m_setName,
-			path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
-		] () {
+		return [plug = PlugPtr( plug ),
+				setName = m_setName,
+				path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )]() {
 			return ::editSetMembership( plug.get(), setName.string(), path, EditScopeAlgo::SetMembership::Unchanged );
 		};
 	}

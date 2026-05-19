@@ -111,8 +111,9 @@ const InternedString g_auxiliaryConnectionsGadgetName( "__auxiliaryConnections" 
 const InternedString g_annotationsGadgetName( "__annotations" );
 const InternedString g_dragEditGadgetName( "__dragEdit" );
 
-struct CompareV2fX{
-	bool operator()(const Imath::V2f &a, const Imath::V2f &b) const
+struct CompareV2fX
+{
+	bool operator () ( const Imath::V2f &a, const Imath::V2f &b ) const
 	{
 		return a[0] < b[0];
 	}
@@ -144,87 +145,86 @@ struct CompareV2fX{
 class SetPositionsAction : public Gaffer::Action
 {
 
-	public :
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SetPositionsAction, GraphGadgetSetPositionsActionTypeId, Gaffer::Action );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SetPositionsAction, GraphGadgetSetPositionsActionTypeId, Gaffer::Action );
 
-		SetPositionsAction( Gaffer::Node *root )
-			:	m_scriptNode( root->scriptNode() )
+	SetPositionsAction( Gaffer::Node *root )
+		: m_scriptNode( root->scriptNode() )
+	{
+	}
+
+	void addOffset( Gaffer::V2fPlugPtr plug, const V2f &offset )
+	{
+		const V2f v = plug->getValue();
+		m_positions[plug] = { v, v + offset };
+	}
+
+protected:
+
+	Gaffer::GraphComponent *subject() const override
+	{
+		return m_scriptNode;
+	}
+
+	void doAction() override
+	{
+		// The `setValue()` calls we make are themselves undoable, so we must disable
+		// undo to stop them being recorded redundantly.
+		Gaffer::UndoScope scope( m_scriptNode, Gaffer::UndoScope::Disabled );
+		for( auto &p : m_positions )
 		{
+			p.first->setValue( p.second.newPosition );
+		}
+	}
+
+	void undoAction() override
+	{
+		// The `setValue()` calls we make are themselves undoable, so we must disable
+		// undo to stop them being recorded redundantly.
+		Gaffer::UndoScope scope( m_scriptNode, Gaffer::UndoScope::Disabled );
+		for( auto &p : m_positions )
+		{
+			p.first->setValue( p.second.oldPosition );
+		}
+	}
+
+	bool canMerge( const Action *other ) const override
+	{
+		if( !Action::canMerge( other ) )
+		{
+			return false;
 		}
 
-		void addOffset( Gaffer::V2fPlugPtr plug, const V2f &offset )
-		{
-			const V2f v = plug->getValue();
-			m_positions[plug] = { v, v + offset };
-		}
+		const auto a = runTimeCast<const SetPositionsAction>( other );
+		return a && a->m_scriptNode == m_scriptNode;
+	}
 
-	protected :
-
-		Gaffer::GraphComponent *subject() const override
+	void merge( const Action *other ) override
+	{
+		auto a = static_cast<const SetPositionsAction *>( other );
+		for( auto &p : a->m_positions )
 		{
-			return m_scriptNode;
-		}
-
-		void doAction() override
-		{
-			// The `setValue()` calls we make are themselves undoable, so we must disable
-			// undo to stop them being recorded redundantly.
-			Gaffer::UndoScope scope( m_scriptNode, Gaffer::UndoScope::Disabled );
-			for( auto &p : m_positions )
+			auto inserted = m_positions.insert( p );
+			if( !inserted.second )
 			{
-				p.first->setValue( p.second.newPosition );
+				inserted.first->second.newPosition = p.second.newPosition;
 			}
 		}
+	}
 
-		void undoAction() override
-		{
-			// The `setValue()` calls we make are themselves undoable, so we must disable
-			// undo to stop them being recorded redundantly.
-			Gaffer::UndoScope scope( m_scriptNode, Gaffer::UndoScope::Disabled );
-			for( auto &p : m_positions )
-			{
-				p.first->setValue( p.second.oldPosition );
-			}
-		}
+private:
 
-		bool canMerge( const Action *other ) const override
-		{
-			if( !Action::canMerge( other ) )
-			{
-				return false;
-			}
+	Gaffer::ScriptNode *m_scriptNode;
 
-			const auto a = runTimeCast<const SetPositionsAction>( other );
-			return a && a->m_scriptNode == m_scriptNode;
-		}
+	struct Positions
+	{
+		V2f oldPosition;
+		V2f newPosition;
+	};
 
-		void merge( const Action *other ) override
-		{
-			auto a = static_cast<const SetPositionsAction *>( other );
-			for( auto &p : a->m_positions )
-			{
-				auto inserted = m_positions.insert( p );
-				if( !inserted.second )
-				{
-					inserted.first->second.newPosition = p.second.newPosition;
-				}
-			}
-		}
-
-	private :
-
-		Gaffer::ScriptNode *m_scriptNode;
-
-		struct Positions
-		{
-			V2f oldPosition;
-			V2f newPosition;
-		};
-
-		using PositionsMap = std::map<Gaffer::V2fPlugPtr, Positions>;
-		PositionsMap m_positions;
-
+	using PositionsMap = std::map<Gaffer::V2fPlugPtr, Positions>;
+	PositionsMap m_positions;
 };
 
 IE_CORE_DEFINERUNTIMETYPED( SetPositionsAction );
@@ -239,10 +239,10 @@ IE_CORE_DECLAREPTR( SetPositionsAction )
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( GraphGadget );
 
 GraphGadget::GraphGadget( Gaffer::NodePtr root, Gaffer::SetPtr filter )
-	:	m_dragStartPosition( 0 ), m_lastDragPosition( 0 ), m_dragMode( None ), m_dragReconnectCandidate( nullptr ), m_dragReconnectSrcNodule( nullptr ), m_dragReconnectDstNodule( nullptr ), m_dragMergeGroupId( 0 )
+	: m_dragStartPosition( 0 ), m_lastDragPosition( 0 ), m_dragMode( None ), m_dragReconnectCandidate( nullptr ), m_dragReconnectSrcNodule( nullptr ), m_dragReconnectDstNodule( nullptr ), m_dragMergeGroupId( 0 )
 {
-	buttonPressSignal().connect( boost::bind( &GraphGadget::buttonPress, this, ::_1,  ::_2 ) );
-	buttonReleaseSignal().connect( boost::bind( &GraphGadget::buttonRelease, this, ::_1,  ::_2 ) );
+	buttonPressSignal().connect( boost::bind( &GraphGadget::buttonPress, this, ::_1, ::_2 ) );
+	buttonReleaseSignal().connect( boost::bind( &GraphGadget::buttonRelease, this, ::_1, ::_2 ) );
 	dragBeginSignal().connect( boost::bind( &GraphGadget::dragBegin, this, ::_1, ::_2 ) );
 	dragEnterSignal().connect( boost::bind( &GraphGadget::dragEnter, this, ::_1, ::_2 ) );
 	dragMoveSignal().connect( boost::bind( &GraphGadget::dragMove, this, ::_1, ::_2 ) );
@@ -364,8 +364,8 @@ void GraphGadget::setFilter( Gaffer::SetPtr filter )
 	m_filter = filter;
 	if( m_filter )
 	{
-		m_filterMemberAddedConnection = m_filter->memberAddedSignal().connect( boost::bind( &GraphGadget::filterMemberAdded, this, ::_1,  ::_2 ) );
-		m_filterMemberRemovedConnection = m_filter->memberRemovedSignal().connect( boost::bind( &GraphGadget::filterMemberRemoved, this, ::_1,  ::_2 ) );
+		m_filterMemberAddedConnection = m_filter->memberAddedSignal().connect( boost::bind( &GraphGadget::filterMemberAdded, this, ::_1, ::_2 ) );
+		m_filterMemberRemovedConnection = m_filter->memberRemovedSignal().connect( boost::bind( &GraphGadget::filterMemberRemoved, this, ::_1, ::_2 ) );
 	}
 	else
 	{
@@ -417,7 +417,7 @@ size_t GraphGadget::connectionGadgets( const Gaffer::Plug *plug, std::vector<Con
 		const Gaffer::Plug::OutputContainer &outputs = plug->outputs();
 		for( Gaffer::Plug::OutputContainer::const_iterator it = outputs.begin(), eIt = outputs.end(); it != eIt; ++it )
 		{
-			if( excludedNodes && excludedNodes->contains( (*it)->node() ) )
+			if( excludedNodes && excludedNodes->contains( ( *it )->node() ) )
 			{
 				continue;
 			}
@@ -704,7 +704,7 @@ NodeGadget *GraphGadget::nodeGadgetAt( const IECore::LineSegment3f &lineInGadget
 {
 	const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
 
-	std::vector<Gadget*> gadgetsUnderMouse = viewportGadget->gadgetsAt(
+	std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
 		viewportGadget->gadgetToRasterSpace( lineInGadgetSpace.p0, this )
 	);
 
@@ -726,17 +726,17 @@ ConnectionGadget *GraphGadget::connectionGadgetAt( const IECore::LineSegment3f &
 {
 	const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
 
-	std::vector<Gadget*> gadgetsUnderMouse = viewportGadget->gadgetsAt(
+	std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
 		viewportGadget->gadgetToRasterSpace( lineInGadgetSpace.p0, this )
 	);
 
-	if ( !gadgetsUnderMouse.size() )
+	if( !gadgetsUnderMouse.size() )
 	{
 		return nullptr;
 	}
 
 	ConnectionGadget *connectionGadget = runTimeCast<ConnectionGadget>( gadgetsUnderMouse[0] );
-	if ( !connectionGadget )
+	if( !connectionGadget )
 	{
 		connectionGadget = gadgetsUnderMouse[0]->ancestor<ConnectionGadget>();
 	}
@@ -753,10 +753,10 @@ ConnectionGadget *GraphGadget::reconnectionGadgetAt( const NodeGadget *gadget, c
 	rasterRegion.extendBy( viewportGadget->gadgetToRasterSpace( center - Imath::V3f( 2, 2, 1 ), this ) );
 	rasterRegion.extendBy( viewportGadget->gadgetToRasterSpace( center + Imath::V3f( 2, 2, 1 ), this ) );
 
-	std::vector<Gadget*> gadgetsUnderMouse = viewportGadget->gadgetsAt(
+	std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
 		rasterRegion, GraphLayer::Connections
 	);
-	for( Gadget* g : gadgetsUnderMouse )
+	for( Gadget *g : gadgetsUnderMouse )
 	{
 		if( ConnectionGadget *c = IECore::runTimeCast<ConnectionGadget>( g ) )
 		{
@@ -781,54 +781,53 @@ void GraphGadget::renderLayer( Layer layer, const Style *style, RenderReason rea
 	switch( layer )
 	{
 
-	case GraphLayer::Connections :
+		case GraphLayer::Connections :
 
-		// render the new drag connections if they exist
-		if ( m_dragReconnectCandidate )
-		{
-			if ( m_dragReconnectDstNodule )
+			// render the new drag connections if they exist
+			if( m_dragReconnectCandidate )
 			{
-				const Nodule *srcNodule = m_dragReconnectCandidate->srcNodule();
-				const NodeGadget *srcNodeGadget = nodeGadget( srcNodule->plug()->node() );
-				const Imath::V3f srcP = srcNodule->fullTransform( this ).translation();
-				const Imath::V3f dstP = m_dragReconnectDstNodule->fullTransform( this ).translation();
-				const Imath::V3f dstTangent = nodeGadget( m_dragReconnectDstNodule->plug()->node() )->connectionTangent( m_dragReconnectDstNodule );
-				/// \todo: can there be a highlighted/dashed state?
-				style->renderConnection( srcP, srcNodeGadget->connectionTangent( srcNodule ), dstP, dstTangent, Style::HighlightedState );
-			}
+				if( m_dragReconnectDstNodule )
+				{
+					const Nodule *srcNodule = m_dragReconnectCandidate->srcNodule();
+					const NodeGadget *srcNodeGadget = nodeGadget( srcNodule->plug()->node() );
+					const Imath::V3f srcP = srcNodule->fullTransform( this ).translation();
+					const Imath::V3f dstP = m_dragReconnectDstNodule->fullTransform( this ).translation();
+					const Imath::V3f dstTangent = nodeGadget( m_dragReconnectDstNodule->plug()->node() )->connectionTangent( m_dragReconnectDstNodule );
+					/// \todo: can there be a highlighted/dashed state?
+					style->renderConnection( srcP, srcNodeGadget->connectionTangent( srcNodule ), dstP, dstTangent, Style::HighlightedState );
+				}
 
-			if ( m_dragReconnectSrcNodule )
+				if( m_dragReconnectSrcNodule )
+				{
+					const Nodule *dstNodule = m_dragReconnectCandidate->dstNodule();
+					const NodeGadget *dstNodeGadget = nodeGadget( dstNodule->plug()->node() );
+					const Imath::V3f srcP = m_dragReconnectSrcNodule->fullTransform( this ).translation();
+					const Imath::V3f dstP = dstNodule->fullTransform( this ).translation();
+					const Imath::V3f srcTangent = nodeGadget( m_dragReconnectSrcNodule->plug()->node() )->connectionTangent( m_dragReconnectSrcNodule );
+					/// \todo: can there be a highlighted/dashed state?
+					style->renderConnection( srcP, srcTangent, dstP, dstNodeGadget->connectionTangent( dstNodule ), Style::HighlightedState );
+				}
+			}
+			break;
+
+		case GraphLayer::Overlay :
+
+			// render drag select thing if needed
+			if( m_dragMode == Selecting )
 			{
-				const Nodule *dstNodule = m_dragReconnectCandidate->dstNodule();
-				const NodeGadget *dstNodeGadget = nodeGadget( dstNodule->plug()->node() );
-				const Imath::V3f srcP = m_dragReconnectSrcNodule->fullTransform( this ).translation();
-				const Imath::V3f dstP = dstNodule->fullTransform( this ).translation();
-				const Imath::V3f srcTangent = nodeGadget( m_dragReconnectSrcNodule->plug()->node() )->connectionTangent( m_dragReconnectSrcNodule );
-				/// \todo: can there be a highlighted/dashed state?
-				style->renderConnection( srcP, srcTangent, dstP, dstNodeGadget->connectionTangent( dstNodule ), Style::HighlightedState );
+				const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+				ViewportGadget::RasterScope rasterScope( viewportGadget );
+
+				Box2f b;
+				b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_dragStartPosition.x, m_dragStartPosition.y, 0 ), this ) );
+				b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_lastDragPosition.x, m_lastDragPosition.y, 0 ), this ) );
+				style->renderSelectionBox( b );
 			}
-		}
-		break;
+			break;
 
-	case GraphLayer::Overlay :
-
-		// render drag select thing if needed
-		if( m_dragMode == Selecting )
-		{
-			const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
-			ViewportGadget::RasterScope rasterScope( viewportGadget );
-
-			Box2f b;
-			b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_dragStartPosition.x, m_dragStartPosition.y, 0 ), this ) );
-			b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_lastDragPosition.x, m_lastDragPosition.y, 0 ), this ) );
-			style->renderSelectionBox( b );
-		}
-		break;
-
-	default:
-		break;
+		default :
+			break;
 	}
-
 }
 
 unsigned GraphGadget::layerMask() const
@@ -897,7 +896,7 @@ void GraphGadget::filterMemberAdded( Gaffer::Set *set, IECore::RunTimeTyped *mem
 	{
 		if( !findNodeGadget( node ) )
 		{
-			if( NodeGadget * g = addNodeGadget( node ) )
+			if( NodeGadget *g = addNodeGadget( node ) )
 			{
 				addConnectionGadgets( g );
 			}
@@ -943,7 +942,7 @@ void GraphGadget::inputChanged( Gaffer::Plug *dstPlug )
 void GraphGadget::plugSet( Gaffer::Plug *plug )
 {
 	const InternedString &name = plug->getName();
-	if( name==g_positionPlugName )
+	if( name == g_positionPlugName )
 	{
 		Gaffer::Node *node = plug->node();
 		NodeGadget *ng = findNodeGadget( node );
@@ -952,7 +951,7 @@ void GraphGadget::plugSet( Gaffer::Plug *plug )
 			updateNodeGadgetTransform( ng );
 		}
 	}
-	else if( name==g_inputConnectionsMinimisedPlugName || name == g_outputConnectionsMinimisedPlugName )
+	else if( name == g_inputConnectionsMinimisedPlugName || name == g_outputConnectionsMinimisedPlugName )
 	{
 		std::vector<ConnectionGadget *> connections;
 		connectionGadgets( plug->node(), connections );
@@ -1013,7 +1012,7 @@ bool GraphGadget::buttonRelease( GadgetPtr gadget, const ButtonEvent &event )
 
 bool GraphGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 {
-	if( event.buttons==ButtonEvent::Left )
+	if( event.buttons == ButtonEvent::Left )
 	{
 		// selection/deselection
 
@@ -1024,7 +1023,7 @@ bool GraphGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 
 		ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
 
-		std::vector<Gadget*> gadgetsUnderMouse = viewportGadget->gadgetsAt(
+		std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
 			viewportGadget->gadgetToRasterSpace( event.line.p0, this )
 		);
 
@@ -1032,7 +1031,7 @@ bool GraphGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 		{
 			// background click. clear selection unless a modifier is held, in
 			// which case we're expecting a drag to modify the selection.
-			if( !(event.modifiers & ButtonEvent::Shift) && !(event.modifiers & ButtonEvent::Control) )
+			if( !( event.modifiers & ButtonEvent::Shift ) && !( event.modifiers & ButtonEvent::Control ) )
 			{
 				m_scriptNode->selection()->clear();
 			}
@@ -1067,7 +1066,7 @@ bool GraphGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 				connectedNodeGadgets( node, connected, event.modifiers & ButtonEvent::Shift ? Gaffer::Plug::In : Gaffer::Plug::Out );
 				for( std::vector<NodeGadget *>::const_iterator it = connected.begin(), eIt = connected.end(); it != eIt; ++it )
 				{
-					affectedNodes.push_back( (*it)->node() );
+					affectedNodes.push_back( ( *it )->node() );
 				}
 			}
 
@@ -1242,8 +1241,8 @@ bool GraphGadget::dragMove( GadgetPtr gadget, const DragDropEvent &event )
 		for( ; pIt != pEnd; pIt++ )
 		{
 			if(
-				fabs( pOffset[1] - (*pIt)[1] ) < snapThresh &&
-				fabs( pOffset[0] - (*pIt)[0] ) < snapThresh
+				fabs( pOffset[1] - ( *pIt )[1] ) < snapThresh &&
+				fabs( pOffset[0] - ( *pIt )[0] ) < snapThresh
 			)
 			{
 				pos = *pIt + m_dragStartPosition;
@@ -1528,11 +1527,10 @@ void GraphGadget::calculateDragSnapOffsets( Gaffer::Set *nodes )
 	for( int axis = 0; axis <= 1; ++axis )
 	{
 		std::sort( m_dragSnapOffsets[axis].begin(), m_dragSnapOffsets[axis].end() );
-		m_dragSnapOffsets[axis].erase( std::unique( m_dragSnapOffsets[axis].begin(), m_dragSnapOffsets[axis].end()), m_dragSnapOffsets[axis].end() );
+		m_dragSnapOffsets[axis].erase( std::unique( m_dragSnapOffsets[axis].begin(), m_dragSnapOffsets[axis].end() ), m_dragSnapOffsets[axis].end() );
 	}
 
 	std::sort( m_dragSnapPoints.begin(), m_dragSnapPoints.end(), CompareV2fX() );
-
 }
 
 void GraphGadget::offsetNodes( Gaffer::Set *nodes, const Imath::V2f &offset )
@@ -1558,7 +1556,7 @@ void GraphGadget::offsetNodes( Gaffer::Set *nodes, const Imath::V2f &offset )
 
 std::string GraphGadget::dragMergeGroup() const
 {
-	return fmt::format( "GraphGadget{}{}", (void*)this, m_dragMergeGroupId );
+	return fmt::format( "GraphGadget{}{}", (void *)this, m_dragMergeGroupId );
 }
 
 void GraphGadget::updateDragSelection( bool dragEnd, ModifiableEvent::Modifiers modifiers )
@@ -1607,7 +1605,7 @@ void GraphGadget::updateGraph()
 	{
 		const Gaffer::Node *node = it->first;
 		it++; // increment now as the iterator will be invalidated by removeNodeGadget()
-		if( (m_filter && !m_filter->contains( node )) || node->parent<Gaffer::Node>() != m_root )
+		if( ( m_filter && !m_filter->contains( node ) ) || node->parent<Gaffer::Node>() != m_root )
 		{
 			removeNodeGadget( node );
 		}
@@ -1631,7 +1629,6 @@ void GraphGadget::updateGraph()
 	{
 		addConnectionGadgets( it->second.gadget );
 	}
-
 }
 
 NodeGadget *GraphGadget::addNodeGadget( Gaffer::Node *node )
@@ -1683,7 +1680,7 @@ NodeGadget *GraphGadget::addNodeGadget( Gaffer::Node *node )
 void GraphGadget::removeNodeGadget( const Gaffer::Node *node )
 {
 	NodeGadgetMap::iterator it = m_nodeGadgets.find( node );
-	if( it!=m_nodeGadgets.end() )
+	if( it != m_nodeGadgets.end() )
 	{
 		removeConnectionGadgets( it->second.gadget );
 		removeChild( it->second.gadget );
@@ -1694,7 +1691,7 @@ void GraphGadget::removeNodeGadget( const Gaffer::Node *node )
 NodeGadget *GraphGadget::findNodeGadget( const Gaffer::Node *node ) const
 {
 	NodeGadgetMap::const_iterator it = m_nodeGadgets.find( node );
-	if( it==m_nodeGadgets.end() )
+	if( it == m_nodeGadgets.end() )
 	{
 		return nullptr;
 	}
@@ -1741,7 +1738,7 @@ void GraphGadget::addConnectionGadgets( Nodule *nodule )
 	else
 	{
 		// Reconnect any old output connections which may have been dangling
-		for( Gaffer::Plug::OutputContainer::const_iterator oIt( nodule->plug()->outputs().begin() ); oIt!= nodule->plug()->outputs().end(); ++oIt )
+		for( Gaffer::Plug::OutputContainer::const_iterator oIt( nodule->plug()->outputs().begin() ); oIt != nodule->plug()->outputs().end(); ++oIt )
 		{
 			ConnectionGadget *connection = findConnectionGadget( *oIt );
 			if( connection && connection->srcNodule() != nodule )
@@ -1830,7 +1827,7 @@ void GraphGadget::removeConnectionGadget( const Nodule *dstNodule )
 ConnectionGadget *GraphGadget::findConnectionGadget( const Nodule *dstNodule ) const
 {
 	ConnectionGadgetMap::const_iterator it = m_connectionGadgets.find( dstNodule );
-	if( it==m_connectionGadgets.end() )
+	if( it == m_connectionGadgets.end() )
 	{
 		return nullptr;
 	}

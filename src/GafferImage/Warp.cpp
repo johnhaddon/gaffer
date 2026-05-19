@@ -53,44 +53,44 @@ using namespace GafferImage;
 
 namespace
 {
-	IECore::InternedString g_tileInputBoundName( "tileInputBound"  );
-	IECore::InternedString g_pixelInputPositionsName( "pixelInputPositions"  );
-	IECore::InternedString g_pixelInputDerivativesName( "pixelInputDerivatives"  );
+IECore::InternedString g_tileInputBoundName( "tileInputBound" );
+IECore::InternedString g_pixelInputPositionsName( "pixelInputPositions" );
+IECore::InternedString g_pixelInputDerivativesName( "pixelInputDerivatives" );
 
-	const CompoundObject *sampleRegionsEmptyTile()
-	{
-		static ConstCompoundObjectPtr g_sampleRegionsEmptyTile( new CompoundObject() );
-		return g_sampleRegionsEmptyTile.get();
-	}
+const CompoundObject *sampleRegionsEmptyTile()
+{
+	static ConstCompoundObjectPtr g_sampleRegionsEmptyTile( new CompoundObject() );
+	return g_sampleRegionsEmptyTile.get();
+}
 
-	void hashEngineIfTileValid( ImagePlug::ChannelDataScope &tileScope, const ObjectPlug *plug, const Box2i &dataWindow, const V2i &tileOrigin, IECore::MurmurHash &h )
+void hashEngineIfTileValid( ImagePlug::ChannelDataScope &tileScope, const ObjectPlug *plug, const Box2i &dataWindow, const V2i &tileOrigin, IECore::MurmurHash &h )
+{
+	if( BufferAlgo::intersects( dataWindow, Box2i( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) ) ) )
 	{
-		if( BufferAlgo::intersects( dataWindow, Box2i( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) ) ) )
-		{
-			tileScope.setTileOrigin( &tileOrigin );
-			plug->hash( h );
-		}
-	}
-
-	ConstObjectPtr computeEngineIfTileValid( ImagePlug::ChannelDataScope &tileScope, const ObjectPlug *plug, const Box2i &dataWindow, const V2i &tileOrigin )
-	{
-		if( BufferAlgo::intersects( dataWindow, Box2i( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) ) ) )
-		{
-			tileScope.setTileOrigin( &tileOrigin );
-			return plug->getValue();
-		}
-		else
-		{
-			return nullptr;
-		}
+		tileScope.setTileOrigin( &tileOrigin );
+		plug->hash( h );
 	}
 }
+
+ConstObjectPtr computeEngineIfTileValid( ImagePlug::ChannelDataScope &tileScope, const ObjectPlug *plug, const Box2i &dataWindow, const V2i &tileOrigin )
+{
+	if( BufferAlgo::intersects( dataWindow, Box2i( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) ) ) )
+	{
+		tileScope.setTileOrigin( &tileOrigin );
+		return plug->getValue();
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+} // namespace
 
 float Warp::approximateDerivative( float upper, float center, float lower )
 {
 	if( center == Engine::black.x )
 	{
-		return 0.0f;						// Sample is totally invalid
+		return 0.0f; // Sample is totally invalid
 	}
 	else if( upper != Engine::black.x && lower != Engine::black.x )
 	{
@@ -107,15 +107,15 @@ float Warp::approximateDerivative( float upper, float center, float lower )
 	}
 	else if( upper != Engine::black.x )
 	{
-		return upper - center;				// One sided derivative
+		return upper - center; // One sided derivative
 	}
 	else if( lower != Engine::black.x )
 	{
-		return center - lower;				// One sided derivative
+		return center - lower; // One sided derivative
 	}
 	else
 	{
-		return 1.0f;						// Sample is valid, but no derivative information
+		return 1.0f; // Sample is valid, but no derivative information
 	}
 }
 
@@ -139,40 +139,39 @@ const V2f Warp::Engine::black( std::numeric_limits<float>::infinity() );
 class Warp::EngineData : public Data
 {
 
-	public :
+public:
 
-		EngineData( const Engine *engine )
-			:	engine( engine )
-		{
-		}
+	EngineData( const Engine *engine )
+		: engine( engine )
+	{
+	}
 
-		~EngineData() override
-		{
-			delete engine;
-		}
+	~EngineData() override
+	{
+		delete engine;
+	}
 
-		const Engine *engine;
+	const Engine *engine;
 
-	protected :
+protected:
 
-		void copyFrom( const Object *other, CopyContext *context ) override
-		{
-			Data::copyFrom( other, context );
-			msg( Msg::Warning, "EngineData::copyFrom", "Not implemented" );
-		}
+	void copyFrom( const Object *other, CopyContext *context ) override
+	{
+		Data::copyFrom( other, context );
+		msg( Msg::Warning, "EngineData::copyFrom", "Not implemented" );
+	}
 
-		void save( SaveContext *context ) const override
-		{
-			Data::save( context );
-			msg( Msg::Warning, "EngineData::save", "Not implemented" );
-		}
+	void save( SaveContext *context ) const override
+	{
+		Data::save( context );
+		msg( Msg::Warning, "EngineData::save", "Not implemented" );
+	}
 
-		void load( LoadContextPtr context ) override
-		{
-			Data::load( context );
-			msg( Msg::Warning, "EngineData::load", "Not implemented" );
-		}
-
+	void load( LoadContextPtr context ) override
+	{
+		Data::load( context );
+		msg( Msg::Warning, "EngineData::load", "Not implemented" );
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -184,7 +183,7 @@ GAFFER_NODE_DEFINE_TYPE( Warp );
 size_t Warp::g_firstPlugIndex = 0;
 
 Warp::Warp( const std::string &name )
-	:	FlatImageProcessor( name )
+	: FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -320,14 +319,10 @@ void Warp::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context
 				dataWindow = outPlug()->dataWindowPlug()->getValue();
 			}
 
-			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-				tileOrigin + V2i( ImagePlug::tileSize(), 0 ), h );
-			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-				tileOrigin - V2i( ImagePlug::tileSize(), 0 ), h );
-			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-				tileOrigin + V2i( 0, ImagePlug::tileSize() ), h );
-			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-				tileOrigin - V2i( 0, ImagePlug::tileSize() ), h );
+			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin + V2i( ImagePlug::tileSize(), 0 ), h );
+			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin - V2i( ImagePlug::tileSize(), 0 ), h );
+			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin + V2i( 0, ImagePlug::tileSize() ), h );
+			hashEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin - V2i( 0, ImagePlug::tileSize() ), h );
 		}
 
 		// The sampleRegionsPlug() includes an overall bound for the tile which depends on the filter
@@ -393,8 +388,8 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 				{
 					V2f inputPosition = engine->inputPixel( V2f(
 						( tileOrigin.x + x ) + 0.5,
-						( tileOrigin.y + y ) + 0.5 )
-					);
+						( tileOrigin.y + y ) + 0.5
+					) );
 
 					if( inputPosition != Engine::black )
 					{
@@ -418,10 +413,10 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 		Box2f inputBound;
 
 		V2fVectorDataPtr pixelInputPositionsData = new V2fVectorData();
-		std::vector< V2f > &pixelInputPositions = pixelInputPositionsData->writable();
+		std::vector<V2f> &pixelInputPositions = pixelInputPositionsData->writable();
 		pixelInputPositions.reserve( ImagePlug::tileSize() * ImagePlug::tileSize() );
 		V2fVectorDataPtr pixelInputDerivativesData = new V2fVectorData();
-		std::vector< V2f > &pixelInputDerivatives = pixelInputDerivativesData->writable();
+		std::vector<V2f> &pixelInputDerivatives = pixelInputDerivativesData->writable();
 		pixelInputDerivatives.reserve( ImagePlug::tileSize() * ImagePlug::tileSize() );
 
 		bool useDerivatives = filter && useDerivativesPlug()->getValue();
@@ -433,31 +428,27 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 			ImagePlug::ChannelDataScope tileScope( context );
 
 			ConstEngineDataPtr engineDataPlusX = static_pointer_cast<const EngineData>(
-				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-					tileOrigin + V2i( ImagePlug::tileSize(), 0 )
-				)
+				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin + V2i( ImagePlug::tileSize(), 0 ) )
 			);
 			ConstEngineDataPtr engineDataMinusX = static_pointer_cast<const EngineData>(
-				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-					tileOrigin - V2i( ImagePlug::tileSize(), 0 )
-				)
+				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin - V2i( ImagePlug::tileSize(), 0 ) )
 			);
 			ConstEngineDataPtr engineDataPlusY = static_pointer_cast<const EngineData>(
-				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-					tileOrigin + V2i( 0, ImagePlug::tileSize() )
-				)
+				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin + V2i( 0, ImagePlug::tileSize() ) )
 			);
 			ConstEngineDataPtr engineDataMinusY = static_pointer_cast<const EngineData>(
-				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow,
-					tileOrigin - V2i( 0, ImagePlug::tileSize() )
-				)
+				computeEngineIfTileValid( tileScope, enginePlug(), dataWindow, tileOrigin - V2i( 0, ImagePlug::tileSize() ) )
 			);
 
 			const Engine *enginePlusX = nullptr, *engineMinusX = nullptr, *enginePlusY = nullptr, *engineMinusY = nullptr;
-			if( engineDataPlusX ) enginePlusX = engineDataPlusX->engine;
-			if( engineDataMinusX ) engineMinusX = engineDataMinusX->engine;
-			if( engineDataPlusY ) enginePlusY = engineDataPlusY->engine;
-			if( engineDataMinusY ) engineMinusY = engineDataMinusY->engine;
+			if( engineDataPlusX )
+				enginePlusX = engineDataPlusX->engine;
+			if( engineDataMinusX )
+				engineMinusX = engineDataMinusX->engine;
+			if( engineDataPlusY )
+				enginePlusY = engineDataPlusY->engine;
+			if( engineDataMinusY )
+				engineMinusY = engineDataMinusY->engine;
 
 			std::vector<V2f> threeRowsCache( ImagePlug::tileSize() * 3 );
 
@@ -472,20 +463,23 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 				// Determine which engine we need to use to set up this cache row
 				// ( The first and last are outside this tile, and use a different engine )
 				const Engine *curEngine = engine;
-				if( cacheY == -1 ) curEngine = engineMinusY;
-				if( cacheY == ImagePlug::tileSize() ) curEngine = enginePlusY;
+				if( cacheY == -1 )
+					curEngine = engineMinusY;
+				if( cacheY == ImagePlug::tileSize() )
+					curEngine = enginePlusY;
 
 				for( int x = 0; x < ImagePlug::tileSize(); x++ )
 				{
 					if( BufferAlgo::contains( dataWindow, V2i( tileOrigin.x + x, tileOrigin.y + cacheY ) ) )
 					{
-						threeRowsCache[ cacheRow * ImagePlug::tileSize() + x ] = curEngine->inputPixel( V2f(
+						threeRowsCache[cacheRow * ImagePlug::tileSize() + x] = curEngine->inputPixel( V2f(
 							( tileOrigin.x + x ) + 0.5,
-							( tileOrigin.y + cacheY ) + 0.5 ) );
+							( tileOrigin.y + cacheY ) + 0.5
+						) );
 					}
 					else
 					{
-						threeRowsCache[ cacheRow * ImagePlug::tileSize() + x ] = Engine::black;
+						threeRowsCache[cacheRow * ImagePlug::tileSize() + x] = Engine::black;
 					}
 				}
 
@@ -505,7 +499,7 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 						V2f inputDerivatives( 0.0f );
 						if( BufferAlgo::contains( dataWindow, V2i( tileOrigin.x + x, tileOrigin.y + outputY ) ) )
 						{
-							inputPosition = threeRowsCache[ cacheRowMiddle * ImagePlug::tileSize() + x ];
+							inputPosition = threeRowsCache[cacheRowMiddle * ImagePlug::tileSize() + x];
 
 							if( inputPosition != Engine::black )
 							{
@@ -513,39 +507,43 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 								if( x != ImagePlug::tileSize() - 1 )
 								{
 									// We're not on the border, this offset is cached
-									xPlus = threeRowsCache[ cacheRowMiddle * ImagePlug::tileSize() + x + 1 ];
+									xPlus = threeRowsCache[cacheRowMiddle * ImagePlug::tileSize() + x + 1];
 								}
 								else if( enginePlusX )
 								{
 									// This offset goes over the border, fetch it from the other engine
 									xPlus = enginePlusX->inputPixel( V2f(
 										( tileOrigin.x + x + 1 ) + 0.5,
-										( tileOrigin.y + outputY ) + 0.5 ) );
+										( tileOrigin.y + outputY ) + 0.5
+									) );
 								}
 								V2f xMinus = Engine::black;
 								if( x != 0 )
 								{
 									// We're not on the border, this offset is cached
-									xMinus = threeRowsCache[ cacheRowMiddle * ImagePlug::tileSize() + x - 1 ];
+									xMinus = threeRowsCache[cacheRowMiddle * ImagePlug::tileSize() + x - 1];
 								}
 								else if( engineMinusX )
 								{
 									// This offset goes over the border, fetch it from the other engine
 									xMinus = engineMinusX->inputPixel( V2f(
 										( tileOrigin.x + x - 1 ) + 0.5,
-										( tileOrigin.y + outputY ) + 0.5 ) );
+										( tileOrigin.y + outputY ) + 0.5
+									) );
 								}
 
-								V2f yMinus = threeRowsCache[ cacheRowMinus * ImagePlug::tileSize() + x ];
-								V2f yPlus = threeRowsCache[ cacheRowPlus * ImagePlug::tileSize() + x ];
+								V2f yMinus = threeRowsCache[cacheRowMinus * ImagePlug::tileSize() + x];
+								V2f yPlus = threeRowsCache[cacheRowPlus * ImagePlug::tileSize() + x];
 
 								V2f dPdx(
-									approximateDerivative(  xPlus.x, inputPosition.x, xMinus.x ),
-									approximateDerivative(  xPlus.y, inputPosition.y, xMinus.y ) );
+									approximateDerivative( xPlus.x, inputPosition.x, xMinus.x ),
+									approximateDerivative( xPlus.y, inputPosition.y, xMinus.y )
+								);
 
 								V2f dPdy(
-									approximateDerivative(  yPlus.x, inputPosition.x, yMinus.x ),
-									approximateDerivative(  yPlus.y, inputPosition.y, yMinus.y ) );
+									approximateDerivative( yPlus.x, inputPosition.x, yMinus.x ),
+									approximateDerivative( yPlus.y, inputPosition.y, yMinus.y )
+								);
 
 								inputDerivatives = FilterAlgo::derivativesToAxisAligned( inputPosition, dPdx, dPdy );
 
@@ -555,7 +553,6 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 						pixelInputPositions.push_back( inputPosition );
 						pixelInputDerivatives.push_back( inputDerivatives );
 					}
-
 				}
 			}
 		}
@@ -570,11 +567,12 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 					{
 						inputPosition = engine->inputPixel( V2f(
 							( tileOrigin.x + x ) + 0.5,
-							( tileOrigin.y + y ) + 0.5 ) );
+							( tileOrigin.y + y ) + 0.5
+						) );
 
 						if( inputPosition != Engine::black )
 						{
-							inputBound.extendBy( FilterAlgo::filterSupport( inputPosition, 1.0f, 1.0f,  filterWidth ) );
+							inputBound.extendBy( FilterAlgo::filterSupport( inputPosition, 1.0f, 1.0f, filterWidth ) );
 						}
 					}
 					pixelInputPositions.push_back( inputPosition );
@@ -587,12 +585,13 @@ void Warp::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 		// the corner min bound is below the pixel center
 		Box2i inputPixelBound(
 			V2i( (int)ceilf( inputBound.min.x - 0.5 ), (int)ceilf( inputBound.min.y - 0.5 ) ),
-			V2i( (int)floorf( inputBound.max.x - 0.5 ) + 1, (int)floorf( inputBound.max.y - 0.5 ) + 1 ) );
+			V2i( (int)floorf( inputBound.max.x - 0.5 ) + 1, (int)floorf( inputBound.max.y - 0.5 ) + 1 )
+		);
 
 		CompoundObjectPtr sampleRegions = new CompoundObject();
-		sampleRegions->members()[ g_tileInputBoundName ] = new Box2iData( inputPixelBound );
-		sampleRegions->members()[ g_pixelInputPositionsName ] = pixelInputPositionsData;
-		sampleRegions->members()[ g_pixelInputDerivativesName ] = pixelInputDerivativesData;
+		sampleRegions->members()[g_tileInputBoundName] = new Box2iData( inputPixelBound );
+		sampleRegions->members()[g_pixelInputPositionsName] = pixelInputPositionsData;
+		sampleRegions->members()[g_pixelInputDerivativesName] = pixelInputDerivativesData;
 		static_cast<CompoundObjectPlug *>( output )->setValue( sampleRegions );
 		return;
 	}
@@ -612,7 +611,7 @@ void Warp::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::
 		sampleRegions = sampleRegionsPlug()->getValue( &sampleRegionsHash );
 	}
 
-	if( sampleRegions.get() == sampleRegionsEmptyTile())
+	if( sampleRegions.get() == sampleRegionsEmptyTile() )
 	{
 		h = ImagePlug::blackTile()->Object::hash();
 		return;
@@ -622,7 +621,7 @@ void Warp::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::
 
 	h.append( sampleRegionsHash );
 
-	const Box2i &tileInputBound = sampleRegions->member< Box2iData >( g_tileInputBoundName, true )->readable();
+	const Box2i &tileInputBound = sampleRegions->member<Box2iData>( g_tileInputBoundName, true )->readable();
 
 	Sampler sampler(
 		inPlug(),
@@ -648,7 +647,7 @@ IECore::ConstFloatVectorDataPtr Warp::computeChannelData( const std::string &cha
 		sampleRegions = sampleRegionsPlug()->getValue();
 	}
 
-	if( sampleRegions.get() == sampleRegionsEmptyTile())
+	if( sampleRegions.get() == sampleRegionsEmptyTile() )
 	{
 		return ImagePlug::blackTile();
 	}
@@ -665,9 +664,9 @@ IECore::ConstFloatVectorDataPtr Warp::computeChannelData( const std::string &cha
 	}
 
 
-	const Box2i &tileInputBound = sampleRegions->member< Box2iData >( g_tileInputBoundName, true )->readable();
-	const std::vector<V2f> &pixelInputPositions = sampleRegions->member< V2fVectorData >( g_pixelInputPositionsName, true )->readable();
-	const std::vector<V2f> &pixelInputDerivatives = sampleRegions->member< V2fVectorData >( g_pixelInputDerivativesName, true )->readable();
+	const Box2i &tileInputBound = sampleRegions->member<Box2iData>( g_tileInputBoundName, true )->readable();
+	const std::vector<V2f> &pixelInputPositions = sampleRegions->member<V2fVectorData>( g_pixelInputPositionsName, true )->readable();
+	const std::vector<V2f> &pixelInputDerivatives = sampleRegions->member<V2fVectorData>( g_pixelInputDerivativesName, true )->readable();
 
 	Box2i dataWindow;
 	{
@@ -692,7 +691,7 @@ IECore::ConstFloatVectorDataPtr Warp::computeChannelData( const std::string &cha
 		for( oP.x = 0; oP.x < ImagePlug::tileSize(); ++oP.x, ++i )
 		{
 			float v = 0;
-			if( BufferAlgo::contains( validPixelsRelativeToTile , oP ) )
+			if( BufferAlgo::contains( validPixelsRelativeToTile, oP ) )
 			{
 				const V2f &input = pixelInputPositions[i];
 				if( input != Engine::black )
@@ -715,7 +714,7 @@ IECore::ConstFloatVectorDataPtr Warp::computeChannelData( const std::string &cha
 	return resultData;
 }
 
-bool  Warp::affectsEngine( const Gaffer::Plug *input ) const
+bool Warp::affectsEngine( const Gaffer::Plug *input ) const
 {
 	return false;
 }

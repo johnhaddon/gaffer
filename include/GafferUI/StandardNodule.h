@@ -45,8 +45,8 @@
 
 namespace Gaffer
 {
-	IE_CORE_FORWARDDECLARE( Plug )
-}
+IE_CORE_FORWARDDECLARE( Plug )
+} // namespace Gaffer
 
 namespace GafferUI
 {
@@ -54,57 +54,56 @@ namespace GafferUI
 class GAFFERUI_API StandardNodule : public Nodule
 {
 
-	public :
+public:
 
-		explicit StandardNodule( Gaffer::PlugPtr plug );
-		~StandardNodule() override;
+	explicit StandardNodule( Gaffer::PlugPtr plug );
+	~StandardNodule() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::StandardNodule, StandardNoduleTypeId, Nodule );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::StandardNodule, StandardNoduleTypeId, Nodule );
 
-		void setLabelVisible( bool labelVisible );
-		bool getLabelVisible() const;
+	void setLabelVisible( bool labelVisible );
+	bool getLabelVisible() const;
 
-		bool canCreateConnection( const Gaffer::Plug *destinationPlug ) const override;
-		void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) override;
-		void createConnection( Gaffer::Plug *destinationPlug ) override;
+	bool canCreateConnection( const Gaffer::Plug *destinationPlug ) const override;
+	void updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) override;
+	void createConnection( Gaffer::Plug *destinationPlug ) override;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-		void renderLabel( const Style *style ) const;
+	void renderLabel( const Style *style ) const;
 
-		void enter( GadgetPtr gadget, const ButtonEvent &event );
-		void leave( GadgetPtr gadget, const ButtonEvent &event );
-		bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
+	void enter( GadgetPtr gadget, const ButtonEvent &event );
+	void leave( GadgetPtr gadget, const ButtonEvent &event );
+	bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
 
-		IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const ButtonEvent &event );
-		bool dragEnter( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragLeave( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragEnd( GadgetPtr gadget, const DragDropEvent &event );
-		bool drop( GadgetPtr gadget, const DragDropEvent &event );
+	IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const ButtonEvent &event );
+	bool dragEnter( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragLeave( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragEnd( GadgetPtr gadget, const DragDropEvent &event );
+	bool drop( GadgetPtr gadget, const DragDropEvent &event );
 
-		void setCompatibleLabelsVisible( const DragDropEvent &event );
+	void setCompatibleLabelsVisible( const DragDropEvent &event );
 
-	private :
+private:
 
-		void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key );
+	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key );
 
-		bool updateUserColor();
+	bool updateUserColor();
 
-		bool m_labelVisible;
-		bool m_draggingConnection;
-		Imath::V3f m_dragPosition;
-		Imath::V3f m_dragTangent;
-		std::optional<Imath::Color3f> m_userColor;
+	bool m_labelVisible;
+	bool m_draggingConnection;
+	Imath::V3f m_dragPosition;
+	Imath::V3f m_dragTangent;
+	std::optional<Imath::Color3f> m_userColor;
 
-		static NoduleTypeDescription<StandardNodule> g_noduleTypeDescription;
-
+	static NoduleTypeDescription<StandardNodule> g_noduleTypeDescription;
 };
 
 IE_CORE_DECLAREPTR( StandardNodule );

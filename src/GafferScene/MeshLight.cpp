@@ -54,7 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshLight );
 size_t MeshLight::g_firstChildIndex = 0;
 
 MeshLight::MeshLight( const std::string &name, const ShaderPtr &shader )
-	:	GafferScene::FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+	: GafferScene::FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstChildIndex );
 
@@ -75,7 +75,7 @@ MeshLight::MeshLight( const std::string &name, const ShaderPtr &shader )
 	addChild( parametersPlug );
 	for( Plug::Iterator srcIt( parametersPlug.get() ), dstIt( shader->parametersPlug() ); !srcIt.done(); ++srcIt, ++dstIt )
 	{
-		(*dstIt)->setInput( *srcIt );
+		( *dstIt )->setInput( *srcIt );
 	}
 
 	// ShaderAssignment node. This assigns the shader

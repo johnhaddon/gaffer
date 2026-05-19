@@ -47,13 +47,12 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManAttributes : public GafferScene::Attributes
 {
 
-	public :
+public:
 
-		RenderManAttributes( const std::string &name=defaultName<RenderManAttributes>() );
-		~RenderManAttributes() override;
+	RenderManAttributes( const std::string &name = defaultName<RenderManAttributes>() );
+	~RenderManAttributes() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManAttributes, RenderManAttributesTypeId, GafferScene::Attributes );
-
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManAttributes, RenderManAttributesTypeId, GafferScene::Attributes );
 };
 
 IE_CORE_DECLAREPTR( RenderManAttributes )

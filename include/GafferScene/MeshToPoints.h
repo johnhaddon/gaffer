@@ -51,26 +51,25 @@ namespace GafferScene
 class GAFFERSCENE_API MeshToPoints : public Deformer
 {
 
-	public :
+public:
 
-		explicit MeshToPoints( const std::string &name=defaultName<MeshToPoints>() );
-		~MeshToPoints() override;
+	explicit MeshToPoints( const std::string &name = defaultName<MeshToPoints>() );
+	~MeshToPoints() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshToPoints, MeshToPointsTypeId, Deformer );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshToPoints, MeshToPointsTypeId, Deformer );
 
-		Gaffer::StringPlug *typePlug();
-		const Gaffer::StringPlug *typePlug() const;
+	Gaffer::StringPlug *typePlug();
+	const Gaffer::StringPlug *typePlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshToPoints )

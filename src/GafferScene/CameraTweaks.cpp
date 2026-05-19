@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( CameraTweaks );
 size_t CameraTweaks::g_firstPlugIndex = 0;
 
 CameraTweaks::CameraTweaks( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "ignoreMissing", Plug::In, false ) );
@@ -84,11 +84,9 @@ const Gaffer::TweaksPlug *CameraTweaks::tweaksPlug() const
 
 bool CameraTweaks::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == ignoreMissingPlug() ||
-		tweaksPlug()->isAncestorOf( input )
-	;
+		tweaksPlug()->isAncestorOf( input );
 }
 
 void CameraTweaks::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -125,7 +123,7 @@ IECore::ConstObjectPtr CameraTweaks::computeProcessedObject( const ScenePath &pa
 	tweaksPlug->applyTweaks(
 
 		// Getter
-		[&] ( const std::string &name, const bool withFallback ) {
+		[&]( const std::string &name, const bool withFallback ) {
 			if( name == "fieldOfView" )
 			{
 				virtualParameter = new FloatData( result->calculateFieldOfView()[0] );
@@ -141,7 +139,7 @@ IECore::ConstObjectPtr CameraTweaks::computeProcessedObject( const ScenePath &pa
 		},
 
 		// Setter
-		[&] ( const std::string &name, IECore::DataPtr value ) {
+		[&]( const std::string &name, IECore::DataPtr value ) {
 			if( name == "fieldOfView" )
 			{
 				if( auto fieldOfView = runTimeCast<const FloatData>( value.get() ) )

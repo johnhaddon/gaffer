@@ -47,85 +47,83 @@
 #include "Gaffer/TypedObjectPlug.h"
 
 
-
 namespace GafferImage
 {
 
 class GAFFERIMAGE_API DiskBlur : public ImageProcessor
 {
-	public :
+public:
 
-		// This is similar to Sampler::BoundingMode, but Mirror isn't yet supported by the
-		// sampler
-		enum class BoundingMode
-		{
-			/// Returns 0 outside the data window
-			Black = Sampler::BoundingMode::Black,
-			/// Flips the source
-			Mirror = 2
-		};
+	// This is similar to Sampler::BoundingMode, but Mirror isn't yet supported by the
+	// sampler
+	enum class BoundingMode
+	{
+		/// Returns 0 outside the data window
+		Black = Sampler::BoundingMode::Black,
+		/// Flips the source
+		Mirror = 2
+	};
 
-		explicit DiskBlur( const std::string &name=defaultName<DiskBlur>() );
-		~DiskBlur() override;
+	explicit DiskBlur( const std::string &name = defaultName<DiskBlur>() );
+	~DiskBlur() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DiskBlur, DiskBlurTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DiskBlur, DiskBlurTypeId, ImageProcessor );
 
-		Gaffer::FloatPlug *radiusPlug();
-		const Gaffer::FloatPlug *radiusPlug() const;
+	Gaffer::FloatPlug *radiusPlug();
+	const Gaffer::FloatPlug *radiusPlug() const;
 
-		Gaffer::StringPlug *radiusChannelPlug();
-		const Gaffer::StringPlug *radiusChannelPlug() const;
+	Gaffer::StringPlug *radiusChannelPlug();
+	const Gaffer::StringPlug *radiusChannelPlug() const;
 
-		Gaffer::FloatPlug *approximationThresholdPlug();
-		const Gaffer::FloatPlug *approximationThresholdPlug() const;
+	Gaffer::FloatPlug *approximationThresholdPlug();
+	const Gaffer::FloatPlug *approximationThresholdPlug() const;
 
-		Gaffer::IntPlug *maxRadiusPlug();
-		const Gaffer::IntPlug *maxRadiusPlug() const;
+	Gaffer::IntPlug *maxRadiusPlug();
+	const Gaffer::IntPlug *maxRadiusPlug() const;
 
-		Gaffer::IntPlug *boundingModePlug();
-		const Gaffer::IntPlug *boundingModePlug() const;
+	Gaffer::IntPlug *boundingModePlug();
+	const Gaffer::IntPlug *boundingModePlug() const;
 
-		Gaffer::FloatVectorDataPlug *layerBoundariesPlug();
-		const Gaffer::FloatVectorDataPlug *layerBoundariesPlug() const;
+	Gaffer::FloatVectorDataPlug *layerBoundariesPlug();
+	const Gaffer::FloatVectorDataPlug *layerBoundariesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		Gaffer::ObjectVectorPlug *tileBoundPlug();
-		const Gaffer::ObjectVectorPlug *tileBoundPlug() const;
+	Gaffer::ObjectVectorPlug *tileBoundPlug();
+	const Gaffer::ObjectVectorPlug *tileBoundPlug() const;
 
-		Gaffer::ObjectVectorPlug *scanlinesLUTPlug();
-		const Gaffer::ObjectVectorPlug *scanlinesLUTPlug() const;
+	Gaffer::ObjectVectorPlug *scanlinesLUTPlug();
+	const Gaffer::ObjectVectorPlug *scanlinesLUTPlug() const;
 
-		Gaffer::BoolPlug *useReferenceImplementationPlug();
-		const Gaffer::BoolPlug *useReferenceImplementationPlug() const;
+	Gaffer::BoolPlug *useReferenceImplementationPlug();
+	const Gaffer::BoolPlug *useReferenceImplementationPlug() const;
 
-		Gaffer::ObjectVectorPlug *layerWeightsPlug();
-		const Gaffer::ObjectVectorPlug *layerWeightsPlug() const;
+	Gaffer::ObjectVectorPlug *layerWeightsPlug();
+	const Gaffer::ObjectVectorPlug *layerWeightsPlug() const;
 
-		void hashScanlinesLUT( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstObjectVectorPtr computeScanlinesLUT( const Gaffer::Context *context ) const;
+	void hashScanlinesLUT( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstObjectVectorPtr computeScanlinesLUT( const Gaffer::Context *context ) const;
 
-		void hashTileBound( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstObjectVectorPtr computeTileBound( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const;
+	void hashTileBound( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstObjectVectorPtr computeTileBound( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const;
 
-		void hashLayerWeights( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstObjectVectorPtr computeLayerWeights( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const;
+	void hashLayerWeights( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstObjectVectorPtr computeLayerWeights( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const;
 
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DiskBlur )

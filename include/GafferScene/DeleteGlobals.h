@@ -58,34 +58,33 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteGlobals : public GlobalsProcessor
 {
 
-	public :
+public:
 
-		explicit DeleteGlobals( const std::string &name=defaultName<DeleteGlobals>() );
-		~DeleteGlobals() override;
+	explicit DeleteGlobals( const std::string &name = defaultName<DeleteGlobals>() );
+	~DeleteGlobals() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteGlobals, DeleteGlobalsTypeId, GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteGlobals, DeleteGlobalsTypeId, GlobalsProcessor );
 
-		Gaffer::StringPlug *namesPlug();
-		const Gaffer::StringPlug *namesPlug() const;
+	Gaffer::StringPlug *namesPlug();
+	const Gaffer::StringPlug *namesPlug() const;
 
-		Gaffer::BoolPlug *invertNamesPlug();
-		const Gaffer::BoolPlug *invertNamesPlug() const;
+	Gaffer::BoolPlug *invertNamesPlug();
+	const Gaffer::BoolPlug *invertNamesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		virtual std::string namePrefix() const;
+	virtual std::string namePrefix() const;
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 
-		friend void GafferSceneModule::bindGlobals();
-
+	friend void GafferSceneModule::bindGlobals();
 };
 
 IE_CORE_DECLAREPTR( DeleteGlobals );

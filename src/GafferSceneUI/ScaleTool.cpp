@@ -66,7 +66,7 @@ GAFFER_NODE_DEFINE_TYPE( ScaleTool );
 ScaleTool::ToolDescription<ScaleTool, SceneView> ScaleTool::g_toolDescription;
 
 ScaleTool::ScaleTool( SceneView *view, const std::string &name )
-	:	TransformTool( view, name )
+	: TransformTool( view, name )
 {
 	static Style::Axes axes[] = { Style::X, Style::Y, Style::Z, Style::XY, Style::XZ, Style::YZ, Style::XYZ };
 	static const char *handleNames[] = { "x", "y", "z", "xy", "xz", "yz", "xyz" };
@@ -108,14 +108,14 @@ void ScaleTool::updateHandles( float rasterScale )
 		bool enabled = true;
 		for( const auto &s : selection() )
 		{
-			if( !Scale( s ).canApply( (*it)->axisMask() ) )
+			if( !Scale( s ).canApply( ( *it )->axisMask() ) )
 			{
 				enabled = false;
 				break;
 			}
 		}
-		(*it)->setEnabled( enabled );
-		(*it)->setRasterScale( rasterScale );
+		( *it )->setEnabled( enabled );
+		( *it )->setRasterScale( rasterScale );
 	}
 }
 
@@ -161,7 +161,7 @@ bool ScaleTool::dragEnd()
 //////////////////////////////////////////////////////////////////////////
 
 ScaleTool::Scale::Scale( const Selection &selection )
-	:	m_selection( selection )
+	: m_selection( selection )
 {
 }
 
@@ -200,7 +200,7 @@ void ScaleTool::Scale::apply( const Imath::V3i &axisMask, const Imath::V3f &scal
 		FloatPlug *plug = scalePlug->getChild( i );
 		if( axisMask[i] && canSetValueOrAddKey( plug ) )
 		{
-			setValueOrAddKey( plug, m_selection.context()->getTime(), (*m_originalScale)[i] * scale[i] );
+			setValueOrAddKey( plug, m_selection.context()->getTime(), ( *m_originalScale )[i] * scale[i] );
 		}
 	}
 }

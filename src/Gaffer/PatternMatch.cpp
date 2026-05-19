@@ -45,7 +45,7 @@ GAFFER_NODE_DEFINE_TYPE( PatternMatch );
 size_t PatternMatch::g_firstPlugIndex = 0;
 
 PatternMatch::PatternMatch( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -128,7 +128,7 @@ void PatternMatch::hash( const ValuePlug *output, const Context *context, IECore
 	}
 }
 
-void PatternMatch::compute( ValuePlug *output, const Context *context) const
+void PatternMatch::compute( ValuePlug *output, const Context *context ) const
 {
 	ComputeNode::compute( output, context );
 
@@ -136,8 +136,8 @@ void PatternMatch::compute( ValuePlug *output, const Context *context) const
 	{
 		static_cast<BoolPlug *>( output )->setValue(
 			enabledPlug()->getValue() ?
-			IECore::StringAlgo::matchMultiple( stringPlug()->getValue(), patternPlug()->getValue() ) :
-			false
+				IECore::StringAlgo::matchMultiple( stringPlug()->getValue(), patternPlug()->getValue() ) :
+				false
 		);
 	}
 	else

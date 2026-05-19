@@ -56,11 +56,11 @@ namespace
 {
 
 const boost::container::flat_map<int, ConstColor4fDataPtr> g_sourceTypeColors = {
-{ (int)Inspector::Result::SourceType::Upstream, nullptr },
-{ (int)Inspector::Result::SourceType::EditScope, new Color4fData( Imath::Color4f( 48, 100, 153, 150 ) / 255.0f ) },
-{ (int)Inspector::Result::SourceType::Downstream, new Color4fData( Imath::Color4f( 239, 198, 24, 104 ) / 255.0f ) },
-{ (int)Inspector::Result::SourceType::Other, nullptr },
-{ (int)Inspector::Result::SourceType::External, new Color4fData( Imath::Color4f( 121, 77, 56, 120 ) / 255.0f ) },
+	{ (int)Inspector::Result::SourceType::Upstream, nullptr },
+	{ (int)Inspector::Result::SourceType::EditScope, new Color4fData( Imath::Color4f( 48, 100, 153, 150 ) / 255.0f ) },
+	{ (int)Inspector::Result::SourceType::Downstream, new Color4fData( Imath::Color4f( 239, 198, 24, 104 ) / 255.0f ) },
+	{ (int)Inspector::Result::SourceType::Other, nullptr },
+	{ (int)Inspector::Result::SourceType::External, new Color4fData( Imath::Color4f( 121, 77, 56, 120 ) / 255.0f ) },
 };
 const Color4fDataPtr g_fallbackValueForegroundColor = new Color4fData( Imath::Color4f( 163, 163, 163, 255 ) / 255.0f );
 const ConstStringDataPtr g_missingOutputShader = new StringData( "Missing output shader" );
@@ -68,25 +68,25 @@ const StringDataPtr g_shaderConnectionIcon = new StringData( "sceneInspectorShad
 const InternedString g_shaderLabel( "label" );
 const InternedString g_shaderNodeName( "gaffer:nodeName" );
 
-}  // namespace
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // InspectorColumn
 //////////////////////////////////////////////////////////////////////////
 
 InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const std::string &columnName, const std::string &columnToolTip, PathColumn::SizeMode sizeMode )
-	:	InspectorColumn( inspector, PathColumn::CellData( headerValue( columnName != "" ? columnName : inspector->name() ), nullptr, nullptr, new IECore::StringData( columnToolTip ) ), sizeMode )
+	: InspectorColumn( inspector, PathColumn::CellData( headerValue( columnName != "" ? columnName : inspector->name() ), nullptr, nullptr, new IECore::StringData( columnToolTip ) ), sizeMode )
 {
 }
 
 InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_inspector( inspector ), m_headerData( headerData ), m_contextProperty( "inspector:context" )
+	: PathColumn( sizeMode ), m_inspector( inspector ), m_headerData( headerData ), m_contextProperty( "inspector:context" )
 {
 	inspector->dirtiedSignal().connect( boost::bind( &InspectorColumn::inspectorDirtied, this ) );
 }
 
 InspectorColumn::InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, IECore::InternedString contextProperty, PathColumn::SizeMode sizeMode )
-	:	PathColumn( sizeMode ), m_inspector( inspectorProperty ), m_headerData( headerData ), m_contextProperty( contextProperty )
+	: PathColumn( sizeMode ), m_inspector( inspectorProperty ), m_headerData( headerData ), m_contextProperty( contextProperty )
 {
 }
 
@@ -216,7 +216,7 @@ PathColumn::CellData InspectorColumn::cellDataFromValue( const IECore::Object *v
 		}
 		auto label = shader->blindData()->member<StringData>( g_shaderLabel );
 		auto nodeName = shader->blindData()->member<StringData>( g_shaderNodeName );
-		if( label && (!nodeName || label->readable() != nodeName->readable() ) )
+		if( label && ( !nodeName || label->readable() != nodeName->readable() ) )
 		{
 			// The Shader node creates `label` and `gaffer:nodeName` metadata
 			// with identical values. If the label is different it is because

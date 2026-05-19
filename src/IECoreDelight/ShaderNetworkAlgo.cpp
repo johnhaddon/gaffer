@@ -74,7 +74,7 @@ using QueryCache = IECorePreview::LRUCache<std::string, OSLQueryPtr, IECorePrevi
 QueryCache &queryCache()
 {
 	static QueryCache g_cache(
-		[] ( const std::string &shaderName, size_t &cost, const IECore::Canceller *canceller ) -> OSLQueryPtr {
+		[]( const std::string &shaderName, size_t &cost, const IECore::Canceller *canceller ) -> OSLQueryPtr {
 			const char *searchPath = getenv( "OSL_SHADER_PATHS" );
 			OSLQueryPtr query = std::make_shared<OSL::OSLQuery>();
 			cost = 1;
@@ -89,7 +89,7 @@ QueryCache &queryCache()
 	return g_cache;
 }
 
-}  // namespace
+} // namespace
 
 namespace
 {
@@ -156,9 +156,9 @@ const OSL::OSLQuery::Parameter *splineValueParameter(
 bool find3DelightSplineParameters(
 	const OSL::OSLQuery &query,
 	const std::string &splineParameterName,
-	const OSL::OSLQuery::Parameter * &positionsParameter,
-	const OSL::OSLQuery::Parameter * &valuesParameter,
-	const OSL::OSLQuery::Parameter * &basisParameter
+	const OSL::OSLQuery::Parameter *&positionsParameter,
+	const OSL::OSLQuery::Parameter *&valuesParameter,
+	const OSL::OSLQuery::Parameter *&basisParameter
 )
 {
 	positionsParameter = nullptr;
@@ -237,8 +237,7 @@ void renameSplineParameters( ShaderNetwork *shaderNetwork )
 							positionsParameter,
 							valuesParameter,
 							basisParameter
-						)
-					)
+						) )
 					{
 						if( name == splineParameterName + "Positions" )
 						{
@@ -286,7 +285,7 @@ void addDefaultUVShader( ShaderNetwork *shaderNetwork )
 		auto it = shader->parameters().find( g_uvCoordParameterName );
 		if(
 			it != shader->parameters().end() &&
-			!shaderNetwork->input( ShaderNetwork::Parameter( handle, g_uvCoordParameterName) )
+			!shaderNetwork->input( ShaderNetwork::Parameter( handle, g_uvCoordParameterName ) )
 		)
 		{
 			if( uvCoordHandle.string().empty() )
@@ -349,23 +348,20 @@ struct DataTraits
 {
 
 	using DataType = IECore::TypedData<T>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec2<T> >
+struct DataTraits<Vec2<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec2<T>>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec3<T> >
+struct DataTraits<Vec3<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec3<T>>;
-
 };
 
 Color3f blackbody( float kelvins )
@@ -375,25 +371,25 @@ Color3f blackbody( float kelvins )
 	static SplinefColor3f g_spline(
 		CubicBasisf::catmullRom(),
 		{
-			{  1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
-			{  1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
-			{  1500.0f, Color3f( 1.000000f, 0.149664f, 0.000000f ) },
-			{  2000.0f, Color3f( 1.000000f, 0.256644f, 0.008095f ) },
-			{  2500.0f, Color3f( 1.000000f, 0.372033f, 0.067450f ) },
-			{  3000.0f, Color3f( 1.000000f, 0.476725f, 0.153601f ) },
-			{  3500.0f, Color3f( 1.000000f, 0.570376f, 0.259196f ) },
-			{  4000.0f, Color3f( 1.000000f, 0.653480f, 0.377155f ) },
-			{  4500.0f, Color3f( 1.000000f, 0.726878f, 0.501606f ) },
-			{  5000.0f, Color3f( 1.000000f, 0.791543f, 0.628050f ) },
-			{  5500.0f, Color3f( 1.000000f, 0.848462f, 0.753228f ) },
-			{  6000.0f, Color3f( 1.000000f, 0.898581f, 0.874905f ) },
-			{  6500.0f, Color3f( 1.000000f, 0.942771f, 0.991642f ) },
-			{  7000.0f, Color3f( 0.906947f, 0.890456f, 1.000000f ) },
-			{  7500.0f, Color3f( 0.828247f, 0.841838f, 1.000000f ) },
-			{  8000.0f, Color3f( 0.765791f, 0.801896f, 1.000000f ) },
-			{  8500.0f, Color3f( 0.715255f, 0.768579f, 1.000000f ) },
-			{  9000.0f, Color3f( 0.673683f, 0.740423f, 1.000000f ) },
-			{  9500.0f, Color3f( 0.638992f, 0.716359f, 1.000000f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
+			{ 1500.0f, Color3f( 1.000000f, 0.149664f, 0.000000f ) },
+			{ 2000.0f, Color3f( 1.000000f, 0.256644f, 0.008095f ) },
+			{ 2500.0f, Color3f( 1.000000f, 0.372033f, 0.067450f ) },
+			{ 3000.0f, Color3f( 1.000000f, 0.476725f, 0.153601f ) },
+			{ 3500.0f, Color3f( 1.000000f, 0.570376f, 0.259196f ) },
+			{ 4000.0f, Color3f( 1.000000f, 0.653480f, 0.377155f ) },
+			{ 4500.0f, Color3f( 1.000000f, 0.726878f, 0.501606f ) },
+			{ 5000.0f, Color3f( 1.000000f, 0.791543f, 0.628050f ) },
+			{ 5500.0f, Color3f( 1.000000f, 0.848462f, 0.753228f ) },
+			{ 6000.0f, Color3f( 1.000000f, 0.898581f, 0.874905f ) },
+			{ 6500.0f, Color3f( 1.000000f, 0.942771f, 0.991642f ) },
+			{ 7000.0f, Color3f( 0.906947f, 0.890456f, 1.000000f ) },
+			{ 7500.0f, Color3f( 0.828247f, 0.841838f, 1.000000f ) },
+			{ 8000.0f, Color3f( 0.765791f, 0.801896f, 1.000000f ) },
+			{ 8500.0f, Color3f( 0.715255f, 0.768579f, 1.000000f ) },
+			{ 9000.0f, Color3f( 0.673683f, 0.740423f, 1.000000f ) },
+			{ 9500.0f, Color3f( 0.638992f, 0.716359f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.609681f, 0.695588f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.609681f, 0.695588f, 1.000000f ) },
 		}
@@ -445,7 +441,7 @@ const InternedString g_input2ZParameter( "input2Z" );
 const InternedString g_inputNormalParameter( "input_normal" );
 const InternedString g_intensityParameter( "intensity" );
 const InternedString g_iorParameter( "ior" );
-const InternedString g_lengthParameter ("length" );
+const InternedString g_lengthParameter( "length" );
 const InternedString g_radiusParameter( "radius" );
 const InternedString g_mParameter( "m" );
 const InternedString g_metallicParameter( "metallic" );
@@ -546,7 +542,7 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 
 void transferUSDShapingParameters( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader )
 {
-	if( auto d = usdShader->parametersData()->member<FloatData>( g_shapingConeAngleParameter) )
+	if( auto d = usdShader->parametersData()->member<FloatData>( g_shapingConeAngleParameter ) )
 	{
 		shader->setName( "spotLight" );
 		// USD docs don't currently specify any semantics for `shaping:cone:softness`, but we assume
@@ -668,7 +664,7 @@ void cylinderStatic(
 	{
 		const float a = ( (float)i / (float)numSegments ) * 2.f * M_PI;
 
-		const float z = sin( a ) ;
+		const float z = sin( a );
 		const float y = cos( a );
 
 		n.push_back( V3f( 0, y, z ) );
@@ -731,7 +727,7 @@ void cylinderP( const float radius, const float length, std::vector<V3f> &p )
 		const float z = sin( a ) * radius;
 		const float y = cos( a ) * radius;
 
-		p.push_back( V3f( halfLength, y, z ) );  // Length along the X-axis
+		p.push_back( V3f( halfLength, y, z ) ); // Length along the X-axis
 		p.push_back( V3f( -halfLength, y, z ) );
 	}
 
@@ -778,7 +774,7 @@ void convertUSDUVTextures( ShaderNetwork *network )
 	}
 }
 
-}  // namespace
+} // namespace
 
 namespace IECoreDelight
 {
@@ -1006,7 +1002,6 @@ void convertUSDShaders( ShaderNetwork *shaderNetwork )
 						}
 					}
 				}
-
 			}
 		}
 
@@ -1216,6 +1211,6 @@ void updateLightGeometry( const ShaderNetwork *shaderNetwork, NSIContext_t conte
 	}
 }
 
-}  // namespace ShaderNetworkAlgo
+} // namespace ShaderNetworkAlgo
 
-}  // namespace IECoreDelight
+} // namespace IECoreDelight

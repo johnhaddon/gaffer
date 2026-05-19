@@ -88,9 +88,10 @@ GAFFER_NODE_DEFINE_TYPE( View );
 size_t View::g_firstPlugIndex = 0;
 
 View::View( const std::string &name, Gaffer::ScriptNodePtr scriptNode, Gaffer::PlugPtr inPlug )
-	:	Node( name ),
-		m_scriptNode( scriptNode ), m_viewportGadget( new ViewportGadget ),
-		m_contextTracker( ContextTracker::acquireForFocus( scriptNode.get() ) )
+	: Node( name ),
+	  m_scriptNode( scriptNode ),
+	  m_viewportGadget( new ViewportGadget ),
+	  m_contextTracker( ContextTracker::acquireForFocus( scriptNode.get() ) )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	setChild( "in", inPlug );
@@ -155,7 +156,7 @@ Gaffer::EditScope *View::editScope()
 {
 	return PlugAlgo::findSource(
 		editScopePlug(),
-		[] ( Plug *plug ) {
+		[]( Plug *plug ) {
 			return runTimeCast<EditScope>( plug->node() );
 		}
 	);
@@ -166,7 +167,7 @@ const Gaffer::EditScope *View::editScope() const
 	// Cheeky cast to avoid a duplicate `PlugAlgo::findSource( const... )` implementation
 	return PlugAlgo::findSource(
 		const_cast<Plug *>( editScopePlug() ),
-		[] ( Plug *plug ) {
+		[]( Plug *plug ) {
 			return runTimeCast<const EditScope>( plug->node() );
 		}
 	);
@@ -229,12 +230,12 @@ ViewPtr View::create( Gaffer::PlugPtr plug )
 		std::string plugPath = plug->relativeName( node );
 		const NamedCreatorMap &m = namedCreators();
 		IECore::TypeId t = node->typeId();
-		while( t!=IECore::InvalidTypeId )
+		while( t != IECore::InvalidTypeId )
 		{
 			NamedCreatorMap::const_iterator it = m.find( t );
-			if( it!=m.end() )
+			if( it != m.end() )
 			{
-				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt!=it->second.rend(); nIt++ )
+				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt != it->second.rend(); nIt++ )
 				{
 					if( boost::regex_match( plugPath, nIt->first ) )
 					{
@@ -250,10 +251,10 @@ ViewPtr View::create( Gaffer::PlugPtr plug )
 
 	CreatorMap &m = creators();
 	IECore::TypeId t = plug->typeId();
-	while( t!=IECore::InvalidTypeId )
+	while( t != IECore::InvalidTypeId )
 	{
 		CreatorMap::const_iterator it = m.find( t );
-		if( it!=m.end() )
+		if( it != m.end() )
 		{
 			ViewPtr view = it->second( scriptNode );
 			view->inPlug()->setInput( plug );
@@ -364,11 +365,8 @@ using DisplayTransformCreatorMap = boost::multi_index::multi_index_container<
 	NamedTransform,
 	boost::multi_index::indexed_by<
 		boost::multi_index::ordered_unique<
-			boost::multi_index::key<&NamedTransform::first>
-		>,
-		boost::multi_index::sequenced<>
-	>
->;
+			boost::multi_index::key<&NamedTransform::first>>,
+		boost::multi_index::sequenced<>>>;
 
 DisplayTransformCreatorMap &displayTransformCreators()
 {
@@ -379,7 +377,7 @@ DisplayTransformCreatorMap &displayTransformCreators()
 	return *g_creators;
 }
 
-using RegistrationChangedSignal = Gaffer::Signals::Signal<void ( const std::string & )>;
+using RegistrationChangedSignal = Gaffer::Signals::Signal<void( const std::string & )>;
 
 RegistrationChangedSignal &registrationChangedSignal()
 {
@@ -414,7 +412,7 @@ MurmurHash hashWithoutFrame( const Context *context )
 size_t View::DisplayTransform::g_firstPlugIndex = 0;
 
 View::DisplayTransform::DisplayTransform( View *view )
-	:	m_shaderDirty( true ), m_parametersDirty( true )
+	: m_shaderDirty( true ), m_parametersDirty( true )
 {
 	// Our settings are represented as plugs parented to us.
 
@@ -468,7 +466,6 @@ View::DisplayTransform::DisplayTransform( View *view )
 	view->contextChangedSignal().connect(
 		boost::bind( &DisplayTransform::contextChanged, this )
 	);
-
 }
 
 View::DisplayTransform::DisplayTransform::~DisplayTransform()

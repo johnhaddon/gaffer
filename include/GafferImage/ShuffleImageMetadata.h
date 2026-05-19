@@ -46,27 +46,26 @@ namespace GafferImage
 class GAFFERIMAGE_API ShuffleImageMetadata : public MetadataProcessor
 {
 
-	public :
+public:
 
-		explicit ShuffleImageMetadata( const std::string &name=defaultName<ShuffleImageMetadata>() );
-		~ShuffleImageMetadata() override;
+	explicit ShuffleImageMetadata( const std::string &name = defaultName<ShuffleImageMetadata>() );
+	~ShuffleImageMetadata() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ShuffleImageMetadata, ShuffleImageMetadataTypeId, MetadataProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ShuffleImageMetadata, ShuffleImageMetadataTypeId, MetadataProcessor );
 
-		Gaffer::ShufflesPlug *shufflesPlug();
-		const Gaffer::ShufflesPlug *shufflesPlug() const;
+	Gaffer::ShufflesPlug *shufflesPlug();
+	const Gaffer::ShufflesPlug *shufflesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
+	void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ShuffleImageMetadata );

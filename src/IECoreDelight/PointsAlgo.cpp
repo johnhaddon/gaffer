@@ -54,14 +54,7 @@ void staticParameters( const IECoreScene::PointsPrimitive *object, ParameterList
 	if( object->variables.find( "width" ) == object->variables.end() )
 	{
 		// Width is a required parameter
-		parameters.add( {
-			"width",
-			&g_one,
-			NSITypeFloat,
-			0,
-			1,
-			0
-		} );
+		parameters.add( { "width", &g_one, NSITypeFloat, 0, 1, 0 } );
 	}
 }
 

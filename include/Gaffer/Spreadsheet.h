@@ -48,208 +48,204 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Spreadsheet : public ComputeNode
 {
 
-	public :
+public:
 
-		explicit Spreadsheet( const std::string &name=defaultName<Spreadsheet>() );
-		~Spreadsheet() override;
+	explicit Spreadsheet( const std::string &name = defaultName<Spreadsheet>() );
+	~Spreadsheet() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Spreadsheet, SpreadsheetTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Spreadsheet, SpreadsheetTypeId, ComputeNode );
 
-		/// Plug types
-		/// ==========
+	/// Plug types
+	/// ==========
+	///
+	/// The spreadsheet is defined using a hierarchy of specialised plug
+	/// types, organised first by row and then by column.
+
+	IE_CORE_FORWARDDECLARE( RowPlug );
+
+	/// Top level plug that has a child for each row in the spreadsheet.
+	/// This also provides methods for adding and removing rows and columns.
+	/// Accessed via `Spreadsheet::rowsPlug()`.
+	///
+	/// > Note : It is strongly recommended that the child RowPlugs are
+	/// > accessed via their numeric indices and never via their names.
+	class GAFFER_API RowsPlug : public ValuePlug
+	{
+
+	public:
+
+		RowsPlug( const std::string &name = defaultName<RowsPlug>(), Direction direction = In, unsigned flags = Default );
+		~RowsPlug() override;
+
+		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowsPlug, Gaffer::SpreadsheetRowsPlugTypeId, Gaffer::ValuePlug );
+
+		/// Row accessors
+		/// =============
+
+		RowPlug *defaultRow();
+		const RowPlug *defaultRow() const;
+
+		/// Returns the first row which has a name - as specified by
+		/// `RowPlug::namePlug()->getValue()` - equal to `rowName`.
+		/// Ignores rows with names driven by a ComputeNode, and never
+		/// returns `defaultRow()`.
+		RowPlug *row( const std::string &rowName );
+		const RowPlug *row( const std::string &rowName ) const;
+
+		/// Methods for adjusting spreadsheet size
+		/// ======================================
 		///
-		/// The spreadsheet is defined using a hierarchy of specialised plug
-		/// types, organised first by row and then by column.
-
-		IE_CORE_FORWARDDECLARE( RowPlug );
-
-		/// Top level plug that has a child for each row in the spreadsheet.
-		/// This also provides methods for adding and removing rows and columns.
-		/// Accessed via `Spreadsheet::rowsPlug()`.
+		/// Several constraints must be maintained when adjusting the
+		/// size of the spreadsheet, so these dedicated methods should
+		/// be used instead of manual addition of children.
 		///
-		/// > Note : It is strongly recommended that the child RowPlugs are
-		/// > accessed via their numeric indices and never via their names.
-		class GAFFER_API RowsPlug : public ValuePlug
-		{
+		/// These methods are defined on the RowPlug rather than on the
+		/// Spreadsheet so that they can be used for the editing and
+		/// serialisation of promoted plugs.
 
-			public :
+		/// Adds a column to the spreadsheet, using `value` as a prototype for
+		/// the `CellPlug::valuePlug()` for each cell. If `adoptEnabledPlug`
+		/// is true, then `value` must have a BoolPlug child called "enabled",
+		/// and this will be used instead of adding another "enabled" plug to
+		/// the cell itself. This is useful when adding columns for NameValuePlugs
+		/// and TweakPlugs.
+		size_t addColumn( const ValuePlug *value, IECore::InternedString name, bool adoptEnabledPlug );
+		/// \todo Remove this overload, and add default values for `name` and `adoptEnabledPlug`
+		/// in the version above.
+		size_t addColumn( const ValuePlug *value, IECore::InternedString name = IECore::InternedString() );
+		void removeColumn( size_t columnIndex );
 
-				RowsPlug( const std::string &name = defaultName<RowsPlug>(), Direction direction = In, unsigned flags = Default );
-				~RowsPlug() override;
+		RowPlug *addRow();
+		/// \todo Return `RowPlug::Range`, which we can't do right
+		/// now because it doesn't have constructors which specify
+		/// the begin/end iterators.
+		void addRows( size_t numRows );
+		void removeRow( RowPlugPtr row );
 
-				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowsPlug, Gaffer::SpreadsheetRowsPlugTypeId, Gaffer::ValuePlug );
+		/// Overrides
+		/// =========
 
-				/// Row accessors
-				/// =============
+		bool acceptsChild( const GraphComponent *potentialChild ) const override;
+		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-				RowPlug *defaultRow();
-				const RowPlug *defaultRow() const;
+	private:
 
-				/// Returns the first row which has a name - as specified by
-				/// `RowPlug::namePlug()->getValue()` - equal to `rowName`.
-				/// Ignores rows with names driven by a ComputeNode, and never
-				/// returns `defaultRow()`.
-				RowPlug *row( const std::string &rowName );
-				const RowPlug *row( const std::string &rowName ) const;
+		std::vector<ValuePlug *> outPlugs();
 
-				/// Methods for adjusting spreadsheet size
-				/// ======================================
-				///
-				/// Several constraints must be maintained when adjusting the
-				/// size of the spreadsheet, so these dedicated methods should
-				/// be used instead of manual addition of children.
-				///
-				/// These methods are defined on the RowPlug rather than on the
-				/// Spreadsheet so that they can be used for the editing and
-				/// serialisation of promoted plugs.
+		// Used to implement the `row()` accessor.
+		class RowNameMap;
+		std::unique_ptr<RowNameMap> m_rowNameMap;
+	};
 
-				/// Adds a column to the spreadsheet, using `value` as a prototype for
-				/// the `CellPlug::valuePlug()` for each cell. If `adoptEnabledPlug`
-				/// is true, then `value` must have a BoolPlug child called "enabled",
-				/// and this will be used instead of adding another "enabled" plug to
-				/// the cell itself. This is useful when adding columns for NameValuePlugs
-				/// and TweakPlugs.
-				size_t addColumn( const ValuePlug *value, IECore::InternedString name, bool adoptEnabledPlug );
-				/// \todo Remove this overload, and add default values for `name` and `adoptEnabledPlug`
-				/// in the version above.
-				size_t addColumn( const ValuePlug *value, IECore::InternedString name = IECore::InternedString() );
-				void removeColumn( size_t columnIndex );
+	IE_CORE_DECLAREPTR( RowsPlug );
 
-				RowPlug *addRow();
-				/// \todo Return `RowPlug::Range`, which we can't do right
-				/// now because it doesn't have constructors which specify
-				/// the begin/end iterators.
-				void addRows( size_t numRows );
-				void removeRow( RowPlugPtr row );
+	/// Defines a single row of the spreadsheet. Access using
+	/// `RowPlug::Range( *rowsPlug() )` or via `rowsPlug()->getChild<RowPlug>()`.
+	class GAFFER_API RowPlug : public ValuePlug
+	{
 
-				/// Overrides
-				/// =========
+	public:
 
-				bool acceptsChild( const GraphComponent *potentialChild ) const override;
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowPlug, Gaffer::SpreadsheetRowPlugTypeId, Gaffer::ValuePlug );
 
-			private :
+		StringPlug *namePlug();
+		const StringPlug *namePlug() const;
 
-				std::vector<ValuePlug *> outPlugs();
+		BoolPlug *enabledPlug();
+		const BoolPlug *enabledPlug() const;
 
-				// Used to implement the `row()` accessor.
-				class RowNameMap;
-				std::unique_ptr<RowNameMap> m_rowNameMap;
+		ValuePlug *cellsPlug();
+		const ValuePlug *cellsPlug() const;
 
-		};
+		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		IE_CORE_DECLAREPTR( RowsPlug );
+	private:
 
-		/// Defines a single row of the spreadsheet. Access using
-		/// `RowPlug::Range( *rowsPlug() )` or via `rowsPlug()->getChild<RowPlug>()`.
-		class GAFFER_API RowPlug : public ValuePlug
-		{
+		RowPlug( const std::string &name, Plug::Direction direction = Plug::In, unsigned flags = Default );
+		friend class Spreadsheet;
+	};
 
-			public :
+	/// Defines a single cell in the spreadsheet. Access using
+	/// `CellPlug::Range( *rowPlug->cellsPlug() )` or via
+	/// `rowPlug->cellsPlug()->getChild<CellPlug>()`.
+	class GAFFER_API CellPlug : public ValuePlug
+	{
 
-				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::RowPlug, Gaffer::SpreadsheetRowPlugTypeId, Gaffer::ValuePlug );
+	public:
 
-				StringPlug *namePlug();
-				const StringPlug *namePlug() const;
+		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::CellPlug, Gaffer::SpreadsheetCellPlugTypeId, Gaffer::ValuePlug );
 
-				BoolPlug *enabledPlug();
-				const BoolPlug *enabledPlug() const;
+		/// Returns the plug used to enable or disable this cell.
+		/// Note : If `addColumn( adoptEnabledPlug = true )` was
+		/// used, this will return a child of `valuePlug()`, not
+		/// a direct child of the CellPlug itself.
+		BoolPlug *enabledPlug();
+		const BoolPlug *enabledPlug() const;
 
-				ValuePlug *cellsPlug();
-				const ValuePlug *cellsPlug() const;
+		template<typename T = Gaffer::ValuePlug>
+		T *valuePlug();
 
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		template<typename T = Gaffer::ValuePlug>
+		const T *valuePlug() const;
 
-			private :
+		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-				RowPlug( const std::string &name, Plug::Direction direction = Plug::In, unsigned flags = Default );
-				friend class Spreadsheet;
+	private:
 
-		};
+		CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug = false, Plug::Direction direction = Plug::In );
+		friend class Spreadsheet;
+	};
 
-		/// Defines a single cell in the spreadsheet. Access using
-		/// `CellPlug::Range( *rowPlug->cellsPlug() )` or via
-		/// `rowPlug->cellsPlug()->getChild<CellPlug>()`.
-		class GAFFER_API CellPlug : public ValuePlug
-		{
+	IE_CORE_DECLAREPTR( CellPlug );
 
-			public :
+	/// Plug accessors
+	/// ==============
 
-				GAFFER_PLUG_DECLARE_TYPE( Gaffer::Spreadsheet::CellPlug, Gaffer::SpreadsheetCellPlugTypeId, Gaffer::ValuePlug );
+	StringPlug *selectorPlug();
+	const StringPlug *selectorPlug() const;
 
-				/// Returns the plug used to enable or disable this cell.
-				/// Note : If `addColumn( adoptEnabledPlug = true )` was
-				/// used, this will return a child of `valuePlug()`, not
-				/// a direct child of the CellPlug itself.
-				BoolPlug *enabledPlug();
-				const BoolPlug *enabledPlug() const;
+	RowsPlug *rowsPlug();
+	const RowsPlug *rowsPlug() const;
 
-				template<typename T = Gaffer::ValuePlug>
-				T *valuePlug();
+	ValuePlug *outPlug();
+	const ValuePlug *outPlug() const;
 
-				template<typename T = Gaffer::ValuePlug>
-				const T *valuePlug() const;
+	StringVectorDataPlug *enabledRowNamesPlug();
+	const StringVectorDataPlug *enabledRowNamesPlug() const;
 
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	CompoundObjectPlug *resolvedRowsPlug();
+	const CompoundObjectPlug *resolvedRowsPlug() const;
 
-			private :
+	IntPlug *activeRowIndexPlug();
+	const IntPlug *activeRowIndexPlug() const;
 
-				CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug = false, Plug::Direction direction = Plug::In );
-				friend class Spreadsheet;
+	/// Returns the input plug which provides the value
+	/// for `output` in the current context.
+	ValuePlug *activeInPlug( const ValuePlug *output );
+	const ValuePlug *activeInPlug( const ValuePlug *output ) const;
 
-		};
+	/// DependencyNode methods
+	/// ======================
 
-		IE_CORE_DECLAREPTR( CellPlug );
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
+	BoolPlug *enabledPlug() override;
+	const BoolPlug *enabledPlug() const override;
+	Plug *correspondingInput( const Plug *output ) override;
+	const Plug *correspondingInput( const Plug *output ) const override;
 
-		/// Plug accessors
-		/// ==============
+protected:
 
-		StringPlug *selectorPlug();
-		const StringPlug *selectorPlug() const;
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-		RowsPlug *rowsPlug();
-		const RowsPlug *rowsPlug() const;
+private:
 
-		ValuePlug *outPlug();
-		const ValuePlug *outPlug() const;
+	ObjectPlug *rowsMapPlug();
+	const ObjectPlug *rowsMapPlug() const;
 
-		StringVectorDataPlug *enabledRowNamesPlug();
-		const StringVectorDataPlug *enabledRowNamesPlug() const;
+	const ValuePlug *correspondingInput( const Plug *output, size_t rowIndex ) const;
 
-		CompoundObjectPlug *resolvedRowsPlug();
-		const CompoundObjectPlug *resolvedRowsPlug() const;
-
-		IntPlug *activeRowIndexPlug();
-		const IntPlug *activeRowIndexPlug() const;
-
-		/// Returns the input plug which provides the value
-		/// for `output` in the current context.
-		ValuePlug *activeInPlug( const ValuePlug *output );
-		const ValuePlug *activeInPlug( const ValuePlug *output ) const;
-
-		/// DependencyNode methods
-		/// ======================
-
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
-		BoolPlug *enabledPlug() override;
-		const BoolPlug *enabledPlug() const override;
-		Plug *correspondingInput( const Plug *output ) override;
-		const Plug *correspondingInput( const Plug *output ) const override;
-
-	protected :
-
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
-
-	private :
-
-		ObjectPlug *rowsMapPlug();
-		const ObjectPlug *rowsMapPlug() const;
-
-		const ValuePlug *correspondingInput( const Plug *output, size_t rowIndex ) const;
-
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Spreadsheet )

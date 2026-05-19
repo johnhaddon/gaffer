@@ -124,26 +124,26 @@ GAFFERSCENE_API IECore::MurmurHash matchingPathsHash( const IECore::PathMatcher 
 ///
 /// };
 /// ```
-template <class ThreadableFunctor>
+template<class ThreadableFunctor>
 void parallelProcessLocations( const GafferScene::ScenePlug *scene, ThreadableFunctor &f, const ScenePlug::ScenePath &root = ScenePlug::ScenePath() );
 
 /// Calls a functor on all locations in the scene. This differs from `parallelProcessLocations()` in that a single instance
 /// of the functor is used for all locations.
 /// The functor must take `( const ScenePlug *, const ScenePlug::ScenePath & )`, and can return false to prune traversal.
-template <class ThreadableFunctor>
+template<class ThreadableFunctor>
 void parallelTraverse( const ScenePlug *scene, ThreadableFunctor &f, const ScenePlug::ScenePath &root = ScenePlug::ScenePath() );
 
 /// As for `parallelTraverse()`, but only calling the functor for locations matched by the filter.
-template <class ThreadableFunctor>
+template<class ThreadableFunctor>
 void filteredParallelTraverse( const ScenePlug *scene, const FilterPlug *filterPlug, ThreadableFunctor &f, const ScenePlug::ScenePath &root = ScenePlug::ScenePath() );
 /// As above, but using a PathMatcher as a filter.
-template <class ThreadableFunctor>
+template<class ThreadableFunctor>
 void filteredParallelTraverse( const ScenePlug *scene, const IECore::PathMatcher &filter, ThreadableFunctor &f, const ScenePlug::ScenePath &root = ScenePlug::ScenePath() );
 
 /// Calls `locationFunctor` in parallel for all locations in the scene, passing the results
 /// serially to `gatherFunctor`. Parent locations are guaranteed to be passed to `gatherFunctor`
 /// before their children, but otherwise the order of execution is unspecified.
-template <class LocationFunctor, class GatherFunctor>
+template<class LocationFunctor, class GatherFunctor>
 void parallelGatherLocations(
 	const ScenePlug *scene,
 	LocationFunctor &&locationFunctor, // Signature : T locationFunctor( const ScenePlug *scene, const ScenePath &path )
@@ -153,10 +153,10 @@ void parallelGatherLocations(
 
 /// Calls `locationFunctor` in parallel for all locations in the scene, merging all results
 /// using `reduceFunctor`.
-template <typename T, typename LocationFunctor, typename ReduceFunctor>
+template<typename T, typename LocationFunctor, typename ReduceFunctor>
 T parallelReduceLocations(
 	const ScenePlug *scene,
-	const T& identity,
+	const T &identity,
 	LocationFunctor &&locationFunctor, // Signature : T locationFunctor( const ScenePlug *scene, const ScenePath &path )
 	ReduceFunctor &&reduceFunctor, // Signature : void reduceFunctor( T &result, const T &other )
 	const ScenePlug::ScenePath &root = ScenePlug::ScenePath()
@@ -164,10 +164,10 @@ T parallelReduceLocations(
 
 /// Calls `locationFunctor` in parallel for all locations in the scene. The results from sibling locations
 /// are merged using `reduceFunctor`, and results from children are merged using `mergeChildrenFunctor`.
-template <typename T, typename LocationFunctor, typename MergeChildrenFunctor, typename ReduceFunctor>
+template<typename T, typename LocationFunctor, typename MergeChildrenFunctor, typename ReduceFunctor>
 T parallelReduceLocations(
 	const ScenePlug *scene,
-	const T& identity,
+	const T &identity,
 	LocationFunctor &&locationFunctor, // Signature : T locationFunctor( const ScenePlug *scene, const ScenePath &path )
 	MergeChildrenFunctor &&mergeChildrenFunctor, // Signature : void mergeChildrenFunctor( T &result, const T &childrenResult )
 	ReduceFunctor &&reduceFunctor, // Signature : void reduceFunctor( T &result, const T &sibling )
@@ -241,7 +241,7 @@ struct AttributeHistory : public History
 	AttributeHistory(
 		const ScenePlugPtr &scene, const Gaffer::ContextPtr &context,
 		const IECore::InternedString &attributeName, const IECore::ConstObjectPtr &attributeValue
-	) :	History( scene, context ), attributeName( attributeName ), attributeValue( attributeValue ) {}
+	) : History( scene, context ), attributeName( attributeName ), attributeValue( attributeValue ) {}
 	IECore::InternedString attributeName;
 	IECore::ConstObjectPtr attributeValue;
 };
@@ -264,7 +264,7 @@ struct OptionHistory : public History
 	OptionHistory(
 		const ScenePlugPtr &scene, const Gaffer::ContextPtr &context,
 		const IECore::InternedString &optionName, const IECore::ConstObjectPtr &optionValue
-	) :	History( scene, context ), optionName( optionName ), optionValue( optionValue ) {}
+	) : History( scene, context ), optionName( optionName ), optionValue( optionValue ) {}
 	IECore::InternedString optionName;
 	IECore::ConstObjectPtr optionValue;
 };
@@ -283,7 +283,7 @@ struct PrimitiveVariableHistory : public History
 	PrimitiveVariableHistory(
 		const ScenePlugPtr &scene, const Gaffer::ContextPtr &context,
 		const IECore::InternedString &primitiveVariableName, const IECoreScene::PrimitiveVariable &primitiveVariableValue
-	) :	History( scene, context ), primitiveVariableName( primitiveVariableName ), primitiveVariableValue( primitiveVariableValue ) {}
+	) : History( scene, context ), primitiveVariableName( primitiveVariableName ), primitiveVariableValue( primitiveVariableValue ) {}
 	IECore::InternedString primitiveVariableName;
 	IECoreScene::PrimitiveVariable primitiveVariableValue;
 };
@@ -389,7 +389,7 @@ GAFFERSCENE_API void validateName( IECore::InternedString name );
 
 /// Function to return a SceneProcessor used to adapt the
 /// scene for rendering.
-using RenderAdaptor = std::function<SceneProcessorPtr ()>;
+using RenderAdaptor = std::function<SceneProcessorPtr()>;
 /// Registers an adaptor to be applied when `client` renders using `renderer`. Standard
 /// wildcards may be used to match multiple clients and/or renderers.
 GAFFERSCENE_API void registerRenderAdaptor( const std::string &name, RenderAdaptor adaptor, const std::string &client, const std::string &renderer );

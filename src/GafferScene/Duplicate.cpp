@@ -53,105 +53,102 @@ using namespace GafferScene;
 class Duplicate::DuplicatesData : public IECore::Data
 {
 
-	public :
+public:
 
-		DuplicatesData( const Duplicate *node, const Context *context )
+	DuplicatesData( const Duplicate *node, const Context *context )
+	{
+		const ScenePath &source = context->get<ScenePath>( ScenePlug::scenePathContextName );
+
+		// The names of the duplicates are composed of a stem and possibly a
+		// numeric suffix.
+
+		std::string stem;
+		int suffix;
+
+		const std::string name = node->namePlug()->getValue();
+		const int copies = node->copiesPlug()->getValue();
+
+		if( name.size() )
 		{
-			const ScenePath &source = context->get<ScenePath>( ScenePlug::scenePathContextName );
-
-			// The names of the duplicates are composed of a stem and possibly a
-			// numeric suffix.
-
-			std::string stem;
-			int suffix;
-
-			const std::string name = node->namePlug()->getValue();
-			const int copies = node->copiesPlug()->getValue();
-
-			if( name.size() )
-			{
-				const int nameSuffix = StringAlgo::numericSuffix( name, &stem );
-				suffix = copies == 1 ? nameSuffix : max( nameSuffix, 1 );
-			}
-			else if( !source.size() )
-			{
-				stem = "root";
-				suffix = 1;
-			}
-			else
-			{
-				// No explicit name provided. Derive stem and suffix from source.
-				suffix = StringAlgo::numericSuffix( source.back(), 0, &stem );
-				suffix++;
-			}
-
-			// Generate names, and at the same time, the transforms associated with them.
-
-			m_names = new InternedStringVectorData;
-			std::vector<InternedString> &names = m_names->writable();
-			names.reserve( copies );
-
-			const Imath::M44f matrix = node->transformPlug()->matrix();
-
-			if( suffix == -1 )
-			{
-				assert( copies == 1 );
-				names.push_back( stem );
-				m_transforms[stem] = matrix;
-			}
-			else
-			{
-				Imath::M44f m = matrix;
-				for( int i = 0; i < copies; ++i )
-				{
-					InternedString name = stem + std::to_string( suffix++ );
-					names.push_back( name );
-					m_transforms[name] = m;
-					m = m * matrix;
-				}
-			}
+			const int nameSuffix = StringAlgo::numericSuffix( name, &stem );
+			suffix = copies == 1 ? nameSuffix : max( nameSuffix, 1 );
+		}
+		else if( !source.size() )
+		{
+			stem = "root";
+			suffix = 1;
+		}
+		else
+		{
+			// No explicit name provided. Derive stem and suffix from source.
+			suffix = StringAlgo::numericSuffix( source.back(), 0, &stem );
+			suffix++;
 		}
 
-		static bool affectedBy( const Duplicate *node, const Plug *input )
-		{
-			return
-				input == node->copiesPlug() ||
-				input == node->namePlug() ||
-				node->transformPlug()->isAncestorOf( input )
-			;
-		}
+		// Generate names, and at the same time, the transforms associated with them.
 
-		static void hash( const Duplicate *node, const Context *context, IECore::MurmurHash &h )
+		m_names = new InternedStringVectorData;
+		std::vector<InternedString> &names = m_names->writable();
+		names.reserve( copies );
+
+		const Imath::M44f matrix = node->transformPlug()->matrix();
+
+		if( suffix == -1 )
 		{
-			node->copiesPlug()->hash( h );
-			node->namePlug()->hash( h );
-			const ScenePath &source = context->get<ScenePath>( ScenePlug::scenePathContextName );
-			if( !source.size() )
+			assert( copies == 1 );
+			names.push_back( stem );
+			m_transforms[stem] = matrix;
+		}
+		else
+		{
+			Imath::M44f m = matrix;
+			for( int i = 0; i < copies; ++i )
 			{
-				h.append( false );
+				InternedString name = stem + std::to_string( suffix++ );
+				names.push_back( name );
+				m_transforms[name] = m;
+				m = m * matrix;
 			}
-			else
-			{
-				h.append( source.back() );
-			}
-			node->transformPlug()->hash( h );
 		}
+	}
 
-		ConstInternedStringVectorDataPtr names() const
+	static bool affectedBy( const Duplicate *node, const Plug *input )
+	{
+		return input == node->copiesPlug() ||
+			input == node->namePlug() ||
+			node->transformPlug()->isAncestorOf( input );
+	}
+
+	static void hash( const Duplicate *node, const Context *context, IECore::MurmurHash &h )
+	{
+		node->copiesPlug()->hash( h );
+		node->namePlug()->hash( h );
+		const ScenePath &source = context->get<ScenePath>( ScenePlug::scenePathContextName );
+		if( !source.size() )
 		{
-			return m_names;
+			h.append( false );
 		}
-
-		const Imath::M44f &transform( const IECore::InternedString &name ) const
+		else
 		{
-			return m_transforms.at( name );
+			h.append( source.back() );
 		}
+		node->transformPlug()->hash( h );
+	}
 
-	private :
+	ConstInternedStringVectorDataPtr names() const
+	{
+		return m_names;
+	}
 
-		InternedStringVectorDataPtr m_names;
-		unordered_map<InternedString, Imath::M44f> m_transforms;
+	const Imath::M44f &transform( const IECore::InternedString &name ) const
+	{
+		return m_transforms.at( name );
+	}
 
+private:
+
+	InternedStringVectorDataPtr m_names;
+	unordered_map<InternedString, Imath::M44f> m_transforms;
 };
 
 GAFFER_NODE_DEFINE_TYPE( Duplicate );
@@ -159,7 +156,7 @@ GAFFER_NODE_DEFINE_TYPE( Duplicate );
 size_t Duplicate::g_firstPlugIndex = 0;
 
 Duplicate::Duplicate( const std::string &name )
-	:	BranchCreator( name )
+	: BranchCreator( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -288,10 +285,8 @@ Imath::Box3f Duplicate::computeBranchBound( const ScenePath &sourcePath, const S
 
 bool Duplicate::affectsBranchTransform( const Gaffer::Plug *input ) const
 {
-	return
-		input == inPlug()->transformPlug() ||
-		input == duplicatesPlug()
-	;
+	return input == inPlug()->transformPlug() ||
+		input == duplicatesPlug();
 }
 
 void Duplicate::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -421,10 +416,8 @@ IECore::ConstInternedStringVectorDataPtr Duplicate::computeBranchSetNames( const
 
 bool Duplicate::affectsBranchSet( const Gaffer::Plug *input ) const
 {
-	return
-		input == inPlug()->setPlug() ||
-		input == duplicatesPlug()
-	;
+	return input == inPlug()->setPlug() ||
+		input == duplicatesPlug();
 }
 
 void Duplicate::hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const

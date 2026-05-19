@@ -49,7 +49,7 @@ Monitor::~Monitor()
 }
 
 Monitor::Scope::Scope( const MonitorPtr &monitor, bool active )
-	:	ThreadState::Scope( (bool)monitor )
+	: ThreadState::Scope( (bool)monitor )
 {
 	if( !m_threadState )
 	{
@@ -72,7 +72,7 @@ Monitor::Scope::Scope( const MonitorPtr &monitor, bool active )
 }
 
 Monitor::Scope::Scope( const MonitorSet &monitors, bool active )
-	:	ThreadState::Scope( !monitors.empty() )
+	: ThreadState::Scope( !monitors.empty() )
 {
 	if( !m_threadState )
 	{

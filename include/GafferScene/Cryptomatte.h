@@ -49,77 +49,80 @@ namespace GafferScene
 class GAFFERSCENE_API Cryptomatte : public GafferImage::FlatImageProcessor
 {
 
-	public:
-		explicit Cryptomatte(const std::string &name = defaultName<Cryptomatte>());
-		~Cryptomatte() override;
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION(GafferScene::Cryptomatte, CryptomatteTypeId, GafferImage::FlatImageProcessor);
+	explicit Cryptomatte( const std::string &name = defaultName<Cryptomatte>() );
+	~Cryptomatte() override;
 
-		enum class ManifestSource
-		{
-			None = 0,
-			Metadata,
-			Sidecar,
-		};
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::Cryptomatte, CryptomatteTypeId, GafferImage::FlatImageProcessor );
 
-		//! @name Plug Accessors
-		/// Returns a pointer to the node's plugs.
-		//////////////////////////////////////////////////////////////
-		//@{
-		Gaffer::StringPlug *layerPlug();
-		const Gaffer::StringPlug *layerPlug() const;
+	enum class ManifestSource
+	{
+		None = 0,
+		Metadata,
+		Sidecar,
+	};
 
-		Gaffer::IntPlug *manifestSourcePlug();
-		const Gaffer::IntPlug *manifestSourcePlug() const;
+	//! @name Plug Accessors
+	/// Returns a pointer to the node's plugs.
+	//////////////////////////////////////////////////////////////
+	//@{
+	Gaffer::StringPlug *layerPlug();
+	const Gaffer::StringPlug *layerPlug() const;
 
-		Gaffer::StringPlug *manifestDirectoryPlug();
-		const Gaffer::StringPlug *manifestDirectoryPlug() const;
+	Gaffer::IntPlug *manifestSourcePlug();
+	const Gaffer::IntPlug *manifestSourcePlug() const;
 
-		Gaffer::StringPlug *sidecarFilePlug();
-		const Gaffer::StringPlug *sidecarFilePlug() const;
+	Gaffer::StringPlug *manifestDirectoryPlug();
+	const Gaffer::StringPlug *manifestDirectoryPlug() const;
 
-		Gaffer::StringVectorDataPlug *matteNamesPlug();
-		const Gaffer::StringVectorDataPlug *matteNamesPlug() const;
+	Gaffer::StringPlug *sidecarFilePlug();
+	const Gaffer::StringPlug *sidecarFilePlug() const;
 
-		Gaffer::StringPlug *outputChannelPlug();
-		const Gaffer::StringPlug *outputChannelPlug() const;
-		//@}
+	Gaffer::StringVectorDataPlug *matteNamesPlug();
+	const Gaffer::StringVectorDataPlug *matteNamesPlug() const;
 
-		void affects(const Gaffer::Plug *input, AffectedPlugsContainer &outputs) const override;
+	Gaffer::StringPlug *outputChannelPlug();
+	const Gaffer::StringPlug *outputChannelPlug() const;
+	//@}
 
-	protected:
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute(Gaffer::ValuePlug *output, const Gaffer::Context *context) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+protected:
 
-		void hashChannelNames(const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames(const Gaffer::Context *context, const GafferImage::ImagePlug *parent) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-		void hashChannelData(const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData(const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent) const override;
+	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
 
-	private:
-		Gaffer::FloatVectorDataPlug *matteValuesPlug();
-		const Gaffer::FloatVectorDataPlug *matteValuesPlug() const;
+	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
 
-		Gaffer::AtomicCompoundDataPlug *manifestPlug();
-		const Gaffer::AtomicCompoundDataPlug *manifestPlug() const;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
 
-		Gaffer::PathMatcherDataPlug *manifestPathDataPlug();
-		const Gaffer::PathMatcherDataPlug *manifestPathDataPlug() const;
+private:
 
-		GafferScene::ScenePlug *manifestScenePlug();
-		const GafferScene::ScenePlug *manifestScenePlug() const;
+	Gaffer::FloatVectorDataPlug *matteValuesPlug();
+	const Gaffer::FloatVectorDataPlug *matteValuesPlug() const;
 
-		Gaffer::FloatVectorDataPlug *matteChannelDataPlug();
-		const Gaffer::FloatVectorDataPlug *matteChannelDataPlug() const;
+	Gaffer::AtomicCompoundDataPlug *manifestPlug();
+	const Gaffer::AtomicCompoundDataPlug *manifestPlug() const;
 
-		static size_t g_firstPlugIndex;
+	Gaffer::PathMatcherDataPlug *manifestPathDataPlug();
+	const Gaffer::PathMatcherDataPlug *manifestPathDataPlug() const;
+
+	GafferScene::ScenePlug *manifestScenePlug();
+	const GafferScene::ScenePlug *manifestScenePlug() const;
+
+	Gaffer::FloatVectorDataPlug *matteChannelDataPlug();
+	const Gaffer::FloatVectorDataPlug *matteChannelDataPlug() const;
+
+	static size_t g_firstPlugIndex;
 };
 
-IE_CORE_DECLAREPTR(Cryptomatte);
+IE_CORE_DECLAREPTR( Cryptomatte );
 
 } // namespace GafferScene

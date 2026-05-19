@@ -71,23 +71,21 @@ template<typename T>
 class ConverterDescription
 {
 
-	public :
+public:
 
-		/// Type-specific conversion functions.
-		using TypedObjectSamples = IECoreScenePreview::Renderer::Samples<const T *>;
-		using TypedConverter = AtNode *(*)( const TypedObjectSamples &, float, float, AtUniverse *, const std::string &, const AtNode *, const std::string & );
+	/// Type-specific conversion functions.
+	using TypedObjectSamples = IECoreScenePreview::Renderer::Samples<const T *>;
+	using TypedConverter = AtNode *(*)( const TypedObjectSamples &, float, float, AtUniverse *, const std::string &, const AtNode *, const std::string & );
 
-		ConverterDescription( TypedConverter converter )
-		{
-			registerConverter(
-				T::staticTypeId(),
-				[converter] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parent, const std::string &messageContext )
-				{
-					return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), motionStart, motionEnd, universe, nodeName, parent, messageContext );
-				}
-			);
-		}
-
+	ConverterDescription( TypedConverter converter )
+	{
+		registerConverter(
+			T::staticTypeId(),
+			[converter]( const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parent, const std::string &messageContext ) {
+				return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), motionStart, motionEnd, universe, nodeName, parent, messageContext );
+			}
+		);
+	}
 };
 
 } // namespace NodeAlgo

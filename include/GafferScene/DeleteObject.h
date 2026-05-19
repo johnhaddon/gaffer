@@ -44,30 +44,29 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteObject : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		explicit DeleteObject( const std::string &name=defaultName<DeleteObject>() );
-		~DeleteObject() override;
+	explicit DeleteObject( const std::string &name = defaultName<DeleteObject>() );
+	~DeleteObject() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteObject, DeleteObjectTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteObject, DeleteObjectTypeId, FilteredSceneProcessor );
 
-		Gaffer::BoolPlug *adjustBoundsPlug();
-		const Gaffer::BoolPlug *adjustBoundsPlug() const;
+	Gaffer::BoolPlug *adjustBoundsPlug();
+	const Gaffer::BoolPlug *adjustBoundsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteObject )

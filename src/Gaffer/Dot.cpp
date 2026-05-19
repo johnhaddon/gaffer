@@ -52,7 +52,7 @@ static InternedString g_sectionName( "noduleLayout:section" );
 size_t Dot::g_firstPlugIndex = 0;
 
 Dot::Dot( const std::string &name )
-	:	DependencyNode( name )
+	: DependencyNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "labelType", Plug::In, None, None, Custom ) );
@@ -78,8 +78,8 @@ void Dot::setup( const Plug *plug )
 	Gaffer::PlugPtr in = plug->createCounterpart( g_inPlugName, Plug::In );
 	Gaffer::PlugPtr out = plug->createCounterpart( g_outPlugName, Plug::Out );
 
-	MetadataAlgo::copyColors( originalPlug , in.get() , /* overwrite = */ false );
-	MetadataAlgo::copyColors( originalPlug , out.get() , /* overwrite = */ false );
+	MetadataAlgo::copyColors( originalPlug, in.get(), /* overwrite = */ false );
+	MetadataAlgo::copyColors( originalPlug, out.get(), /* overwrite = */ false );
 
 	in->setFlags( Plug::Serialisable, true );
 	out->setFlags( Plug::Serialisable, true );

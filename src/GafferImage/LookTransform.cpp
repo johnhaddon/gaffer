@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( LookTransform );
 size_t LookTransform::g_firstPlugIndex = 0;
 
 LookTransform::LookTransform( const std::string &name )
-		:   OpenColorIOTransform( name, true )
+	: OpenColorIOTransform( name, true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "look" ) );

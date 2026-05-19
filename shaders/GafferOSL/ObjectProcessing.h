@@ -110,7 +110,7 @@ closure color outColor( string name, color value )
 
 // Custom closure used by ShadingEngine to detect shaders that will
 // deform an object.
-closure color deformation( string name ) [[ int builtin = 1 ]];
+closure color deformation( string name )[[int builtin = 1]];
 
 closure color outPoint( string name, point value )
 {

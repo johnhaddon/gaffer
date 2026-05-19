@@ -81,75 +81,72 @@ struct Dependencies : public IECore::RefCounted
 class TestProcess : public Process
 {
 
-	public :
+public:
 
-		TestProcess( const Plug *plug, int result, const Dependencies::ConstPtr &dependencies )
-			:	Process( g_staticType, plug, plug ), m_result( result ), m_dependencies( dependencies )
-		{
-		}
+	TestProcess( const Plug *plug, int result, const Dependencies::ConstPtr &dependencies )
+		: Process( g_staticType, plug, plug ), m_result( result ), m_dependencies( dependencies )
+	{
+	}
 
-		using ResultType = int;
+	using ResultType = int;
 
-		ResultType run() const
-		{
-			const ThreadState &threadState = ThreadState::current();
-			tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	ResultType run() const
+	{
+		const ThreadState &threadState = ThreadState::current();
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
-			tbb::parallel_for_each(
+		tbb::parallel_for_each(
 
-				m_dependencies->map.begin(), m_dependencies->map.end(),
+			m_dependencies->map.begin(), m_dependencies->map.end(),
 
-				[&] ( const Dependencies::Map::value_type &dependency ) {
+			[&]( const Dependencies::Map::value_type &dependency ) {
+				ThreadState::Scope scope( threadState );
+				const int expectedResult = dependency.first;
 
-					ThreadState::Scope scope( threadState );
-					const int expectedResult = dependency.first;
+				const Plug *p = plug();
+				if( const Plug *input = p->getInput() )
+				{
+					// Compute the dependencies using the plug's input if it
+					// has one, otherwise using this plug. The only reason
+					// for using an input is get more fine-grained information
+					// from the Monitors used in the unit tests (because they
+					// capture statistics per plug).
+					p = input;
+				}
 
-					const Plug *p = plug();
-					if( const Plug *input = p->getInput() )
-					{
-						// Compute the dependencies using the plug's input if it
-						// has one, otherwise using this plug. The only reason
-						// for using an input is get more fine-grained information
-						// from the Monitors used in the unit tests (because they
-						// capture statistics per plug).
-						p = input;
-					}
+				int actualResult;
+				if( expectedResult >= 0 )
+				{
+					actualResult = Process::acquireCollaborativeResult<TestProcess>( expectedResult, p, expectedResult, dependency.second );
+				}
+				else
+				{
+					actualResult = TestProcess( p, expectedResult, dependency.second ).run();
+				}
+				GAFFERTEST_ASSERTEQUAL( actualResult, expectedResult );
+			},
 
-					int actualResult;
-					if( expectedResult >= 0 )
-					{
-						actualResult = Process::acquireCollaborativeResult<TestProcess>( expectedResult, p, expectedResult, dependency.second );
-					}
-					else
-					{
-						actualResult = TestProcess( p, expectedResult, dependency.second ).run();
-					}
-					GAFFERTEST_ASSERTEQUAL( actualResult, expectedResult );
+			taskGroupContext
 
-				},
+		);
 
-				taskGroupContext
+		return m_result;
+	}
 
-			);
+	using CacheType = IECorePreview::LRUCache<int, int, IECorePreview::LRUCachePolicy::Parallel>;
+	static CacheType g_cache;
 
-			return m_result;
-		}
+	static size_t cacheCostFunction( int value )
+	{
+		return 1;
+	}
 
-		using CacheType = IECorePreview::LRUCache<int, int, IECorePreview::LRUCachePolicy::Parallel>;
-		static CacheType g_cache;
+private:
 
-		static size_t cacheCostFunction( int value )
-		{
-			return 1;
-		}
+	const int m_result;
+	const Dependencies::ConstPtr m_dependencies;
 
-	private :
-
-		const int m_result;
-		const Dependencies::ConstPtr m_dependencies;
-
-		static const IECore::InternedString g_staticType;
-
+	static const IECore::InternedString g_staticType;
 };
 
 TestProcess::CacheType TestProcess::g_cache( TestProcess::CacheType::GetterFunction(), 100000 );

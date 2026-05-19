@@ -80,7 +80,6 @@ void GafferSceneModule::bindAttributes()
 			.value( "Color", AttributeVisualiser::Color )
 			.value( "FalseColor", AttributeVisualiser::FalseColor )
 			.value( "Random", AttributeVisualiser::Random )
-			.value( "ShaderNodeColor", AttributeVisualiser::ShaderNodeColor )
-		;
+			.value( "ShaderNodeColor", AttributeVisualiser::ShaderNodeColor );
 	}
 }

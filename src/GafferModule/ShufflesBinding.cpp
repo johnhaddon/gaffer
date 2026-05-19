@@ -82,12 +82,12 @@ CompoundDataPtr shuffleCompoundDataWithExtraSources( const ShufflesPlug &shuffle
 
 class ShufflePlugSerialiser : public ValuePlugSerialiser
 {
-	public :
+public:
 
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
-		{
-			return false;
-		}
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		return false;
+	}
 };
 
 } // namespace
@@ -114,8 +114,7 @@ void GafferModule::bindShuffles()
 					arg_( "replaceDestination" ) = true
 				)
 			)
-		)
-	;
+		);
 
 	Serialisation::registerSerialiser( ShufflePlug::staticTypeId(), new ShufflePlugSerialiser );
 
@@ -132,7 +131,5 @@ void GafferModule::bindShuffles()
 		.def( "shuffle", &shuffleCompoundObject, ( arg( "sourceContainer" ), arg( "ignoreMissingSource" ) = true ) )
 		.def( "shuffle", &shuffleCompoundData, ( arg( "sourceContainer" ), arg( "ignoreMissingSource" ) = true ) )
 		.def( "shuffleWithExtraSources", &shuffleCompoundObjectWithExtraSources, ( arg( "sourceContainer" ), arg( "extraSources" ), arg( "ignoreMissingSource" ) = true ) )
-		.def( "shuffleWithExtraSources", &shuffleCompoundDataWithExtraSources, ( arg( "sourceContainer" ), arg( "extraSources" ), arg( "ignoreMissingSource" ) = true ) )
-	;
-
+		.def( "shuffleWithExtraSources", &shuffleCompoundDataWithExtraSources, ( arg( "sourceContainer" ), arg( "extraSources" ), arg( "ignoreMissingSource" ) = true ) );
 }

@@ -49,7 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( Parameters );
 size_t Parameters::g_firstPlugIndex = 0;
 
 Parameters::Parameters( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "parameters" ) );
@@ -71,10 +71,8 @@ const Gaffer::CompoundDataPlug *Parameters::parametersPlug() const
 
 bool Parameters::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
-		parametersPlug()->isAncestorOf( input )
-	;
+	return ObjectProcessor::affectsProcessedObject( input ) ||
+		parametersPlug()->isAncestorOf( input );
 }
 
 void Parameters::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const

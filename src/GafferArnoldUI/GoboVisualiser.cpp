@@ -81,10 +81,10 @@ IECoreGL::RenderablePtr quadWireframe( const V2f &size )
 	vector<V3f> &p = pData->writable();
 
 	vertsPerCurve.push_back( 4 );
-	p.push_back( V3f( -size.x/2, -size.y/2, 0  ) );
-	p.push_back( V3f( size.x/2, -size.y/2, 0  ) );
-	p.push_back( V3f( size.x/2, size.y/2, 0  ) );
-	p.push_back( V3f( -size.x/2, size.y/2, 0  ) );
+	p.push_back( V3f( -size.x / 2, -size.y / 2, 0 ) );
+	p.push_back( V3f( size.x / 2, -size.y / 2, 0 ) );
+	p.push_back( V3f( size.x / 2, size.y / 2, 0 ) );
+	p.push_back( V3f( -size.x / 2, size.y / 2, 0 ) );
 
 	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
 	curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
@@ -113,12 +113,12 @@ struct OSLTextureCacheGetterKey
 {
 
 	OSLTextureCacheGetterKey()
-		:	shaderNetwork( nullptr ), resolution( 512 )
+		: shaderNetwork( nullptr ), resolution( 512 )
 	{
 	}
 
 	OSLTextureCacheGetterKey( const IECoreScene::ShaderNetwork::Parameter &out, const IECoreScene::ShaderNetwork *shaderNetwork, int resolution )
-		:	output( out ), shaderNetwork( shaderNetwork ), resolution( resolution )
+		: output( out ), shaderNetwork( shaderNetwork ), resolution( resolution )
 	{
 		shaderNetwork->hash( hash );
 		hash.append( resolution );
@@ -126,7 +126,7 @@ struct OSLTextureCacheGetterKey
 		hash.append( output.name );
 	}
 
-	operator const IECore::MurmurHash & () const
+	operator const IECore::MurmurHash &() const
 	{
 		return hash;
 	}
@@ -135,7 +135,6 @@ struct OSLTextureCacheGetterKey
 	const IECoreScene::ShaderNetwork *shaderNetwork;
 	int resolution;
 	MurmurHash hash;
-
 };
 
 CompoundDataPtr getter( const OSLTextureCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller )
@@ -155,49 +154,44 @@ OSLTextureCache g_oslTextureCache( getter, 1024 * 1024 * 64 );
 
 const char *texturedFragSource()
 {
-	return
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"in vec2 fragmentuv;"
-		""
-		"uniform sampler2D texture;"
-		""
-		"void main()"
-		"{"
-			"gl_FragColor = texture2D( texture, fragmentuv );"
-		"}"
-	;
+	return "#if __VERSION__ <= 120\n"
+		   "#define in varying\n"
+		   "#endif\n"
+		   ""
+		   "in vec2 fragmentuv;"
+		   ""
+		   "uniform sampler2D texture;"
+		   ""
+		   "void main()"
+		   "{"
+		   "gl_FragColor = texture2D( texture, fragmentuv );"
+		   "}";
 }
 
 const char *constantFragSource()
 {
-	return
-		"void main()"
-		"{"
-			"gl_FragColor = vec4( 1.0, 0.835, 0.07, 1 );"
-		"}"
-	;
+	return "void main()"
+		   "{"
+		   "gl_FragColor = vec4( 1.0, 0.835, 0.07, 1 );"
+		   "}";
 }
 
 
 class GoboVisualiser final : public LightFilterVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( GoboVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( GoboVisualiser )
 
-		GoboVisualiser();
-		~GoboVisualiser() override;
+	GoboVisualiser();
+	~GoboVisualiser() override;
 
-		Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	protected :
+protected:
 
-		static LightFilterVisualiser::LightFilterVisualiserDescription<GoboVisualiser> g_visualiserDescription;
-
+	static LightFilterVisualiser::LightFilterVisualiserDescription<GoboVisualiser> g_visualiserDescription;
 };
 
 IE_CORE_DECLAREPTR( GoboVisualiser )

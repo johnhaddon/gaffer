@@ -58,18 +58,18 @@ namespace IECore
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( GafferImage::FormatData, GafferImage::FormatDataTypeId )
 
-template<> GAFFERIMAGE_API
-void FormatData::save( SaveContext *context ) const
+template<>
+GAFFERIMAGE_API void FormatData::save( SaveContext *context ) const
 {
 	Data::save( context );
 
 	IndexedIO *container = context->rawContainer();
-	container->write( "displayWindow", (const int*)&(readable().getDisplayWindow()), 4 );
+	container->write( "displayWindow", (const int *)&( readable().getDisplayWindow() ), 4 );
 	container->write( "pixelAspect", readable().getPixelAspect() );
 }
 
-template<> GAFFERIMAGE_API
-void FormatData::load( LoadContextPtr context )
+template<>
+GAFFERIMAGE_API void FormatData::load( LoadContextPtr context )
 {
 	Data::load( context );
 
@@ -85,8 +85,8 @@ void FormatData::load( LoadContextPtr context )
 	writable().setPixelAspect( pixelAspect );
 }
 
-template<> GAFFERIMAGE_API
-void SimpleDataHolder<GafferImage::Format>::hash( MurmurHash &h ) const
+template<>
+GAFFERIMAGE_API void SimpleDataHolder<GafferImage::Format>::hash( MurmurHash &h ) const
 {
 	const GafferImage::Format &f = readable();
 	h.append( f.getDisplayWindow() );

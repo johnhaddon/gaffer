@@ -425,7 +425,7 @@ Imath::M44f getTransform( const ccl::Transform transform )
 		transform.x.y, transform.y.y, transform.z.y, 0.0f,
 		transform.x.z, transform.y.z, transform.z.z, 0.0f,
 		transform.x.w, transform.y.w, transform.z.w, 1.0f
-		);
+	);
 }
 
 void setSocket( ccl::Node *node, const ccl::SocketType *socket, const IECore::Data *value )
@@ -441,60 +441,60 @@ void setSocket( ccl::Node *node, const ccl::SocketType *socket, const IECore::Da
 
 	switch( socket->type )
 	{
-		case ccl::SocketType::BOOLEAN:
+		case ccl::SocketType::BOOLEAN :
 			setNumericSocket<bool>( node, *socket, value );
 			break;
-		case ccl::SocketType::FLOAT:
+		case ccl::SocketType::FLOAT :
 			setNumericSocket<float>( node, *socket, value );
 			break;
-		case ccl::SocketType::INT:
+		case ccl::SocketType::INT :
 			setNumericSocket<int>( node, *socket, value );
 			break;
-		case ccl::SocketType::UINT:
+		case ccl::SocketType::UINT :
 			setNumericSocket<ccl::uint>( node, *socket, value );
 			break;
-		case ccl::SocketType::COLOR:
-		case ccl::SocketType::VECTOR:
-		case ccl::SocketType::POINT:
-		case ccl::SocketType::NORMAL:
+		case ccl::SocketType::COLOR :
+		case ccl::SocketType::VECTOR :
+		case ccl::SocketType::POINT :
+		case ccl::SocketType::NORMAL :
 			setFloat3Socket( node, *socket, value );
 			break;
-		case ccl::SocketType::POINT2:
+		case ccl::SocketType::POINT2 :
 			setFloat2Socket( node, *socket, value );
 			break;
-		case ccl::SocketType::CLOSURE:
+		case ccl::SocketType::CLOSURE :
 			break;
-		case ccl::SocketType::STRING:
+		case ccl::SocketType::STRING :
 			setStringSocket( node, *socket, value );
 			break;
-		case ccl::SocketType::ENUM:
+		case ccl::SocketType::ENUM :
 			setEnumSocket( node, *socket, value );
 			break;
-		case ccl::SocketType::TRANSFORM:
+		case ccl::SocketType::TRANSFORM :
 			setTransformSocket( node, *socket, value );
 			break;
-		case ccl::SocketType::BOOLEAN_ARRAY:
+		case ccl::SocketType::BOOLEAN_ARRAY :
 			setArraySocket<bool>( node, *socket, value );
 			break;
-		case ccl::SocketType::FLOAT_ARRAY:
+		case ccl::SocketType::FLOAT_ARRAY :
 			setArraySocket<float>( node, *socket, value );
 			break;
-		case ccl::SocketType::INT_ARRAY:
+		case ccl::SocketType::INT_ARRAY :
 			setArraySocket<int>( node, *socket, value );
 			break;
-		case ccl::SocketType::COLOR_ARRAY:
-		case ccl::SocketType::VECTOR_ARRAY:
-		case ccl::SocketType::POINT_ARRAY:
-		case ccl::SocketType::NORMAL_ARRAY:
+		case ccl::SocketType::COLOR_ARRAY :
+		case ccl::SocketType::VECTOR_ARRAY :
+		case ccl::SocketType::POINT_ARRAY :
+		case ccl::SocketType::NORMAL_ARRAY :
 			setFloat3ArraySocket( node, *socket, value );
 			break;
-		case ccl::SocketType::POINT2_ARRAY:
+		case ccl::SocketType::POINT2_ARRAY :
 			setFloat2ArraySocket( node, *socket, value );
 			break;
-		case ccl::SocketType::STRING_ARRAY:
+		case ccl::SocketType::STRING_ARRAY :
 			setArraySocket<ccl::ustring, StringVectorData>( node, *socket, value );
 			break;
-		default:
+		default :
 			IECore::msg(
 				IECore::Msg::Warning, "Cycles::SocketAlgo",
 				fmt::format(
@@ -526,9 +526,9 @@ void setRampSocket( ccl::Node *node, const ccl::SocketType *socket, const IECore
 	IECore::Splineff evaluator = ramp.evaluator();
 
 	ccl::array<float> rampTable( RAMP_TABLE_SIZE );
-	for (int i = 0; i < RAMP_TABLE_SIZE; i++)
+	for( int i = 0; i < RAMP_TABLE_SIZE; i++ )
 	{
-		rampTable[i] = evaluator( (float)i / (float)(RAMP_TABLE_SIZE - 1) );
+		rampTable[i] = evaluator( (float)i / (float)( RAMP_TABLE_SIZE - 1 ) );
 	}
 	node->set( *socket, rampTable );
 }
@@ -538,9 +538,9 @@ void setRampSocket( ccl::Node *node, const ccl::SocketType *socket, const IECore
 	IECore::SplinefColor3f evaluator = ramp.evaluator();
 
 	ccl::array<ccl::float3> rampTable( RAMP_TABLE_SIZE );
-	for (int i = 0; i < RAMP_TABLE_SIZE; i++)
+	for( int i = 0; i < RAMP_TABLE_SIZE; i++ )
 	{
-		Color3f solve = evaluator( (float)i / (float)(RAMP_TABLE_SIZE - 1) );
+		Color3f solve = evaluator( (float)i / (float)( RAMP_TABLE_SIZE - 1 ) );
 		rampTable[i] = ccl::make_float3( solve.x, solve.y, solve.z );
 	}
 	node->set( *socket, rampTable );
@@ -550,112 +550,97 @@ ccl::ParamValue setParamValue( const IECore::InternedString &name, const IECore:
 {
 	switch( value->typeId() )
 	{
-		case BoolDataTypeId :
-			{
-				const BoolData *data = static_cast<const BoolData *>( value );
-				float result = static_cast<float>( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
-			}
-			break;
-		case IntDataTypeId :
-			{
-				const IntData *data = static_cast<const IntData *>( value );
-				float result = static_cast<float>( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
-			}
-			break;
-		case UIntDataTypeId :
-			{
-				const UIntData *data = static_cast<const UIntData *>( value );
-				float result = static_cast<float>( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
-			}
-			break;
-		case DoubleDataTypeId :
-			{
-				const DoubleData *data = static_cast<const DoubleData *>( value );
-				float result = static_cast<float>( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
-			}
-			break;
-		case FloatDataTypeId :
-			{
-				const FloatData *data = static_cast<const FloatData *>( value );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &data->readable() );
-			}
-			break;
-		case Color3fDataTypeId :
-			{
-				const Color3fData *data = static_cast<const Color3fData *>( value );
-				// Need to pad to float4 to prevent an assert in Cycles debug mode
-				const Color3f color = data->readable();
-				const ccl::float4 result = ccl::make_float4( color[0], color[1], color[2], 1.0f );
-				return ccl::ParamValue( name.string(), ccl::TypeRGBA, 1, &result );
-			}
-			break;
-		case Color4fDataTypeId :
-			{
-				const Color4fData *data = static_cast<const Color4fData *>( value );
-				return ccl::ParamValue( name.string(), ccl::TypeRGBA, 1, data->readable().getValue() );
-			}
-			break;
-		case V2fDataTypeId :
-			{
-				const V2fData *data = static_cast<const V2fData *>( value );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat2, 1, data->readable().getValue() );
-			}
-			break;
-		case V2iDataTypeId :
-			{
-				const V2iData *data = static_cast<const V2iData *>( value );
-				const ccl::float2 result = setVector( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat2, 1, &result );
-			}
-			break;
-		case V3fDataTypeId :
-			{
-				const V3fData *data = static_cast<const V3fData *>( value );
-				// Need to pad to float4 to prevent an assert in Cycles debug mode
-				const V3f vec = data->readable();
-				const ccl::float4 result = ccl::make_float4( vec[0], vec[1], vec[2], 1.0f );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat4, 1, &result );
-			}
-			break;
-		case V3iDataTypeId :
-			{
-				const V3iData *data = static_cast<const V3iData *>( value );
-				// Need to pad to float4 to prevent an assert in Cycles debug mode
-				const V3i vec = data->readable();
-				const ccl::float4 result = ccl::make_float4( (float)vec[0], (float)vec[1], (float)vec[2], 1.0f );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat4, 1, &result );
-			}
-			break;
-		case QuatfDataTypeId :
-			{
-				const QuatfData *data = static_cast<const QuatfData *>( value );
-				const ccl::float4 result = setQuaternion( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeFloat4, 1, &result );
-			}
-			break;
-		case M44fDataTypeId :
-			{
-				const M44fData *data = static_cast<const M44fData *>( value );
-				const ccl::Transform result = setTransform( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeMatrix, 1, &result );
-			}
-			break;
-		case M44dDataTypeId :
-			{
-				const M44dData *data = static_cast<const M44dData *>( value );
-				const ccl::Transform result = setTransform( data->readable() );
-				return ccl::ParamValue( name.string(), ccl::TypeMatrix, 1, &result );
-			}
-			break;
-		default :
-			{
-				// A ParamValue that we can test with .data() to see if it's a nullptr.
-				return ccl::ParamValue();
-			}
+		case BoolDataTypeId : {
+			const BoolData *data = static_cast<const BoolData *>( value );
+			float result = static_cast<float>( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
+		}
+		break;
+		case IntDataTypeId : {
+			const IntData *data = static_cast<const IntData *>( value );
+			float result = static_cast<float>( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
+		}
+		break;
+		case UIntDataTypeId : {
+			const UIntData *data = static_cast<const UIntData *>( value );
+			float result = static_cast<float>( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
+		}
+		break;
+		case DoubleDataTypeId : {
+			const DoubleData *data = static_cast<const DoubleData *>( value );
+			float result = static_cast<float>( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &result );
+		}
+		break;
+		case FloatDataTypeId : {
+			const FloatData *data = static_cast<const FloatData *>( value );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat, 1, &data->readable() );
+		}
+		break;
+		case Color3fDataTypeId : {
+			const Color3fData *data = static_cast<const Color3fData *>( value );
+			// Need to pad to float4 to prevent an assert in Cycles debug mode
+			const Color3f color = data->readable();
+			const ccl::float4 result = ccl::make_float4( color[0], color[1], color[2], 1.0f );
+			return ccl::ParamValue( name.string(), ccl::TypeRGBA, 1, &result );
+		}
+		break;
+		case Color4fDataTypeId : {
+			const Color4fData *data = static_cast<const Color4fData *>( value );
+			return ccl::ParamValue( name.string(), ccl::TypeRGBA, 1, data->readable().getValue() );
+		}
+		break;
+		case V2fDataTypeId : {
+			const V2fData *data = static_cast<const V2fData *>( value );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat2, 1, data->readable().getValue() );
+		}
+		break;
+		case V2iDataTypeId : {
+			const V2iData *data = static_cast<const V2iData *>( value );
+			const ccl::float2 result = setVector( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat2, 1, &result );
+		}
+		break;
+		case V3fDataTypeId : {
+			const V3fData *data = static_cast<const V3fData *>( value );
+			// Need to pad to float4 to prevent an assert in Cycles debug mode
+			const V3f vec = data->readable();
+			const ccl::float4 result = ccl::make_float4( vec[0], vec[1], vec[2], 1.0f );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat4, 1, &result );
+		}
+		break;
+		case V3iDataTypeId : {
+			const V3iData *data = static_cast<const V3iData *>( value );
+			// Need to pad to float4 to prevent an assert in Cycles debug mode
+			const V3i vec = data->readable();
+			const ccl::float4 result = ccl::make_float4( (float)vec[0], (float)vec[1], (float)vec[2], 1.0f );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat4, 1, &result );
+		}
+		break;
+		case QuatfDataTypeId : {
+			const QuatfData *data = static_cast<const QuatfData *>( value );
+			const ccl::float4 result = setQuaternion( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeFloat4, 1, &result );
+		}
+		break;
+		case M44fDataTypeId : {
+			const M44fData *data = static_cast<const M44fData *>( value );
+			const ccl::Transform result = setTransform( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeMatrix, 1, &result );
+		}
+		break;
+		case M44dDataTypeId : {
+			const M44dData *data = static_cast<const M44dData *>( value );
+			const ccl::Transform result = setTransform( data->readable() );
+			return ccl::ParamValue( name.string(), ccl::TypeMatrix, 1, &result );
+		}
+		break;
+		default : {
+			// A ParamValue that we can test with .data() to see if it's a nullptr.
+			return ccl::ParamValue();
+		}
 	}
 }
 

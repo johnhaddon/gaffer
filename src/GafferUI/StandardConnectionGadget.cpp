@@ -70,20 +70,18 @@ ConnectionGadget::ConnectionGadgetTypeDescription<StandardConnectionGadget> Stan
 static IECore::InternedString g_colorKey( "connectionGadget:color" );
 
 StandardConnectionGadget::StandardConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule )
-	:	ConnectionGadget( srcNodule, dstNodule ), m_dragEnd( Gaffer::Plug::Invalid ), m_hovering( false ), m_dotPreview( false ), m_dotPreviewLocation( 0 ), m_addingConnection( false )
+	: ConnectionGadget( srcNodule, dstNodule ), m_dragEnd( Gaffer::Plug::Invalid ), m_hovering( false ), m_dotPreview( false ), m_dotPreviewLocation( 0 ), m_addingConnection( false )
 {
 	enterSignal().connect( boost::bind( &StandardConnectionGadget::enter, this, ::_2 ) );
 	mouseMoveSignal().connect( boost::bind( &StandardConnectionGadget::mouseMove, this, ::_2 ) );
 	leaveSignal().connect( boost::bind( &StandardConnectionGadget::leave, this, ::_2 ) );
-	buttonPressSignal().connect( boost::bind( &StandardConnectionGadget::buttonPress, this,  ::_2 ) );
+	buttonPressSignal().connect( boost::bind( &StandardConnectionGadget::buttonPress, this, ::_2 ) );
 	dragBeginSignal().connect( boost::bind( &StandardConnectionGadget::dragBegin, this, ::_2 ) );
 	dragEnterSignal().connect( boost::bind( &StandardConnectionGadget::dragEnter, this, ::_2 ) );
 	dragMoveSignal().connect( boost::bind( &StandardConnectionGadget::dragMove, this, ::_2 ) );
 	dragEndSignal().connect( boost::bind( &StandardConnectionGadget::dragEnd, this, ::_2 ) );
 
-	Metadata::plugValueChangedSignal( dstNodule->plug()->node() ).connect(
-		boost::bind( &StandardConnectionGadget::plugMetadataChanged, this, ::_1, ::_2 )
-	);
+	Metadata::plugValueChangedSignal( dstNodule->plug()->node() ).connect( boost::bind( &StandardConnectionGadget::plugMetadataChanged, this, ::_1, ::_2 ) );
 
 	updateUserColor();
 }
@@ -218,7 +216,8 @@ void StandardConnectionGadget::updateConnectionGeometry()
 
 		if( srcNodule )
 		{
-			m_srcPos = V3f( 0 ) * srcNodule->fullTransform( p );;
+			m_srcPos = V3f( 0 ) * srcNodule->fullTransform( p );
+			;
 			m_srcTangent = srcNodeGadget ? srcNodeGadget->connectionTangent( srcNodule ) : V3f( 0, -1, 0 );
 		}
 		else if( srcNodeGadget )
@@ -255,24 +254,24 @@ bool StandardConnectionGadget::canCreateConnection( const Gaffer::Plug *endpoint
 
 	switch( m_dragEnd )
 	{
-	case Gaffer::Plug::Out :
-		return dstNodule()->plug()->acceptsInput( endpoint );
-	case Gaffer::Plug::In :
-		return endpoint->acceptsInput( srcNodule()->plug() );
-	case Gaffer::Plug::Invalid :
-		return false;
+		case Gaffer::Plug::Out :
+			return dstNodule()->plug()->acceptsInput( endpoint );
+		case Gaffer::Plug::In :
+			return endpoint->acceptsInput( srcNodule()->plug() );
+		case Gaffer::Plug::Invalid :
+			return false;
 	}
 	return false;
 }
 
 void StandardConnectionGadget::updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent )
 {
-	if( m_dragEnd==Gaffer::Plug::Out )
+	if( m_dragEnd == Gaffer::Plug::Out )
 	{
 		m_srcPos = position;
 		m_srcTangent = tangent;
 	}
-	else if( m_dragEnd==Gaffer::Plug::In )
+	else if( m_dragEnd == Gaffer::Plug::In )
 	{
 		m_dstPos = position;
 		m_dstTangent = tangent;
@@ -347,7 +346,7 @@ void StandardConnectionGadget::renderLayer( Layer layer, const Style *style, Ren
 		);
 	}
 
-	if(m_addingConnection)
+	if( m_addingConnection )
 	{
 		style->renderConnection(
 			m_srcPos, m_srcTangent, m_dstPosOrig, m_dstTangentOrig,
@@ -381,7 +380,7 @@ Imath::Box3f StandardConnectionGadget::renderBound() const
 	return r;
 }
 
-Imath::V3f StandardConnectionGadget::closestPoint( const Imath::V3f& p ) const
+Imath::V3f StandardConnectionGadget::closestPoint( const Imath::V3f &p ) const
 {
 	const_cast<StandardConnectionGadget *>( this )->updateConnectionGeometry();
 
@@ -400,10 +399,11 @@ float StandardConnectionGadget::distanceToNodeGadget( const IECore::LineSegment3
 	}
 
 	const M44f relativeTransform = fullTransform() * nodeGadget->fullTransform().inverse();
-	V3f p0 = line.p0 * relativeTransform; p0.z = 0;
+	V3f p0 = line.p0 * relativeTransform;
+	p0.z = 0;
 	const V3f p1 = closestPointOnBox( p0, nodeGadget->bound() );
 
-	return (p0 - p1).length();
+	return ( p0 - p1 ).length();
 }
 
 Gaffer::Plug::Direction StandardConnectionGadget::endAt( const IECore::LineSegment3f &line ) const
@@ -452,14 +452,13 @@ Gaffer::Plug::Direction StandardConnectionGadget::endAt( const IECore::LineSegme
 	}
 
 	return Gaffer::Plug::Invalid;
-
 }
 
 bool StandardConnectionGadget::buttonPress( const ButtonEvent &event )
 {
 	if( m_dotPreview )
 	{
-		if( event.buttons!=ButtonEvent::Left )
+		if( event.buttons != ButtonEvent::Left )
 		{
 			return false;
 		}
@@ -492,7 +491,7 @@ bool StandardConnectionGadget::buttonPress( const ButtonEvent &event )
 	}
 
 	// We have to accept button presses so we can initiate dragging.
-	return event.buttons==ButtonEvent::Left && m_hovering;
+	return event.buttons == ButtonEvent::Left && m_hovering;
 }
 
 IECore::RunTimeTypedPtr StandardConnectionGadget::dragBegin( const DragDropEvent &event )
@@ -650,7 +649,7 @@ bool StandardConnectionGadget::keyPressed( const KeyEvent &event )
 
 bool StandardConnectionGadget::keyReleased( const KeyEvent &event )
 {
-	if( !(event.modifiers & ButtonEvent::Control) )
+	if( !( event.modifiers & ButtonEvent::Control ) )
 	{
 		m_dotPreview = false;
 		dirty( DirtyType::Render );

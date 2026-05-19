@@ -46,7 +46,7 @@
 namespace Gaffer
 {
 class StringPlug;
-}
+} // namespace Gaffer
 
 namespace GafferVDB
 {
@@ -54,48 +54,47 @@ namespace GafferVDB
 class GAFFERVDB_API PointsToLevelSet : public GafferScene::ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit PointsToLevelSet( const std::string &name=defaultName<PointsToLevelSet>() );
-		~PointsToLevelSet() override;
+	explicit PointsToLevelSet( const std::string &name = defaultName<PointsToLevelSet>() );
+	~PointsToLevelSet() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferVDB::PointsToLevelSet, PointsToLevelSetTypeId, GafferScene::ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferVDB::PointsToLevelSet, PointsToLevelSetTypeId, GafferScene::ObjectProcessor );
 
-		Gaffer::StringPlug *widthPlug();
-		const Gaffer::StringPlug *widthPlug() const;
+	Gaffer::StringPlug *widthPlug();
+	const Gaffer::StringPlug *widthPlug() const;
 
-		Gaffer::FloatPlug *widthScalePlug();
-		const Gaffer::FloatPlug *widthScalePlug() const;
+	Gaffer::FloatPlug *widthScalePlug();
+	const Gaffer::FloatPlug *widthScalePlug() const;
 
-		Gaffer::BoolPlug *useVelocityPlug();
-		const Gaffer::BoolPlug *useVelocityPlug() const;
+	Gaffer::BoolPlug *useVelocityPlug();
+	const Gaffer::BoolPlug *useVelocityPlug() const;
 
-		Gaffer::StringPlug *velocityPlug();
-		const Gaffer::StringPlug *velocityPlug() const;
+	Gaffer::StringPlug *velocityPlug();
+	const Gaffer::StringPlug *velocityPlug() const;
 
-		Gaffer::FloatPlug *velocityScalePlug();
-		const Gaffer::FloatPlug *velocityScalePlug() const;
+	Gaffer::FloatPlug *velocityScalePlug();
+	const Gaffer::FloatPlug *velocityScalePlug() const;
 
-		Gaffer::StringPlug *gridPlug();
-		const Gaffer::StringPlug *gridPlug() const;
+	Gaffer::StringPlug *gridPlug();
+	const Gaffer::StringPlug *gridPlug() const;
 
-		Gaffer::FloatPlug *voxelSizePlug();
-		const Gaffer::FloatPlug *voxelSizePlug() const;
+	Gaffer::FloatPlug *voxelSizePlug();
+	const Gaffer::FloatPlug *voxelSizePlug() const;
 
-		Gaffer::FloatPlug *halfBandwidthPlug();
-		const Gaffer::FloatPlug *halfBandwidthPlug() const;
+	Gaffer::FloatPlug *halfBandwidthPlug();
+	const Gaffer::FloatPlug *halfBandwidthPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *plug ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
-		Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
+	bool affectsProcessedObject( const Gaffer::Plug *plug ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( PointsToLevelSet )

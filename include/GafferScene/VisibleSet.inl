@@ -100,19 +100,18 @@ inline VisibleSet::Visibility VisibleSet::visibility( const std::vector<Interned
 		// This path is visible as all its ancestors are expanded
 		result.drawMode = VisibleSet::Visibility::Visible;
 		// If the path is also expanded then it could have visible children
-		result.descendantsVisible |= (bool)(expansions.match( path ) & PathMatcher::ExactMatch);
+		result.descendantsVisible |= (bool)( expansions.match( path ) & PathMatcher::ExactMatch );
 	}
 
 	return result;
-
 }
 
-inline bool VisibleSet::operator == ( const VisibleSet& rhs ) const
+inline bool VisibleSet::operator == ( const VisibleSet &rhs ) const
 {
 	return expansions == rhs.expansions && inclusions == rhs.inclusions && exclusions == rhs.exclusions;
 }
 
-inline bool VisibleSet::operator != ( const VisibleSet& rhs ) const
+inline bool VisibleSet::operator != ( const VisibleSet &rhs ) const
 {
 	return expansions != rhs.expansions || inclusions != rhs.inclusions || exclusions != rhs.exclusions;
 }

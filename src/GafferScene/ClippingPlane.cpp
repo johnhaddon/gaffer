@@ -49,7 +49,7 @@ static IECore::InternedString g_clippingPlanesSetName( "__clippingPlanes" );
 GAFFER_NODE_DEFINE_TYPE( ClippingPlane );
 
 ClippingPlane::ClippingPlane( const std::string &name )
-	:	ObjectSource( name, "clippingPlane" )
+	: ObjectSource( name, "clippingPlane" )
 {
 }
 

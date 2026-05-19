@@ -50,11 +50,11 @@ static PerformanceMonitor::Statistics g_emptyStatistics;
 //////////////////////////////////////////////////////////////////////////
 
 PerformanceMonitor::Statistics::Statistics( size_t hashCount, size_t computeCount, boost::chrono::nanoseconds hashDuration, boost::chrono::nanoseconds computeDuration )
-	:	hashCount( hashCount ), computeCount( computeCount ), hashDuration( hashDuration ), computeDuration( computeDuration )
+	: hashCount( hashCount ), computeCount( computeCount ), hashDuration( hashDuration ), computeDuration( computeDuration )
 {
 }
 
-PerformanceMonitor::Statistics & PerformanceMonitor::Statistics::operator += ( const Statistics &rhs )
+PerformanceMonitor::Statistics &PerformanceMonitor::Statistics::operator += ( const Statistics &rhs )
 {
 	hashCount += rhs.hashCount;
 	computeCount += rhs.computeCount;
@@ -65,12 +65,10 @@ PerformanceMonitor::Statistics & PerformanceMonitor::Statistics::operator += ( c
 
 bool PerformanceMonitor::Statistics::operator == ( const Statistics &rhs )
 {
-	return
-		hashCount == rhs.hashCount &&
+	return hashCount == rhs.hashCount &&
 		computeCount == rhs.computeCount &&
 		hashDuration == rhs.hashDuration &&
-		computeDuration == rhs.computeDuration
-	;
+		computeDuration == rhs.computeDuration;
 }
 
 bool PerformanceMonitor::Statistics::operator != ( const Statistics &rhs )
@@ -127,7 +125,7 @@ void PerformanceMonitor::processStarted( const Process *process )
 	boost::chrono::high_resolution_clock::time_point now = boost::chrono::high_resolution_clock::now();
 	if( !threadData.durationStack.empty() )
 	{
-		*(threadData.durationStack.top()) += now - threadData.then;
+		*( threadData.durationStack.top() ) += now - threadData.then;
 	}
 	threadData.then = now;
 
@@ -154,7 +152,7 @@ void PerformanceMonitor::processFinished( const Process *process )
 
 	ThreadData &threadData = m_threadData.local();
 	boost::chrono::high_resolution_clock::time_point now = boost::chrono::high_resolution_clock::now();
-	*(threadData.durationStack.top()) += now - threadData.then;
+	*( threadData.durationStack.top() ) += now - threadData.then;
 	threadData.durationStack.pop();
 	threadData.then = now;
 }

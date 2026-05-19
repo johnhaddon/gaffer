@@ -53,7 +53,7 @@ const RtUString g_shadowSubset( "shadowSubset" );
 } // namespace
 
 MaterialCache::MaterialCache( Session *session )
-	:	m_session( session )
+	: m_session( session )
 {
 }
 
@@ -112,7 +112,6 @@ ConstDisplacementPtr MaterialCache::getDisplacement( const IECoreScene::ShaderNe
 ConstLightShaderPtr MaterialCache::getLightShader( const IECoreScene::ShaderNetwork *network, const IECoreScene::ShaderNetwork *lightFilter, RtUString shadowSubset )
 {
 	auto convert = [&] {
-
 		std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( network );
 		if( nodes.size() && !shadowSubset.Empty() )
 		{
@@ -125,7 +124,6 @@ ConstLightShaderPtr MaterialCache::getLightShader( const IECoreScene::ShaderNetw
 		}
 		riley::LightShaderId id = m_session->createLightShader( { (uint32_t)nodes.size(), nodes.data() }, { (uint32_t)filterNodes.size(), filterNodes.data() } );
 		return new LightShader( id, m_session );
-
 	};
 
 	if( auto *outputShader = network->outputShader() )

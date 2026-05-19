@@ -58,7 +58,7 @@ using namespace GafferBindings;
 namespace
 {
 
-Animation::CurvePlugPtr acquire( ValuePlug* const plug )
+Animation::CurvePlugPtr acquire( ValuePlug *const plug )
 {
 	ScopedGILRelease gilRelease;
 	return Animation::acquire( plug );
@@ -82,7 +82,7 @@ void setInterpolation( Animation::Key &k, const Animation::Interpolation interpo
 	k.setInterpolation( interpolation );
 }
 
-Animation::Key* getKey( Animation::Tangent &t )
+Animation::Key *getKey( Animation::Tangent &t )
 {
 	return &( t.key() );
 }
@@ -93,7 +93,7 @@ void setSlope( Animation::Tangent &t, const double slope )
 	t.setSlope( slope );
 }
 
-void setSlopeFromPosition( Animation::Tangent &t, const Imath::V2d& position, const bool relative )
+void setSlopeFromPosition( Animation::Tangent &t, const Imath::V2d &position, const bool relative )
 {
 	ScopedGILRelease gilRelease;
 	t.setSlopeFromPosition( position, relative );
@@ -111,7 +111,7 @@ void setScale( Animation::Tangent &t, const double scale )
 	t.setScale( scale );
 }
 
-void setScaleFromPosition( Animation::Tangent &t, const Imath::V2d& position, const bool relative )
+void setScaleFromPosition( Animation::Tangent &t, const Imath::V2d &position, const bool relative )
 {
 	ScopedGILRelease gilRelease;
 	t.setScaleFromPosition( position, relative );
@@ -122,7 +122,7 @@ Imath::V2d getPosition( Animation::Tangent &t, const bool relative )
 	return t.getPosition( relative );
 }
 
-void setPosition( Animation::Tangent &t, const Imath::V2d& position, const bool relative )
+void setPosition( Animation::Tangent &t, const Imath::V2d &position, const bool relative )
 {
 	ScopedGILRelease gilRelease;
 	t.setPosition( position, relative );
@@ -192,7 +192,7 @@ void setExtrapolation( Animation::CurvePlug &p, const Animation::Direction direc
 
 struct CurvePlugKeySlotCaller
 {
-	void operator()( boost::python::object slot, const Animation::CurvePlugPtr c, const Animation::KeyPtr k )
+	void operator () ( boost::python::object slot, const Animation::CurvePlugPtr c, const Animation::KeyPtr k )
 	{
 		try
 		{
@@ -207,7 +207,7 @@ struct CurvePlugKeySlotCaller
 
 struct CurvePlugDirectionSlotCaller
 {
-	void operator()( boost::python::object slot, const Animation::CurvePlugPtr c, const Animation::Direction d )
+	void operator () ( boost::python::object slot, const Animation::CurvePlugPtr c, const Animation::Direction d )
 	{
 		try
 		{
@@ -223,29 +223,28 @@ struct CurvePlugDirectionSlotCaller
 class CurvePlugSerialiser : public ValuePlugSerialiser
 {
 
-	public :
+public:
 
-		std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	{
+		std::string result = ValuePlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
+		const Animation::CurvePlug *const curve = static_cast<const Animation::CurvePlug *>( graphComponent );
+		const Gaffer::Animation::Extrapolation extrapolationIn = curve->getExtrapolation( Gaffer::Animation::Direction::In );
+		if( extrapolationIn != Gaffer::Animation::Extrapolation::Constant )
 		{
-			std::string result = ValuePlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
-			const Animation::CurvePlug* const curve = static_cast<const Animation::CurvePlug *>( graphComponent );
-			const Gaffer::Animation::Extrapolation extrapolationIn = curve->getExtrapolation( Gaffer::Animation::Direction::In );
-			if( extrapolationIn != Gaffer::Animation::Extrapolation::Constant )
-			{
-				result += identifier + ".setExtrapolation( Gaffer.Animation.Direction.In, Gaffer.Animation.Extrapolation." + Animation::toString( extrapolationIn ) + " )\n";
-			}
-			const Gaffer::Animation::Extrapolation extrapolationOut = curve->getExtrapolation( Gaffer::Animation::Direction::Out );
-			if( extrapolationOut != Gaffer::Animation::Extrapolation::Constant )
-			{
-				result += identifier + ".setExtrapolation( Gaffer.Animation.Direction.Out, Gaffer.Animation.Extrapolation." + Animation::toString( extrapolationOut ) + " )\n";
-			}
-			for( const auto &key : *curve )
-			{
-				result += identifier + ".addKey( " + keyRepr( key ) + " )\n";
-			}
-			return result;
+			result += identifier + ".setExtrapolation( Gaffer.Animation.Direction.In, Gaffer.Animation.Extrapolation." + Animation::toString( extrapolationIn ) + " )\n";
 		}
-
+		const Gaffer::Animation::Extrapolation extrapolationOut = curve->getExtrapolation( Gaffer::Animation::Direction::Out );
+		if( extrapolationOut != Gaffer::Animation::Extrapolation::Constant )
+		{
+			result += identifier + ".setExtrapolation( Gaffer.Animation.Direction.Out, Gaffer.Animation.Extrapolation." + Animation::toString( extrapolationOut ) + " )\n";
+		}
+		for( const auto &key : *curve )
+		{
+			result += identifier + ".addKey( " + keyRepr( key ) + " )\n";
+		}
+		return result;
+	}
 };
 
 } // namespace
@@ -253,176 +252,139 @@ class CurvePlugSerialiser : public ValuePlugSerialiser
 void GafferModule::bindAnimation()
 {
 
-	scope s = DependencyNodeClass< Animation >()
-		.def( "canAnimate", &Animation::canAnimate )
-		.staticmethod( "canAnimate" )
-		.def( "isAnimated", &Animation::isAnimated )
-		.staticmethod( "isAnimated" )
-		.def( "acquire", &acquire )
-		.staticmethod( "acquire" )
-		.def( "defaultInterpolation", &Animation::defaultInterpolation )
-		.staticmethod( "defaultInterpolation" )
-		.def( "defaultTieMode", &Animation::defaultTieMode )
-		.def( "defaultExtrapolation", &Animation::defaultExtrapolation )
-		.staticmethod( "defaultExtrapolation" )
-		.staticmethod( "defaultTieMode" )
-		.def( "defaultSlope", &Animation::defaultSlope )
-		.staticmethod( "defaultSlope" )
-		.def( "defaultScale", &Animation::defaultScale )
-		.staticmethod( "defaultScale" )
-		.def( "opposite", &Animation::opposite )
-		.staticmethod( "opposite" )
-	;
+	scope s = DependencyNodeClass<Animation>()
+				  .def( "canAnimate", &Animation::canAnimate )
+				  .staticmethod( "canAnimate" )
+				  .def( "isAnimated", &Animation::isAnimated )
+				  .staticmethod( "isAnimated" )
+				  .def( "acquire", &acquire )
+				  .staticmethod( "acquire" )
+				  .def( "defaultInterpolation", &Animation::defaultInterpolation )
+				  .staticmethod( "defaultInterpolation" )
+				  .def( "defaultTieMode", &Animation::defaultTieMode )
+				  .def( "defaultExtrapolation", &Animation::defaultExtrapolation )
+				  .staticmethod( "defaultExtrapolation" )
+				  .staticmethod( "defaultTieMode" )
+				  .def( "defaultSlope", &Animation::defaultSlope )
+				  .staticmethod( "defaultSlope" )
+				  .def( "defaultScale", &Animation::defaultScale )
+				  .staticmethod( "defaultScale" )
+				  .def( "opposite", &Animation::opposite )
+				  .staticmethod( "opposite" );
 
-	enum_< Animation::Interpolation >( "Interpolation" )
+	enum_<Animation::Interpolation>( "Interpolation" )
 		.value( Animation::toString( Animation::Interpolation::Constant ), Animation::Interpolation::Constant )
 		.value( Animation::toString( Animation::Interpolation::ConstantNext ), Animation::Interpolation::ConstantNext )
 		.value( Animation::toString( Animation::Interpolation::Linear ), Animation::Interpolation::Linear )
 		.value( Animation::toString( Animation::Interpolation::Cubic ), Animation::Interpolation::Cubic )
-		.value( Animation::toString( Animation::Interpolation::Bezier ), Animation::Interpolation::Bezier )
-	;
+		.value( Animation::toString( Animation::Interpolation::Bezier ), Animation::Interpolation::Bezier );
 
-	enum_< Animation::Extrapolation >( "Extrapolation" )
+	enum_<Animation::Extrapolation>( "Extrapolation" )
 		.value( Animation::toString( Animation::Extrapolation::Constant ), Animation::Extrapolation::Constant )
 		.value( Animation::toString( Animation::Extrapolation::Linear ), Animation::Extrapolation::Linear )
 		.value( Animation::toString( Animation::Extrapolation::Cycle ), Animation::Extrapolation::Cycle )
 		.value( Animation::toString( Animation::Extrapolation::CycleOffset ), Animation::Extrapolation::CycleOffset )
 		.value( Animation::toString( Animation::Extrapolation::CycleFlop ), Animation::Extrapolation::CycleFlop )
-		.value( Animation::toString( Animation::Extrapolation::CycleFlip ), Animation::Extrapolation::CycleFlip )
-	;
+		.value( Animation::toString( Animation::Extrapolation::CycleFlip ), Animation::Extrapolation::CycleFlip );
 
-	enum_< Animation::Direction >( "Direction" )
+	enum_<Animation::Direction>( "Direction" )
 		.value( Animation::toString( Animation::Direction::In ), Animation::Direction::In )
-		.value( Animation::toString( Animation::Direction::Out ), Animation::Direction::Out )
-	;
+		.value( Animation::toString( Animation::Direction::Out ), Animation::Direction::Out );
 
-	enum_< Animation::TieMode >( "TieMode" )
+	enum_<Animation::TieMode>( "TieMode" )
 		.value( Animation::toString( Animation::TieMode::Manual ), Animation::TieMode::Manual )
 		.value( Animation::toString( Animation::TieMode::Slope ), Animation::TieMode::Slope )
-		.value( Animation::toString( Animation::TieMode::Scale ), Animation::TieMode::Scale )
-	;
+		.value( Animation::toString( Animation::TieMode::Scale ), Animation::TieMode::Scale );
 
-	class_< Animation::Tangent, boost::noncopyable >( "Tangent", no_init )
-		.def( "key", &getKey,
-			return_value_policy<IECorePython::CastToIntrusivePtr>()
-		)
+	class_<Animation::Tangent, boost::noncopyable>( "Tangent", no_init )
+		.def( "key", &getKey, return_value_policy<IECorePython::CastToIntrusivePtr>() )
 		.def( "direction", &Animation::Tangent::direction )
 		.def( "setSlope", &setSlope )
 		.def( "setSlopeFromPosition", setSlopeFromPosition, ( arg( "position" ), arg( "relative" ) = false ) )
-		.def( "getSlope", (double (Animation::Tangent::*)() const)&Animation::Tangent::getSlope )
+		.def( "getSlope", ( double ( Animation::Tangent::* )() const ) & Animation::Tangent::getSlope )
 		.def( "setScale", &setScale )
 		.def( "setScaleFromPosition", setScaleFromPosition, ( arg( "position" ), arg( "relative" ) = false ) )
-		.def( "getScale", (double (Animation::Tangent::*)() const)&Animation::Tangent::getScale )
+		.def( "getScale", ( double ( Animation::Tangent::* )() const ) & Animation::Tangent::getScale )
 		.def( "setSlopeAndScale", &setSlopeAndScale )
 		.def( "setPosition", &setPosition, ( arg( "position" ), arg( "relative" ) = false ) )
 		.def( "getPosition", &getPosition, arg( "relative" ) = false )
 		.def( "slopeIsConstrained", &Animation::Tangent::slopeIsConstrained )
-		.def( "scaleIsConstrained", &Animation::Tangent::scaleIsConstrained )
-		;
+		.def( "scaleIsConstrained", &Animation::Tangent::scaleIsConstrained );
 
-	IECorePython::RunTimeTypedClass< Animation::Key >( "Key" )
-		.def( init< float, float, Animation::Interpolation, double, double, double, double, Animation::TieMode >(
-				(
-					arg( "time" ) = 0.0f,
-					arg( "value" ) = 0.0f,
-					arg( "interpolation" ) = Animation::defaultInterpolation(),
-					arg( "inSlope" ) = Animation::defaultSlope(),
-					arg( "inScale" ) = Animation::defaultScale(),
-					arg( "outSlope" ) = Animation::defaultSlope(),
-					arg( "outScale" ) = Animation::defaultScale(),
-					arg( "tieMode" ) = Animation::defaultTieMode()
-				)
-			)
-		)
+	IECorePython::RunTimeTypedClass<Animation::Key>( "Key" )
+		.def( init<float, float, Animation::Interpolation, double, double, double, double, Animation::TieMode>( ( arg( "time" ) = 0.0f, arg( "value" ) = 0.0f, arg( "interpolation" ) = Animation::defaultInterpolation(), arg( "inSlope" ) = Animation::defaultSlope(), arg( "inScale" ) = Animation::defaultScale(), arg( "outSlope" ) = Animation::defaultSlope(), arg( "outScale" ) = Animation::defaultScale(), arg( "tieMode" ) = Animation::defaultTieMode() ) ) )
 		.def( "getTime", &Animation::Key::getTime )
 		.def( "setTime", &setTime )
 		.def( "getValue", &Animation::Key::getValue )
 		.def( "setValue", &setValue )
 		.def( "getInterpolation", &Animation::Key::getInterpolation )
 		.def( "setInterpolation", &setInterpolation )
-		.def( "tangentIn",
-			(Animation::Tangent& (Animation::Key::*)())&Animation::Key::tangentIn,
-			return_internal_reference<>() )
-		.def( "tangentOut",
-			(Animation::Tangent& (Animation::Key::*)())&Animation::Key::tangentOut,
-			return_internal_reference<>() )
-		.def( "tangent",
-			(Animation::Tangent& (Animation::Key::*)( Animation::Direction ))&Animation::Key::tangent,
-			return_internal_reference<>() )
+		.def( "tangentIn", ( Animation::Tangent & (Animation::Key::*)() ) & Animation::Key::tangentIn, return_internal_reference<>() )
+		.def( "tangentOut", ( Animation::Tangent & (Animation::Key::*)() ) & Animation::Key::tangentOut, return_internal_reference<>() )
+		.def( "tangent", ( Animation::Tangent & (Animation::Key::*)( Animation::Direction ) ) & Animation::Key::tangent, return_internal_reference<>() )
 		.def( "setTieMode", &setTieMode )
 		.def( "getTieMode", &Animation::Key::getTieMode )
 		.def( "isActive", &Animation::Key::isActive )
 		.def( "__repr__", &keyRepr )
 		.def(
 			"parent",
-			(Animation::CurvePlug *(Animation::Key::*)())&Animation::Key::parent,
+			( Animation::CurvePlug * (Animation::Key::*)() ) & Animation::Key::parent,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
-		)
-	;
+		);
 
-	PlugClass< Animation::CurvePlug >()
-		.def( init< const char *, Plug::Direction, unsigned >(
-				(
-					boost::python::arg_( "name" )=GraphComponent::defaultName<Animation::CurvePlug>(),
-					boost::python::arg_( "direction" )=Plug::In,
-					boost::python::arg_( "flags" )=Plug::Default
-				)
-			)
-		)
-		.def( "keyAddedSignal", &Animation::CurvePlug::keyAddedSignal, return_internal_reference< 1 >() )
-		.def( "keyRemovedSignal", &Animation::CurvePlug::keyRemovedSignal, return_internal_reference< 1 >() )
-		.def( "keyTimeChangedSignal", &Animation::CurvePlug::keyTimeChangedSignal, return_internal_reference< 1 >() )
-		.def( "keyValueChangedSignal", &Animation::CurvePlug::keyValueChangedSignal, return_internal_reference< 1 >() )
-		.def( "keyInterpolationChangedSignal", &Animation::CurvePlug::keyInterpolationChangedSignal, return_internal_reference< 1 >() )
-		.def( "keyTieModeChangedSignal", &Animation::CurvePlug::keyTieModeChangedSignal, return_internal_reference< 1 >() )
-		.def( "extrapolationChangedSignal", &Animation::CurvePlug::extrapolationChangedSignal, return_internal_reference< 1 >() )
+	PlugClass<Animation::CurvePlug>()
+		.def( init<const char *, Plug::Direction, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<Animation::CurvePlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default ) ) )
+		.def( "keyAddedSignal", &Animation::CurvePlug::keyAddedSignal, return_internal_reference<1>() )
+		.def( "keyRemovedSignal", &Animation::CurvePlug::keyRemovedSignal, return_internal_reference<1>() )
+		.def( "keyTimeChangedSignal", &Animation::CurvePlug::keyTimeChangedSignal, return_internal_reference<1>() )
+		.def( "keyValueChangedSignal", &Animation::CurvePlug::keyValueChangedSignal, return_internal_reference<1>() )
+		.def( "keyInterpolationChangedSignal", &Animation::CurvePlug::keyInterpolationChangedSignal, return_internal_reference<1>() )
+		.def( "keyTieModeChangedSignal", &Animation::CurvePlug::keyTieModeChangedSignal, return_internal_reference<1>() )
+		.def( "extrapolationChangedSignal", &Animation::CurvePlug::extrapolationChangedSignal, return_internal_reference<1>() )
 		.def( "addKey", &addKey, arg( "removeActiveClashing" ) = true )
 		.def( "insertKey", &insertKey )
 		.def( "insertKey", &insertKeyValue )
 		.def( "hasKey", &Animation::CurvePlug::hasKey )
 		.def(
 			"getKey",
-			(Animation::Key *(Animation::CurvePlug::*)( float ))&Animation::CurvePlug::getKey,
+			( Animation::Key * (Animation::CurvePlug::*)(float)) & Animation::CurvePlug::getKey,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
 		)
 		.def( "removeKey", &removeKey )
 		.def( "removeInactiveKeys", &removeInactiveKeys )
 		.def(
 			"closestKey",
-			(Animation::Key *(Animation::CurvePlug::*)( float ))&Animation::CurvePlug::closestKey,
+			( Animation::Key * (Animation::CurvePlug::*)(float)) & Animation::CurvePlug::closestKey,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
 		)
 		.def(
 			"closestKey",
-			(Animation::Key *(Animation::CurvePlug::*)( float, float ))&Animation::CurvePlug::closestKey,
+			( Animation::Key * (Animation::CurvePlug::*)(float, float)) & Animation::CurvePlug::closestKey,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
 		)
 		.def(
 			"previousKey",
-			(Animation::Key *(Animation::CurvePlug::*)( float ))&Animation::CurvePlug::previousKey,
+			( Animation::Key * (Animation::CurvePlug::*)(float)) & Animation::CurvePlug::previousKey,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
 		)
 		.def(
 			"nextKey",
-			(Animation::Key *(Animation::CurvePlug::*)( float ))&Animation::CurvePlug::nextKey,
+			( Animation::Key * (Animation::CurvePlug::*)(float)) & Animation::CurvePlug::nextKey,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
 		)
 		.def( "setExtrapolation", &setExtrapolation )
 		.def( "getExtrapolation", &Animation::CurvePlug::getExtrapolation )
 		.def(
 			"getExtrapolationKey",
-			(Animation::Key *(Animation::CurvePlug::*)( Animation::Direction ))&Animation::CurvePlug::getExtrapolationKey,
-			return_value_policy<IECorePython::CastToIntrusivePtr>() )
+			( Animation::Key * (Animation::CurvePlug::*)( Animation::Direction ) ) & Animation::CurvePlug::getExtrapolationKey,
+			return_value_policy<IECorePython::CastToIntrusivePtr>()
+		)
 		.def( "evaluate", &Animation::CurvePlug::evaluate )
-		.attr( "__qualname__" ) = "Animation.CurvePlug"
-	;
+		.attr( "__qualname__" ) = "Animation.CurvePlug";
 
-	SignalClass< Animation::CurvePlug::CurvePlugKeySignal,
-		DefaultSignalCaller< Animation::CurvePlug::CurvePlugKeySignal >, CurvePlugKeySlotCaller >( "CurvePlugKeySignal" );
+	SignalClass<Animation::CurvePlug::CurvePlugKeySignal, DefaultSignalCaller<Animation::CurvePlug::CurvePlugKeySignal>, CurvePlugKeySlotCaller>( "CurvePlugKeySignal" );
 
-	SignalClass< Animation::CurvePlug::CurvePlugDirectionSignal,
-		DefaultSignalCaller< Animation::CurvePlug::CurvePlugDirectionSignal >, CurvePlugDirectionSlotCaller >( "CurvePlugDirectionSignal" );
+	SignalClass<Animation::CurvePlug::CurvePlugDirectionSignal, DefaultSignalCaller<Animation::CurvePlug::CurvePlugDirectionSignal>, CurvePlugDirectionSlotCaller>( "CurvePlugDirectionSignal" );
 
 	Serialisation::registerSerialiser( Gaffer::Animation::CurvePlug::staticTypeId(), new CurvePlugSerialiser );
-
 }

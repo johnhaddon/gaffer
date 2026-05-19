@@ -64,7 +64,7 @@ size_t Expression::g_firstPlugIndex;
 GAFFER_NODE_DEFINE_TYPE( Expression );
 
 Expression::Expression( const std::string &name )
-	:	ComputeNode( name ), m_engine( nullptr )
+	: ComputeNode( name ), m_engine( nullptr )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -126,9 +126,7 @@ void Expression::setExpression( const std::string &expression, const std::string
 	EnginePtr engine = Engine::create( language );
 	if( !engine )
 	{
-		throw Exception( fmt::format(
-			"Failed to create engine for language \"{}\"", language
-		) );
+		throw Exception( fmt::format( "Failed to create engine for language \"{}\"", language ) );
 	}
 
 	std::vector<ValuePlug *> inPlugs, outPlugs;
@@ -146,10 +144,7 @@ void Expression::setExpression( const std::string &expression, const std::string
 		{
 			if( std::binary_search( sortedInPlugs.begin(), sortedInPlugs.end(), *it ) )
 			{
-				throw Exception( fmt::format(
-					"Cannot both read from and write to plug \"{}\"",
-					(*it)->relativeName( parent() )
-				) );
+				throw Exception( fmt::format( "Cannot both read from and write to plug \"{}\"", ( *it )->relativeName( parent() ) ) );
 			}
 		}
 	}
@@ -282,7 +277,7 @@ void Expression::affects( const Plug *input, AffectedPlugsContainer &outputs ) c
 	{
 		for( ValuePlug::RecursiveIterator it( outPlug() ); !it.done(); ++it )
 		{
-			if( !(*it)->children().size() )
+			if( !( *it )->children().size() )
 			{
 				outputs.push_back( it->get() );
 			}
@@ -300,18 +295,18 @@ void Expression::hash( const ValuePlug *output, const Context *context, IECore::
 		expressionPlug()->hash( h );
 		for( ValuePlug::Iterator it( inPlug() ); !it.done(); ++it )
 		{
-			(*it)->hash( h );
+			( *it )->hash( h );
 			// We must hash the types of the input plugs, because
 			// an identical expression but with different input plug
 			// types may yield a different result from Engine::execute().
-			h.append( (*it)->typeId() );
+			h.append( ( *it )->typeId() );
 		}
 		for( ValuePlug::Iterator it( outPlug() ); !it.done(); ++it )
 		{
 			// We also need to hash the types of the output plugs,
 			// because an identical expression with different output
 			// types may yield a different result from Engine::execute().
-			h.append( (*it)->typeId() );
+			h.append( ( *it )->typeId() );
 		}
 
 		for( std::vector<IECore::InternedString>::const_iterator it = m_contextNames.begin(); it != m_contextNames.end(); it++ )
@@ -454,7 +449,7 @@ void Expression::removeChildren( ValuePlug *parentPlug, size_t startChildIndex )
 {
 	// Remove backwards, because children() is a vector and
 	// it's therefore cheaper to remove from the end.
-	for( int i = (int)(parentPlug->children().size() ) - 1; i >= (int)startChildIndex; --i )
+	for( int i = (int)( parentPlug->children().size() ) - 1; i >= (int)startChildIndex; --i )
 	{
 		Plug *toRemove = parentPlug->getChild<Plug>( i );
 		toRemove->removeOutputs();
@@ -473,15 +468,15 @@ std::string Expression::transcribe( const std::string &expression, bool toIntern
 	for( ValuePlug::Iterator it( inPlug() ); !it.done(); ++it )
 	{
 		internalPlugs.push_back( it->get() );
-		externalPlugs.push_back( (*it)->getInput<ValuePlug>() );
+		externalPlugs.push_back( ( *it )->getInput<ValuePlug>() );
 	}
 
 	for( ValuePlug::Iterator it( outPlug() ); !it.done(); ++it )
 	{
 		internalPlugs.push_back( it->get() );
-		if( !(*it)->outputs().empty() )
+		if( !( *it )->outputs().empty() )
 		{
-			externalPlugs.push_back( static_cast<const ValuePlug *>( (*it)->outputs().front() ) );
+			externalPlugs.push_back( static_cast<const ValuePlug *>( ( *it )->outputs().front() ) );
 		}
 		else
 		{
@@ -539,7 +534,6 @@ void Expression::plugSet( const Plug *plug )
 	// us in.
 	updatePlugs( inPlugs, outPlugs );
 	expressionPlug()->setValue( transcribe( expression, /* toInternalForm = */ true ) );
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -565,7 +559,7 @@ void Expression::Engine::registerEngine( const std::string engineType, Creator c
 void Expression::Engine::registeredEngines( std::vector<std::string> &engineTypes )
 {
 	const CreatorMap &m = creators();
-	for( CreatorMap::const_iterator it = m.begin(); it!=m.end(); it++ )
+	for( CreatorMap::const_iterator it = m.begin(); it != m.end(); it++ )
 	{
 		engineTypes.push_back( it->first );
 	}

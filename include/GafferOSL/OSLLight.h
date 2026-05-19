@@ -49,44 +49,43 @@ class OSLShader;
 class GAFFEROSL_API OSLLight : public GafferScene::Light
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLLight, OSLLightTypeId, GafferScene::Light );
+	GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLLight, OSLLightTypeId, GafferScene::Light );
 
-		explicit OSLLight( const std::string &name=defaultName<OSLLight>() );
-		~OSLLight() override;
+	explicit OSLLight( const std::string &name = defaultName<OSLLight>() );
+	~OSLLight() override;
 
-		enum Shape
-		{
-			Disk = 0,
-			Sphere = 1,
-			Geometry = 2
-		};
+	enum Shape
+	{
+		Disk = 0,
+		Sphere = 1,
+		Geometry = 2
+	};
 
-		Gaffer::IntPlug *shapePlug();
-		const Gaffer::IntPlug *shapePlug() const;
+	Gaffer::IntPlug *shapePlug();
+	const Gaffer::IntPlug *shapePlug() const;
 
-		Gaffer::FloatPlug *radiusPlug();
-		const Gaffer::FloatPlug *radiusPlug() const;
+	Gaffer::FloatPlug *radiusPlug();
+	const Gaffer::FloatPlug *radiusPlug() const;
 
-		Gaffer::StringPlug *geometryTypePlug();
-		const Gaffer::StringPlug *geometryTypePlug() const;
+	Gaffer::StringPlug *geometryTypePlug();
+	const Gaffer::StringPlug *geometryTypePlug() const;
 
-		Gaffer::Box3fPlug *geometryBoundPlug();
-		const Gaffer::Box3fPlug *geometryBoundPlug() const;
+	Gaffer::Box3fPlug *geometryBoundPlug();
+	const Gaffer::Box3fPlug *geometryBoundPlug() const;
 
-		Gaffer::CompoundDataPlug *geometryParametersPlug();
-		const Gaffer::CompoundDataPlug *geometryParametersPlug() const;
+	Gaffer::CompoundDataPlug *geometryParametersPlug();
+	const Gaffer::CompoundDataPlug *geometryParametersPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( OSLLight )

@@ -50,72 +50,71 @@ namespace Gaffer
 class GAFFER_API Collect : public ComputeNode
 {
 
-	public :
+public:
 
-		Collect( const std::string &name = defaultName<Collect>() );
-		~Collect() override;
+	Collect( const std::string &name = defaultName<Collect>() );
+	~Collect() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::Collect, CollectTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::Collect, CollectTypeId, ComputeNode );
 
-		StringPlug *contextVariablePlug();
-		const StringPlug *contextVariablePlug() const;
+	StringPlug *contextVariablePlug();
+	const StringPlug *contextVariablePlug() const;
 
-		StringPlug *indexContextVariablePlug();
-		const StringPlug *indexContextVariablePlug() const;
+	StringPlug *indexContextVariablePlug();
+	const StringPlug *indexContextVariablePlug() const;
 
-		StringVectorDataPlug *contextValuesPlug();
-		const StringVectorDataPlug *contextValuesPlug() const;
+	StringVectorDataPlug *contextValuesPlug();
+	const StringVectorDataPlug *contextValuesPlug() const;
 
-		BoolPlug *enabledPlug() override;
-		const BoolPlug *enabledPlug() const override;
+	BoolPlug *enabledPlug() override;
+	const BoolPlug *enabledPlug() const override;
 
-		ValuePlug *inPlug();
-		const ValuePlug *inPlug() const;
+	ValuePlug *inPlug();
+	const ValuePlug *inPlug() const;
 
-		ValuePlug *outPlug();
-		const ValuePlug *outPlug() const;
+	ValuePlug *outPlug();
+	const ValuePlug *outPlug() const;
 
-		ObjectPlug *enabledValuesPlug();
-		const ObjectPlug *enabledValuesPlug() const;
+	ObjectPlug *enabledValuesPlug();
+	const ObjectPlug *enabledValuesPlug() const;
 
-		bool canAddInput( const ValuePlug *prototype ) const;
-		ValuePlug *addInput( const ValuePlug *prototype );
-		void removeInput( ValuePlug *inputPlug );
+	bool canAddInput( const ValuePlug *prototype ) const;
+	ValuePlug *addInput( const ValuePlug *prototype );
+	void removeInput( ValuePlug *inputPlug );
 
-		ValuePlug *outputPlugForInput( const ValuePlug *inputPlug );
-		const ValuePlug *outputPlugForInput( const ValuePlug *inputPlug ) const;
+	ValuePlug *outputPlugForInput( const ValuePlug *inputPlug );
+	const ValuePlug *outputPlugForInput( const ValuePlug *inputPlug ) const;
 
-		ValuePlug *inputPlugForOutput( const ValuePlug *outputPlug );
-		const ValuePlug *inputPlugForOutput( const ValuePlug *outputPlug ) const;
+	ValuePlug *inputPlugForOutput( const ValuePlug *outputPlug );
+	const ValuePlug *inputPlugForOutput( const ValuePlug *outputPlug ) const;
 
-		void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context) const override;
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-		ValuePlug::CachePolicy hashCachePolicy( const ValuePlug *output ) const override;
-		ValuePlug::CachePolicy computeCachePolicy( const ValuePlug *output ) const override;
+	ValuePlug::CachePolicy hashCachePolicy( const ValuePlug *output ) const override;
+	ValuePlug::CachePolicy computeCachePolicy( const ValuePlug *output ) const override;
 
-	private :
+private:
 
-		// We collect the values for all output plugs in a single compute and cache
-		// them in a CompoundObject on this internal plug, indexing them by plug name.
-		// This provides greater ValuePlug cache coherency when multiple inputs depend
-		// on the same upstream computes (for instance, when they are each collecting
-		// a property of the same scene location).
-		CompoundObjectPlug *collectionPlug();
-		const CompoundObjectPlug *collectionPlug() const;
+	// We collect the values for all output plugs in a single compute and cache
+	// them in a CompoundObject on this internal plug, indexing them by plug name.
+	// This provides greater ValuePlug cache coherency when multiple inputs depend
+	// on the same upstream computes (for instance, when they are each collecting
+	// a property of the same scene location).
+	CompoundObjectPlug *collectionPlug();
+	const CompoundObjectPlug *collectionPlug() const;
 
-		void inputAdded( GraphComponent *input );
-		void inputRemoved( GraphComponent *input );
-		void inputNameChanged( GraphComponent *input, IECore::InternedString oldName );
+	void inputAdded( GraphComponent *input );
+	void inputRemoved( GraphComponent *input );
+	void inputNameChanged( GraphComponent *input, IECore::InternedString oldName );
 
-		std::unordered_map<GraphComponent *, Signals::ScopedConnection> m_inputNameChangedConnections;
+	std::unordered_map<GraphComponent *, Signals::ScopedConnection> m_inputNameChangedConnections;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
-}  // namespace Gaffer
+} // namespace Gaffer

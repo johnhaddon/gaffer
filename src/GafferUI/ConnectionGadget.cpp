@@ -49,7 +49,7 @@ using namespace GafferUI;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ConnectionGadget );
 
 ConnectionGadget::ConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule )
-	:	ConnectionCreator( defaultName<ConnectionGadget>() ), m_active( false ), m_minimised( false )
+	: ConnectionCreator( defaultName<ConnectionGadget>() ), m_active( false ), m_minimised( false )
 {
 	setNodules( srcNodule, dstNodule );
 }
@@ -140,12 +140,12 @@ ConnectionGadgetPtr ConnectionGadget::create( NodulePtr srcNodule, NodulePtr dst
 		std::string plugPath = plug->relativeName( node );
 		const NamedCreatorMap &m = namedCreators();
 		IECore::TypeId t = node->typeId();
-		while( t!=IECore::InvalidTypeId )
+		while( t != IECore::InvalidTypeId )
 		{
 			NamedCreatorMap::const_iterator it = m.find( t );
-			if( it!=m.end() )
+			if( it != m.end() )
 			{
-				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt!=it->second.rend(); nIt++ )
+				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt != it->second.rend(); nIt++ )
 				{
 					if( boost::regex_match( plugPath, nIt->first ) )
 					{
@@ -159,10 +159,10 @@ ConnectionGadgetPtr ConnectionGadget::create( NodulePtr srcNodule, NodulePtr dst
 
 	CreatorMap &m = creators();
 	IECore::TypeId t = plug->typeId();
-	while( t!=IECore::InvalidTypeId )
+	while( t != IECore::InvalidTypeId )
 	{
 		CreatorMap::const_iterator it = m.find( t );
-		if( it!=m.end() )
+		if( it != m.end() )
 		{
 			return it->second( srcNodule, dstNodule );
 		}

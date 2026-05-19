@@ -42,7 +42,7 @@ using namespace GafferScene;
 GAFFER_NODE_DEFINE_TYPE( DeletePrimitiveVariables );
 
 DeletePrimitiveVariables::DeletePrimitiveVariables( const std::string &name )
-	:	PrimitiveVariableProcessor( name )
+	: PrimitiveVariableProcessor( name )
 {
 }
 

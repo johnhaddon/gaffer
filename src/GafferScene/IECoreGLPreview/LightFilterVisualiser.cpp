@@ -101,7 +101,7 @@ Visualisations LightFilterVisualiser::allVisualisations( const IECore::CompoundO
 	/// This seems pretty expensive to do everywhere.
 	/// The alternative would be to register attribute visualisers to specific attributes.
 	/// But then we wouldn't be able to have a visualiser that is influenced by multiple attributes simultaneously
-	for( const auto& it : attributes->members() )
+	for( const auto &it : attributes->members() )
 	{
 		const std::string &attributeName = it.first.string();
 		if( attributeName.find( ":lightFilter" ) == std::string::npos )
@@ -129,7 +129,7 @@ Visualisations LightFilterVisualiser::allVisualisations( const IECore::CompoundO
 		// find the light shader influenced by the filter
 
 		std::vector<std::string> tokens;
-		boost::split( tokens, attributeName, boost::is_any_of(":") );
+		boost::split( tokens, attributeName, boost::is_any_of( ":" ) );
 		const IECoreScene::ShaderNetwork *lightShaderNetwork = attributes->member<IECoreScene::ShaderNetwork>( tokens.front() + ":light" );
 
 		// If the light is a USD light, the renderer-specific `lightShaderNetwork` won't be valid
@@ -179,7 +179,7 @@ Visualisations LightFilterVisualiser::allVisualisations( const IECore::CompoundO
 			{
 				resultState = new IECoreGL::State( false );
 			}
-			resultState->add( const_cast<IECoreGL::State*>( curState.get() ) );
+			resultState->add( const_cast<IECoreGL::State *>( curState.get() ) );
 		}
 	}
 

@@ -48,7 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( CDL );
 size_t CDL::g_firstPlugIndex = 0;
 
 CDL::CDL( const std::string &name )
-	:	OpenColorIOTransform( name )
+	: OpenColorIOTransform( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Color3fPlug( "slope", Plug::In, Imath::V3f( 1. ) ) );
@@ -120,7 +120,7 @@ const Gaffer::IntPlug *CDL::directionPlug() const
 
 bool CDL::affectsTransform( const Gaffer::Plug *input ) const
 {
-	return(
+	return (
 		slopePlug()->isAncestorOf( input ) ||
 		offsetPlug()->isAncestorOf( input ) ||
 		powerPlug()->isAncestorOf( input ) ||

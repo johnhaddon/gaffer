@@ -75,8 +75,8 @@ inline boost::span<const float> DeepPixelAccessor::sample( int x, int y )
 	cachedData( p, tileData, tileOffsets, tilePixelIndex );
 
 	assert( tileData );
-	int prev = tilePixelIndex > 0 ? tileOffsets[ tilePixelIndex - 1 ] : 0;
-	return boost::span<const float>( &tileData[ prev ], &tileData[ tileOffsets[ tilePixelIndex ] ] );
+	int prev = tilePixelIndex > 0 ? tileOffsets[tilePixelIndex - 1] : 0;
+	return boost::span<const float>( &tileData[prev], &tileData[tileOffsets[tilePixelIndex]] );
 }
 
 inline unsigned int DeepPixelAccessor::sampleCount( int x, int y )
@@ -112,11 +112,11 @@ inline unsigned int DeepPixelAccessor::sampleCount( int x, int y )
 	int tilePixelIndex;
 	cachedData( p, tileData, tileOffsets, tilePixelIndex );
 
-	int prev = tilePixelIndex > 0 ? tileOffsets[ tilePixelIndex - 1 ] : 0;
-	return tileOffsets[ tilePixelIndex ] - prev;
+	int prev = tilePixelIndex > 0 ? tileOffsets[tilePixelIndex - 1] : 0;
+	return tileOffsets[tilePixelIndex] - prev;
 }
 
-inline void DeepPixelAccessor::cachedData( Imath::V2i p, const float *& tileData, const int *& tileOffsets, int &tilePixelIndex )
+inline void DeepPixelAccessor::cachedData( Imath::V2i p, const float *&tileData, const int *&tileOffsets, int &tilePixelIndex )
 {
 	// Get the smart pointer to the tile we want.
 
@@ -130,20 +130,20 @@ inline void DeepPixelAccessor::cachedData( Imath::V2i p, const float *& tileData
 		// Get the origin of the tile we want.
 		Imath::V2i tileOrigin( p.x & ~( ImagePlug::tileSize() - 1 ), p.y & ~( ImagePlug::tileSize() - 1 ) );
 
-		m_dataCache[ cacheIndex ] = m_plug->channelData( m_channelName, tileOrigin );
+		m_dataCache[cacheIndex] = m_plug->channelData( m_channelName, tileOrigin );
 
-		if( !m_offsetsCache[ cacheIndex ] )
+		if( !m_offsetsCache[cacheIndex] )
 		{
-			m_offsetsCache[ cacheIndex ] = m_plug->sampleOffsets( tileOrigin );
+			m_offsetsCache[cacheIndex] = m_plug->sampleOffsets( tileOrigin );
 		}
 	}
 	else
 	{
-		if( !m_offsetsCache[ cacheIndex ] )
+		if( !m_offsetsCache[cacheIndex] )
 		{
 			// Get the origin of the tile we want.
 			Imath::V2i tileOrigin( p.x & ~( ImagePlug::tileSize() - 1 ), p.y & ~( ImagePlug::tileSize() - 1 ) );
-			m_offsetsCache[ cacheIndex ] = m_plug->sampleOffsets( tileOrigin );
+			m_offsetsCache[cacheIndex] = m_plug->sampleOffsets( tileOrigin );
 		}
 	}
 

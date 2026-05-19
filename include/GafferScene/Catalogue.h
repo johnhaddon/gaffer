@@ -56,7 +56,7 @@ namespace GafferSceneModule
 // Forward declaration to enable friend declaration.
 void bindCatalogue();
 
-} // namespace GafferImageModule
+} // namespace GafferSceneModule
 
 namespace GafferScene
 {
@@ -64,123 +64,121 @@ namespace GafferScene
 class GAFFERSCENE_API Catalogue : public GafferImage::ImageNode
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Catalogue, CatalogueTypeId, GafferImage::ImageNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Catalogue, CatalogueTypeId, GafferImage::ImageNode );
 
-		explicit Catalogue( const std::string &name = defaultName<Catalogue>() );
-		~Catalogue() override;
+	explicit Catalogue( const std::string &name = defaultName<Catalogue>() );
+	~Catalogue() override;
 
-		/// Plug type used to represent an image in the catalogue.
-		class GAFFERSCENE_API Image : public Gaffer::Plug
-		{
+	/// Plug type used to represent an image in the catalogue.
+	class GAFFERSCENE_API Image : public Gaffer::Plug
+	{
 
-			public :
+	public:
 
-				GAFFER_PLUG_DECLARE_TYPE( GafferScene::Catalogue::Image, CatalogueImageTypeId, Gaffer::Plug );
+		GAFFER_PLUG_DECLARE_TYPE( GafferScene::Catalogue::Image, CatalogueImageTypeId, Gaffer::Plug );
 
-				Image( const std::string &name = defaultName<Image>(), Direction direction = In, unsigned flags = Default );
+		Image( const std::string &name = defaultName<Image>(), Direction direction = In, unsigned flags = Default );
 
-				Gaffer::StringPlug *fileNamePlug();
-				const Gaffer::StringPlug *fileNamePlug() const;
+		Gaffer::StringPlug *fileNamePlug();
+		const Gaffer::StringPlug *fileNamePlug() const;
 
-				Gaffer::StringPlug *descriptionPlug();
-				const Gaffer::StringPlug *descriptionPlug() const;
+		Gaffer::StringPlug *descriptionPlug();
+		const Gaffer::StringPlug *descriptionPlug() const;
 
-				Gaffer::IntPlug *outputIndexPlug();
-				const Gaffer::IntPlug *outputIndexPlug() const;
+		Gaffer::IntPlug *outputIndexPlug();
+		const Gaffer::IntPlug *outputIndexPlug() const;
 
-				/// Primarily used to take a snapshot of a live render.
-				/// This image must have have been added to a Catalogue
-				/// before calling. The snapshot will be saved to disk
-				/// asynchronously.
-				void copyFrom( const Image *other );
+		/// Primarily used to take a snapshot of a live render.
+		/// This image must have have been added to a Catalogue
+		/// before calling. The snapshot will be saved to disk
+		/// asynchronously.
+		void copyFrom( const Image *other );
 
-				static Ptr load( const std::filesystem::path &fileName );
-				void save( const std::filesystem::path &fileName ) const;
+		static Ptr load( const std::filesystem::path &fileName );
+		void save( const std::filesystem::path &fileName ) const;
 
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-			private :
+	private:
 
-				// The Catalogue needs to know the name of each image
-				// so it can support the `catalogue:imageName` context
-				// variable. But computes can only depend on plugs,
-				// so we transfer the name into this private plug
-				// each time it changes.
-				void nameChanged( IECore::InternedString oldName ) override;
-
-				Gaffer::StringPlug *namePlug();
-				const Gaffer::StringPlug *namePlug() const;
-				friend class Catalogue;
-
-		};
-
-		Gaffer::Plug *imagesPlug();
-		const Gaffer::Plug *imagesPlug() const;
-
-		Gaffer::IntPlug *imageIndexPlug();
-		const Gaffer::IntPlug *imageIndexPlug() const;
+		// The Catalogue needs to know the name of each image
+		// so it can support the `catalogue:imageName` context
+		// variable. But computes can only depend on plugs,
+		// so we transfer the name into this private plug
+		// each time it changes.
+		void nameChanged( IECore::InternedString oldName ) override;
 
 		Gaffer::StringPlug *namePlug();
 		const Gaffer::StringPlug *namePlug() const;
+		friend class Catalogue;
+	};
 
-		Gaffer::StringPlug *directoryPlug();
-		const Gaffer::StringPlug *directoryPlug() const;
+	Gaffer::Plug *imagesPlug();
+	const Gaffer::Plug *imagesPlug() const;
 
-		Gaffer::StringVectorDataPlug *imageNamesPlug();
-		const Gaffer::StringVectorDataPlug *imageNamesPlug() const;
+	Gaffer::IntPlug *imageIndexPlug();
+	const Gaffer::IntPlug *imageIndexPlug() const;
 
-		/// All Catalogues share a single DisplayDriverServer instance
-		/// to receive rendered images. To send an image to the catalogues,
-		/// use an IECoreImage::ClientDisplayDriver with the "displayPort" parameter
-		/// set to match `Catalogue::displayDriverServer()->portNumber()`.
-		static IECoreImage::DisplayDriverServer *displayDriverServer();
+	Gaffer::StringPlug *namePlug();
+	const Gaffer::StringPlug *namePlug() const;
 
-		/// Generates a filename that could be used for storing
-		/// a particular image locally in this Catalogue's directory.
-		/// Primarily exists to be used in the UI.
-		std::filesystem::path generateFileName( const Image *image ) const;
-		std::filesystem::path generateFileName( const GafferImage::ImagePlug *image ) const;
+	Gaffer::StringPlug *directoryPlug();
+	const Gaffer::StringPlug *directoryPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	Gaffer::StringVectorDataPlug *imageNamesPlug();
+	const Gaffer::StringVectorDataPlug *imageNamesPlug() const;
 
-	private :
+	/// All Catalogues share a single DisplayDriverServer instance
+	/// to receive rendered images. To send an image to the catalogues,
+	/// use an IECoreImage::ClientDisplayDriver with the "displayPort" parameter
+	/// set to match `Catalogue::displayDriverServer()->portNumber()`.
+	static IECoreImage::DisplayDriverServer *displayDriverServer();
 
-		Gaffer::IntPlug *internalImageIndexPlug();
-		const Gaffer::IntPlug *internalImageIndexPlug() const;
+	/// Generates a filename that could be used for storing
+	/// a particular image locally in this Catalogue's directory.
+	/// Primarily exists to be used in the UI.
+	std::filesystem::path generateFileName( const Image *image ) const;
+	std::filesystem::path generateFileName( const GafferImage::ImagePlug *image ) const;
 
-		Gaffer::ObjectPlug *imageIndexMapPlug();
-		const Gaffer::ObjectPlug *imageIndexMapPlug() const;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		Gaffer::StringPlug *invalidImageTextPlug();
-		const Gaffer::StringPlug *invalidImageTextPlug() const;
+private:
 
-		Gaffer::Switch *imageSwitch();
-		const Gaffer::Switch *imageSwitch() const;
+	Gaffer::IntPlug *internalImageIndexPlug();
+	const Gaffer::IntPlug *internalImageIndexPlug() const;
 
-		IE_CORE_FORWARDDECLARE( InternalImage );
-		static InternalImage *imageNode( Image *image );
-		static const InternalImage *imageNode( const Image *image );
+	Gaffer::ObjectPlug *imageIndexMapPlug();
+	const Gaffer::ObjectPlug *imageIndexMapPlug() const;
 
-		void imageAdded( GraphComponent *graphComponent );
-		void imageRemoved( GraphComponent *graphComponent );
-		void imagesReordered( const std::vector<size_t> &originalIndices );
+	Gaffer::StringPlug *invalidImageTextPlug();
+	const Gaffer::StringPlug *invalidImageTextPlug() const;
 
-		void driverCreated( IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters );
-		void imageReceived( Gaffer::Plug *plug );
+	Gaffer::Switch *imageSwitch();
+	const Gaffer::Switch *imageSwitch() const;
 
-		void plugSet( const Gaffer::Plug *plug );
+	IE_CORE_FORWARDDECLARE( InternalImage );
+	static InternalImage *imageNode( Image *image );
+	static const InternalImage *imageNode( const Image *image );
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void imageAdded( GraphComponent *graphComponent );
+	void imageRemoved( GraphComponent *graphComponent );
+	void imagesReordered( const std::vector<size_t> &originalIndices );
 
-		static size_t g_firstPlugIndex;
+	void driverCreated( IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters );
+	void imageReceived( Gaffer::Plug *plug );
 
-		// For bindings
-		friend void GafferSceneModule::bindCatalogue();
-		static const std::type_info &internalImageTypeInfo();
+	void plugSet( const Gaffer::Plug *plug );
 
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+
+	static size_t g_firstPlugIndex;
+
+	// For bindings
+	friend void GafferSceneModule::bindCatalogue();
+	static const std::type_info &internalImageTypeInfo();
 };
 
 IE_CORE_DECLAREPTR( Catalogue );

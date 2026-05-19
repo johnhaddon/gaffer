@@ -54,7 +54,7 @@ namespace IECoreCycles
 namespace ShaderNetworkAlgo
 {
 
-IECORECYCLES_API ccl::ShaderInput  *input( ccl::ShaderNode *node, IECore::InternedString name );
+IECORECYCLES_API ccl::ShaderInput *input( ccl::ShaderNode *node, IECore::InternedString name );
 IECORECYCLES_API ccl::ShaderOutput *output( ccl::ShaderNode *node, IECore::InternedString name );
 
 

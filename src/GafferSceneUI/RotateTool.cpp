@@ -71,9 +71,14 @@ RotateTool::ToolDescription<RotateTool, SceneView> RotateTool::g_toolDescription
 size_t RotateTool::g_firstPlugIndex = 0;
 
 RotateTool::RotateTool( SceneView *view, const std::string &name )
-	:	TransformTool( view, name )
+	: TransformTool( view, name )
 {
-	static Style::Axes axes[] = { Style::XYZ, Style::X, Style::Y, Style::Z, };
+	static Style::Axes axes[] = {
+		Style::XYZ,
+		Style::X,
+		Style::Y,
+		Style::Z,
+	};
 	static const char *handleNames[] = { "xyz", "x", "y", "z" };
 
 	for( int i = 0; i < 4; ++i )
@@ -135,8 +140,7 @@ bool RotateTool::affectsHandles( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return
-		input == orientationPlug() ||
+	return input == orientationPlug() ||
 		input == scenePlug()->transformPlug();
 }
 
@@ -152,15 +156,15 @@ void RotateTool::updateHandles( float rasterScale )
 		bool enabled = true;
 		for( const auto &s : selection() )
 		{
-			if( !Rotation( s, orientation ).canApply( (*it)->axisMask(), /* maintainRoll = */ false ) )
+			if( !Rotation( s, orientation ).canApply( ( *it )->axisMask(), /* maintainRoll = */ false ) )
 			{
 				enabled = false;
 				break;
 			}
 		}
 
-		(*it)->setEnabled( enabled );
-		(*it)->setRasterScale( rasterScale );
+		( *it )->setEnabled( enabled );
+		( *it )->setRasterScale( rasterScale );
 	}
 }
 
@@ -188,7 +192,7 @@ bool RotateTool::keyRelease( const GafferUI::KeyEvent &event )
 	return false;
 }
 
-void RotateTool::sceneGadgetLeave( const GafferUI::ButtonEvent & event )
+void RotateTool::sceneGadgetLeave( const GafferUI::ButtonEvent &event )
 {
 	if( getTargetedMode() )
 	{
@@ -283,7 +287,7 @@ bool RotateTool::buttonPress( const GafferUI::ButtonEvent &event )
 
 	const SceneView *sv = static_cast<const SceneView *>( view() );
 	const Gadget *g = sv->viewportGadget()->getPrimaryChild();
-	const SceneGadget* sg = static_cast<const SceneGadget *>( g );
+	const SceneGadget *sg = static_cast<const SceneGadget *>( g );
 	if( !sg->objectAt( event.line, _, targetPos ) )
 	{
 		return true;
@@ -347,7 +351,7 @@ bool RotateTool::buttonPress( const GafferUI::ButtonEvent &event )
 //////////////////////////////////////////////////////////////////////////
 
 RotateTool::Rotation::Rotation( const Selection &selection, Orientation orientation )
-	:	m_selection( selection )
+	: m_selection( selection )
 {
 	const M44f handlesTransform = selection.orientedTransform( orientation );
 	m_gadgetToTransform = handlesTransform * selection.sceneToTransformSpace();
@@ -447,7 +451,8 @@ Imath::V3f RotateTool::Rotation::updatedRotateValue( const Gaffer::V3fPlug *rota
 		*currentValue = current;
 	}
 
-	Eulerf e; e.extract( mFinal );
+	Eulerf e;
+	e.extract( mFinal );
 	e.makeNear( degreesToRadians( current ) );
 
 	return radiansToDegrees( V3f( e ) );

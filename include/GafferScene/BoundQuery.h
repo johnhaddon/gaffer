@@ -55,46 +55,46 @@ struct GAFFERSCENE_API BoundQuery : Gaffer::ComputeNode
 {
 	enum class Space
 	{
-		Local    = 0x00,
-		World    = 0x01,
+		Local = 0x00,
+		World = 0x01,
 		Relative = 0x02
 	};
 
-	explicit BoundQuery( std::string const& name = defaultName< BoundQuery >() );
+	explicit BoundQuery( std::string const &name = defaultName<BoundQuery>() );
 	~BoundQuery() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::BoundQuery, BoundQueryTypeId, Gaffer::ComputeNode );
 
-	ScenePlug* scenePlug();
-	ScenePlug const* scenePlug() const;
-	Gaffer::StringPlug* locationPlug();
-	Gaffer::StringPlug const* locationPlug() const;
-	Gaffer::IntPlug* spacePlug();
-	Gaffer::IntPlug const* spacePlug() const;
-	Gaffer::StringPlug* relativeLocationPlug();
-	Gaffer::StringPlug const* relativeLocationPlug() const;
-	Gaffer::Box3fPlug* boundPlug();
-	Gaffer::Box3fPlug const* boundPlug() const;
-	Gaffer::V3fPlug* centerPlug();
-	Gaffer::V3fPlug const* centerPlug() const;
-	Gaffer::V3fPlug* sizePlug();
-	Gaffer::V3fPlug const* sizePlug() const;
+	ScenePlug *scenePlug();
+	ScenePlug const *scenePlug() const;
+	Gaffer::StringPlug *locationPlug();
+	Gaffer::StringPlug const *locationPlug() const;
+	Gaffer::IntPlug *spacePlug();
+	Gaffer::IntPlug const *spacePlug() const;
+	Gaffer::StringPlug *relativeLocationPlug();
+	Gaffer::StringPlug const *relativeLocationPlug() const;
+	Gaffer::Box3fPlug *boundPlug();
+	Gaffer::Box3fPlug const *boundPlug() const;
+	Gaffer::V3fPlug *centerPlug();
+	Gaffer::V3fPlug const *centerPlug() const;
+	Gaffer::V3fPlug *sizePlug();
+	Gaffer::V3fPlug const *sizePlug() const;
 
-	void affects( Gaffer::Plug const* input, AffectedPlugsContainer& outputs ) const override;
+	void affects( Gaffer::Plug const *input, AffectedPlugsContainer &outputs ) const override;
 
 protected:
 
-	void hash( Gaffer::ValuePlug const* output, Gaffer::Context const* context, IECore::MurmurHash& hash ) const override;
-	void compute( Gaffer::ValuePlug* output, Gaffer::Context const* context ) const override;
+	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &hash ) const override;
+	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
 private:
 
-	Gaffer::AtomicBox3fPlug* internalBoundPlug();
-	Gaffer::AtomicBox3fPlug const* internalBoundPlug() const;
+	Gaffer::AtomicBox3fPlug *internalBoundPlug();
+	Gaffer::AtomicBox3fPlug const *internalBoundPlug() const;
 
 	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( BoundQuery )
 
-} // GafferScene
+} // namespace GafferScene

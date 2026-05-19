@@ -90,10 +90,9 @@ struct Isolate::SetsToKeep
 		return result;
 	}
 
-	private :
+private:
 
-		boost::container::static_vector<IECore::PathMatcher, 3> m_sets;
-
+	boost::container::static_vector<IECore::PathMatcher, 3> m_sets;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -105,7 +104,7 @@ GAFFER_NODE_DEFINE_TYPE( Isolate );
 size_t Isolate::g_firstPlugIndex = 0;
 
 Isolate::Isolate( const std::string &name )
-	:	FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
+	: FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "from", Plug::In, "/" ) );
@@ -174,14 +173,12 @@ void Isolate::affects( const Gaffer::Plug *input, AffectedPlugsContainer &output
 	const bool affectsSetsToKeep =
 		input == keepLightsPlug() ||
 		input == keepCamerasPlug() ||
-		input == inPlug()->setPlug()
-	;
+		input == inPlug()->setPlug();
 
 	const bool affectsMayPruneChildren =
 		input == fromPlug() ||
 		input == filterPlug() ||
-		affectsSetsToKeep
-	;
+		affectsSetsToKeep;
 
 	if(
 		input == adjustBoundsPlug() ||
@@ -388,13 +385,14 @@ IECore::ConstPathMatcherDataPtr Isolate::computeSet( const IECore::InternedStrin
 	sceneScope.remove( ScenePlug::setNameContextName );
 
 	const std::string fromString = fromPlug()->getValue();
-	ScenePlug::ScenePath fromPath; ScenePlug::stringToPath( fromString, fromPath );
+	ScenePlug::ScenePath fromPath;
+	ScenePlug::stringToPath( fromString, fromPath );
 
 	const SetsToKeep setsToKeep( this );
 
 	for( PathMatcher::RawIterator pIt = inputSet.begin(), peIt = inputSet.end(); pIt != peIt; )
 	{
-		sceneScope.set( ScenePlug::scenePathContextName, &(*pIt) );
+		sceneScope.set( ScenePlug::scenePathContextName, &( *pIt ) );
 		const int m = filterPlug()->getValue() | setsToKeep.match( *pIt );
 		if( m & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch ) )
 		{
@@ -431,7 +429,8 @@ IECore::ConstPathMatcherDataPtr Isolate::computeSet( const IECore::InternedStrin
 bool Isolate::mayPruneChildren( const ScenePath &path, const Gaffer::Context *context, const SetsToKeep &setsToKeep ) const
 {
 	const std::string fromString = fromPlug()->getValue();
-	ScenePlug::ScenePath fromPath; ScenePlug::stringToPath( fromString, fromPath );
+	ScenePlug::ScenePath fromPath;
+	ScenePlug::stringToPath( fromString, fromPath );
 	if( !boost::starts_with( path, fromPath ) )
 	{
 		return false;

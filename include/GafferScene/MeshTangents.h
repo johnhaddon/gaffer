@@ -47,62 +47,61 @@ namespace GafferScene
 class GAFFERSCENE_API MeshTangents : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit MeshTangents( const std::string &name=defaultName<MeshTangents>() );
-		~MeshTangents() override;
+	explicit MeshTangents( const std::string &name = defaultName<MeshTangents>() );
+	~MeshTangents() override;
 
-		enum Mode
-		{
-			UV,
-			FirstEdge,
-			TwoEdges,
-			PrimitiveCentroid,
-			NumberOfModes
-		};
+	enum Mode
+	{
+		UV,
+		FirstEdge,
+		TwoEdges,
+		PrimitiveCentroid,
+		NumberOfModes
+	};
 
-		Gaffer::StringPlug *uvSetPlug();
-		const Gaffer::StringPlug *uvSetPlug() const;
+	Gaffer::StringPlug *uvSetPlug();
+	const Gaffer::StringPlug *uvSetPlug() const;
 
-		Gaffer::StringPlug *positionPlug();
-		const Gaffer::StringPlug *positionPlug() const;
+	Gaffer::StringPlug *positionPlug();
+	const Gaffer::StringPlug *positionPlug() const;
 
-		Gaffer::StringPlug *uTangentPlug();
-		const Gaffer::StringPlug *uTangentPlug() const;
+	Gaffer::StringPlug *uTangentPlug();
+	const Gaffer::StringPlug *uTangentPlug() const;
 
-		Gaffer::StringPlug *vTangentPlug();
-		const Gaffer::StringPlug *vTangentPlug() const;
+	Gaffer::StringPlug *vTangentPlug();
+	const Gaffer::StringPlug *vTangentPlug() const;
 
-		Gaffer::BoolPlug *orthogonalPlug();
-		const Gaffer::BoolPlug *orthogonalPlug() const;
+	Gaffer::BoolPlug *orthogonalPlug();
+	const Gaffer::BoolPlug *orthogonalPlug() const;
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::BoolPlug *leftHandedPlug();
-		const Gaffer::BoolPlug *leftHandedPlug() const;
+	Gaffer::BoolPlug *leftHandedPlug();
+	const Gaffer::BoolPlug *leftHandedPlug() const;
 
-		Gaffer::StringPlug *normalPlug();
-		const Gaffer::StringPlug *normalPlug() const;
+	Gaffer::StringPlug *normalPlug();
+	const Gaffer::StringPlug *normalPlug() const;
 
-		Gaffer::StringPlug *tangentPlug();
-		const Gaffer::StringPlug *tangentPlug() const;
+	Gaffer::StringPlug *tangentPlug();
+	const Gaffer::StringPlug *tangentPlug() const;
 
-		Gaffer::StringPlug *biTangentPlug();
-		const Gaffer::StringPlug *biTangentPlug() const;
+	Gaffer::StringPlug *biTangentPlug();
+	const Gaffer::StringPlug *biTangentPlug() const;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshTangents, MeshTangentsTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshTangents, MeshTangentsTypeId, ObjectProcessor );
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshTangents )

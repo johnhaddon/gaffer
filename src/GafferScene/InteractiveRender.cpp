@@ -97,59 +97,59 @@ unordered_set<string> &activeRenderIds()
 	return g_activeRenderIds;
 }
 
-} // anon namespace
+} // namespace
 
 // A thread-safe message handler for render messaging
 class InteractiveRender::RenderMessageHandler : public MessageHandler
 {
-	public :
+public:
 
-		RenderMessageHandler()
-			:	m_messages( new MessagesData )
-		{
-		}
+	RenderMessageHandler()
+		: m_messages( new MessagesData )
+	{
+	}
 
-		void handle( MessageHandler::Level level, const std::string &context, const std::string &message  ) override
-		{
-			// Always forward to the default handler for visibility outside of the UI
-			MessageHandler::getDefaultHandler()->handle( level, context, message );
+	void handle( MessageHandler::Level level, const std::string &context, const std::string &message ) override
+	{
+		// Always forward to the default handler for visibility outside of the UI
+		MessageHandler::getDefaultHandler()->handle( level, context, message );
 
-			{
-				tbb::mutex::scoped_lock lock( m_mutex );
-				m_messages->writable().add( IECorePreview::Message( level, context, message ) );
-			}
-
-			messagesChangedSignal();
-		}
-
-		IECore::DataPtr messages()
 		{
 			tbb::mutex::scoped_lock lock( m_mutex );
-			return m_messages->copy();
+			m_messages->writable().add( IECorePreview::Message( level, context, message ) );
 		}
 
-		void messagesHash( IECore::MurmurHash &h )
+		messagesChangedSignal();
+	}
+
+	IECore::DataPtr messages()
+	{
+		tbb::mutex::scoped_lock lock( m_mutex );
+		return m_messages->copy();
+	}
+
+	void messagesHash( IECore::MurmurHash &h )
+	{
+		tbb::mutex::scoped_lock lock( m_mutex );
+		m_messages->hash( h );
+	}
+
+	void clear()
+	{
 		{
 			tbb::mutex::scoped_lock lock( m_mutex );
-			m_messages->hash( h );
+			m_messages->writable().clear();
 		}
 
-		void clear()
-		{
-			{
-				tbb::mutex::scoped_lock lock( m_mutex );
-				m_messages->writable().clear();
-			}
+		messagesChangedSignal();
+	}
 
-			messagesChangedSignal();
-		}
+	Signals::Signal<void()> messagesChangedSignal;
 
-		Signals::Signal<void ()> messagesChangedSignal;
+private:
 
-	private :
-
-		tbb::mutex m_mutex;
-		MessagesDataPtr m_messages;
+	tbb::mutex m_mutex;
+	MessagesDataPtr m_messages;
 };
 
 
@@ -160,9 +160,9 @@ size_t InteractiveRender::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( InteractiveRender );
 
 InteractiveRender::InteractiveRender( const std::string &name )
-	:	ComputeNode( name ),
-		m_state( Stopped ),
-		m_messageHandler( new RenderMessageHandler() )
+	: ComputeNode( name ),
+	  m_state( Stopped ),
+	  m_messageHandler( new RenderMessageHandler() )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in" ) );
@@ -401,9 +401,7 @@ void InteractiveRender::update()
 		m_updateRequiredConnection = m_controller->updateRequiredSignal().connect(
 			boost::bind( &InteractiveRender::update, this )
 		);
-		m_scriptMetadataChangedConnection = Metadata::nodeValueChangedSignal( scriptNode() ).connect(
-			boost::bind( &InteractiveRender::scriptMetadataChanged, this, ::_2 )
-		);
+		m_scriptMetadataChangedConnection = Metadata::nodeValueChangedSignal( scriptNode() ).connect( boost::bind( &InteractiveRender::scriptMetadataChanged, this, ::_2 ) );
 
 		// We can now use a live render manifest from the controller, so get rid of the saved manifest
 		m_lastRenderManifest.reset();
@@ -491,7 +489,6 @@ void InteractiveRender::stop()
 	m_controller.reset();
 	m_renderer.reset();
 	m_state = Stopped;
-
 }
 
 void InteractiveRender::scriptMetadataChanged( IECore::InternedString key )

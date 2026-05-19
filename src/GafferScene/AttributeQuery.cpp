@@ -56,34 +56,34 @@ using namespace Gaffer;
 namespace
 {
 
-Gaffer::Plug const* correspondingPlug( const Gaffer::Plug* const parent, const Gaffer::Plug* const child, const Gaffer::Plug* const other )
+Gaffer::Plug const *correspondingPlug( const Gaffer::Plug *const parent, const Gaffer::Plug *const child, const Gaffer::Plug *const other )
 {
 	assert( parent != 0 );
 	assert( child != 0 );
 	assert( other != 0 );
 
-	boost::container::small_vector< const Gaffer::Plug*, 4 > path;
+	boost::container::small_vector<const Gaffer::Plug *, 4> path;
 
-	const Gaffer::Plug* plug = child;
+	const Gaffer::Plug *plug = child;
 
 	while( plug != parent )
 	{
 		path.push_back( plug );
-		plug = plug->parent< Gaffer::Plug >();
+		plug = plug->parent<Gaffer::Plug>();
 	}
 
 	plug = other;
 
-	while( ! path.empty() )
+	while( !path.empty() )
 	{
-		plug = plug->getChild< Gaffer::Plug >( path.back()->getName() );
+		plug = plug->getChild<Gaffer::Plug>( path.back()->getName() );
 		path.pop_back();
 	}
 
 	return plug;
 }
 
-void addChildPlugsToAffectedOutputs( const Gaffer::Plug* const plug, Gaffer::DependencyNode::AffectedPlugsContainer& outputs )
+void addChildPlugsToAffectedOutputs( const Gaffer::Plug *const plug, Gaffer::DependencyNode::AffectedPlugsContainer &outputs )
 {
 	assert( plug != 0 );
 
@@ -91,10 +91,11 @@ void addChildPlugsToAffectedOutputs( const Gaffer::Plug* const plug, Gaffer::Dep
 	{
 		outputs.push_back( plug );
 	}
-	else for( const Gaffer::PlugPtr& child : Gaffer::Plug::OutputRange( *plug ) )
-	{
-		addChildPlugsToAffectedOutputs( child.get(), outputs );
-	}
+	else
+		for( const Gaffer::PlugPtr &child : Gaffer::Plug::OutputRange( *plug ) )
+		{
+			addChildPlugsToAffectedOutputs( child.get(), outputs );
+		}
 }
 
 } // namespace
@@ -106,8 +107,8 @@ size_t AttributeQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( AttributeQuery );
 
-AttributeQuery::AttributeQuery( const std::string& name )
-: Gaffer::ComputeNode( name )
+AttributeQuery::AttributeQuery( const std::string &name )
+	: Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
@@ -119,72 +120,79 @@ AttributeQuery::AttributeQuery( const std::string& name )
 }
 
 AttributeQuery::~AttributeQuery()
-{}
-
-ScenePlug* AttributeQuery::scenePlug()
 {
-	return const_cast< ScenePlug* >(
-		static_cast< const AttributeQuery* >( this )->scenePlug() );
 }
 
-const ScenePlug* AttributeQuery::scenePlug() const
+ScenePlug *AttributeQuery::scenePlug()
 {
-	return getChild< ScenePlug >( g_firstPlugIndex );
+	return const_cast<ScenePlug *>(
+		static_cast<const AttributeQuery *>( this )->scenePlug()
+	);
 }
 
-Gaffer::StringPlug* AttributeQuery::locationPlug()
+const ScenePlug *AttributeQuery::scenePlug() const
 {
-	return const_cast< Gaffer::StringPlug* >(
-		static_cast< const AttributeQuery* >( this )->locationPlug() );
+	return getChild<ScenePlug>( g_firstPlugIndex );
 }
 
-const Gaffer::StringPlug* AttributeQuery::locationPlug() const
+Gaffer::StringPlug *AttributeQuery::locationPlug()
 {
-	return getChild< Gaffer::StringPlug >( g_firstPlugIndex + 1 );
+	return const_cast<Gaffer::StringPlug *>(
+		static_cast<const AttributeQuery *>( this )->locationPlug()
+	);
 }
 
-Gaffer::StringPlug* AttributeQuery::attributePlug()
+const Gaffer::StringPlug *AttributeQuery::locationPlug() const
 {
-	return const_cast< Gaffer::StringPlug* >(
-		static_cast< const AttributeQuery* >( this )->attributePlug() );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 1 );
 }
 
-const Gaffer::StringPlug* AttributeQuery::attributePlug() const
+Gaffer::StringPlug *AttributeQuery::attributePlug()
 {
-	return getChild< Gaffer::StringPlug >( g_firstPlugIndex + 2 );
+	return const_cast<Gaffer::StringPlug *>(
+		static_cast<const AttributeQuery *>( this )->attributePlug()
+	);
 }
 
-Gaffer::BoolPlug* AttributeQuery::inheritPlug()
+const Gaffer::StringPlug *AttributeQuery::attributePlug() const
 {
-	return const_cast< Gaffer::BoolPlug* >(
-		static_cast< const AttributeQuery* >( this )->inheritPlug() );
+	return getChild<Gaffer::StringPlug>( g_firstPlugIndex + 2 );
 }
 
-const Gaffer::BoolPlug* AttributeQuery::inheritPlug() const
+Gaffer::BoolPlug *AttributeQuery::inheritPlug()
 {
-	return getChild< Gaffer::BoolPlug >( g_firstPlugIndex + 3 );
+	return const_cast<Gaffer::BoolPlug *>(
+		static_cast<const AttributeQuery *>( this )->inheritPlug()
+	);
 }
 
-Gaffer::BoolPlug* AttributeQuery::existsPlug()
+const Gaffer::BoolPlug *AttributeQuery::inheritPlug() const
 {
-	return const_cast< Gaffer::BoolPlug* >(
-		static_cast< const AttributeQuery* >( this )->existsPlug() );
+	return getChild<Gaffer::BoolPlug>( g_firstPlugIndex + 3 );
 }
 
-const Gaffer::BoolPlug* AttributeQuery::existsPlug() const
+Gaffer::BoolPlug *AttributeQuery::existsPlug()
 {
-	return getChild< Gaffer::BoolPlug >( g_firstPlugIndex + 4 );
+	return const_cast<Gaffer::BoolPlug *>(
+		static_cast<const AttributeQuery *>( this )->existsPlug()
+	);
 }
 
-Gaffer::ObjectPlug* AttributeQuery::internalObjectPlug()
+const Gaffer::BoolPlug *AttributeQuery::existsPlug() const
 {
-	return const_cast< Gaffer::ObjectPlug* >(
-		static_cast< const AttributeQuery* >( this )->internalObjectPlug() );
+	return getChild<Gaffer::BoolPlug>( g_firstPlugIndex + 4 );
 }
 
-const Gaffer::ObjectPlug* AttributeQuery::internalObjectPlug() const
+Gaffer::ObjectPlug *AttributeQuery::internalObjectPlug()
 {
-	return getChild< Gaffer::ObjectPlug >( g_firstPlugIndex + 5 );
+	return const_cast<Gaffer::ObjectPlug *>(
+		static_cast<const AttributeQuery *>( this )->internalObjectPlug()
+	);
+}
+
+const Gaffer::ObjectPlug *AttributeQuery::internalObjectPlug() const
+{
+	return getChild<Gaffer::ObjectPlug>( g_firstPlugIndex + 5 );
 }
 
 bool AttributeQuery::isSetup() const
@@ -192,18 +200,17 @@ bool AttributeQuery::isSetup() const
 	return ( defaultPlug() != nullptr ) && ( valuePlug() != nullptr );
 }
 
-bool AttributeQuery::canSetup( const Gaffer::ValuePlug* const plug ) const
+bool AttributeQuery::canSetup( const Gaffer::ValuePlug *const plug ) const
 {
 	const bool success =
 		( plug != nullptr ) &&
-		( ! isSetup() ) &&
-		( PlugAlgo::canSetValueFromData( plug ) || (Gaffer::TypeId)plug->typeId() == ObjectPlugTypeId )
-	;
+		( !isSetup() ) &&
+		( PlugAlgo::canSetValueFromData( plug ) || (Gaffer::TypeId)plug->typeId() == ObjectPlugTypeId );
 
 	return success;
 }
 
-void AttributeQuery::setup( const Gaffer::ValuePlug* const plug )
+void AttributeQuery::setup( const Gaffer::ValuePlug *const plug )
 {
 	if( defaultPlug() )
 	{
@@ -239,13 +246,13 @@ IECore::InternedString AttributeQuery::defaultPlugName() const
 	return name;
 }
 
-void AttributeQuery::affects( const Gaffer::Plug* const input, AffectedPlugsContainer& outputs ) const
+void AttributeQuery::affects( const Gaffer::Plug *const input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
 
 	if( input == internalObjectPlug() )
 	{
-		const Gaffer::ValuePlug* const vplug = valuePlug();
+		const Gaffer::ValuePlug *const vplug = valuePlug();
 
 		if( vplug != nullptr )
 		{
@@ -260,7 +267,8 @@ void AttributeQuery::affects( const Gaffer::Plug* const input, AffectedPlugsCont
 		( input == attributePlug() ) ||
 		( input == scenePlug()->existsPlug() ) ||
 		( input == scenePlug()->attributesPlug() ) ||
-		( input == scenePlug()->globalsPlug() && !inheritPlug()->isSetToDefault() ) )
+		( input == scenePlug()->globalsPlug() && !inheritPlug()->isSetToDefault() )
+	)
 	{
 		outputs.push_back( internalObjectPlug() );
 	}
@@ -268,13 +276,14 @@ void AttributeQuery::affects( const Gaffer::Plug* const input, AffectedPlugsCont
 	{
 		assert( input != 0 );
 
-		const Gaffer::ValuePlug* const dplug = defaultPlug();
+		const Gaffer::ValuePlug *const dplug = defaultPlug();
 
 		if(
 			( dplug == input ) ||
-			( dplug->isAncestorOf( input ) ) )
+			( dplug->isAncestorOf( input ) )
+		)
 		{
-			const Gaffer::ValuePlug* const vplug = valuePlug();
+			const Gaffer::ValuePlug *const vplug = valuePlug();
 
 			if( vplug != nullptr )
 			{
@@ -284,7 +293,7 @@ void AttributeQuery::affects( const Gaffer::Plug* const input, AffectedPlugsCont
 	}
 }
 
-void AttributeQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::Context* const context, IECore::MurmurHash& h ) const
+void AttributeQuery::hash( const Gaffer::ValuePlug *const output, const Gaffer::Context *const context, IECore::MurmurHash &h ) const
 {
 	ComputeNode::hash( output, context, h );
 
@@ -292,17 +301,15 @@ void AttributeQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::
 	{
 		const std::string loc = locationPlug()->getValue();
 
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			const ScenePlug* const splug = scenePlug();
+			const ScenePlug *const splug = scenePlug();
 
 			const ScenePlug::ScenePath path = ScenePlug::stringToPath( loc );
 
 			if( splug->exists( path ) )
 			{
-				h.append( ( inheritPlug()->getValue() )
-					? splug->fullAttributesHash( path, /* withGlobalAttributes = */ true )
-					: splug->attributesHash( path ) );
+				h.append( ( inheritPlug()->getValue() ) ? splug->fullAttributesHash( path, /* withGlobalAttributes = */ true ) : splug->attributesHash( path ) );
 				attributePlug()->hash( h );
 			}
 		}
@@ -315,19 +322,20 @@ void AttributeQuery::hash( const Gaffer::ValuePlug* const output, const Gaffer::
 	{
 		assert( output != 0 );
 
-		const Gaffer::ValuePlug* const vplug = valuePlug();
+		const Gaffer::ValuePlug *const vplug = valuePlug();
 
 		if(
 			( vplug == output ) ||
-			( vplug->isAncestorOf( output ) ) )
+			( vplug->isAncestorOf( output ) )
+		)
 		{
 			internalObjectPlug()->hash( h );
-			IECore::assertedStaticCast< const Gaffer::ValuePlug >( correspondingPlug( vplug, output, defaultPlug() ) )->hash( h );
+			IECore::assertedStaticCast<const Gaffer::ValuePlug>( correspondingPlug( vplug, output, defaultPlug() ) )->hash( h );
 		}
 	}
 }
 
-void AttributeQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Context* const context ) const
+void AttributeQuery::compute( Gaffer::ValuePlug *const output, const Gaffer::Context *const context ) const
 {
 	if( output == internalObjectPlug() )
 	{
@@ -335,9 +343,9 @@ void AttributeQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Con
 
 		const std::string loc = locationPlug()->getValue();
 
-		if( ! loc.empty() )
+		if( !loc.empty() )
 		{
-			const ScenePlug* const splug = scenePlug();
+			const ScenePlug *const splug = scenePlug();
 
 			const ScenePlug::ScenePath path = ScenePlug::stringToPath( loc );
 
@@ -345,14 +353,12 @@ void AttributeQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Con
 			{
 				const std::string name = attributePlug()->getValue();
 
-				if( ! name.empty() )
+				if( !name.empty() )
 				{
-					const IECore::ConstCompoundObjectPtr cobj = ( inheritPlug()->getValue() )
-						? boost::static_pointer_cast< const IECore::CompoundObject >( splug->fullAttributes( path, /* withGlobalAttributes = */ true ) )
-						: ( splug->attributes( path ) );
+					const IECore::ConstCompoundObjectPtr cobj = ( inheritPlug()->getValue() ) ? boost::static_pointer_cast<const IECore::CompoundObject>( splug->fullAttributes( path, /* withGlobalAttributes = */ true ) ) : ( splug->attributes( path ) );
 					assert( cobj );
 
-					const IECore::CompoundObject::ObjectMap& objmap = cobj->members();
+					const IECore::CompoundObject::ObjectMap &objmap = cobj->members();
 					const IECore::CompoundObject::ObjectMap::const_iterator it = objmap.find( name );
 
 					if( it != objmap.end() )
@@ -363,24 +369,25 @@ void AttributeQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Con
 			}
 		}
 
-		IECore::assertedStaticCast< Gaffer::ObjectPlug >( output )->setValue( obj );
+		IECore::assertedStaticCast<Gaffer::ObjectPlug>( output )->setValue( obj );
 	}
 	else if( output == existsPlug() )
 	{
 		const IECore::ConstObjectPtr object = internalObjectPlug()->getValue();
 		assert( object );
 
-		IECore::assertedStaticCast< Gaffer::BoolPlug >( output )->setValue( object->isNotEqualTo( IECore::NullObject::defaultNullObject() ) );
+		IECore::assertedStaticCast<Gaffer::BoolPlug>( output )->setValue( object->isNotEqualTo( IECore::NullObject::defaultNullObject() ) );
 	}
 	else
 	{
 		assert( output != 0 );
 
-		const Gaffer::ValuePlug* const vplug = valuePlug();
+		const Gaffer::ValuePlug *const vplug = valuePlug();
 
 		if(
 			( vplug == output ) ||
-			( vplug->isAncestorOf( output ) ) )
+			( vplug->isAncestorOf( output ) )
+		)
 		{
 			const IECore::ConstObjectPtr object = internalObjectPlug()->getValue();
 			assert( object );
@@ -408,9 +415,9 @@ void AttributeQuery::compute( Gaffer::ValuePlug* const output, const Gaffer::Con
 				}
 			}
 
-			output->setFrom( static_cast<const Gaffer::ValuePlug *>(correspondingPlug( vplug, output, defaultPlug() ) ) );
+			output->setFrom( static_cast<const Gaffer::ValuePlug *>( correspondingPlug( vplug, output, defaultPlug() ) ) );
 		}
 	}
 }
 
-} // GafferScene
+} // namespace GafferScene

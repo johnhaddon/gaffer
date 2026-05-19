@@ -56,46 +56,45 @@ namespace GafferImage
 class GAFFERIMAGE_API ImageProcessor : public ImageNode
 {
 
-	public :
+public:
 
-		/// Constructs with a single input ImagePlug named "in". Use inPlug()
-		/// to access this plug.
-		explicit ImageProcessor( const std::string &name=defaultName<ImageProcessor>() );
+	/// Constructs with a single input ImagePlug named "in". Use inPlug()
+	/// to access this plug.
+	explicit ImageProcessor( const std::string &name = defaultName<ImageProcessor>() );
 
-		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
-		/// convenience for accessing the first child in the array, and use
-		/// inPlugs() to access the array itself.
-		ImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
-		~ImageProcessor() override;
+	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
+	/// convenience for accessing the first child in the array, and use
+	/// inPlugs() to access the array itself.
+	ImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
+	~ImageProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageProcessor, ImageProcessorTypeId, ImageNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageProcessor, ImageProcessorTypeId, ImageNode );
 
-		/// Returns the primary image input. For nodes with multiple inputs
-		/// this will be the first child of the inPlugs() array. For nodes
-		/// with a single input, it will be a plug parented directly to the
-		/// node.
-		ImagePlug *inPlug();
-		const ImagePlug *inPlug() const;
+	/// Returns the primary image input. For nodes with multiple inputs
+	/// this will be the first child of the inPlugs() array. For nodes
+	/// with a single input, it will be a plug parented directly to the
+	/// node.
+	ImagePlug *inPlug();
+	const ImagePlug *inPlug() const;
 
-		/// For nodes with multiple inputs, returns the ArrayPlug which
-		/// hosts them. For single input nodes, returns null.
-		Gaffer::ArrayPlug *inPlugs();
-		const Gaffer::ArrayPlug *inPlugs() const;
+	/// For nodes with multiple inputs, returns the ArrayPlug which
+	/// hosts them. For single input nodes, returns null.
+	Gaffer::ArrayPlug *inPlugs();
+	const Gaffer::ArrayPlug *inPlugs() const;
 
-		Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
-		const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
+	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
+	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-	protected :
+protected:
 
-		/// Reimplemented to pass through the hashes of the inPlug() when the node is disabled.
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		/// Reimplemented from ImageNode to pass through the inPlug() computations when the node is disabled.
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	/// Reimplemented to pass through the hashes of the inPlug() when the node is disabled.
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	/// Reimplemented from ImageNode to pass through the inPlug() computations when the node is disabled.
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ImageProcessor )

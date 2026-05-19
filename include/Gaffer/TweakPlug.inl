@@ -184,11 +184,7 @@ bool TweakPlug::applyElementwiseTweak(
 
 	if(
 		mode == Gaffer::TweakPlug::Create ||
-		( !current.data && (
-			mode == Gaffer::TweakPlug::CreateIfMissing ||
-			mode == Gaffer::TweakPlug::ListAppend ||
-			mode == Gaffer::TweakPlug::ListPrepend
-		) )
+		( !current.data && ( mode == Gaffer::TweakPlug::CreateIfMissing || mode == Gaffer::TweakPlug::ListAppend || mode == Gaffer::TweakPlug::ListPrepend ) )
 	)
 	{
 		DataAndIndices result;
@@ -239,7 +235,6 @@ bool TweakPlug::applyElementwiseTweak(
 
 	return true;
 }
-
 
 
 template<class GetDataFunctor, class SetDataFunctor>

@@ -64,40 +64,36 @@ const InternedString g_glVisualiserScaleString( "gl:visualiser:scale" );
 
 const char *faceCameraVertexSource()
 {
-	return
-		"#version 120\n"
-		""
-		"#if __VERSION__ <= 120\n"
-		"#define in attribute\n"
-		"#endif\n"
-		""
-		"in vec3 vertexP;"
-		"void main()"
-		"{"
-			"vec3 aimedXAxis, aimedYAxis, aimedZAxis;"
-			""
-			"aimedXAxis = normalize( gl_ModelViewMatrixInverse * vec4( 0, 0, -1, 0 ) ).xyz;"
-			"aimedYAxis = normalize( gl_ModelViewMatrixInverse * vec4( 0, 1, 0, 0 ) ).xyz;"
-			"aimedZAxis = normalize( gl_ModelViewMatrixInverse * vec4( 1, 0, 0, 0 ) ).xyz;"
-			""
-			"vec3 pAimed = vertexP.x * aimedXAxis + vertexP.y * aimedYAxis + vertexP.z * aimedZAxis;"
-			"vec4 pCam = gl_ModelViewMatrix * vec4( pAimed, 1 );"
-			""
-			"gl_Position = gl_ProjectionMatrix * pCam;"
-		"}"
-		;
+	return "#version 120\n"
+		   ""
+		   "#if __VERSION__ <= 120\n"
+		   "#define in attribute\n"
+		   "#endif\n"
+		   ""
+		   "in vec3 vertexP;"
+		   "void main()"
+		   "{"
+		   "vec3 aimedXAxis, aimedYAxis, aimedZAxis;"
+		   ""
+		   "aimedXAxis = normalize( gl_ModelViewMatrixInverse * vec4( 0, 0, -1, 0 ) ).xyz;"
+		   "aimedYAxis = normalize( gl_ModelViewMatrixInverse * vec4( 0, 1, 0, 0 ) ).xyz;"
+		   "aimedZAxis = normalize( gl_ModelViewMatrixInverse * vec4( 1, 0, 0, 0 ) ).xyz;"
+		   ""
+		   "vec3 pAimed = vertexP.x * aimedXAxis + vertexP.y * aimedYAxis + vertexP.z * aimedZAxis;"
+		   "vec4 pCam = gl_ModelViewMatrix * vec4( pAimed, 1 );"
+		   ""
+		   "gl_Position = gl_ProjectionMatrix * pCam;"
+		   "}";
 }
 
 const char *knotFragSource()
 {
-	return
-		"uniform vec3 markerColor;"
-		""
-		"void main()"
-		"{"
-			"gl_FragColor = vec4(markerColor, 1);"
-		"}"
-		;
+	return "uniform vec3 markerColor;"
+		   ""
+		   "void main()"
+		   "{"
+		   "gl_FragColor = vec4(markerColor, 1);"
+		   "}";
 }
 
 // \todo These should be consolidated with the function in BarndoorVisualiser into a templatized version
@@ -164,9 +160,9 @@ void addKnot( IECoreGL::GroupPtr group, const Knot &knot, const float visualiser
 
 	V3fVectorDataPtr p = new V3fVectorData;
 	std::vector<V3f> &pVec = p->writable();
-	pVec.push_back( V3f(  0, 0,  0  ) );
-	pVec.push_back( V3f(  0, visualiserScale * 2.f, -visualiserScale * 2.f  ) );
-	pVec.push_back( V3f(  0, visualiserScale * 2.f, visualiserScale * 2.f  ) );
+	pVec.push_back( V3f( 0, 0, 0 ) );
+	pVec.push_back( V3f( 0, visualiserScale * 2.f, -visualiserScale * 2.f ) );
+	pVec.push_back( V3f( 0, visualiserScale * 2.f, visualiserScale * 2.f ) );
 
 	IECoreScene::MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive( vertsPerPoly, vertIds, "linear", p );
 	ToGLMeshConverterPtr meshConverter = new ToGLMeshConverter( mesh );
@@ -181,14 +177,17 @@ void addKnot( IECoreGL::GroupPtr group, const Knot &knot, const float visualiser
 	shaderParameters->members()["markerColor"] = new IECore::Color3fData( knot.second );
 
 	markerGroup->getState()->add(
-		new IECoreGL::Primitive::Selectable( false ) );
+		new IECoreGL::Primitive::Selectable( false )
+	);
 	markerGroup->getState()->add(
 		new IECoreGL::ShaderStateComponent(
 			ShaderLoader::defaultShaderLoader(),
 			TextureLoader::defaultTextureLoader(),
 			faceCameraVertexSource(),
 			"",
-			knotFragSource(), shaderParameters ) );
+			knotFragSource(), shaderParameters
+		)
+	);
 
 	group->addChild( markerGroup );
 }
@@ -196,19 +195,18 @@ void addKnot( IECoreGL::GroupPtr group, const Knot &knot, const float visualiser
 class DecayVisualiser final : public LightFilterVisualiser
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( DecayVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( DecayVisualiser )
 
-		DecayVisualiser();
-		~DecayVisualiser() override;
+	DecayVisualiser();
+	~DecayVisualiser() override;
 
-		Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
 
-	protected :
+protected:
 
-		static LightFilterVisualiser::LightFilterVisualiserDescription<DecayVisualiser> g_visualiserDescription;
-
+	static LightFilterVisualiser::LightFilterVisualiserDescription<DecayVisualiser> g_visualiserDescription;
 };
 
 IE_CORE_DECLAREPTR( DecayVisualiser )

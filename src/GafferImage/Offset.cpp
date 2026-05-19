@@ -56,7 +56,7 @@ GAFFER_NODE_DEFINE_TYPE( Offset );
 size_t Offset::g_firstPlugIndex = 0;
 
 Offset::Offset( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V2iPlug( "offset" ) );
@@ -274,8 +274,8 @@ IECore::ConstFloatVectorDataPtr Offset::computeChannelData( const std::string &c
 					int inIndex = ImagePlug::pixelIndex( inScanlineOrigin, inTileOrigin );
 					int outIndex = ImagePlug::pixelIndex( inScanlineOrigin + offset, tileOrigin );
 
-					int outOffset = outIndex > 0 ? outSampleOffsets[ outIndex - 1 ] : 0;
-					int inOffset = inIndex > 0 ? inSampleOffsets[ inIndex - 1 ] : 0;
+					int outOffset = outIndex > 0 ? outSampleOffsets[outIndex - 1] : 0;
+					int inOffset = inIndex > 0 ? inSampleOffsets[inIndex - 1] : 0;
 
 					int scanlineSamples = outSampleOffsets[outIndex + scanlineLength - 1] - outOffset;
 
@@ -396,11 +396,11 @@ IECore::ConstIntVectorDataPtr Offset::computeSampleOffsets( const Imath::V2i &ti
 			{
 				int inIndex = ImagePlug::pixelIndex( inScanlineOrigin, inTileOrigin );
 				int outIndex = ImagePlug::pixelIndex( inScanlineOrigin + offset, tileOrigin );
-				int prevOffset = inIndex > 0 ? in[ inIndex - 1 ] : 0;
+				int prevOffset = inIndex > 0 ? in[inIndex - 1] : 0;
 				for( unsigned int j = 0; j < scanlineLength; j++ )
 				{
-					int offset = in[ inIndex + j ];
-					out[ outIndex + j ] = offset - prevOffset;
+					int offset = in[inIndex + j];
+					out[outIndex + j] = offset - prevOffset;
 					prevOffset = offset;
 				}
 			}

@@ -46,37 +46,36 @@ namespace Gaffer
 class GAFFER_API ContextVariables : public ContextProcessor
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextVariables, ContextVariablesTypeId, ContextProcessor );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::ContextVariables, ContextVariablesTypeId, ContextProcessor );
 
-		explicit ContextVariables( const std::string &name=GraphComponent::defaultName<ContextVariables>() );
-		~ContextVariables() override;
+	explicit ContextVariables( const std::string &name = GraphComponent::defaultName<ContextVariables>() );
+	~ContextVariables() override;
 
-		CompoundDataPlug *variablesPlug();
-		const CompoundDataPlug *variablesPlug() const;
+	CompoundDataPlug *variablesPlug();
+	const CompoundDataPlug *variablesPlug() const;
 
-		AtomicCompoundDataPlug *extraVariablesPlug();
-		const AtomicCompoundDataPlug *extraVariablesPlug() const;
+	AtomicCompoundDataPlug *extraVariablesPlug();
+	const AtomicCompoundDataPlug *extraVariablesPlug() const;
 
-		void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
+	void affects( const Plug *input, DependencyNode::AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Implemented to compute combinedVariablesPlug
-		void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
-		void compute( ValuePlug *output, const Context *context ) const override;
+	/// Implemented to compute combinedVariablesPlug
+	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
+	void compute( ValuePlug *output, const Context *context ) const override;
 
-		bool affectsContext( const Plug *input ) const override;
-		void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
+	bool affectsContext( const Plug *input ) const override;
+	void processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-	private :
+private:
 
-		AtomicCompoundDataPlug *combinedVariablesPlug();
-		const AtomicCompoundDataPlug *combinedVariablesPlug() const;
+	AtomicCompoundDataPlug *combinedVariablesPlug();
+	const AtomicCompoundDataPlug *combinedVariablesPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ContextVariables );

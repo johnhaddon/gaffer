@@ -66,10 +66,9 @@ struct InputScope
 		m_scope->removeMatching( deleteContextVariables );
 	}
 
-	private :
+private:
 
-		std::optional<Context::EditableScope> m_scope;
-
+	std::optional<Context::EditableScope> m_scope;
 };
 
 bool connectedIndividually( const ArrayPlug *array, size_t childIndex )
@@ -113,8 +112,8 @@ GAFFER_NODE_DEFINE_TYPE( Switch );
 
 size_t Switch::g_firstPlugIndex = 0;
 
-Switch::Switch( const std::string &name)
-	:	ComputeNode( name )
+Switch::Switch( const std::string &name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -144,7 +143,7 @@ void Switch::setup( const Plug *plug )
 	}
 
 	PlugPtr inElement = plug->createCounterpart( "in0", Plug::In );
-	MetadataAlgo::copyColors( plug , inElement.get() , /* overwrite = */ false  );
+	MetadataAlgo::copyColors( plug, inElement.get(), /* overwrite = */ false );
 	inElement->setFlags( Plug::Serialisable, true );
 	ArrayPlugPtr in = new ArrayPlug(
 		g_inPlugsName,
@@ -157,7 +156,7 @@ void Switch::setup( const Plug *plug )
 
 	PlugPtr out = plug->createCounterpart( g_outPlugName, Plug::Out );
 	out->setFlags( Plug::Serialisable, true );
-	MetadataAlgo::copyColors( plug , out.get() , /* overwrite = */ false  );
+	MetadataAlgo::copyColors( plug, out.get(), /* overwrite = */ false );
 	addChild( out );
 }
 
@@ -257,7 +256,7 @@ void Switch::affects( const Plug *input, DependencyNode::AffectedPlugsContainer 
 			{
 				for( Plug::RecursiveOutputIterator it( out ); !it.done(); ++it )
 				{
-					if( !(*it)->children().size() )
+					if( !( *it )->children().size() )
 					{
 						outputs.push_back( it->get() );
 					}
@@ -408,7 +407,7 @@ void Switch::plugSet( Plug *plug )
 
 void Switch::plugInputChanged( Plug *plug )
 {
-	if( plug == indexPlug() || plug == enabledPlug() || plug == deleteContextVariablesPlug()  )
+	if( plug == indexPlug() || plug == enabledPlug() || plug == deleteContextVariablesPlug() )
 	{
 		updateInternalConnection();
 	}
@@ -452,7 +451,7 @@ size_t Switch::inputIndex( const Context *context ) const
 	if( inPlugs->resizeWhenInputsChange() )
 	{
 		// Last input is always unconnected, so should be ignored.
-		return index % (numInputs - 1);
+		return index % ( numInputs - 1 );
 	}
 	else
 	{

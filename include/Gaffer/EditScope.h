@@ -67,76 +67,75 @@ class BoxOut;
 class GAFFER_API EditScope : public Box
 {
 
-	public :
+public:
 
-		explicit EditScope( const std::string &name=defaultName<EditScope>() );
-		~EditScope() override;
+	explicit EditScope( const std::string &name = defaultName<EditScope>() );
+	~EditScope() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::EditScope, EditScopeTypeId, Box );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::EditScope, EditScopeTypeId, Box );
 
-		/// Setup and plugs
-		/// ===============
-		///
-		/// EditScopes always have primary `in` and `out` plugs
-		/// of the same type, created by the `setup()` method.
-		/// Initially, `in` is connected directly to `out` (via
-		/// BoxIn and BoxOut nodes).
+	/// Setup and plugs
+	/// ===============
+	///
+	/// EditScopes always have primary `in` and `out` plugs
+	/// of the same type, created by the `setup()` method.
+	/// Initially, `in` is connected directly to `out` (via
+	/// BoxIn and BoxOut nodes).
 
-		void setup( const Plug *plug );
+	void setup( const Plug *plug );
 
-		template<typename T=Plug>
-		T *inPlug();
-		template<typename T=Plug>
-		const T *inPlug() const;
+	template<typename T = Plug>
+	T *inPlug();
+	template<typename T = Plug>
+	const T *inPlug() const;
 
-		template<typename T=Plug>
-		T *outPlug();
-		template<typename T=Plug>
-		const T *outPlug() const;
+	template<typename T = Plug>
+	T *outPlug();
+	template<typename T = Plug>
+	const T *outPlug() const;
 
-		/// Processors
-		/// ==========
-		///
-		/// Processors are child nodes that are inserted on the
-		/// internal path between the `out` and the `in` plugs. They
-		/// must have their own `in` and `out` plugs of the same
-		/// type as the EditScope itself.
+	/// Processors
+	/// ==========
+	///
+	/// Processors are child nodes that are inserted on the
+	/// internal path between the `out` and the `in` plugs. They
+	/// must have their own `in` and `out` plugs of the same
+	/// type as the EditScope itself.
 
-		/// Acquires a processor of the specified `type`. Throws if
-		/// `type` has not been registered by `registerProcessor()`.
-		template<typename T=DependencyNode>
-		T *acquireProcessor( const std::string &type, bool createIfNecessary = true );
+	/// Acquires a processor of the specified `type`. Throws if
+	/// `type` has not been registered by `registerProcessor()`.
+	template<typename T = DependencyNode>
+	T *acquireProcessor( const std::string &type, bool createIfNecessary = true );
 
-		/// Returns all the processors between the `out` and the `in` plugs.
-		std::vector<Gaffer::DependencyNode*> processors();
+	/// Returns all the processors between the `out` and the `in` plugs.
+	std::vector<Gaffer::DependencyNode *> processors();
 
-		/// Processor Factory
-		/// -----------------
+	/// Processor Factory
+	/// -----------------
 
-		using ProcessorCreator = std::function<DependencyNodePtr()>;
-		/// Registers a function that creates a processor of the specified type. This
-		/// is used by `acquireProcessor()` when the desired processor has not
-		/// been created yet.
-		static void registerProcessor( const std::string &type, ProcessorCreator creator );
-		static void deregisterProcessor( const std::string &type );
-		/// Returns a list of all the currently registered processor types.
-		static const std::vector<std::string> &registeredProcessors();
+	using ProcessorCreator = std::function<DependencyNodePtr()>;
+	/// Registers a function that creates a processor of the specified type. This
+	/// is used by `acquireProcessor()` when the desired processor has not
+	/// been created yet.
+	static void registerProcessor( const std::string &type, ProcessorCreator creator );
+	static void deregisterProcessor( const std::string &type );
+	/// Returns a list of all the currently registered processor types.
+	static const std::vector<std::string> &registeredProcessors();
 
-		/// Convenience class to allow static registrations of processors.
-		/// e.g. `static ProcessorRegistration g_registration( "Type", creator )`.
-		struct ProcessorRegistration
+	/// Convenience class to allow static registrations of processors.
+	/// e.g. `static ProcessorRegistration g_registration( "Type", creator )`.
+	struct ProcessorRegistration
+	{
+		ProcessorRegistration( const std::string &type, ProcessorCreator creator )
 		{
-			ProcessorRegistration( const std::string &type, ProcessorCreator creator )
-			{
-				registerProcessor( type, creator );
-			}
-		};
+			registerProcessor( type, creator );
+		}
+	};
 
-	private :
+private:
 
-		BoxOut *boxOut();
-		DependencyNode *acquireProcessorInternal( const std::string &type, bool createIfNecessary );
-
+	BoxOut *boxOut();
+	DependencyNode *acquireProcessorInternal( const std::string &type, bool createIfNecessary );
 };
 
 IE_CORE_DECLAREPTR( EditScope )

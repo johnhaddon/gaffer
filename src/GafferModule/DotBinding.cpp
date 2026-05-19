@@ -84,8 +84,7 @@ class DotSerialiser : public NodeSerialiser
 		}
 
 		// Only serialise a call to setup() when we need to construct this node
-		if( !Serialisation::acquireSerialiser( graphComponent->parent() )->childNeedsConstruction(
-			graphComponent, serialisation ) )
+		if( !Serialisation::acquireSerialiser( graphComponent->parent() )->childNeedsConstruction( graphComponent, serialisation ) )
 		{
 			return result;
 		}
@@ -106,7 +105,6 @@ class DotSerialiser : public NodeSerialiser
 
 		return result;
 	}
-
 };
 
 } // namespace
@@ -115,17 +113,14 @@ void GafferModule::bindDot()
 {
 
 	scope s = DependencyNodeClass<Dot>()
-		.def( "setup", &setup )
-	;
+				  .def( "setup", &setup );
 
 	enum_<Dot::LabelType>( "LabelType" )
 		.value( "None", Dot::None )
 		.value( "None_", Dot::None )
 		.value( "NodeName", Dot::NodeName )
 		.value( "UpstreamNodeName", Dot::UpstreamNodeName )
-		.value( "Custom", Dot::Custom )
-	;
+		.value( "Custom", Dot::Custom );
 
 	Serialisation::registerSerialiser( Dot::staticTypeId(), new DotSerialiser );
-
 }

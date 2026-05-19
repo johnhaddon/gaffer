@@ -69,8 +69,8 @@ void PathMatcherData::save( SaveContext *context ) const;
 template<>
 void PathMatcherData::load( LoadContextPtr context );
 
-template<> GAFFERSCENE_API
-void VisibleSetData::save( SaveContext *context ) const
+template<>
+GAFFERSCENE_API void VisibleSetData::save( SaveContext *context ) const
 {
 	Data::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), g_ioVersion );
@@ -85,8 +85,8 @@ void VisibleSetData::save( SaveContext *context ) const
 	context->save( expansionsData.get(), visibleSetIO.get(), g_expansionsEntry );
 }
 
-template<> GAFFERSCENE_API
-void VisibleSetData::load( LoadContextPtr context )
+template<>
+GAFFERSCENE_API void VisibleSetData::load( LoadContextPtr context )
 {
 	Data::load( context );
 	unsigned int v = 0;

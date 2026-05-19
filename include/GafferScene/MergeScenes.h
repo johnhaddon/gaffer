@@ -46,111 +46,110 @@ namespace GafferScene
 class GAFFERSCENE_API MergeScenes : public SceneProcessor
 {
 
-	public :
+public:
 
-		explicit MergeScenes( const std::string &name=defaultName<MergeScenes>() );
-		~MergeScenes() override;
+	explicit MergeScenes( const std::string &name = defaultName<MergeScenes>() );
+	~MergeScenes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MergeScenes, MergeScenesTypeId, SceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MergeScenes, MergeScenesTypeId, SceneProcessor );
 
-		enum class Mode
-		{
-			Keep,
-			Replace,
-			Merge
-		};
+	enum class Mode
+	{
+		Keep,
+		Replace,
+		Merge
+	};
 
-		Gaffer::IntPlug *transformModePlug();
-		const Gaffer::IntPlug *transformModePlug() const;
+	Gaffer::IntPlug *transformModePlug();
+	const Gaffer::IntPlug *transformModePlug() const;
 
-		Gaffer::IntPlug *attributesModePlug();
-		const Gaffer::IntPlug *attributesModePlug() const;
+	Gaffer::IntPlug *attributesModePlug();
+	const Gaffer::IntPlug *attributesModePlug() const;
 
-		Gaffer::IntPlug *objectModePlug();
-		const Gaffer::IntPlug *objectModePlug() const;
+	Gaffer::IntPlug *objectModePlug();
+	const Gaffer::IntPlug *objectModePlug() const;
 
-		Gaffer::IntPlug *globalsModePlug();
-		const Gaffer::IntPlug *globalsModePlug() const;
+	Gaffer::IntPlug *globalsModePlug();
+	const Gaffer::IntPlug *globalsModePlug() const;
 
-		Gaffer::BoolPlug *adjustBoundsPlug();
-		const Gaffer::BoolPlug *adjustBoundsPlug() const;
+	Gaffer::BoolPlug *adjustBoundsPlug();
+	const Gaffer::BoolPlug *adjustBoundsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		using InputMask = std::bitset<32>;
+	using InputMask = std::bitset<32>;
 
-		// Plugs used to track which inputs are valid
-		// at the current location. The value can be
-		// converted directly to an `InputMask` for use
-		// with `visit()`.
-		Gaffer::IntPlug *activeInputsPlug();
-		const Gaffer::IntPlug *activeInputsPlug() const;
+	// Plugs used to track which inputs are valid
+	// at the current location. The value can be
+	// converted directly to an `InputMask` for use
+	// with `visit()`.
+	Gaffer::IntPlug *activeInputsPlug();
+	const Gaffer::IntPlug *activeInputsPlug() const;
 
-		Gaffer::AtomicBox3fPlug *mergedDescendantsBoundPlug();
-		const Gaffer::AtomicBox3fPlug *mergedDescendantsBoundPlug() const;
+	Gaffer::AtomicBox3fPlug *mergedDescendantsBoundPlug();
+	const Gaffer::AtomicBox3fPlug *mergedDescendantsBoundPlug() const;
 
-		void hashActiveInputs( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		int computeActiveInputs( const Gaffer::Context *context ) const;
+	void hashActiveInputs( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	int computeActiveInputs( const Gaffer::Context *context ) const;
 
-		void hashMergedDescendantsBound( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		const Imath::Box3f computeMergedDescendantsBound( const Gaffer::Context *context ) const;
+	void hashMergedDescendantsBound( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	const Imath::Box3f computeMergedDescendantsBound( const Gaffer::Context *context ) const;
 
-		enum class InputType
-		{
-			Sole,
-			First,
-			Other
-		};
+	enum class InputType
+	{
+		Sole,
+		First,
+		Other
+	};
 
-		enum VisitOrder
-		{
-			Forwards,
-			Backwards,
-			FirstOnly,
-			LastOnly
-		};
+	enum VisitOrder
+	{
+		Forwards,
+		Backwards,
+		FirstOnly,
+		LastOnly
+	};
 
-		VisitOrder visitOrder( Mode mode, VisitOrder replaceOrder = VisitOrder::LastOnly ) const;
-		InputMask connectedInputs() const;
+	VisitOrder visitOrder( Mode mode, VisitOrder replaceOrder = VisitOrder::LastOnly ) const;
+	InputMask connectedInputs() const;
 
-		// Calls `visitor( inputType, inputIndex, input )` for all inputs specified by `inputMask`.
-		// Visitor may return `true` to continue to subsequent inputs or `false` to stop iteration.
-		template<typename Visitor>
-		void visit( InputMask inputMask, Visitor &&visitor, VisitOrder order = VisitOrder::Forwards ) const;
+	// Calls `visitor( inputType, inputIndex, input )` for all inputs specified by `inputMask`.
+	// Visitor may return `true` to continue to subsequent inputs or `false` to stop iteration.
+	template<typename Visitor>
+	void visit( InputMask inputMask, Visitor &&visitor, VisitOrder order = VisitOrder::Forwards ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MergeScenes )

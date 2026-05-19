@@ -47,47 +47,46 @@ namespace GafferScene
 class GAFFERSCENE_API ShuffleRenderPasses : public Gaffer::ContextProcessor
 {
 
-	public :
+public:
 
-		explicit ShuffleRenderPasses( const std::string &name=defaultName<ShuffleRenderPasses>() );
-		~ShuffleRenderPasses() override;
+	explicit ShuffleRenderPasses( const std::string &name = defaultName<ShuffleRenderPasses>() );
+	~ShuffleRenderPasses() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::ShuffleRenderPasses, ShuffleRenderPassesTypeId, Gaffer::ContextProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::ShuffleRenderPasses, ShuffleRenderPassesTypeId, Gaffer::ContextProcessor );
 
-		GafferScene::ScenePlug *inPlug();
-		const GafferScene::ScenePlug *inPlug() const;
+	GafferScene::ScenePlug *inPlug();
+	const GafferScene::ScenePlug *inPlug() const;
 
-		GafferScene::ScenePlug *outPlug();
-		const GafferScene::ScenePlug *outPlug() const;
+	GafferScene::ScenePlug *outPlug();
+	const GafferScene::ScenePlug *outPlug() const;
 
-		Gaffer::ShufflesPlug *shufflesPlug();
-		const Gaffer::ShufflesPlug *shufflesPlug() const;
+	Gaffer::ShufflesPlug *shufflesPlug();
+	const Gaffer::ShufflesPlug *shufflesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		bool affectsContext( const Gaffer::Plug *input ) const override;
-		void processContext( Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
+	bool affectsContext( const Gaffer::Plug *input ) const override;
+	void processContext( Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const override;
 
-	private :
+private:
 
-		class ProcessedScope;
+	class ProcessedScope;
 
-		Gaffer::StringPlug *sourceNamePlug();
-		const Gaffer::StringPlug *sourceNamePlug() const;
+	Gaffer::StringPlug *sourceNamePlug();
+	const Gaffer::StringPlug *sourceNamePlug() const;
 
-		Gaffer::ObjectPlug *mappingPlug();
-		const Gaffer::ObjectPlug *mappingPlug() const;
+	Gaffer::ObjectPlug *mappingPlug();
+	const Gaffer::ObjectPlug *mappingPlug() const;
 
-		void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
-		IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const;
+	void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
+	IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ShuffleRenderPasses );

@@ -48,43 +48,42 @@ namespace Gaffer
 class GAFFER_API MatchPatternPathFilter : public Gaffer::PathFilter
 {
 
-	public :
+public:
 
-		/// The filter passes through any path whose name matches
-		/// one or more of the patterns (using StringAlgo match()).
-		/// If leafOnly is true then directories will always be passed
-		/// through.
-		explicit MatchPatternPathFilter( const std::vector<IECore::StringAlgo::MatchPattern> &patterns, IECore::InternedString propertyName = "name", bool leafOnly = true, IECore::CompoundDataPtr userData = nullptr );
-		~MatchPatternPathFilter() override;
+	/// The filter passes through any path whose name matches
+	/// one or more of the patterns (using StringAlgo match()).
+	/// If leafOnly is true then directories will always be passed
+	/// through.
+	explicit MatchPatternPathFilter( const std::vector<IECore::StringAlgo::MatchPattern> &patterns, IECore::InternedString propertyName = "name", bool leafOnly = true, IECore::CompoundDataPtr userData = nullptr );
+	~MatchPatternPathFilter() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::MatchPatternPathFilter, MatchPatternPathFilterTypeId, PathFilter );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::MatchPatternPathFilter, MatchPatternPathFilterTypeId, PathFilter );
 
-		void setMatchPatterns( const std::vector<IECore::StringAlgo::MatchPattern> &patterns );
-		const std::vector<IECore::StringAlgo::MatchPattern> &getMatchPatterns() const;
+	void setMatchPatterns( const std::vector<IECore::StringAlgo::MatchPattern> &patterns );
+	const std::vector<IECore::StringAlgo::MatchPattern> &getMatchPatterns() const;
 
-		void setPropertyName( IECore::InternedString propertyName );
-		IECore::InternedString getPropertyName() const;
+	void setPropertyName( IECore::InternedString propertyName );
+	IECore::InternedString getPropertyName() const;
 
-		/// \todo Refactor the base class so that derived classes
-		/// are just responsible for returning a bool when given a
-		/// path, and then move inverting on to the base class.
-		void setInverted( bool inverted );
-		bool getInverted() const;
+	/// \todo Refactor the base class so that derived classes
+	/// are just responsible for returning a bool when given a
+	/// path, and then move inverting on to the base class.
+	void setInverted( bool inverted );
+	bool getInverted() const;
 
-	protected :
+protected:
 
-		void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
+	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-	private :
+private:
 
-		bool invert( bool b ) const;
-		bool remove( PathPtr path ) const;
+	bool invert( bool b ) const;
+	bool remove( PathPtr path ) const;
 
-		std::vector<IECore::StringAlgo::MatchPattern> m_patterns;
-		IECore::InternedString m_propertyName;
-		bool m_leafOnly;
-		bool m_inverted;
-
+	std::vector<IECore::StringAlgo::MatchPattern> m_patterns;
+	IECore::InternedString m_propertyName;
+	bool m_leafOnly;
+	bool m_inverted;
 };
 
 IE_CORE_DECLAREPTR( MatchPatternPathFilter )

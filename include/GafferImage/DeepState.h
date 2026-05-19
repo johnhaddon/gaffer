@@ -47,54 +47,54 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepState : public ImageProcessor
 {
 
-	public :
-		enum class TargetState
-		{
-			Sorted,
-			Tidy,
-			Flat
-		};
+public:
+
+	enum class TargetState
+	{
+		Sorted,
+		Tidy,
+		Flat
+	};
 
 
-		explicit DeepState( const std::string &name=defaultName<DeepState>() );
-		~DeepState() override;
+	explicit DeepState( const std::string &name = defaultName<DeepState>() );
+	~DeepState() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepState, DeepStateTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::DeepState, DeepStateTypeId, ImageProcessor );
 
-		Gaffer::IntPlug *deepStatePlug();
-		const Gaffer::IntPlug *deepStatePlug() const;
+	Gaffer::IntPlug *deepStatePlug();
+	const Gaffer::IntPlug *deepStatePlug() const;
 
-		Gaffer::BoolPlug *pruneTransparentPlug();
-		const Gaffer::BoolPlug *pruneTransparentPlug() const;
+	Gaffer::BoolPlug *pruneTransparentPlug();
+	const Gaffer::BoolPlug *pruneTransparentPlug() const;
 
-		Gaffer::BoolPlug *pruneOccludedPlug();
-		const Gaffer::BoolPlug *pruneOccludedPlug() const;
+	Gaffer::BoolPlug *pruneOccludedPlug();
+	const Gaffer::BoolPlug *pruneOccludedPlug() const;
 
-		Gaffer::FloatPlug *occludedThresholdPlug();
-		const Gaffer::FloatPlug *occludedThresholdPlug() const;
+	Gaffer::FloatPlug *occludedThresholdPlug();
+	const Gaffer::FloatPlug *occludedThresholdPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		Gaffer::CompoundObjectPlug *sampleMappingPlug();
-		const Gaffer::CompoundObjectPlug *sampleMappingPlug() const;
+	Gaffer::CompoundObjectPlug *sampleMappingPlug();
+	const Gaffer::CompoundObjectPlug *sampleMappingPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeepState )

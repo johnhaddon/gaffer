@@ -122,385 +122,383 @@ GafferScene::ScenePlug *findSceneForImage( GafferImage::ImagePlug *image, std::s
 class CropWindowTool::Rectangle : public GafferUI::Gadget
 {
 
-	public :
+public:
 
-		enum RectangleChangedReason
-		{
-			Invalid,
-			SetBound,
-			DragBegin,
-			DragMove,
-			DragEnd
-		};
+	enum RectangleChangedReason
+	{
+		Invalid,
+		SetBound,
+		DragBegin,
+		DragMove,
+		DragEnd
+	};
 
-		Rectangle( bool rasterSpace )
-			:	Gadget(), m_rasterSpace( rasterSpace ), m_editable( true ), m_masked( false ), m_dragInside( false ), m_xDragEdge( 0 ), m_yDragEdge( 0 )
+	Rectangle( bool rasterSpace )
+		: Gadget(), m_rasterSpace( rasterSpace ), m_editable( true ), m_masked( false ), m_dragInside( false ), m_xDragEdge( 0 ), m_yDragEdge( 0 )
+	{
+		mouseMoveSignal().connect( boost::bind( &Rectangle::mouseMove, this, ::_2 ) );
+		buttonPressSignal().connect( boost::bind( &Rectangle::buttonPress, this, ::_2 ) );
+		dragBeginSignal().connect( boost::bind( &Rectangle::dragBegin, this, ::_1, ::_2 ) );
+		dragEnterSignal().connect( boost::bind( &Rectangle::dragEnter, this, ::_1, ::_2 ) );
+		dragMoveSignal().connect( boost::bind( &Rectangle::dragMove, this, ::_2 ) );
+		dragEndSignal().connect( boost::bind( &Rectangle::dragEnd, this, ::_2 ) );
+		leaveSignal().connect( boost::bind( &Rectangle::leave, this ) );
+	}
+
+	Imath::Box3f bound() const override
+	{
+		if( m_rasterSpace )
 		{
-			mouseMoveSignal().connect( boost::bind( &Rectangle::mouseMove, this, ::_2 ) );
-			buttonPressSignal().connect( boost::bind( &Rectangle::buttonPress, this, ::_2 ) );
-			dragBeginSignal().connect( boost::bind( &Rectangle::dragBegin, this, ::_1, ::_2 ) );
-			dragEnterSignal().connect( boost::bind( &Rectangle::dragEnter, this, ::_1, ::_2 ) );
-			dragMoveSignal().connect( boost::bind( &Rectangle::dragMove, this, ::_2 ) );
-			dragEndSignal().connect( boost::bind( &Rectangle::dragEnd, this, ::_2 ) );
-			leaveSignal().connect( boost::bind( &Rectangle::leave, this ) );
+			// We draw in raster space so don't have a sensible bound
+			return Box3f();
+		}
+		else
+		{
+			return Box3f(
+				V3f( m_rectangle.min.x, m_rectangle.min.y, 0 ),
+				V3f( m_rectangle.max.x, m_rectangle.max.y, 0 )
+			);
+		}
+	}
+
+	void setRectangle( const Imath::Box2f &rectangle )
+	{
+		setRectangleInternal( rectangle, SetBound );
+	}
+
+	const Imath::Box2f &getRectangle() const
+	{
+		return m_rectangle;
+	}
+
+	void setEditable( bool editable )
+	{
+		m_editable = editable;
+	}
+
+	bool getEditable() const
+	{
+		return m_editable;
+	}
+
+	void setMasked( bool masked )
+	{
+		if( m_masked == masked )
+		{
+			return;
+		}
+		m_masked = masked;
+		dirty( DirtyType::Render );
+	}
+
+	bool getMasked() const
+	{
+		return m_masked;
+	}
+
+	using UnarySignal = Signals::Signal<void( Rectangle *, RectangleChangedReason )>;
+	UnarySignal &rectangleChangedSignal()
+	{
+		return m_rectangleChangedSignal;
+	}
+
+protected:
+
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+	{
+		if( layer != Layer::Front )
+		{
+			return;
 		}
 
-		Imath::Box3f bound() const override
+		if( m_rectangle.isEmpty() )
 		{
-			if( m_rasterSpace )
-			{
-				// We draw in raster space so don't have a sensible bound
-				return Box3f();
-			}
-			else
-			{
-				return Box3f(
-					V3f( m_rectangle.min.x, m_rectangle.min.y, 0 ),
-					V3f( m_rectangle.max.x, m_rectangle.max.y, 0 )
-				);
-			}
+			return;
 		}
 
-		void setRectangle( const Imath::Box2f &rectangle )
+		/// \todo Would it make sense for the ViewportGadget to have a way
+		/// of adding a child as an overlay, so we didn't have to do the
+		/// raster scope bit manually? Maybe that would let us write more reusable
+		/// gadgets, which could be used in any space, and we wouldn't need
+		/// eventPosition().
+		std::optional<ViewportGadget::RasterScope> rasterScope;
+		if( m_rasterSpace )
 		{
-			setRectangleInternal( rectangle, SetBound );
+			rasterScope.emplace( ancestor<ViewportGadget>() );
 		}
 
-		const Imath::Box2f &getRectangle() const
-		{
-			return m_rectangle;
-		}
+		glPushAttrib( GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT );
 
-		void setEditable( bool editable )
+		if( isSelectionRender( reason ) )
 		{
-			m_editable = editable;
-		}
-
-		bool getEditable() const
-		{
-			return m_editable;
-		}
-
-		void setMasked( bool masked )
-		{
-			if( m_masked == masked )
+			if( m_editable )
 			{
-				return;
-			}
-			m_masked = masked;
-			dirty( DirtyType::Render );
-		}
-
-		bool getMasked() const
-		{
-			return m_masked;
-		}
-
-		using UnarySignal = Signals::Signal<void ( Rectangle *, RectangleChangedReason )>;
-		UnarySignal &rectangleChangedSignal()
-		{
-			return m_rectangleChangedSignal;
-		}
-
-	protected :
-
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
-		{
-			if( layer != Layer::Front )
-			{
-				return;
-			}
-
-			if( m_rectangle.isEmpty() )
-			{
-				return;
-			}
-
-			/// \todo Would it make sense for the ViewportGadget to have a way
-			/// of adding a child as an overlay, so we didn't have to do the
-			/// raster scope bit manually? Maybe that would let us write more reusable
-			/// gadgets, which could be used in any space, and we wouldn't need
-			/// eventPosition().
-			std::optional<ViewportGadget::RasterScope> rasterScope;
-			if( m_rasterSpace )
-			{
-				rasterScope.emplace( ancestor<ViewportGadget>() );
-			}
-
-			glPushAttrib( GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT );
-
-				if( isSelectionRender( reason ) )
-				{
-					if( m_editable )
-					{
-						static const Box2f extents( V2f( -100000 ), V2f( 100000 ) );
-						style->renderSolidRectangle( extents );
-					}
-				}
-				else
-				{
-					if( m_masked )
-					{
-						glColor4f( 0.0f, 0.0f, 0.0f, 0.2f );
-						style->renderSolidRectangle( Box2f(
-							V2f( m_rectangle.min.x - 100000, m_rectangle.min.y ),
-							V2f( m_rectangle.max.x + 100000, m_rectangle.min.y - 100000 )
-						) );
-						style->renderSolidRectangle( Box2f(
-							V2f( m_rectangle.min.x - 100000, m_rectangle.max.y ),
-							V2f( m_rectangle.max.x + 100000, m_rectangle.max.y + 100000 )
-						) );
-						style->renderSolidRectangle( Box2f(
-							V2f( m_rectangle.min.x - 100000, m_rectangle.min.y ),
-							V2f( m_rectangle.min.x, m_rectangle.max.y )
-						) );
-						style->renderSolidRectangle( Box2f(
-							V2f( m_rectangle.max.x, m_rectangle.min.y ),
-							V2f( m_rectangle.max.x + 100000, m_rectangle.max.y )
-						) );
-					}
-
-					glEnable( GL_LINE_SMOOTH );
-					glLineWidth( 2.5f );
-					glColor4f( 1.0f, 0.33f, 0.33f, 1.0f );
-					style->renderRectangle( m_rectangle );
-				}
-
-			glPopAttrib();
-
-		}
-
-		unsigned layerMask() const override
-		{
-			return (unsigned)Layer::Front;
-		}
-
-		Imath::Box3f renderBound() const override
-		{
-			if( m_rasterSpace || m_editable || m_masked )
-			{
-				// We don't have a sensible bound when we're drawing
-				// in raster space or drawing an "infinite" mask outside
-				// the rectangle.
-				Box3f b;
-				b.makeInfinite();
-				return b;
-			}
-			else
-			{
-				return bound();
+				static const Box2f extents( V2f( -100000 ), V2f( 100000 ) );
+				style->renderSolidRectangle( extents );
 			}
 		}
-
-	private :
-
-		void setRectangleInternal( const Imath::Box2f &rectangle, RectangleChangedReason reason )
+		else
 		{
-			if( reason != DragBegin && reason != DragEnd && rectangle == m_rectangle )
+			if( m_masked )
 			{
-				// Early out if the value isn't changing. We never early out
-				// for DragBegin or DragEnd because we want to always signal
-				// those so a complete begin/move/end sequence is always
-				// available.
-				return;
+				glColor4f( 0.0f, 0.0f, 0.0f, 0.2f );
+				style->renderSolidRectangle( Box2f(
+					V2f( m_rectangle.min.x - 100000, m_rectangle.min.y ),
+					V2f( m_rectangle.max.x + 100000, m_rectangle.min.y - 100000 )
+				) );
+				style->renderSolidRectangle( Box2f(
+					V2f( m_rectangle.min.x - 100000, m_rectangle.max.y ),
+					V2f( m_rectangle.max.x + 100000, m_rectangle.max.y + 100000 )
+				) );
+				style->renderSolidRectangle( Box2f(
+					V2f( m_rectangle.min.x - 100000, m_rectangle.min.y ),
+					V2f( m_rectangle.min.x, m_rectangle.max.y )
+				) );
+				style->renderSolidRectangle( Box2f(
+					V2f( m_rectangle.max.x, m_rectangle.min.y ),
+					V2f( m_rectangle.max.x + 100000, m_rectangle.max.y )
+				) );
 			}
-			m_rectangle = rectangle;
-			dirty( DirtyType::Bound );
-			rectangleChangedSignal()( this, reason );
+
+			glEnable( GL_LINE_SMOOTH );
+			glLineWidth( 2.5f );
+			glColor4f( 1.0f, 0.33f, 0.33f, 1.0f );
+			style->renderRectangle( m_rectangle );
 		}
 
-		bool mouseMove( const ButtonEvent &event )
+		glPopAttrib();
+	}
+
+	unsigned layerMask() const override
+	{
+		return (unsigned)Layer::Front;
+	}
+
+	Imath::Box3f renderBound() const override
+	{
+		if( m_rasterSpace || m_editable || m_masked )
 		{
-			int x, y;
-			bool inside;
+			// We don't have a sensible bound when we're drawing
+			// in raster space or drawing an "infinite" mask outside
+			// the rectangle.
+			Box3f b;
+			b.makeInfinite();
+			return b;
+		}
+		else
+		{
+			return bound();
+		}
+	}
 
-			hoveredEdges( event, x, y, inside );
+private:
 
-			if( !inside || event.modifiers == ButtonEvent::Modifiers::Shift )
-			{
-				Pointer::setCurrent( "crossHair" );
-			}
-			else if( x && y )
-			{
-				const bool isDown = m_rasterSpace ? ( x * y > 0 ) : ( x * y < 0 );
-				Pointer::setCurrent( isDown ? "moveDiagonallyDown" : "moveDiagonallyUp" );
-			}
-			else if( x )
-			{
-				Pointer::setCurrent( "moveHorizontally" );
-			}
-			else if( y )
-			{
-				Pointer::setCurrent( "moveVertically" );
-			}
-			else
-			{
-				Pointer::setCurrent( "move" );
-			}
+	void setRectangleInternal( const Imath::Box2f &rectangle, RectangleChangedReason reason )
+	{
+		if( reason != DragBegin && reason != DragEnd && rectangle == m_rectangle )
+		{
+			// Early out if the value isn't changing. We never early out
+			// for DragBegin or DragEnd because we want to always signal
+			// those so a complete begin/move/end sequence is always
+			// available.
+			return;
+		}
+		m_rectangle = rectangle;
+		dirty( DirtyType::Bound );
+		rectangleChangedSignal()( this, reason );
+	}
 
+	bool mouseMove( const ButtonEvent &event )
+	{
+		int x, y;
+		bool inside;
+
+		hoveredEdges( event, x, y, inside );
+
+		if( !inside || event.modifiers == ButtonEvent::Modifiers::Shift )
+		{
+			Pointer::setCurrent( "crossHair" );
+		}
+		else if( x && y )
+		{
+			const bool isDown = m_rasterSpace ? ( x * y > 0 ) : ( x * y < 0 );
+			Pointer::setCurrent( isDown ? "moveDiagonallyDown" : "moveDiagonallyUp" );
+		}
+		else if( x )
+		{
+			Pointer::setCurrent( "moveHorizontally" );
+		}
+		else if( y )
+		{
+			Pointer::setCurrent( "moveVertically" );
+		}
+		else
+		{
+			Pointer::setCurrent( "move" );
+		}
+
+		return false;
+	}
+
+	bool buttonPress( const GafferUI::ButtonEvent &event )
+	{
+		if( event.buttons != ButtonEvent::Left )
+		{
 			return false;
 		}
 
-		bool buttonPress( const GafferUI::ButtonEvent &event )
-		{
-			if( event.buttons != ButtonEvent::Left )
-			{
-				return false;
-			}
+		hoveredEdges( event, m_xDragEdge, m_yDragEdge, m_dragInside );
+		return true;
+	}
 
-			hoveredEdges( event, m_xDragEdge, m_yDragEdge, m_dragInside );
-			return true;
+	IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+	{
+		m_dragStart = eventPosition( event );
+		m_dragStartRectangle = m_rectangle;
+		return IECore::NullObject::defaultNullObject();
+	}
+
+	bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+	{
+		if( event.sourceGadget != this )
+		{
+			return false;
 		}
 
-		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+		updateDragRectangle( event, DragBegin );
+		return true;
+	}
+
+	bool dragMove( const GafferUI::DragDropEvent &event )
+	{
+		updateDragRectangle( event, DragMove );
+		return true;
+	}
+
+	bool dragEnd( const GafferUI::DragDropEvent &event )
+	{
+		updateDragRectangle( event, DragEnd );
+		return true;
+	}
+
+	void updateDragRectangle( const GafferUI::DragDropEvent &event, RectangleChangedReason reason )
+	{
+		const V2f p = eventPosition( event );
+		Box2f b = m_dragStartRectangle;
+
+		if( !m_dragInside || event.modifiers == ButtonEvent::Modifiers::Shift )
 		{
-			m_dragStart = eventPosition( event );
-			m_dragStartRectangle = m_rectangle;
-			return IECore::NullObject::defaultNullObject();
+			b.min = m_dragStart;
+			b.max = p;
 		}
-
-		bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+		else if( m_xDragEdge || m_yDragEdge )
 		{
-			if( event.sourceGadget != this )
+			if( m_xDragEdge == -1 )
 			{
-				return false;
+				b.min.x = p.x;
+			}
+			else if( m_xDragEdge == 1 )
+			{
+				b.max.x = p.x;
 			}
 
-			updateDragRectangle( event, DragBegin );
-			return true;
-		}
-
-		bool dragMove( const GafferUI::DragDropEvent &event )
-		{
-			updateDragRectangle( event, DragMove );
-			return true;
-		}
-
-		bool dragEnd( const GafferUI::DragDropEvent &event )
-		{
-			updateDragRectangle( event, DragEnd );
-			return true;
-		}
-
-		void updateDragRectangle( const GafferUI::DragDropEvent &event, RectangleChangedReason reason )
-		{
-			const V2f p = eventPosition( event );
-			Box2f b = m_dragStartRectangle;
-
-			if( !m_dragInside || event.modifiers == ButtonEvent::Modifiers::Shift )
+			if( m_yDragEdge == -1 )
 			{
-				b.min = m_dragStart;
-				b.max = p;
+				b.min.y = p.y;
 			}
-			else if( m_xDragEdge || m_yDragEdge )
+			else if( m_yDragEdge == 1 )
 			{
-				if( m_xDragEdge == -1 )
-				{
-					b.min.x = p.x;
-				}
-				else if( m_xDragEdge == 1 )
-				{
-					b.max.x = p.x;
-				}
-
-				if( m_yDragEdge == -1 )
-				{
-					b.min.y = p.y;
-				}
-				else if( m_yDragEdge == 1 )
-				{
-					b.max.y = p.y;
-				}
-			}
-			else
-			{
-				const V2f offset = p - m_dragStart;
-				b.min += offset;
-				b.max += offset;
-			}
-
-			// fix max < min issues
-			Box2f c;
-			c.extendBy( b.min );
-			c.extendBy( b.max );
-
-			setRectangleInternal( c, reason );
-		}
-
-		void leave()
-		{
-			Pointer::setCurrent( "" );
-		}
-
-		void hoveredEdges( const ButtonEvent &event, int &x, int &y, bool &inside ) const
-		{
-			static const float threshold = 10;
-			static const V2f threshold2f( threshold );
-
-			x = y = 0;
-
-			const V2f p = eventPosition( event );
-
-			Box2f thresholdRegion = m_rectangle;
-			thresholdRegion.min -= threshold2f;
-			thresholdRegion.max += threshold2f;
-
-			inside = thresholdRegion.intersects( p );
-
-			const float xMinDelta = fabs( p.x - m_rectangle.min.x );
-			const float xMaxDelta = fabs( p.x - m_rectangle.max.x );
-			if( xMinDelta < xMaxDelta && xMinDelta < threshold )
-			{
-				x = -1;
-			}
-			else if( xMaxDelta < threshold )
-			{
-				x = 1;
-			}
-
-			const float yMinDelta = fabs( p.y - m_rectangle.min.y );
-			const float yMaxDelta = fabs( p.y - m_rectangle.max.y );
-			if( yMinDelta < yMaxDelta && yMinDelta < threshold )
-			{
-				y = -1;
-			}
-			else if( yMaxDelta < threshold )
-			{
-				y = 1;
+				b.max.y = p.y;
 			}
 		}
-
-		V2f eventPosition( const ButtonEvent &event ) const
+		else
 		{
-			const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
-			if( m_rasterSpace )
-			{
-				return viewportGadget->gadgetToRasterSpace( event.line.p1, this );
-			}
-			else
-			{
-				const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
-				V2f pixel = imageGadget->pixelAt( event.line );
-				Context::Scope contextScope( imageGadget->getContext() );
-				pixel.x *= imageGadget->getImage()->format().getPixelAspect();
-				return pixel;
-			}
+			const V2f offset = p - m_dragStart;
+			b.min += offset;
+			b.max += offset;
 		}
 
-		bool m_rasterSpace;
+		// fix max < min issues
+		Box2f c;
+		c.extendBy( b.min );
+		c.extendBy( b.max );
 
-		Imath::Box2f m_rectangle;
-		UnarySignal m_rectangleChangedSignal;
+		setRectangleInternal( c, reason );
+	}
 
-		bool m_editable;
-		bool m_masked;
+	void leave()
+	{
+		Pointer::setCurrent( "" );
+	}
 
-		Imath::Box2f m_dragStartRectangle;
-		Imath::V2f m_dragStart;
-		bool m_dragInside;
-		int m_xDragEdge;
-		int m_yDragEdge;
+	void hoveredEdges( const ButtonEvent &event, int &x, int &y, bool &inside ) const
+	{
+		static const float threshold = 10;
+		static const V2f threshold2f( threshold );
 
+		x = y = 0;
+
+		const V2f p = eventPosition( event );
+
+		Box2f thresholdRegion = m_rectangle;
+		thresholdRegion.min -= threshold2f;
+		thresholdRegion.max += threshold2f;
+
+		inside = thresholdRegion.intersects( p );
+
+		const float xMinDelta = fabs( p.x - m_rectangle.min.x );
+		const float xMaxDelta = fabs( p.x - m_rectangle.max.x );
+		if( xMinDelta < xMaxDelta && xMinDelta < threshold )
+		{
+			x = -1;
+		}
+		else if( xMaxDelta < threshold )
+		{
+			x = 1;
+		}
+
+		const float yMinDelta = fabs( p.y - m_rectangle.min.y );
+		const float yMaxDelta = fabs( p.y - m_rectangle.max.y );
+		if( yMinDelta < yMaxDelta && yMinDelta < threshold )
+		{
+			y = -1;
+		}
+		else if( yMaxDelta < threshold )
+		{
+			y = 1;
+		}
+	}
+
+	V2f eventPosition( const ButtonEvent &event ) const
+	{
+		const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+		if( m_rasterSpace )
+		{
+			return viewportGadget->gadgetToRasterSpace( event.line.p1, this );
+		}
+		else
+		{
+			const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
+			V2f pixel = imageGadget->pixelAt( event.line );
+			Context::Scope contextScope( imageGadget->getContext() );
+			pixel.x *= imageGadget->getImage()->format().getPixelAspect();
+			return pixel;
+		}
+	}
+
+	bool m_rasterSpace;
+
+	Imath::Box2f m_rectangle;
+	UnarySignal m_rectangleChangedSignal;
+
+	bool m_editable;
+	bool m_masked;
+
+	Imath::Box2f m_dragStartRectangle;
+	Imath::V2f m_dragStart;
+	bool m_dragInside;
+	int m_xDragEdge;
+	int m_yDragEdge;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -514,7 +512,7 @@ CropWindowTool::ToolDescription<CropWindowTool, SceneView> CropWindowTool::g_sce
 CropWindowTool::ToolDescription<CropWindowTool, ImageView> CropWindowTool::g_imageToolDescription;
 
 CropWindowTool::CropWindowTool( View *view, const std::string &name )
-	:	Tool( view, name ), m_needScenePlugSearch( true ), m_needCropWindowPlugSearch( true ), m_overlayDirty( true )
+	: Tool( view, name ), m_needScenePlugSearch( true ), m_needCropWindowPlugSearch( true ), m_overlayDirty( true )
 {
 	const bool rasterSpace = runTimeCast<SceneView>( view );
 	m_overlay = new Rectangle( rasterSpace );
@@ -820,18 +818,17 @@ void CropWindowTool::preRender()
 		);
 
 		setOverlayVisible( true );
-
 	}
 	catch( const std::exception &e )
 	{
-		setErrorMessage( std::string("Error: ") + e.what() );
+		setErrorMessage( std::string( "Error: " ) + e.what() );
 		setOverlayVisible( false );
 	}
 }
 
 void CropWindowTool::findScenePlug()
 {
-	if ( !m_needScenePlugSearch )
+	if( !m_needScenePlugSearch )
 	{
 		return;
 	}
@@ -862,7 +859,6 @@ void CropWindowTool::findScenePlug()
 }
 
 
-
 void CropWindowTool::findCropWindowPlug()
 {
 	if( !m_needCropWindowPlugSearch )
@@ -891,7 +887,7 @@ void CropWindowTool::findCropWindowPlug()
 
 		if( m_cropWindowPlug )
 		{
-			const std::string plugName =  m_cropWindowPlug->relativeName( m_cropWindowPlug->ancestor<ScriptNode>() );
+			const std::string plugName = m_cropWindowPlug->relativeName( m_cropWindowPlug->ancestor<ScriptNode>() );
 
 			// Even after the second search, we could still be read-only
 			if( MetadataAlgo::readOnly( m_cropWindowPlug.get() ) )
@@ -911,10 +907,7 @@ void CropWindowTool::findCropWindowPlug()
 				}
 
 				m_overlay->setEditable( plugEditable );
-				setOverlayMessage( plugEditable
-					? ( "Info: Editing <b>" + plugName + "</b>" )
-					: ( "Warning: <b>" + plugName + "</b> isn't editable" )
-				);
+				setOverlayMessage( plugEditable ? ( "Info: Editing <b>" + plugName + "</b>" ) : ( "Warning: <b>" + plugName + "</b> isn't editable" ) );
 			}
 
 			m_cropWindowPlugDirtiedConnection = m_cropWindowPlug->node()->plugDirtiedSignal().connect( boost::bind( &CropWindowTool::plugDirtied, this, ::_1 ) );
@@ -926,12 +919,11 @@ void CropWindowTool::findCropWindowPlug()
 			// (as the crop is still defined in the scene), we use the overlay message instead.
 			setOverlayMessage( "Error: No crop window found. Insert a <b>StandardOptions</b> node." );
 		}
-
 	}
 	catch( const std::exception &e )
 	{
 		m_cropWindowPlug = nullptr;
-		setOverlayMessage( std::string("Error: ") + e.what() );
+		setOverlayMessage( std::string( "Error: " ) + e.what() );
 	}
 
 	if( !m_cropWindowPlug )
@@ -945,7 +937,7 @@ void CropWindowTool::findCropWindowPlug()
 
 bool CropWindowTool::findCropWindowPlug( const SceneAlgo::History *history, bool enabledOnly )
 {
-	if ( findCropWindowPlugFromNode( history->scene.get(), enabledOnly ) )
+	if( findCropWindowPlugFromNode( history->scene.get(), enabledOnly ) )
 	{
 		return true;
 	}

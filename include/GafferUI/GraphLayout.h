@@ -66,43 +66,42 @@ IE_CORE_FORWARDDECLARE( GraphGadget );
 class GAFFERUI_API GraphLayout : public IECore::RunTimeTyped
 {
 
-	public :
+public:
 
-		~GraphLayout() override;
+	~GraphLayout() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferUI::GraphLayout, GraphLayoutTypeId, IECore::RunTimeTyped );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferUI::GraphLayout, GraphLayoutTypeId, IECore::RunTimeTyped );
 
-		/// Attempts to connect the specified node to the specified input nodes. Returns true
-		/// if any connections were made and false otherwise.
-		/// \undoable
-		virtual bool connectNode( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs ) const = 0;
-		/// Attempts to connect the specified nodes to the specified input nodes in a sensible fashion.
-		/// Returns true if any connections were made and false otherwise.
-		/// \undoable
-		virtual bool connectNodes( GraphGadget *graph, Gaffer::Set *nodes, Gaffer::Set *potentialInputs ) const = 0;
+	/// Attempts to connect the specified node to the specified input nodes. Returns true
+	/// if any connections were made and false otherwise.
+	/// \undoable
+	virtual bool connectNode( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs ) const = 0;
+	/// Attempts to connect the specified nodes to the specified input nodes in a sensible fashion.
+	/// Returns true if any connections were made and false otherwise.
+	/// \undoable
+	virtual bool connectNodes( GraphGadget *graph, Gaffer::Set *nodes, Gaffer::Set *potentialInputs ) const = 0;
 
-		/// Positions the specified node somewhere sensible, while leaving all other
-		/// nodes in the graph in their current positions. The fallbackPosition may
-		/// be specified to provide a hint as to where might be convenient for the user
-		/// in the absence of a better means of determining a position.
-		/// \undoable
-		virtual void positionNode( GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const = 0;
-		/// Positions the specified nodes somewhere sensible, preserving their relative positions
-		/// and leaving all other nodes in the graph in their current positions. The fallbackPosition may
-		/// be specified to provide a hint as to where might be convenient for the user
-		/// in the absence of a better means of determining a position.
-		/// \undoable
-		virtual void positionNodes( GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const = 0;
+	/// Positions the specified node somewhere sensible, while leaving all other
+	/// nodes in the graph in their current positions. The fallbackPosition may
+	/// be specified to provide a hint as to where might be convenient for the user
+	/// in the absence of a better means of determining a position.
+	/// \undoable
+	virtual void positionNode( GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const = 0;
+	/// Positions the specified nodes somewhere sensible, preserving their relative positions
+	/// and leaving all other nodes in the graph in their current positions. The fallbackPosition may
+	/// be specified to provide a hint as to where might be convenient for the user
+	/// in the absence of a better means of determining a position.
+	/// \undoable
+	virtual void positionNodes( GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const = 0;
 
-		/// Automatically positions the specified nodes relative to one another to
-		/// make best sense of the connections between them.
-		/// \undoable
-		virtual void layoutNodes( GraphGadget *graph, Gaffer::Set *nodes ) const = 0;
+	/// Automatically positions the specified nodes relative to one another to
+	/// make best sense of the connections between them.
+	/// \undoable
+	virtual void layoutNodes( GraphGadget *graph, Gaffer::Set *nodes ) const = 0;
 
-	protected :
+protected:
 
-		GraphLayout();
-
+	GraphLayout();
 };
 
 IE_CORE_DECLAREPTR( GraphLayout );

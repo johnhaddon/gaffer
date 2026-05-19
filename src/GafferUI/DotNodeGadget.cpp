@@ -64,7 +64,7 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DotNodeGadget );
 DotNodeGadget::NodeGadgetTypeDescription<DotNodeGadget> DotNodeGadget::g_nodeGadgetTypeDescription( Gaffer::Dot::staticTypeId() );
 
 DotNodeGadget::DotNodeGadget( Gaffer::NodePtr node )
-	:	StandardNodeGadget( node )
+	: StandardNodeGadget( node )
 {
 	if( !runTimeCast<Dot>( node ) )
 	{

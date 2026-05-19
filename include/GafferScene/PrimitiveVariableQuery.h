@@ -51,64 +51,64 @@ namespace GafferScene
 
 struct GAFFERSCENE_API PrimitiveVariableQuery : Gaffer::ComputeNode
 {
-	explicit PrimitiveVariableQuery( const std::string& name = defaultName< PrimitiveVariableQuery >() );
+	explicit PrimitiveVariableQuery( const std::string &name = defaultName<PrimitiveVariableQuery>() );
 	~PrimitiveVariableQuery() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveVariableQuery, PrimitiveVariableQueryTypeId, Gaffer::ComputeNode );
 
-	ScenePlug* scenePlug();
-	const ScenePlug* scenePlug() const;
+	ScenePlug *scenePlug();
+	const ScenePlug *scenePlug() const;
 
-	Gaffer::StringPlug* locationPlug();
-	const Gaffer::StringPlug* locationPlug() const;
+	Gaffer::StringPlug *locationPlug();
+	const Gaffer::StringPlug *locationPlug() const;
 
-	Gaffer::ArrayPlug* queriesPlug();
-	const Gaffer::ArrayPlug* queriesPlug() const;
+	Gaffer::ArrayPlug *queriesPlug();
+	const Gaffer::ArrayPlug *queriesPlug() const;
 
-	Gaffer::ArrayPlug* outPlug();
-	const Gaffer::ArrayPlug* outPlug() const;
+	Gaffer::ArrayPlug *outPlug();
+	const Gaffer::ArrayPlug *outPlug() const;
 
 	/// Adds a query for variable, with a type and default value specified by plug. The
 	/// returned NameValuePlug is parented to `queriesPlug()` and may be edited subsequently
 	/// to modify the variable name and default. Corresponding children are added to `outPlug()`
 	/// to provide the output from the query.
-	Gaffer::NameValuePlug* addQuery( const Gaffer::ValuePlug* plug, const std::string& variable = "" );
+	Gaffer::NameValuePlug *addQuery( const Gaffer::ValuePlug *plug, const std::string &variable = "" );
 
 	/// Removes a query. Throws an Exception if the query or corresponding children
 	/// of `outPlug()` can not be deleted.
-	void removeQuery( Gaffer::NameValuePlug* plug );
+	void removeQuery( Gaffer::NameValuePlug *plug );
 
 	/// Returns the `exists`, `value`, `type`, `interpolation` or child of `out` corresponding
 	/// to the specified query plug. Throws an exception if the query does not exist or
 	/// the corresponding output plug does not exist or is the wrong type.
-	const Gaffer::BoolPlug* existsPlugFromQuery( const Gaffer::NameValuePlug* queryPlug ) const;
-	const Gaffer::ValuePlug* valuePlugFromQuery( const Gaffer::NameValuePlug* queryPlug ) const;
-	const Gaffer::StringPlug* typePlugFromQuery( const Gaffer::NameValuePlug* queryPlug ) const;
-	const Gaffer::IntPlug* interpolationPlugFromQuery( const Gaffer::NameValuePlug* queryPlug ) const;
-	const Gaffer::ValuePlug* outPlugFromQuery( const Gaffer::NameValuePlug* queryPlug ) const;
+	const Gaffer::BoolPlug *existsPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
+	const Gaffer::ValuePlug *valuePlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
+	const Gaffer::StringPlug *typePlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
+	const Gaffer::IntPlug *interpolationPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
+	const Gaffer::ValuePlug *outPlugFromQuery( const Gaffer::NameValuePlug *queryPlug ) const;
 
 	/// Returns the child of `queryPlug` or `outPlug` corresponding to the `outputPlug`.
 	/// `outputPlug` can be any descendant of the desired ancestor.
 	/// Throws an exception if there is no corresponding query or the result is the wrong type.
-	const Gaffer::NameValuePlug* queryPlug( const Gaffer::ValuePlug* outputPlug ) const;
-	const Gaffer::ValuePlug* outPlug( const Gaffer::ValuePlug* outputPlug ) const;
+	const Gaffer::NameValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
+	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
 public:
 
-	void affects( const Gaffer::Plug* input, AffectedPlugsContainer& outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
 protected:
 
-	void hash( const Gaffer::ValuePlug* output, const Gaffer::Context* context, IECore::MurmurHash& h ) const override;
-	void compute( Gaffer::ValuePlug* output, const Gaffer::Context* context) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
 private:
 
-	const Gaffer::ObjectPlug* internalObjectPlug() const;
+	const Gaffer::ObjectPlug *internalObjectPlug() const;
 
 	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( PrimitiveVariableQuery );
 
-} // GafferScene
+} // namespace GafferScene

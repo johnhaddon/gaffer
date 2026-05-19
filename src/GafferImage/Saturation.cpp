@@ -46,7 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( Saturation );
 size_t Saturation::g_firstPlugIndex = 0;
 
 Saturation::Saturation( const std::string &name )
-	:	ColorProcessor( name )
+	: ColorProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FloatPlug( "saturation", Gaffer::Plug::In, 1.0f, 0.0f ) );
@@ -84,8 +84,7 @@ ColorProcessor::ColorProcessorFunction Saturation::colorProcessor( const Gaffer:
 		return ColorProcessorFunction();
 	}
 
-	return [saturation] ( IECore::FloatVectorData *rData, IECore::FloatVectorData *gData, IECore::FloatVectorData *bData )
-	{
+	return [saturation]( IECore::FloatVectorData *rData, IECore::FloatVectorData *gData, IECore::FloatVectorData *bData ) {
 		std::vector<float> &r = rData->writable();
 		std::vector<float> &g = gData->writable();
 		std::vector<float> &b = bData->writable();

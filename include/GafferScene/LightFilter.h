@@ -43,10 +43,10 @@
 namespace GafferSceneModule
 {
 
-	// Forward declaration to enable friend declaration
-	class LightFilterSerialiser;
+// Forward declaration to enable friend declaration
+class LightFilterSerialiser;
 
-} // namespace GafferModule
+} // namespace GafferSceneModule
 
 namespace GafferScene
 {
@@ -54,50 +54,49 @@ namespace GafferScene
 class GAFFERSCENE_API LightFilter : public ObjectSource
 {
 
-	public :
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::LightFilter, LightFilterTypeId, ObjectSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::LightFilter, LightFilterTypeId, ObjectSource );
 
-		~LightFilter() override;
+	~LightFilter() override;
 
-		void loadShader( const std::string &shaderName, bool keepExistingValues=false );
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false );
 
-		Gaffer::StringPlug *filteredLightsPlug();
-		const Gaffer::StringPlug *filteredLightsPlug() const;
+	Gaffer::StringPlug *filteredLightsPlug();
+	const Gaffer::StringPlug *filteredLightsPlug() const;
 
-		Gaffer::Plug *parametersPlug();
-		const Gaffer::Plug *parametersPlug() const;
+	Gaffer::Plug *parametersPlug();
+	const Gaffer::Plug *parametersPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		explicit LightFilter( GafferScene::ShaderPtr shader, const std::string &name=defaultName<LightFilter>() );
+	explicit LightFilter( GafferScene::ShaderPtr shader, const std::string &name = defaultName<LightFilter>() );
 
-		void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
+	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-		void hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-		void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
+	void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 
-	private :
+private:
 
-		friend class GafferSceneModule::LightFilterSerialiser;
+	friend class GafferSceneModule::LightFilterSerialiser;
 
-		GafferScene::ShaderPlug *shaderPlug();
-		const GafferScene::ShaderPlug *shaderPlug() const;
+	GafferScene::ShaderPlug *shaderPlug();
+	const GafferScene::ShaderPlug *shaderPlug() const;
 
-		GafferScene::Shader *shaderNode();
-		const GafferScene::Shader *shaderNode() const;
+	GafferScene::Shader *shaderNode();
+	const GafferScene::Shader *shaderNode() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( LightFilter )

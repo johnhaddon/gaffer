@@ -54,7 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( MergeCurves );
 size_t MergeCurves::g_firstPlugIndex = 0;
 
 MergeCurves::MergeCurves( const std::string &name )
-	:	MergeObjects( name, "/mergedCurves" )
+	: MergeObjects( name, "/mergedCurves" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 }
@@ -63,13 +63,13 @@ MergeCurves::~MergeCurves()
 {
 }
 
-IECore::ConstObjectPtr MergeCurves::computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MergeCurves::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
 {
-	std::vector< std::pair< const IECoreScene::Primitive *, Imath::M44f > > curves;
+	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> curves;
 
 	for( const auto &[object, transform] : sources )
 	{
-		const IECoreScene::CurvesPrimitive * m = IECore::runTimeCast< const IECoreScene::CurvesPrimitive >( object.get() );
+		const IECoreScene::CurvesPrimitive *m = IECore::runTimeCast<const IECoreScene::CurvesPrimitive>( object.get() );
 		if( !m )
 		{
 			// Just skip anything that's not a curve

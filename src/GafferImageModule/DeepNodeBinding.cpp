@@ -59,14 +59,12 @@ void GafferImageModule::bindDeepNodes()
 		scope s = DependencyNodeClass<FlatToDeep>();
 		enum_<FlatToDeep::ZMode>( "ZMode" )
 			.value( "Constant", FlatToDeep::ZMode::Constant )
-			.value( "Channel", FlatToDeep::ZMode::Channel )
-		;
+			.value( "Channel", FlatToDeep::ZMode::Channel );
 		enum_<FlatToDeep::ZBackMode>( "ZBackMode" )
 			.value( "None", FlatToDeep::ZBackMode::None )
 			.value( "None_", FlatToDeep::ZBackMode::None )
 			.value( "Thickness", FlatToDeep::ZBackMode::Thickness )
-			.value( "Channel", FlatToDeep::ZBackMode::Channel )
-		;
+			.value( "Channel", FlatToDeep::ZBackMode::Channel );
 	}
 	DependencyNodeClass<DeepMerge>();
 	{
@@ -75,8 +73,7 @@ void GafferImageModule::bindDeepNodes()
 		enum_<DeepState::TargetState>( "TargetState" )
 			.value( "Sorted", DeepState::TargetState::Sorted )
 			.value( "Tidy", DeepState::TargetState::Tidy )
-			.value( "Flat", DeepState::TargetState::Flat )
-		;
+			.value( "Flat", DeepState::TargetState::Flat );
 	}
 	{
 		scope s = DependencyNodeClass<DeepToFlat>();
@@ -85,8 +82,7 @@ void GafferImageModule::bindDeepNodes()
 			.value( "Range", DeepToFlat::DepthMode::Range )
 			.value( "Filtered", DeepToFlat::DepthMode::Filtered )
 			.value( "None", DeepToFlat::DepthMode::None )
-			.value( "None_", DeepToFlat::DepthMode::None )
-		;
+			.value( "None_", DeepToFlat::DepthMode::None );
 	}
 	DependencyNodeClass<Empty>();
 	DependencyNodeClass<DeepSampleCounts>();

@@ -48,31 +48,31 @@ namespace GafferScene
 class GAFFERSCENE_API AttributeTweaks : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit AttributeTweaks( const std::string &name=defaultName<AttributeTweaks>() );
-		~AttributeTweaks() override;
+	explicit AttributeTweaks( const std::string &name = defaultName<AttributeTweaks>() );
+	~AttributeTweaks() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::AttributeTweaks, AttributeTweaksTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::AttributeTweaks, AttributeTweaksTypeId, AttributeProcessor );
 
-		Gaffer::BoolPlug *localisePlug();
-		const Gaffer::BoolPlug *localisePlug() const;
+	Gaffer::BoolPlug *localisePlug();
+	const Gaffer::BoolPlug *localisePlug() const;
 
-		Gaffer::BoolPlug *ignoreMissingPlug();
-		const Gaffer::BoolPlug *ignoreMissingPlug() const;
+	Gaffer::BoolPlug *ignoreMissingPlug();
+	const Gaffer::BoolPlug *ignoreMissingPlug() const;
 
-		Gaffer::TweaksPlug *tweaksPlug();
-		const Gaffer::TweaksPlug *tweaksPlug() const;
+	Gaffer::TweaksPlug *tweaksPlug();
+	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( AttributeTweaks )
 
-}  // namespace GafferScene
+} // namespace GafferScene

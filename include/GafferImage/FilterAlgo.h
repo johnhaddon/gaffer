@@ -54,7 +54,7 @@ namespace FilterAlgo
 
 GAFFERIMAGE_API const std::vector<std::string> &filterNames();
 
-GAFFERIMAGE_API const OIIO::Filter2D* acquireFilter( const std::string &name );
+GAFFERIMAGE_API const OIIO::Filter2D *acquireFilter( const std::string &name );
 
 
 // Find the region covered by a filter with a given width, given a position and axis-aligned derivatives

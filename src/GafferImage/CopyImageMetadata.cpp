@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyImageMetadata );
 size_t CopyImageMetadata::g_firstPlugIndex = 0;
 
 CopyImageMetadata::CopyImageMetadata( const std::string &name )
-	:	MetadataProcessor( name )
+	: MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "copyFrom" ) );
@@ -99,7 +99,7 @@ void CopyImageMetadata::affects( const Gaffer::Plug *input, AffectedPlugsContain
 {
 	MetadataProcessor::affects( input, outputs );
 
-	if ( input == inPlug()->viewNamesPlug() || input == copyFromPlug()->metadataPlug() || input == namesPlug() || input == invertNamesPlug() )
+	if( input == inPlug()->viewNamesPlug() || input == copyFromPlug()->metadataPlug() || input == namesPlug() || input == invertNamesPlug() )
 	{
 		outputs.push_back( outPlug()->metadataPlug() );
 	}
@@ -132,7 +132,7 @@ IECore::ConstCompoundDataPtr CopyImageMetadata::computeProcessedMetadata( const 
 
 	const std::string names = namesPlug()->getValue();
 	const bool invert = invertNamesPlug()->getValue();
-	if ( !invert && !names.size() )
+	if( !invert && !names.size() )
 	{
 		return inputMetadata;
 	}

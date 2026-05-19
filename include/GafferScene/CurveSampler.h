@@ -44,29 +44,28 @@ namespace GafferScene
 class GAFFERSCENE_API CurveSampler : public PrimitiveSampler
 {
 
-	public :
+public:
 
-		explicit CurveSampler( const std::string &name = defaultName<CurveSampler>() );
-		~CurveSampler() override;
+	explicit CurveSampler( const std::string &name = defaultName<CurveSampler>() );
+	~CurveSampler() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CurveSampler, CurveSamplerTypeId, PrimitiveSampler );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CurveSampler, CurveSamplerTypeId, PrimitiveSampler );
 
-		Gaffer::StringPlug *curveIndexPlug();
-		const Gaffer::StringPlug *curveIndexPlug() const;
+	Gaffer::StringPlug *curveIndexPlug();
+	const Gaffer::StringPlug *curveIndexPlug() const;
 
-		Gaffer::StringPlug *vPlug();
-		const Gaffer::StringPlug *vPlug() const;
+	Gaffer::StringPlug *vPlug();
+	const Gaffer::StringPlug *vPlug() const;
 
-	protected :
+protected:
 
-		bool affectsSamplingFunction( const Gaffer::Plug *input ) const override;
-		void hashSamplingFunction( IECore::MurmurHash &h ) const override;
-		SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const override;
+	bool affectsSamplingFunction( const Gaffer::Plug *input ) const override;
+	void hashSamplingFunction( IECore::MurmurHash &h ) const override;
+	SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CurveSampler )

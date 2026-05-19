@@ -57,14 +57,14 @@ IE_CORE_DEFINERUNTIMETYPED( SphereLevelSet );
 size_t SphereLevelSet::g_firstPlugIndex = 0;
 
 SphereLevelSet::SphereLevelSet( const std::string &name )
-: ObjectSource( name, "sphere" )
+	: ObjectSource( name, "sphere" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild( new StringPlug( "grid", Plug::In, "surface") );
+	addChild( new StringPlug( "grid", Plug::In, "surface" ) );
 	addChild( new FloatPlug( "radius", Plug::In, 1.0f, 0.0f ) );
 	addChild( new V3fPlug( "center", Plug::In, V3f( 0.0f, 0.0f, 0.0f ) ) );
 	addChild( new FloatPlug( "voxelSize", Plug::In, 0.1f, 0.0001f ) );
-	addChild( new FloatPlug( "halfWidth", Plug::In, (float) openvdb::LEVEL_SET_HALF_WIDTH, 1.0001f ) );
+	addChild( new FloatPlug( "halfWidth", Plug::In, (float)openvdb::LEVEL_SET_HALF_WIDTH, 1.0001f ) );
 }
 
 SphereLevelSet::~SphereLevelSet()
@@ -183,7 +183,7 @@ IECore::ConstObjectPtr SphereLevelSet::computeSource( const Context *context ) c
 
 	openvdb::FloatGrid::Ptr grid = openvdb::tools::createLevelSetSphere<openvdb::FloatGrid, Interrupter>(
 		radiusPlug()->getValue(),
-		openvdb::Vec3f(center.x, center.y, center.z),
+		openvdb::Vec3f( center.x, center.y, center.z ),
 		voxelSizePlug()->getValue(),
 		halfWidthPlug()->getValue(),
 		&interrupter
@@ -197,7 +197,6 @@ IECore::ConstObjectPtr SphereLevelSet::computeSource( const Context *context ) c
 	newVDBObject->insertGrid( grid );
 
 	return newVDBObject;
-
 }
 
 Gaffer::ValuePlug::CachePolicy SphereLevelSet::computeCachePolicy( const Gaffer::ValuePlug *output ) const

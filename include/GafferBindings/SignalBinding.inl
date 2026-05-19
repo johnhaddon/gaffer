@@ -59,9 +59,8 @@ struct Slot<Gaffer::Signals::Signal<Result( Args... ), Combiner>, Caller>
 {
 
 	Slot( boost::python::object slot )
-		:	m_slot( boost::python::borrowed( slot.ptr() ) )
+		: m_slot( boost::python::borrowed( slot.ptr() ) )
 	{
-
 	}
 
 	~Slot()
@@ -70,7 +69,7 @@ struct Slot<Gaffer::Signals::Signal<Result( Args... ), Combiner>, Caller>
 		m_slot.reset();
 	}
 
-	Result operator()( Args&&... args )
+	Result operator () ( Args &&...args )
 	{
 		IECorePython::ScopedGILLock gilLock;
 		try
@@ -91,7 +90,6 @@ struct Slot<Gaffer::Signals::Signal<Result( Args... ), Combiner>, Caller>
 	}
 
 	boost::python::handle<PyObject> m_slot;
-
 };
 
 // Overload boost's `visit_each()` function for all our Slot types.
@@ -150,7 +148,6 @@ struct DefaultSignalCaller<Gaffer::Signals::Signal<Result( Args... ), Combiner>>
 		IECorePython::ScopedGILRelease gilRelease;
 		return s( args... );
 	}
-
 };
 
 template<typename Signal>
@@ -160,7 +157,7 @@ template<typename Result, typename... Args, typename Combiner>
 struct DefaultSlotCaller<Gaffer::Signals::Signal<Result( Args... ), Combiner>>
 {
 
-	Result operator()( boost::python::object slot, Args&&... args )
+	Result operator () ( boost::python::object slot, Args &&...args )
 	{
 		try
 		{
@@ -178,15 +175,14 @@ struct DefaultSlotCaller<Gaffer::Signals::Signal<Result( Args... ), Combiner>>
 			IECorePython::ExceptionAlgo::translatePythonException();
 		}
 	}
-
 };
 
 template<typename Signal, typename SignalCaller, typename SlotCaller>
 SignalClass<Signal, SignalCaller, SlotCaller>::SignalClass( const char *className, const char *docString )
-	:	boost::python::class_<Signal, boost::noncopyable>( className, docString )
+	: boost::python::class_<Signal, boost::noncopyable>( className, docString )
 {
 	this->def( "connect", &Detail::connect<Signal, SlotCaller>, ( boost::python::arg( "slot" ), boost::python::arg( "scoped" ) = false ) );
-	this->def( "connectFront", &Detail::connectFront<Signal, SlotCaller>, (boost::python::arg( "slot" ), boost::python::arg( "scoped" ) = false ) );
+	this->def( "connectFront", &Detail::connectFront<Signal, SlotCaller>, ( boost::python::arg( "slot" ), boost::python::arg( "scoped" ) = false ) );
 	this->def( "disconnectAllSlots", &Signal::disconnectAllSlots );
 	this->def( "numSlots", &Signal::numSlots );
 	this->def( "empty", &Signal::empty );

@@ -46,58 +46,57 @@ namespace GafferScene
 class GAFFERSCENE_API MeshSplit : public BranchCreator
 {
 
-	public :
+public:
 
-		explicit MeshSplit( const std::string &name=defaultName<MeshSplit>() );
-		~MeshSplit() override;
+	explicit MeshSplit( const std::string &name = defaultName<MeshSplit>() );
+	~MeshSplit() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshSplit, MeshSplitTypeId, BranchCreator );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshSplit, MeshSplitTypeId, BranchCreator );
 
-		Gaffer::StringPlug *segmentPlug();
-		const Gaffer::StringPlug *segmentPlug() const;
+	Gaffer::StringPlug *segmentPlug();
+	const Gaffer::StringPlug *segmentPlug() const;
 
-		Gaffer::BoolPlug *nameFromSegmentPlug();
-		const Gaffer::BoolPlug *nameFromSegmentPlug() const;
+	Gaffer::BoolPlug *nameFromSegmentPlug();
+	const Gaffer::BoolPlug *nameFromSegmentPlug() const;
 
-		Gaffer::BoolPlug *preciseBoundsPlug();
-		const Gaffer::BoolPlug *preciseBoundsPlug() const;
+	Gaffer::BoolPlug *preciseBoundsPlug();
+	const Gaffer::BoolPlug *preciseBoundsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		bool affectsBranchBound( const Gaffer::Plug *input ) const override;
-		void hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box3f computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
+	bool affectsBranchBound( const Gaffer::Plug *input ) const override;
+	void hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box3f computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
 
-		bool affectsBranchTransform( const Gaffer::Plug *input ) const override;
-		void hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::M44f computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
+	bool affectsBranchTransform( const Gaffer::Plug *input ) const override;
+	void hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::M44f computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
 
-		void hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
+	void hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
 
-		bool processesRootObject() const override;
-		bool affectsBranchObject( const Gaffer::Plug *input ) const override;
-		void hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
+	bool processesRootObject() const override;
+	bool affectsBranchObject( const Gaffer::Plug *input ) const override;
+	void hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
 
-		bool affectsBranchChildNames( const Gaffer::Plug *input ) const override;
-		void hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstInternedStringVectorDataPtr computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
+	bool affectsBranchChildNames( const Gaffer::Plug *input ) const override;
+	void hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstInternedStringVectorDataPtr computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		IE_CORE_FORWARDDECLARE( MeshSplitterData );
+	IE_CORE_FORWARDDECLARE( MeshSplitterData );
 
-		Gaffer::ObjectPlug *meshSplitterPlug();
-		const Gaffer::ObjectPlug *meshSplitterPlug() const;
+	Gaffer::ObjectPlug *meshSplitterPlug();
+	const Gaffer::ObjectPlug *meshSplitterPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshSplit )

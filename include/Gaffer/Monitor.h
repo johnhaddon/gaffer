@@ -50,61 +50,59 @@ class Process;
 class GAFFER_API Monitor : public IECore::RefCounted
 {
 
-	public :
+public:
 
-		~Monitor() override;
+	~Monitor() override;
 
-		IE_CORE_DECLAREMEMBERPTR( Monitor )
+	IE_CORE_DECLAREMEMBERPTR( Monitor )
 
-		using MonitorSet = boost::container::flat_set<MonitorPtr>;
+	using MonitorSet = boost::container::flat_set<MonitorPtr>;
 
-		class GAFFER_API Scope : private ThreadState::Scope
-		{
+	class GAFFER_API Scope : private ThreadState::Scope
+	{
 
-			public :
+	public:
 
-				/// Constructs a Scope where the monitor has the specified
-				/// active state. If monitor is null, the scope is a no-op.
-				explicit Scope( const MonitorPtr &monitor, bool active = true );
-				/// Constructs a Scope where each of `monitors` has the
-				/// specified `active` state.
-				explicit Scope( const MonitorSet &monitors, bool active = true );
-				/// Returns to the previously active set of monitors.
-				~Scope();
+		/// Constructs a Scope where the monitor has the specified
+		/// active state. If monitor is null, the scope is a no-op.
+		explicit Scope( const MonitorPtr &monitor, bool active = true );
+		/// Constructs a Scope where each of `monitors` has the
+		/// specified `active` state.
+		explicit Scope( const MonitorSet &monitors, bool active = true );
+		/// Returns to the previously active set of monitors.
+		~Scope();
 
-			private :
+	private:
 
-				void initializeMightForce();
+		void initializeMightForce();
 
-				MonitorSet m_monitors;
+		MonitorSet m_monitors;
+	};
 
-		};
+	/// Returns the set of monitors that are currently active
+	/// on this thread.
+	static const MonitorSet &current();
 
-		/// Returns the set of monitors that are currently active
-		/// on this thread.
-		static const MonitorSet &current();
+protected:
 
-	protected :
+	Monitor();
 
-		Monitor();
+	friend class Process;
 
-		friend class Process;
+	/// Implementations must be safe to call concurrently.
+	virtual void processStarted( const Process *process ) = 0;
+	/// Implementations must be safe to call concurrently.
+	virtual void processFinished( const Process *process ) = 0;
 
-		/// Implementations must be safe to call concurrently.
-		virtual void processStarted( const Process *process ) = 0;
-		/// Implementations must be safe to call concurrently.
-		virtual void processFinished( const Process *process ) = 0;
+	/// Must return true if forceMonitoring will ever return true from this Monitor
+	/// \todo : In order to efficently support a monitor that only forces monitoring during
+	/// compute processes, we would need to make this specific to processType - this will
+	/// perhaps be easier if we switch to using a type id instead of a string.
+	virtual bool mightForceMonitoring();
 
-		/// Must return true if forceMonitoring will ever return true from this Monitor
-		/// \todo : In order to efficently support a monitor that only forces monitoring during
-		/// compute processes, we would need to make this specific to processType - this will
-		/// perhaps be easier if we switch to using a type id instead of a string.
-		virtual bool mightForceMonitoring();
-
-		/// Return true to force the monitored process to run, rather than using employing caches that
-		/// may allow skipping the execution ( obviously, this is much slower than using the caches )
-		virtual bool forceMonitoring( const Gaffer::Plug *plug, const IECore::InternedString &processType );
-
+	/// Return true to force the monitored process to run, rather than using employing caches that
+	/// may allow skipping the execution ( obviously, this is much slower than using the caches )
+	virtual bool forceMonitoring( const Gaffer::Plug *plug, const IECore::InternedString &processType );
 };
 
 IE_CORE_DECLAREPTR( Monitor )

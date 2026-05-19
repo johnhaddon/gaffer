@@ -55,99 +55,97 @@ IE_CORE_FORWARDDECLARE( ShadingEngine )
 class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 {
 
-	public :
+public:
 
-		explicit OSLObject( const std::string &name=defaultName<OSLObject>() );
-		~OSLObject() override;
+	explicit OSLObject( const std::string &name = defaultName<OSLObject>() );
+	~OSLObject() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLObject, OSLObjectTypeId, GafferScene::Deformer );
+	GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLObject, OSLObjectTypeId, GafferScene::Deformer );
 
-		Gaffer::IntPlug *interpolationPlug();
-		const Gaffer::IntPlug *interpolationPlug() const;
+	Gaffer::IntPlug *interpolationPlug();
+	const Gaffer::IntPlug *interpolationPlug() const;
 
-		Gaffer::BoolPlug *useTransformPlug();
-		const Gaffer::BoolPlug *useTransformPlug() const;
+	Gaffer::BoolPlug *useTransformPlug();
+	const Gaffer::BoolPlug *useTransformPlug() const;
 
-		Gaffer::BoolPlug *useAttributesPlug();
-		const Gaffer::BoolPlug *useAttributesPlug() const;
+	Gaffer::BoolPlug *useAttributesPlug();
+	const Gaffer::BoolPlug *useAttributesPlug() const;
 
-		GafferScene::ScenePlug *sourcePlug();
-		const GafferScene::ScenePlug *sourcePlug() const;
+	GafferScene::ScenePlug *sourcePlug();
+	const GafferScene::ScenePlug *sourcePlug() const;
 
-		class GAFFEROSL_API SourceLocationPlug : public Gaffer::ValuePlug
-		{
+	class GAFFEROSL_API SourceLocationPlug : public Gaffer::ValuePlug
+	{
 
-			public :
+	public:
 
-				GAFFER_PLUG_DECLARE_TYPE( OSLObject::SourceLocationPlug, OSLObjectSourceLocationPlugTypeId, ValuePlug );
+		GAFFER_PLUG_DECLARE_TYPE( OSLObject::SourceLocationPlug, OSLObjectSourceLocationPlugTypeId, ValuePlug );
 
-				explicit SourceLocationPlug( const std::string &name = defaultName<SourceLocationPlug>(), Direction direction=In, unsigned flags = Default );
+		explicit SourceLocationPlug( const std::string &name = defaultName<SourceLocationPlug>(), Direction direction = In, unsigned flags = Default );
 
-				Gaffer::StringPlug *namePlug();
-				const Gaffer::StringPlug *namePlug() const;
+		Gaffer::StringPlug *namePlug();
+		const Gaffer::StringPlug *namePlug() const;
 
-				Gaffer::BoolPlug *enabledPlug();
-				const Gaffer::BoolPlug *enabledPlug() const;
+		Gaffer::BoolPlug *enabledPlug();
+		const Gaffer::BoolPlug *enabledPlug() const;
 
-				Gaffer::StringPlug *locationPlug();
-				const Gaffer::StringPlug *locationPlug() const;
+		Gaffer::StringPlug *locationPlug();
+		const Gaffer::StringPlug *locationPlug() const;
 
-				Gaffer::BoolPlug *pointCloudPlug();
-				const Gaffer::BoolPlug *pointCloudPlug() const;
+		Gaffer::BoolPlug *pointCloudPlug();
+		const Gaffer::BoolPlug *pointCloudPlug() const;
 
-				Gaffer::BoolPlug *transformPlug();
-				const Gaffer::BoolPlug *transformPlug() const;
+		Gaffer::BoolPlug *transformPlug();
+		const Gaffer::BoolPlug *transformPlug() const;
 
-				bool acceptsChild( const GraphComponent *potentialChild ) const override;
-				Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+		bool acceptsChild( const GraphComponent *potentialChild ) const override;
+		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	};
 
-		};
+	Gaffer::ArrayPlug *sourceLocationsPlug();
+	const Gaffer::ArrayPlug *sourceLocationsPlug() const;
 
-		Gaffer::ArrayPlug *sourceLocationsPlug();
-		const Gaffer::ArrayPlug *sourceLocationsPlug() const;
+	Gaffer::BoolPlug *ignoreMissingSourceLocationsPlug();
+	const Gaffer::BoolPlug *ignoreMissingSourceLocationsPlug() const;
 
-		Gaffer::BoolPlug *ignoreMissingSourceLocationsPlug();
-		const Gaffer::BoolPlug *ignoreMissingSourceLocationsPlug() const;
+	Gaffer::Plug *primitiveVariablesPlug();
+	const Gaffer::Plug *primitiveVariablesPlug() const;
 
-		Gaffer::Plug *primitiveVariablesPlug();
-		const Gaffer::Plug *primitiveVariablesPlug() const;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+protected:
 
-	protected :
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
+	bool adjustBounds() const override;
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
-		Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
-		bool adjustBounds() const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+private:
 
-	private :
+	GafferScene::ShaderPlug *shaderPlug();
+	const GafferScene::ShaderPlug *shaderPlug() const;
 
-		GafferScene::ShaderPlug *shaderPlug();
-		const GafferScene::ShaderPlug *shaderPlug() const;
+	Gaffer::ObjectPlug *resampledInObjectPlug();
+	const Gaffer::ObjectPlug *resampledInObjectPlug() const;
 
-		Gaffer::ObjectPlug *resampledInObjectPlug();
-		const Gaffer::ObjectPlug *resampledInObjectPlug() const;
+	Gaffer::StringPlug *resampledNamesPlug();
+	const Gaffer::StringPlug *resampledNamesPlug() const;
 
-		Gaffer::StringPlug *resampledNamesPlug();
-		const Gaffer::StringPlug *resampledNamesPlug() const;
+	ConstShadingEnginePtr shadingEngine( const Gaffer::Context *context, const IECore::CompoundObject *substitutions ) const;
 
-		ConstShadingEnginePtr shadingEngine( const Gaffer::Context *context, const IECore::CompoundObject *substitutions ) const;
+	GafferOSL::OSLCode *oslCode();
+	const GafferOSL::OSLCode *oslCode() const;
 
-		GafferOSL::OSLCode *oslCode();
-		const GafferOSL::OSLCode *oslCode() const;
+	void primitiveVariableAdded( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
+	void primitiveVariableRemoved( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
 
-		void primitiveVariableAdded( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
-		void primitiveVariableRemoved( const Gaffer::GraphComponent *parent, Gaffer::GraphComponent *child );
+	void updatePrimitiveVariables();
 
-		void updatePrimitiveVariables();
-
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( OSLObject )

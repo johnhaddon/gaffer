@@ -56,135 +56,132 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API CapturingRenderer : public Renderer
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( CapturingRenderer )
+	IE_CORE_DECLAREMEMBERPTR( CapturingRenderer )
 
-		CapturingRenderer(
-			RenderType type = RenderType::Interactive,
-			const std::string &fileName = "",
-			const IECore::MessageHandlerPtr &messageHandler = IECore::MessageHandlerPtr()
-		);
-		~CapturingRenderer() override;
+	CapturingRenderer(
+		RenderType type = RenderType::Interactive,
+		const std::string &fileName = "",
+		const IECore::MessageHandlerPtr &messageHandler = IECore::MessageHandlerPtr()
+	);
+	~CapturingRenderer() override;
+
+	/// Introspection
+	/// =============
+
+	class GAFFERSCENE_API CapturedAttributes : public AttributesInterface
+	{
+
+	public:
+
+		IE_CORE_DECLAREMEMBERPTR( CapturedAttributes );
+
+		const IECore::CompoundObject *attributes() const;
+
+	private:
+
+		CapturedAttributes( const IECore::ConstCompoundObjectPtr &attributes );
+
+		static int uneditableAttributeValue( const CapturedAttributes *attributes );
+		static bool unrenderableAttributeValue( const CapturedAttributes *attributes );
+
+		friend class CapturingRenderer;
+
+		IECore::ConstCompoundObjectPtr m_attributes;
+	};
+
+	IE_CORE_DECLAREPTR( CapturedAttributes );
+
+	class GAFFERSCENE_API CapturedObject : public ObjectInterface
+	{
+
+	public:
+
+		IE_CORE_DECLAREMEMBERPTR( CapturedObject )
+
+		~CapturedObject() override;
 
 		/// Introspection
 		/// =============
 
-		class GAFFERSCENE_API CapturedAttributes : public AttributesInterface
-		{
+		const std::string &capturedName() const;
 
-			public :
+		const ObjectSamples &capturedSamples() const;
+		const SampleTimes &capturedSampleTimes() const;
 
-				IE_CORE_DECLAREMEMBERPTR( CapturedAttributes );
+		const TransformSamples &capturedTransforms() const;
+		const SampleTimes &capturedTransformTimes() const;
 
-				const IECore::CompoundObject *attributes() const;
+		const CapturedAttributes *capturedAttributes() const;
+		std::vector<IECore::InternedString> capturedLinkTypes() const;
+		const ObjectSet *capturedLinks( const IECore::InternedString &type ) const;
 
-			private :
+		int numAttributeEdits() const;
+		int numLinkEdits( const IECore::InternedString &type ) const;
 
-				CapturedAttributes( const IECore::ConstCompoundObjectPtr &attributes );
-
-				static int uneditableAttributeValue( const CapturedAttributes *attributes );
-				static bool unrenderableAttributeValue( const CapturedAttributes *attributes );
-
-				friend class CapturingRenderer;
-
-				IECore::ConstCompoundObjectPtr m_attributes;
-
-		};
-
-		IE_CORE_DECLAREPTR( CapturedAttributes );
-
-		class GAFFERSCENE_API CapturedObject : public ObjectInterface
-		{
-
-			public :
-
-				IE_CORE_DECLAREMEMBERPTR( CapturedObject )
-
-				~CapturedObject() override;
-
-				/// Introspection
-				/// =============
-
-				const std::string &capturedName() const;
-
-				const ObjectSamples &capturedSamples() const;
-				const SampleTimes &capturedSampleTimes() const;
-
-				const TransformSamples &capturedTransforms() const;
-				const SampleTimes &capturedTransformTimes() const;
-
-				const CapturedAttributes *capturedAttributes() const;
-				std::vector<IECore::InternedString> capturedLinkTypes() const;
-				const ObjectSet *capturedLinks( const IECore::InternedString &type ) const;
-
-				int numAttributeEdits() const;
-				int numLinkEdits( const IECore::InternedString &type ) const;
-
-				uint32_t id() const;
-				uint32_t instanceID() const;
-
-				/// Renderer interface
-				/// ==================
-
-				void transform( const TransformSamples &samples, const SampleTimes &times ) override;
-				bool attributes( const AttributesInterface *attributes ) override;
-				void link( const IECore::InternedString &type, const ConstObjectSetPtr &objects ) override;
-				void assignID( uint32_t id ) override;
-				void assignInstanceID( uint32_t instanceID ) override;
-
-			private :
-
-				CapturedObject( CapturingRenderer *renderer, const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times );
-
-				friend class CapturingRenderer;
-
-				CapturingRenderer *m_renderer;
-				const std::string m_name;
-				ObjectSamples m_capturedSamples;
-				SampleTimes m_capturedSampleTimes;
-				TransformSamples m_capturedTransforms;
-				SampleTimes m_capturedTransformTimes;
-				ConstCapturedAttributesPtr m_capturedAttributes;
-				int m_numAttributeEdits;
-				std::unordered_map<IECore::InternedString, std::pair<ConstObjectSetPtr, int>> m_capturedLinks;
-				uint32_t m_id;
-				uint32_t m_instanceID;
-
-		};
-
-		IE_CORE_DECLAREPTR( CapturedObject );
-
-		std::vector<std::string> capturedObjectNames() const;
-		const CapturedObject *capturedObject( const std::string &name ) const;
+		uint32_t id() const;
+		uint32_t instanceID() const;
 
 		/// Renderer interface
 		/// ==================
 
-		IECore::InternedString name() const override;
-		void option( const IECore::InternedString &name, const IECore::Object *value ) override;
-		void output( const IECore::InternedString &name, const IECoreScene::Output *output ) override;
-		AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override;
-		ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		ObjectInterfacePtr light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		ObjectInterfacePtr object( const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-		void render() override;
-		void pause() override;
+		void transform( const TransformSamples &samples, const SampleTimes &times ) override;
+		bool attributes( const AttributesInterface *attributes ) override;
+		void link( const IECore::InternedString &type, const ConstObjectSetPtr &objects ) override;
+		void assignID( uint32_t id ) override;
+		void assignInstanceID( uint32_t instanceID ) override;
 
-	private :
+	private:
 
-		void checkPaused() const;
+		CapturedObject( CapturingRenderer *renderer, const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times );
 
-		IECore::MessageHandlerPtr m_messageHandler;
+		friend class CapturingRenderer;
 
-		RenderType m_renderType;
-		std::atomic_bool m_rendering;
-		using ObjectMap = tbb::concurrent_hash_map<std::string, CapturedObject *>;
-		ObjectMap m_capturedObjects;
+		CapturingRenderer *m_renderer;
+		const std::string m_name;
+		ObjectSamples m_capturedSamples;
+		SampleTimes m_capturedSampleTimes;
+		TransformSamples m_capturedTransforms;
+		SampleTimes m_capturedTransformTimes;
+		ConstCapturedAttributesPtr m_capturedAttributes;
+		int m_numAttributeEdits;
+		std::unordered_map<IECore::InternedString, std::pair<ConstObjectSetPtr, int>> m_capturedLinks;
+		uint32_t m_id;
+		uint32_t m_instanceID;
+	};
 
-		static Renderer::TypeDescription<CapturingRenderer> g_typeDescription;
+	IE_CORE_DECLAREPTR( CapturedObject );
 
+	std::vector<std::string> capturedObjectNames() const;
+	const CapturedObject *capturedObject( const std::string &name ) const;
+
+	/// Renderer interface
+	/// ==================
+
+	IECore::InternedString name() const override;
+	void option( const IECore::InternedString &name, const IECore::Object *value ) override;
+	void output( const IECore::InternedString &name, const IECoreScene::Output *output ) override;
+	AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override;
+	ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr object( const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	void render() override;
+	void pause() override;
+
+private:
+
+	void checkPaused() const;
+
+	IECore::MessageHandlerPtr m_messageHandler;
+
+	RenderType m_renderType;
+	std::atomic_bool m_rendering;
+	using ObjectMap = tbb::concurrent_hash_map<std::string, CapturedObject *>;
+	ObjectMap m_capturedObjects;
+
+	static Renderer::TypeDescription<CapturingRenderer> g_typeDescription;
 };
 
 IE_CORE_DECLAREPTR( CapturingRenderer )

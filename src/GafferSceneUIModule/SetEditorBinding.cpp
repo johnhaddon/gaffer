@@ -125,23 +125,22 @@ struct PathMatcherCacheGetterKey
 {
 
 	PathMatcherCacheGetterKey()
-		:	setNames( nullptr )
+		: setNames( nullptr )
 	{
 	}
 
 	PathMatcherCacheGetterKey( const IECore::MurmurHash &hash, ConstInternedStringVectorDataPtr setNames )
-		:	hash( hash ), setNames( setNames )
+		: hash( hash ), setNames( setNames )
 	{
 	}
 
-	operator const IECore::MurmurHash & () const
+	operator const IECore::MurmurHash &() const
 	{
 		return hash;
 	}
 
 	const MurmurHash hash;
 	const ConstInternedStringVectorDataPtr setNames;
-
 };
 
 PathMatcher pathMatcherCacheGetter( const PathMatcherCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller )
@@ -174,205 +173,204 @@ const InternedString g_setPropertyName( "setPath:set" );
 class SetPath : public Gaffer::Path
 {
 
-	public :
+public:
 
-		SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr )
-			:	Path( filter )
+	SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr )
+		: Path( filter )
+	{
+		setScene( scene );
+		setContext( context );
+	}
+
+	SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root = "/", Gaffer::PathFilterPtr filter = nullptr )
+		: Path( names, root, filter )
+	{
+		setScene( scene );
+		setContext( context );
+	}
+
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SetPath, GafferSceneUI::SetPathTypeId, Gaffer::Path );
+
+	~SetPath() override
+	{
+	}
+
+	void setScene( ScenePlugPtr scene )
+	{
+		if( m_scene == scene )
 		{
-			setScene( scene );
-			setContext( context );
+			return;
 		}
 
-		SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root = "/", Gaffer::PathFilterPtr filter = nullptr )
-			:	Path( names, root, filter )
+		m_scene = scene;
+		m_plugDirtiedConnection = scene->node()->plugDirtiedSignal().connect( boost::bind( &SetPath::plugDirtied, this, ::_1 ) );
+
+		emitPathChanged();
+	}
+
+	ScenePlug *getScene()
+	{
+		return m_scene.get();
+	}
+
+	const ScenePlug *getScene() const
+	{
+		return m_scene.get();
+	}
+
+	void setContext( Gaffer::ContextPtr context )
+	{
+		if( m_context == context )
 		{
-			setScene( scene );
-			setContext( context );
+			return;
 		}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SetPath, GafferSceneUI::SetPathTypeId, Gaffer::Path );
+		m_context = context;
+		m_contextChangedConnection = context->changedSignal().connect( boost::bind( &SetPath::contextChanged, this, ::_2 ) );
 
-		~SetPath() override
+		emitPathChanged();
+	}
+
+	Gaffer::Context *getContext()
+	{
+		return m_context.get();
+	}
+
+	const Gaffer::Context *getContext() const
+	{
+		return m_context.get();
+	}
+
+	bool isValid( const IECore::Canceller *canceller = nullptr ) const override
+	{
+		if( !Path::isValid() )
 		{
+			return false;
 		}
 
-		void setScene( ScenePlugPtr scene )
-		{
-			if( m_scene == scene )
-			{
-				return;
-			}
+		const PathMatcher p = pathMatcher( canceller );
+		return p.match( names() ) & ( PathMatcher::ExactMatch | PathMatcher::DescendantMatch );
+	}
 
-			m_scene = scene;
-			m_plugDirtiedConnection = scene->node()->plugDirtiedSignal().connect( boost::bind( &SetPath::plugDirtied, this, ::_1 ) );
+	bool isLeaf( const IECore::Canceller *canceller ) const override
+	{
+		const PathMatcher p = pathMatcher( canceller );
+		const unsigned match = p.match( names() );
+		return match & PathMatcher::ExactMatch && !( match & PathMatcher::DescendantMatch );
+	}
 
-			emitPathChanged();
-		}
+	PathPtr copy() const override
+	{
+		return new SetPath( m_scene, m_context, names(), root(), const_cast<PathFilter *>( getFilter() ) );
+	}
 
-		ScenePlug *getScene()
-		{
-			return m_scene.get();
-		}
+	void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override
+	{
+		Path::propertyNames( names, canceller );
+		names.push_back( g_setNamePropertyName );
+		names.push_back( g_memberCountPropertyName );
+		names.push_back( g_setPropertyName );
+	}
 
-		const ScenePlug *getScene() const
-		{
-			return m_scene.get();
-		}
-
-		void setContext( Gaffer::ContextPtr context )
-		{
-			if( m_context == context )
-			{
-				return;
-			}
-
-			m_context = context;
-			m_contextChangedConnection = context->changedSignal().connect( boost::bind( &SetPath::contextChanged, this, ::_2 ) );
-
-			emitPathChanged();
-		}
-
-		Gaffer::Context *getContext()
-		{
-			return m_context.get();
-		}
-
-		const Gaffer::Context *getContext() const
-		{
-			return m_context.get();
-		}
-
-		bool isValid( const IECore::Canceller *canceller = nullptr ) const override
-		{
-			if( !Path::isValid() )
-			{
-				return false;
-			}
-
-			const PathMatcher p = pathMatcher( canceller );
-			return p.match( names() ) & ( PathMatcher::ExactMatch | PathMatcher::DescendantMatch );
-		}
-
-		bool isLeaf( const IECore::Canceller *canceller ) const override
-		{
-			const PathMatcher p = pathMatcher( canceller );
-			const unsigned match = p.match( names() );
-			return match & PathMatcher::ExactMatch && !( match & PathMatcher::DescendantMatch );
-		}
-
-		PathPtr copy() const override
-		{
-			return new SetPath( m_scene, m_context, names(), root(), const_cast<PathFilter *>( getFilter() ) );
-		}
-
-		void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override
-		{
-			Path::propertyNames( names, canceller );
-			names.push_back( g_setNamePropertyName );
-			names.push_back( g_memberCountPropertyName );
-			names.push_back( g_setPropertyName );
-		}
-
-		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
-		{
-			if( name == g_setNamePropertyName )
-			{
-				const PathMatcher p = pathMatcher( canceller );
-				if( p.match( names() ) & PathMatcher::ExactMatch )
-				{
-					return new StringData( names().back().string() );
-				}
-			}
-			else if( name == g_setPropertyName )
-			{
-				const PathMatcher p = pathMatcher( canceller );
-				if( p.match( names() ) & PathMatcher::ExactMatch )
-				{
-					Context::EditableScope scopedContext( getContext() );
-					if( canceller )
-					{
-						scopedContext.setCanceller( canceller );
-					}
-					return getScene()->set( names().back().string() );
-				}
-			}
-			else if( name == g_memberCountPropertyName )
-			{
-				if( auto set = runTimeCast<const PathMatcherData>( property( g_setPropertyName, canceller ) ) )
-				{
-					return new IntData( set->readable().size() );
-				}
-			}
-
-			return Path::property( name, canceller );
-		}
-
-		const Gaffer::Plug *cancellationSubject() const override
-		{
-			return m_scene.get();
-		}
-
-	protected :
-
-		void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override
+	IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+	{
+		if( name == g_setNamePropertyName )
 		{
 			const PathMatcher p = pathMatcher( canceller );
-
-			auto it = p.find( names() );
-			if( it == p.end() )
+			if( p.match( names() ) & PathMatcher::ExactMatch )
 			{
-				return;
+				return new StringData( names().back().string() );
 			}
+		}
+		else if( name == g_setPropertyName )
+		{
+			const PathMatcher p = pathMatcher( canceller );
+			if( p.match( names() ) & PathMatcher::ExactMatch )
+			{
+				Context::EditableScope scopedContext( getContext() );
+				if( canceller )
+				{
+					scopedContext.setCanceller( canceller );
+				}
+				return getScene()->set( names().back().string() );
+			}
+		}
+		else if( name == g_memberCountPropertyName )
+		{
+			if( auto set = runTimeCast<const PathMatcherData>( property( g_setPropertyName, canceller ) ) )
+			{
+				return new IntData( set->readable().size() );
+			}
+		}
 
+		return Path::property( name, canceller );
+	}
+
+	const Gaffer::Plug *cancellationSubject() const override
+	{
+		return m_scene.get();
+	}
+
+protected:
+
+	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override
+	{
+		const PathMatcher p = pathMatcher( canceller );
+
+		auto it = p.find( names() );
+		if( it == p.end() )
+		{
+			return;
+		}
+
+		++it;
+		while( it != p.end() && it->size() == names().size() + 1 )
+		{
+			children.push_back( new SetPath( m_scene, m_context, *it, root(), const_cast<PathFilter *>( getFilter() ) ) );
+			it.prune();
 			++it;
-			while( it != p.end() && it->size() == names().size() + 1 )
-			{
-				children.push_back( new SetPath( m_scene, m_context, *it, root(), const_cast<PathFilter *>( getFilter() ) ) );
-				it.prune();
-				++it;
-			}
-
-			std::sort(
-				children.begin(), children.end(),
-				[]( const PathPtr &a, const PathPtr &b ) {
-					return a->names().back().string() < b->names().back().string();
-				}
-			);
 		}
 
+		std::sort(
+			children.begin(), children.end(),
+			[]( const PathPtr &a, const PathPtr &b ) {
+				return a->names().back().string() < b->names().back().string();
+			}
+		);
+	}
 
-	private :
 
-		const IECore::PathMatcher pathMatcher( const IECore::Canceller *canceller ) const
+private:
+
+	const IECore::PathMatcher pathMatcher( const IECore::Canceller *canceller ) const
+	{
+		Context::EditableScope scopedContext( m_context.get() );
+		if( canceller )
 		{
-			Context::EditableScope scopedContext( m_context.get() );
-			if( canceller )
-			{
-				scopedContext.setCanceller( canceller );
-			}
-			const PathMatcherCacheGetterKey key( m_scene.get()->setNamesHash(), m_scene.get()->setNames() );
-			return g_pathMatcherCache.get( key );
+			scopedContext.setCanceller( canceller );
 		}
+		const PathMatcherCacheGetterKey key( m_scene.get()->setNamesHash(), m_scene.get()->setNames() );
+		return g_pathMatcherCache.get( key );
+	}
 
-		void contextChanged( const IECore::InternedString &key )
+	void contextChanged( const IECore::InternedString &key )
+	{
+		emitPathChanged();
+	}
+
+	void plugDirtied( Gaffer::Plug *plug )
+	{
+		if( plug == m_scene->setNamesPlug() || plug == m_scene->setPlug() )
 		{
 			emitPathChanged();
 		}
+	}
 
-		void plugDirtied( Gaffer::Plug *plug )
-		{
-			if( plug == m_scene->setNamesPlug() || plug == m_scene->setPlug() )
-			{
-				emitPathChanged();
-			}
-		}
-
-		Gaffer::NodePtr m_node;
-		ScenePlugPtr m_scene;
-		Gaffer::ContextPtr m_context;
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
-		Gaffer::Signals::ScopedConnection m_contextChangedConnection;
-
+	Gaffer::NodePtr m_node;
+	ScenePlugPtr m_scene;
+	Gaffer::ContextPtr m_context;
+	Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
+	Gaffer::Signals::ScopedConnection m_contextChangedConnection;
 };
 
 IE_CORE_DEFINERUNTIMETYPED( SetPath );
@@ -398,36 +396,35 @@ ConstStringDataPtr g_setFolderIcon = new StringData( "setFolder.png" );
 class SetNameColumn : public StandardPathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( SetNameColumn )
+	IE_CORE_DECLAREMEMBERPTR( SetNameColumn )
 
-		SetNameColumn()
-			:	StandardPathColumn( "Name", "name", GafferUI::PathColumn::SizeMode::Stretch )
+	SetNameColumn()
+		: StandardPathColumn( "Name", "name", GafferUI::PathColumn::SizeMode::Stretch )
+	{
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result = StandardPathColumn::cellData( path, canceller );
+
+		const auto setName = runTimeCast<const IECore::StringData>( path.property( g_setNamePropertyName, canceller ) );
+		if( !setName )
 		{
+			result.icon = g_setFolderIcon;
+		}
+		else
+		{
+			const auto memberCount = runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
+			if( memberCount )
+			{
+				result.icon = memberCount->readable() > 0 ? g_populatedSetIcon : g_emptySetIcon;
+			}
 		}
 
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result = StandardPathColumn::cellData( path, canceller );
-
-			const auto setName = runTimeCast<const IECore::StringData>( path.property( g_setNamePropertyName, canceller ) );
-			if( !setName )
-			{
-				result.icon = g_setFolderIcon;
-			}
-			else
-			{
-				const auto memberCount = runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
-				if( memberCount )
-				{
-					result.icon = memberCount->readable() > 0 ? g_populatedSetIcon : g_emptySetIcon;
-				}
-			}
-
-			return result;
-		}
-
+		return result;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -437,40 +434,37 @@ class SetNameColumn : public StandardPathColumn
 class SetMembersColumn : public StandardPathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( SetMembersColumn )
+	IE_CORE_DECLAREMEMBERPTR( SetMembersColumn )
 
-		SetMembersColumn()
-			:	StandardPathColumn( "Members", g_memberCountPropertyName )
+	SetMembersColumn()
+		: StandardPathColumn( "Members", g_memberCountPropertyName )
+	{
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result = StandardPathColumn::cellData( path, canceller );
+		if( const auto setName = runTimeCast<const IECore::StringData>( path.property( g_setNamePropertyName, canceller ) ) )
 		{
+			const auto memberCount = runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
+			const auto count = memberCount ? memberCount->readable() : 0;
+			result.toolTip = new IECore::StringData(
+				fmt::format( "{} scene location{} of {}", count, count == 1 ? " is a member" : "s are members", setName->readable() )
+			);
 		}
 
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result = StandardPathColumn::cellData( path, canceller );
-			if( const auto setName = runTimeCast<const IECore::StringData>( path.property( g_setNamePropertyName, canceller ) ) )
-			{
-				const auto memberCount = runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
-				const auto count = memberCount ? memberCount->readable() : 0;
-				result.toolTip = new IECore::StringData(
-					fmt::format( "{} scene location{} of {}",
-						count, count == 1 ? " is a member" : "s are members", setName->readable()
-					)
-				);
-			}
+		return result;
+	}
 
-			return result;
-		}
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+	{
+		CellData result = StandardPathColumn::headerData( rootPath, canceller );
+		result.toolTip = new IECore::StringData( "The number of scene locations that are set members" );
 
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
-		{
-			CellData result = StandardPathColumn::headerData( rootPath, canceller );
-			result.toolTip = new IECore::StringData( "The number of scene locations that are set members" );
-
-			return result;
-		}
-
+		return result;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -480,57 +474,52 @@ class SetMembersColumn : public StandardPathColumn
 class SetSelectionColumn : public PathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( SetSelectionColumn )
+	IE_CORE_DECLAREMEMBERPTR( SetSelectionColumn )
 
-		SetSelectionColumn( ScriptNodePtr script )
-			:	PathColumn(), m_script( script ), m_selectedPaths( ScriptNodeAlgo::getSelectedPaths( script.get() ) )
+	SetSelectionColumn( ScriptNodePtr script )
+		: PathColumn(), m_script( script ), m_selectedPaths( ScriptNodeAlgo::getSelectedPaths( script.get() ) )
+	{
+		ScriptNodeAlgo::selectedPathsChangedSignal( script.get() ).connect( boost::bind( &SetSelectionColumn::selectedPathsChanged, this ) );
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result;
+		if( const auto set = runTimeCast<const PathMatcherData>( path.property( g_setPropertyName, canceller ) ) )
 		{
-			ScriptNodeAlgo::selectedPathsChangedSignal( script.get() ).connect(
-				boost::bind( &SetSelectionColumn::selectedPathsChanged, this )
+			int count = numSelected( set->readable(), m_selectedPaths );
+			result.value = new IntData( count );
+			result.toolTip = new IECore::StringData(
+				fmt::format( "{} selected scene location{} of {}", count, count == 1 ? " is a member or descendant" : "s are members and/or descendants", path.names().back().string() )
 			);
 		}
 
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result;
-			if( const auto set = runTimeCast<const PathMatcherData>( path.property( g_setPropertyName, canceller ) ) )
-			{
-				int count = numSelected( set->readable(), m_selectedPaths );
-				result.value = new IntData( count );
-				result.toolTip = new IECore::StringData(
-					fmt::format( "{} selected scene location{} of {}",
-						count, count == 1 ? " is a member or descendant" : "s are members and/or descendants", path.names().back().string()
-					)
-				);
-			}
+		return result;
+	}
 
-			return result;
-		}
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+	{
+		CellData result;
+		result.value = g_headerValue;
+		result.toolTip = g_headerToolTip;
+		return result;
+	}
 
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
-		{
-			CellData result;
-			result.value = g_headerValue;
-			result.toolTip = g_headerToolTip;
-			return result;
-		}
+private:
 
-	private :
+	void selectedPathsChanged()
+	{
+		m_selectedPaths = ScriptNodeAlgo::getSelectedPaths( m_script.get() );
+		changedSignal()( this );
+	}
 
-		void selectedPathsChanged()
-		{
-			m_selectedPaths = ScriptNodeAlgo::getSelectedPaths( m_script.get() );
-			changedSignal()( this );
-		}
+	ScriptNodePtr m_script;
+	PathMatcher m_selectedPaths;
 
-		ScriptNodePtr m_script;
-		PathMatcher m_selectedPaths;
-
-		static const ConstStringDataPtr g_headerValue;
-		static const ConstStringDataPtr g_headerToolTip;
-
+	static const ConstStringDataPtr g_headerValue;
+	static const ConstStringDataPtr g_headerToolTip;
 };
 
 const ConstStringDataPtr SetSelectionColumn::g_headerValue = new StringData( "Selected" );
@@ -544,199 +533,198 @@ const ConstStringDataPtr SetSelectionColumn::g_headerToolTip = new StringData( "
 class VisibleSetInclusionsColumn : public PathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( VisibleSetInclusionsColumn )
+	IE_CORE_DECLAREMEMBERPTR( VisibleSetInclusionsColumn )
 
-		VisibleSetInclusionsColumn( ScriptNodePtr script )
-			:	PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	VisibleSetInclusionsColumn( ScriptNodePtr script )
+		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	{
+		buttonPressSignal().connect( boost::bind( &VisibleSetInclusionsColumn::buttonPress, this, ::_3 ) );
+		buttonReleaseSignal().connect( boost::bind( &VisibleSetInclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &VisibleSetInclusionsColumn::visibleSetChanged, this ) );
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result;
+
+		auto setPath = IECore::runTimeCast<const SetPath>( &path );
+		if( !setPath )
 		{
-			buttonPressSignal().connect( boost::bind( &VisibleSetInclusionsColumn::buttonPress, this, ::_3 ) );
-			buttonReleaseSignal().connect( boost::bind( &VisibleSetInclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-			ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &VisibleSetInclusionsColumn::visibleSetChanged, this ) );
-		}
-
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result;
-
-			auto setPath = IECore::runTimeCast<const SetPath>( &path );
-			if( !setPath )
-			{
-				return result;
-			}
-
-			const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
-			if( !setName )
-			{
-				// We only interact with locations representing sets
-				return result;
-			}
-
-			auto iconData = new CompoundData;
-			iconData->writable()["state:highlighted"] = g_setIncludedHighlightedTransparentIconName;
-			result.icon = iconData;
-			result.toolTip = g_inclusionToolTip;
-
-			if( m_visibleSet.inclusions.isEmpty() )
-			{
-				result.value = new IntData( 0 );
-				return result;
-			}
-
-			Context::Scope scopedContext( setPath->getContext() );
-			const auto setMembers = setPath->getScene()->set( setName->readable() );
-			const auto includedSetMembers = setMembers->readable().intersection( m_visibleSet.inclusions );
-			result.value = new IntData( includedSetMembers.size() );
-			if( includedSetMembers.isEmpty() )
-			{
-				return result;
-			}
-
-			size_t excludedSetMemberCount = 0;
-			if( !m_visibleSet.exclusions.isEmpty() )
-			{
-				for( IECore::PathMatcher::Iterator it = includedSetMembers.begin(), eIt = includedSetMembers.end(); it != eIt; ++it )
-				{
-					const auto visibility = m_visibleSet.visibility( *it );
-					if( visibility.drawMode != GafferScene::VisibleSet::Visibility::Visible )
-					{
-						excludedSetMemberCount++;
-					}
-				}
-			}
-
-			iconData->writable()["state:highlighted"] = g_setIncludedHighlightedIconName;
-			const bool allSetMembersIncluded = includedSetMembers.size() == setMembers->readable().size();
-			if( excludedSetMemberCount == 0 )
-			{
-				iconData->writable()["state:normal"] = allSetMembersIncluded ? g_setIncludedIconName : g_setPartiallyIncludedIconName;
-				result.toolTip = allSetMembersIncluded ? g_setIncludedToolTip : g_setPartiallyIncludedToolTip;
-			}
-			else if( includedSetMembers.size() == excludedSetMemberCount )
-			{
-				iconData->writable()["state:normal"] = g_setIncludedDisabledIconName;
-				result.toolTip = allSetMembersIncluded ? g_setIncludedOverrideToolTip : g_setPartiallyIncludedOverrideToolTip;
-			}
-			else
-			{
-				iconData->writable()["state:normal"] = g_setPartiallyDisabledIconName;
-				result.toolTip = allSetMembersIncluded ? g_setIncludedPartialOverrideToolTip : g_setPartiallyIncludedPartialOverrideToolTip;
-			}
-
 			return result;
 		}
 
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+		const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
+		if( !setName )
 		{
-			return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_inclusionsEmptyIconName : g_setIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
+			// We only interact with locations representing sets
+			return result;
 		}
 
-	private :
+		auto iconData = new CompoundData;
+		iconData->writable()["state:highlighted"] = g_setIncludedHighlightedTransparentIconName;
+		result.icon = iconData;
+		result.toolTip = g_inclusionToolTip;
 
-		void visibleSetChanged()
+		if( m_visibleSet.inclusions.isEmpty() )
 		{
-			// We take a copy, because `cellData()` is called from background threads,
-			// and it's not safe to call `getVisibleSet()` concurrently with modifications
-			// on the foreground thread.
-			m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
-			changedSignal()( this );
+			result.value = new IntData( 0 );
+			return result;
 		}
 
-		bool buttonPress( const ButtonEvent &event )
+		Context::Scope scopedContext( setPath->getContext() );
+		const auto setMembers = setPath->getScene()->set( setName->readable() );
+		const auto includedSetMembers = setMembers->readable().intersection( m_visibleSet.inclusions );
+		result.value = new IntData( includedSetMembers.size() );
+		if( includedSetMembers.isEmpty() )
 		{
-			if( event.buttons != ButtonEvent::Left )
-			{
-				return false;
-			}
-
-			return true;
+			return result;
 		}
 
-		bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+		size_t excludedSetMemberCount = 0;
+		if( !m_visibleSet.exclusions.isEmpty() )
 		{
-			auto setPath = IECore::runTimeCast<const SetPath>( &path );
-			if( !setPath )
+			for( IECore::PathMatcher::Iterator it = includedSetMembers.begin(), eIt = includedSetMembers.end(); it != eIt; ++it )
 			{
-				return false;
-			}
-
-			const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
-			if( !setName )
-			{
-				// We only interact with locations representing sets
-				return false;
-			}
-
-			Context::Scope scopedContext( setPath->getContext() );
-			const auto setMembers = setPath->getScene()->set( setName->readable() );
-			auto pathsToInclude = IECore::PathMatcher( setMembers->readable() );
-			const auto selection = widget.getSelection();
-			if( std::holds_alternative<IECore::PathMatcher>( selection ) )
-			{
-				// Permit bulk editing of a selection of set names when clicking on one of the selected set names
-				const auto selectedPaths = std::get<IECore::PathMatcher>( selection );
-				if( selectedPaths.match( setPath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+				const auto visibility = m_visibleSet.visibility( *it );
+				if( visibility.drawMode != GafferScene::VisibleSet::Visibility::Visible )
 				{
-					auto selectedSetPath = setPath->copy();
-					for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt; ++it )
+					excludedSetMemberCount++;
+				}
+			}
+		}
+
+		iconData->writable()["state:highlighted"] = g_setIncludedHighlightedIconName;
+		const bool allSetMembersIncluded = includedSetMembers.size() == setMembers->readable().size();
+		if( excludedSetMemberCount == 0 )
+		{
+			iconData->writable()["state:normal"] = allSetMembersIncluded ? g_setIncludedIconName : g_setPartiallyIncludedIconName;
+			result.toolTip = allSetMembersIncluded ? g_setIncludedToolTip : g_setPartiallyIncludedToolTip;
+		}
+		else if( includedSetMembers.size() == excludedSetMemberCount )
+		{
+			iconData->writable()["state:normal"] = g_setIncludedDisabledIconName;
+			result.toolTip = allSetMembersIncluded ? g_setIncludedOverrideToolTip : g_setPartiallyIncludedOverrideToolTip;
+		}
+		else
+		{
+			iconData->writable()["state:normal"] = g_setPartiallyDisabledIconName;
+			result.toolTip = allSetMembersIncluded ? g_setIncludedPartialOverrideToolTip : g_setPartiallyIncludedPartialOverrideToolTip;
+		}
+
+		return result;
+	}
+
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+	{
+		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_inclusionsEmptyIconName : g_setIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
+	}
+
+private:
+
+	void visibleSetChanged()
+	{
+		// We take a copy, because `cellData()` is called from background threads,
+		// and it's not safe to call `getVisibleSet()` concurrently with modifications
+		// on the foreground thread.
+		m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
+		changedSignal()( this );
+	}
+
+	bool buttonPress( const ButtonEvent &event )
+	{
+		if( event.buttons != ButtonEvent::Left )
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+	{
+		auto setPath = IECore::runTimeCast<const SetPath>( &path );
+		if( !setPath )
+		{
+			return false;
+		}
+
+		const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
+		if( !setName )
+		{
+			// We only interact with locations representing sets
+			return false;
+		}
+
+		Context::Scope scopedContext( setPath->getContext() );
+		const auto setMembers = setPath->getScene()->set( setName->readable() );
+		auto pathsToInclude = IECore::PathMatcher( setMembers->readable() );
+		const auto selection = widget.getSelection();
+		if( std::holds_alternative<IECore::PathMatcher>( selection ) )
+		{
+			// Permit bulk editing of a selection of set names when clicking on one of the selected set names
+			const auto selectedPaths = std::get<IECore::PathMatcher>( selection );
+			if( selectedPaths.match( setPath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+			{
+				auto selectedSetPath = setPath->copy();
+				for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt; ++it )
+				{
+					selectedSetPath->setFromString( ScenePlug::pathToString( *it ) );
+					const auto selectedSetName = runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
+					if( selectedSetName && selectedSetName->readable() != setName->readable() )
 					{
-						selectedSetPath->setFromString( ScenePlug::pathToString( *it ) );
-						const auto selectedSetName = runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
-						if( selectedSetName && selectedSetName->readable() != setName->readable() )
-						{
-							pathsToInclude.addPaths( setPath->getScene()->set( selectedSetName->readable() )->readable() );
-						}
+						pathsToInclude.addPaths( setPath->getScene()->set( selectedSetName->readable() )->readable() );
 					}
 				}
 			}
+		}
 
-			bool update = false;
-			auto visibleSet = m_visibleSet;
-			if( event.button == ButtonEvent::Left && !event.modifiers )
-			{
-				const auto includedSetMembers = setMembers->readable().intersection( visibleSet.inclusions );
-				if( includedSetMembers.isEmpty() )
-				{
-					update = visibleSet.inclusions.addPaths( pathsToInclude );
-				}
-				else
-				{
-					update = visibleSet.inclusions.removePaths( pathsToInclude );
-				}
-			}
-			else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
+		bool update = false;
+		auto visibleSet = m_visibleSet;
+		if( event.button == ButtonEvent::Left && !event.modifiers )
+		{
+			const auto includedSetMembers = setMembers->readable().intersection( visibleSet.inclusions );
+			if( includedSetMembers.isEmpty() )
 			{
 				update = visibleSet.inclusions.addPaths( pathsToInclude );
 			}
-
-			if( update )
+			else
 			{
-				ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
+				update = visibleSet.inclusions.removePaths( pathsToInclude );
 			}
-
-			return true;
+		}
+		else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
+		{
+			update = visibleSet.inclusions.addPaths( pathsToInclude );
 		}
 
-		ScriptNodePtr m_script;
-		VisibleSet m_visibleSet;
+		if( update )
+		{
+			ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
+		}
 
-		static IECore::StringDataPtr g_setIncludedIconName;
-		static IECore::StringDataPtr g_setIncludedDisabledIconName;
-		static IECore::StringDataPtr g_setIncludedHighlightedIconName;
-		static IECore::StringDataPtr g_setIncludedHighlightedTransparentIconName;
-		static IECore::StringDataPtr g_setPartiallyIncludedIconName;
-		static IECore::StringDataPtr g_setPartiallyDisabledIconName;
-		static IECore::StringDataPtr g_inclusionsEmptyIconName;
+		return true;
+	}
 
-		static IECore::StringDataPtr g_inclusionToolTip;
-		static IECore::StringDataPtr g_setIncludedToolTip;
-		static IECore::StringDataPtr g_setIncludedOverrideToolTip;
-		static IECore::StringDataPtr g_setIncludedPartialOverrideToolTip;
-		static IECore::StringDataPtr g_setPartiallyIncludedToolTip;
-		static IECore::StringDataPtr g_setPartiallyIncludedOverrideToolTip;
-		static IECore::StringDataPtr g_setPartiallyIncludedPartialOverrideToolTip;
+	ScriptNodePtr m_script;
+	VisibleSet m_visibleSet;
 
+	static IECore::StringDataPtr g_setIncludedIconName;
+	static IECore::StringDataPtr g_setIncludedDisabledIconName;
+	static IECore::StringDataPtr g_setIncludedHighlightedIconName;
+	static IECore::StringDataPtr g_setIncludedHighlightedTransparentIconName;
+	static IECore::StringDataPtr g_setPartiallyIncludedIconName;
+	static IECore::StringDataPtr g_setPartiallyDisabledIconName;
+	static IECore::StringDataPtr g_inclusionsEmptyIconName;
+
+	static IECore::StringDataPtr g_inclusionToolTip;
+	static IECore::StringDataPtr g_setIncludedToolTip;
+	static IECore::StringDataPtr g_setIncludedOverrideToolTip;
+	static IECore::StringDataPtr g_setIncludedPartialOverrideToolTip;
+	static IECore::StringDataPtr g_setPartiallyIncludedToolTip;
+	static IECore::StringDataPtr g_setPartiallyIncludedOverrideToolTip;
+	static IECore::StringDataPtr g_setPartiallyIncludedPartialOverrideToolTip;
 };
 
 StringDataPtr VisibleSetInclusionsColumn::g_setIncludedIconName = new StringData( "locationIncluded.png" );
@@ -784,166 +772,166 @@ StringDataPtr VisibleSetInclusionsColumn::g_setPartiallyIncludedPartialOverrideT
 class VisibleSetExclusionsColumn : public PathColumn
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( VisibleSetExclusionsColumn )
+	IE_CORE_DECLAREMEMBERPTR( VisibleSetExclusionsColumn )
 
-		VisibleSetExclusionsColumn( ScriptNodePtr script )
-			:	PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	VisibleSetExclusionsColumn( ScriptNodePtr script )
+		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+	{
+		buttonPressSignal().connect( boost::bind( &VisibleSetExclusionsColumn::buttonPress, this, ::_3 ) );
+		buttonReleaseSignal().connect( boost::bind( &VisibleSetExclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &VisibleSetExclusionsColumn::visibleSetChanged, this ) );
+	}
+
+	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
+	{
+		CellData result;
+
+		auto setPath = IECore::runTimeCast<const SetPath>( &path );
+		if( !setPath )
 		{
-			buttonPressSignal().connect( boost::bind( &VisibleSetExclusionsColumn::buttonPress, this, ::_3 ) );
-			buttonReleaseSignal().connect( boost::bind( &VisibleSetExclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-			ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &VisibleSetExclusionsColumn::visibleSetChanged, this ) );
-		}
-
-		CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
-		{
-			CellData result;
-
-			auto setPath = IECore::runTimeCast<const SetPath>( &path );
-			if( !setPath )
-			{
-				return result;
-			}
-
-			const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
-			if( !setName )
-			{
-				// We only interact with locations representing sets
-				return result;
-			}
-
-			auto iconData = new CompoundData;
-			iconData->writable()["state:highlighted"] = g_setExcludedHighlightedTransparentIconName;
-			result.icon = iconData;
-			result.toolTip = g_exclusionToolTip;
-
-			if( m_visibleSet.exclusions.isEmpty() )
-			{
-				result.value = new IntData( 0 );
-				return result;
-			}
-
-			Context::Scope scopedContext( setPath->getContext() );
-			const auto setMembers = setPath->getScene()->set( setName->readable() );
-			const auto excludedSetMembers = setMembers->readable().intersection( m_visibleSet.exclusions );
-			result.value = new IntData( excludedSetMembers.size() );
-			if( excludedSetMembers.isEmpty() )
-			{
-				return result;
-			}
-
-			const bool allSetMembersExcluded = excludedSetMembers.size() == setMembers->readable().size();
-			iconData->writable()["state:highlighted"] = g_setExcludedHighlightedIconName;
-			iconData->writable()["state:normal"] = allSetMembersExcluded ? g_setExcludedIconName : g_setPartiallyExcludedIconName;
-			result.toolTip = allSetMembersExcluded ? g_setExcludedToolTip : g_setPartiallyExcludedToolTip;
-
 			return result;
 		}
 
-		CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+		const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
+		if( !setName )
 		{
-			return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_exclusionsEmptyIconName : g_setExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
+			// We only interact with locations representing sets
+			return result;
 		}
 
-	private :
+		auto iconData = new CompoundData;
+		iconData->writable()["state:highlighted"] = g_setExcludedHighlightedTransparentIconName;
+		result.icon = iconData;
+		result.toolTip = g_exclusionToolTip;
 
-		void visibleSetChanged()
+		if( m_visibleSet.exclusions.isEmpty() )
 		{
-			// We take a copy, because `cellData()` is called from background threads,
-			// and it's not safe to call `getVisibleSet()` concurrently with modifications
-			// on the foreground thread.
-			m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
-			changedSignal()( this );
+			result.value = new IntData( 0 );
+			return result;
 		}
 
-		bool buttonPress( const ButtonEvent &event )
+		Context::Scope scopedContext( setPath->getContext() );
+		const auto setMembers = setPath->getScene()->set( setName->readable() );
+		const auto excludedSetMembers = setMembers->readable().intersection( m_visibleSet.exclusions );
+		result.value = new IntData( excludedSetMembers.size() );
+		if( excludedSetMembers.isEmpty() )
 		{
-			if( event.buttons != ButtonEvent::Left )
-			{
-				return false;
-			}
-
-			return true;
+			return result;
 		}
 
-		bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+		const bool allSetMembersExcluded = excludedSetMembers.size() == setMembers->readable().size();
+		iconData->writable()["state:highlighted"] = g_setExcludedHighlightedIconName;
+		iconData->writable()["state:normal"] = allSetMembersExcluded ? g_setExcludedIconName : g_setPartiallyExcludedIconName;
+		result.toolTip = allSetMembersExcluded ? g_setExcludedToolTip : g_setPartiallyExcludedToolTip;
+
+		return result;
+	}
+
+	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
+	{
+		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_exclusionsEmptyIconName : g_setExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
+	}
+
+private:
+
+	void visibleSetChanged()
+	{
+		// We take a copy, because `cellData()` is called from background threads,
+		// and it's not safe to call `getVisibleSet()` concurrently with modifications
+		// on the foreground thread.
+		m_visibleSet = ScriptNodeAlgo::getVisibleSet( m_script.get() );
+		changedSignal()( this );
+	}
+
+	bool buttonPress( const ButtonEvent &event )
+	{
+		if( event.buttons != ButtonEvent::Left )
 		{
-			auto setPath = IECore::runTimeCast<const SetPath>( &path );
-			if( !setPath )
-			{
-				return false;
-			}
+			return false;
+		}
 
-			const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
-			if( !setName )
-			{
-				// We only interact with locations representing sets
-				return false;
-			}
+		return true;
+	}
 
-			Context::Scope scopedContext( setPath->getContext() );
-			const auto setMembers = setPath->getScene()->set( setName->readable() );
-			auto pathsToExclude = IECore::PathMatcher( setMembers->readable() );
-			const auto selection = widget.getSelection();
-			if( std::holds_alternative<IECore::PathMatcher>( selection ) )
+	bool buttonRelease( const Gaffer::Path &path, const GafferUI::PathListingWidget &widget, const ButtonEvent &event )
+	{
+		auto setPath = IECore::runTimeCast<const SetPath>( &path );
+		if( !setPath )
+		{
+			return false;
+		}
+
+		const auto setName = runTimeCast<const IECore::StringData>( setPath->property( g_setNamePropertyName ) );
+		if( !setName )
+		{
+			// We only interact with locations representing sets
+			return false;
+		}
+
+		Context::Scope scopedContext( setPath->getContext() );
+		const auto setMembers = setPath->getScene()->set( setName->readable() );
+		auto pathsToExclude = IECore::PathMatcher( setMembers->readable() );
+		const auto selection = widget.getSelection();
+		if( std::holds_alternative<IECore::PathMatcher>( selection ) )
+		{
+			// Permit bulk editing of a selection of set names when clicking on one of the selected set names
+			const auto selectedPaths = std::get<IECore::PathMatcher>( selection );
+			if( selectedPaths.match( setPath->names() ) & IECore::PathMatcher::Result::ExactMatch )
 			{
-				// Permit bulk editing of a selection of set names when clicking on one of the selected set names
-				const auto selectedPaths = std::get<IECore::PathMatcher>( selection );
-				if( selectedPaths.match( setPath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+				auto selectedSetPath = setPath->copy();
+				for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt; ++it )
 				{
-					auto selectedSetPath = setPath->copy();
-					for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt; ++it )
+					selectedSetPath->setFromString( ScenePlug::pathToString( *it ) );
+					const auto selectedSetName = runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
+					if( selectedSetName && selectedSetName->readable() != setName->readable() )
 					{
-						selectedSetPath->setFromString( ScenePlug::pathToString( *it ) );
-						const auto selectedSetName = runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
-						if( selectedSetName && selectedSetName->readable() != setName->readable() )
-						{
-							pathsToExclude.addPaths( setPath->getScene()->set( selectedSetName->readable() )->readable() );
-						}
+						pathsToExclude.addPaths( setPath->getScene()->set( selectedSetName->readable() )->readable() );
 					}
 				}
 			}
+		}
 
-			bool update = false;
-			auto visibleSet = m_visibleSet;
-			if( event.button == ButtonEvent::Left && !event.modifiers )
-			{
-				const auto excludedSetMembers = setMembers->readable().intersection( visibleSet.exclusions );
-				if( excludedSetMembers.isEmpty() )
-				{
-					update = visibleSet.exclusions.addPaths( pathsToExclude );
-				}
-				else
-				{
-					update = visibleSet.exclusions.removePaths( pathsToExclude );
-				}
-			}
-			else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
+		bool update = false;
+		auto visibleSet = m_visibleSet;
+		if( event.button == ButtonEvent::Left && !event.modifiers )
+		{
+			const auto excludedSetMembers = setMembers->readable().intersection( visibleSet.exclusions );
+			if( excludedSetMembers.isEmpty() )
 			{
 				update = visibleSet.exclusions.addPaths( pathsToExclude );
 			}
-
-			if( update )
+			else
 			{
-				ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
+				update = visibleSet.exclusions.removePaths( pathsToExclude );
 			}
-
-			return true;
+		}
+		else if( event.button == ButtonEvent::Left && event.modifiers == ButtonEvent::Modifiers::Shift )
+		{
+			update = visibleSet.exclusions.addPaths( pathsToExclude );
 		}
 
-		ScriptNodePtr m_script;
-		VisibleSet m_visibleSet;
+		if( update )
+		{
+			ScriptNodeAlgo::setVisibleSet( m_script.get(), visibleSet );
+		}
 
-		static IECore::StringDataPtr g_setExcludedIconName;
-		static IECore::StringDataPtr g_setPartiallyExcludedIconName;
-		static IECore::StringDataPtr g_setExcludedHighlightedIconName;
-		static IECore::StringDataPtr g_setExcludedHighlightedTransparentIconName;
-		static IECore::StringDataPtr g_exclusionsEmptyIconName;
+		return true;
+	}
 
-		static IECore::StringDataPtr g_exclusionToolTip;
-		static IECore::StringDataPtr g_setExcludedToolTip;
-		static IECore::StringDataPtr g_setPartiallyExcludedToolTip;
+	ScriptNodePtr m_script;
+	VisibleSet m_visibleSet;
+
+	static IECore::StringDataPtr g_setExcludedIconName;
+	static IECore::StringDataPtr g_setPartiallyExcludedIconName;
+	static IECore::StringDataPtr g_setExcludedHighlightedIconName;
+	static IECore::StringDataPtr g_setExcludedHighlightedTransparentIconName;
+	static IECore::StringDataPtr g_exclusionsEmptyIconName;
+
+	static IECore::StringDataPtr g_exclusionToolTip;
+	static IECore::StringDataPtr g_setExcludedToolTip;
+	static IECore::StringDataPtr g_setPartiallyExcludedToolTip;
 };
 
 StringDataPtr VisibleSetExclusionsColumn::g_setExcludedIconName = new StringData( "locationExcluded.png" );
@@ -972,75 +960,74 @@ StringDataPtr VisibleSetExclusionsColumn::g_setPartiallyExcludedToolTip = new St
 class SetEditorSearchFilter : public Gaffer::PathFilter
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( SetEditorSearchFilter )
+	IE_CORE_DECLAREMEMBERPTR( SetEditorSearchFilter )
 
-		SetEditorSearchFilter( IECore::CompoundDataPtr userData = nullptr )
-			:	PathFilter( userData )
+	SetEditorSearchFilter( IECore::CompoundDataPtr userData = nullptr )
+		: PathFilter( userData )
+	{
+	}
+
+	void setMatchPattern( const string &matchPattern )
+	{
+		if( m_matchPattern == matchPattern )
 		{
+			return;
+		}
+		m_matchPattern = matchPattern;
+		m_wildcardPattern = IECore::StringAlgo::hasWildcards( matchPattern ) ? matchPattern : "*" + matchPattern + "*";
+
+		changedSignal()( this );
+	}
+
+	const string &getMatchPattern() const
+	{
+		return m_matchPattern;
+	}
+
+	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override
+	{
+		if( m_matchPattern.empty() || paths.empty() )
+		{
+			return;
 		}
 
-		void setMatchPattern( const string &matchPattern )
-		{
-			if( m_matchPattern == matchPattern )
-			{
-				return;
-			}
-			m_matchPattern = matchPattern;
-			m_wildcardPattern = IECore::StringAlgo::hasWildcards( matchPattern ) ? matchPattern : "*" + matchPattern + "*";
+		paths.erase(
+			std::remove_if(
+				paths.begin(),
+				paths.end(),
+				[this]( const auto &p ) { return remove( p ); }
+			),
+			paths.end()
+		);
+	}
 
-			changedSignal()( this );
+	bool remove( PathPtr path ) const
+	{
+		if( !path->names().size() )
+		{
+			return true;
 		}
 
-		const string &getMatchPattern() const
+		bool leaf = path->isLeaf();
+		if( !leaf )
 		{
-			return m_matchPattern;
+			std::vector<PathPtr> c;
+			path->children( c );
+
+			leaf = std::all_of( c.begin(), c.end(), [this]( const auto &p ) { return remove( p ); } );
 		}
 
-		void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override
-		{
-			if( m_matchPattern.empty() || paths.empty() )
-			{
-				return;
-			}
+		const bool match = IECore::StringAlgo::matchMultiple( path->names().back().string(), m_wildcardPattern );
 
-			paths.erase(
-				std::remove_if(
-					paths.begin(),
-					paths.end(),
-					[this] ( const auto &p ) { return remove( p ); }
-				),
-				paths.end()
-			);
-		}
+		return leaf && !match;
+	}
 
-		bool remove( PathPtr path ) const
-		{
-			if( !path->names().size() )
-			{
-				return true;
-			}
+private:
 
-			bool leaf = path->isLeaf();
-			if( !leaf )
-			{
-				std::vector<PathPtr> c;
-				path->children( c );
-
-				leaf = std::all_of( c.begin(), c.end(), [this] ( const auto &p ) { return remove( p ); } );
-			}
-
-			const bool match = IECore::StringAlgo::matchMultiple( path->names().back().string(), m_wildcardPattern );
-
-			return leaf && !match;
-		}
-
-	private:
-
-		std::string m_matchPattern;
-		std::string m_wildcardPattern;
-
+	std::string m_matchPattern;
+	std::string m_wildcardPattern;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -1052,79 +1039,76 @@ class SetEditorSearchFilter : public Gaffer::PathFilter
 class SetEditorEmptySetFilter : public Gaffer::PathFilter
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( SetEditorEmptySetFilter )
+	IE_CORE_DECLAREMEMBERPTR( SetEditorEmptySetFilter )
 
-		SetEditorEmptySetFilter( ScriptNodePtr scriptNode, bool useSelection = false, IECore::CompoundDataPtr userData = nullptr )
-			:	PathFilter( userData ), m_scriptNode( scriptNode )
+	SetEditorEmptySetFilter( ScriptNodePtr scriptNode, bool useSelection = false, IECore::CompoundDataPtr userData = nullptr )
+		: PathFilter( userData ), m_scriptNode( scriptNode )
+	{
+		if( useSelection )
 		{
-			if( useSelection )
+			m_selectedPathsChangedConnection = ScriptNodeAlgo::selectedPathsChangedSignal( m_scriptNode.get() ).connect( boost::bind( &SetEditorEmptySetFilter::selectedPathsChanged, this ) );
+			m_selectedPaths = ScriptNodeAlgo::getSelectedPaths( scriptNode.get() );
+		}
+	}
+
+	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override
+	{
+		paths.erase(
+			std::remove_if(
+				paths.begin(),
+				paths.end(),
+				[this, canceller]( auto &p ) { return remove( p, canceller ); }
+			),
+			paths.end()
+		);
+	}
+
+	bool remove( PathPtr path, const IECore::Canceller *canceller ) const
+	{
+		if( !path->names().size() )
+		{
+			return true;
+		}
+
+		bool leaf = path->isLeaf();
+		if( !leaf )
+		{
+			std::vector<PathPtr> c;
+			path->children( c );
+
+			leaf = std::all_of( c.begin(), c.end(), [this, canceller]( const auto &p ) { return remove( p, canceller ); } );
+		}
+
+		bool members = false;
+		if( auto set = runTimeCast<const PathMatcherData>( path->property( g_setPropertyName ) ) )
+		{
+			if( m_selectedPathsChangedConnection.connected() )
 			{
-				m_selectedPathsChangedConnection = ScriptNodeAlgo::selectedPathsChangedSignal( m_scriptNode.get() ).connect(
-					boost::bind( &SetEditorEmptySetFilter::selectedPathsChanged, this )
-				);
-				m_selectedPaths = ScriptNodeAlgo::getSelectedPaths( scriptNode.get() );
+				members = numSelected( set->readable(), m_selectedPaths );
+			}
+			else
+			{
+				members = set->readable().size() > 0;
 			}
 		}
 
-		void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override
-		{
-			paths.erase(
-				std::remove_if(
-					paths.begin(),
-					paths.end(),
-					[this, canceller] ( auto &p ) { return remove( p, canceller ); }
-				),
-				paths.end()
-			);
-		}
+		return leaf && !members;
+	}
 
-		bool remove( PathPtr path, const IECore::Canceller *canceller ) const
-		{
-			if( !path->names().size() )
-			{
-				return true;
-			}
+private:
 
-			bool leaf = path->isLeaf();
-			if( !leaf )
-			{
-				std::vector<PathPtr> c;
-				path->children( c );
+	void selectedPathsChanged()
+	{
+		m_selectedPaths = ScriptNodeAlgo::getSelectedPaths( m_scriptNode.get() );
+		changedSignal()( this );
+	}
 
-				leaf = std::all_of( c.begin(), c.end(), [this, canceller] ( const auto &p ) { return remove( p, canceller ); } );
-			}
-
-			bool members = false;
-			if( auto set = runTimeCast<const PathMatcherData>( path->property( g_setPropertyName ) ) )
-			{
-				if( m_selectedPathsChangedConnection.connected() )
-				{
-					members = numSelected( set->readable(), m_selectedPaths );
-				}
-				else
-				{
-					members = set->readable().size() > 0 ;
-				}
-			}
-
-			return leaf && !members;
-		}
-
-	private :
-
-		void selectedPathsChanged()
-		{
-			m_selectedPaths = ScriptNodeAlgo::getSelectedPaths( m_scriptNode.get() );
-			changedSignal()( this );
-		}
-
-		ScriptNodePtr m_scriptNode;
-		// Only connected if using selection.
-		Gaffer::Signals::ScopedConnection m_selectedPathsChangedConnection;
-		PathMatcher m_selectedPaths;
-
+	ScriptNodePtr m_scriptNode;
+	// Only connected if using selection.
+	Gaffer::Signals::ScopedConnection m_selectedPathsChangedConnection;
+	PathMatcher m_selectedPaths;
 };
 
 } // namespace
@@ -1168,39 +1152,30 @@ void GafferSceneUIModule::bindSetEditor()
 			)
 		)
 		.def( "setScene", &SetPath::setScene )
-		.def( "getScene", (ScenePlug *(SetPath::*)())&SetPath::getScene, return_value_policy<CastToIntrusivePtr>() )
+		.def( "getScene", ( ScenePlug * (SetPath::*)() ) & SetPath::getScene, return_value_policy<CastToIntrusivePtr>() )
 		.def( "setContext", &SetPath::setContext )
-		.def( "getContext", (Context *(SetPath::*)())&SetPath::getContext, return_value_policy<CastToIntrusivePtr>() )
-	;
+		.def( "getContext", ( Context * (SetPath::*)() ) & SetPath::getContext, return_value_policy<CastToIntrusivePtr>() );
 
 	RefCountedClass<SetEditorSearchFilter, PathFilter>( "SearchFilter" )
 		.def( init<IECore::CompoundDataPtr>( ( boost::python::arg( "userData" ) = object() ) ) )
 		.def( "setMatchPattern", &SetEditorSearchFilter::setMatchPattern )
-		.def( "getMatchPattern", &SetEditorSearchFilter::getMatchPattern, return_value_policy<copy_const_reference>() )
-	;
+		.def( "getMatchPattern", &SetEditorSearchFilter::getMatchPattern, return_value_policy<copy_const_reference>() );
 
 	RefCountedClass<SetEditorEmptySetFilter, PathFilter>( "EmptySetFilter" )
-		.def( init<ScriptNodePtr, bool, CompoundDataPtr>( ( boost::python::arg( "scriptNode" ), boost::python::arg( "useSelection" ) = false, boost::python::arg( "userData" ) = object() ) ) )
-	;
+		.def( init<ScriptNodePtr, bool, CompoundDataPtr>( ( boost::python::arg( "scriptNode" ), boost::python::arg( "useSelection" ) = false, boost::python::arg( "userData" ) = object() ) ) );
 
 	RefCountedClass<SetNameColumn, GafferUI::PathColumn>( "SetNameColumn" )
-		.def( init<>() )
-	;
+		.def( init<>() );
 
 	RefCountedClass<SetMembersColumn, GafferUI::PathColumn>( "SetMembersColumn" )
-		.def( init<>() )
-	;
+		.def( init<>() );
 
 	RefCountedClass<SetSelectionColumn, GafferUI::PathColumn>( "SetSelectionColumn" )
-		.def( init<ScriptNodePtr>() )
-	;
+		.def( init<ScriptNodePtr>() );
 
 	RefCountedClass<VisibleSetInclusionsColumn, GafferUI::PathColumn>( "VisibleSetInclusionsColumn" )
-		.def( init<ScriptNodePtr>() )
-	;
+		.def( init<ScriptNodePtr>() );
 
 	RefCountedClass<VisibleSetExclusionsColumn, GafferUI::PathColumn>( "VisibleSetExclusionsColumn" )
-		.def( init<ScriptNodePtr>() )
-	;
-
+		.def( init<ScriptNodePtr>() );
 }

@@ -53,7 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageNode );
 size_t ImageNode::g_firstPlugIndex = 0;
 
 ImageNode::ImageNode( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "out", Gaffer::Plug::Out ) );
@@ -334,7 +334,7 @@ void ImageNode::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 	{
 		for( ValuePlug::Iterator it( outPlug() ); !it.done(); ++it )
 		{
-			if( (*it)->getInput() )
+			if( ( *it )->getInput() )
 			{
 				// If the output gets its value from an input connection.
 				// there will be no compute for it, so we shouldn't declare

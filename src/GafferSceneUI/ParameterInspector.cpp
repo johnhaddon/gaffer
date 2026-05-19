@@ -82,16 +82,13 @@ IECore::ConstObjectPtr parameterData( const Object *attribute, const ShaderNetwo
 	const ShaderNetwork::Parameter input = parameter.shader.string().empty() ? shaderNetwork->input( { shaderNetwork->getOutput().shader, parameter.name } ) : shaderNetwork->input( parameter );
 	if( input )
 	{
-		return new CompoundData( {
-			{ g_shaderConnectionShader, new InternedStringData( input.shader ) },
-			{ g_shaderConnectionParameter, new InternedStringData( input.name ) }
-		} );
+		return new CompoundData( { { g_shaderConnectionShader, new InternedStringData( input.shader ) }, { g_shaderConnectionParameter, new InternedStringData( input.name ) } } );
 	}
 
 	return shader->parametersData()->member( parameter.name );
 }
 
-}  // namespace
+} // namespace
 
 IE_CORE_DEFINERUNTIMETYPED( ParameterInspector )
 
@@ -102,7 +99,6 @@ ParameterInspector::ParameterInspector(
 )
 	: AttributeInspector( scene, editScope, attribute, parameter.name.string(), "parameter" ), m_parameter( parameter ), m_inheritAttributes( inheritAttributes )
 {
-
 }
 
 const IECoreScene::ShaderNetwork::Parameter &ParameterInspector::parameter() const
@@ -190,7 +186,7 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 	}
 	else if( auto shaderAssignment = runTimeCast<ShaderAssignment>( sceneNode ) )
 	{
-		if( shaderAssignment->globalPlug()->getValue() || !(shaderAssignment->filterPlug()->match( shaderAssignment->inPlug() ) & PathMatcher::ExactMatch) )
+		if( shaderAssignment->globalPlug()->getValue() || !( shaderAssignment->filterPlug()->match( shaderAssignment->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
@@ -210,16 +206,12 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 	}
 	else if( auto shaderTweaks = runTimeCast<ShaderTweaks>( sceneNode ) )
 	{
-		if( shaderTweaks->globalPlug()->getValue() || !(shaderTweaks->filterPlug()->match( shaderTweaks->inPlug() ) & PathMatcher::ExactMatch) )
+		if( shaderTweaks->globalPlug()->getValue() || !( shaderTweaks->filterPlug()->match( shaderTweaks->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
 
-		const std::string tweakName = (
-			m_parameter.shader.string() +
-			( m_parameter.shader.string().empty() ? "" : "." ) +
-			m_parameter.name.string()
-		);
+		const std::string tweakName = ( m_parameter.shader.string() + ( m_parameter.shader.string().empty() ? "" : "." ) + m_parameter.name.string() );
 
 		for( const auto &tweak : TweakPlug::Range( *shaderTweaks->tweaksPlug() ) )
 		{
@@ -262,20 +254,18 @@ Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction(
 	}
 	else
 	{
-		return [
-			editScope = EditScopePtr( editScope ),
-			attributeName = attributeHistory->attributeName,
-			context = attributeHistory->context,
-			parameter = m_parameter
-		] ( bool createIfNecessary ) {
-				Context::Scope scope( context.get() );
-				return EditScopeAlgo::acquireParameterEdit(
-					editScope.get(),
-					context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
-					attributeName,
-					parameter,
-					createIfNecessary
-				);
+		return [editScope = EditScopePtr( editScope ),
+				attributeName = attributeHistory->attributeName,
+				context = attributeHistory->context,
+				parameter = m_parameter]( bool createIfNecessary ) {
+			Context::Scope scope( context.get() );
+			return EditScopeAlgo::acquireParameterEdit(
+				editScope.get(),
+				context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
+				attributeName,
+				parameter,
+				createIfNecessary
+			);
 		};
 	}
 }

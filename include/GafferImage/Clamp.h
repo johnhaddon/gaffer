@@ -53,49 +53,48 @@ namespace GafferImage
 class GAFFERIMAGE_API Clamp : public ChannelDataProcessor
 {
 
-	public :
+public:
 
-		explicit Clamp( const std::string &name=defaultName<Clamp>() );
-		~Clamp() override;
+	explicit Clamp( const std::string &name = defaultName<Clamp>() );
+	~Clamp() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Clamp, ClampTypeId, ChannelDataProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Clamp, ClampTypeId, ChannelDataProcessor );
 
-		//! @name Plug Accessors
-		/// Returns a pointer to the node's plugs.
-		//////////////////////////////////////////////////////////////
-		//@{
-		Gaffer::Color4fPlug *minPlug();
-		const Gaffer::Color4fPlug *minPlug() const;
-		Gaffer::Color4fPlug *maxPlug();
-		const Gaffer::Color4fPlug *maxPlug() const;
-		Gaffer::Color4fPlug *minClampToPlug();
-		const Gaffer::Color4fPlug *minClampToPlug() const;
-		Gaffer::Color4fPlug *maxClampToPlug();
-		const Gaffer::Color4fPlug *maxClampToPlug() const;
+	//! @name Plug Accessors
+	/// Returns a pointer to the node's plugs.
+	//////////////////////////////////////////////////////////////
+	//@{
+	Gaffer::Color4fPlug *minPlug();
+	const Gaffer::Color4fPlug *minPlug() const;
+	Gaffer::Color4fPlug *maxPlug();
+	const Gaffer::Color4fPlug *maxPlug() const;
+	Gaffer::Color4fPlug *minClampToPlug();
+	const Gaffer::Color4fPlug *minClampToPlug() const;
+	Gaffer::Color4fPlug *maxClampToPlug();
+	const Gaffer::Color4fPlug *maxClampToPlug() const;
 
-		Gaffer::BoolPlug *minEnabledPlug();
-		const Gaffer::BoolPlug *minEnabledPlug() const;
-		Gaffer::BoolPlug *maxEnabledPlug();
-		const Gaffer::BoolPlug *maxEnabledPlug() const;
-		Gaffer::BoolPlug *minClampToEnabledPlug();
-		const Gaffer::BoolPlug *minClampToEnabledPlug() const;
-		Gaffer::BoolPlug *maxClampToEnabledPlug();
-		const Gaffer::BoolPlug *maxClampToEnabledPlug() const;
-		//@}
+	Gaffer::BoolPlug *minEnabledPlug();
+	const Gaffer::BoolPlug *minEnabledPlug() const;
+	Gaffer::BoolPlug *maxEnabledPlug();
+	const Gaffer::BoolPlug *maxEnabledPlug() const;
+	Gaffer::BoolPlug *minClampToEnabledPlug();
+	const Gaffer::BoolPlug *minClampToEnabledPlug() const;
+	Gaffer::BoolPlug *maxClampToEnabledPlug();
+	const Gaffer::BoolPlug *maxClampToEnabledPlug() const;
+	//@}
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		bool enabled() const override;
+	bool enabled() const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelName, IECore::FloatVectorDataPtr outData ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelName, IECore::FloatVectorDataPtr outData ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Clamp )

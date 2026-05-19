@@ -49,8 +49,9 @@ namespace IECorePreview
 struct GAFFER_API Message
 {
 	Message( IECore::MessageHandler::Level l, const std::string &c, const std::string &m )
-		:	level( l ), context( c ), message( m )
-	{}
+		: level( l ), context( c ), message( m )
+	{
+	}
 
 	IECore::MessageHandler::Level level;
 	std::string context;
@@ -70,66 +71,66 @@ struct GAFFER_API Message
 ///
 class GAFFER_API Messages
 {
-	public :
+public:
 
-		Messages();
-		Messages( const Messages &other ) = default;
-		Messages &operator = ( const Messages &other ) = default;
+	Messages();
+	Messages( const Messages &other ) = default;
+	Messages &operator = ( const Messages &other ) = default;
 
-		/// Equality implies all messages in the container are the same.
-		bool operator == ( const Messages &other ) const;
-		bool operator != ( const Messages &other ) const;
+	/// Equality implies all messages in the container are the same.
+	bool operator == ( const Messages &other ) const;
+	bool operator != ( const Messages &other ) const;
 
-		void add( const Message &message );
-		void clear();
+	void add( const Message &message );
+	void clear();
 
-		size_t size() const;
+	size_t size() const;
 
-		const Message& operator[]( size_t index ) const;
+	const Message &operator [] ( size_t index ) const;
 
-		/// The number of messages of a specific severity
-		/// Messages are counted when they are added, so this is cheap.
-		size_t count( const IECore::MessageHandler::Level &level ) const;
+	/// The number of messages of a specific severity
+	/// Messages are counted when they are added, so this is cheap.
+	size_t count( const IECore::MessageHandler::Level &level ) const;
 
-		/// The index of the first message that differs to the messages in
-		/// the other container. std::nullopt is returned if :
-		///  - This container is empty.
-		///  - This container's messages match those in others, and others
-		///    is of equal or greater size.
-		std::optional<size_t> firstDifference( const Messages &others ) const;
+	/// The index of the first message that differs to the messages in
+	/// the other container. std::nullopt is returned if :
+	///  - This container is empty.
+	///  - This container's messages match those in others, and others
+	///    is of equal or greater size.
+	std::optional<size_t> firstDifference( const Messages &others ) const;
 
-		/// The hash of all messages in the container.  Messages are hashed
-		/// when they are added, so this is cheap.
-		IECore::MurmurHash hash() const;
+	/// The hash of all messages in the container.  Messages are hashed
+	/// when they are added, so this is cheap.
+	IECore::MurmurHash hash() const;
 
-	private :
+private:
 
-		// \todo The current implementation is naive and is sensitive to
-		// bucketSize .vs. ingest/copy rate and total number of messages.
-		//
-		// Messages are stored in const buckets whose size is determined by the
-		// m_bucketSize. Each bucket of messages is shared between all copies
-		// of the container, so the copy cost is that of the pointers to the
-		// full buckets themselves, rather than any of the messages. Only `size
-		// % m_bucketSize` messages from the 'next' bucket are ever directly
-		// copied.
-		//
-		// As such there is a trade-off between the expected number of
-		// messages, and the rate of ingest .vs. copies. If the bucketSize is
-		// much smaller than the total number of messages, then the cost of
-		// copying the bucket list can become significant. If the bucket size
-		// is too large, then the cost of copying messages for the next bucket
-		// may be significant. There is much scope for improvement here.
-		//
-		size_t m_bucketSize;
-		using Bucket = std::vector<Message>;
+	// \todo The current implementation is naive and is sensitive to
+	// bucketSize .vs. ingest/copy rate and total number of messages.
+	//
+	// Messages are stored in const buckets whose size is determined by the
+	// m_bucketSize. Each bucket of messages is shared between all copies
+	// of the container, so the copy cost is that of the pointers to the
+	// full buckets themselves, rather than any of the messages. Only `size
+	// % m_bucketSize` messages from the 'next' bucket are ever directly
+	// copied.
+	//
+	// As such there is a trade-off between the expected number of
+	// messages, and the rate of ingest .vs. copies. If the bucketSize is
+	// much smaller than the total number of messages, then the cost of
+	// copying the bucket list can become significant. If the bucket size
+	// is too large, then the cost of copying messages for the next bucket
+	// may be significant. There is much scope for improvement here.
+	//
+	size_t m_bucketSize;
+	using Bucket = std::vector<Message>;
 
-		Bucket m_nextBucket;
-		std::vector<std::shared_ptr<const Bucket>> m_buckets;
+	Bucket m_nextBucket;
+	std::vector<std::shared_ptr<const Bucket>> m_buckets;
 
-		std::array<size_t, int(IECore::MessageHandler::Level::Invalid)> m_counts;
+	std::array<size_t, int( IECore::MessageHandler::Level::Invalid )> m_counts;
 
-		IECore::MurmurHash m_hash;
+	IECore::MurmurHash m_hash;
 };
 
-} // IECorePreview
+} // namespace IECorePreview

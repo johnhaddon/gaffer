@@ -51,52 +51,51 @@ namespace Private
 class GAFFERSCENEUI_API TransformInspector : public Inspector
 {
 
-	public :
+public:
 
-		enum class Space
-		{
-			Local,
-			World
-		};
+	enum class Space
+	{
+		Local,
+		World
+	};
 
-		enum class Component
-		{
-			Matrix,
-			Translate,
-			Rotate,
-			Scale,
-			Shear
-		};
+	enum class Component
+	{
+		Matrix,
+		Translate,
+		Rotate,
+		Scale,
+		Shear
+	};
 
-		TransformInspector(
-			const GafferScene::ScenePlugPtr &scene,
-			const Gaffer::PlugPtr &editScope,
-			Space space = Space::World,
-			Component component = Component::Matrix
-		);
+	TransformInspector(
+		const GafferScene::ScenePlugPtr &scene,
+		const Gaffer::PlugPtr &editScope,
+		Space space = Space::World,
+		Component component = Component::Matrix
+	);
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::TransformInspector, TransformInspectorTypeId, Inspector );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::TransformInspector, TransformInspectorTypeId, Inspector );
 
-		static const char *toString( Space space );
-		static const char *toString( Component component );
+	static const char *toString( Space space );
+	static const char *toString( Component component );
 
-	protected :
+protected:
 
-		GafferScene::SceneAlgo::History::ConstPtr history() const override;
-		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
-		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
-		AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
+	GafferScene::SceneAlgo::History::ConstPtr history() const override;
+	IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history ) const override;
+	Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
+	AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
 
-	private :
+private:
 
-		const GafferScene::ScenePlugPtr m_scene;
-		const Space m_space;
-		const Component m_component;
-
+	const GafferScene::ScenePlugPtr m_scene;
+	const Space m_space;
+	const Component m_component;
 };
 
 IE_CORE_DECLAREPTR( TransformInspector )
 
-}  // namespace Private
+} // namespace Private
 
-}  // namespace GafferSceneUI
+} // namespace GafferSceneUI

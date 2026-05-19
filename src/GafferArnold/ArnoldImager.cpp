@@ -80,7 +80,7 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldImager );
 size_t ArnoldImager::g_firstPlugIndex = 0;
 
 ArnoldImager::ArnoldImager( const std::string &name )
-	:	GlobalsProcessor( name )
+	: GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "imager" ) );
@@ -200,19 +200,13 @@ IECore::ConstCompoundObjectPtr ArnoldImager::computeProcessedGlobals( const Gaff
 			ShaderNetwork::Parameter insertedOut = ShaderNetworkAlgo::addShaders( mergedImager.get(), imager );
 			if( mode == Mode::InsertLast )
 			{
-				mergedImager->addConnection( {
-					mergedImager->getOutput(),
-					firstInput( mergedImager.get(), insertedOut.shader )
-				} );
+				mergedImager->addConnection( { mergedImager->getOutput(), firstInput( mergedImager.get(), insertedOut.shader ) } );
 				mergedImager->setOutput( insertedOut );
 			}
 			else
 			{
 				assert( mode == Mode::InsertFirst );
-				mergedImager->addConnection( {
-					insertedOut,
-					firstInput( mergedImager.get(), mergedImager->getOutput().shader )
-				} );
+				mergedImager->addConnection( { insertedOut, firstInput( mergedImager.get(), mergedImager->getOutput().shader ) } );
 			}
 			result->members()[g_imagerOptionName] = mergedImager;
 		}

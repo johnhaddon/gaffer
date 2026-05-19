@@ -69,11 +69,11 @@ static IECore::InternedString g_colorKey( "nodule:color" );
 static IECore::InternedString g_labelKey( "noduleLayout:label" );
 
 StandardNodule::StandardNodule( Gaffer::PlugPtr plug )
-	:	Nodule( plug ), m_labelVisible( false ), m_draggingConnection( false )
+	: Nodule( plug ), m_labelVisible( false ), m_draggingConnection( false )
 {
 	enterSignal().connect( boost::bind( &StandardNodule::enter, this, ::_1, ::_2 ) );
 	leaveSignal().connect( boost::bind( &StandardNodule::leave, this, ::_1, ::_2 ) );
-	buttonPressSignal().connect( boost::bind( &StandardNodule::buttonPress, this, ::_1,  ::_2 ) );
+	buttonPressSignal().connect( boost::bind( &StandardNodule::buttonPress, this, ::_1, ::_2 ) );
 	dragBeginSignal().connect( boost::bind( &StandardNodule::dragBegin, this, ::_1, ::_2 ) );
 	dragMoveSignal().connect( boost::bind( &StandardNodule::dragMove, this, ::_1, ::_2 ) );
 	dragEnterSignal().connect( boost::bind( &StandardNodule::dragEnter, this, ::_1, ::_2 ) );
@@ -197,7 +197,6 @@ void StandardNodule::renderLayer( Layer layer, const Style *style, RenderReason 
 		default :
 
 			break;
-
 	}
 
 	// if the nodule isn't highlighted it will be drawn in the normal, non-overlayed manner
@@ -255,7 +254,7 @@ void StandardNodule::renderLabel( const Style *style ) const
 	}
 	else
 	{
-		theta = sign( theta ) * lerp( 135.0f, 180.0f, (fabs( theta ) - 90.0f) / 90.0f );
+		theta = sign( theta ) * lerp( 135.0f, 180.0f, ( fabs( theta ) - 90.0f ) / 90.0f );
 	}
 
 	// we also don't want the text to be upside down, so we correct the rotation
@@ -479,7 +478,7 @@ void StandardNodule::setCompatibleLabelsVisible( const DragDropEvent &event )
 
 	for( StandardNodule::RecursiveIterator it( nodeGadget ); !it.done(); ++it )
 	{
-		(*it)->setLabelVisible( creator->canCreateConnection( it->get()->plug() ) ? true : false );
+		( *it )->setLabelVisible( creator->canCreateConnection( it->get()->plug() ) ? true : false );
 	}
 }
 

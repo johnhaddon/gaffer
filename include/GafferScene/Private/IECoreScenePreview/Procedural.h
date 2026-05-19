@@ -54,19 +54,18 @@ class Renderer;
 class GAFFERSCENE_API Procedural : public IECoreScene::VisibleRenderable
 {
 
-	public :
+public:
 
-		Procedural();
-		~Procedural() override;
+	Procedural();
+	~Procedural() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Procedural, IECoreScenePreview::PreviewProceduralTypeId, IECoreScene::VisibleRenderable );
+	IE_CORE_DECLAREEXTENSIONOBJECT( Procedural, IECoreScenePreview::PreviewProceduralTypeId, IECoreScene::VisibleRenderable );
 
 #if CORTEX_COMPATIBILITY_VERSION < MAKE_CORTEX_COMPATIBILITY_VERSION( 10, 6 )
-		void render( IECoreScene::Renderer *renderer ) const final {};
+	void render( IECoreScene::Renderer *renderer ) const final {};
 #endif
-		/// Must be implemented by derived classes.
-		virtual void render( Renderer *renderer ) const = 0;
-
+	/// Must be implemented by derived classes.
+	virtual void render( Renderer *renderer ) const = 0;
 };
 
 IE_CORE_DECLAREPTR( Procedural )

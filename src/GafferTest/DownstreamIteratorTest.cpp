@@ -132,5 +132,4 @@ void GafferTest::testDownstreamIterator()
 	GAFFERTEST_ASSERT( visited[3] == c->floatRangePlug()->getChild( 0 ) );
 	GAFFERTEST_ASSERT( visited[4] == c->outFloatPlug() );
 	GAFFERTEST_ASSERT( visited[5] == d->floatRangePlug()->getChild( 0 ) );
-
 }

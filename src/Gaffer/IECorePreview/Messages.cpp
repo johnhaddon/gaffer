@@ -79,11 +79,11 @@ void Messages::add( const Message &message )
 	m_nextBucket.push_back( message );
 	message.hash( m_hash );
 
-	++m_counts[ int(message.level) ];
+	++m_counts[int( message.level )];
 
 	if( m_nextBucket.size() == m_bucketSize )
 	{
-		const std::shared_ptr<const Bucket> b( new Bucket( std::move(m_nextBucket) ) );
+		const std::shared_ptr<const Bucket> b( new Bucket( std::move( m_nextBucket ) ) );
 		m_buckets.push_back( b );
 		m_nextBucket.reserve( m_bucketSize );
 	}
@@ -102,11 +102,11 @@ size_t Messages::size() const
 	return ( m_buckets.size() * m_bucketSize ) + m_nextBucket.size();
 }
 
-const Message& Messages::operator[]( size_t index ) const
+const Message &Messages::operator [] ( size_t index ) const
 {
 	const size_t item = index % m_bucketSize;
 	const size_t bucket = index / m_bucketSize;
-	return bucket == m_buckets.size() ? m_nextBucket[ item ] : (*m_buckets[ bucket ])[ item ];
+	return bucket == m_buckets.size() ? m_nextBucket[item] : ( *m_buckets[bucket] )[item];
 }
 
 size_t Messages::count( const IECore::MessageHandler::Level &level ) const
@@ -116,7 +116,7 @@ size_t Messages::count( const IECore::MessageHandler::Level &level ) const
 		return 0;
 	}
 
-	return m_counts[ int(level) ];
+	return m_counts[int( level )];
 }
 
 std::optional<size_t> Messages::firstDifference( const Messages &other ) const
@@ -142,7 +142,7 @@ std::optional<size_t> Messages::firstDifference( const Messages &other ) const
 	const size_t numComparableBuckets = std::min( m_buckets.size(), other.m_buckets.size() );
 	if( numComparableBuckets > 0 )
 	{
-		for( size_t i = numComparableBuckets - 1; ; --i )
+		for( size_t i = numComparableBuckets - 1;; --i )
 		{
 			if( m_buckets[i] == other.m_buckets[i] )
 			{
@@ -150,7 +150,10 @@ std::optional<size_t> Messages::firstDifference( const Messages &other ) const
 				break;
 			}
 
-			if( i == 0 ) { break; }
+			if( i == 0 )
+			{
+				break;
+			}
 		}
 	}
 
@@ -158,7 +161,7 @@ std::optional<size_t> Messages::firstDifference( const Messages &other ) const
 	const size_t numComparableMessages = std::min( size(), other.size() );
 	for( size_t i = comparisonStartIndex; i < numComparableMessages; ++i )
 	{
-		if( (*this)[i] != other[i] )
+		if( ( *this )[i] != other[i] )
 		{
 			return i;
 		}

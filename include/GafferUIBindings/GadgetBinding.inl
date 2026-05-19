@@ -67,7 +67,7 @@ static std::string getToolTip( const T &p, const IECore::LineSegment3f &line )
 
 template<typename T, typename TWrapper>
 GadgetClass<T, TWrapper>::GadgetClass( const char *docString )
-	:	GafferBindings::GraphComponentClass<T, TWrapper>( docString )
+	: GafferBindings::GraphComponentClass<T, TWrapper>( docString )
 {
 	this->def( "setHighlighted", &Detail::setHighlighted<T> );
 	this->def( "bound", &Detail::bound<T> );

@@ -82,8 +82,8 @@ void GafferTest::testManyContexts()
 		// ( On the other hand, using a Context directly copies new memory for the value to
 		// create a fully independent context, which is pretty slow ).
 		Context::EditableScope tmp( base.get() );
-		tmp.set( keys[i%numKeys], &i );
-		GAFFERTEST_ASSERT( tmp.context()->get<int>( keys[i%numKeys] ) == i );
+		tmp.set( keys[i % numKeys], &i );
+		GAFFERTEST_ASSERT( tmp.context()->get<int>( keys[i % numKeys] ) == i );
 		GAFFERTEST_ASSERT( tmp.context()->hash() != baseHash );
 	}
 }
@@ -112,7 +112,7 @@ void GafferTest::testManyEnvironmentSubstitutions()
 	ContextPtr context = new Context();
 
 	const std::string phrase( "${GAFFER_ROOT}" );
-	const std::string expectedResult( getenv( "GAFFER_ROOT") );
+	const std::string expectedResult( getenv( "GAFFER_ROOT" ) );
 
 	Timer t;
 	for( int i = 0; i < 1000000; ++i )
@@ -182,7 +182,6 @@ void GafferTest::testEditableScope()
 
 	scope.setTime( 8.5 );
 	GAFFERTEST_ASSERT( currentContext->getFrame() == 68 );
-
 }
 
 // Create the number of contexts specified, and return counts for how many collisions there are
@@ -199,7 +198,7 @@ void GafferTest::testEditableScope()
 // "seed" can be used to perform different runs to get an average number.
 // The goal is that regardless of how we create the contexts, they are all unique, and should therefore
 // have an identical chance of collisions if our hashing performs ideally.
-std::tuple<int,int,int,int> GafferTest::countContextHash32Collisions( int contexts, int mode, int seed )
+std::tuple<int, int, int, int> GafferTest::countContextHash32Collisions( int contexts, int mode, int seed )
 {
 	std::unordered_set<uint32_t> used[4];
 
@@ -213,7 +212,7 @@ std::tuple<int,int,int,int> GafferTest::countContextHash32Collisions( int contex
 		numberNames[i] = InternedString( i );
 	}
 
-	int collisions[4] = {0,0,0,0};
+	int collisions[4] = { 0, 0, 0, 0 };
 	for( int i = 0; i < contexts; i++ )
 	{
 		int curMode = mode;
@@ -273,7 +272,7 @@ void GafferTest::testContextHashPerformance( int numEntries, int entrySize, bool
 	ContextPtr baseContext = new Context();
 	for( int i = 0; i < numEntries; i++ )
 	{
-		baseContext->set( InternedString( i ), std::string( entrySize, 'x') );
+		baseContext->set( InternedString( i ), std::string( entrySize, 'x' ) );
 	}
 
 	const InternedString varyingVarName = "varyVar";
@@ -286,19 +285,16 @@ void GafferTest::testContextHashPerformance( int numEntries, int entrySize, bool
 
 	const ThreadState &threadState = ThreadState::current();
 
-	tbb::parallel_for( tbb::blocked_range<int>( 0, 10000000 ), [&threadState, &varyingVarName]( const tbb::blocked_range<int> &r )
+	tbb::parallel_for( tbb::blocked_range<int>( 0, 10000000 ), [&threadState, &varyingVarName]( const tbb::blocked_range<int> &r ) {
+		for( int i = r.begin(); i != r.end(); ++i )
 		{
-			for( int i = r.begin(); i != r.end(); ++i )
-			{
-				Context::EditableScope scope( threadState );
-				scope.set( varyingVarName, &i );
+			Context::EditableScope scope( threadState );
+			scope.set( varyingVarName, &i );
 
-				// This call is relied on by ValuePlug's HashCacheKey, so it is crucial that it be fast
-				scope.context()->hash();
-			}
+			// This call is relied on by ValuePlug's HashCacheKey, so it is crucial that it be fast
+			scope.context()->hash();
 		}
-	);
-
+	} );
 }
 
 void GafferTest::testContextCopyPerformance( int numEntries, int entrySize )
@@ -308,20 +304,18 @@ void GafferTest::testContextCopyPerformance( int numEntries, int entrySize )
 	ContextPtr baseContext = new Context();
 	for( int i = 0; i < numEntries; i++ )
 	{
-		baseContext->set( InternedString( i ), std::string( entrySize, 'x') );
+		baseContext->set( InternedString( i ), std::string( entrySize, 'x' ) );
 	}
 
 	tbb::parallel_for(
 		tbb::blocked_range<int>( 0, 1000000 ),
-		[&baseContext]( const tbb::blocked_range<int> &r )
-		{
+		[&baseContext]( const tbb::blocked_range<int> &r ) {
 			for( int i = r.begin(); i != r.end(); ++i )
 			{
 				ContextPtr copy = new Context( *baseContext );
 			}
 		}
 	);
-
 }
 
 void GafferTest::testCopyEditableScope()

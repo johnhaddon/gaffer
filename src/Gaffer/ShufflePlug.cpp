@@ -215,7 +215,7 @@ Gaffer::PlugPtr ShufflesPlug::createCounterpart( const std::string &name, Direct
 	PlugPtr result = new ShufflesPlug( name, direction, getFlags() );
 	for( Plug::Iterator it( this ); !it.done(); ++it )
 	{
-		result->addChild( (*it)->createCounterpart( (*it)->getName(), direction ) );
+		result->addChild( ( *it )->createCounterpart( ( *it )->getName(), direction ) );
 	}
 	return result;
 }

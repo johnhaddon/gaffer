@@ -75,7 +75,7 @@ static boost::python::tuple countContextHash32CollisionsWrapper( int entries, in
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	auto result = countContextHash32Collisions( entries, mode, seed );
-	return boost::python::make_tuple( std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result) );
+	return boost::python::make_tuple( std::get<0>( result ), std::get<1>( result ), std::get<2>( result ), std::get<3>( result ) );
 }
 
 static float asFloat32( const float value )
@@ -87,13 +87,7 @@ BOOST_PYTHON_MODULE( _GafferTest )
 {
 
 	GafferBindings::DependencyNodeClass<MultiplyNode>()
-		.def( init<const char *, bool>(
-				(
-					boost::python::arg_( "name" ),
-					boost::python::arg_( "brokenAffects" )=false
-				)
-			)
-		);
+		.def( init<const char *, bool>( ( boost::python::arg_( "name" ), boost::python::arg_( "brokenAffects" ) = false ) ) );
 
 	def( "asFloat32", &asFloat32 );
 	def( "testRecursiveChildIterator", &testRecursiveChildIterator );
@@ -125,5 +119,4 @@ BOOST_PYTHON_MODULE( _GafferTest )
 
 	def( "testConcurrentAccessToDifferentInstances", &testConcurrentAccessToDifferentInstancesWrapper );
 	def( "testConcurrentAccessToSameInstance", &testConcurrentAccessToSameInstanceWrapper );
-
 }

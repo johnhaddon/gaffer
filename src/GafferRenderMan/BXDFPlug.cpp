@@ -43,7 +43,7 @@ using namespace GafferRenderMan;
 GAFFER_PLUG_DEFINE_TYPE( BXDFPlug );
 
 BXDFPlug::BXDFPlug( const std::string &name, Direction direction, unsigned flags )
-	:	GafferScene::ClosurePlug( name, direction, flags )
+	: GafferScene::ClosurePlug( name, direction, flags )
 {
 }
 

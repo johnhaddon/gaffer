@@ -77,14 +77,7 @@ void staticParameters( const IECoreScene::CurvesPrimitive *object, ParameterList
 
 	if( basis )
 	{
-		parameters.add( {
-			"basis",
-			basis,
-			NSITypeString,
-			0,
-			1,
-			0
-		} );
+		parameters.add( { "basis", basis, NSITypeString, 0, 1, 0 } );
 	}
 
 	if( object->wrap() == CurvesPrimitive::Wrap::Periodic )
@@ -95,7 +88,6 @@ void staticParameters( const IECoreScene::CurvesPrimitive *object, ParameterList
 	{
 		parameters.add( { "extrapolate", &g_one, NSITypeInteger, 0, 1, 0 } );
 	}
-
 }
 
 bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &objects, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle )

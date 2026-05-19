@@ -50,7 +50,7 @@ static boost::python::list affects( const T &n, const Gaffer::Plug *p )
 	Gaffer::DependencyNode::AffectedPlugsContainer a;
 	n.T::affects( p, a );
 	boost::python::list result;
-	for( Gaffer::DependencyNode::AffectedPlugsContainer::const_iterator it=a.begin(); it!=a.end(); it++ )
+	for( Gaffer::DependencyNode::AffectedPlugsContainer::const_iterator it = a.begin(); it != a.end(); it++ )
 	{
 		result.append( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( *it ) ) );
 	}
@@ -75,7 +75,7 @@ GAFFERBINDINGS_API PyTypeObject *dependencyNodeMetaclass();
 
 template<typename T, typename Ptr>
 DependencyNodeClass<T, Ptr>::DependencyNodeClass( const char *docString )
-	:	NodeClass<T, Ptr>( docString )
+	: NodeClass<T, Ptr>( docString )
 {
 	this->def( "affects", &Detail::affects<T> );
 	this->def( "enabledPlug", &Detail::enabledPlug<T> );
@@ -86,7 +86,7 @@ DependencyNodeClass<T, Ptr>::DependencyNodeClass( const char *docString )
 
 template<typename T, typename Ptr>
 DependencyNodeClass<T, Ptr>::DependencyNodeClass( const char *docString, boost::python::no_init_t )
-	:	NodeClass<T, Ptr>( docString, boost::python::no_init )
+	: NodeClass<T, Ptr>( docString, boost::python::no_init )
 {
 	this->def( "affects", &Detail::affects<T> );
 	this->def( "enabledPlug", &Detail::enabledPlug<T> );

@@ -46,7 +46,8 @@ using namespace IECoreScene;
 using namespace Gaffer;
 using namespace GafferScene;
 
-namespace {
+namespace
+{
 
 // Output a segment value for each face which groups faces into groups which share the same index targets.
 // The internal code for this function calls these index targets "vertices", since that is the easiest case
@@ -75,7 +76,7 @@ void segmentIndices( const std::vector<int> &verticesPerFace, const std::vector<
 		for( int i = 0; i < f; i++ )
 		{
 			// For each vertex in the current face
-			int v = indices[ vertexIdsIndex + i ];
+			int v = indices[vertexIdsIndex + i];
 
 			// Trace the references between vertices until we find a vertex that points to itself,
 			// this is the lowest vertex index in this segment
@@ -109,7 +110,7 @@ void segmentIndices( const std::vector<int> &verticesPerFace, const std::vector<
 		// allocations anyway ).
 		for( int i = 0; i < f; i++ )
 		{
-			int v = indices[ vertexIdsIndex + i ];
+			int v = indices[vertexIdsIndex + i];
 			while( true )
 			{
 				int vNext = segments[v];
@@ -141,7 +142,7 @@ void segmentIndices( const std::vector<int> &verticesPerFace, const std::vector<
 		}
 		else
 		{
-			segments[i] = segments[ segments[i] ];
+			segments[i] = segments[segments[i]];
 		}
 	}
 
@@ -154,7 +155,7 @@ void segmentIndices( const std::vector<int> &verticesPerFace, const std::vector<
 	vertexIdsIndex = 0;
 	for( int f : verticesPerFace )
 	{
-		uniformSegments.push_back( segments[ indices[ vertexIdsIndex ] ] );
+		uniformSegments.push_back( segments[indices[vertexIdsIndex]] );
 		vertexIdsIndex += f;
 	}
 }
@@ -166,7 +167,7 @@ size_t MeshSegments::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( MeshSegments );
 
 MeshSegments::MeshSegments( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -200,11 +201,9 @@ const Gaffer::StringPlug *MeshSegments::segmentPlug() const
 
 bool MeshSegments::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input == connectivityPlug() ||
-		input == segmentPlug()
-	;
+		input == segmentPlug();
 }
 
 void MeshSegments::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -289,7 +288,7 @@ IECore::ConstObjectPtr MeshSegments::computeProcessedObject( const ScenePath &pa
 		}
 		else
 		{
-			throw IECore::Exception( "Invalid interpolation for primitive variable \"" + connectivityPrimVar + "\".");
+			throw IECore::Exception( "Invalid interpolation for primitive variable \"" + connectivityPrimVar + "\"." );
 		}
 	}
 

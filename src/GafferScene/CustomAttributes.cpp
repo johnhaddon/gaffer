@@ -42,7 +42,7 @@ using namespace GafferScene;
 GAFFER_NODE_DEFINE_TYPE( CustomAttributes );
 
 CustomAttributes::CustomAttributes( const std::string &name )
-	:	Attributes( name )
+	: Attributes( name )
 {
 }
 

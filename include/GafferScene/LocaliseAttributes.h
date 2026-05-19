@@ -46,29 +46,28 @@ namespace GafferScene
 class GAFFERSCENE_API LocaliseAttributes : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit LocaliseAttributes( const std::string &name=defaultName<LocaliseAttributes>() );
-		~LocaliseAttributes() override;
+	explicit LocaliseAttributes( const std::string &name = defaultName<LocaliseAttributes>() );
+	~LocaliseAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::LocaliseAttributes, LocaliseAttributesTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::LocaliseAttributes, LocaliseAttributesTypeId, AttributeProcessor );
 
-		Gaffer::StringPlug *attributesPlug();
-		const Gaffer::StringPlug *attributesPlug() const;
+	Gaffer::StringPlug *attributesPlug();
+	const Gaffer::StringPlug *attributesPlug() const;
 
-		Gaffer::BoolPlug *includeGlobalAttributesPlug();
-		const Gaffer::BoolPlug *includeGlobalAttributesPlug() const;
+	Gaffer::BoolPlug *includeGlobalAttributesPlug();
+	const Gaffer::BoolPlug *includeGlobalAttributesPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( LocaliseAttributes )

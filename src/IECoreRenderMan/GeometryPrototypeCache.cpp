@@ -46,7 +46,7 @@ using namespace IECoreScene;
 using namespace IECoreRenderMan;
 
 GeometryPrototypeCache::GeometryPrototypeCache( Session *session )
-	:	m_session( session )
+	: m_session( session )
 {
 }
 
@@ -62,8 +62,7 @@ GeometryPrototypePtr GeometryPrototypeCache::get( const IECore::Object *object, 
 
 GeometryPrototypePtr GeometryPrototypeCache::get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes, const std::string &messageContext )
 {
-	auto converter = [&] ( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes, Session *session, GeometryPrototypePtr &result ) {
-
+	auto converter = [&]( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes, Session *session, GeometryPrototypePtr &result ) {
 		riley::DisplacementId displacement;
 		if( auto d = attributes->displacement() )
 		{
@@ -81,7 +80,6 @@ GeometryPrototypePtr GeometryPrototypeCache::get( const IECoreScenePreview::Rend
 				session
 			);
 		}
-
 	};
 
 	std::optional<IECore::MurmurHash> attributesHash = attributes->prototypeHash();

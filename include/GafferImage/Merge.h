@@ -58,54 +58,53 @@ namespace GafferImage
 class GAFFERIMAGE_API Merge : public FlatImageProcessor
 {
 
-	public :
+public:
 
-		explicit Merge( const std::string &name=defaultName<Merge>() );
-		~Merge() override;
+	explicit Merge( const std::string &name = defaultName<Merge>() );
+	~Merge() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Merge, MergeTypeId, FlatImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Merge, MergeTypeId, FlatImageProcessor );
 
-		enum Operation
-		{
-			Add,       // A + B
-			Atop,      // Ab + B(1-a)
-			Divide,    // A / B
-			In,        // Ab
-			Out,       // A(1-b)
-			Mask,      // Ba
-			Matte,     // Aa + B(1-a)
-			Multiply,  // AB
-			Over,      // A + B(1-a)
-			Subtract,  // A - B
-			Difference,// fabs( A - B )
-			Under,     // A(1-b) + B
-			Min,       // min( A, B )
-			Max        // max( A, B )
-		};
+	enum Operation
+	{
+		Add, // A + B
+		Atop, // Ab + B(1-a)
+		Divide, // A / B
+		In, // Ab
+		Out, // A(1-b)
+		Mask, // Ba
+		Matte, // Aa + B(1-a)
+		Multiply, // AB
+		Over, // A + B(1-a)
+		Subtract, // A - B
+		Difference, // fabs( A - B )
+		Under, // A(1-b) + B
+		Min, // min( A, B )
+		Max // max( A, B )
+	};
 
-		Gaffer::IntPlug *operationPlug();
-		const Gaffer::IntPlug *operationPlug() const;
+	Gaffer::IntPlug *operationPlug();
+	const Gaffer::IntPlug *operationPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Reimplemented to hash the connected input plugs
-		void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	/// Reimplemented to hash the connected input plugs
+	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		/// Sets the data window to the union of all of the data windows.
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		/// Creates a union of all of the connected inputs channelNames.
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		/// Implemented to call doMergeOperation according to operationPlug()
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	/// Sets the data window to the union of all of the data windows.
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	/// Creates a union of all of the connected inputs channelNames.
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	/// Implemented to call doMergeOperation according to operationPlug()
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Merge )

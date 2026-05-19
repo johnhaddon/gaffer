@@ -48,14 +48,14 @@ GAFFER_NODE_DEFINE_TYPE( FilteredSceneProcessor );
 size_t FilteredSceneProcessor::g_firstPlugIndex = 0;
 
 FilteredSceneProcessor::FilteredSceneProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
-	:	SceneProcessor( name )
+	: SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FilterPlug( "filter", Plug::In, filterDefault, IECore::PathMatcher::NoMatch, IECore::PathMatcher::EveryMatch, Plug::Default ) );
 }
 
 FilteredSceneProcessor::FilteredSceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	SceneProcessor( name, minInputs, maxInputs )
+	: SceneProcessor( name, minInputs, maxInputs )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FilterPlug( "filter", Plug::In, PathMatcher::NoMatch, PathMatcher::NoMatch, PathMatcher::EveryMatch, Plug::Default ) );

@@ -88,7 +88,7 @@ void GafferTestModule::testConcurrentAccessToDifferentInstances()
 	parallel_for(
 		blocked_range<size_t>( 0, iterations ),
 		[]( const blocked_range<size_t> &r ) {
-			for( size_t i=r.begin(); i!=r.end(); ++i )
+			for( size_t i = r.begin(); i != r.end(); ++i )
 			{
 				NodePtr n = new Node();
 				PlugPtr p = new Plug();
@@ -120,7 +120,7 @@ void GafferTestModule::testConcurrentAccessToSameInstance()
 	parallel_for(
 		blocked_range<size_t>( 0, iterations ),
 		[&]( const blocked_range<size_t> &r ) {
-			for( size_t i=r.begin(); i!=r.end(); ++i )
+			for( size_t i = r.begin(); i != r.end(); ++i )
 			{
 				// Write a value
 				ConstDataPtr value = i % 2 ? value1 : value2;

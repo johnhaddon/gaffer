@@ -62,7 +62,7 @@ object findDestinationWrapper( Plug *plug, object predicate )
 {
 	return PlugAlgo::findDestination(
 		plug,
-		[&predicate] ( Plug *plug ) {
+		[&predicate]( Plug *plug ) {
 			object o = predicate( PlugPtr( plug ) );
 			return o;
 		}
@@ -73,7 +73,7 @@ object findSourceWrapper( Plug *plug, object predicate )
 {
 	return PlugAlgo::findSource(
 		plug,
-		[&predicate] ( Plug *plug ) {
+		[&predicate]( Plug *plug ) {
 			object o = predicate( PlugPtr( plug ) );
 			return o;
 		}
@@ -180,5 +180,4 @@ void GafferModule::bindPlugAlgo()
 	def( "promoteWithName", &promoteWithName, ( arg( "plug" ), arg( "name" ), arg( "parent" ) = object(), arg( "excludeMetadata" ) = "layout:*" ) );
 	def( "isPromoted", &PlugAlgo::isPromoted, ( arg( "plug" ) ) );
 	def( "unpromote", &unpromote, ( arg( "plug" ) ) );
-
 }

@@ -54,20 +54,20 @@ static InternedString g_namePropertyName( "name" );
 static InternedString g_fullNamePropertyName( "fullName" );
 
 Path::Path( PathFilterPtr filter )
-	:	m_pathChangedSignal( nullptr )
+	: m_pathChangedSignal( nullptr )
 {
 	setFilter( filter );
 }
 
 Path::Path( const std::string &path, PathFilterPtr filter )
-	:	m_pathChangedSignal( nullptr )
+	: m_pathChangedSignal( nullptr )
 {
 	setFromString( path );
 	setFilter( filter );
 }
 
 Path::Path( const Names &names, const IECore::InternedString &root, PathFilterPtr filter )
-	:	m_root( root ), m_names( names ), m_pathChangedSignal( nullptr )
+	: m_root( root ), m_names( names ), m_pathChangedSignal( nullptr )
 {
 	for( Names::const_iterator it = m_names.begin(), eIt = m_names.end(); it != eIt; ++it )
 	{
@@ -301,7 +301,7 @@ void Path::set( size_t begin, size_t end, const Names &names )
 		throw IECore::Exception( "Index out of range" );
 	}
 
-	Names::difference_type sizeDifference = names.size() - (end - begin);
+	Names::difference_type sizeDifference = names.size() - ( end - begin );
 
 	if( sizeDifference == 0 )
 	{
@@ -368,15 +368,14 @@ std::string Path::string() const
 
 bool Path::operator == ( const Path &other ) const
 {
-	return
-		typeId() == other.typeId() &&
+	return typeId() == other.typeId() &&
 		m_root == other.m_root &&
 		m_names == other.m_names;
 }
 
 bool Path::operator != ( const Path &other ) const
 {
-	return !(*this == other );
+	return !( *this == other );
 }
 
 const Plug *Path::cancellationSubject() const
@@ -394,7 +393,7 @@ void Path::emitPathChanged()
 	{
 		return;
 	}
-	(*m_pathChangedSignal)( this );
+	( *m_pathChangedSignal )( this );
 }
 
 void Path::pathChangedSignalCreated()

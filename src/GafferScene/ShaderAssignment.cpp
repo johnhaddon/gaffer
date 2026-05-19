@@ -62,7 +62,7 @@ const InternedString g_oslTarget( g_oslPrefix ? std::string( g_oslPrefix ) + ":s
 size_t ShaderAssignment::g_firstPlugIndex = 0;
 
 ShaderAssignment::ShaderAssignment( const std::string &name )
-	:	AttributeProcessor( name, PathMatcher::EveryMatch )
+	: AttributeProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "shader" ) );

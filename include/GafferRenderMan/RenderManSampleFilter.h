@@ -45,13 +45,12 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManSampleFilter : public RenderManOutputFilter
 {
 
-	public :
+public:
 
-		explicit RenderManSampleFilter( const std::string &name=defaultName<RenderManSampleFilter>() );
-		~RenderManSampleFilter() override;
+	explicit RenderManSampleFilter( const std::string &name = defaultName<RenderManSampleFilter>() );
+	~RenderManSampleFilter() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManSampleFilter, RenderManSampleFilterTypeId, RenderManOutputFilter );
-
+	GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManSampleFilter, RenderManSampleFilterTypeId, RenderManOutputFilter );
 };
 
 IE_CORE_DECLAREPTR( RenderManSampleFilter )

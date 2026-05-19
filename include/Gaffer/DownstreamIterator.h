@@ -54,262 +54,260 @@ namespace Gaffer
 class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, const Plug, boost::forward_traversal_tag>
 {
 
-	public :
+public:
 
-		DownstreamIterator( const Plug *plug )
-			:	m_root( plug ), m_pruned( false )
+	DownstreamIterator( const Plug *plug )
+		: m_root( plug ), m_pruned( false )
+	{
+		m_stack.push_back(
+			Level(
+				plug
+			)
+		);
+	}
+
+	size_t depth() const
+	{
+		return m_stack.size() - 1;
+	}
+
+	const Plug *upstream() const
+	{
+		if( m_stack.size() > 1 )
 		{
-			m_stack.push_back(
-				Level(
-					plug
-				)
+			return *( m_stack[m_stack.size() - 2].it );
+		}
+		return m_root;
+	}
+
+	/// Calling prune() causes the next increment to skip any recursion
+	/// that it would normally perform.
+	void prune()
+	{
+		m_pruned = true;
+	}
+
+	/// Returns true when iteration is complete.
+	bool done() const
+	{
+		return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end;
+	}
+
+private:
+
+	friend class boost::iterator_core_access;
+
+	class Level
+	{
+
+	public:
+
+		Level( const Plug *plug )
+			: plugs( plug->outputs().begin(), plug->outputs().end() )
+		{
+			addDependentPlugs( plug );
+			addAncestorOutputs( plug );
+			it = plugs.begin();
+			end = plugs.end();
+		}
+
+		Level( const Level &other )
+		{
+			*this = other;
+		}
+
+		bool operator == ( const Level &other ) const
+		{
+			return plugs == other.plugs && ( it - plugs.begin() == other.it - other.plugs.begin() );
+		}
+
+		Level &operator = ( const Level &rhs )
+		{
+			plugs = rhs.plugs;
+			it = plugs.begin() + ( rhs.it - rhs.plugs.begin() );
+			end = plugs.end();
+			return *this;
+		}
+
+		DependencyNode::AffectedPlugsContainer plugs;
+		DependencyNode::AffectedPlugsContainer::const_iterator it;
+		DependencyNode::AffectedPlugsContainer::const_iterator end;
+
+	private:
+
+		void addDependentPlugs( const Plug *plug )
+		{
+			if( !plug->children().empty() )
+			{
+				// We only call affects() for leaf level plugs. This
+				// is because ComputeNode hash/compute also only occurs
+				// for leaf plugs, and it would be too big a burden on
+				// node implementers to implement affects() to reflect
+				// child behaviour in parents.
+				return;
+			}
+
+			const DependencyNode *node = IECore::runTimeCast<const DependencyNode>( plug->node() );
+			if( !node || !node->refCount() )
+			{
+				// No node, or node constructing or destructing.
+				// We can't call `DependencyNode::affects()`.
+				return;
+			}
+
+			const size_t firstDependentIndex = plugs.size();
+
+			// We don't want client code iterating the graph to
+			// be responsible for dealing with buggy Node::affects()
+			// implementations, so we catch and report any exceptions
+			// which occur.
+			try
+			{
+				node->affects( plug, plugs );
+			}
+			catch( const std::exception &e )
+			{
+				IECore::msg(
+					IECore::Msg::Error,
+					node->fullName() + "::affects()",
+					e.what()
+				);
+			}
+			catch( ... )
+			{
+				IECore::msg(
+					IECore::Msg::Error,
+					node->fullName() + "::affects()",
+					"Unknown exception"
+				);
+			}
+
+			// Likewise we don't want client code to be exposed to
+			// dependencies which are disallowed.
+			plugs.erase(
+				std::remove_if(
+					plugs.begin() + firstDependentIndex,
+					plugs.end(),
+					isNonLeaf
+				),
+				plugs.end()
 			);
 		}
 
-		size_t depth() const
+		static bool isNonLeaf( const Plug *plug )
 		{
-			return m_stack.size() - 1;
-		}
-
-		const Plug *upstream() const
-		{
-			if( m_stack.size() > 1 )
+			if( plug->children().empty() )
 			{
-				return *(m_stack[m_stack.size()-2].it);
-			}
-			return m_root;
-		}
-
-		/// Calling prune() causes the next increment to skip any recursion
-		/// that it would normally perform.
-		void prune()
-		{
-			m_pruned = true;
-		}
-
-		/// Returns true when iteration is complete.
-		bool done() const
-		{
-			return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end;
-		}
-
-	private :
-
-		friend class boost::iterator_core_access;
-
-		class Level
-		{
-
-			public :
-
-				Level( const Plug *plug )
-					:	plugs( plug->outputs().begin(), plug->outputs().end() )
-				{
-					addDependentPlugs( plug );
-					addAncestorOutputs( plug );
-					it = plugs.begin();
-					end = plugs.end();
-				}
-
-				Level( const Level &other )
-				{
-					*this = other;
-				}
-
-				bool operator == ( const Level &other ) const
-				{
-					return plugs == other.plugs && ( it - plugs.begin() == other.it - other.plugs.begin() );
-				}
-
-				Level &operator=( const Level &rhs )
-				{
-					plugs = rhs.plugs;
-					it = plugs.begin() + (rhs.it - rhs.plugs.begin());
-					end = plugs.end();
-					return *this;
-				}
-
-				DependencyNode::AffectedPlugsContainer plugs;
-				DependencyNode::AffectedPlugsContainer::const_iterator it;
-				DependencyNode::AffectedPlugsContainer::const_iterator end;
-
-			private :
-
-				void addDependentPlugs( const Plug *plug )
-				{
-					if( !plug->children().empty() )
-					{
-						// We only call affects() for leaf level plugs. This
-						// is because ComputeNode hash/compute also only occurs
-						// for leaf plugs, and it would be too big a burden on
-						// node implementers to implement affects() to reflect
-						// child behaviour in parents.
-						return;
-					}
-
-					const DependencyNode *node = IECore::runTimeCast<const DependencyNode>( plug->node() );
-					if( !node || !node->refCount() )
-					{
-						// No node, or node constructing or destructing.
-						// We can't call `DependencyNode::affects()`.
-						return;
-					}
-
-					const size_t firstDependentIndex = plugs.size();
-
-					// We don't want client code iterating the graph to
-					// be responsible for dealing with buggy Node::affects()
-					// implementations, so we catch and report any exceptions
-					// which occur.
-					try
-					{
-						node->affects( plug, plugs );
-					}
-					catch( const std::exception &e )
-					{
-						IECore::msg(
-							IECore::Msg::Error,
-							node->fullName() + "::affects()",
-							e.what()
-						);
-					}
-					catch( ... )
-					{
-						IECore::msg(
-							IECore::Msg::Error,
-							node->fullName() + "::affects()",
-							"Unknown exception"
-						);
-					}
-
-					// Likewise we don't want client code to be exposed to
-					// dependencies which are disallowed.
-					plugs.erase(
-						std::remove_if(
-							plugs.begin() + firstDependentIndex,
-							plugs.end(),
-							isNonLeaf
-						),
-						plugs.end()
-					);
-				}
-
-				static bool isNonLeaf( const Plug *plug )
-				{
-					if( plug->children().empty() )
-					{
-						return false;
-					}
-					const Node *node = plug->node();
-					IECore::msg(
-						IECore::Msg::Error,
-						node->fullName() + "::affects()",
-						"Non-leaf plug " + plug->relativeName( node ) + " returned by affects()"
-					);
-					return true;
-				}
-
-				void addAncestorOutputs( const Plug *plug )
-				{
-					// It is valid to connect a compound plug into
-					// a non-compound Plug, but when this is done, the
-					// "leaf level" where the plugs have no children
-					// is deeper on the source side than it is on the
-					// destination side. Since we only propagate dependencies
-					// along the leaf levels, we must account for the
-					// mismatch by finding ancestors which output to leaf
-					// level plugs, and including those destination
-					// plugs in our traversal.
-					plug = plug->parent<Plug>();
-					while( plug )
-					{
-						for( Plug::OutputContainer::const_iterator pIt = plug->outputs().begin(), eIt = plug->outputs().end(); pIt!=eIt; ++pIt )
-						{
-							if( (*pIt)->children().empty() )
-							{
-								plugs.push_back( *pIt );
-							}
-						}
-						plug = plug->parent<Plug>();
-					}
-				}
-
-		};
-
-		using Levels = std::vector<Level>;
-		Levels m_stack;
-		const Plug *m_root;
-		bool m_pruned;
-
-		void increment()
-		{
-			const Plug *currentPlug = *(stackTop().it);
-			if( !m_pruned && !cyclic() )
-			{
-				// go downstream if we can
-				Level level( currentPlug );
-				if( !level.plugs.empty() )
-				{
-					m_stack.push_back( level );
-					return;
-				}
-				// otherwise fall through
-			}
-
-			++(stackTop().it);
-			while( m_stack.size() > 1 && stackTop().it == stackTop().end )
-			{
-				m_stack.pop_back();
-				++(stackTop().it);
-			}
-			m_pruned = false;
-		}
-
-		bool equal( const DownstreamIterator &other ) const
-		{
-			return m_stack == other.m_stack;
-		}
-
-		const Plug &dereference() const
-		{
-			return **(stackTop().it);
-		}
-
-		Level &stackTop()
-		{
-			return *(m_stack.rbegin());
-		}
-
-		const Level &stackTop() const
-		{
-			return *(m_stack.rbegin());
-		}
-
-		bool cyclic() const
-		{
-			const Plug *currentPlug = *(stackTop().it);
-			if( !currentPlug->getFlags( Plug::AcceptsDependencyCycles ) )
-			{
-				// We don't want to iterate our stack looking for cycles
-				// on every increment - that would be slow. Instead we only
-				// check for a cycle when we visit the rare plugs which
-				// declare that they expect to take part in a cycle.
 				return false;
 			}
-			if( currentPlug == m_root )
+			const Node *node = plug->node();
+			IECore::msg(
+				IECore::Msg::Error,
+				node->fullName() + "::affects()",
+				"Non-leaf plug " + plug->relativeName( node ) + " returned by affects()"
+			);
+			return true;
+		}
+
+		void addAncestorOutputs( const Plug *plug )
+		{
+			// It is valid to connect a compound plug into
+			// a non-compound Plug, but when this is done, the
+			// "leaf level" where the plugs have no children
+			// is deeper on the source side than it is on the
+			// destination side. Since we only propagate dependencies
+			// along the leaf levels, we must account for the
+			// mismatch by finding ancestors which output to leaf
+			// level plugs, and including those destination
+			// plugs in our traversal.
+			plug = plug->parent<Plug>();
+			while( plug )
+			{
+				for( Plug::OutputContainer::const_iterator pIt = plug->outputs().begin(), eIt = plug->outputs().end(); pIt != eIt; ++pIt )
+				{
+					if( ( *pIt )->children().empty() )
+					{
+						plugs.push_back( *pIt );
+					}
+				}
+				plug = plug->parent<Plug>();
+			}
+		}
+	};
+
+	using Levels = std::vector<Level>;
+	Levels m_stack;
+	const Plug *m_root;
+	bool m_pruned;
+
+	void increment()
+	{
+		const Plug *currentPlug = *( stackTop().it );
+		if( !m_pruned && !cyclic() )
+		{
+			// go downstream if we can
+			Level level( currentPlug );
+			if( !level.plugs.empty() )
+			{
+				m_stack.push_back( level );
+				return;
+			}
+			// otherwise fall through
+		}
+
+		++( stackTop().it );
+		while( m_stack.size() > 1 && stackTop().it == stackTop().end )
+		{
+			m_stack.pop_back();
+			++( stackTop().it );
+		}
+		m_pruned = false;
+	}
+
+	bool equal( const DownstreamIterator &other ) const
+	{
+		return m_stack == other.m_stack;
+	}
+
+	const Plug &dereference() const
+	{
+		return **( stackTop().it );
+	}
+
+	Level &stackTop()
+	{
+		return *( m_stack.rbegin() );
+	}
+
+	const Level &stackTop() const
+	{
+		return *( m_stack.rbegin() );
+	}
+
+	bool cyclic() const
+	{
+		const Plug *currentPlug = *( stackTop().it );
+		if( !currentPlug->getFlags( Plug::AcceptsDependencyCycles ) )
+		{
+			// We don't want to iterate our stack looking for cycles
+			// on every increment - that would be slow. Instead we only
+			// check for a cycle when we visit the rare plugs which
+			// declare that they expect to take part in a cycle.
+			return false;
+		}
+		if( currentPlug == m_root )
+		{
+			return true;
+		}
+		for( int i = 0, e = m_stack.size() - 1; i < e; ++i )
+		{
+			if( *( m_stack[i].it ) == currentPlug )
 			{
 				return true;
 			}
-			for( int i = 0, e = m_stack.size() - 1; i < e; ++i )
-			{
-				if( *(m_stack[i].it) == currentPlug )
-				{
-					return true;
-				}
-			}
-			return false;
 		}
-
+		return false;
+	}
 };
 
 } // namespace Gaffer

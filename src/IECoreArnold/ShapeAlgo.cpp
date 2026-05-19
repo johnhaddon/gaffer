@@ -59,7 +59,7 @@ using namespace IECoreArnold;
 namespace
 {
 
-const AtString g_radiusArnoldString("radius");
+const AtString g_radiusArnoldString( "radius" );
 
 AtArray *indices( const IntVectorData *data )
 {
@@ -75,7 +75,7 @@ AtArray *indices( const IntVectorData *data )
 AtArray *identityIndices( size_t size )
 {
 	AtArray *result = AiArrayAllocate( size, 1, AI_TYPE_UINT );
-	for( size_t i=0; i < size; ++i )
+	for( size_t i = 0; i < size; ++i )
 	{
 		AiArraySetInt( result, i, i );
 	}
@@ -214,7 +214,7 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 {
 	// make sure the primitive variable doesn't clash with built-ins
 	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
-	if ( AiNodeEntryLookUpParameter( entry, name ) != nullptr )
+	if( AiNodeEntryLookUpParameter( entry, name ) != nullptr )
 	{
 		msg(
 			Msg::Warning,
@@ -329,7 +329,7 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 
 			AiNodeSetArray(
 				shape,
-				AtString((name.c_str() + string("idxs")).c_str()),
+				AtString( ( name.c_str() + string( "idxs" ) ).c_str() ),
 				indicesArray
 			);
 			return;
@@ -365,7 +365,7 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 
 void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, AtNode *shape, const char **namesToIgnore, const std::string &messageContext )
 {
-	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end(); it!=eIt; it++ )
+	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end(); it != eIt; it++ )
 	{
 		if( namesToIgnore )
 		{

@@ -114,7 +114,6 @@ void setupNoduleSectionMetadata( Plug *dst, const Plug *src )
 	}
 
 	Metadata::registerValue( dst, g_sectionName, new StringData( section ) );
-
 }
 
 // See equivalent function in PlugAlgo.cpp for an explanation of
@@ -130,8 +129,8 @@ void applyDynamicFlag( Plug *plug )
 	{
 		for( Plug::RecursiveIterator it( plug ); !it.done(); ++it )
 		{
-			(*it)->setFlags( Plug::Dynamic, true );
-			if( find( begin( compoundTypes ), end( compoundTypes ), (Gaffer::TypeId)(*it)->typeId() ) == end( compoundTypes ) )
+			( *it )->setFlags( Plug::Dynamic, true );
+			if( find( begin( compoundTypes ), end( compoundTypes ), (Gaffer::TypeId)( *it )->typeId() ) == end( compoundTypes ) )
 			{
 				it.prune();
 			}
@@ -173,7 +172,7 @@ GAFFER_NODE_DEFINE_TYPE( BoxIO );
 size_t BoxIO::g_firstPlugIndex = 0;
 
 BoxIO::BoxIO( Plug::Direction direction, const std::string &name )
-	:	Node( name ), m_direction( direction )
+	: Node( name ), m_direction( direction )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	// Must not accept inputs because the name is syncronised with the promoted
@@ -217,8 +216,7 @@ void BoxIO::setup( const Plug *plug )
 	MetadataAlgo::copyIf(
 		plug,
 		m_direction == Plug::In ? inPlugInternal() : outPlugInternal(),
-		[]( const GraphComponent *from, const GraphComponent *to, InternedString name )
-		{
+		[]( const GraphComponent *from, const GraphComponent *to, InternedString name ) {
 			if( StringAlgo::matchMultiple( name.string(), "layout:*" ) )
 			{
 				/// \todo Remove this condition and rely on registered exclusions only. An obstacle
@@ -649,7 +647,7 @@ bool BoxIO::canInsert( const Box *box )
 			const Plug::OutputContainer &outputs = plug->outputs();
 			for( Plug::OutputContainer::const_iterator oIt = outputs.begin(), oeIt = outputs.end(); oIt != oeIt; ++oIt )
 			{
-				if( hasNodule( *oIt ) && !runTimeCast<BoxIO>( (*oIt)->node() ) )
+				if( hasNodule( *oIt ) && !runTimeCast<BoxIO>( ( *oIt )->node() ) )
 				{
 					return true;
 				}
@@ -682,7 +680,7 @@ void BoxIO::insert( Box *box )
 			const Plug::OutputContainer &outputs = plug->outputs();
 			for( Plug::OutputContainer::const_iterator oIt = outputs.begin(), oeIt = outputs.end(); oIt != oeIt; ++oIt )
 			{
-				if( hasNodule( *oIt ) && !runTimeCast<BoxIO>( (*oIt)->node() ) )
+				if( hasNodule( *oIt ) && !runTimeCast<BoxIO>( ( *oIt )->node() ) )
 				{
 					outputsNeedingBoxIn.push_back( *oIt );
 				}
@@ -701,7 +699,7 @@ void BoxIO::insert( Box *box )
 			boxIn->inPlugInternal()->setInput( plug );
 			for( std::vector<Plug *>::const_iterator oIt = outputsNeedingBoxIn.begin(), oeIt = outputsNeedingBoxIn.end(); oIt != oeIt; ++oIt )
 			{
-				(*oIt)->setInput( boxIn->plug() );
+				( *oIt )->setInput( boxIn->plug() );
 			}
 		}
 		else
@@ -723,5 +721,4 @@ void BoxIO::insert( Box *box )
 			plug->setInput( boxOut->outPlugInternal() );
 		}
 	}
-
 }

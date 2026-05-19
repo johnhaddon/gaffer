@@ -46,7 +46,7 @@ using namespace GafferScene;
 GAFFER_NODE_DEFINE_TYPE( ReverseWinding );
 
 ReverseWinding::ReverseWinding( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 }
 

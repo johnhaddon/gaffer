@@ -63,13 +63,13 @@ struct CoverageData : public IECore::Data
 {
 
 	CoverageData( const Format &format, const vector<Box2f> &cells )
-		:	m_format( format ),
-			m_tileWindow(
-				ImagePlug::tileIndex( m_format.getDisplayWindow().min ),
-				ImagePlug::tileIndex( m_format.getDisplayWindow().max ) + V2i( 1 )
-			)
+		: m_format( format ),
+		  m_tileWindow(
+			  ImagePlug::tileIndex( m_format.getDisplayWindow().min ),
+			  ImagePlug::tileIndex( m_format.getDisplayWindow().max ) + V2i( 1 )
+		  )
 	{
-		const size_t numTiles = ( m_tileWindow.size().x ) * ( m_tileWindow.size().y  );
+		const size_t numTiles = ( m_tileWindow.size().x ) * ( m_tileWindow.size().y );
 		m_coverage.resize( numTiles );
 
 		for( size_t cellIndex = 0; cellIndex < cells.size(); ++cellIndex )
@@ -106,12 +106,11 @@ struct CoverageData : public IECore::Data
 		return m_coverage[BufferAlgo::index( tileIndex, m_tileWindow )];
 	}
 
-	private :
+private:
 
-		const Format m_format;
-		const Box2i m_tileWindow; // Tile indices, not pixel indices
-		vector<vector<int>> m_coverage;
-
+	const Format m_format;
+	const Box2i m_tileWindow; // Tile indices, not pixel indices
+	vector<vector<int>> m_coverage;
 };
 
 IE_CORE_DECLAREPTR( CoverageData );
@@ -123,7 +122,7 @@ GAFFER_NODE_DEFINE_TYPE( ContactSheetCore );
 size_t ContactSheetCore::g_firstPlugIndex = 0;
 
 ContactSheetCore::ContactSheetCore( const std::string &name )
-	:	FlatImageProcessor( name )
+	: FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -426,7 +425,7 @@ IECore::ConstStringVectorDataPtr ContactSheetCore::computeChannelNames( const Ga
 		ConstStringVectorDataPtr channelNamesData = inPlug()->channelNamesPlug()->getValue();
 		for( const std::string &c : channelNamesData->readable() )
 		{
-			if ( std::find( result.begin(), result.end(), c ) == result.end() )
+			if( std::find( result.begin(), result.end(), c ) == result.end() )
 			{
 				result.push_back( c );
 			}

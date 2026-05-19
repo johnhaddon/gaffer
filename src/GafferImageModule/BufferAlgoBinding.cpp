@@ -50,6 +50,5 @@ void GafferImageModule::bindBufferAlgo()
 	def( "intersects", &GafferImage::BufferAlgo::intersects );
 	def( "intersection", &GafferImage::BufferAlgo::intersection );
 	def( "clamp", &GafferImage::BufferAlgo::clamp );
-	def( "contains", ( bool (*)( const Imath::Box2i&, const Imath::V2i & ) )&GafferImage::BufferAlgo::contains );
-
+	def( "contains", (bool ( * )( const Imath::Box2i &, const Imath::V2i & ))&GafferImage::BufferAlgo::contains );
 }

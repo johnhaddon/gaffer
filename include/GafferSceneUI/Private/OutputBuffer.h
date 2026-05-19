@@ -55,71 +55,70 @@ namespace GafferSceneUI
 class OutputBuffer
 {
 
-	public :
+public:
 
-		/// Calls `renderer->output()` to create outputs that will be sent to
-		/// this buffer.
-		OutputBuffer( IECoreScenePreview::Renderer *renderer );
-		~OutputBuffer();
+	/// Calls `renderer->output()` to create outputs that will be sent to
+	/// this buffer.
+	OutputBuffer( IECoreScenePreview::Renderer *renderer );
+	~OutputBuffer();
 
-		/// Renders the output buffers to OpenGL.
-		void render() const;
-		/// Renders an overlay showing the selected objects.
-		void renderSelection() const;
+	/// Renders the output buffers to OpenGL.
+	void render() const;
+	/// Renders an overlay showing the selected objects.
+	void renderSelection() const;
 
-		/// Specifies a set of objects to be drawn as highlighted.
-		void setSelection( const std::vector<uint32_t> &ids );
-		const std::vector<uint32_t> &getSelection() const;
+	/// Specifies a set of objects to be drawn as highlighted.
+	void setSelection( const std::vector<uint32_t> &ids );
+	const std::vector<uint32_t> &getSelection() const;
 
-		/// Returns the ID for the object found at the specified NDC position, filling `depth` with its
-		/// depth from the camera. Returns 0 if no object is found.
-		uint32_t idAt( const Imath::V2f &ndcPosition, float &depth ) const;
-		/// Returns the IDs of all objects found in the specified region of NDC space.
-		std::vector<uint32_t> idsAt( const Imath::Box2f &ndcBox ) const;
+	/// Returns the ID for the object found at the specified NDC position, filling `depth` with its
+	/// depth from the camera. Returns 0 if no object is found.
+	uint32_t idAt( const Imath::V2f &ndcPosition, float &depth ) const;
+	/// Returns the IDs of all objects found in the specified region of NDC space.
+	std::vector<uint32_t> idsAt( const Imath::Box2f &ndcBox ) const;
 
-		/// Signal emitted when the buffers have changed and `render()`
-		/// should be called.
-		using BufferChangedSignal = Gaffer::Signals::Signal<void()>;
-		BufferChangedSignal &bufferChangedSignal();
+	/// Signal emitted when the buffers have changed and `render()`
+	/// should be called.
+	using BufferChangedSignal = Gaffer::Signals::Signal<void()>;
+	BufferChangedSignal &bufferChangedSignal();
 
-		/// See `SceneGadget::snapshotToFile()` for documentation.
-		void snapshotToFile(
-			const std::filesystem::path &fileName,
-			const Imath::Box2f &resolutionGate = Imath::Box2f(),
-			const IECore::CompoundData *metadata = nullptr
-		);
+	/// See `SceneGadget::snapshotToFile()` for documentation.
+	void snapshotToFile(
+		const std::filesystem::path &fileName,
+		const Imath::Box2f &resolutionGate = Imath::Box2f(),
+		const IECore::CompoundData *metadata = nullptr
+	);
 
-	private :
+private:
 
-		class DisplayDriver;
+	class DisplayDriver;
 
-		void imageFormat( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow );
-		template<typename T>
-		void updateBuffer( const Imath::Box2i &box, const T *data, int numChannels, std::vector<T> &buffer );
-		void dirtyTexture();
-		void renderInternal( bool renderSelection ) const;
+	void imageFormat( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow );
+	template<typename T>
+	void updateBuffer( const Imath::Box2i &box, const T *data, int numChannels, std::vector<T> &buffer );
+	void dirtyTexture();
+	void renderInternal( bool renderSelection ) const;
 
-		// Used to prevent the buffers being reallocated by an `imageFormat()` call
-		// on a background thread while they are being read from by the foreground
-		// thread. _Not_ used to synchronise reads/writes - see `updateBuffer()`.
-		mutable std::mutex m_bufferReallocationMutex;
+	// Used to prevent the buffers being reallocated by an `imageFormat()` call
+	// on a background thread while they are being read from by the foreground
+	// thread. _Not_ used to synchronise reads/writes - see `updateBuffer()`.
+	mutable std::mutex m_bufferReallocationMutex;
 
-		Imath::Box2i m_dataWindow;
-		std::vector<float> m_rgbaBuffer;
-		std::vector<float> m_depthBuffer;
-		std::vector<uint32_t> m_idBuffer;
-		std::vector<uint32_t> m_selectionBuffer;
-		BufferChangedSignal m_bufferChangedSignal;
+	Imath::Box2i m_dataWindow;
+	std::vector<float> m_rgbaBuffer;
+	std::vector<float> m_depthBuffer;
+	std::vector<uint32_t> m_idBuffer;
+	std::vector<uint32_t> m_selectionBuffer;
+	BufferChangedSignal m_bufferChangedSignal;
 
-		mutable std::atomic_bool m_texturesDirty;
-		mutable IECoreGL::TexturePtr m_rgbaTexture;
-		mutable IECoreGL::TexturePtr m_depthTexture;
-		mutable IECoreGL::TexturePtr m_idTexture;
-		class BufferTexture;
-		mutable std::unique_ptr<BufferTexture> m_selectionTexture;
-		mutable IECoreGL::ShaderPtr m_shader;
-		mutable IECoreGL::Shader::SetupPtr m_shaderSetup;
-
+	mutable std::atomic_bool m_texturesDirty;
+	mutable IECoreGL::TexturePtr m_rgbaTexture;
+	mutable IECoreGL::TexturePtr m_depthTexture;
+	mutable IECoreGL::TexturePtr m_idTexture;
+	class BufferTexture;
+	mutable std::unique_ptr<BufferTexture> m_selectionTexture;
+	mutable IECoreGL::ShaderPtr m_shader;
+	mutable IECoreGL::Shader::SetupPtr m_shaderSetup;
 };
 
 } // namespace GafferSceneUI

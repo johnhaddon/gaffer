@@ -44,35 +44,34 @@ namespace GafferScene
 class GAFFERSCENE_API PointConstraint : public Constraint
 {
 
-	public :
+public:
 
-		explicit PointConstraint( const std::string &name=defaultName<PointConstraint>() );
-		~PointConstraint() override;
+	explicit PointConstraint( const std::string &name = defaultName<PointConstraint>() );
+	~PointConstraint() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::PointConstraint, PointConstraintTypeId, Constraint );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::PointConstraint, PointConstraintTypeId, Constraint );
 
-		Gaffer::BoolPlug *xEnabledPlug();
-		const Gaffer::BoolPlug *xEnabledPlug() const;
+	Gaffer::BoolPlug *xEnabledPlug();
+	const Gaffer::BoolPlug *xEnabledPlug() const;
 
-		Gaffer::BoolPlug *yEnabledPlug();
-		const Gaffer::BoolPlug *yEnabledPlug() const;
+	Gaffer::BoolPlug *yEnabledPlug();
+	const Gaffer::BoolPlug *yEnabledPlug() const;
 
-		Gaffer::BoolPlug *zEnabledPlug();
-		const Gaffer::BoolPlug *zEnabledPlug() const;
+	Gaffer::BoolPlug *zEnabledPlug();
+	const Gaffer::BoolPlug *zEnabledPlug() const;
 
-		Gaffer::V3fPlug *offsetPlug();
-		const Gaffer::V3fPlug *offsetPlug() const;
+	Gaffer::V3fPlug *offsetPlug();
+	const Gaffer::V3fPlug *offsetPlug() const;
 
-	protected :
+protected:
 
-		bool affectsConstraint( const Gaffer::Plug *input ) const override;
-		void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
+	bool affectsConstraint( const Gaffer::Plug *input ) const override;
+	void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( PointConstraint )

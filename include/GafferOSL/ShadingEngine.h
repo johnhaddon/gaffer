@@ -50,69 +50,67 @@ namespace GafferOSL
 class GAFFEROSL_API ShadingEngine : public IECore::RefCounted
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( ShadingEngine )
+	IE_CORE_DECLAREMEMBERPTR( ShadingEngine )
 
-		explicit ShadingEngine( const IECoreScene::ShaderNetwork *shaderNetwork );
+	explicit ShadingEngine( const IECoreScene::ShaderNetwork *shaderNetwork );
 
-		// Fast version that takes ownership of network instead of copying
-		ShadingEngine( IECoreScene::ShaderNetworkPtr &&shaderNetwork );
+	// Fast version that takes ownership of network instead of copying
+	ShadingEngine( IECoreScene::ShaderNetworkPtr &&shaderNetwork );
 
-		~ShadingEngine() override;
+	~ShadingEngine() override;
 
-		struct Transform
+	struct Transform
+	{
+
+		Transform()
 		{
+		}
 
-			Transform()
-			{
-			}
+		Transform( Imath::M44f fromObjectSpace )
+			: fromObjectSpace( fromObjectSpace ), toObjectSpace( fromObjectSpace.inverse() )
+		{
+		}
 
-			Transform( Imath::M44f fromObjectSpace )
-				: fromObjectSpace( fromObjectSpace ), toObjectSpace( fromObjectSpace.inverse() )
-			{
-			}
+		Transform( Imath::M44f fromObjectSpace, Imath::M44f toObjectSpace )
+			: fromObjectSpace( fromObjectSpace ), toObjectSpace( toObjectSpace )
+		{
+		}
 
-			Transform( Imath::M44f fromObjectSpace, Imath::M44f toObjectSpace )
-				: fromObjectSpace( fromObjectSpace ), toObjectSpace( toObjectSpace )
-			{
-			}
+		Imath::M44f fromObjectSpace;
+		Imath::M44f toObjectSpace;
+	};
 
-			Imath::M44f fromObjectSpace;
-			Imath::M44f toObjectSpace;
+	using Transforms = std::map<IECore::InternedString, Transform>;
+	using PointClouds = std::map<IECore::InternedString, IECoreScene::ConstPrimitivePtr>;
 
-		};
+	/// Append a unique hash representing this shading engine to `h`.
+	void hash( IECore::MurmurHash &h ) const;
+	IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Transforms &transforms = Transforms() ) const;
+	IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Transforms &transforms, const PointClouds &pointClouds ) const;
 
-		using Transforms = std::map<IECore::InternedString, Transform>;
-		using PointClouds = std::map<IECore::InternedString, IECoreScene::ConstPrimitivePtr>;
+	bool needsAttribute( const std::string &name ) const;
+	bool hasDeformation() const;
 
-		/// Append a unique hash representing this shading engine to `h`.
-		void hash( IECore::MurmurHash &h ) const;
-		IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Transforms &transforms = Transforms() ) const;
-		IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Transforms &transforms, const PointClouds &pointClouds ) const;
+private:
 
-		bool needsAttribute( const std::string &name ) const;
-		bool hasDeformation() const;
+	void queryShaderGroup();
 
-	private :
+	const IECore::MurmurHash m_hash;
 
-		void queryShaderGroup();
+	bool m_timeNeeded;
+	std::vector<IECore::InternedString> m_contextVariablesNeeded;
 
-		const IECore::MurmurHash m_hash;
+	using AttributesNeededContainer = boost::container::flat_set<std::string>;
+	AttributesNeededContainer m_attributesNeeded;
 
-		bool m_timeNeeded;
-		std::vector<IECore::InternedString> m_contextVariablesNeeded;
+	// Set to true if the shader reads attributes who's name is not know at compile time
+	bool m_unknownAttributesNeeded;
 
-		using AttributesNeededContainer = boost::container::flat_set<std::string>;
-		AttributesNeededContainer m_attributesNeeded;
+	bool m_hasDeformation;
 
-		// Set to true if the shader reads attributes who's name is not know at compile time
-		bool m_unknownAttributesNeeded;
-
-		bool m_hasDeformation;
-
-		void *m_shaderGroupRef;
-
+	void *m_shaderGroupRef;
 };
 
 IE_CORE_DECLAREPTR( ShadingEngine )

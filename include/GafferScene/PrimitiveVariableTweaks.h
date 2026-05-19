@@ -46,60 +46,59 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveVariableTweaks : public Deformer
 {
 
-	public :
+public:
 
-		enum class SelectionMode
-		{
-			All,
-			IdList,
-			IdListPrimitiveVariable,
-			MaskPrimitiveVariable
-		};
+	enum class SelectionMode
+	{
+		All,
+		IdList,
+		IdListPrimitiveVariable,
+		MaskPrimitiveVariable
+	};
 
-		explicit PrimitiveVariableTweaks( const std::string &name=defaultName<PrimitiveVariableTweaks>() );
-		~PrimitiveVariableTweaks() override;
+	explicit PrimitiveVariableTweaks( const std::string &name = defaultName<PrimitiveVariableTweaks>() );
+	~PrimitiveVariableTweaks() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveVariableTweaks, PrimitiveVariableTweaksTypeId, Deformer );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveVariableTweaks, PrimitiveVariableTweaksTypeId, Deformer );
 
-		Gaffer::IntPlug *interpolationPlug();
-		const Gaffer::IntPlug *interpolationPlug() const;
+	Gaffer::IntPlug *interpolationPlug();
+	const Gaffer::IntPlug *interpolationPlug() const;
 
-		Gaffer::IntPlug *selectionModePlug();
-		const Gaffer::IntPlug *selectionModePlug() const;
+	Gaffer::IntPlug *selectionModePlug();
+	const Gaffer::IntPlug *selectionModePlug() const;
 
-		Gaffer::Int64VectorDataPlug *idListPlug();
-		const Gaffer::Int64VectorDataPlug *idListPlug() const;
+	Gaffer::Int64VectorDataPlug *idListPlug();
+	const Gaffer::Int64VectorDataPlug *idListPlug() const;
 
-		Gaffer::StringPlug *idListVariablePlug();
-		const Gaffer::StringPlug *idListVariablePlug() const;
+	Gaffer::StringPlug *idListVariablePlug();
+	const Gaffer::StringPlug *idListVariablePlug() const;
 
-		Gaffer::StringPlug *idPlug();
-		const Gaffer::StringPlug *idPlug() const;
+	Gaffer::StringPlug *idPlug();
+	const Gaffer::StringPlug *idPlug() const;
 
-		Gaffer::StringPlug *maskVariablePlug();
-		const Gaffer::StringPlug *maskVariablePlug() const;
+	Gaffer::StringPlug *maskVariablePlug();
+	const Gaffer::StringPlug *maskVariablePlug() const;
 
-		Gaffer::BoolPlug *invertSelectionPlug();
-		const Gaffer::BoolPlug *invertSelectionPlug() const;
+	Gaffer::BoolPlug *invertSelectionPlug();
+	const Gaffer::BoolPlug *invertSelectionPlug() const;
 
-		Gaffer::BoolPlug *ignoreMissingPlug();
-		const Gaffer::BoolPlug *ignoreMissingPlug() const;
+	Gaffer::BoolPlug *ignoreMissingPlug();
+	const Gaffer::BoolPlug *ignoreMissingPlug() const;
 
-		Gaffer::TweaksPlug *tweaksPlug();
-		const Gaffer::TweaksPlug *tweaksPlug() const;
+	Gaffer::TweaksPlug *tweaksPlug();
+	const Gaffer::TweaksPlug *tweaksPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-		bool adjustBounds() const override;
+	bool adjustBounds() const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( PrimitiveVariableTweaks )

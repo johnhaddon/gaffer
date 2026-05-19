@@ -123,7 +123,7 @@ GafferScene::ShaderTweakProxy::ShaderLoaderDescription<TestShader> g_testShaderT
 GAFFER_NODE_DEFINE_TYPE( TestShader )
 
 TestShader::TestShader( const std::string &name )
-	:	Shader( name )
+	: Shader( name )
 {
 	// The base class expects `loadShader()` to set `type`, but
 	// we don't want to make assumptions for the purposes of testing.

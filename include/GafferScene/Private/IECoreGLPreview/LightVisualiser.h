@@ -59,51 +59,50 @@ IE_CORE_FORWARDDECLARE( LightVisualiser )
 class GAFFERSCENE_API LightVisualiser : public IECore::RefCounted
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( LightVisualiser )
+	IE_CORE_DECLAREMEMBERPTR( LightVisualiser )
 
-		LightVisualiser();
-		~LightVisualiser() override;
+	LightVisualiser();
+	~LightVisualiser() override;
 
-		/// Must be implemented by derived classes to visualise
-		/// the light contained within `shaderNetwork`.
-		virtual Visualisations visualise(
-			const IECore::InternedString &attributeName,
-			const IECoreScene::ShaderNetwork *shaderNetwork,
-			const IECore::CompoundObject *attributes,
-			IECoreGL::ConstStatePtr &state
-		) const = 0;
+	/// Must be implemented by derived classes to visualise
+	/// the light contained within `shaderNetwork`.
+	virtual Visualisations visualise(
+		const IECore::InternedString &attributeName,
+		const IECoreScene::ShaderNetwork *shaderNetwork,
+		const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	) const = 0;
 
-		/// Registers a visualiser to visualise a particular type of light.
-		/// For instance, `registerLightVisualiser( "ai:light", "point_light", visualiser )`
-		/// would register a visualiser for an Arnold point light.
-		static void registerLightVisualiser(
-			const IECore::InternedString &attributeName,
-			const IECore::InternedString &shaderName,
-			ConstLightVisualiserPtr visualiser
-		);
+	/// Registers a visualiser to visualise a particular type of light.
+	/// For instance, `registerLightVisualiser( "ai:light", "point_light", visualiser )`
+	/// would register a visualiser for an Arnold point light.
+	static void registerLightVisualiser(
+		const IECore::InternedString &attributeName,
+		const IECore::InternedString &shaderName,
+		ConstLightVisualiserPtr visualiser
+	);
 
-		/// Get all registered visualisations for the given attributes, by
-		/// returning a map of renderable groups and some extra state. The
-		/// return value may be left empty and/or the state may be left null if
-		/// no registered visualisers do anything with these attributes.
-		static Visualisations allVisualisations(
-			const IECore::CompoundObject *attributes,
-			IECoreGL::ConstStatePtr &state
-		);
+	/// Get all registered visualisations for the given attributes, by
+	/// returning a map of renderable groups and some extra state. The
+	/// return value may be left empty and/or the state may be left null if
+	/// no registered visualisers do anything with these attributes.
+	static Visualisations allVisualisations(
+		const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	);
 
-	protected :
+protected:
 
-		template<typename VisualiserType>
-		struct LightVisualiserDescription
+	template<typename VisualiserType>
+	struct LightVisualiserDescription
+	{
+		LightVisualiserDescription( const IECore::InternedString &attributeName, const IECore::InternedString &shaderName )
 		{
-			LightVisualiserDescription( const IECore::InternedString &attributeName, const IECore::InternedString &shaderName )
-			{
-				registerLightVisualiser( attributeName, shaderName, new VisualiserType() );
-			};
+			registerLightVisualiser( attributeName, shaderName, new VisualiserType() );
 		};
-
+	};
 };
 
 } // namespace IECoreGLPreview

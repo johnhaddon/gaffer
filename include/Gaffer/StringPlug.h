@@ -85,53 +85,52 @@ namespace Gaffer
 class GAFFER_API StringPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = std::string;
+	using ValueType = std::string;
 
-		GAFFER_PLUG_DECLARE_TYPE( Gaffer::StringPlug, StringPlugTypeId, ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( Gaffer::StringPlug, StringPlugTypeId, ValuePlug );
 
-		explicit StringPlug(
-			const std::string &name = defaultName<StringPlug>(),
-			Direction direction=In,
-			const std::string &defaultValue = "",
-			unsigned flags = Default,
-			unsigned substitutions = IECore::StringAlgo::AllSubstitutions
-		);
-		~StringPlug() override;
+	explicit StringPlug(
+		const std::string &name = defaultName<StringPlug>(),
+		Direction direction = In,
+		const std::string &defaultValue = "",
+		unsigned flags = Default,
+		unsigned substitutions = IECore::StringAlgo::AllSubstitutions
+	);
+	~StringPlug() override;
 
-		unsigned substitutions() const;
+	unsigned substitutions() const;
 
-		/// Accepts only instances of StringPlug or derived classes.
-		bool acceptsInput( const Plug *input ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Accepts only instances of StringPlug or derived classes.
+	bool acceptsInput( const Plug *input ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		const std::string &defaultValue() const;
+	const std::string &defaultValue() const;
 
-		/// \undoable
-		void setValue( const std::string &value );
-		/// \undoable
-		void setValue( const char *value );
-		/// Calls `setValue( value.generic_string() )`.
-		/// > Note : When representing paths as strings, Gaffer uses the generic
-		/// > `/` separator on all platforms, _not_ the platform's native separator
-		/// > (which would be `\` on Windows).
-		/// \undoable
-		void setValue( const std::filesystem::path &value );
-		/// Returns the value.
-		std::string getValue() const;
+	/// \undoable
+	void setValue( const std::string &value );
+	/// \undoable
+	void setValue( const char *value );
+	/// Calls `setValue( value.generic_string() )`.
+	/// > Note : When representing paths as strings, Gaffer uses the generic
+	/// > `/` separator on all platforms, _not_ the platform's native separator
+	/// > (which would be `\` on Windows).
+	/// \undoable
+	void setValue( const std::filesystem::path &value );
+	/// Returns the value.
+	std::string getValue() const;
 
-		void setFrom( const ValuePlug *other ) override;
+	void setFrom( const ValuePlug *other ) override;
 
-		IECore::MurmurHash hash() const override;
-		/// Ensures the method above doesn't mask
-		/// ValuePlug::hash( h )
-		using ValuePlug::hash;
+	IECore::MurmurHash hash() const override;
+	/// Ensures the method above doesn't mask
+	/// ValuePlug::hash( h )
+	using ValuePlug::hash;
 
-	private :
+private:
 
-		unsigned m_substitutions;
-
+	unsigned m_substitutions;
 };
 
 IE_CORE_DECLAREPTR( StringPlug );

@@ -91,13 +91,12 @@ struct MappingData : public IECore::Data
 		return it->second;
 	}
 
-	private :
+private:
 
-		StringVectorDataPtr m_outChannelNames;
+	StringVectorDataPtr m_outChannelNames;
 
-		using Map = unordered_map<string, string>;
-		Map m_mapping;
-
+	using Map = unordered_map<string, string>;
+	Map m_mapping;
 };
 
 IE_CORE_DECLAREPTR( MappingData )
@@ -109,7 +108,7 @@ size_t Shuffle::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( Shuffle );
 
 Shuffle::Shuffle( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "missingSourceMode", Plug::In, (int)MissingSourceMode::Black, (int)MissingSourceMode::Ignore, (int)MissingSourceMode::Black ) );
@@ -141,7 +140,7 @@ const Gaffer::IntPlug *Shuffle::missingSourceModePlug() const
 
 Gaffer::ShufflesPlug *Shuffle::shufflesPlug()
 {
-	return getChild<ShufflesPlug>( g_firstPlugIndex +1 );
+	return getChild<ShufflesPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::ShufflesPlug *Shuffle::shufflesPlug() const
@@ -228,7 +227,7 @@ void Shuffle::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffe
 {
 	std::string c = inChannelName( context->get<string>( ImagePlug::channelNameContextName ) );
 
-	if( c == "__black" || c == "" || c == "__white")
+	if( c == "__black" || c == "" || c == "__white" )
 	{
 		const Imath::V2i tileOrigin = context->get<Imath::V2i>( ImagePlug::tileOriginContextName );
 
@@ -260,7 +259,7 @@ IECore::ConstFloatVectorDataPtr Shuffle::computeChannelData( const std::string &
 {
 	std::string c = inChannelName( context->get<string>( ImagePlug::channelNameContextName ) );
 
-	if( c == "__black" || c == "" || c == "__white")
+	if( c == "__black" || c == "" || c == "__white" )
 	{
 		ImagePlug::ChannelDataScope channelDataScope( context );
 		channelDataScope.remove( ImagePlug::channelNameContextName );
@@ -278,7 +277,7 @@ IECore::ConstFloatVectorDataPtr Shuffle::computeChannelData( const std::string &
 
 			FloatVectorDataPtr result = new FloatVectorData();
 			result->writable().resize(
-				sampleOffsets->readable()[ ImagePlug::tileSize() * ImagePlug::tileSize() - 1 ],
+				sampleOffsets->readable()[ImagePlug::tileSize() * ImagePlug::tileSize() - 1],
 				( c == "__white" ) ? 1.0f : 0.0f
 			);
 

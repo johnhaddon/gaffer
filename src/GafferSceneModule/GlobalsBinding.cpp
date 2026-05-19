@@ -78,7 +78,7 @@ boost::python::tuple registeredOutputsWrapper()
 	vector<string> names;
 	Outputs::registeredOutputs( names );
 	boost::python::list l;
-	for( vector<string>::const_iterator it = names.begin(); it!=names.end(); it++ )
+	for( vector<string>::const_iterator it = names.begin(); it != names.end(); it++ )
 	{
 		l.append( *it );
 	}
@@ -92,8 +92,7 @@ void GafferSceneModule::bindGlobals()
 
 	DependencyNodeClass<GlobalsProcessor>();
 	DependencyNodeClass<DeleteGlobals>()
-		.def( "_namePrefix", &DeleteGlobals::namePrefix )
-	;
+		.def( "_namePrefix", &DeleteGlobals::namePrefix );
 
 	DependencyNodeClass<DeleteOutputs>();
 	DependencyNodeClass<DeleteSets>();
@@ -101,19 +100,20 @@ void GafferSceneModule::bindGlobals()
 	DependencyNodeClass<Outputs>()
 		.def( "addOutput", &addOutputWrapper )
 		.def( "addOutput", &addOutputWrapper2 )
-		.def( "registerOutput", &Outputs::registerOutput ).staticmethod( "registerOutput" )
-		.def( "deregisterOutput", &Outputs::deregisterOutput ).staticmethod( "deregisterOutput" )
-		.def( "registeredOutputs", &registeredOutputsWrapper ).staticmethod( "registeredOutputs" )
-	;
+		.def( "registerOutput", &Outputs::registerOutput )
+		.staticmethod( "registerOutput" )
+		.def( "deregisterOutput", &Outputs::deregisterOutput )
+		.staticmethod( "deregisterOutput" )
+		.def( "registeredOutputs", &registeredOutputsWrapper )
+		.staticmethod( "registeredOutputs" );
 
 	{
 		scope s = DependencyNodeClass<GafferScene::Set>();
 
-			enum_<GafferScene::Set::Mode>( "Mode" )
-				.value( "Create", GafferScene::Set::Create )
-				.value( "Add", GafferScene::Set::Add )
-				.value( "Remove", GafferScene::Set::Remove )
-			;
+		enum_<GafferScene::Set::Mode>( "Mode" )
+			.value( "Create", GafferScene::Set::Create )
+			.value( "Add", GafferScene::Set::Add )
+			.value( "Remove", GafferScene::Set::Remove );
 	}
 
 	DependencyNodeClass<GlobalShader>();
@@ -123,8 +123,7 @@ void GafferSceneModule::bindGlobals()
 
 		enum_<DeleteRenderPasses::Mode>( "Mode" )
 			.value( "Keep", DeleteRenderPasses::Keep )
-			.value( "Delete", DeleteRenderPasses::Delete )
-		;
+			.value( "Delete", DeleteRenderPasses::Delete );
 	}
 	DependencyNodeClass<RenderPasses>();
 	DependencyNodeClass<RenderPassShader>();
@@ -134,5 +133,4 @@ void GafferSceneModule::bindGlobals()
 	// the standard NodeSerialiser in place of the ContextProcessor's SetupBasedNodeSerialiser to avoid
 	// serialising another `setup()` call.
 	Serialisation::registerSerialiser( ShuffleRenderPasses::staticTypeId(), new NodeSerialiser() );
-
 }

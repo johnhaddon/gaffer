@@ -49,5 +49,4 @@ BOOST_PYTHON_MODULE( _IECoreDelight )
 	scope shaderNetworkAlgoScope( shaderNetworkAlgoModule );
 
 	def( "convertUSDShaders", &ShaderNetworkAlgo::convertUSDShaders );
-
 }

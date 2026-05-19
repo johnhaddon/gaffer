@@ -47,38 +47,37 @@ namespace GafferScene
 class GAFFERSCENE_API MeshDistortion : public ObjectProcessor
 {
 
-	public :
+public:
 
-		explicit MeshDistortion( const std::string &name=defaultName<MeshDistortion>() );
-		~MeshDistortion() override;
+	explicit MeshDistortion( const std::string &name = defaultName<MeshDistortion>() );
+	~MeshDistortion() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshDistortion, MeshDistortionTypeId, ObjectProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::MeshDistortion, MeshDistortionTypeId, ObjectProcessor );
 
-		Gaffer::StringPlug *positionPlug();
-		const Gaffer::StringPlug *positionPlug() const;
+	Gaffer::StringPlug *positionPlug();
+	const Gaffer::StringPlug *positionPlug() const;
 
-		Gaffer::StringPlug *referencePositionPlug();
-		const Gaffer::StringPlug *referencePositionPlug() const;
+	Gaffer::StringPlug *referencePositionPlug();
+	const Gaffer::StringPlug *referencePositionPlug() const;
 
-		Gaffer::StringPlug *uvSetPlug();
-		const Gaffer::StringPlug *uvSetPlug() const;
+	Gaffer::StringPlug *uvSetPlug();
+	const Gaffer::StringPlug *uvSetPlug() const;
 
-		Gaffer::StringPlug *distortionPlug();
-		const Gaffer::StringPlug *distortionPlug() const;
+	Gaffer::StringPlug *distortionPlug();
+	const Gaffer::StringPlug *distortionPlug() const;
 
-		Gaffer::StringPlug *uvDistortionPlug();
-		const Gaffer::StringPlug *uvDistortionPlug() const;
+	Gaffer::StringPlug *uvDistortionPlug();
+	const Gaffer::StringPlug *uvDistortionPlug() const;
 
-	protected :
+protected:
 
-		bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( MeshDistortion )

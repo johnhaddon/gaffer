@@ -62,51 +62,50 @@ namespace GafferScene
 class GAFFERSCENE_API SetVisualiser : public AttributeProcessor
 {
 
-	public :
+public:
 
-		explicit SetVisualiser( const std::string &name=defaultName<SetVisualiser>() );
-		~SetVisualiser() override;
+	explicit SetVisualiser( const std::string &name = defaultName<SetVisualiser>() );
+	~SetVisualiser() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::SetVisualiser, SetVisualiserTypeId, AttributeProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::SetVisualiser, SetVisualiserTypeId, AttributeProcessor );
 
-		Gaffer::StringPlug *setsPlug();
-		const Gaffer::StringPlug *setsPlug() const;
+	Gaffer::StringPlug *setsPlug();
+	const Gaffer::StringPlug *setsPlug() const;
 
-		Gaffer::BoolPlug *includeInheritedPlug();
-		const Gaffer::BoolPlug *includeInheritedPlug() const;
+	Gaffer::BoolPlug *includeInheritedPlug();
+	const Gaffer::BoolPlug *includeInheritedPlug() const;
 
-		Gaffer::FloatPlug *stripeWidthPlug();
-		const Gaffer::FloatPlug *stripeWidthPlug() const;
+	Gaffer::FloatPlug *stripeWidthPlug();
+	const Gaffer::FloatPlug *stripeWidthPlug() const;
 
-		Gaffer::CompoundDataPlug *colorOverridesPlug();
-		const Gaffer::CompoundDataPlug *colorOverridesPlug() const;
+	Gaffer::CompoundDataPlug *colorOverridesPlug();
+	const Gaffer::CompoundDataPlug *colorOverridesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
-		void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
+	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
 
-	private :
+private:
 
-		Gaffer::AtomicCompoundDataPlug *outSetsPlug();
-		const Gaffer::AtomicCompoundDataPlug *outSetsPlug() const;
+	Gaffer::AtomicCompoundDataPlug *outSetsPlug();
+	const Gaffer::AtomicCompoundDataPlug *outSetsPlug() const;
 
-		/// Computes a filtered list of sets from the input ScenePlug, taking
-		/// into account filtering defined by the Node's plugs and masking of
-		/// Gaffer-internal sets, etc.
-		std::vector<IECore::InternedString> candidateSetNames() const;
+	/// Computes a filtered list of sets from the input ScenePlug, taking
+	/// into account filtering defined by the Node's plugs and masking of
+	/// Gaffer-internal sets, etc.
+	std::vector<IECore::InternedString> candidateSetNames() const;
 
-		/// Produces a stable list of colors for the supplied set names
-		std::vector<Imath::Color3f> colorsForSets( const std::vector<IECore::InternedString>& setNames ) const;
+	/// Produces a stable list of colors for the supplied set names
+	std::vector<Imath::Color3f> colorsForSets( const std::vector<IECore::InternedString> &setNames ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( SetVisualiser )

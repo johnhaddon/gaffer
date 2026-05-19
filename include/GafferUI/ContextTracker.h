@@ -71,155 +71,154 @@ namespace GafferUI
 class GAFFERUI_API ContextTracker final : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
-	public :
+public:
 
-		/// Constructs an instance that will track the graph upstream of the
-		/// target `node`, taking into account what connections are active in
-		/// the target `context`.
-		ContextTracker( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context );
-		~ContextTracker() override;
+	/// Constructs an instance that will track the graph upstream of the
+	/// target `node`, taking into account what connections are active in
+	/// the target `context`.
+	ContextTracker( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context );
+	~ContextTracker() override;
 
-		IE_CORE_DECLAREMEMBERPTR( ContextTracker );
+	IE_CORE_DECLAREMEMBERPTR( ContextTracker );
 
-		/// Shared instances
-		/// ================
-		///
-		/// Tracking the upstream contexts can involve significant computation,
-		/// so it is recommended that ContextTracker instances are shared
-		/// between UI components. The `aquire()` methods maintain a pool of
-		/// instances for this purpose. Acquisition and destruction of shared
-		/// instances is not threadsafe, and must always be done on the UI
-		/// thread.
+	/// Shared instances
+	/// ================
+	///
+	/// Tracking the upstream contexts can involve significant computation,
+	/// so it is recommended that ContextTracker instances are shared
+	/// between UI components. The `aquire()` methods maintain a pool of
+	/// instances for this purpose. Acquisition and destruction of shared
+	/// instances is not threadsafe, and must always be done on the UI
+	/// thread.
 
-		/// Returns a shared instance for the target `node`. The node must
-		/// belong to a ScriptNode, so that `ScriptNode::context()` can be used
-		/// to provide the target context.
-		static Ptr acquire( const Gaffer::NodePtr &node );
-		/// Returns a shared instance that will automatically track the focus
-		/// node in the ScriptNode associated with `graphComponent`.
-		static Ptr acquireForFocus( Gaffer::GraphComponent *graphComponent );
+	/// Returns a shared instance for the target `node`. The node must
+	/// belong to a ScriptNode, so that `ScriptNode::context()` can be used
+	/// to provide the target context.
+	static Ptr acquire( const Gaffer::NodePtr &node );
+	/// Returns a shared instance that will automatically track the focus
+	/// node in the ScriptNode associated with `graphComponent`.
+	static Ptr acquireForFocus( Gaffer::GraphComponent *graphComponent );
 
-		/// Target
-		/// ======
+	/// Target
+	/// ======
 
-		const Gaffer::Node *targetNode() const;
-		const Gaffer::Context *targetContext() const;
+	const Gaffer::Node *targetNode() const;
+	const Gaffer::Context *targetContext() const;
 
-		/// Update and signalling
-		/// =====================
-		///
-		/// Updates are performed asynchronously in background tasks so that
-		/// the UI is never blocked. Clients should connect to `changedSignal()`
-		/// to be notified when updates are complete.
+	/// Update and signalling
+	/// =====================
+	///
+	/// Updates are performed asynchronously in background tasks so that
+	/// the UI is never blocked. Clients should connect to `changedSignal()`
+	/// to be notified when updates are complete.
 
-		/// Returns true if an update is in-progress, in which case queries will
-		/// return stale values.
-		bool updatePending() const;
-		using Signal = Gaffer::Signals::Signal<void ( ContextTracker & ), Gaffer::Signals::CatchingCombiner<void>>;
-		/// Signal emitted when the results of any queries have changed.
-		Signal &changedSignal();
-		/// As above, but if `graphComponent` is a part of a View or Editor, returns
-		/// a signal that is also emitted when the viewed node changes. This accounts
-		/// for rule 2 documented in `context()`.
-		Signal &changedSignal( Gaffer::GraphComponent *graphComponent );
+	/// Returns true if an update is in-progress, in which case queries will
+	/// return stale values.
+	bool updatePending() const;
+	using Signal = Gaffer::Signals::Signal<void( ContextTracker & ), Gaffer::Signals::CatchingCombiner<void>>;
+	/// Signal emitted when the results of any queries have changed.
+	Signal &changedSignal();
+	/// As above, but if `graphComponent` is a part of a View or Editor, returns
+	/// a signal that is also emitted when the viewed node changes. This accounts
+	/// for rule 2 documented in `context()`.
+	Signal &changedSignal( Gaffer::GraphComponent *graphComponent );
 
-		/// Queries
-		/// =======
-		///
-		/// Queries return immediately so will not block the UI waiting for computation.
-		/// But while `updatePending()` is `true` they will return stale values.
+	/// Queries
+	/// =======
+	///
+	/// Queries return immediately so will not block the UI waiting for computation.
+	/// But while `updatePending()` is `true` they will return stale values.
 
-		/// Returns true if the specified plug or node contributes to the
-		/// evaluation of the target.
-		bool isTracked( const Gaffer::Plug *plug ) const;
-		bool isTracked( const Gaffer::Node *node ) const;
+	/// Returns true if the specified plug or node contributes to the
+	/// evaluation of the target.
+	bool isTracked( const Gaffer::Plug *plug ) const;
+	bool isTracked( const Gaffer::Node *node ) const;
 
-		/// Returns the most suitable context for the UI to evaluate a plug or
-		/// node in. This will always return a valid context, even if the plug
-		/// or node has not been tracked.
-		///
-		/// Contexts are chosen as follows :
-		///
-		/// 1. If the node or plug is tracked, then the first context
-		///    it was tracked in is chosen.
-		/// 2. If the node or plug is part of a `View` or `Editor`, then
-		///    the context for the node being viewed is chosen.
-		/// 3. Otherwise, a copy of `targetContext()` is chosen.
-		///
-		/// > Note : The returned context is immutable, so it is not necessary
-		/// > to monitor it for changes via `Context::changedSignal()`. It is
-		/// > only necessary to monitor `ContextTracker::changedSignal()`.
-		Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const;
-		Gaffer::ConstContextPtr context( const Gaffer::Node *node ) const;
+	/// Returns the most suitable context for the UI to evaluate a plug or
+	/// node in. This will always return a valid context, even if the plug
+	/// or node has not been tracked.
+	///
+	/// Contexts are chosen as follows :
+	///
+	/// 1. If the node or plug is tracked, then the first context
+	///    it was tracked in is chosen.
+	/// 2. If the node or plug is part of a `View` or `Editor`, then
+	///    the context for the node being viewed is chosen.
+	/// 3. Otherwise, a copy of `targetContext()` is chosen.
+	///
+	/// > Note : The returned context is immutable, so it is not necessary
+	/// > to monitor it for changes via `Context::changedSignal()`. It is
+	/// > only necessary to monitor `ContextTracker::changedSignal()`.
+	Gaffer::ConstContextPtr context( const Gaffer::Plug *plug ) const;
+	Gaffer::ConstContextPtr context( const Gaffer::Node *node ) const;
 
-		/// If the node is tracked, returns the value of `node->enabledPlug()`
-		/// in `context( node )`. If the node is not tracked, returns `false`.
-		bool isEnabled( const Gaffer::DependencyNode *node ) const;
+	/// If the node is tracked, returns the value of `node->enabledPlug()`
+	/// in `context( node )`. If the node is not tracked, returns `false`.
+	bool isEnabled( const Gaffer::DependencyNode *node ) const;
 
-	private :
+private:
 
-		void updateNode( const Gaffer::NodePtr &node );
-		void plugDirtied( const Gaffer::Plug *plug );
-		void contextChanged( IECore::InternedString variable );
-		void scheduleUpdate();
-		void updateInBackground();
-		void editorInputChanged( const Gaffer::Plug *plug );
-		void emitChanged();
-		const Gaffer::Context *findPlugContext( const Gaffer::Plug *plug ) const;
+	void updateNode( const Gaffer::NodePtr &node );
+	void plugDirtied( const Gaffer::Plug *plug );
+	void contextChanged( IECore::InternedString variable );
+	void scheduleUpdate();
+	void updateInBackground();
+	void editorInputChanged( const Gaffer::Plug *plug );
+	void emitChanged();
+	const Gaffer::Context *findPlugContext( const Gaffer::Plug *plug ) const;
 
-		Gaffer::ConstNodePtr m_node;
-		Gaffer::ConstContextPtr m_targetContext;
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
+	Gaffer::ConstNodePtr m_node;
+	Gaffer::ConstContextPtr m_targetContext;
+	Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
 
-		Gaffer::Signals::ScopedConnection m_idleConnection;
-		std::unique_ptr<Gaffer::BackgroundTask> m_updateTask;
-		Signal m_changedSignal;
+	Gaffer::Signals::ScopedConnection m_idleConnection;
+	std::unique_ptr<Gaffer::BackgroundTask> m_updateTask;
+	Signal m_changedSignal;
 
-		struct TrackedEditor
-		{
-			Signal changedSignal;
-			Gaffer::Signals::ScopedConnection plugInputChangedConnection;
-		};
-		using TrackedEditors = std::unordered_map<const Gaffer::Node *, TrackedEditor>;
-		TrackedEditors m_trackedEditors;
+	struct TrackedEditor
+	{
+		Signal changedSignal;
+		Gaffer::Signals::ScopedConnection plugInputChangedConnection;
+	};
+	using TrackedEditors = std::unordered_map<const Gaffer::Node *, TrackedEditor>;
+	TrackedEditors m_trackedEditors;
 
-		struct NodeData
-		{
-			Gaffer::ConstContextPtr context = nullptr;
-			bool dependencyNodeEnabled = false;
-			// If `true`, then all input plugs on the node are assumed to be
-			// active in the Node's context. This is just an optimisation that
-			// allows us to keep the size of `m_plugContexts` to a minimum.
-			bool allInputsActive = false;
-		};
+	struct NodeData
+	{
+		Gaffer::ConstContextPtr context = nullptr;
+		bool dependencyNodeEnabled = false;
+		// If `true`, then all input plugs on the node are assumed to be
+		// active in the Node's context. This is just an optimisation that
+		// allows us to keep the size of `m_plugContexts` to a minimum.
+		bool allInputsActive = false;
+	};
 
-		/// Allows `map.find( T * )` to avoid the creation of a temporary `intrusive_ptr<T>`
-		/// when `intrusive_ptr<T>` is used as the key in an `unordered_map`. Should be used
-		/// in conjunction with `std::equal_to<>` in the `unordered_map` instantiation.
-		/// \todo Move to `IECore/RefCounted.h`
-		template<typename T>
-		struct TransparentPtrHash
-		{
-			using is_transparent = void;
-			std::size_t operator()( T *x ) const { return std::hash<T *>()( x ); }
-			std::size_t operator()( const boost::intrusive_ptr<T> &x ) const { return std::hash<T *>()( x.get() ); }
-		};
+	/// Allows `map.find( T * )` to avoid the creation of a temporary `intrusive_ptr<T>`
+	/// when `intrusive_ptr<T>` is used as the key in an `unordered_map`. Should be used
+	/// in conjunction with `std::equal_to<>` in the `unordered_map` instantiation.
+	/// \todo Move to `IECore/RefCounted.h`
+	template<typename T>
+	struct TransparentPtrHash
+	{
+		using is_transparent = void;
+		std::size_t operator () ( T *x ) const { return std::hash<T *>()( x ); }
+		std::size_t operator () ( const boost::intrusive_ptr<T> &x ) const { return std::hash<T *>()( x.get() ); }
+	};
 
-		/// \todo Use `std::unordered_map` when the VFX platform gods give us C++20.
-		using NodeContexts = boost::unordered_map<Gaffer::ConstNodePtr, NodeData, TransparentPtrHash<const Gaffer::Node>, std::equal_to<>>;
-		NodeContexts m_nodeContexts;
-		using PlugContexts = boost::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr, TransparentPtrHash<const Gaffer::Plug>, std::equal_to<>>;
-		// Stores plug-specific contexts, which take precedence over `m_nodeContexts`.
-		PlugContexts m_plugContexts;
+	/// \todo Use `std::unordered_map` when the VFX platform gods give us C++20.
+	using NodeContexts = boost::unordered_map<Gaffer::ConstNodePtr, NodeData, TransparentPtrHash<const Gaffer::Node>, std::equal_to<>>;
+	NodeContexts m_nodeContexts;
+	using PlugContexts = boost::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr, TransparentPtrHash<const Gaffer::Plug>, std::equal_to<>>;
+	// Stores plug-specific contexts, which take precedence over `m_nodeContexts`.
+	PlugContexts m_plugContexts;
 
-		static void visit(
-			std::deque<std::pair<const Gaffer::Plug *, Gaffer::ConstContextPtr>> &toVisit,
-			NodeContexts &nodeContexts, PlugContexts &plugContexts, const IECore::Canceller *canceller
-		);
+	static void visit(
+		std::deque<std::pair<const Gaffer::Plug *, Gaffer::ConstContextPtr>> &toVisit,
+		NodeContexts &nodeContexts, PlugContexts &plugContexts, const IECore::Canceller *canceller
+	);
 
-		// The context returned for plugs and nodes that we haven't tracked.
-		Gaffer::ConstContextPtr m_defaultContext;
-
+	// The context returned for plugs and nodes that we haven't tracked.
+	Gaffer::ConstContextPtr m_defaultContext;
 };
 
 IE_CORE_DECLAREPTR( ContextTracker )

@@ -52,42 +52,41 @@ IE_CORE_FORWARDDECLARE( AttributeVisualiser )
 class GAFFERSCENE_API AttributeVisualiser : public IECore::RefCounted
 {
 
-	public :
+public:
 
-		IE_CORE_DECLAREMEMBERPTR( AttributeVisualiser )
-		~AttributeVisualiser() override;
+	IE_CORE_DECLAREMEMBERPTR( AttributeVisualiser )
+	~AttributeVisualiser() override;
 
-		virtual Visualisations visualise(
-			const IECore::CompoundObject *attributes,
-			IECoreGL::ConstStatePtr &state
-		) const = 0;
+	virtual Visualisations visualise(
+		const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	) const = 0;
 
-		/// Registers an attribute visualiser
-		static void registerVisualiser( ConstAttributeVisualiserPtr visualiser );
+	/// Registers an attribute visualiser
+	static void registerVisualiser( ConstAttributeVisualiserPtr visualiser );
 
-		/// Get all registered visualisations for the given attributes, by
-		/// returning a map of renderable groups and some extra state. The
-		/// return value may be left empty and/or the state may left null if no
-		/// registered visualisers do anything with these attributes.
-		static Visualisations allVisualisations(
-			const IECore::CompoundObject *attributes,
-			IECoreGL::ConstStatePtr &state
-		);
+	/// Get all registered visualisations for the given attributes, by
+	/// returning a map of renderable groups and some extra state. The
+	/// return value may be left empty and/or the state may left null if no
+	/// registered visualisers do anything with these attributes.
+	static Visualisations allVisualisations(
+		const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	);
 
-	protected :
+protected:
 
-		AttributeVisualiser();
+	AttributeVisualiser();
 
-		template<typename VisualiserType>
-		struct AttributeVisualiserDescription
+	template<typename VisualiserType>
+	struct AttributeVisualiserDescription
+	{
+
+		AttributeVisualiserDescription()
 		{
-
-			AttributeVisualiserDescription()
-			{
-				registerVisualiser( new VisualiserType );
-			}
-
-		};
+			registerVisualiser( new VisualiserType );
+		}
+	};
 };
 
 IE_CORE_DECLAREPTR( AttributeVisualiser )

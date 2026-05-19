@@ -78,63 +78,62 @@ IE_CORE_FORWARDDECLARE( ImageGadget )
 class GAFFERIMAGEUI_API ImageView : public GafferUI::View
 {
 
-	public :
+public:
 
-		explicit ImageView( Gaffer::ScriptNodePtr scriptNode );
-		~ImageView() override;
+	explicit ImageView( Gaffer::ScriptNodePtr scriptNode );
+	~ImageView() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImageUI::ImageView, ImageViewTypeId, GafferUI::View );
+	GAFFER_NODE_DECLARE_TYPE( GafferImageUI::ImageView, ImageViewTypeId, GafferUI::View );
 
-		Gaffer::StringVectorDataPlug *channelsPlug();
-		const Gaffer::StringVectorDataPlug *channelsPlug() const;
+	Gaffer::StringVectorDataPlug *channelsPlug();
+	const Gaffer::StringVectorDataPlug *channelsPlug() const;
 
-		Gaffer::StringPlug *viewPlug();
-		const Gaffer::StringPlug *viewPlug() const;
-		Gaffer::StringPlug *compareModePlug();
-		const Gaffer::StringPlug *compareModePlug() const;
-		Gaffer::BoolPlug *compareWipePlug();
-		const Gaffer::BoolPlug *compareWipePlug() const;
-		GafferImage::ImagePlug *compareImagePlug();
-		const GafferImage::ImagePlug *compareImagePlug() const;
-		Gaffer::StringPlug *compareCatalogueOutputPlug();
-		const Gaffer::StringPlug *compareCatalogueOutputPlug() const;
-		Gaffer::BoolPlug *compareMatchDisplayWindowsPlug();
-		const Gaffer::BoolPlug *compareMatchDisplayWindowsPlug() const;
+	Gaffer::StringPlug *viewPlug();
+	const Gaffer::StringPlug *viewPlug() const;
+	Gaffer::StringPlug *compareModePlug();
+	const Gaffer::StringPlug *compareModePlug() const;
+	Gaffer::BoolPlug *compareWipePlug();
+	const Gaffer::BoolPlug *compareWipePlug() const;
+	GafferImage::ImagePlug *compareImagePlug();
+	const GafferImage::ImagePlug *compareImagePlug() const;
+	Gaffer::StringPlug *compareCatalogueOutputPlug();
+	const Gaffer::StringPlug *compareCatalogueOutputPlug() const;
+	Gaffer::BoolPlug *compareMatchDisplayWindowsPlug();
+	const Gaffer::BoolPlug *compareMatchDisplayWindowsPlug() const;
 
-		/// The gadget responsible for displaying the image.
-		ImageGadget *imageGadget();
-		const ImageGadget *imageGadget() const;
+	/// The gadget responsible for displaying the image.
+	ImageGadget *imageGadget();
+	const ImageGadget *imageGadget() const;
 
-	protected :
+protected:
 
-		/// May be called from a subclass constructor to add a converter
-		/// from non-image input types, allowing them to be viewed as images.
-		/// The converter must have an "in" Plug (of any desired type), and
-		/// convert the incoming data to an image to view on an "out" ImagePlug.
-		/// \note If the necessary conversion requires several nodes, a Box
-		/// provides a means of packaging them to meet these requirements.
-		/// \note Subclasses are not allowed to call setPreprocessor() as the
-		/// preprocessor is managed by the ImageView base class.
-		void insertConverter( Gaffer::NodePtr converter );
+	/// May be called from a subclass constructor to add a converter
+	/// from non-image input types, allowing them to be viewed as images.
+	/// The converter must have an "in" Plug (of any desired type), and
+	/// convert the incoming data to an image to view on an "out" ImagePlug.
+	/// \note If the necessary conversion requires several nodes, a Box
+	/// provides a means of packaging them to meet these requirements.
+	/// \note Subclasses are not allowed to call setPreprocessor() as the
+	/// preprocessor is managed by the ImageView base class.
+	void insertConverter( Gaffer::NodePtr converter );
 
-	private :
+private:
 
-		void contextChanged();
-		void plugSet( Gaffer::Plug *plug );
-		bool keyPress( const GafferUI::KeyEvent &event );
-		void preRender();
+	void contextChanged();
+	void plugSet( Gaffer::Plug *plug );
+	bool keyPress( const GafferUI::KeyEvent &event );
+	void preRender();
 
-		void setWipeActive( bool active );
+	void setWipeActive( bool active );
 
-		ImageGadgetPtr m_imageGadgets[2];
-		bool m_framed;
+	ImageGadgetPtr m_imageGadgets[2];
+	bool m_framed;
 
-		IE_CORE_FORWARDDECLARE( WipeHandle );
-		WipeHandlePtr m_wipeHandle;
+	IE_CORE_FORWARDDECLARE( WipeHandle );
+	WipeHandlePtr m_wipeHandle;
 
-		Gaffer::ContextVariablesPtr m_comparisonSelect;
-		static ViewDescription<ImageView> g_viewDescription;
-
+	Gaffer::ContextVariablesPtr m_comparisonSelect;
+	static ViewDescription<ImageView> g_viewDescription;
 };
 
 IE_CORE_DECLAREPTR( ImageView );

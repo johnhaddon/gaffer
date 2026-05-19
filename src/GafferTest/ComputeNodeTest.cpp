@@ -55,11 +55,11 @@ struct Edit
 {
 
 	Edit( const std::atomic_bool &stop )
-		:	m_stop( stop )
+		: m_stop( stop )
 	{
 	}
 
-	void operator()()
+	void operator () ()
 	{
 		while( !m_stop )
 		{
@@ -70,17 +70,16 @@ struct Edit
 		}
 	}
 
-	private :
+private:
 
-		const std::atomic_bool &m_stop;
-
+	const std::atomic_bool &m_stop;
 };
 
 struct Compute
 {
 
 	Compute()
-		:	m_node1( new GafferTest::MultiplyNode ), m_node2( new GafferTest::MultiplyNode )
+		: m_node1( new GafferTest::MultiplyNode ), m_node2( new GafferTest::MultiplyNode )
 	{
 		m_node1->op1Plug()->setValue( 3 );
 		m_node1->op2Plug()->setValue( 3 );
@@ -88,19 +87,18 @@ struct Compute
 		m_node2->op2Plug()->setValue( 1 );
 	}
 
-	void operator()( const blocked_range<size_t> &r ) const
+	void operator () ( const blocked_range<size_t> &r ) const
 	{
-		for( size_t i=r.begin(); i!=r.end(); ++i )
+		for( size_t i = r.begin(); i != r.end(); ++i )
 		{
 			GAFFERTEST_ASSERT( m_node2->productPlug()->getValue() == 9 );
 		}
 	}
 
-	private :
+private:
 
-		GafferTest::MultiplyNodePtr m_node1;
-		GafferTest::MultiplyNodePtr m_node2;
-
+	GafferTest::MultiplyNodePtr m_node1;
+	GafferTest::MultiplyNodePtr m_node2;
 };
 
 } // namespace

@@ -57,12 +57,12 @@ struct SlotCallRange
 {
 
 	SlotCallRange( const SlotCallRange &other )
-		: current( other.current), last( other.last )
+		: current( other.current ), last( other.last )
 	{
 	}
 
 	SlotCallRange( SlotCallIterator f, SlotCallIterator l )
-		:	current( f ), last( l )
+		: current( f ), last( l )
 	{
 	}
 
@@ -89,7 +89,6 @@ struct SlotCallRange
 
 	SlotCallIterator current;
 	SlotCallIterator last;
-
 };
 
 // A little wrapper class allowing a python callable to be used as a result
@@ -100,17 +99,17 @@ struct PythonResultCombiner
 	using result_type = object;
 
 	PythonResultCombiner()
-		:	combiner( object() )
+		: combiner( object() )
 	{
 	}
 
 	PythonResultCombiner( object c )
-		:	combiner( c )
+		: combiner( c )
 	{
 	}
 
 	template<typename SlotCallIterator>
-	result_type operator()( SlotCallIterator first, SlotCallIterator last ) const
+	result_type operator () ( SlotCallIterator first, SlotCallIterator last ) const
 	{
 		if( !combiner )
 		{
@@ -133,7 +132,6 @@ struct PythonResultCombiner
 	}
 
 	object combiner;
-
 };
 
 template<typename Signal>
@@ -149,16 +147,13 @@ void bind( const char *name )
 	// bind using the standard SignalClass, and add a constructor allowing a custom
 	// result combiner to be passed.
 	scope s = SignalClass<Signal>( name )
-		.def( "__init__", make_constructor( &construct<Signal>, default_call_policies() ) )
-	;
+				  .def( "__init__", make_constructor( &construct<Signal>, default_call_policies() ) );
 
 	// bind the appropriate result range type so the custom result combiner can get the slot results.
 	using Range = SlotCallRange<typename Signal::SlotCallIterator>;
 	boost::python::class_<Range>( "__SignalResultRange", no_init )
 		.def( "__iter__", &Range::iter, return_self<>() )
-		.def( "__next__", &Range::next )
-	;
-
+		.def( "__next__", &Range::next );
 }
 
 } // namespace
@@ -175,25 +170,21 @@ void GafferModule::bindSignals()
 		.def( "setBlocked", &Connection::setBlocked, ( arg( "blocked" ) ) )
 		.def( "getBlocked", &Connection::getBlocked )
 		.def( "disconnect", &Connection::disconnect )
-		.def( "connected", &Connection::connected )
-	;
+		.def( "connected", &Connection::connected );
 
 	class_<ScopedConnection, bases<Connection>, boost::noncopyable>( "ScopedConnection", no_init )
-		.def( init<const Connection &>() )
-	;
+		.def( init<const Connection &>() );
 
 	class_<Gaffer::Signals::Trackable, boost::noncopyable>( "Trackable" )
-		.def( "_disconnectTrackedConnections", &Trackable::disconnectTrackedConnections )
-	;
+		.def( "_disconnectTrackedConnections", &Trackable::disconnectTrackedConnections );
 
-	using Signal0 = Gaffer::Signals::Signal<object (), PythonResultCombiner>;
-	using Signal1 = Gaffer::Signals::Signal<object ( object ), PythonResultCombiner>;
-	using Signal2 = Gaffer::Signals::Signal<object ( object, object ), PythonResultCombiner>;
-	using Signal3 = Gaffer::Signals::Signal<object ( object, object, object ), PythonResultCombiner>;
+	using Signal0 = Gaffer::Signals::Signal<object(), PythonResultCombiner>;
+	using Signal1 = Gaffer::Signals::Signal<object( object ), PythonResultCombiner>;
+	using Signal2 = Gaffer::Signals::Signal<object( object, object ), PythonResultCombiner>;
+	using Signal3 = Gaffer::Signals::Signal<object( object, object, object ), PythonResultCombiner>;
 
 	bind<Signal0>( "Signal0" );
 	bind<Signal1>( "Signal1" );
 	bind<Signal2>( "Signal2" );
 	bind<Signal3>( "Signal3" );
-
 }

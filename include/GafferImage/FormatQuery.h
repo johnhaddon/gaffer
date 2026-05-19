@@ -51,31 +51,31 @@ namespace GafferImage
 struct GAFFERIMAGE_API FormatQuery : Gaffer::ComputeNode
 {
 
-	explicit FormatQuery( std::string const& name = defaultName< FormatQuery >() );
+	explicit FormatQuery( std::string const &name = defaultName<FormatQuery>() );
 	~FormatQuery() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferImage::FormatQuery, FormatQueryTypeId, Gaffer::ComputeNode );
 
-	GafferImage::ImagePlug* imagePlug();
-	GafferImage::ImagePlug const* imagePlug() const;
+	GafferImage::ImagePlug *imagePlug();
+	GafferImage::ImagePlug const *imagePlug() const;
 
 	Gaffer::StringPlug *viewPlug();
 	const Gaffer::StringPlug *viewPlug() const;
 
-	GafferImage::FormatPlug* formatPlug();
-	GafferImage::FormatPlug const* formatPlug() const;
+	GafferImage::FormatPlug *formatPlug();
+	GafferImage::FormatPlug const *formatPlug() const;
 
-	Gaffer::V2fPlug* centerPlug();
-	Gaffer::V2fPlug const* centerPlug() const;
-	Gaffer::V2iPlug* sizePlug();
-	Gaffer::V2iPlug const* sizePlug() const;
+	Gaffer::V2fPlug *centerPlug();
+	Gaffer::V2fPlug const *centerPlug() const;
+	Gaffer::V2iPlug *sizePlug();
+	Gaffer::V2iPlug const *sizePlug() const;
 
-	void affects( Gaffer::Plug const* input, AffectedPlugsContainer& outputs ) const override;
+	void affects( Gaffer::Plug const *input, AffectedPlugsContainer &outputs ) const override;
 
 protected:
 
-	void hash( Gaffer::ValuePlug const* output, Gaffer::Context const* context, IECore::MurmurHash& hash ) const override;
-	void compute( Gaffer::ValuePlug* output, Gaffer::Context const* context ) const override;
+	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &hash ) const override;
+	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
 private:
 
@@ -84,4 +84,4 @@ private:
 
 IE_CORE_DECLAREPTR( FormatQuery )
 
-} // GafferImage
+} // namespace GafferImage

@@ -49,45 +49,45 @@ namespace GafferImage
 class GAFFERIMAGE_API ChannelDataProcessor : public ImageProcessor
 {
 
-	public :
+public:
 
-		explicit ChannelDataProcessor( const std::string &name=defaultName<ChannelDataProcessor>(), bool premultiplyPlug = false );
-		~ChannelDataProcessor() override;
+	explicit ChannelDataProcessor( const std::string &name = defaultName<ChannelDataProcessor>(), bool premultiplyPlug = false );
+	~ChannelDataProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ChannelDataProcessor, ChannelDataProcessorTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ChannelDataProcessor, ChannelDataProcessorTypeId, ImageProcessor );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		Gaffer::StringPlug *channelsPlug();
-		const Gaffer::StringPlug *channelsPlug() const;
+	Gaffer::StringPlug *channelsPlug();
+	const Gaffer::StringPlug *channelsPlug() const;
 
-		Gaffer::BoolPlug *processUnpremultipliedPlug();
-		const Gaffer::BoolPlug *processUnpremultipliedPlug() const;
+	Gaffer::BoolPlug *processUnpremultipliedPlug();
+	const Gaffer::BoolPlug *processUnpremultipliedPlug() const;
 
-	protected :
+protected:
 
-		/// This implementation queries whether or not the requested channel is masked by the channelMaskPlug().
-		bool channelEnabled( const std::string &channel ) const override;
+	/// This implementation queries whether or not the requested channel is masked by the channelMaskPlug().
+	bool channelEnabled( const std::string &channel ) const override;
 
-		/// Implemented to initialize the output tile and then call processChannelData()
-		/// All other ImagePlug children are passed through via direct connection to the input values.
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	/// Implemented to initialize the output tile and then call processChannelData()
+	/// All other ImagePlug children are passed through via direct connection to the input values.
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		/// Should be implemented by derived classes to processes each channel's data.
-		/// @param context The context that the channel data is being requested for.
-		/// @param parent The parent image plug that the output is being processed for.
-		/// @param channelIndex An index in the range of 0-3 which indicates whether the channel to be processed is R, G, B or A.
-		///                     It is useful for querying Color4f plugs for the value that coresponds to the channel being processed.
-		/// @param outData The tile where the result of the operation should be written. It is initialized with the coresponding tile data from inPlug() which should be used as the input data.
-		virtual void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channel, IECore::FloatVectorDataPtr outData ) const = 0;
+	/// Should be implemented by derived classes to processes each channel's data.
+	/// @param context The context that the channel data is being requested for.
+	/// @param parent The parent image plug that the output is being processed for.
+	/// @param channelIndex An index in the range of 0-3 which indicates whether the channel to be processed is R, G, B or A.
+	///                     It is useful for querying Color4f plugs for the value that coresponds to the channel being processed.
+	/// @param outData The tile where the result of the operation should be written. It is initialized with the coresponding tile data from inPlug() which should be used as the input data.
+	virtual void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channel, IECore::FloatVectorDataPtr outData ) const = 0;
 
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-	private :
-		bool m_hasUnpremultPlug;
+private:
 
-		static size_t g_firstPlugIndex;
+	bool m_hasUnpremultPlug;
 
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ChannelDataProcessor )

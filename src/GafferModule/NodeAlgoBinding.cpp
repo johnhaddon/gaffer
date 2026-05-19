@@ -50,11 +50,11 @@ struct PythonVisitor
 {
 
 	PythonVisitor( object visitor )
-		:	m_visitor( visitor )
+		: m_visitor( visitor )
 	{
 	}
 
-	bool operator()( Node *node ) const
+	bool operator () ( Node *node ) const
 	{
 		object r = m_visitor( NodePtr( node ) );
 		extract<bool> boolExtractor( r );
@@ -67,10 +67,9 @@ struct PythonVisitor
 		return boolExtractor;
 	}
 
-	private :
+private:
 
-		object m_visitor;
-
+	object m_visitor;
 };
 
 void visitUpstreamWrapper( Node &node, object visitor, NodeAlgo::VisitOrder order )
@@ -92,20 +91,19 @@ struct PythonPredicate
 {
 
 	PythonPredicate( object predicate )
-		:	m_predicate( predicate )
+		: m_predicate( predicate )
 	{
 	}
 
-	bool operator()( const Node *node ) const
+	bool operator () ( const Node *node ) const
 	{
 		object r = m_predicate( NodePtr( const_cast<Node *>( node ) ) );
 		return extract<bool>( r );
 	}
 
-	private :
+private:
 
-		object m_predicate;
-
+	object m_predicate;
 };
 
 NodePtr findUpstreamWrapper( Node &node, object predicate, NodeAlgo::VisitOrder order )
@@ -156,11 +154,11 @@ list findAllConnectedWrapper( Node &node, object predicate, NodeAlgo::VisitOrder
 struct FindByTypeVisitor
 {
 	FindByTypeVisitor( IECore::TypeId type )
-		:	m_type( type )
+		: m_type( type )
 	{
 	}
 
-	bool operator()( Node *node )
+	bool operator () ( Node *node )
 	{
 		if( node->isInstanceOf( m_type ) )
 		{
@@ -171,9 +169,9 @@ struct FindByTypeVisitor
 
 	list result;
 
-	private :
+private:
 
-		const IECore::TypeId m_type;
+	const IECore::TypeId m_type;
 };
 
 list upstreamNodes( Node &node, IECore::TypeId type, NodeAlgo::VisitOrder order )
@@ -209,8 +207,7 @@ void GafferModule::bindNodeAlgo()
 
 	enum_<NodeAlgo::VisitOrder>( "VisitOrder" )
 		.value( "DepthFirst", NodeAlgo::VisitOrder::DepthFirst )
-		.value( "BreadthFirst", NodeAlgo::VisitOrder::BreadthFirst )
-	;
+		.value( "BreadthFirst", NodeAlgo::VisitOrder::BreadthFirst );
 
 	def( "visitUpstream", &visitUpstreamWrapper, ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
 	def( "visitDownstream", &visitDownstreamWrapper, ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
@@ -227,5 +224,4 @@ void GafferModule::bindNodeAlgo()
 	def( "upstreamNodes", &upstreamNodes, ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
 	def( "downstreamNodes", &downstreamNodes, ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
 	def( "connectedNodes", &connectedNodes, ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-
 }

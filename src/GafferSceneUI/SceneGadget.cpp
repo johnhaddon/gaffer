@@ -72,8 +72,7 @@ Box3f sceneBound( const ScenePlug *scene, const PathMatcher *include, const Path
 {
 	tbb::enumerable_thread_specific<Box3f> threadBounds;
 
-	auto f = [&exclude, &threadBounds] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
-
+	auto f = [&exclude, &threadBounds]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
 		const unsigned m = exclude ? exclude->match( path ) : (unsigned)PathMatcher::NoMatch;
 		if( m & PathMatcher::ExactMatch )
 		{
@@ -99,7 +98,7 @@ Box3f sceneBound( const ScenePlug *scene, const PathMatcher *include, const Path
 	};
 
 	tbb::this_task_arena::isolate(
-		[&] () {
+		[&]() {
 			if( include )
 			{
 				SceneAlgo::filteredParallelTraverse( scene, *include, f );
@@ -112,7 +111,7 @@ Box3f sceneBound( const ScenePlug *scene, const PathMatcher *include, const Path
 	);
 
 	return threadBounds.combine(
-		[] ( const Box3f b1, const Box3f b2 ) {
+		[]( const Box3f b1, const Box3f b2 ) {
 			Box3f bc;
 			bc.extendBy( b1 );
 			bc.extendBy( b2 );
@@ -152,7 +151,7 @@ PathMatcher findTypedObjects( const ScenePlug *scene, const PathMatcher &paths, 
 
 	vector<IECore::TypeId> typeIds = typeIdsFromTypeNames( typeNames );
 
-	auto f = [&typeIds, &threadResults] ( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
+	auto f = [&typeIds, &threadResults]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
 		if( isObjectInstanceOf( scene, typeIds ) )
 		{
 			threadResults.local().addPath( path );
@@ -163,7 +162,7 @@ PathMatcher findTypedObjects( const ScenePlug *scene, const PathMatcher &paths, 
 	SceneAlgo::filteredParallelTraverse( scene, paths, f );
 
 	return threadResults.combine(
-		[] ( const PathMatcher &a, const PathMatcher &b ) {
+		[]( const PathMatcher &a, const PathMatcher &b ) {
 			PathMatcher c = a;
 			c.addPaths( b );
 			return c;
@@ -187,19 +186,15 @@ const IECore::StringDataPtr g_displayColorSpace = new StringData( "display" );
 } // namespace
 
 SceneGadget::SceneGadget()
-	:	Gadget( defaultName<SceneGadget>() ),
-		m_paused( false ),
-		m_updateErrored( false ),
-		m_renderRequestPending( false ),
-		m_layer( Gadget::Layer::Main )
+	: Gadget( defaultName<SceneGadget>() ),
+	  m_paused( false ),
+	  m_updateErrored( false ),
+	  m_renderRequestPending( false ),
+	  m_layer( Gadget::Layer::Main )
 {
 	using Option = CompoundObject::ObjectMap::value_type;
 	CompoundObjectPtr openGLOptions = new CompoundObject;
-	openGLOptions->members().insert( {
-		Option( "gl:primitive:wireframeColor", new Color4fData( Color4f( 0.2f, 0.2f, 0.2f, 1.0f ) ) ),
-		Option( "gl:primitive:pointColor", new Color4fData( Color4f( 0.9f, 0.9f, 0.9f, 1.0f ) ) ),
-		Option( "gl:primitive:pointWidth", new FloatData( 2.0f ) )
-	} );
+	openGLOptions->members().insert( { Option( "gl:primitive:wireframeColor", new Color4fData( Color4f( 0.2f, 0.2f, 0.2f, 1.0f ) ) ), Option( "gl:primitive:pointColor", new Color4fData( Color4f( 0.9f, 0.9f, 0.9f, 1.0f ) ) ), Option( "gl:primitive:pointWidth", new FloatData( 2.0f ) ) } );
 	m_openGLOptions = openGLOptions;
 
 	visibilityChangedSignal().connect( boost::bind( &SceneGadget::visibilityChanged, this ) );
@@ -686,7 +681,7 @@ std::optional<V3f> SceneGadget::normalAt( const IECore::LineSegment3f &lineInGad
 			V2f( 0, -spread ),
 			V2f( spread, 0 ),
 			V2f( 0, spread ),
-			V2f( -spread, 0 )  // wrap back to left for final comparison
+			V2f( -spread, 0 ) // wrap back to left for final comparison
 		};
 
 		for( const auto &offset : offsetList )
@@ -924,8 +919,7 @@ void SceneGadget::updateRenderer()
 		return;
 	}
 
-	auto progressCallback = [this] ( BackgroundTask::Status progress ) {
-
+	auto progressCallback = [this]( BackgroundTask::Status progress ) {
 		if( !refCount() )
 		{
 			return;
@@ -945,8 +939,7 @@ void SceneGadget::updateRenderer()
 		bool shouldRequestRender = !m_renderRequestPending.exchange( true );
 		bool shouldEmitStateChange =
 			progress == BackgroundTask::Completed ||
-			progress == BackgroundTask::Errored
-		;
+			progress == BackgroundTask::Errored;
 
 		if( shouldRequestRender || shouldEmitStateChange )
 		{
@@ -970,7 +963,6 @@ void SceneGadget::updateRenderer()
 				}
 			);
 		}
-
 	};
 
 	m_renderer->pause();

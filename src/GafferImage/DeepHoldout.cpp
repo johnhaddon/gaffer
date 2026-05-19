@@ -53,16 +53,16 @@ using namespace GafferImage;
 
 namespace
 {
-	std::string g_premultipliedAverageZName( "__premultipliedAverageZ" );
-	std::string g_holdoutAlphaName( "__holdoutAlpha" );
-}
+std::string g_premultipliedAverageZName( "__premultipliedAverageZ" );
+std::string g_holdoutAlphaName( "__holdoutAlpha" );
+} // namespace
 
 GAFFER_NODE_DEFINE_TYPE( DeepHoldout );
 
 size_t DeepHoldout::g_firstPlugIndex = 0;
 
 DeepHoldout::DeepHoldout( const std::string &name )
-	:	ImageProcessor( name )
+	: ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new GafferImage::ImagePlug( "holdout" ) );
@@ -100,7 +100,6 @@ DeepHoldout::DeepHoldout( const std::string &name )
 	outPlug()->dataWindowPlug()->setInput( inPlug()->dataWindowPlug() );
 	outPlug()->formatPlug()->setInput( inPlug()->formatPlug() );
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
-
 }
 
 DeepHoldout::~DeepHoldout()

@@ -67,7 +67,7 @@ AtNode *convertStatic( const IECoreScene::PointsPrimitive *points, AtUniverse *u
 	const StringData *t = points->variableData<StringData>( "type", PrimitiveVariable::Constant );
 	if( t )
 	{
-		if( t->readable() == "particle" || t->readable()=="disk" )
+		if( t->readable() == "particle" || t->readable() == "disk" )
 		{
 			// default type is disk - no need to do anything
 		}
@@ -91,7 +91,6 @@ AtNode *convertStatic( const IECoreScene::PointsPrimitive *points, AtUniverse *u
 	ShapeAlgo::convertPrimitiveVariables( points, result, ignore, messageContext );
 
 	return result;
-
 }
 
 AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )

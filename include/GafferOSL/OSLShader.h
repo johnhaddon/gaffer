@@ -49,49 +49,48 @@ IE_CORE_FORWARDDECLARE( ShadingEngine )
 class GAFFEROSL_API OSLShader : public GafferScene::Shader
 {
 
-	public :
+public:
 
-		explicit OSLShader( const std::string &name=defaultName<OSLShader>() );
-		~OSLShader() override;
+	explicit OSLShader( const std::string &name = defaultName<OSLShader>() );
+	~OSLShader() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLShader, OSLShaderTypeId, GafferScene::Shader );
+	GAFFER_NODE_DECLARE_TYPE( GafferOSL::OSLShader, OSLShaderTypeId, GafferScene::Shader );
 
-		/// Returns a plug based on the "correspondingInput" metadata of each output plug
-		Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
-		const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
+	/// Returns a plug based on the "correspondingInput" metadata of each output plug
+	Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) override;
+	const Gaffer::Plug *correspondingInput( const Gaffer::Plug *output ) const override;
 
-		/// \undoable.
-		void loadShader( const std::string &shaderName, bool keepExistingValues=false ) override;
+	/// \undoable.
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-		void reloadShader() override;
+	void reloadShader() override;
 
-		ConstShadingEnginePtr shadingEngine( const IECore::CompoundObject *substitutions = nullptr ) const;
+	ConstShadingEnginePtr shadingEngine( const IECore::CompoundObject *substitutions = nullptr ) const;
 
-		/// Returns an OSL metadata item from the shader.
-		const IECore::Data *shaderMetadata( const IECore::InternedString &name ) const;
-		/// Returns an OSL metadata item from the specified shader parameter.
-		const IECore::Data *parameterMetadata( const Gaffer::Plug *plug, const IECore::InternedString &name ) const;
-		/// Evaluates an OSL expression using the current values of the shader parameters.
-		bool evaluateActivatorExpression( const std::string &expression ) const;
+	/// Returns an OSL metadata item from the shader.
+	const IECore::Data *shaderMetadata( const IECore::InternedString &name ) const;
+	/// Returns an OSL metadata item from the specified shader parameter.
+	const IECore::Data *parameterMetadata( const Gaffer::Plug *plug, const IECore::InternedString &name ) const;
+	/// Evaluates an OSL expression using the current values of the shader parameters.
+	bool evaluateActivatorExpression( const std::string &expression ) const;
 
-		/// Allows other renderer shaders to connect to OSL shaders by registering them.
-		/// Returns true on success, false if already added.
-		static bool registerCompatibleShader( const IECore::InternedString shaderType );
+	/// Allows other renderer shaders to connect to OSL shaders by registering them.
+	/// Returns true on success, false if already added.
+	static bool registerCompatibleShader( const IECore::InternedString shaderType );
 
 
-	protected :
+protected:
 
-		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-	private :
+private:
 
-		// Shader metadata is stored in a "shader" member of the result and
-		// parameter metadata is stored indexed by name inside a
-		// "parameter" member of the result.
-		const IECore::CompoundData *metadata() const;
+	// Shader metadata is stored in a "shader" member of the result and
+	// parameter metadata is stored indexed by name inside a
+	// "parameter" member of the result.
+	const IECore::CompoundData *metadata() const;
 
-		mutable IECore::ConstCompoundDataPtr m_metadata;
-
+	mutable IECore::ConstCompoundDataPtr m_metadata;
 };
 
 IE_CORE_DECLAREPTR( OSLShader )

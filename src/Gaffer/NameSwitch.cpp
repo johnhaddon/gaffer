@@ -48,7 +48,7 @@ size_t NameSwitch::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( NameSwitch );
 
 NameSwitch::NameSwitch( const std::string &name )
-	:	Switch( name )
+	: Switch( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -131,10 +131,8 @@ void NameSwitch::affects( const Plug *input, DependencyNode::AffectedPlugsContai
 	auto nameValuePlug = input->parent<NameValuePlug>();
 	if(
 		input == selectorPlug() ||
-		(
-			nameValuePlug && nameValuePlug->parent() == inPlugs() &&
-			( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() )
-		)
+		( nameValuePlug && nameValuePlug->parent() == inPlugs() &&
+		  ( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() ) )
 	)
 	{
 		outputs.push_back( outIndexPlug() );

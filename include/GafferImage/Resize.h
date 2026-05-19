@@ -55,73 +55,72 @@ IE_CORE_FORWARDDECLARE( Resample )
 
 class GAFFERIMAGE_API Resize : public ImageProcessor
 {
-	public :
+public:
 
-		explicit Resize( const std::string &name=defaultName<Resize>() );
-		~Resize() override;
+	explicit Resize( const std::string &name = defaultName<Resize>() );
+	~Resize() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Resize, ResizeTypeId, ImageProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Resize, ResizeTypeId, ImageProcessor );
 
-		enum FitMode
-		{
-			Horizontal,
-			Vertical,
-			Fit,
-			Fill,
-			Distort
-		};
+	enum FitMode
+	{
+		Horizontal,
+		Vertical,
+		Fit,
+		Fill,
+		Distort
+	};
 
-		GafferImage::FormatPlug *formatPlug();
-		const GafferImage::FormatPlug *formatPlug() const;
+	GafferImage::FormatPlug *formatPlug();
+	const GafferImage::FormatPlug *formatPlug() const;
 
-		Gaffer::IntPlug *fitModePlug();
-		const Gaffer::IntPlug *fitModePlug() const;
+	Gaffer::IntPlug *fitModePlug();
+	const Gaffer::IntPlug *fitModePlug() const;
 
-		Gaffer::StringPlug *filterPlug();
-		const Gaffer::StringPlug *filterPlug() const;
+	Gaffer::StringPlug *filterPlug();
+	const Gaffer::StringPlug *filterPlug() const;
 
-		Gaffer::BoolPlug *filterDeepPlug();
-		const Gaffer::BoolPlug *filterDeepPlug() const;
+	Gaffer::BoolPlug *filterDeepPlug();
+	const Gaffer::BoolPlug *filterDeepPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-		void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		Gaffer::M33fPlug *matrixPlug();
-		const Gaffer::M33fPlug *matrixPlug() const;
+	Gaffer::M33fPlug *matrixPlug();
+	const Gaffer::M33fPlug *matrixPlug() const;
 
-		// We use an internal Resample node to do all the hard
-		// work of filtering the image into a new data window,
-		// and receive the result of that through this plug.
-		ImagePlug *resampledInPlug();
-		const ImagePlug *resampledInPlug() const;
+	// We use an internal Resample node to do all the hard
+	// work of filtering the image into a new data window,
+	// and receive the result of that through this plug.
+	ImagePlug *resampledInPlug();
+	const ImagePlug *resampledInPlug() const;
 
-		// When we're actually changing the format, we get our
-		// output from resampledInPlug(), but when the format
-		// happens to be the same as the input, we simply pass
-		// through inPlug(). This function just returns the
-		// appropriate plug.
-		const ImagePlug *source() const;
+	// When we're actually changing the format, we get our
+	// output from resampledInPlug(), but when the format
+	// happens to be the same as the input, we simply pass
+	// through inPlug(). This function just returns the
+	// appropriate plug.
+	const ImagePlug *source() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Resize )

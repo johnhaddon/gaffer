@@ -44,13 +44,12 @@ namespace Gaffer
 class GAFFER_API BoxIn : public BoxIO
 {
 
-	public :
+public:
 
-		explicit BoxIn( const std::string &name=defaultName<BoxIn>() );
-		~BoxIn() override;
+	explicit BoxIn( const std::string &name = defaultName<BoxIn>() );
+	~BoxIn() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::BoxIn, BoxInTypeId, BoxIO );
-
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::BoxIn, BoxInTypeId, BoxIO );
 };
 
 IE_CORE_DECLAREPTR( BoxIn )

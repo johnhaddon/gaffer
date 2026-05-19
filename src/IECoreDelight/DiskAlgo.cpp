@@ -55,14 +55,7 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const DiskPrimitive *>
 	ParameterList parameters;
 
 	const V3f p( 0, 0, samples[0]->getZ() );
-	parameters.add( {
-		"P",
-		&p,
-		NSITypePoint,
-		0,
-		1,
-		NSIParamPerVertex
-	} );
+	parameters.add( { "P", &p, NSITypePoint, 0, 1, NSIParamPerVertex } );
 
 	// Technically speaking, I think the normal should probably
 	// point in +ve Z (to be facing a default camera which is facing
@@ -70,24 +63,10 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const DiskPrimitive *>
 	// be used as the geometry for spotlights, in which case 3Delight
 	// seems to want it to point in -ve Z.
 	const V3f n( 0, 0, -1 );
-	parameters.add( {
-		"N",
-		&n,
-		NSITypeNormal,
-		0,
-		1,
-		NSIParamPerVertex
-	} );
+	parameters.add( { "N", &n, NSITypeNormal, 0, 1, NSIParamPerVertex } );
 
 	const float width = samples[0]->getRadius() * 2;
-	parameters.add( {
-		"width",
-		&width,
-		NSITypeFloat,
-		0,
-		1,
-		NSIParamPerVertex
-	} );
+	parameters.add( { "width", &width, NSITypeFloat, 0, 1, NSIParamPerVertex } );
 
 	NSISetAttribute( context, handle, parameters.size(), parameters.data() );
 	return true;

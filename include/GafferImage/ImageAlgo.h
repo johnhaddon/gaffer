@@ -135,7 +135,7 @@ enum TileOrder
 };
 
 // Call the functor in parallel, once per tile
-template <class TileFunctor>
+template<class TileFunctor>
 void parallelProcessTiles(
 	const ImagePlug *imagePlug,
 	TileFunctor &&functor, // Signature : void functor( const ImagePlug *imagePlug, const V2i &tileOrigin )
@@ -144,7 +144,7 @@ void parallelProcessTiles(
 );
 
 // Call the functor in parallel, once per tile per channel
-template <class TileFunctor>
+template<class TileFunctor>
 void parallelProcessTiles(
 	const ImagePlug *imagePlug,
 	const std::vector<std::string> &channelNames,
@@ -155,7 +155,7 @@ void parallelProcessTiles(
 
 // Process all tiles in parallel using TileFunctor, passing the
 // results in series to GatherFunctor.
-template <class TileFunctor, class GatherFunctor>
+template<class TileFunctor, class GatherFunctor>
 void parallelGatherTiles(
 	const ImagePlug *image,
 	const TileFunctor &tileFunctor, // Signature : T tileFunctor( const ImagePlug *imagePlug, const V2i &tileOrigin )
@@ -166,7 +166,7 @@ void parallelGatherTiles(
 
 // Process all tiles in parallel using TileFunctor, passing the
 // results in series to GatherFunctor.
-template <class TileFunctor, class GatherFunctor>
+template<class TileFunctor, class GatherFunctor>
 void parallelGatherTiles(
 	const ImagePlug *image,
 	const std::vector<std::string> &channelNames,
@@ -204,14 +204,14 @@ GAFFERIMAGE_API IECore::ConstCompoundObjectPtr tiles( const ImagePlug *imagePlug
 /// ==============================
 
 /// If the provided sample offsets do not match, raise an exception that indicates where the mismatch occured.
-GAFFERIMAGE_API void throwIfSampleOffsetsMismatch( const IECore::IntVectorData* sampleOffsetsA, const IECore::IntVectorData* sampleOffsetsB, const Imath::V2i &tileOrigin, const std::string &message );
+GAFFERIMAGE_API void throwIfSampleOffsetsMismatch( const IECore::IntVectorData *sampleOffsetsA, const IECore::IntVectorData *sampleOffsetsB, const Imath::V2i &tileOrigin, const std::string &message );
 
 
 /// Multi-View Utils
 /// ==============================
 
 // Return true if the current view in the context is one of the viewNames, or is covered by a default view
-GAFFERIMAGE_API bool viewIsValid( const Gaffer::Context *context, const std::vector< std::string > &viewNames );
+GAFFERIMAGE_API bool viewIsValid( const Gaffer::Context *context, const std::vector<std::string> &viewNames );
 
 } // namespace ImageAlgo
 

@@ -41,7 +41,7 @@ using namespace GafferUI;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( IndividualContainer );
 
 IndividualContainer::IndividualContainer( GadgetPtr child )
-	:	ContainerGadget( defaultName<IndividualContainer>() )
+	: ContainerGadget( defaultName<IndividualContainer>() )
 {
 	setChild( child );
 }
@@ -56,7 +56,7 @@ bool IndividualContainer::acceptsChild( const Gaffer::GraphComponent *potentialC
 	{
 		return false;
 	}
-	return children().size()==0;
+	return children().size() == 0;
 }
 
 void IndividualContainer::setChild( GadgetPtr child )

@@ -54,77 +54,76 @@ namespace GafferImage
 class GAFFERIMAGE_API Text : public Shape
 {
 
-	public :
+public:
 
-		explicit Text( const std::string &name=defaultName<Text>() );
-		~Text() override;
+	explicit Text( const std::string &name = defaultName<Text>() );
+	~Text() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Text, TextTypeId, Shape );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Text, TextTypeId, Shape );
 
-		enum HorizontalAlignment
-		{
-			Left,
-			Right,
-			HorizontalCenter
-		};
+	enum HorizontalAlignment
+	{
+		Left,
+		Right,
+		HorizontalCenter
+	};
 
-		enum VerticalAlignment
-		{
-			Bottom,
-			Top,
-			VerticalCenter
-		};
+	enum VerticalAlignment
+	{
+		Bottom,
+		Top,
+		VerticalCenter
+	};
 
-		Gaffer::StringPlug *textPlug();
-		const Gaffer::StringPlug *textPlug() const;
+	Gaffer::StringPlug *textPlug();
+	const Gaffer::StringPlug *textPlug() const;
 
-		Gaffer::StringPlug *fontPlug();
-		const Gaffer::StringPlug *fontPlug() const;
+	Gaffer::StringPlug *fontPlug();
+	const Gaffer::StringPlug *fontPlug() const;
 
-		Gaffer::V2iPlug *sizePlug();
-		const Gaffer::V2iPlug *sizePlug() const;
+	Gaffer::V2iPlug *sizePlug();
+	const Gaffer::V2iPlug *sizePlug() const;
 
-		Gaffer::Box2iPlug *areaPlug();
-		const Gaffer::Box2iPlug *areaPlug() const;
+	Gaffer::Box2iPlug *areaPlug();
+	const Gaffer::Box2iPlug *areaPlug() const;
 
-		Gaffer::IntPlug *horizontalAlignmentPlug();
-		const Gaffer::IntPlug *horizontalAlignmentPlug() const;
+	Gaffer::IntPlug *horizontalAlignmentPlug();
+	const Gaffer::IntPlug *horizontalAlignmentPlug() const;
 
-		Gaffer::IntPlug *verticalAlignmentPlug();
-		const Gaffer::IntPlug *verticalAlignmentPlug() const;
+	Gaffer::IntPlug *verticalAlignmentPlug();
+	const Gaffer::IntPlug *verticalAlignmentPlug() const;
 
-		Gaffer::Transform2DPlug *transformPlug();
-		const Gaffer::Transform2DPlug *transformPlug() const;
+	Gaffer::Transform2DPlug *transformPlug();
+	const Gaffer::Transform2DPlug *transformPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		bool affectsLayout( const Gaffer::Plug *input ) const;
-		void hashLayout( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-		IECore::ConstCompoundObjectPtr computeLayout( const Gaffer::Context *context ) const;
+	bool affectsLayout( const Gaffer::Plug *input ) const;
+	void hashLayout( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	IECore::ConstCompoundObjectPtr computeLayout( const Gaffer::Context *context ) const;
 
-		bool affectsShapeDataWindow( const Gaffer::Plug *input ) const override;
-		void hashShapeDataWindow( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		Imath::Box2i computeShapeDataWindow( const Gaffer::Context *context ) const override;
+	bool affectsShapeDataWindow( const Gaffer::Plug *input ) const override;
+	void hashShapeDataWindow( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	Imath::Box2i computeShapeDataWindow( const Gaffer::Context *context ) const override;
 
-		bool affectsShapeChannelData( const Gaffer::Plug *input ) const override;
-		void hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstFloatVectorDataPtr computeShapeChannelData(  const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
+	bool affectsShapeChannelData( const Gaffer::Plug *input ) const override;
+	void hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstFloatVectorDataPtr computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		// We compute out layout once and cache it on this plug,
-		// for subsequent use in computing the data window and
-		// channel data.
-		Gaffer::CompoundObjectPlug *layoutPlug();
-		const Gaffer::CompoundObjectPlug *layoutPlug() const;
+	// We compute out layout once and cache it on this plug,
+	// for subsequent use in computing the data window and
+	// channel data.
+	Gaffer::CompoundObjectPlug *layoutPlug();
+	const Gaffer::CompoundObjectPlug *layoutPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Text )

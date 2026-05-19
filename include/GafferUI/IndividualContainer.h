@@ -47,26 +47,25 @@ namespace GafferUI
 class GAFFERUI_API IndividualContainer : public ContainerGadget
 {
 
-	public :
+public:
 
-		explicit IndividualContainer( GadgetPtr child=nullptr );
-		~IndividualContainer() override;
+	explicit IndividualContainer( GadgetPtr child = nullptr );
+	~IndividualContainer() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::IndividualContainer, IndividualContainerTypeId, ContainerGadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::IndividualContainer, IndividualContainerTypeId, ContainerGadget );
 
-		/// Accepts the child only if there are currently no children.
-		bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
+	/// Accepts the child only if there are currently no children.
+	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
 
-		/// Removes the current child if there is one, and replaces it
-		/// with the specified gadget.
-		void setChild( GadgetPtr child );
-		/// Returns the child, performing a runTimeCast to T.
-		template<typename T=Gadget>
-		T *getChild();
-		/// Returns the child, performing a runTimeCast to T.
-		template<typename T=Gadget>
-		const T *getChild() const;
-
+	/// Removes the current child if there is one, and replaces it
+	/// with the specified gadget.
+	void setChild( GadgetPtr child );
+	/// Returns the child, performing a runTimeCast to T.
+	template<typename T = Gadget>
+	T *getChild();
+	/// Returns the child, performing a runTimeCast to T.
+	template<typename T = Gadget>
+	const T *getChild() const;
 };
 
 IE_CORE_DECLAREPTR( IndividualContainer );

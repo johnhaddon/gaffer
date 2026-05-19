@@ -49,7 +49,7 @@ namespace IECoreCycles
 {
 
 IEDisplayOutputDriver::IEDisplayOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers )
-	:	m_dataWindow( dataWindow )
+	: m_dataWindow( dataWindow )
 {
 	const ccl::NodeEnum &typeEnum = *ccl::Pass::get_type_enum();
 
@@ -159,7 +159,7 @@ void IEDisplayOutputDriver::write_render_tile( const Tile &tile )
 	{
 		if( !tile.get_pass_pixels( layer.name, layer.numChannels, &pixels[0] ) )
 		{
-			memset( &pixels[0], 0, pixels.size() * sizeof(float) );
+			memset( &pixels[0], 0, pixels.size() * sizeof( float ) );
 		}
 
 		if( layer.name == "id" )

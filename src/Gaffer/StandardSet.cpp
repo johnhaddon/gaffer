@@ -43,7 +43,7 @@ using namespace boost::placeholders;
 using namespace Gaffer;
 
 StandardSet::StandardSet( bool removeOrphans )
-	:	m_removeOrphans( removeOrphans )
+	: m_removeOrphans( removeOrphans )
 {
 }
 
@@ -162,7 +162,7 @@ bool StandardSet::contains( const Member *object ) const
 	// const cast is ugly but safe and it allows us to present the
 	// appropriate public interface (you should be able to query membership
 	// without non-const access to an object).
-	return m_members.find( const_cast<IECore::RunTimeTyped *>( object ) )!=m_members.end();
+	return m_members.find( const_cast<IECore::RunTimeTyped *>( object ) ) != m_members.end();
 }
 
 Set::Member *StandardSet::member( size_t index )

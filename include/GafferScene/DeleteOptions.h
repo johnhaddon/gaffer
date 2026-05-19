@@ -44,17 +44,16 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteOptions : public DeleteGlobals
 {
 
-	public :
+public:
 
-		explicit DeleteOptions( const std::string &name=defaultName<DeleteOptions>() );
-		~DeleteOptions() override;
+	explicit DeleteOptions( const std::string &name = defaultName<DeleteOptions>() );
+	~DeleteOptions() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteOptions, DeleteOptionsTypeId, DeleteGlobals );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteOptions, DeleteOptionsTypeId, DeleteGlobals );
 
-	protected :
+protected:
 
-		std::string namePrefix() const override;
-
+	std::string namePrefix() const override;
 };
 
 IE_CORE_DECLAREPTR( DeleteOptions );

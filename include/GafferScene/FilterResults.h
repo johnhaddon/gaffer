@@ -52,45 +52,44 @@ IE_CORE_FORWARDDECLARE( FilterPlug )
 class GAFFERSCENE_API FilterResults : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit FilterResults( const std::string &name=defaultName<FilterResults>() );
-		~FilterResults() override;
+	explicit FilterResults( const std::string &name = defaultName<FilterResults>() );
+	~FilterResults() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::FilterResults, FilterResultsTypeId, ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::FilterResults, FilterResultsTypeId, ComputeNode );
 
-		ScenePlug *scenePlug();
-		const ScenePlug *scenePlug() const;
+	ScenePlug *scenePlug();
+	const ScenePlug *scenePlug() const;
 
-		FilterPlug *filterPlug();
-		const FilterPlug *filterPlug() const;
+	FilterPlug *filterPlug();
+	const FilterPlug *filterPlug() const;
 
-		Gaffer::StringPlug *rootPlug();
-		const Gaffer::StringPlug *rootPlug() const;
+	Gaffer::StringPlug *rootPlug();
+	const Gaffer::StringPlug *rootPlug() const;
 
-		Gaffer::PathMatcherDataPlug *outPlug();
-		const Gaffer::PathMatcherDataPlug *outPlug() const;
+	Gaffer::PathMatcherDataPlug *outPlug();
+	const Gaffer::PathMatcherDataPlug *outPlug() const;
 
-		Gaffer::StringVectorDataPlug *outStringsPlug();
-		const Gaffer::StringVectorDataPlug *outStringsPlug() const;
+	Gaffer::StringVectorDataPlug *outStringsPlug();
+	const Gaffer::StringVectorDataPlug *outStringsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
-		Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		Gaffer::PathMatcherDataPlug *internalOutPlug();
-		const Gaffer::PathMatcherDataPlug *internalOutPlug() const;
+	Gaffer::PathMatcherDataPlug *internalOutPlug();
+	const Gaffer::PathMatcherDataPlug *internalOutPlug() const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( FilterResults )

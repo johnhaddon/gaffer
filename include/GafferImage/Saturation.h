@@ -45,25 +45,25 @@ namespace GafferImage
 class GAFFERIMAGE_API Saturation : public ColorProcessor
 {
 
-	public :
+public:
 
-		explicit Saturation( const std::string &name=defaultName<Saturation>() );
-		~Saturation() override;
+	explicit Saturation( const std::string &name = defaultName<Saturation>() );
+	~Saturation() override;
 
-		Gaffer::FloatPlug *saturationPlug();
-		const Gaffer::FloatPlug *saturationPlug() const;
+	Gaffer::FloatPlug *saturationPlug();
+	const Gaffer::FloatPlug *saturationPlug() const;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Saturation, SaturationTypeId, ColorProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Saturation, SaturationTypeId, ColorProcessor );
 
-	protected :
+protected:
 
-		bool affectsColorProcessor( const Gaffer::Plug *input ) const override;
-		void hashColorProcessor( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		ColorProcessorFunction colorProcessor( const Gaffer::Context *context ) const override;
+	bool affectsColorProcessor( const Gaffer::Plug *input ) const override;
+	void hashColorProcessor( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	ColorProcessorFunction colorProcessor( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Saturation )

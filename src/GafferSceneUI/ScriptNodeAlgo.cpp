@@ -89,7 +89,7 @@ ChangedSignals &changedSignals( ScriptNode *script )
 	// be destroyed during static destruction (because Python has already
 	// shut down at that point).
 	static std::unordered_map<const ScriptNode *, ChangedSignals> *g_signals = new std::unordered_map<const ScriptNode *, ChangedSignals>;
-	ChangedSignals &result = (*g_signals)[script];
+	ChangedSignals &result = ( *g_signals )[script];
 	if( !result.connection.connected() )
 	{
 		// Either we just made the signals, or an old ScriptNode
@@ -215,12 +215,13 @@ void ScriptNodeAlgo::setSelectedPaths( Gaffer::ScriptNode *script, const IECore:
 	else
 	{
 		std::vector<IECore::InternedString> lastSelectedPath = getLastSelectedPath( script );
-		if( !(paths.match( lastSelectedPath ) & PathMatcher::ExactMatch) )
+		if( !( paths.match( lastSelectedPath ) & PathMatcher::ExactMatch ) )
 		{
 			const PathMatcher::Iterator it = paths.begin();
 			Metadata::registerValue( script, g_lastSelectedPathName, new InternedStringVectorData( *it ), /* persistent = */ false );
 		}
-	}}
+	}
+}
 
 IECore::PathMatcher ScriptNodeAlgo::getSelectedPaths( const Gaffer::ScriptNode *script )
 {

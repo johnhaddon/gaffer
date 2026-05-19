@@ -93,138 +93,136 @@ class TaskParallel;
 /// which yield the same Key must also yield the same results from the GetterFunction.
 ///
 /// \ingroup utilityGroup
-template<typename Key, typename Value, template <typename> class Policy=LRUCachePolicy::Parallel, typename GetterKey=Key>
+template<typename Key, typename Value, template<typename> class Policy = LRUCachePolicy::Parallel, typename GetterKey = Key>
 class LRUCache : private boost::noncopyable
 {
-	public:
+public:
 
-		using Cost = size_t;
-		using KeyType = Key;
+	using Cost = size_t;
+	using KeyType = Key;
 
-		/// The GetterFunction is responsible for computing the value and cost for a cache entry
-		/// when given the key. It should throw a descriptive exception if it can't get the data for
-		/// any reason. Cancellation support requires that `IECore::Canceller::check( canceller )`
-		/// is called periodically.
-		using GetterFunction = boost::function<Value ( const GetterKey &key, Cost &cost, const IECore::Canceller *canceller )>;
-		/// The optional RemovalCallback is called whenever an item is discarded from the cache.
-		using RemovalCallback = boost::function<void ( const Key &key, const Value &data )>;
+	/// The GetterFunction is responsible for computing the value and cost for a cache entry
+	/// when given the key. It should throw a descriptive exception if it can't get the data for
+	/// any reason. Cancellation support requires that `IECore::Canceller::check( canceller )`
+	/// is called periodically.
+	using GetterFunction = boost::function<Value( const GetterKey &key, Cost &cost, const IECore::Canceller *canceller )>;
+	/// The optional RemovalCallback is called whenever an item is discarded from the cache.
+	using RemovalCallback = boost::function<void( const Key &key, const Value &data )>;
 
-		LRUCache( GetterFunction getter, Cost maxCost, RemovalCallback removalCallback = RemovalCallback(), bool cacheErrors = true );
-		virtual ~LRUCache();
+	LRUCache( GetterFunction getter, Cost maxCost, RemovalCallback removalCallback = RemovalCallback(), bool cacheErrors = true );
+	virtual ~LRUCache();
 
-		/// Retrieves an item from the cache, computing it if necessary.
-		/// The item is returned by value, as it may be removed from the
-		/// cache at any time by operations on another thread, or may not
-		/// even be stored in the cache if it exceeds the maximum cost.
-		/// Throws if the item can not be computed. Throws `IECore::Cancelled`
-		/// if the operation was successfully cancelled via the `canceller`
-		/// argument.
-		Value get( const GetterKey &key, const IECore::Canceller *canceller = nullptr );
+	/// Retrieves an item from the cache, computing it if necessary.
+	/// The item is returned by value, as it may be removed from the
+	/// cache at any time by operations on another thread, or may not
+	/// even be stored in the cache if it exceeds the maximum cost.
+	/// Throws if the item can not be computed. Throws `IECore::Cancelled`
+	/// if the operation was successfully cancelled via the `canceller`
+	/// argument.
+	Value get( const GetterKey &key, const IECore::Canceller *canceller = nullptr );
 
-		/// Retrieves an item from the cache if it has been computed or set
-		/// previously. Throws if a previous call to `get()` failed.
-		std::optional<Value> getIfCached( const Key &key );
+	/// Retrieves an item from the cache if it has been computed or set
+	/// previously. Throws if a previous call to `get()` failed.
+	std::optional<Value> getIfCached( const Key &key );
 
-		/// Adds an item to the cache directly, bypassing the GetterFunction.
-		/// Returns true for success and false on failure - failure can occur
-		/// if the cost exceeds the maximum cost for the cache. Note that even
-		/// when true is returned, the item may be removed from the cache by a
-		/// subsequent (or concurrent) operation.
-		bool set( const Key &key, const Value &value, Cost cost );
-		/// As above, but only if the item is not cached already. This avoids
-		/// calling a potentially expensive cost function in the case that the
-		/// item is cached already.
-		/// \todo Ideally we wouldn't need the cost calculation to be duplicated
-		/// between CostFunction and GetterFunction.
-		template<typename CostFunction>
-		bool setIfUncached( const Key &key, const Value &value, CostFunction &&costFunction );
+	/// Adds an item to the cache directly, bypassing the GetterFunction.
+	/// Returns true for success and false on failure - failure can occur
+	/// if the cost exceeds the maximum cost for the cache. Note that even
+	/// when true is returned, the item may be removed from the cache by a
+	/// subsequent (or concurrent) operation.
+	bool set( const Key &key, const Value &value, Cost cost );
+	/// As above, but only if the item is not cached already. This avoids
+	/// calling a potentially expensive cost function in the case that the
+	/// item is cached already.
+	/// \todo Ideally we wouldn't need the cost calculation to be duplicated
+	/// between CostFunction and GetterFunction.
+	template<typename CostFunction>
+	bool setIfUncached( const Key &key, const Value &value, CostFunction &&costFunction );
 
-		/// Returns true if the object is in the cache. Note that the
-		/// return value may be invalidated immediately by operations performed
-		/// by another thread.
-		bool cached( const Key &key ) const;
+	/// Returns true if the object is in the cache. Note that the
+	/// return value may be invalidated immediately by operations performed
+	/// by another thread.
+	bool cached( const Key &key ) const;
 
-		/// Erases the item if it was cached. Returns true if it was cached
-		/// and false if it wasn't cached and therefore wasn't removed.
-		bool erase( const Key &key );
+	/// Erases the item if it was cached. Returns true if it was cached
+	/// and false if it wasn't cached and therefore wasn't removed.
+	bool erase( const Key &key );
 
-		/// Erases all cached items. Note that when this returns, the cache
-		/// may have been repopulated with items if other threads have called
-		/// set() or get() concurrently.
-		void clear();
+	/// Erases all cached items. Note that when this returns, the cache
+	/// may have been repopulated with items if other threads have called
+	/// set() or get() concurrently.
+	void clear();
 
-		/// Sets the maximum cost of the items held in the cache, discarding any
-		/// items if necessary to meet the new limit.
-		void setMaxCost( Cost maxCost );
+	/// Sets the maximum cost of the items held in the cache, discarding any
+	/// items if necessary to meet the new limit.
+	void setMaxCost( Cost maxCost );
 
-		/// Returns the maximum cost.
-		Cost getMaxCost() const;
+	/// Returns the maximum cost.
+	Cost getMaxCost() const;
 
-		/// Returns the current cost of all cached items.
-		Cost currentCost() const;
+	/// Returns the current cost of all cached items.
+	Cost currentCost() const;
 
-	private :
+private:
 
-		// Data
-		//////////////////////////////////////////////////////////////////////////
+	// Data
+	//////////////////////////////////////////////////////////////////////////
 
-		// Give Policy access to CacheEntry definitions.
-		friend class Policy<LRUCache>;
+	// Give Policy access to CacheEntry definitions.
+	friend class Policy<LRUCache>;
 
-		// A function for computing values, and one for notifying of removals.
-		GetterFunction m_getter;
-		RemovalCallback m_removalCallback;
+	// A function for computing values, and one for notifying of removals.
+	GetterFunction m_getter;
+	RemovalCallback m_removalCallback;
 
-		// Status of each item in the cache.
-		enum Status
-		{
-			Uncached, // entry without valid value
-			Cached, // entry with valid value
-			Failed // m_getter failed when computing entry
-		};
+	// Status of each item in the cache.
+	enum Status
+	{
+		Uncached, // entry without valid value
+		Cached, // entry with valid value
+		Failed // m_getter failed when computing entry
+	};
 
-		// The type used to store a single cached item.
-		struct CacheEntry
-		{
-			CacheEntry();
+	// The type used to store a single cached item.
+	struct CacheEntry
+	{
+		CacheEntry();
 
-			// We use a boost::variant to compactly store
-			// a union of the data needed for each Status.
-			//
-			// - Uncached : A boost::blank instance
-			// - Cached : The Value itself
-			// - Failed : The exception thrown by the GetterFn
-			using State = boost::variant<boost::blank, Value, std::exception_ptr>;
+		// We use a boost::variant to compactly store
+		// a union of the data needed for each Status.
+		//
+		// - Uncached : A boost::blank instance
+		// - Cached : The Value itself
+		// - Failed : The exception thrown by the GetterFn
+		using State = boost::variant<boost::blank, Value, std::exception_ptr>;
 
-			State state;
-			Cost cost; // the cost for this item
+		State state;
+		Cost cost; // the cost for this item
 
-			Status status() const;
+		Status status() const;
+	};
 
-		};
+	// Policy. This is responsible for
+	// the internal storage for the cache.
+	Policy<LRUCache> m_policy;
 
-		// Policy. This is responsible for
-		// the internal storage for the cache.
-		Policy<LRUCache> m_policy;
+	Cost m_maxCost;
+	bool m_cacheErrors;
 
-		Cost m_maxCost;
-		bool m_cacheErrors;
+	// Methods
+	// =======
 
-		// Methods
-		// =======
+	// Updates the cached value and updates the current
+	// total cost.
+	bool setInternal( const Key &key, CacheEntry &cacheEntry, const Value &value, Cost cost );
 
-		// Updates the cached value and updates the current
-		// total cost.
-		bool setInternal( const Key &key, CacheEntry &cacheEntry, const Value &value, Cost cost );
+	// Removes any cached value and updates the current total
+	// cost.
+	bool eraseInternal( const Key &key, CacheEntry &cacheEntry );
 
-		// Removes any cached value and updates the current total
-		// cost.
-		bool eraseInternal( const Key &key, CacheEntry &cacheEntry );
-
-		// Removes items from the cache until the current cost is
-		// at or below the specified limit.
-		void limitCost( Cost cost );
-
+	// Removes items from the cache until the current cost is
+	// at or below the specified limit.
+	void limitCost( Cost cost );
 };
 
 } // namespace IECorePreview

@@ -77,7 +77,8 @@ using namespace Imath;
 using namespace Gaffer;
 using namespace GafferUI;
 
-namespace {
+namespace
+{
 
 const float g_borderWidth = 0.5f;
 const float g_maxFocusWidth = 2.0f;
@@ -102,258 +103,255 @@ const IECoreGL::Texture *focusIconTexture( bool focus, bool hover )
 
 class FocusGadget : public Gadget
 {
-	public :
+public:
 
-		FocusGadget( StandardNodeGadget* parent )
-			:	m_oval( false ),
-				m_mouseOver( false )
-		{
-			buttonPressSignal().connect( boost::bind( &FocusGadget::buttonPressed, this, ::_1,  ::_2 ) );
-			buttonReleaseSignal().connect( boost::bind( &FocusGadget::buttonRelease, this, ::_1,  ::_2 ) );
-			enterSignal().connect( boost::bind( &FocusGadget::mouseEntered, this, ::_1,  ::_2 ) );
-			leaveSignal().connect( boost::bind( &FocusGadget::mouseLeft, this, ::_1,  ::_2 ) );
-			buttonDoubleClickSignal().connect( boost::bind( &FocusGadget::buttonDoubleClick, this, ::_1,  ::_2 ) );
-			parent->enterSignal().connect( boost::bind( &FocusGadget::nodeMouseEntered, this, ::_1,  ::_2 ) );
-			parent->leaveSignal().connect( boost::bind( &FocusGadget::nodeMouseLeft, this, ::_1,  ::_2 ) );
+	FocusGadget( StandardNodeGadget *parent )
+		: m_oval( false ),
+		  m_mouseOver( false )
+	{
+		buttonPressSignal().connect( boost::bind( &FocusGadget::buttonPressed, this, ::_1, ::_2 ) );
+		buttonReleaseSignal().connect( boost::bind( &FocusGadget::buttonRelease, this, ::_1, ::_2 ) );
+		enterSignal().connect( boost::bind( &FocusGadget::mouseEntered, this, ::_1, ::_2 ) );
+		leaveSignal().connect( boost::bind( &FocusGadget::mouseLeft, this, ::_1, ::_2 ) );
+		buttonDoubleClickSignal().connect( boost::bind( &FocusGadget::buttonDoubleClick, this, ::_1, ::_2 ) );
+		parent->enterSignal().connect( boost::bind( &FocusGadget::nodeMouseEntered, this, ::_1, ::_2 ) );
+		parent->leaveSignal().connect( boost::bind( &FocusGadget::nodeMouseLeft, this, ::_1, ::_2 ) );
 
-			// FocusGadget always stays attached to its parent StandardNodeGadget, this must never change,
-			// since we later assume that parent() is a StandardNodeGadget
-			parent->addChild( this );
-		}
+		// FocusGadget always stays attached to its parent StandardNodeGadget, this must never change,
+		// since we later assume that parent() is a StandardNodeGadget
+		parent->addChild( this );
+	}
 
-		~FocusGadget() override
-		{
-			// Make sure we don't leave around a dangling raw pointer after we destruct
-			if( g_pendingHoveredFocus == this )
-			{
-				g_pendingHoveredFocus = nullptr;
-			}
-		}
-
-		void setOval( bool oval )
-		{
-			m_oval = oval;
-			dirty( DirtyType::Render );
-		}
-
-		bool getOval() const
-		{
-			return m_oval;
-		}
-
-		Imath::Box3f bound() const override
-		{
-			return Box3f();
-		}
-
-	protected :
-
-		void toggleFocus()
-		{
-			StandardNodeGadget* parentNodeGadget = static_cast<StandardNodeGadget*>( parent() );
-			if( ScriptNode *script = parentNodeGadget->node()->ancestor<ScriptNode>() )
-			{
-				if( script->getFocus() != parentNodeGadget->node() )
-				{
-					script->setFocus( parentNodeGadget->node() );
-				}
-				else
-				{
-					// Unfocus if we click the icon on the focussed node
-					script->setFocus( nullptr );
-				}
-			}
-		}
-
-		bool buttonPressed( GadgetPtr gadget, const ButtonEvent &event )
-		{
-			return true;
-		}
-
-		bool buttonRelease( GadgetPtr gadget, const ButtonEvent &event )
-		{
-			if( m_mouseOver && event.button == ButtonEvent::Left )
-			{
-				toggleFocus();
-			}
-
-			return true;
-		}
-
-		bool mouseEntered( GadgetPtr gadget, const ButtonEvent &event )
-		{
-			m_mouseOver = true;
-			dirty( DirtyType::Render );
-			return false;
-		}
-
-		bool mouseLeft( GadgetPtr gadget, const ButtonEvent &event )
-		{
-			m_mouseOver = false;
-			dirty( DirtyType::Render );
-			return false;
-		}
-
-		bool buttonDoubleClick( GadgetPtr gadget, const ButtonEvent &event )
-		{
-			if( event.buttons==ButtonEvent::Left )
-			{
-				// A user might rapidly click on the focus to toggle on and off - it's more consistent if
-				// all clicks are treated the same, even if they come fast enough to be classified as a "double click"
-				toggleFocus();
-			}
-
-			return true;
-		}
-
-		bool nodeMouseEntered( GadgetPtr gadget, const ButtonEvent &event )
-		{
-			static QTimer focusGadgetTimer;
-			static QMetaObject::Connection focusGadgetTimerCallback = focusGadgetTimer.callOnTimeout(
-				[]{
-					if( g_pendingHoveredFocus )
-					{
-						StandardNodeGadget* parentNodeGadget = static_cast<StandardNodeGadget*>( g_pendingHoveredFocus->parent() );
-						if( !parentNodeGadget )
-						{
-							IECore::msg( IECore::Msg::Error, "FocusGadget::nodeMouseEntered", "Focus gadget hover timer triggered on unparented FocusGadget" );
-							return;
-						}
-						g_hoveredFocus = g_pendingHoveredFocus;
-						g_hoveredFocusNodePosition = parentNodeGadget->getTransform();
-						g_pendingHoveredFocus->dirty( DirtyType::Render );
-					}
-				}
-			);
-			focusGadgetTimer.stop();
-			focusGadgetTimer.setSingleShot( true );
-			g_pendingHoveredFocus = this;
-			focusGadgetTimer.start( 500 );
-			return false;
-		}
-
-		bool nodeMouseLeft( GadgetPtr gadget, const ButtonEvent &event )
+	~FocusGadget() override
+	{
+		// Make sure we don't leave around a dangling raw pointer after we destruct
+		if( g_pendingHoveredFocus == this )
 		{
 			g_pendingHoveredFocus = nullptr;
-			if( g_hoveredFocus )
+		}
+	}
+
+	void setOval( bool oval )
+	{
+		m_oval = oval;
+		dirty( DirtyType::Render );
+	}
+
+	bool getOval() const
+	{
+		return m_oval;
+	}
+
+	Imath::Box3f bound() const override
+	{
+		return Box3f();
+	}
+
+protected:
+
+	void toggleFocus()
+	{
+		StandardNodeGadget *parentNodeGadget = static_cast<StandardNodeGadget *>( parent() );
+		if( ScriptNode *script = parentNodeGadget->node()->ancestor<ScriptNode>() )
+		{
+			if( script->getFocus() != parentNodeGadget->node() )
 			{
-				g_hoveredFocus = nullptr;
-				dirty( DirtyType::Render );
+				script->setFocus( parentNodeGadget->node() );
 			}
-			return false;
+			else
+			{
+				// Unfocus if we click the icon on the focussed node
+				script->setFocus( nullptr );
+			}
+		}
+	}
+
+	bool buttonPressed( GadgetPtr gadget, const ButtonEvent &event )
+	{
+		return true;
+	}
+
+	bool buttonRelease( GadgetPtr gadget, const ButtonEvent &event )
+	{
+		if( m_mouseOver && event.button == ButtonEvent::Left )
+		{
+			toggleFocus();
 		}
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+		return true;
+	}
+
+	bool mouseEntered( GadgetPtr gadget, const ButtonEvent &event )
+	{
+		m_mouseOver = true;
+		dirty( DirtyType::Render );
+		return false;
+	}
+
+	bool mouseLeft( GadgetPtr gadget, const ButtonEvent &event )
+	{
+		m_mouseOver = false;
+		dirty( DirtyType::Render );
+		return false;
+	}
+
+	bool buttonDoubleClick( GadgetPtr gadget, const ButtonEvent &event )
+	{
+		if( event.buttons == ButtonEvent::Left )
 		{
-			Gadget::renderLayer( layer, style, reason );
+			// A user might rapidly click on the focus to toggle on and off - it's more consistent if
+			// all clicks are treated the same, even if they come fast enough to be classified as a "double click"
+			toggleFocus();
+		}
 
-			const StandardNodeGadget* parentNodeGadget = static_cast<const StandardNodeGadget*>( parent() );
+		return true;
+	}
 
-			if( this == g_hoveredFocus && parentNodeGadget->getTransform() != g_hoveredFocusNodePosition )
-			{
-				// If we have moved, then we are being dragged, and we don't treat ourselves as hovered
-				// when the node is being dragged
-				g_hoveredFocus = nullptr;
-			}
-
-			bool focussed = parentNodeGadget->node()->ancestor<ScriptNode>()->getFocus() == parentNodeGadget->node();
-			if( this == g_hoveredFocus || m_mouseOver || focussed || ( reason == RenderReason::Select) )
-			{
-				Box3f b = parentNodeGadget->bound();
-
-				float borderWidth = parentNodeGadget->focusBorderWidth();
-
-				float nodeBorder = g_borderWidth;
-				float radius = sqrtf( 2.0f ) * ( borderWidth + nodeBorder ) - nodeBorder;
-
-				V2f size = V2f( radius );
-
-				V2f center;
-
-				if( m_oval )
+	bool nodeMouseEntered( GadgetPtr gadget, const ButtonEvent &event )
+	{
+		static QTimer focusGadgetTimer;
+		static QMetaObject::Connection focusGadgetTimerCallback = focusGadgetTimer.callOnTimeout(
+			[] {
+				if( g_pendingHoveredFocus )
 				{
-					const V3f s = b.size();
-					float nodeRadius = 0.5f * std::min( s.x, s.y );
-
-					float offset = (1.0f/sqrtf(2.0f)) * ( nodeRadius + radius ) - nodeRadius;
-
-					center = V2f( b.max.x + offset, b.max.y + offset);
-				}
-				else
-				{
-					center = V2f( b.max.x + borderWidth, b.max.y + borderWidth );
-
-				}
-
-				if( !isSelectionRender( reason ) )
-				{
-					style->renderImage( Box2f( center - size, center + size ), focusIconTexture( focussed, m_mouseOver) );
-				}
-				else
-				{
-					if( reason == RenderReason::DragSelect )
+					StandardNodeGadget *parentNodeGadget = static_cast<StandardNodeGadget *>( g_pendingHoveredFocus->parent() );
+					if( !parentNodeGadget )
 					{
-						// Not a target for dragging
+						IECore::msg( IECore::Msg::Error, "FocusGadget::nodeMouseEntered", "Focus gadget hover timer triggered on unparented FocusGadget" );
 						return;
 					}
-
-					// Render a circle for selection, instead of an icon which is treated as square by
-					// the selection code
-					style->renderFrame( Box2f( center, center ), size.x );
+					g_hoveredFocus = g_pendingHoveredFocus;
+					g_hoveredFocusNodePosition = parentNodeGadget->getTransform();
+					g_pendingHoveredFocus->dirty( DirtyType::Render );
 				}
 			}
+		);
+		focusGadgetTimer.stop();
+		focusGadgetTimer.setSingleShot( true );
+		g_pendingHoveredFocus = this;
+		focusGadgetTimer.start( 500 );
+		return false;
+	}
+
+	bool nodeMouseLeft( GadgetPtr gadget, const ButtonEvent &event )
+	{
+		g_pendingHoveredFocus = nullptr;
+		if( g_hoveredFocus )
+		{
+			g_hoveredFocus = nullptr;
+			dirty( DirtyType::Render );
+		}
+		return false;
+	}
+
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+	{
+		Gadget::renderLayer( layer, style, reason );
+
+		const StandardNodeGadget *parentNodeGadget = static_cast<const StandardNodeGadget *>( parent() );
+
+		if( this == g_hoveredFocus && parentNodeGadget->getTransform() != g_hoveredFocusNodePosition )
+		{
+			// If we have moved, then we are being dragged, and we don't treat ourselves as hovered
+			// when the node is being dragged
+			g_hoveredFocus = nullptr;
 		}
 
-		unsigned layerMask() const override
+		bool focussed = parentNodeGadget->node()->ancestor<ScriptNode>()->getFocus() == parentNodeGadget->node();
+		if( this == g_hoveredFocus || m_mouseOver || focussed || ( reason == RenderReason::Select ) )
 		{
-			return (int)GraphLayer::Highlighting;
-		}
-
-		Imath::Box3f renderBound() const override
-		{
-			// There should be a simple heuristic that would give a max bound, but it's actually bit
-			// tricky to find one, so the quickest approach is just to duplicate the logic from renderLayer
-			float nodeBorder = g_borderWidth;
-			float maxRadius = sqrtf( 2.0f ) * ( g_maxFocusWidth + nodeBorder ) - nodeBorder;
-			V3f center;
-			const StandardNodeGadget* parentNodeGadget = static_cast<const StandardNodeGadget*>( parent() );
 			Box3f b = parentNodeGadget->bound();
+
+			float borderWidth = parentNodeGadget->focusBorderWidth();
+
+			float nodeBorder = g_borderWidth;
+			float radius = sqrtf( 2.0f ) * ( borderWidth + nodeBorder ) - nodeBorder;
+
+			V2f size = V2f( radius );
+
+			V2f center;
+
 			if( m_oval )
 			{
 				const V3f s = b.size();
 				float nodeRadius = 0.5f * std::min( s.x, s.y );
 
-				float offset = (1.0f/sqrtf(2.0f)) * ( nodeRadius + maxRadius ) - nodeRadius;
+				float offset = ( 1.0f / sqrtf( 2.0f ) ) * ( nodeRadius + radius ) - nodeRadius;
 
-				center = V3f( b.max.x + offset, b.max.y + offset, 0.0f );
+				center = V2f( b.max.x + offset, b.max.y + offset );
 			}
 			else
 			{
-				center = V3f( b.max.x + g_maxFocusWidth, b.max.y + g_maxFocusWidth, 0.0f );
-
+				center = V2f( b.max.x + borderWidth, b.max.y + borderWidth );
 			}
 
-			return Box3f( center - V3f( maxRadius ), center + V3f( maxRadius ) );
+			if( !isSelectionRender( reason ) )
+			{
+				style->renderImage( Box2f( center - size, center + size ), focusIconTexture( focussed, m_mouseOver ) );
+			}
+			else
+			{
+				if( reason == RenderReason::DragSelect )
+				{
+					// Not a target for dragging
+					return;
+				}
+
+				// Render a circle for selection, instead of an icon which is treated as square by
+				// the selection code
+				style->renderFrame( Box2f( center, center ), size.x );
+			}
+		}
+	}
+
+	unsigned layerMask() const override
+	{
+		return (int)GraphLayer::Highlighting;
+	}
+
+	Imath::Box3f renderBound() const override
+	{
+		// There should be a simple heuristic that would give a max bound, but it's actually bit
+		// tricky to find one, so the quickest approach is just to duplicate the logic from renderLayer
+		float nodeBorder = g_borderWidth;
+		float maxRadius = sqrtf( 2.0f ) * ( g_maxFocusWidth + nodeBorder ) - nodeBorder;
+		V3f center;
+		const StandardNodeGadget *parentNodeGadget = static_cast<const StandardNodeGadget *>( parent() );
+		Box3f b = parentNodeGadget->bound();
+		if( m_oval )
+		{
+			const V3f s = b.size();
+			float nodeRadius = 0.5f * std::min( s.x, s.y );
+
+			float offset = ( 1.0f / sqrtf( 2.0f ) ) * ( nodeRadius + maxRadius ) - nodeRadius;
+
+			center = V3f( b.max.x + offset, b.max.y + offset, 0.0f );
+		}
+		else
+		{
+			center = V3f( b.max.x + g_maxFocusWidth, b.max.y + g_maxFocusWidth, 0.0f );
 		}
 
-	private :
+		return Box3f( center - V3f( maxRadius ), center + V3f( maxRadius ) );
+	}
 
-		bool m_oval;
-		bool m_mouseOver;
+private:
 
-		bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
+	bool m_oval;
+	bool m_mouseOver;
 
-		// A focus gadget that the cursor is currently over, but we aren't going to show it as hovered
-		// until a time duration has elapsed.  Must be cleared if the FocusGadget it points to is destructed
-		static FocusGadget *g_pendingHoveredFocus;
+	bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
 
-		// This pointer is never dereferenced, only compared to, so we don't need to worry about cleaning it up
-		static FocusGadget *g_hoveredFocus;
+	// A focus gadget that the cursor is currently over, but we aren't going to show it as hovered
+	// until a time duration has elapsed.  Must be cleared if the FocusGadget it points to is destructed
+	static FocusGadget *g_pendingHoveredFocus;
 
-		// The position of the node the hoveredFocus is attached to - if this node is moved, that means we are
-		// dragging the node currently, and we will no longer treat it as hovered.
-		static M44f g_hoveredFocusNodePosition;
+	// This pointer is never dereferenced, only compared to, so we don't need to worry about cleaning it up
+	static FocusGadget *g_hoveredFocus;
 
+	// The position of the node the hoveredFocus is attached to - if this node is moved, that means we are
+	// dragging the node currently, and we will no longer treat it as hovered.
+	static M44f g_hoveredFocusNodePosition;
 };
 
 FocusGadget *FocusGadget::g_pendingHoveredFocus = nullptr;
@@ -369,103 +367,102 @@ M44f FocusGadget::g_hoveredFocusNodePosition;
 class StandardNodeGadget::ErrorGadget : public Gadget
 {
 
-	public :
+public:
 
-		ErrorGadget( const std::string &name = defaultName<ErrorGadget>() )
-			:	Gadget( name ), m_image( new ImageGadget( "gadgetError.png" ) )
+	ErrorGadget( const std::string &name = defaultName<ErrorGadget>() )
+		: Gadget( name ), m_image( new ImageGadget( "gadgetError.png" ) )
+	{
+		m_image->setTransform( M44f().scale( V3f( .025 ) ) );
+		addChild( m_image );
+	}
+
+	void addError( PlugPtr plug, const std::string &error )
+	{
+		PlugEntry &entry = m_errors[plug];
+		entry.error = error;
+		if( auto tracker = ContextTracker::acquireForFocus( plug.get() ) )
 		{
-			m_image->setTransform( M44f().scale( V3f( .025 ) ) );
-			addChild( m_image );
+			entry.trackedContext = tracker->context( plug.get() )->hash();
 		}
-
-		void addError( PlugPtr plug, const std::string &error )
+		if( !entry.parentChangedConnection.connected() )
 		{
-			PlugEntry &entry = m_errors[plug];
-			entry.error = error;
-			if( auto tracker = ContextTracker::acquireForFocus( plug.get() ) )
-			{
-				entry.trackedContext = tracker->context( plug.get() )->hash();
-			}
-			if( !entry.parentChangedConnection.connected() )
-			{
-				entry.parentChangedConnection = plug->parentChangedSignal().connect( boost::bind( &ErrorGadget::plugParentChanged, this, ::_1 ) );
-			}
-			m_image->setVisible( true );
+			entry.parentChangedConnection = plug->parentChangedSignal().connect( boost::bind( &ErrorGadget::plugParentChanged, this, ::_1 ) );
 		}
+		m_image->setVisible( true );
+	}
 
-		void removeError( const Plug *plug )
+	void removeError( const Plug *plug )
+	{
+		m_errors.erase( plug );
+		m_image->setVisible( m_errors.size() );
+	}
+
+	void removeStaleErrors( const ContextTracker *tracker )
+	{
+		// We call `removeError()` whenever a plug is dirtied, but that can
+		// still leave errors lingering if the original error was a problem
+		// of _context_ rather than plug values. So when the tracked context
+		// changes, we remove any errors which occurred within a different
+		// tracked context.
+		for( auto it = m_errors.begin(); it != m_errors.end(); )
 		{
-			m_errors.erase( plug );
-			m_image->setVisible( m_errors.size() );
+			if( it->second.trackedContext != tracker->context( it->first.get() )->hash() )
+			{
+				it = m_errors.erase( it );
+			}
+			else
+			{
+				++it;
+			}
 		}
+		m_image->setVisible( m_errors.size() );
+	}
 
-		void removeStaleErrors( const ContextTracker *tracker )
+	std::string getToolTip( const IECore::LineSegment3f &position ) const override
+	{
+		std::string result = Gadget::getToolTip( position );
+		if( !result.empty() )
 		{
-			// We call `removeError()` whenever a plug is dirtied, but that can
-			// still leave errors lingering if the original error was a problem
-			// of _context_ rather than plug values. So when the tracked context
-			// changes, we remove any errors which occurred within a different
-			// tracked context.
-			for( auto it = m_errors.begin(); it != m_errors.end(); )
-			{
-				if( it->second.trackedContext != tracker->context( it->first.get() )->hash() )
-				{
-					it = m_errors.erase( it );
-				}
-				else
-				{
-					++it;
-				}
-			}
-			m_image->setVisible( m_errors.size() );
-		}
-
-		std::string getToolTip( const IECore::LineSegment3f &position ) const override
-		{
-			std::string result = Gadget::getToolTip( position );
-			if( !result.empty() )
-			{
-				return result;
-			}
-
-			std::set<std::string> reported;
-			for( PlugErrors::const_iterator it = m_errors.begin(); it != m_errors.end(); ++it )
-			{
-				if( reported.find( it->second.error ) == reported.end() )
-				{
-					if( result.size() )
-					{
-						result += "\n";
-					}
-					result += it->second.error;
-					reported.insert( it->second.error );
-				}
-			}
 			return result;
 		}
 
-	private :
-
-		void plugParentChanged( GraphComponent *plug )
+		std::set<std::string> reported;
+		for( PlugErrors::const_iterator it = m_errors.begin(); it != m_errors.end(); ++it )
 		{
-			if( !plug->parent() )
+			if( reported.find( it->second.error ) == reported.end() )
 			{
-				removeError( static_cast<Plug *>( plug ) );
+				if( result.size() )
+				{
+					result += "\n";
+				}
+				result += it->second.error;
+				reported.insert( it->second.error );
 			}
 		}
+		return result;
+	}
 
-		ImageGadgetPtr m_image;
+private:
 
-		struct PlugEntry
+	void plugParentChanged( GraphComponent *plug )
+	{
+		if( !plug->parent() )
 		{
-			std::string error;
-			IECore::MurmurHash trackedContext;
-			Signals::ScopedConnection parentChangedConnection;
-		};
+			removeError( static_cast<Plug *>( plug ) );
+		}
+	}
 
-		using PlugErrors = std::map<ConstPlugPtr, PlugEntry>;
-		PlugErrors m_errors;
+	ImageGadgetPtr m_image;
 
+	struct PlugEntry
+	{
+		std::string error;
+		IECore::MurmurHash trackedContext;
+		Signals::ScopedConnection parentChangedConnection;
+	};
+
+	using PlugErrors = std::map<ConstPlugPtr, PlugEntry>;
+	PlugErrors m_errors;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -561,8 +558,8 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( StandardNodeGadget );
 NodeGadget::NodeGadgetTypeDescription<StandardNodeGadget> StandardNodeGadget::g_nodeGadgetTypeDescription( Gaffer::Node::staticTypeId() );
 
 static const float g_defaultMinWidth = 10.0f;
-static IECore::InternedString g_minWidthKey( "nodeGadget:minWidth"  );
-static IECore::InternedString g_paddingKey( "nodeGadget:padding"  );
+static IECore::InternedString g_minWidthKey( "nodeGadget:minWidth" );
+static IECore::InternedString g_paddingKey( "nodeGadget:padding" );
 static IECore::InternedString g_colorKey( "nodeGadget:color" );
 static IECore::InternedString g_shapeKey( "nodeGadget:shape" );
 static IECore::InternedString g_focusGadgetVisibleKey( "nodeGadget:focusGadgetVisible" );
@@ -582,15 +579,15 @@ StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node )
 // and it should be possible to make NodeGadget's independent of StandardNodeGadget.  The right solution is
 // probably to move more functionality for dealing with Focus and such into NodeGadget, so that other Gadgets
 // can optionally use it without needing to inherit from StandardNodeGadget
-StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node, bool auxiliary  )
-	:	NodeGadget( node ),
-		m_strikeThroughState( StrikeThroughState::Invisible ),
-		m_labelsVisibleOnHover( true ),
-		m_dragDestination( nullptr ),
-		m_userColor( 0 ),
-		m_oval( false ),
-		m_auxiliary( auxiliary ),
-		m_focusGadget( new FocusGadget( this ) )
+StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node, bool auxiliary )
+	: NodeGadget( node ),
+	  m_strikeThroughState( StrikeThroughState::Invisible ),
+	  m_labelsVisibleOnHover( true ),
+	  m_dragDestination( nullptr ),
+	  m_userColor( 0 ),
+	  m_oval( false ),
+	  m_auxiliary( auxiliary ),
+	  m_focusGadget( new FocusGadget( this ) )
 {
 
 	// build our ui structure
@@ -751,8 +748,7 @@ void StandardNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 
 	switch( layer )
 	{
-		case GraphLayer::Nodes :
-		{
+		case GraphLayer::Nodes : {
 			// decide what state we're rendering in
 			Style::State state = getHighlighted() ? Style::HighlightedState : ( m_active ? Style::NormalState : Style::DisabledState );
 
@@ -774,8 +770,7 @@ void StandardNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 
 			break;
 		}
-		case GraphLayer::Highlighting :
-		{
+		case GraphLayer::Highlighting : {
 			const Box3f b = bound();
 
 			if( m_strikeThroughState != StrikeThroughState::Invisible && !isSelectionRender( reason ) )
@@ -799,8 +794,7 @@ void StandardNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 			}
 			break;
 		}
-		case GraphLayer::OverBackdrops :
-		{
+		case GraphLayer::OverBackdrops : {
 			if( isSelectionRender( reason ) )
 			{
 				break; // Focus highlight not selectable
@@ -998,8 +992,7 @@ LinearContainer *StandardNodeGadget::contentsColumn()
 	{
 		return getChild<Gadget>( 1 ) // column
 			->getChild<Gadget>( 1 ) // row
-			->getChild<LinearContainer>( 1 )
-		;
+			->getChild<LinearContainer>( 1 );
 	}
 }
 
@@ -1137,9 +1130,9 @@ void StandardNodeGadget::enter( Gadget *gadget )
 {
 	if( m_labelsVisibleOnHover )
 	{
-		for( StandardNodule::RecursiveIterator it( gadget  ); !it.done(); ++it )
+		for( StandardNodule::RecursiveIterator it( gadget ); !it.done(); ++it )
 		{
-			(*it)->setLabelVisible( true );
+			( *it )->setLabelVisible( true );
 		}
 	}
 }
@@ -1161,7 +1154,7 @@ bool StandardNodeGadget::dragEnter( GadgetPtr gadget, const DragDropEvent &event
 		// user can see their options.
 		for( StandardNodule::RecursiveIterator it( this ); !it.done(); ++it )
 		{
-			(*it)->setLabelVisible( canConnect( event, it->get() ) );
+			( *it )->setLabelVisible( canConnect( event, it->get() ) );
 		}
 		return true;
 	}
@@ -1232,8 +1225,7 @@ void StandardNodeGadget::noduleAdded( Nodule *nodule )
 	{
 		IECore::ConstBoolDataPtr d = standardNodule->plug()->direction() == Plug::Direction::In ?
 			Gaffer::Metadata::value<IECore::BoolData>( node(), g_inputNoduleLabelsVisibleKey ) :
-			Gaffer::Metadata::value<IECore::BoolData>( node(), g_outputNoduleLabelsVisibleKey )
-		;
+			Gaffer::Metadata::value<IECore::BoolData>( node(), g_outputNoduleLabelsVisibleKey );
 
 		standardNodule->setLabelVisible( d ? d->readable() : false );
 	}
@@ -1252,7 +1244,7 @@ ConnectionCreator *StandardNodeGadget::closestDragDestination( const DragDropEve
 
 	for( ConnectionCreator::RecursiveIterator it( this ); !it.done(); it++ )
 	{
-		if( !(*it)->getVisible() )
+		if( !( *it )->getVisible() )
 		{
 			it.prune();
 			continue;
@@ -1262,7 +1254,7 @@ ConnectionCreator *StandardNodeGadget::closestDragDestination( const DragDropEve
 			continue;
 		}
 
-		const Box3f bound = (*it)->transformedBound( this );
+		const Box3f bound = ( *it )->transformedBound( this );
 		if( bound.isEmpty() )
 		{
 			continue;
@@ -1493,8 +1485,8 @@ void StandardNodeGadget::applyNoduleLabelVisibilityMetadata()
 
 	for( StandardNodule::RecursiveIterator it( this ); !it.done(); ++it )
 	{
-		(*it)->setLabelVisible(
-			(*it)->plug()->direction() == Plug::Direction::In ? inputVisible : outputVisible
+		( *it )->setLabelVisible(
+			( *it )->plug()->direction() == Plug::Direction::In ? inputVisible : outputVisible
 		);
 	}
 }

@@ -57,135 +57,136 @@ namespace
 
 class VisualiserGadget;
 
-}  // namespace
+} // namespace
 
 namespace GafferSceneUI
 {
 
 class GAFFERSCENEUI_API VisualiserTool : public SelectionTool
 {
-	public :
-		explicit VisualiserTool( SceneView *view, const std::string &name = defaultName<VisualiserTool>() );
-		~VisualiserTool() override;
+public:
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::VisualiserTool, VisualiserToolTypeId, SelectionTool );
+	explicit VisualiserTool( SceneView *view, const std::string &name = defaultName<VisualiserTool>() );
+	~VisualiserTool() override;
 
-		enum class Mode
-		{
-			Auto,
-			ColorAutoRange,
-			Color,
-			VertexLabel,
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::VisualiserTool, VisualiserToolTypeId, SelectionTool );
 
-			First = Auto,
-			Last = VertexLabel
-		};
+	enum class Mode
+	{
+		Auto,
+		ColorAutoRange,
+		Color,
+		VertexLabel,
 
-		Gaffer::StringPlug *dataNamePlug();
-		const Gaffer::StringPlug *dataNamePlug() const;
+		First = Auto,
+		Last = VertexLabel
+	};
 
-		Gaffer::FloatPlug *opacityPlug();
-		const Gaffer::FloatPlug *opacityPlug() const;
+	Gaffer::StringPlug *dataNamePlug();
+	const Gaffer::StringPlug *dataNamePlug() const;
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::FloatPlug *opacityPlug();
+	const Gaffer::FloatPlug *opacityPlug() const;
 
-		Gaffer::V3fPlug *valueMinPlug();
-		const Gaffer::V3fPlug *valueMinPlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::V3fPlug *valueMaxPlug();
-		const Gaffer::V3fPlug *valueMaxPlug() const;
+	Gaffer::V3fPlug *valueMinPlug();
+	const Gaffer::V3fPlug *valueMinPlug() const;
 
-		Gaffer::FloatPlug *sizePlug();
-		const Gaffer::FloatPlug *sizePlug() const;
+	Gaffer::V3fPlug *valueMaxPlug();
+	const Gaffer::V3fPlug *valueMaxPlug() const;
 
-		Gaffer::FloatPlug *vectorScalePlug();
-		const Gaffer::FloatPlug *vectorScalePlug() const;
+	Gaffer::FloatPlug *sizePlug();
+	const Gaffer::FloatPlug *sizePlug() const;
 
-		Gaffer::Color3fPlug *vectorColorPlug();
-		const Gaffer::Color3fPlug *vectorColorPlug() const;
+	Gaffer::FloatPlug *vectorScalePlug();
+	const Gaffer::FloatPlug *vectorScalePlug() const;
+
+	Gaffer::Color3fPlug *vectorColorPlug();
+	const Gaffer::Color3fPlug *vectorColorPlug() const;
+
+private:
+
+	friend VisualiserGadget;
+
+	/// Class encapsulating a selected scene location
+	struct Selection
+	{
+		Selection(
+			const GafferScene::ScenePlug &scene,
+			const GafferScene::ScenePlug &uniformPScene,
+			const GafferScene::ScenePlug::ScenePath &path,
+			const Gaffer::Context &context
+		);
+
+		const GafferScene::ScenePlug &scene() const;
+		const GafferScene::ScenePlug &uniformPScene() const;
+		const GafferScene::ScenePlug::ScenePath &path() const;
+		const Gaffer::Context &context() const;
 
 	private:
 
-		friend VisualiserGadget;
+		GafferScene::ConstScenePlugPtr m_scene;
+		GafferScene::ConstScenePlugPtr m_uniformPScene;
+		GafferScene::ScenePlug::ScenePath m_path;
+		Gaffer::ConstContextPtr m_context;
+	};
 
-		/// Class encapsulating a selected scene location
-		struct Selection
-		{
-			Selection(
-				const GafferScene::ScenePlug &scene,
-				const GafferScene::ScenePlug &uniformPScene,
-				const GafferScene::ScenePlug::ScenePath &path,
-				const Gaffer::Context &context
-			);
+	const std::vector<Selection> &selection() const;
 
-			const GafferScene::ScenePlug &scene() const;
-			const GafferScene::ScenePlug &uniformPScene() const;
-			const GafferScene::ScenePlug::ScenePath &path() const;
-			const Gaffer::Context &context() const;
+	using CursorPosition = std::optional<Imath::V2f>;
+	CursorPosition cursorPos() const;
 
-			private:
+	using CursorValue = std::variant<std::monostate, int, float, Imath::V2f, Imath::V3f, Imath::Color3f, Imath::Quatf>;
+	const CursorValue cursorValue() const;
 
-				GafferScene::ConstScenePlugPtr m_scene;
-				GafferScene::ConstScenePlugPtr m_uniformPScene;
-				GafferScene::ScenePlug::ScenePath m_path;
-				Gaffer::ConstContextPtr m_context;
-		};
+	GafferScene::ScenePlug *internalScenePlug();
+	const GafferScene::ScenePlug *internalScenePlug() const;
 
-		const std::vector<Selection> &selection() const;
+	GafferScene::ScenePlug *internalSceneUniformPPlug();
+	const GafferScene::ScenePlug *internalSceneUniformPPlug() const;
 
-		using CursorPosition = std::optional<Imath::V2f>;
-		CursorPosition cursorPos() const;
+	void connectOnActive();
+	void disconnectOnInactive();
+	bool mouseMove( const GafferUI::ButtonEvent &event );
+	void enter( const GafferUI::ButtonEvent &event );
+	void leave( const GafferUI::ButtonEvent &event );
+	bool keyPress( const GafferUI::KeyEvent &event );
+	bool buttonPress( const GafferUI::ButtonEvent &event );
+	bool buttonRelease( const GafferUI::ButtonEvent &event );
+	IECore::RunTimeTypedPtr dragBegin( const GafferUI::DragDropEvent &event );
+	bool dragEnd( const GafferUI::DragDropEvent &event );
+	void plugDirtied( const Gaffer::Plug *plug );
+	void plugSet( const Gaffer::Plug *plug );
+	void updateSelection() const;
+	void preRender();
+	void updateCursorPos( const GafferUI::ButtonEvent &event );
+	void updateCursorValue();
+	SceneGadget *sceneGadget();
+	const SceneGadget *sceneGadget() const;
 
-		using CursorValue = std::variant<std::monostate, int, float, Imath::V2f, Imath::V3f, Imath::Color3f, Imath::Quatf>;
-		const CursorValue cursorValue() const;
+	void contextChanged();
+	void selectedPathsChanged();
 
-		GafferScene::ScenePlug *internalScenePlug();
-		const GafferScene::ScenePlug *internalScenePlug() const;
+	void makeGadgetFirst();
 
-		GafferScene::ScenePlug *internalSceneUniformPPlug();
-		const GafferScene::ScenePlug *internalSceneUniformPPlug() const;
+	Gaffer::Signals::ScopedConnection m_preRenderConnection;
+	Gaffer::Signals::ScopedConnection m_buttonPressConnection;
+	Gaffer::Signals::ScopedConnection m_dragBeginConnection;
 
-		void connectOnActive();
-		void disconnectOnInactive();
-		bool mouseMove( const GafferUI::ButtonEvent &event );
-		void enter( const GafferUI::ButtonEvent &event );
-		void leave( const GafferUI::ButtonEvent &event );
-		bool keyPress( const GafferUI::KeyEvent &event );
-		bool buttonPress( const GafferUI::ButtonEvent &event );
-		bool buttonRelease( const GafferUI::ButtonEvent &event );
-		IECore::RunTimeTypedPtr dragBegin( const GafferUI::DragDropEvent &event );
-		bool dragEnd( const GafferUI::DragDropEvent &event );
-		void plugDirtied( const Gaffer::Plug *plug );
-		void plugSet( const Gaffer::Plug *plug );
-		void updateSelection() const;
-		void preRender();
-		void updateCursorPos( const GafferUI::ButtonEvent &event );
-		void updateCursorValue();
-		SceneGadget *sceneGadget();
-		const SceneGadget *sceneGadget() const;
+	GafferUI::GadgetPtr m_gadget;
+	mutable std::vector<Selection> m_selection;
+	CursorPosition m_cursorPos;
+	CursorValue m_cursorValue;
+	bool m_gadgetDirty;
+	mutable bool m_selectionDirty;
+	bool m_priorityPathsDirty;
+	CursorValue m_valueAtButtonPress;
+	bool m_initiatedDrag;
 
-		void contextChanged();
-		void selectedPathsChanged();
-
-		void makeGadgetFirst();
-
-		Gaffer::Signals::ScopedConnection m_preRenderConnection;
-		Gaffer::Signals::ScopedConnection m_buttonPressConnection;
-		Gaffer::Signals::ScopedConnection m_dragBeginConnection;
-
-		GafferUI::GadgetPtr m_gadget;
-		mutable std::vector<Selection> m_selection;
-		CursorPosition m_cursorPos;
-		CursorValue m_cursorValue;
-		bool m_gadgetDirty;
-		mutable bool m_selectionDirty;
-		bool m_priorityPathsDirty;
-		CursorValue m_valueAtButtonPress;
-		bool m_initiatedDrag;
-
-		static ToolDescription<VisualiserTool, SceneView> m_toolDescription;
-		static size_t g_firstPlugIndex;
+	static ToolDescription<VisualiserTool, SceneView> m_toolDescription;
+	static size_t g_firstPlugIndex;
 };
 
 } // namespace GafferSceneUI

@@ -72,8 +72,6 @@ void GafferSceneModule::bindPrimitiveVariables()
 			.value( "All", PrimitiveVariableTweaks::SelectionMode::All )
 			.value( "IdList", PrimitiveVariableTweaks::SelectionMode::IdList )
 			.value( "IdListPrimitiveVariable", PrimitiveVariableTweaks::SelectionMode::IdListPrimitiveVariable )
-			.value( "MaskPrimitiveVariable", PrimitiveVariableTweaks::SelectionMode::MaskPrimitiveVariable )
-		;
+			.value( "MaskPrimitiveVariable", PrimitiveVariableTweaks::SelectionMode::MaskPrimitiveVariable );
 	}
-
 }

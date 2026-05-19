@@ -144,7 +144,7 @@ void DataWindowQuery::hash( const ValuePlug *output, const Context *context, Mur
 	hash.append( inPlug()->dataWindowHash() );
 }
 
-void DataWindowQuery::compute( ValuePlug *output, const Context *context) const
+void DataWindowQuery::compute( ValuePlug *output, const Context *context ) const
 {
 	std::string view = viewPlug()->getValue();
 	if( view.empty() )

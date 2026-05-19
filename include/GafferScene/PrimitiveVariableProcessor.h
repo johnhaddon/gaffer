@@ -56,36 +56,35 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveVariableProcessor : public SceneElementProcessor
 {
 
-	public :
+public:
 
-		explicit PrimitiveVariableProcessor( const std::string &name=defaultName<PrimitiveVariableProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
-		~PrimitiveVariableProcessor() override;
+	explicit PrimitiveVariableProcessor( const std::string &name = defaultName<PrimitiveVariableProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
+	~PrimitiveVariableProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveVariableProcessor, PrimitiveVariableProcessorTypeId, SceneElementProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::PrimitiveVariableProcessor, PrimitiveVariableProcessorTypeId, SceneElementProcessor );
 
-		Gaffer::StringPlug *namesPlug();
-		const Gaffer::StringPlug *namesPlug() const;
+	Gaffer::StringPlug *namesPlug();
+	const Gaffer::StringPlug *namesPlug() const;
 
-		Gaffer::BoolPlug *invertNamesPlug();
-		const Gaffer::BoolPlug *invertNamesPlug() const;
+	Gaffer::BoolPlug *invertNamesPlug();
+	const Gaffer::BoolPlug *invertNamesPlug() const;
 
-		/// Implemented so that namesPlug() affects outPlug()->objectPlug().
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	/// Implemented so that namesPlug() affects outPlug()->objectPlug().
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Implemented to call processPrimitiveVariable() for the appropriate variables of inputObject.
-		bool processesObject() const override;
-		void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const override;
+	/// Implemented to call processPrimitiveVariable() for the appropriate variables of inputObject.
+	bool processesObject() const override;
+	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const override;
 
-		/// Must be implemented by subclasses to process the primitive variable in place.
-		virtual void processPrimitiveVariable( const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry, IECoreScene::PrimitiveVariable &inputVariable ) const = 0;
+	/// Must be implemented by subclasses to process the primitive variable in place.
+	virtual void processPrimitiveVariable( const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry, IECoreScene::PrimitiveVariable &inputVariable ) const = 0;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( PrimitiveVariableProcessor )

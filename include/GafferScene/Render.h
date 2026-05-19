@@ -52,65 +52,64 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API Render : public GafferDispatch::TaskNode
 {
 
-	public :
+public:
 
-		explicit Render( const std::string &name=defaultName<Render>() );
-		~Render() override;
+	explicit Render( const std::string &name = defaultName<Render>() );
+	~Render() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::Render, GafferScene::RenderTypeId, GafferDispatch::TaskNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::Render, GafferScene::RenderTypeId, GafferDispatch::TaskNode );
 
-		enum Mode
-		{
-			RenderMode = 0,
-			SceneDescriptionMode = 1
-		};
+	enum Mode
+	{
+		RenderMode = 0,
+		SceneDescriptionMode = 1
+	};
 
-		ScenePlug *inPlug();
-		const ScenePlug *inPlug() const;
+	ScenePlug *inPlug();
+	const ScenePlug *inPlug() const;
 
-		Gaffer::StringPlug *rendererPlug();
-		const Gaffer::StringPlug *rendererPlug() const;
+	Gaffer::StringPlug *rendererPlug();
+	const Gaffer::StringPlug *rendererPlug() const;
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		ScenePlug *outPlug();
-		const ScenePlug *outPlug() const;
+	ScenePlug *outPlug();
+	const ScenePlug *outPlug() const;
 
-		Gaffer::StringPlug *resolvedRendererPlug();
-		const Gaffer::StringPlug *resolvedRendererPlug() const;
+	Gaffer::StringPlug *resolvedRendererPlug();
+	const Gaffer::StringPlug *resolvedRendererPlug() const;
 
-		using RenderSignal = Gaffer::Signals::Signal<void ( const Render * ), Gaffer::Signals::CatchingCombiner<void>>;
-		// Signal emitted prior to rendering. When executing a sequence, this is
-		// emitted once per frame.
-		static RenderSignal &preRenderSignal();
-		// Signal emitted after a render has been completed. When executing a
-		// sequence, this is emitted once per frame.
-		static RenderSignal &postRenderSignal();
+	using RenderSignal = Gaffer::Signals::Signal<void( const Render * ), Gaffer::Signals::CatchingCombiner<void>>;
+	// Signal emitted prior to rendering. When executing a sequence, this is
+	// emitted once per frame.
+	static RenderSignal &preRenderSignal();
+	// Signal emitted after a render has been completed. When executing a
+	// sequence, this is emitted once per frame.
+	static RenderSignal &postRenderSignal();
 
-	protected :
+protected:
 
-		void preTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
-		void postTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
-		IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
-		void execute() const override;
-		void executeSequence( const std::vector<float> &frames ) const override;
+	void preTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
+	void postTasks( const Gaffer::Context *context, Tasks &tasks ) const override;
+	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
+	void execute() const override;
+	void executeSequence( const std::vector<float> &frames ) const override;
 
-	private :
+private:
 
-		void executeInternal( bool flushCaches ) const;
+	void executeInternal( bool flushCaches ) const;
 
-		ScenePlug *adaptedInPlug();
-		const ScenePlug *adaptedInPlug() const;
+	ScenePlug *adaptedInPlug();
+	const ScenePlug *adaptedInPlug() const;
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 
-		// Friendship for the bindings
-		friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
-
+	// Friendship for the bindings
+	friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
 };
 
 IE_CORE_DECLAREPTR( Render );

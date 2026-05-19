@@ -195,7 +195,7 @@ bool childNeedsConstruction( const T *self, const Gaffer::GraphComponent *child,
 
 template<typename T, typename Base, typename TWrapper>
 SerialiserClass<T, Base, TWrapper>::SerialiserClass( const char *name )
-	:	IECorePython::RefCountedClass<T, Base, TWrapper>( name )
+	: IECorePython::RefCountedClass<T, Base, TWrapper>( name )
 {
 	this->def( boost::python::init<>() );
 	this->def( "moduleDependencies", &Detail::moduleDependencies<T, TWrapper> );

@@ -77,7 +77,6 @@ class CollectSerialiser : public NodeSerialiser
 
 		return result;
 	}
-
 };
 
 } // namespace
@@ -89,10 +88,8 @@ void GafferModule::bindCollect()
 		.def( "canAddInput", &Collect::canAddInput )
 		.def( "addInput", &addInputWrapper )
 		.def( "removeInput", &removeInputWrapper )
-		.def( "outputPlugForInput", (ValuePlug *(Collect::*)( const ValuePlug *))&Collect::outputPlugForInput, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-		.def( "inputPlugForOutput", (ValuePlug *(Collect::*)( const ValuePlug *))&Collect::inputPlugForOutput, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-	;
+		.def( "outputPlugForInput", ( ValuePlug * (Collect::*)(const ValuePlug *)) & Collect::outputPlugForInput, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.def( "inputPlugForOutput", ( ValuePlug * (Collect::*)(const ValuePlug *)) & Collect::inputPlugForOutput, return_value_policy<IECorePython::CastToIntrusivePtr>() );
 
 	Serialisation::registerSerialiser( Collect::staticTypeId(), new CollectSerialiser );
-
 }

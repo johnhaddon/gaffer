@@ -57,51 +57,51 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API LightTool : public GafferSceneUI::SelectionTool
 {
 
-	public :
+public:
 
-		LightTool( SceneView *view, const std::string &name = defaultName<LightTool>() );
-		~LightTool() override;
+	LightTool( SceneView *view, const std::string &name = defaultName<LightTool>() );
+	~LightTool() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::LightTool, LightToolTypeId, SelectionTool );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::LightTool, LightToolTypeId, SelectionTool );
 
-	private :
+private:
 
-		GafferScene::ScenePlug *scenePlug();
-		const GafferScene::ScenePlug *scenePlug() const;
+	GafferScene::ScenePlug *scenePlug();
+	const GafferScene::ScenePlug *scenePlug() const;
 
-		void contextChanged();
-		void selectedPathsChanged();
-		void metadataChanged( IECore::InternedString key );
-		void updateHandleInspections();
-		void updateHandleTransforms( float rasterScale );
-		void plugDirtied( const Gaffer::Plug *plug );
-		void preRender();
-		void dirtyHandleTransforms();
+	void contextChanged();
+	void selectedPathsChanged();
+	void metadataChanged( IECore::InternedString key );
+	void updateHandleInspections();
+	void updateHandleTransforms( float rasterScale );
+	void plugDirtied( const Gaffer::Plug *plug );
+	void preRender();
+	void dirtyHandleTransforms();
 
-		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget );
-		bool dragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
-		bool dragEnd( GafferUI::Gadget *gadget );
+	IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget );
+	bool dragMove( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event );
+	bool dragEnd( GafferUI::Gadget *gadget );
 
-		std::string undoMergeGroup() const;
+	std::string undoMergeGroup() const;
 
-		GafferUI::GadgetPtr m_handles;
-		bool m_handleInspectionsDirty;
-		bool m_handleTransformsDirty;
+	GafferUI::GadgetPtr m_handles;
+	bool m_handleInspectionsDirty;
+	bool m_handleTransformsDirty;
 
-		bool m_priorityPathsDirty;
+	bool m_priorityPathsDirty;
 
-		bool m_dragging;
+	bool m_dragging;
 
-		Gaffer::Signals::ScopedConnection m_preRenderConnection;
+	Gaffer::Signals::ScopedConnection m_preRenderConnection;
 
-		std::vector<Gaffer::Signals::ScopedConnection> m_inspectorsDirtiedConnection;
+	std::vector<Gaffer::Signals::ScopedConnection> m_inspectorsDirtiedConnection;
 
-		int m_mergeGroupId;
+	int m_mergeGroupId;
 
-		static ToolDescription<LightTool, SceneView> g_toolDescription;
-		static size_t g_firstPlugIndex;
+	static ToolDescription<LightTool, SceneView> g_toolDescription;
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( LightTool )
 
-}  // namespace GafferSceneUI
+} // namespace GafferSceneUI

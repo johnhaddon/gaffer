@@ -67,7 +67,7 @@ namespace
 {
 
 template<class F, typename... Args>
-void dispatchForVdbType( const openvdb::GridBase *grid, F &&functor, Args&&... args )
+void dispatchForVdbType( const openvdb::GridBase *grid, F &&functor, Args &&...args )
 {
 	const std::string &type = grid->type();
 
@@ -86,9 +86,9 @@ void dispatchForVdbType( const openvdb::GridBase *grid, F &&functor, Args&&... a
 	}
 }
 
-template< typename T>
+template<typename T>
 openvdb::GridBase::ConstPtr mergeGrids(
-	const std::vector< std::pair< openvdb::GridBase::ConstPtr, Imath::M44f > > &grids,
+	const std::vector<std::pair<openvdb::GridBase::ConstPtr, Imath::M44f>> &grids,
 	const openvdb::math::Transform &vdbTransform,
 	const IECore::Canceller *canceller
 )
@@ -101,7 +101,7 @@ openvdb::GridBase::ConstPtr mergeGrids(
 	static const Imath::M44f identity;
 	for( const auto &[untypedGrid, transform] : grids )
 	{
-		typename T::ConstPtr grid = openvdb::GridBase::grid< T >( untypedGrid );
+		typename T::ConstPtr grid = openvdb::GridBase::grid<T>( untypedGrid );
 
 		// We check the grid types match when we put them in the grids list
 		assert( grid.get() );
@@ -116,13 +116,8 @@ openvdb::GridBase::ConstPtr mergeGrids(
 		else
 		{
 			openvdb::math::Transform::Ptr toSource = grid->transformPtr()->copy();
-			toSource->postMult( openvdb::math::Mat4d(
-				transform[0][0], transform[0][1], transform[0][2], transform[0][3],
-				transform[1][0], transform[1][1], transform[1][2], transform[1][3],
-				transform[2][0], transform[2][1], transform[2][2], transform[2][3],
-				transform[3][0], transform[3][1], transform[3][2], transform[3][3]
-			) );
-			gridWithTransform = openvdb::GridBase::constGrid< T >( grid->copyGridReplacingTransform( toSource ) );
+			toSource->postMult( openvdb::math::Mat4d( transform[0][0], transform[0][1], transform[0][2], transform[0][3], transform[1][0], transform[1][1], transform[1][2], transform[1][3], transform[2][0], transform[2][1], transform[2][2], transform[2][3], transform[3][0], transform[3][1], transform[3][2], transform[3][3] ) );
+			gridWithTransform = openvdb::GridBase::constGrid<T>( grid->copyGridReplacingTransform( toSource ) );
 
 			transformMatches = false;
 		}
@@ -141,7 +136,6 @@ openvdb::GridBase::ConstPtr mergeGrids(
 			}
 
 			openvdb::tools::csgUnion( *editableResultGrid, *openvdb::deepCopyTypedGrid<T>( grid ) );
-
 		}
 		else
 		{
@@ -197,7 +191,6 @@ openvdb::GridBase::ConstPtr mergeGrids(
 				}
 				openvdb::tools::csgUnion( *editableResultGrid, *destSpaceGrid );
 			}
-
 		}
 	}
 
@@ -210,8 +203,7 @@ IECoreScene::MeshPrimitivePtr volumeToMesh( openvdb::GridBase::ConstPtr grid, do
 
 	dispatchForVdbType(
 		grid.get(),
-		[ &mesher ]( const auto *typedGrid )
-		{
+		[&mesher]( const auto *typedGrid ) {
 			mesher( *typedGrid );
 		}
 	);
@@ -283,7 +275,7 @@ GAFFER_NODE_DEFINE_TYPE( LevelSetToMesh );
 size_t LevelSetToMesh::g_firstPlugIndex = 0;
 
 LevelSetToMesh::LevelSetToMesh( const std::string &name )
-	:	MergeObjects( name, "${scene:path}" )
+	: MergeObjects( name, "${scene:path}" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -308,12 +300,12 @@ const Gaffer::StringPlug *LevelSetToMesh::gridPlug() const
 
 Gaffer::FloatPlug *LevelSetToMesh::isoValuePlug()
 {
-	return getChild<FloatPlug>( g_firstPlugIndex + 1);
+	return getChild<FloatPlug>( g_firstPlugIndex + 1 );
 }
 
 const Gaffer::FloatPlug *LevelSetToMesh::isoValuePlug() const
 {
-	return getChild<FloatPlug>( g_firstPlugIndex + 1);
+	return getChild<FloatPlug>( g_firstPlugIndex + 1 );
 }
 
 Gaffer::FloatPlug *LevelSetToMesh::adaptivityPlug()
@@ -328,12 +320,10 @@ const Gaffer::FloatPlug *LevelSetToMesh::adaptivityPlug() const
 
 bool LevelSetToMesh::affectsMergedObject( const Gaffer::Plug *input ) const
 {
-	return
-		MergeObjects::affectsMergedObject( input ) ||
+	return MergeObjects::affectsMergedObject( input ) ||
 		input == isoValuePlug() ||
 		input == adaptivityPlug() ||
-		input == gridPlug()
-	;
+		input == gridPlug();
 }
 
 void LevelSetToMesh::hashMergedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -345,7 +335,7 @@ void LevelSetToMesh::hashMergedObject( const ScenePath &path, const Gaffer::Cont
 	adaptivityPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject( const std::vector< std::pair< IECore::ConstObjectPtr, Imath::M44f > > &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
 {
 	std::string gridName = gridPlug()->getValue();
 
@@ -363,11 +353,11 @@ IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject( const std::vector< s
 	openvdb::math::Transform::ConstPtr mostPreciseIndexing;
 	std::string gridType;
 
-	std::vector< std::pair< openvdb::GridBase::ConstPtr, Imath::M44f > > grids;
+	std::vector<std::pair<openvdb::GridBase::ConstPtr, Imath::M44f>> grids;
 
 	for( const auto &[object, transform] : sources )
 	{
-		const IECoreVDB::VDBObject * v = IECore::runTimeCast< const IECoreVDB::VDBObject >( object.get() );
+		const IECoreVDB::VDBObject *v = IECore::runTimeCast<const IECoreVDB::VDBObject>( object.get() );
 		if( !v )
 		{
 			// Just skip anything that's not a vdb
@@ -376,7 +366,7 @@ IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject( const std::vector< s
 
 		openvdb::GridBase::ConstPtr grid = v->findGrid( gridPlug()->getValue() );
 
-		if (!grid)
+		if( !grid )
 		{
 			continue;
 		}
@@ -413,9 +403,8 @@ IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject( const std::vector< s
 	openvdb::GridBase::ConstPtr resultGrid;
 	dispatchForVdbType(
 		grids[0].first.get(),
-		[ &grids, &mostPreciseIndexing, &context, &resultGrid ]( const auto *typedGrid )
-		{
-			using GridType = typename std::remove_const_t< std::remove_pointer_t<decltype( typedGrid )> >;
+		[&grids, &mostPreciseIndexing, &context, &resultGrid]( const auto *typedGrid ) {
+			using GridType = typename std::remove_const_t<std::remove_pointer_t<decltype( typedGrid )>>;
 			resultGrid = mergeGrids<GridType>( grids, *mostPreciseIndexing, context->canceller() );
 		}
 	);

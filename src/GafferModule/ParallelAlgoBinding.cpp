@@ -92,7 +92,7 @@ std::shared_ptr<BackgroundTask> backgroundTaskConstructor( const Plug *subject, 
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
-				(*fPtr)( boost::ref( canceller ) );
+				( *fPtr )( boost::ref( canceller ) );
 			}
 			catch( boost::python::error_already_set & )
 			{
@@ -138,20 +138,19 @@ struct GILReleaseUIThreadFunction
 {
 
 	GILReleaseUIThreadFunction( ParallelAlgo::UIThreadFunction function )
-		:	m_function( function )
+		: m_function( function )
 	{
 	}
 
-	void operator()()
+	void operator () ()
 	{
 		IECorePython::ScopedGILRelease gilRelease;
 		m_function();
 	}
 
-	private :
+private:
 
-		ParallelAlgo::UIThreadFunction m_function;
-
+	ParallelAlgo::UIThreadFunction m_function;
 };
 
 void callOnUIThread( boost::python::object f )
@@ -165,7 +164,7 @@ void callOnUIThread( boost::python::object f )
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
-				(*fPtr)();
+				( *fPtr )();
 				// We are likely to be the last owner of the python
 				// function object. Make sure we release it while we
 				// still hold the GIL.
@@ -197,7 +196,7 @@ void pushUIThreadCallHandler( boost::python::object handler )
 	IECorePython::ScopedGILRelease gilRelease;
 
 	Gaffer::ParallelAlgo::pushUIThreadCallHandler(
-		[handlerPtr] ( const ParallelAlgo::UIThreadFunction &function ) {
+		[handlerPtr]( const ParallelAlgo::UIThreadFunction &function ) {
 			IECorePython::ScopedGILLock gilLock;
 			boost::python::object pythonFunction = make_function(
 				GILReleaseUIThreadFunction( function ),
@@ -206,7 +205,7 @@ void pushUIThreadCallHandler( boost::python::object handler )
 			);
 			try
 			{
-				(*handlerPtr)( pythonFunction );
+				( *handlerPtr )( pythonFunction );
 			}
 			catch( boost::python::error_already_set & )
 			{
@@ -235,7 +234,7 @@ std::shared_ptr<BackgroundTask> callOnBackgroundThread( const Plug *subject, boo
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
-				(*fPtr)();
+				( *fPtr )();
 			}
 			catch( boost::python::error_already_set & )
 			{
@@ -254,21 +253,19 @@ void GafferModule::bindParallelAlgo()
 
 	{
 		scope s = class_<BackgroundTask, boost::noncopyable>( "BackgroundTask", no_init )
-			.def( "__init__", make_constructor( &backgroundTaskConstructor, default_call_policies() ) )
-			.def( "cancel", &backgroundTaskCancel )
-			.def( "wait", &backgroundTaskWait )
-			.def( "waitFor", &backgroundTaskWaitFor )
-			.def( "cancelAndWait", &backgroundTaskCancelAndWait )
-			.def( "status", &backgroundTaskStatus )
-		;
+					  .def( "__init__", make_constructor( &backgroundTaskConstructor, default_call_policies() ) )
+					  .def( "cancel", &backgroundTaskCancel )
+					  .def( "wait", &backgroundTaskWait )
+					  .def( "waitFor", &backgroundTaskWaitFor )
+					  .def( "cancelAndWait", &backgroundTaskCancelAndWait )
+					  .def( "status", &backgroundTaskStatus );
 
 		enum_<BackgroundTask::Status>( "Status" )
 			.value( "Pending", BackgroundTask::Pending )
 			.value( "Running", BackgroundTask::Running )
 			.value( "Completed", BackgroundTask::Completed )
 			.value( "Cancelled", BackgroundTask::Cancelled )
-			.value( "Errored", BackgroundTask::Errored )
-		;
+			.value( "Errored", BackgroundTask::Errored );
 	}
 
 	register_ptr_to_python<std::shared_ptr<BackgroundTask>>();
@@ -282,5 +279,4 @@ void GafferModule::bindParallelAlgo()
 	def( "popUIThreadCallHandler", &popUIThreadCallHandler );
 	def( "canCallOnUIThread", &ParallelAlgo::canCallOnUIThread );
 	def( "callOnBackgroundThread", &callOnBackgroundThread );
-
 }

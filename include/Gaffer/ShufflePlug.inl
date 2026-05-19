@@ -73,7 +73,7 @@ T ShufflesPlug::shuffleWithExtraSources( const T &sourceContainer, const T &extr
 template<typename T>
 T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources, bool ignoreMissingSource ) const
 {
-	using NameContainer = std::unordered_set< typename T::key_type >;
+	using NameContainer = std::unordered_set<typename T::key_type>;
 
 	// NOTE : The shuffles are applied in the same order they were added to the parent plug.
 	//        Each shuffle's source may contain wildcards, so a single shuffle may read from
@@ -95,7 +95,7 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 		// NOTE : "source" context variable only applies to the destination plug.
 		//        So retrieve values of other plugs before setting context variable.
 
-		if( ! plug->enabledPlug()->getValue() )
+		if( !plug->enabledPlug()->getValue() )
 			continue;
 
 		const std::string &srcPattern = plug->sourcePlug()->getValue();
@@ -110,7 +110,7 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 		//        Any source substitutons should have already been done when evaluating
 		//        the source plug. We need to do destination substitutions manually.
 
-		if( ! IECore::StringAlgo::hasWildcards( srcPattern ) )
+		if( !IECore::StringAlgo::hasWildcards( srcPattern ) )
 		{
 			// NOTE : No wildcards in source so shuffle is one move.
 
@@ -140,12 +140,12 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 				Gaffer::Context::EditableScope scope( Gaffer::Context::current() );
 				scope.set<std::string>( g_sourceVariable, &srcName );
 				const std::string &dstPattern = plug->destinationPlug()->getValue();
-				if( ! dstPattern.empty() )
+				if( !dstPattern.empty() )
 				{
 					const std::string dstName = scope.context()->substitute( dstPattern );
 					if( dstReplace || ( destinationContainer.find( dstName ) == destinationContainer.end() ) )
 					{
-						destinationContainer[ dstName ] = *srcValue;
+						destinationContainer[dstName] = *srcValue;
 						names.insert( dstName );
 					}
 
@@ -170,8 +170,9 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 
 			NameContainer moveNames;
 			for( typename T::const_iterator
-					sIt    = sourceContainer.begin(),
-					sItEnd = sourceContainer.end(); sIt != sItEnd; ++sIt )
+					 sIt = sourceContainer.begin(),
+					 sItEnd = sourceContainer.end();
+				 sIt != sItEnd; ++sIt )
 			{
 				// NOTE : Quick way to get a string from a key that could be std::string or IECore::InternedString
 
@@ -180,18 +181,18 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 				{
 					scope.set<std::string>( g_sourceVariable, &srcName );
 					const std::string &dstPattern = plug->destinationPlug()->getValue();
-					if( ! dstPattern.empty() )
+					if( !dstPattern.empty() )
 					{
 						const std::string dstName = scope.context()->substitute( dstPattern );
 						// NOTE : Check for clashing move destination names within this shuffle.
 						//        Do check regardless of whether shuffle's replace destination
 						//        flag means destination is not actually written.
 
-						if( ! moveNames.insert( dstName ).second )
+						if( !moveNames.insert( dstName ).second )
 						{
 							throw IECore::Exception(
 								fmt::format(
-									"ShufflesPlug::shuffle : Destination plug \"{}\" shuffles from \"{}\" to \"{}\", " \
+									"ShufflesPlug::shuffle : Destination plug \"{}\" shuffles from \"{}\" to \"{}\", "
 									"cannot write from multiple sources to destination \"{}\"",
 									plug->destinationPlug()->relativeName( plug->node() ? plug->node()->parent() : nullptr ),
 									srcPattern, dstPattern, dstName
@@ -201,7 +202,7 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 
 						if( dstReplace || ( destinationContainer.find( dstName ) == destinationContainer.end() ) )
 						{
-							destinationContainer[ dstName ] = sIt->second;
+							destinationContainer[dstName] = sIt->second;
 							names.insert( dstName );
 						}
 

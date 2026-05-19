@@ -75,7 +75,7 @@ struct MappingData : public IECore::Data
 		// source name. We do this to maintain the input order, preserving
 		// the position of renamed render passes while newly copied
 		// render passes are sorted immediately after their source.
-		vector< tuple<size_t, bool, string> > shuffledNames;
+		vector<tuple<size_t, bool, string>> shuffledNames;
 		shuffledNames.reserve( m_mapping.size() );
 		for( const auto &[destination, source] : m_mapping )
 		{
@@ -105,13 +105,12 @@ struct MappingData : public IECore::Data
 		return it->second;
 	}
 
-	private :
+private:
 
-		StringVectorDataPtr m_outRenderPassNames;
+	StringVectorDataPtr m_outRenderPassNames;
 
-		using Map = unordered_map<string, string>;
-		Map m_mapping;
-
+	using Map = unordered_map<string, string>;
+	Map m_mapping;
 };
 
 IE_CORE_DECLAREPTR( MappingData )
@@ -137,22 +136,21 @@ bool enabled( const BoolPlug *enabledPlug, const Gaffer::Context *context )
 class ShuffleRenderPasses::ProcessedScope : public Context::EditableScope
 {
 
-	public :
+public:
 
-		ProcessedScope( const Context *context, const ShuffleRenderPasses *processor )
-			:	EditableScope( context )
+	ProcessedScope( const Context *context, const ShuffleRenderPasses *processor )
+		: EditableScope( context )
+	{
+		ContextAlgo::GlobalScope globalScope( context, processor->inPlug() );
+		if( processor->enabledPlug()->getValue() )
 		{
-			ContextAlgo::GlobalScope globalScope( context, processor->inPlug() );
-			if( processor->enabledPlug()->getValue() )
-			{
-				processor->processContext( *this, m_storage );
-			}
+			processor->processContext( *this, m_storage );
 		}
+	}
 
-	private :
+private:
 
-		IECore::ConstRefCountedPtr m_storage;
-
+	IECore::ConstRefCountedPtr m_storage;
 };
 
 GAFFER_NODE_DEFINE_TYPE( ShuffleRenderPasses );
@@ -165,7 +163,7 @@ const std::string g_renderPassContextName = "renderPass";
 size_t ShuffleRenderPasses::g_firstPlugIndex = 0;
 
 ShuffleRenderPasses::ShuffleRenderPasses( const std::string &name )
-	:	ContextProcessor( name )
+	: ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );

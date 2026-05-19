@@ -53,58 +53,57 @@ template<typename T>
 class GAFFER_API BoxPlug : public ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = T;
-		using PointType = typename IECore::BoxTraits<T>::BaseType;
-		using ChildType = CompoundNumericPlug<PointType>;
+	using ValueType = T;
+	using PointType = typename IECore::BoxTraits<T>::BaseType;
+	using ChildType = CompoundNumericPlug<PointType>;
 
-		GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( BoxPlug<T>, ValuePlug );
+	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( BoxPlug<T>, ValuePlug );
 
-		explicit BoxPlug(
-			const std::string &name = defaultName<BoxPlug>(),
-			Direction direction=In,
-			T defaultValue = T(),
-			unsigned flags = Default
-		);
+	explicit BoxPlug(
+		const std::string &name = defaultName<BoxPlug>(),
+		Direction direction = In,
+		T defaultValue = T(),
+		unsigned flags = Default
+	);
 
-		BoxPlug(
-			const std::string &name,
-			Direction direction,
-			T defaultValue,
-			const PointType &minValue,
-			const PointType &maxValue,
-			unsigned flags = Default
-		);
+	BoxPlug(
+		const std::string &name,
+		Direction direction,
+		T defaultValue,
+		const PointType &minValue,
+		const PointType &maxValue,
+		unsigned flags = Default
+	);
 
-		~BoxPlug() override;
+	~BoxPlug() override;
 
-		/// Accepts no children following construction.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Accepts no children following construction.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		ChildType *minPlug();
-		const ChildType *minPlug() const;
+	ChildType *minPlug();
+	const ChildType *minPlug() const;
 
-		ChildType *maxPlug();
-		const ChildType *maxPlug() const;
+	ChildType *maxPlug();
+	const ChildType *maxPlug() const;
 
-		T defaultValue() const;
+	T defaultValue() const;
 
-		bool hasMinValue() const;
-		bool hasMaxValue() const;
+	bool hasMinValue() const;
+	bool hasMaxValue() const;
 
-		PointType minValue() const;
-		PointType maxValue() const;
+	PointType minValue() const;
+	PointType maxValue() const;
 
-		/// Calls setValue for the min and max child plugs, using the min and max of
-		/// value.
-		/// \undoable
-		void setValue( const T &value );
-		/// Returns the value, calling getValue() on the min and max child plugs to compute a component
-		/// of the result.
-		T getValue() const;
-
+	/// Calls setValue for the min and max child plugs, using the min and max of
+	/// value.
+	/// \undoable
+	void setValue( const T &value );
+	/// Returns the value, calling getValue() on the min and max child plugs to compute a component
+	/// of the result.
+	T getValue() const;
 };
 
 using Box2iPlug = BoxPlug<Imath::Box2i>;

@@ -45,64 +45,63 @@ namespace GafferScene
 class GAFFERSCENE_API AttributeProcessor : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		~AttributeProcessor() override;
+	~AttributeProcessor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::AttributeProcessor, AttributeProcessorTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::AttributeProcessor, AttributeProcessorTypeId, FilteredSceneProcessor );
 
-		Gaffer::BoolPlug *globalPlug();
-		const Gaffer::BoolPlug *globalPlug() const;
+	Gaffer::BoolPlug *globalPlug();
+	const Gaffer::BoolPlug *globalPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		/// Constructs with a single input ScenePlug named "in". Use inPlug()
-		/// to access this plug.
-		explicit AttributeProcessor( const std::string &name );
-		/// Constructs with an ArrayPlug called "in". Use inPlug() as a
-		/// convenience for accessing the first child in the array, and use
-		/// inPlugs() to access the array itself.
-		AttributeProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
+	/// Constructs with a single input ScenePlug named "in". Use inPlug()
+	/// to access this plug.
+	explicit AttributeProcessor( const std::string &name );
+	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
+	/// convenience for accessing the first child in the array, and use
+	/// inPlugs() to access the array itself.
+	AttributeProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
 
-		/// Must be implemented by derived classes to return true if `input` is used
-		/// by `computeProcessedAttributes()`. Overrides must start by calling the base
-		/// class first, and return true if it returns true.
-		virtual bool affectsProcessedAttributes( const Gaffer::Plug *input ) const = 0;
-		/// Must be implemented by derived classes to form a hash representing the
-		/// work done by `computeProcessedAttributes()`. If `computeProcessedAttributes()`
-		/// will be a no-op, then `h` should be left unchanged.
-		virtual void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
-		/// Must be implemented by derived classes to return the processed attributes.
-		virtual IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const = 0;
+	/// Must be implemented by derived classes to return true if `input` is used
+	/// by `computeProcessedAttributes()`. Overrides must start by calling the base
+	/// class first, and return true if it returns true.
+	virtual bool affectsProcessedAttributes( const Gaffer::Plug *input ) const = 0;
+	/// Must be implemented by derived classes to form a hash representing the
+	/// work done by `computeProcessedAttributes()`. If `computeProcessedAttributes()`
+	/// will be a no-op, then `h` should be left unchanged.
+	virtual void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
+	/// Must be implemented by derived classes to return the processed attributes.
+	virtual IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const = 0;
 
-		/// Would be better as private and final, but needs to be protected so that it can be called by ShaderTweaks.
-		IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	/// Would be better as private and final, but needs to be protected so that it can be called by ShaderTweaks.
+	IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		void init();
-		void plugSet( Gaffer::Plug *plug );
-		void plugInputChanged( Gaffer::Plug *plug );
-		void updateInternalConnections();
+	void init();
+	void plugSet( Gaffer::Plug *plug );
+	void plugInputChanged( Gaffer::Plug *plug );
+	void updateInternalConnections();
 
-		void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
+	void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
 
-		void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
-		IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
+	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
+	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
 
-		/// Private constructor and friendship for old nodes which are filtered to everything
-		/// by default. This was a mistake, and we want to ensure that we don't repeat the mistake
-		/// for new nodes.
-		AttributeProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault );
-		friend class DeleteAttributes;
-		friend class ShaderAssignment;
-		friend class Attributes;
-		friend class AttributeVisualiser;
+	/// Private constructor and friendship for old nodes which are filtered to everything
+	/// by default. This was a mistake, and we want to ensure that we don't repeat the mistake
+	/// for new nodes.
+	AttributeProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault );
+	friend class DeleteAttributes;
+	friend class ShaderAssignment;
+	friend class Attributes;
+	friend class AttributeVisualiser;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( AttributeProcessor )

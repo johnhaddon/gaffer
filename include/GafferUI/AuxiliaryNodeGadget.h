@@ -44,28 +44,28 @@ namespace GafferUI
 class GAFFERUI_API AuxiliaryNodeGadget : public StandardNodeGadget
 {
 
-	public :
+public:
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::AuxiliaryNodeGadget, AuxiliaryNodeGadgetTypeId, StandardNodeGadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::AuxiliaryNodeGadget, AuxiliaryNodeGadgetTypeId, StandardNodeGadget );
 
-		explicit AuxiliaryNodeGadget( Gaffer::NodePtr node );
-		~AuxiliaryNodeGadget() override;
+	explicit AuxiliaryNodeGadget( Gaffer::NodePtr node );
+	~AuxiliaryNodeGadget() override;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 
-	private :
+private:
 
-		static NodeGadgetTypeDescription<AuxiliaryNodeGadget> g_nodeGadgetTypeDescription;
+	static NodeGadgetTypeDescription<AuxiliaryNodeGadget> g_nodeGadgetTypeDescription;
 
-		void nodeMetadataChanged( IECore::InternedString key );
-		bool updateLabel();
+	void nodeMetadataChanged( IECore::InternedString key );
+	bool updateLabel();
 
-		std::string m_label;
-		float m_radius;
+	std::string m_label;
+	float m_radius;
 };
 
 IE_CORE_DECLAREPTR( AuxiliaryNodeGadget )

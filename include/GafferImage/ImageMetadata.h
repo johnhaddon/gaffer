@@ -46,30 +46,29 @@ namespace GafferImage
 class GAFFERIMAGE_API ImageMetadata : public MetadataProcessor
 {
 
-	public :
+public:
 
-		explicit ImageMetadata( const std::string &name=defaultName<ImageMetadata>() );
-		~ImageMetadata() override;
+	explicit ImageMetadata( const std::string &name = defaultName<ImageMetadata>() );
+	~ImageMetadata() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageMetadata, ImageMetadataTypeId, MetadataProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::ImageMetadata, ImageMetadataTypeId, MetadataProcessor );
 
-		Gaffer::CompoundDataPlug *metadataPlug();
-		const Gaffer::CompoundDataPlug *metadataPlug() const;
+	Gaffer::CompoundDataPlug *metadataPlug();
+	const Gaffer::CompoundDataPlug *metadataPlug() const;
 
-		Gaffer::AtomicCompoundDataPlug *extraMetadataPlug();
-		const Gaffer::AtomicCompoundDataPlug *extraMetadataPlug() const;
+	Gaffer::AtomicCompoundDataPlug *extraMetadataPlug();
+	const Gaffer::AtomicCompoundDataPlug *extraMetadataPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
+	void hashProcessedMetadata( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundDataPtr computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ImageMetadata );

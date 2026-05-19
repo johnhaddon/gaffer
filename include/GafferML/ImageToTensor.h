@@ -50,45 +50,44 @@ namespace GafferML
 class GAFFERML_API ImageToTensor : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit ImageToTensor( const std::string &name=defaultName<ImageToTensor>() );
-		~ImageToTensor() override;
+	explicit ImageToTensor( const std::string &name = defaultName<ImageToTensor>() );
+	~ImageToTensor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferML::ImageToTensor, ImageToTensorTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferML::ImageToTensor, ImageToTensorTypeId, Gaffer::ComputeNode );
 
-		GafferImage::ImagePlug *imagePlug();
-		const GafferImage::ImagePlug *imagePlug() const;
+	GafferImage::ImagePlug *imagePlug();
+	const GafferImage::ImagePlug *imagePlug() const;
 
-		Gaffer::StringPlug *viewPlug();
-		const Gaffer::StringPlug *viewPlug() const;
+	Gaffer::StringPlug *viewPlug();
+	const Gaffer::StringPlug *viewPlug() const;
 
-		Gaffer::StringVectorDataPlug *channelsPlug();
-		const Gaffer::StringVectorDataPlug *channelsPlug() const;
+	Gaffer::StringVectorDataPlug *channelsPlug();
+	const Gaffer::StringVectorDataPlug *channelsPlug() const;
 
-		Gaffer::BoolPlug *interleaveChannelsPlug();
-		const Gaffer::BoolPlug *interleaveChannelsPlug() const;
+	Gaffer::BoolPlug *interleaveChannelsPlug();
+	const Gaffer::BoolPlug *interleaveChannelsPlug() const;
 
-		Gaffer::IntPlug *tensorElementTypePlug();
-		const Gaffer::IntPlug *tensorElementTypePlug() const;
+	Gaffer::IntPlug *tensorElementTypePlug();
+	const Gaffer::IntPlug *tensorElementTypePlug() const;
 
-		TensorPlug *tensorPlug();
-		const TensorPlug *tensorPlug() const;
+	TensorPlug *tensorPlug();
+	const TensorPlug *tensorPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ImageToTensor )

@@ -55,7 +55,7 @@ StringPlug::StringPlug(
 	unsigned flags,
 	unsigned substitutions
 )
-	:	ValuePlug( name, direction, new StringData( defaultValue ), flags ), m_substitutions( substitutions )
+	: ValuePlug( name, direction, new StringData( defaultValue ), flags ), m_substitutions( substitutions )
 {
 }
 
@@ -115,19 +115,18 @@ std::string StringPlug::getValue() const
 		m_substitutions &&
 		direction() == In &&
 		Process::current() &&
-		IECore::StringAlgo::hasSubstitutions( s->readable() )
-	;
+		IECore::StringAlgo::hasSubstitutions( s->readable() );
 
 	return performSubstitutions ? Context::current()->substitute( s->readable(), m_substitutions ) : s->readable();
 }
 
 void StringPlug::setFrom( const ValuePlug *other )
 {
-	if( auto stringPlug = IECore::runTimeCast<const StringPlug >( other ) )
+	if( auto stringPlug = IECore::runTimeCast<const StringPlug>( other ) )
 	{
 		setValue( stringPlug->getValue() );
 	}
-	else if( auto stringVectorPlug = IECore::runTimeCast<const StringVectorDataPlug >( other ) )
+	else if( auto stringVectorPlug = IECore::runTimeCast<const StringVectorDataPlug>( other ) )
 	{
 		ConstStringVectorDataPtr data = stringVectorPlug->getValue();
 		setValue( boost::algorithm::join( data->readable(), " " ) );
@@ -142,8 +141,7 @@ IECore::MurmurHash StringPlug::hash() const
 {
 	const bool performSubstitutions =
 		m_substitutions &&
-		direction() == In
-	;
+		direction() == In;
 
 	if( performSubstitutions )
 	{

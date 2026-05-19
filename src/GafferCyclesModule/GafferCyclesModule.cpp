@@ -89,5 +89,4 @@ BOOST_PYTHON_MODULE( _GafferCycles )
 
 		def( "convertUSDShaders", &IECoreCycles::ShaderNetworkAlgo::convertUSDShaders );
 	}
-
 }

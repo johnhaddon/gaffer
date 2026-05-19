@@ -233,32 +233,31 @@ namespace Gaffer
 class GAFFER_API Process::Collaboration : public IECore::RefCounted
 {
 
-	public :
+public:
 
-		// Work around https://bugs.llvm.org/show_bug.cgi?id=32978
-		~Collaboration() noexcept( true ) override;
+	// Work around https://bugs.llvm.org/show_bug.cgi?id=32978
+	~Collaboration() noexcept( true ) override;
 
-		IE_CORE_DECLAREMEMBERPTR( Collaboration );
+	IE_CORE_DECLAREMEMBERPTR( Collaboration );
 
-		// Arena and task group used to allow waiting threads to participate
-		// in collaborative work.
-		tbb::task_arena arena;
-		tbb::task_group taskGroup;
+	// Arena and task group used to allow waiting threads to participate
+	// in collaborative work.
+	tbb::task_arena arena;
+	tbb::task_group taskGroup;
 
-		using Set = std::unordered_set<const Collaboration *>;
-		// Collaborations depending directly on this one.
-		Set dependents;
+	using Set = std::unordered_set<const Collaboration *>;
+	// Collaborations depending directly on this one.
+	Set dependents;
 
-		IECore::CancellerPtr canceller;
+	IECore::CancellerPtr canceller;
 
-		// Returns true if this collaboration depends on `collaboration`, either
-		// directly or indirectly via other collaborations it depends on.
-		// The caller of this function must hold `g_dependentsMutex`.
-		bool dependsOn( const Collaboration *collaboration ) const;
+	// Returns true if this collaboration depends on `collaboration`, either
+	// directly or indirectly via other collaborations it depends on.
+	// The caller of this function must hold `g_dependentsMutex`.
+	bool dependsOn( const Collaboration *collaboration ) const;
 
-		// Protects access to `dependents` on _all_ Collaborations.
-		static tbb::spin_mutex g_dependentsMutex;
-
+	// Protects access to `dependents` on _all_ Collaborations.
+	static tbb::spin_mutex g_dependentsMutex;
 };
 
 /// Collaboration subclass specific to a single type of process, providing storage for the result
@@ -268,38 +267,36 @@ class GAFFER_API Process::Collaboration : public IECore::RefCounted
 template<typename ProcessType>
 class Process::TypedCollaboration : public Process::Collaboration
 {
-	public :
+public:
 
-		std::variant<std::monostate, std::exception_ptr, typename ProcessType::ResultType> result;
+	std::variant<std::monostate, std::exception_ptr, typename ProcessType::ResultType> result;
 
-		typename ProcessType::ResultType resultOrException() const
-		{
-			return std::visit(
-				[] ( auto &&v ) -> typename ProcessType::ResultType
+	typename ProcessType::ResultType resultOrException() const
+	{
+		return std::visit(
+			[]( auto &&v ) -> typename ProcessType::ResultType {
+				using T = std::decay_t<decltype( v )>;
+				if constexpr( std::is_same_v<T, typename ProcessType::ResultType> )
 				{
-					using T = std::decay_t<decltype( v )>;
-					if constexpr( std::is_same_v<T, typename ProcessType::ResultType> )
-					{
-						return v;
-					}
-					else if constexpr( std::is_same_v<T, std::exception_ptr> )
-					{
-						std::rethrow_exception( v );
-					}
-					else
-					{
-						throw IECore::Cancelled();
-					}
-				},
-				result
-			);
-		}
+					return v;
+				}
+				else if constexpr( std::is_same_v<T, std::exception_ptr> )
+				{
+					std::rethrow_exception( v );
+				}
+				else
+				{
+					throw IECore::Cancelled();
+				}
+			},
+			result
+		);
+	}
 
-		IE_CORE_DECLAREMEMBERPTR( TypedCollaboration );
+	IE_CORE_DECLAREMEMBERPTR( TypedCollaboration );
 
-		using PendingCollaborations = tbb::concurrent_hash_map<typename ProcessType::CacheType::KeyType, std::vector<Ptr>>;
-		static PendingCollaborations g_pendingCollaborations;
-
+	using PendingCollaborations = tbb::concurrent_hash_map<typename ProcessType::CacheType::KeyType, std::vector<Ptr>>;
+	static PendingCollaborations g_pendingCollaborations;
 };
 
 template<typename ProcessType>
@@ -307,7 +304,7 @@ typename Process::TypedCollaboration<ProcessType>::PendingCollaborations Process
 
 template<typename ProcessType, typename... ProcessArguments>
 typename ProcessType::ResultType Process::acquireCollaborativeResult(
-	const typename ProcessType::CacheType::KeyType &cacheKey, ProcessArguments&&... args
+	const typename ProcessType::CacheType::KeyType &cacheKey, ProcessArguments &&...args
 )
 {
 	const ThreadState &threadState = ThreadState::current();
@@ -385,7 +382,7 @@ typename ProcessType::ResultType Process::acquireCollaborativeResult(
 		accessor.release();
 
 		collaboration->arena.execute(
-			[&]{ return collaboration->taskGroup.wait(); }
+			[&] { return collaboration->taskGroup.wait(); }
 		);
 
 		return collaboration->resultOrException();
@@ -469,4 +466,4 @@ inline bool Process::forceMonitoring( const ThreadState &s, const Plug *plug, co
 	return false;
 }
 
-} // Gaffer
+} // namespace Gaffer

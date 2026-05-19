@@ -55,7 +55,7 @@ static IECore::InternedString g_labelKey( "auxiliaryNodeGadget:label" );
 static IECore::InternedString g_colorKey( "nodeGadget:color" );
 
 AuxiliaryNodeGadget::AuxiliaryNodeGadget( Gaffer::NodePtr node )
-	:	StandardNodeGadget( node, true ), m_label( "" ), m_radius( 1.0 )
+	: StandardNodeGadget( node, true ), m_label( "" ), m_radius( 1.0 )
 {
 	Gaffer::Metadata::nodeValueChangedSignal( node.get() ).connect( boost::bind( &AuxiliaryNodeGadget::nodeMetadataChanged, this, ::_2 ) );
 
@@ -84,8 +84,8 @@ void AuxiliaryNodeGadget::renderLayer( Layer layer, const Style *style, RenderRe
 	Imath::V3f offset = bound.size() / 2.0;
 
 	glPushMatrix();
-		glTranslatef( -offset.x, -offset.y, 0.0f );
-		style->renderText( Style::LabelText, m_label );
+	glTranslatef( -offset.x, -offset.y, 0.0f );
+	style->renderText( Style::LabelText, m_label );
 	glPopMatrix();
 }
 

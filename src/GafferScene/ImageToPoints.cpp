@@ -59,7 +59,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageToPoints );
 size_t ImageToPoints::g_firstPlugIndex = 0;
 
 ImageToPoints::ImageToPoints( const std::string &name )
-	:	ObjectSource( name, "points" )
+	: ObjectSource( name, "points" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image" ) );
@@ -214,8 +214,7 @@ void ImageToPoints::hashSource( const Gaffer::Context *context, IECore::MurmurHa
 	tbb::enumerable_thread_specific<IECore::MurmurHash> threadLocalHash;
 	ImageAlgo::parallelProcessTiles(
 		imagePlug(),
-		[&] ( const ImagePlug *image, const V2i &tileOrigin ) {
-
+		[&]( const ImagePlug *image, const V2i &tileOrigin ) {
 			const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
 			const Box2i validTileBound = BufferAlgo::intersection(
 				BufferAlgo::intersection( tileBound, dataWindow ), displayWindow
@@ -235,7 +234,7 @@ void ImageToPoints::hashSource( const Gaffer::Context *context, IECore::MurmurHa
 	);
 
 	const MurmurHash tilesHash = threadLocalHash.combine(
-		[] ( const MurmurHash &a, const MurmurHash &b ) {
+		[]( const MurmurHash &a, const MurmurHash &b ) {
 			// See SceneAlgo's ThreadablePathHashAccumulator for further discussion of
 			// this "sum of hashes" strategy for deterministic parallel hashing.
 			return MurmurHash( a.h1() + b.h1(), a.h2() + b.h2() );
@@ -335,8 +334,7 @@ IECore::ConstObjectPtr ImageToPoints::computeSource( const Context *context ) co
 
 	ImageAlgo::parallelProcessTiles(
 		imagePlug(),
-		[&] ( const ImagePlug *image, const V2i &tileOrigin ) {
-
+		[&]( const ImagePlug *image, const V2i &tileOrigin ) {
 			const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
 			const Box2i validTileBound = BufferAlgo::intersection(
 				BufferAlgo::intersection( tileBound, dataWindow ), bufferWindow
@@ -392,9 +390,9 @@ IECore::ConstObjectPtr ImageToPoints::computeSource( const Context *context ) co
 		{
 			IECore::dispatch(
 				variable.data.get(),
-				[&] ( auto *typedData ) {
+				[&]( auto *typedData ) {
 					using DataType = typename std::remove_pointer_t<decltype( typedData )>;
-					if constexpr ( TypeTraits::IsVectorTypedData<DataType>::value )
+					if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
 					{
 						auto &typedVector = typedData->writable();
 						size_t newIndex = 0;
@@ -447,11 +445,7 @@ std::vector<ImageToPoints::ChannelMapping> ImageToPoints::channelMappings() cons
 		auto positionIt = find( positionChannels.begin(), positionChannels.end(), channelName );
 		if( positionIt != positionChannels.end() && positionIt - positionChannels.begin() < 3 )
 		{
-			mapping.destinations.push_back( {
-				"P",
-				V3fVectorData::staticTypeId(),
-				static_cast<size_t>( positionIt - positionChannels.begin() )
-			} );
+			mapping.destinations.push_back( { "P", V3fVectorData::staticTypeId(), static_cast<size_t>( positionIt - positionChannels.begin() ) } );
 			numPositionMappings++;
 		}
 
@@ -464,20 +458,12 @@ std::vector<ImageToPoints::ChannelMapping> ImageToPoints::channelMappings() cons
 			{
 				// Map R, G and B to the components of colour primitive variables.
 				const string layerName = ImageAlgo::layerName( channelName );
-				mapping.destinations.push_back( {
-					layerName == "" ? "Cs" : layerName,
-					Color3fVectorData::staticTypeId(),
-					(size_t)colorIndex
-				} );
+				mapping.destinations.push_back( { layerName == "" ? "Cs" : layerName, Color3fVectorData::staticTypeId(), (size_t)colorIndex } );
 			}
 			else
 			{
 				// Map everything else to individual float primitive variables.
-				mapping.destinations.push_back( {
-					channelName,
-					FloatVectorData::staticTypeId(),
-					0
-				} );
+				mapping.destinations.push_back( { channelName, FloatVectorData::staticTypeId(), 0 } );
 			}
 		}
 
@@ -485,11 +471,7 @@ std::vector<ImageToPoints::ChannelMapping> ImageToPoints::channelMappings() cons
 
 		if( channelName == widthChannel )
 		{
-			mapping.destinations.push_back( {
-				"width",
-				FloatVectorData::staticTypeId(),
-				0
-			} );
+			mapping.destinations.push_back( { "width", FloatVectorData::staticTypeId(), 0 } );
 			haveWidthMapping = true;
 		}
 
@@ -497,11 +479,7 @@ std::vector<ImageToPoints::ChannelMapping> ImageToPoints::channelMappings() cons
 
 		if( channelName == "A" && ignoreTransparent )
 		{
-			mapping.destinations.push_back( {
-				"__imageToPointsAlpha__",
-				FloatVectorData::staticTypeId(),
-				0
-			} );
+			mapping.destinations.push_back( { "__imageToPointsAlpha__", FloatVectorData::staticTypeId(), 0 } );
 			haveAlphaMapping = true;
 		}
 

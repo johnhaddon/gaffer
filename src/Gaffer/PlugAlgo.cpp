@@ -99,7 +99,7 @@ void replacePlugWalk( Plug *existingPlug, Plug *plug, ConnectionsVector &connect
 		// Recurse
 		for( Plug::Iterator it( plug ); !it.done(); ++it )
 		{
-			if( Plug *existingChildPlug = existingPlug->getChild<Plug>( (*it)->getName() ) )
+			if( Plug *existingChildPlug = existingPlug->getChild<Plug>( ( *it )->getName() ) )
 			{
 				replacePlugWalk( existingChildPlug, it->get(), connections );
 			}
@@ -166,7 +166,7 @@ void replacePlug( Gaffer::GraphComponent *parent, PlugPtr plug )
 		}
 		for( vector<PlugPtr>::const_iterator oIt = it->outputs.begin(), oeIt = it->outputs.end(); oIt != oeIt; ++oIt )
 		{
-			(*oIt)->setInput( it->plug );
+			( *oIt )->setInput( it->plug );
 		}
 	}
 }
@@ -327,7 +327,7 @@ ValuePlugPtr typedObjectValuePlug( const std::string &name, Plug::Direction dire
 	return result;
 }
 
-}
+} // namespace
 
 namespace Gaffer
 {
@@ -339,8 +339,7 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 {
 	switch( value->typeId() )
 	{
-		case FloatDataTypeId :
-		{
+		case FloatDataTypeId : {
 			FloatPlugPtr valuePlug = new FloatPlug(
 				name,
 				direction,
@@ -351,8 +350,7 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			);
 			return valuePlug;
 		}
-		case IntDataTypeId :
-		{
+		case IntDataTypeId : {
 			IntPlugPtr valuePlug = new IntPlug(
 				name,
 				direction,
@@ -363,8 +361,7 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			);
 			return valuePlug;
 		}
-		case StringDataTypeId :
-		{
+		case StringDataTypeId : {
 			StringPlugPtr valuePlug = new StringPlug(
 				name,
 				direction,
@@ -373,8 +370,7 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			);
 			return valuePlug;
 		}
-		case BoolDataTypeId :
-		{
+		case BoolDataTypeId : {
 			BoolPlugPtr valuePlug = new BoolPlug(
 				name,
 				direction,
@@ -383,48 +379,37 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			);
 			return valuePlug;
 		}
-		case V2iDataTypeId :
-		{
+		case V2iDataTypeId : {
 			return geometricCompoundNumericValuePlug( name, direction, flags, static_cast<const V2iData *>( value ) );
 		}
-		case V3iDataTypeId :
-		{
+		case V3iDataTypeId : {
 			return geometricCompoundNumericValuePlug( name, direction, flags, static_cast<const V3iData *>( value ) );
 		}
-		case V2fDataTypeId :
-		{
+		case V2fDataTypeId : {
 			return geometricCompoundNumericValuePlug( name, direction, flags, static_cast<const V2fData *>( value ) );
 		}
-		case V3fDataTypeId :
-		{
+		case V3fDataTypeId : {
 			return geometricCompoundNumericValuePlug( name, direction, flags, static_cast<const V3fData *>( value ) );
 		}
-		case Color3fDataTypeId :
-		{
+		case Color3fDataTypeId : {
 			return compoundNumericValuePlug( name, direction, flags, static_cast<const Color3fData *>( value ) );
 		}
-		case Color4fDataTypeId :
-		{
+		case Color4fDataTypeId : {
 			return compoundNumericValuePlug( name, direction, flags, static_cast<const Color4fData *>( value ) );
 		}
-		case Box2fDataTypeId :
-		{
+		case Box2fDataTypeId : {
 			return boxValuePlug( name, direction, flags, static_cast<const Box2fData *>( value ) );
 		}
-		case Box2iDataTypeId :
-		{
+		case Box2iDataTypeId : {
 			return boxValuePlug( name, direction, flags, static_cast<const Box2iData *>( value ) );
 		}
-		case Box3fDataTypeId :
-		{
+		case Box3fDataTypeId : {
 			return boxValuePlug( name, direction, flags, static_cast<const Box3fData *>( value ) );
 		}
-		case Box3iDataTypeId :
-		{
+		case Box3iDataTypeId : {
 			return boxValuePlug( name, direction, flags, static_cast<const Box3iData *>( value ) );
 		}
-		case M44fDataTypeId :
-		{
+		case M44fDataTypeId : {
 			M44fPlugPtr valuePlug = new M44fPlug(
 				name,
 				direction,
@@ -433,60 +418,46 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			);
 			return valuePlug;
 		}
-		case FloatVectorDataTypeId :
-		{
+		case FloatVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const FloatVectorData *>( value ) );
 		}
-		case IntVectorDataTypeId :
-		{
+		case IntVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const IntVectorData *>( value ) );
 		}
-		case Int64VectorDataTypeId :
-		{
+		case Int64VectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const Int64VectorData *>( value ) );
 		}
-		case StringVectorDataTypeId :
-		{
+		case StringVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const StringVectorData *>( value ) );
 		}
-		case InternedStringVectorDataTypeId :
-		{
+		case InternedStringVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const InternedStringVectorData *>( value ) );
 		}
-		case BoolVectorDataTypeId :
-		{
+		case BoolVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const BoolVectorData *>( value ) );
 		}
-		case V2iVectorDataTypeId :
-		{
+		case V2iVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const V2iVectorData *>( value ) );
 		}
-		case V3fVectorDataTypeId :
-		{
+		case V3fVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const V3fVectorData *>( value ) );
 		}
-		case Color3fVectorDataTypeId :
-		{
+		case Color3fVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const Color3fVectorData *>( value ) );
 		}
-		case Color4fVectorDataTypeId :
-		{
+		case Color4fVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const Color4fVectorData *>( value ) );
 		}
-		case M44fVectorDataTypeId :
-		{
+		case M44fVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const M44fVectorData *>( value ) );
 		}
-		case M33fVectorDataTypeId :
-		{
+		case M33fVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const M33fVectorData *>( value ) );
 		}
-		case Box2fVectorDataTypeId :
-		{
+		case Box2fVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const Box2fVectorData *>( value ) );
 		}
-		case PathMatcherDataTypeId :
-		{
+		case PathMatcherDataTypeId : {
 			PathMatcherDataPlugPtr valuePlug = new PathMatcherDataPlug(
 				name,
 				direction,
@@ -495,12 +466,10 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			);
 			return valuePlug;
 		}
-		case RampffDataTypeId :
-		{
+		case RampffDataTypeId : {
 			return new RampffPlug( name, direction, static_cast<const RampffData *>( value )->readable(), flags );
 		}
-		case RampfColor3fDataTypeId :
-		{
+		case RampfColor3fDataTypeId : {
 			return new RampfColor3fPlug( name, direction, static_cast<const RampfColor3fData *>( value )->readable(), flags );
 		}
 		default :
@@ -512,7 +481,7 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 
 IECore::DataPtr getValueAsData( const ValuePlug *plug )
 {
-	switch( static_cast<Gaffer::TypeId>(plug->typeId()) )
+	switch( static_cast<Gaffer::TypeId>( plug->typeId() ) )
 	{
 		case FloatPlugTypeId :
 			return new FloatData( static_cast<const FloatPlug *>( plug )->getValue() );
@@ -522,29 +491,25 @@ IECore::DataPtr getValueAsData( const ValuePlug *plug )
 			return new StringData( static_cast<const StringPlug *>( plug )->getValue() );
 		case BoolPlugTypeId :
 			return new BoolData( static_cast<const BoolPlug *>( plug )->getValue() );
-		case V2iPlugTypeId :
-		{
+		case V2iPlugTypeId : {
 			const V2iPlug *v2iPlug = static_cast<const V2iPlug *>( plug );
 			V2iDataPtr data = new V2iData( v2iPlug->getValue() );
 			data->setInterpretation( v2iPlug->interpretation() );
 			return data;
 		}
-		case V3iPlugTypeId :
-		{
+		case V3iPlugTypeId : {
 			const V3iPlug *v3iPlug = static_cast<const V3iPlug *>( plug );
 			V3iDataPtr data = new V3iData( v3iPlug->getValue() );
 			data->setInterpretation( v3iPlug->interpretation() );
 			return data;
 		}
-		case V2fPlugTypeId :
-		{
+		case V2fPlugTypeId : {
 			const V2fPlug *v2fPlug = static_cast<const V2fPlug *>( plug );
 			V2fDataPtr data = new V2fData( v2fPlug->getValue() );
 			data->setInterpretation( v2fPlug->interpretation() );
 			return data;
 		}
-		case V3fPlugTypeId :
-		{
+		case V3fPlugTypeId : {
 			const V3fPlug *v3fPlug = static_cast<const V3fPlug *>( plug );
 			V3fDataPtr data = new V3fData( v3fPlug->getValue() );
 			data->setInterpretation( v3fPlug->interpretation() );
@@ -626,7 +591,6 @@ IECore::DataPtr getValueAsData( const ValuePlug *plug )
 				fmt::format( "Plug \"{}\" has unsupported type \"{}\"", plug->getName().string(), plug->typeName() )
 			);
 	}
-
 }
 
 IECore::DataPtr extractDataFromPlug( const ValuePlug *plug )
@@ -781,10 +745,10 @@ bool setStringPlugValue( StringPlug *plug, const Data *value )
 {
 	switch( value->typeId() )
 	{
-		case IECore::StringDataTypeId:
+		case IECore::StringDataTypeId :
 			plug->setValue( static_cast<const StringData *>( value )->readable() );
 			return true;
-		case IECore::InternedStringDataTypeId:
+		case IECore::InternedStringDataTypeId :
 			plug->setValue( static_cast<const InternedStringData *>( value )->readable().value() );
 			return true;
 		case IECore::StringVectorDataTypeId : {
@@ -801,7 +765,7 @@ bool setStringPlugValue( StringPlug *plug, const Data *value )
 			}
 			return false;
 		}
-		default:
+		default :
 			return false;
 	}
 }
@@ -912,7 +876,7 @@ bool setCompoundNumericPlugValue( PlugType *plug, const Data *value )
 	for( size_t i = 0, eI = plug->children().size(); i < eI; ++i )
 	{
 		ValuePlug *c = plug->template getChild<ValuePlug>( i );
-		success &= setCompoundNumericPlugValue( plug, c, value);
+		success &= setCompoundNumericPlugValue( plug, c, value );
 	}
 	return success;
 }
@@ -977,7 +941,7 @@ bool setBoxPlugValue( PlugType *plug, const Data *value )
 		for( size_t j = 0, eJ = c->children().size(); j < eJ; ++j )
 		{
 			ValuePlug *gc = c->template getChild<ValuePlug>( j );
-			success &= setBoxPlugValue( plug, gc, value);
+			success &= setBoxPlugValue( plug, gc, value );
 		}
 	}
 	return success;
@@ -987,7 +951,7 @@ bool canSetNumericPlugValue( const Data *value )
 {
 	if( !value )
 	{
-		return true;  // Data type not specified, so it could be a match
+		return true; // Data type not specified, so it could be a match
 	}
 
 	switch( value->typeId() )
@@ -1028,7 +992,7 @@ bool canSetTypedPlugValue( const Data *value )
 {
 	if( !value )
 	{
-		return true;  // Data type not specified, so it could be a match
+		return true; // Data type not specified, so it could be a match
 	}
 
 	using DataType = IECore::TypedData<typename PlugType::ValueType>;
@@ -1051,7 +1015,7 @@ bool canSetTypedDataPlugValue( const Data *value )
 {
 	if( !value )
 	{
-		return true;  // Data type not specified, so it could be a match
+		return true; // Data type not specified, so it could be a match
 	}
 
 	if( runTimeCast<const typename PlugType::ValueType>( value ) )
@@ -1065,7 +1029,7 @@ bool canSetStringVectorDataPlugValue( const Data *value )
 {
 	if( !value )
 	{
-		return true;  // Data type not specified, so it could be a match
+		return true; // Data type not specified, so it could be a match
 	}
 
 	if( value->typeId() == IECore::StringDataTypeId )
@@ -1080,17 +1044,17 @@ bool canSetStringPlugValue( const Data *value )
 {
 	if( !value )
 	{
-		return true;  // Data type not specified, so it could be a match
+		return true; // Data type not specified, so it could be a match
 	}
 	switch( value->typeId() )
 	{
-		case IECore::StringDataTypeId:
-		case IECore::InternedStringDataTypeId:
-		case IECore::StringVectorDataTypeId:
+		case IECore::StringDataTypeId :
+		case IECore::InternedStringDataTypeId :
+		case IECore::StringVectorDataTypeId :
 			return true;
-		case IECore::InternedStringVectorDataTypeId:
+		case IECore::InternedStringVectorDataTypeId :
 			return IECore::size( value ) == 1;
-		default:
+		default :
 			return false;
 	}
 }
@@ -1099,7 +1063,7 @@ bool canSetCompoundNumericPlugValue( const Data *value )
 {
 	if( !value )
 	{
-		return true;  // Data type not specified, so it could be a match
+		return true; // Data type not specified, so it could be a match
 	}
 
 	switch( value->typeId() )
@@ -1134,7 +1098,7 @@ bool canSetBoxPlugValue( const Data *value )
 {
 	if( !value )
 	{
-		return true;  // Data type not specified, so it could be a match
+		return true; // Data type not specified, so it could be a match
 	}
 
 	switch( value->typeId() )
@@ -1157,7 +1121,7 @@ bool canSetBoxPlugValue( const Data *value )
 	}
 }
 
-}  // namespace
+} // namespace
 
 namespace Gaffer
 {
@@ -1169,69 +1133,69 @@ bool canSetValueFromData( const ValuePlug *plug, const IECore::Data *value )
 {
 	switch( static_cast<Gaffer::TypeId>( plug->typeId() ) )
 	{
-		case Gaffer::BoolPlugTypeId:
-		case Gaffer::FloatPlugTypeId:
-		case Gaffer::IntPlugTypeId:
+		case Gaffer::BoolPlugTypeId :
+		case Gaffer::FloatPlugTypeId :
+		case Gaffer::IntPlugTypeId :
 			return canSetNumericPlugValue( value );
-		case Gaffer::BoolVectorDataPlugTypeId:
+		case Gaffer::BoolVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<BoolVectorDataPlug>( value );
-		case Gaffer::FloatVectorDataPlugTypeId:
+		case Gaffer::FloatVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<FloatVectorDataPlug>( value );
-		case Gaffer::IntVectorDataPlugTypeId:
+		case Gaffer::IntVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<IntVectorDataPlug>( value );
-		case Gaffer::Int64VectorDataPlugTypeId:
+		case Gaffer::Int64VectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<Int64VectorDataPlug>( value );
-		case Gaffer::StringPlugTypeId:
+		case Gaffer::StringPlugTypeId :
 			return canSetStringPlugValue( value );
-		case Gaffer::StringVectorDataPlugTypeId:
+		case Gaffer::StringVectorDataPlugTypeId :
 			return canSetStringVectorDataPlugValue( value );
-		case Gaffer::InternedStringVectorDataPlugTypeId:
+		case Gaffer::InternedStringVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<InternedStringVectorDataPlug>( value );
-		case Gaffer::Color3fPlugTypeId:
-		case Gaffer::Color4fPlugTypeId:
-		case Gaffer::V3fPlugTypeId:
-		case Gaffer::V3iPlugTypeId:
-		case Gaffer::V2fPlugTypeId:
-		case Gaffer::V2iPlugTypeId:
+		case Gaffer::Color3fPlugTypeId :
+		case Gaffer::Color4fPlugTypeId :
+		case Gaffer::V3fPlugTypeId :
+		case Gaffer::V3iPlugTypeId :
+		case Gaffer::V2fPlugTypeId :
+		case Gaffer::V2iPlugTypeId :
 			return canSetCompoundNumericPlugValue( value );
-		case Gaffer::Color3fVectorDataPlugTypeId:
+		case Gaffer::Color3fVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<Color3fVectorDataPlug>( value );
-		case Gaffer::Color4fVectorDataPlugTypeId:
+		case Gaffer::Color4fVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<Color4fVectorDataPlug>( value );
-		case Gaffer::V3fVectorDataPlugTypeId:
+		case Gaffer::V3fVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<V3fVectorDataPlug>( value );
-		case Gaffer::V3iVectorDataPlugTypeId:
+		case Gaffer::V3iVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<V3iVectorDataPlug>( value );
-		case Gaffer::V2fVectorDataPlugTypeId:
+		case Gaffer::V2fVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<V2fVectorDataPlug>( value );
-		case Gaffer::V2iVectorDataPlugTypeId:
+		case Gaffer::V2iVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<V2iVectorDataPlug>( value );
-		case Gaffer::M33fVectorDataPlugTypeId:
+		case Gaffer::M33fVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<M33fVectorDataPlug>( value );
-		case Gaffer::M44fVectorDataPlugTypeId:
+		case Gaffer::M44fVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<M44fVectorDataPlug>( value );
-		case Gaffer::Box2fVectorDataPlugTypeId:
+		case Gaffer::Box2fVectorDataPlugTypeId :
 			return canSetTypedDataPlugValue<Box2fVectorDataPlug>( value );
-		case Gaffer::AtomicCompoundDataPlugTypeId:
+		case Gaffer::AtomicCompoundDataPlugTypeId :
 			return canSetTypedDataPlugValue<AtomicCompoundDataPlug>( value );
-		case Gaffer::PathMatcherDataPlugTypeId:
+		case Gaffer::PathMatcherDataPlugTypeId :
 			return canSetTypedDataPlugValue<PathMatcherDataPlug>( value );
-		case Gaffer::Box3fPlugTypeId:
-		case Gaffer::Box3iPlugTypeId:
-		case Gaffer::Box2fPlugTypeId:
-		case Gaffer::Box2iPlugTypeId:
+		case Gaffer::Box3fPlugTypeId :
+		case Gaffer::Box3iPlugTypeId :
+		case Gaffer::Box2fPlugTypeId :
+		case Gaffer::Box2iPlugTypeId :
 			return canSetBoxPlugValue( value );
-		case Gaffer::M33fPlugTypeId:
+		case Gaffer::M33fPlugTypeId :
 			return canSetTypedPlugValue<M33fPlug>( value );
-		case Gaffer::M44fPlugTypeId:
+		case Gaffer::M44fPlugTypeId :
 			return canSetTypedPlugValue<M44fPlug>( value );
-		case Gaffer::AtomicBox2fPlugTypeId:
+		case Gaffer::AtomicBox2fPlugTypeId :
 			return canSetTypedPlugValue<AtomicBox2fPlug>( value );
-		case Gaffer::AtomicBox3fPlugTypeId:
+		case Gaffer::AtomicBox3fPlugTypeId :
 			return canSetTypedPlugValue<AtomicBox3fPlug>( value );
-		case Gaffer::AtomicBox2iPlugTypeId:
+		case Gaffer::AtomicBox2iPlugTypeId :
 			return canSetTypedPlugValue<AtomicBox2iPlug>( value );
-		default:
+		default :
 			return false;
 	}
 }
@@ -1243,79 +1207,79 @@ bool setValueFromData( ValuePlug *plug, const IECore::Data *value )
 
 	switch( static_cast<Gaffer::TypeId>( plug->typeId() ) )
 	{
-		case Gaffer::BoolPlugTypeId:
+		case Gaffer::BoolPlugTypeId :
 			return setNumericPlugValue( static_cast<BoolPlug *>( plug ), value );
-		case Gaffer::FloatPlugTypeId:
+		case Gaffer::FloatPlugTypeId :
 			return setNumericPlugValue( static_cast<FloatPlug *>( plug ), value );
-		case Gaffer::IntPlugTypeId:
+		case Gaffer::IntPlugTypeId :
 			return setNumericPlugValue( static_cast<IntPlug *>( plug ), value );
-		case Gaffer::BoolVectorDataPlugTypeId:
+		case Gaffer::BoolVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<BoolVectorDataPlug *>( plug ), value );
-		case Gaffer::FloatVectorDataPlugTypeId:
+		case Gaffer::FloatVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<FloatVectorDataPlug *>( plug ), value );
-		case Gaffer::IntVectorDataPlugTypeId:
+		case Gaffer::IntVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<IntVectorDataPlug *>( plug ), value );
-		case Gaffer::Int64VectorDataPlugTypeId:
+		case Gaffer::Int64VectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<Int64VectorDataPlug *>( plug ), value );
-		case Gaffer::StringPlugTypeId:
+		case Gaffer::StringPlugTypeId :
 			return setStringPlugValue( static_cast<StringPlug *>( plug ), value );
-		case Gaffer::StringVectorDataPlugTypeId:
+		case Gaffer::StringVectorDataPlugTypeId :
 			return setStringVectorDataPlugValue( static_cast<StringVectorDataPlug *>( plug ), value );
-		case Gaffer::InternedStringVectorDataPlugTypeId:
+		case Gaffer::InternedStringVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<InternedStringVectorDataPlug *>( plug ), value );
-		case Gaffer::Color3fPlugTypeId:
+		case Gaffer::Color3fPlugTypeId :
 			return setCompoundNumericPlugValue( static_cast<Color3fPlug *>( plug ), value );
-		case Gaffer::Color4fPlugTypeId:
+		case Gaffer::Color4fPlugTypeId :
 			return setCompoundNumericPlugValue( static_cast<Color4fPlug *>( plug ), value );
-		case Gaffer::V3fPlugTypeId:
+		case Gaffer::V3fPlugTypeId :
 			return setCompoundNumericPlugValue( static_cast<V3fPlug *>( plug ), value );
-		case Gaffer::V3iPlugTypeId:
+		case Gaffer::V3iPlugTypeId :
 			return setCompoundNumericPlugValue( static_cast<V3iPlug *>( plug ), value );
-		case Gaffer::V2fPlugTypeId:
+		case Gaffer::V2fPlugTypeId :
 			return setCompoundNumericPlugValue( static_cast<V2fPlug *>( plug ), value );
-		case Gaffer::V2iPlugTypeId:
+		case Gaffer::V2iPlugTypeId :
 			return setCompoundNumericPlugValue( static_cast<V2iPlug *>( plug ), value );
-		case Gaffer::V3fVectorDataPlugTypeId:
+		case Gaffer::V3fVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<V3fVectorDataPlug *>( plug ), value );
-		case Gaffer::V3iVectorDataPlugTypeId:
+		case Gaffer::V3iVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<V3iVectorDataPlug *>( plug ), value );
-		case Gaffer::V2fVectorDataPlugTypeId:
+		case Gaffer::V2fVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<V2fVectorDataPlug *>( plug ), value );
-		case Gaffer::V2iVectorDataPlugTypeId:
+		case Gaffer::V2iVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<V2iVectorDataPlug *>( plug ), value );
-		case Gaffer::Color3fVectorDataPlugTypeId:
+		case Gaffer::Color3fVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<Color3fVectorDataPlug *>( plug ), value );
-		case Gaffer::Color4fVectorDataPlugTypeId:
+		case Gaffer::Color4fVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<Color4fVectorDataPlug *>( plug ), value );
-		case Gaffer::M33fVectorDataPlugTypeId:
+		case Gaffer::M33fVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<M33fVectorDataPlug *>( plug ), value );
-		case Gaffer::M44fVectorDataPlugTypeId:
+		case Gaffer::M44fVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<M44fVectorDataPlug *>( plug ), value );
-		case Gaffer::Box2fVectorDataPlugTypeId:
+		case Gaffer::Box2fVectorDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<Box2fVectorDataPlug *>( plug ), value );
-		case Gaffer::AtomicCompoundDataPlugTypeId:
+		case Gaffer::AtomicCompoundDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<AtomicCompoundDataPlug *>( plug ), value );
-		case Gaffer::PathMatcherDataPlugTypeId:
+		case Gaffer::PathMatcherDataPlugTypeId :
 			return setTypedDataPlugValue( static_cast<PathMatcherDataPlug *>( plug ), value );
-		case Gaffer::Box3fPlugTypeId:
+		case Gaffer::Box3fPlugTypeId :
 			return setBoxPlugValue( static_cast<Box3fPlug *>( plug ), value );
-		case Gaffer::Box3iPlugTypeId:
+		case Gaffer::Box3iPlugTypeId :
 			return setBoxPlugValue( static_cast<Box3iPlug *>( plug ), value );
-		case Gaffer::Box2fPlugTypeId:
+		case Gaffer::Box2fPlugTypeId :
 			return setBoxPlugValue( static_cast<Box2fPlug *>( plug ), value );
-		case Gaffer::Box2iPlugTypeId:
+		case Gaffer::Box2iPlugTypeId :
 			return setBoxPlugValue( static_cast<Box2iPlug *>( plug ), value );
-		case Gaffer::M33fPlugTypeId:
+		case Gaffer::M33fPlugTypeId :
 			return setTypedPlugValue( static_cast<M33fPlug *>( plug ), value );
-		case Gaffer::M44fPlugTypeId:
+		case Gaffer::M44fPlugTypeId :
 			return setTypedPlugValue( static_cast<M44fPlug *>( plug ), value );
-		case Gaffer::AtomicBox2fPlugTypeId:
+		case Gaffer::AtomicBox2fPlugTypeId :
 			return setTypedPlugValue( static_cast<AtomicBox2fPlug *>( plug ), value );
-		case Gaffer::AtomicBox3fPlugTypeId:
+		case Gaffer::AtomicBox3fPlugTypeId :
 			return setTypedPlugValue( static_cast<AtomicBox3fPlug *>( plug ), value );
-		case Gaffer::AtomicBox2iPlugTypeId:
+		case Gaffer::AtomicBox2iPlugTypeId :
 			return setTypedPlugValue( static_cast<AtomicBox2iPlug *>( plug ), value );
-		default:
+		default :
 			return false;
 	}
 }
@@ -1350,33 +1314,32 @@ bool setValueFromData( const ValuePlug *plug, ValuePlug *leafPlug, const IECore:
 
 		switch( static_cast<Gaffer::TypeId>( plug->typeId() ) )
 		{
-			case Gaffer::Color3fPlugTypeId:
+			case Gaffer::Color3fPlugTypeId :
 				return setCompoundNumericPlugValue( static_cast<const Color3fPlug *>( plug ), leafPlug, value );
-			case Gaffer::Color4fPlugTypeId:
+			case Gaffer::Color4fPlugTypeId :
 				return setCompoundNumericPlugValue( static_cast<const Color4fPlug *>( plug ), leafPlug, value );
-			case Gaffer::V3fPlugTypeId:
+			case Gaffer::V3fPlugTypeId :
 				return setCompoundNumericPlugValue( static_cast<const V3fPlug *>( plug ), leafPlug, value );
-			case Gaffer::V3iPlugTypeId:
+			case Gaffer::V3iPlugTypeId :
 				return setCompoundNumericPlugValue( static_cast<const V3iPlug *>( plug ), leafPlug, value );
-			case Gaffer::V2fPlugTypeId:
+			case Gaffer::V2fPlugTypeId :
 				return setCompoundNumericPlugValue( static_cast<const V2fPlug *>( plug ), leafPlug, value );
-			case Gaffer::V2iPlugTypeId:
+			case Gaffer::V2iPlugTypeId :
 				return setCompoundNumericPlugValue( static_cast<const V2iPlug *>( plug ), leafPlug, value );
-			case Gaffer::Box3fPlugTypeId:
+			case Gaffer::Box3fPlugTypeId :
 				return setBoxPlugValue( static_cast<const Box3fPlug *>( plug ), leafPlug, value );
-			case Gaffer::Box3iPlugTypeId:
+			case Gaffer::Box3iPlugTypeId :
 				return setBoxPlugValue( static_cast<const Box3iPlug *>( plug ), leafPlug, value );
-			case Gaffer::Box2fPlugTypeId:
+			case Gaffer::Box2fPlugTypeId :
 				return setBoxPlugValue( static_cast<const Box2fPlug *>( plug ), leafPlug, value );
-			case Gaffer::Box2iPlugTypeId:
+			case Gaffer::Box2iPlugTypeId :
 				return setBoxPlugValue( static_cast<const Box2iPlug *>( plug ), leafPlug, value );
-			default:
+			default :
 				return false;
 		}
 	}
 
 	return setValueFromData( leafPlug, value );
-
 }
 
 bool setValueOrInsertKeyFromData( ValuePlug *plug, float time, const IECore::Data *value )
@@ -1435,9 +1398,9 @@ bool setValueOrInsertKeyFromData( ValuePlug *plug, float time, const IECore::Dat
 	return setValueFromData( plug, value );
 }
 
-}  // namespace PlugAlgo
+} // namespace PlugAlgo
 
-}  // namespace Gaffer
+} // namespace Gaffer
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -1469,7 +1432,7 @@ bool validatePromotability( const Plug *plug, const Plug *parent, bool throwExce
 		}
 		else
 		{
-			throw IECore::Exception(  "Cannot promote null plug" );
+			throw IECore::Exception( "Cannot promote null plug" );
 		}
 	}
 
@@ -1530,7 +1493,7 @@ bool validatePromotability( const Plug *plug, const Plug *parent, bool throwExce
 			else
 			{
 				throw IECore::Exception(
-					fmt::format( "Cannot promote plug \"{}\" as it already has an input.", plug->fullName()	)
+					fmt::format( "Cannot promote plug \"{}\" as it already has an input.", plug->fullName() )
 				);
 			}
 		}
@@ -1609,7 +1572,7 @@ void applyDynamicFlag( Plug *plug )
 	{
 		for( Plug::RecursiveIterator it( plug ); !it.done(); ++it )
 		{
-			(*it)->setFlags( Plug::Dynamic, true );
+			( *it )->setFlags( Plug::Dynamic, true );
 			if( find( compoundTypes.begin(), compoundTypes.end(), (Gaffer::TypeId)plug->typeId() ) != compoundTypes.end() )
 			{
 				it.prune();
@@ -1755,7 +1718,7 @@ bool isPromoted( const Plug *plug )
 	{
 		for( Plug::OutputContainer::const_iterator it = plug->outputs().begin(), eIt = plug->outputs().end(); it != eIt; ++it )
 		{
-			if( (*it)->node() == enclosingNode )
+			if( ( *it )->node() == enclosingNode )
 			{
 				return true;
 			}
@@ -1791,7 +1754,7 @@ void unpromote( Plug *plug )
 	{
 		for( Plug::OutputContainer::const_iterator it = plug->outputs().begin(), eIt = plug->outputs().end(); it != eIt; ++it )
 		{
-			if( (*it)->node() == externalNode )
+			if( ( *it )->node() == externalNode )
 			{
 				externalPlug = *it;
 				break;
@@ -1811,8 +1774,8 @@ void unpromote( Plug *plug )
 		for( Plug::Iterator it( plugToRemove ); !it.done(); ++it )
 		{
 			if(
-				( (*it)->direction() == Plug::In && (*it)->outputs().size() ) ||
-				( (*it)->direction() == Plug::Out && (*it)->getInput() )
+				( ( *it )->direction() == Plug::In && ( *it )->outputs().size() ) ||
+				( ( *it )->direction() == Plug::Out && ( *it )->getInput() )
 			)
 			{
 				remove = false;

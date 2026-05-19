@@ -46,7 +46,7 @@ using namespace GafferSceneTest;
 GAFFER_NODE_DEFINE_TYPE( CompoundObjectSource )
 
 CompoundObjectSource::CompoundObjectSource( const std::string &name )
-	:	SceneNode( name )
+	: SceneNode( name )
 {
 	addChild( new ObjectPlug( "in", Plug::In, new CompoundObject() ) );
 }
@@ -162,7 +162,7 @@ IECore::ConstInternedStringVectorDataPtr CompoundObjectSource::computeChildNames
 		return outPlug()->childNamesPlug()->defaultValue();
 	}
 	InternedStringVectorDataPtr result = new InternedStringVectorData;
-	for( CompoundObject::ObjectMap::const_iterator it = children->members().begin(); it!=children->members().end(); it++ )
+	for( CompoundObject::ObjectMap::const_iterator it = children->members().begin(); it != children->members().end(); it++ )
 	{
 		result->writable().push_back( it->first.value() );
 	}
@@ -250,7 +250,7 @@ IECore::ConstCompoundObjectPtr CompoundObjectSource::entryForPath( const ScenePa
 {
 	ConstCompoundObjectPtr result = inObject();
 
-	for( ScenePath::const_iterator it=path.begin(); it!=path.end(); it++ )
+	for( ScenePath::const_iterator it = path.begin(); it != path.end(); it++ )
 	{
 		result = result->member<CompoundObject>( "children", true /* throw exceptions */ );
 		result = result->member<CompoundObject>( *it, true /* throw exceptions */ );

@@ -53,7 +53,7 @@ Transform2DPlug::Transform2DPlug(
 	const Imath::V2f &defaultPivot,
 	unsigned flags
 )
-	:	ValuePlug( name, direction, flags )
+	: ValuePlug( name, direction, flags )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -100,7 +100,6 @@ Transform2DPlug::Transform2DPlug(
 			flags
 		)
 	);
-
 }
 
 Transform2DPlug::~Transform2DPlug()
@@ -136,32 +135,32 @@ const V2fPlug *Transform2DPlug::translatePlug() const
 
 FloatPlug *Transform2DPlug::rotatePlug()
 {
-	return getChild<FloatPlug>( g_firstPlugIndex+1 );
+	return getChild<FloatPlug>( g_firstPlugIndex + 1 );
 }
 
 const FloatPlug *Transform2DPlug::rotatePlug() const
 {
-	return getChild<FloatPlug>( g_firstPlugIndex+1 );
+	return getChild<FloatPlug>( g_firstPlugIndex + 1 );
 }
 
 V2fPlug *Transform2DPlug::scalePlug()
 {
-	return getChild<V2fPlug>( g_firstPlugIndex+2 );
+	return getChild<V2fPlug>( g_firstPlugIndex + 2 );
 }
 
 const V2fPlug *Transform2DPlug::scalePlug() const
 {
-	return getChild<V2fPlug>( g_firstPlugIndex+2 );
+	return getChild<V2fPlug>( g_firstPlugIndex + 2 );
 }
 
 V2fPlug *Transform2DPlug::pivotPlug()
 {
-	return getChild<V2fPlug>( g_firstPlugIndex+3 );
+	return getChild<V2fPlug>( g_firstPlugIndex + 3 );
 }
 
 const V2fPlug *Transform2DPlug::pivotPlug() const
 {
-	return getChild<V2fPlug>( g_firstPlugIndex+3 );
+	return getChild<V2fPlug>( g_firstPlugIndex + 3 );
 }
 
 Imath::M33f Transform2DPlug::matrix() const
@@ -180,7 +179,7 @@ Imath::M33f Transform2DPlug::matrix() const
 	s.scale( scalePlug()->getValue() );
 
 	M33f pi;
-	pi.translate( pivotVec*Imath::V2f(-1.f) );
+	pi.translate( pivotVec * Imath::V2f( -1.f ) );
 	M33f result = pi * s * r * t * p;
 
 	return result;

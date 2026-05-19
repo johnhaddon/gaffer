@@ -72,17 +72,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		:	plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
 	{
 	}
 
-	bool operator==( const HistoryCacheKey &rhs ) const
+	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return
-			plug == rhs.plug &&
+		return plug == rhs.plug &&
 			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount
-		;
+			dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -103,7 +101,7 @@ using HistoryCache = IECorePreview::LRUCache<HistoryCacheKey, SceneAlgo::History
 
 HistoryCache g_historyCache(
 	// Getter
-	[] ( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
+	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		return SceneAlgo::history(
@@ -113,13 +111,13 @@ HistoryCache g_historyCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const HistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// Histories contain PlugPtrs, which could potentially be the sole
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
@@ -129,13 +127,13 @@ struct OptionHistoryCacheKey : public HistoryCacheKey
 {
 	OptionHistoryCacheKey() {};
 	OptionHistoryCacheKey( const ScenePlug *plug, IECore::InternedString option )
-		:	HistoryCacheKey( plug->globalsPlug() ), option( option )
+		: HistoryCacheKey( plug->globalsPlug() ), option( option )
 	{
 	}
 
-	bool operator==( const OptionHistoryCacheKey &rhs ) const
+	bool operator == ( const OptionHistoryCacheKey &rhs ) const
 	{
-		return HistoryCacheKey::operator==( rhs ) && option == rhs.option;
+		return HistoryCacheKey::operator == ( rhs ) && option == rhs.option;
 	}
 
 	IECore::InternedString option;
@@ -153,7 +151,7 @@ using OptionHistoryCache = IECorePreview::LRUCache<OptionHistoryCacheKey, SceneA
 
 OptionHistoryCache g_optionHistoryCache(
 	// Getter
-	[] ( const OptionHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
+	[]( const OptionHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		SceneAlgo::History::ConstPtr globalsHistory = g_historyCache.get( key, canceller );
@@ -162,16 +160,16 @@ OptionHistoryCache g_optionHistoryCache(
 	// Max cost
 	1000,
 	// Removal callback
-	[] ( const OptionHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
+	[]( const OptionHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// See comment in g_historyCache
 		ParallelAlgo::callOnUIThread(
-			[history] () {}
+			[history]() {}
 		);
 	}
 
 );
 
-}  // namespace
+} // namespace
 
 IE_CORE_DEFINERUNTIMETYPED( OptionInspector )
 
@@ -180,8 +178,9 @@ OptionInspector::OptionInspector(
 	const Gaffer::PlugPtr &editScope,
 	IECore::InternedString option
 )
-	:	Inspector( { scene->globalsPlug() }, "option", option.string(), editScope ),
-		m_scene( scene ), m_option( option )
+	: Inspector( { scene->globalsPlug() }, "option", option.string(), editScope ),
+	  m_scene( scene ),
+	  m_option( option )
 {
 }
 
@@ -284,12 +283,10 @@ Inspector::AcquireEditFunctionOrFailure OptionInspector::acquireEditFunction( Ga
 		}
 		else
 		{
-			return [
-				editScope = EditScopePtr( editScope ),
-				renderPass,
-				option = m_option,
-				context = history->context
-			] ( bool createIfNecessary ) {
+			return [editScope = EditScopePtr( editScope ),
+					renderPass,
+					option = m_option,
+					context = history->context]( bool createIfNecessary ) {
 				Context::Scope scope( context.get() );
 				return EditScopeAlgo::acquireRenderPassOptionEdit(
 					editScope.get(),
@@ -319,11 +316,9 @@ Inspector::AcquireEditFunctionOrFailure OptionInspector::acquireEditFunction( Ga
 		}
 		else
 		{
-			return [
-				editScope = EditScopePtr( editScope ),
-				option = m_option,
-				context = history->context
-			] ( bool createIfNecessary ) {
+			return [editScope = EditScopePtr( editScope ),
+					option = m_option,
+					context = history->context]( bool createIfNecessary ) {
 				Context::Scope scope( context.get() );
 				return EditScopeAlgo::acquireOptionEdit(
 					editScope.get(),

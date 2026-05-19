@@ -70,7 +70,7 @@ bool hasInput( const Plug *p )
 GAFFER_PLUG_DEFINE_TYPE( ArrayPlug )
 
 ArrayPlug::ArrayPlug( const std::string &name, Direction direction, ConstPlugPtr elementPrototype, size_t minSize, size_t maxSize, unsigned flags, bool resizeWhenInputsChange )
-	:	Plug( name, direction, flags ), m_elementPrototype( elementPrototype ), m_minSize( minSize ), m_maxSize( std::max( maxSize, m_minSize ) ), m_resizeWhenInputsChange( resizeWhenInputsChange )
+	: Plug( name, direction, flags ), m_elementPrototype( elementPrototype ), m_minSize( minSize ), m_maxSize( std::max( maxSize, m_minSize ) ), m_resizeWhenInputsChange( resizeWhenInputsChange )
 {
 	if( !m_elementPrototype )
 	{
@@ -180,7 +180,7 @@ void ArrayPlug::resize( size_t size )
 	{
 		PlugPtr p = m_elementPrototype->createCounterpart( m_elementPrototype->getName(), direction() );
 		addChild( p );
-		MetadataAlgo::copyColors( m_elementPrototype.get(), p.get() , /* overwrite = */ false );
+		MetadataAlgo::copyColors( m_elementPrototype.get(), p.get(), /* overwrite = */ false );
 	}
 
 	Gaffer::Signals::BlockedConnection blockedInputChange( m_inputChangedConnection );

@@ -67,17 +67,17 @@ const IECore::InternedString g_inspectorContextPropertyName( "inspector:context"
 IE_CORE_DEFINERUNTIMETYPED( ScenePath );
 
 ScenePath::ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter )
-	:	Path( filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
+	: Path( filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
 {
 }
 
 ScenePath::ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, const std::string &path, Gaffer::PathFilterPtr filter )
-	:	Path( path, filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
+	: Path( path, filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
 {
 }
 
 ScenePath::ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root, Gaffer::PathFilterPtr filter )
-	:	Path( names, root, filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
+	: Path( names, root, filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
 {
 }
 

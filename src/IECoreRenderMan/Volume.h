@@ -47,18 +47,17 @@ namespace IECoreRenderMan
 class Volume : public Object
 {
 
-	public :
+public:
 
-		Volume( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session, const IECoreVDB::VDBObject *vdbObject );
+	Volume( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session, const IECoreVDB::VDBObject *vdbObject );
 
-		void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
+	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
 
-	private :
+private:
 
-		void fixupTransformEdit( riley::GeometryInstanceResult editResult );
+	void fixupTransformEdit( riley::GeometryInstanceResult editResult );
 
-		RtPrimVarList m_primVars;
-
+	RtPrimVarList m_primVars;
 };
 
 } // namespace IECoreRenderMan

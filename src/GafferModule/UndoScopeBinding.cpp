@@ -82,8 +82,7 @@ void GafferModule::bindUndoScope()
 	enum_<UndoScope::State>( "State" )
 		.value( "Invalid", UndoScope::Invalid )
 		.value( "Enabled", UndoScope::Enabled )
-		.value( "Disabled", UndoScope::Disabled )
-	;
+		.value( "Disabled", UndoScope::Disabled );
 
 	cls.def(
 		"__init__",

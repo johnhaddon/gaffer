@@ -53,41 +53,40 @@ namespace GafferUSD
 class GAFFERUSD_API USDLayerWriter : public GafferDispatch::TaskNode
 {
 
-	public :
+public:
 
-		explicit USDLayerWriter( const std::string &name=defaultName<USDLayerWriter>() );
-		~USDLayerWriter() override;
+	explicit USDLayerWriter( const std::string &name = defaultName<USDLayerWriter>() );
+	~USDLayerWriter() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDLayerWriter, USDLayerWriterTypeId, GafferDispatch::TaskNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDLayerWriter, USDLayerWriterTypeId, GafferDispatch::TaskNode );
 
-		Gaffer::StringPlug *fileNamePlug();
-		const Gaffer::StringPlug *fileNamePlug() const;
+	Gaffer::StringPlug *fileNamePlug();
+	const Gaffer::StringPlug *fileNamePlug() const;
 
-		GafferScene::ScenePlug *basePlug();
-		const GafferScene::ScenePlug *basePlug() const;
+	GafferScene::ScenePlug *basePlug();
+	const GafferScene::ScenePlug *basePlug() const;
 
-		GafferScene::ScenePlug *layerPlug();
-		const GafferScene::ScenePlug *layerPlug() const;
+	GafferScene::ScenePlug *layerPlug();
+	const GafferScene::ScenePlug *layerPlug() const;
 
-		GafferScene::ScenePlug *outPlug();
-		const GafferScene::ScenePlug *outPlug() const;
+	GafferScene::ScenePlug *outPlug();
+	const GafferScene::ScenePlug *outPlug() const;
 
-	protected :
+protected:
 
-		IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
-		bool requiresSequenceExecution() const override;
-		void execute() const override;
-		void executeSequence( const std::vector<float> &frames ) const override;
+	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
+	bool requiresSequenceExecution() const override;
+	void execute() const override;
+	void executeSequence( const std::vector<float> &frames ) const override;
 
-	private :
+private:
 
-		const GafferScene::SceneWriter *sceneWriter() const;
+	const GafferScene::SceneWriter *sceneWriter() const;
 
-		static size_t g_firstPlugIndex;
+	static size_t g_firstPlugIndex;
 
-		// Friendship for the bindings
-		friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
-
+	// Friendship for the bindings
+	friend struct GafferDispatchBindings::Detail::TaskNodeAccessor;
 };
 
 IE_CORE_DECLAREPTR( USDLayerWriter )

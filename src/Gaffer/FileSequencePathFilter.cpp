@@ -53,7 +53,7 @@ using namespace Gaffer;
 IE_CORE_DEFINERUNTIMETYPED( FileSequencePathFilter );
 
 FileSequencePathFilter::FileSequencePathFilter( Keep mode, IECore::CompoundDataPtr userData )
-	:	PathFilter( userData ), m_mode( mode )
+	: PathFilter( userData ), m_mode( mode )
 {
 }
 
@@ -68,7 +68,7 @@ FileSequencePathFilter::Keep FileSequencePathFilter::getMode() const
 
 void FileSequencePathFilter::setMode( Keep mode )
 {
-	if ( mode == m_mode )
+	if( mode == m_mode )
 	{
 		return;
 	}

@@ -63,7 +63,7 @@ GAFFER_NODE_DEFINE_TYPE( Attributes );
 size_t Attributes::g_firstPlugIndex = 0;
 
 Attributes::Attributes( const std::string &name )
-	:	AttributeProcessor( name, PathMatcher::EveryMatch )
+	: AttributeProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "attributes" ) );
@@ -72,7 +72,7 @@ Attributes::Attributes( const std::string &name )
 
 
 Attributes::Attributes( const std::string &name, const std::string &rendererPrefix )
-	:	Attributes( name )
+	: Attributes( name )
 {
 	const string targetPattern = fmt::format( "attribute:{}:*", rendererPrefix );
 	for( const auto &target : Metadata::targetsWithMetadata( targetPattern, g_defaultValue ) )
@@ -111,11 +111,9 @@ const Gaffer::CompoundObjectPlug *Attributes::extraAttributesPlug() const
 }
 bool Attributes::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return
-		AttributeProcessor::affectsProcessedAttributes( input ) ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) ||
 		attributesPlug()->isAncestorOf( input ) ||
-		input == extraAttributesPlug()
-	;
+		input == extraAttributesPlug();
 }
 
 void Attributes::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const

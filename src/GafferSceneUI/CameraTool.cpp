@@ -115,7 +115,7 @@ CameraTool::ToolDescription<CameraTool, SceneView> CameraTool::g_toolDescription
 size_t CameraTool::g_firstPlugIndex = 0;
 
 CameraTool::CameraTool( SceneView *view, const std::string &name )
-	:	SelectionTool( view, name ), m_dragId( 0 )
+	: SelectionTool( view, name ), m_dragId( 0 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -392,7 +392,8 @@ void CameraTool::viewportCameraChanged()
 	plugTransform = plugTransform * transformSpaceOffset;
 	const V3f t = plugTransform.translation();
 
-	Eulerf e; e.extract( plugTransform );
+	Eulerf e;
+	e.extract( plugTransform );
 	e.makeNear( degreesToRadians( edit->rotate->getValue() ) );
 	const V3f r = radiansToDegrees( V3f( e ) );
 

@@ -57,8 +57,9 @@ boost::python::object pythonConnection( const Gaffer::Signals::Connection &conne
 		// we construct via the python-bound copy constructor which
 		// avoids the problem.
 		PyTypeObject *type = boost::python::converter::registry::query(
-			boost::python::type_info( typeid( Gaffer::Signals::ScopedConnection ) )
-		)->get_class_object();
+								 boost::python::type_info( typeid( Gaffer::Signals::ScopedConnection ) )
+		)
+								 ->get_class_object();
 
 		boost::python::object oType( boost::python::handle<>( boost::python::borrowed( type ) ) );
 		return oType( boost::python::object( connection ) );

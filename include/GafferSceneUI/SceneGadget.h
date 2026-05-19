@@ -63,193 +63,192 @@ IE_CORE_FORWARDDECLARE( SceneGadget );
 class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 {
 
-	public :
+public:
 
-		SceneGadget();
-		~SceneGadget() override;
+	SceneGadget();
+	~SceneGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneUI::SceneGadget, SceneGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferSceneUI::SceneGadget, SceneGadgetTypeId, Gadget );
 
-		/// Scene
-		/// =====
-		///
-		/// These methods specify the scene and how it is drawn.
+	/// Scene
+	/// =====
+	///
+	/// These methods specify the scene and how it is drawn.
 
-		void setScene( GafferScene::ConstScenePlugPtr scene );
-		const GafferScene::ScenePlug *getScene() const;
+	void setScene( GafferScene::ConstScenePlugPtr scene );
+	const GafferScene::ScenePlug *getScene() const;
 
-		void setContext( Gaffer::ConstContextPtr context );
-		const Gaffer::Context *getContext() const;
+	void setContext( Gaffer::ConstContextPtr context );
+	const Gaffer::Context *getContext() const;
 
-		/// Limits the expanded parts of the scene to those in the specified VisibleSet.
-		void setVisibleSet( const GafferScene::VisibleSet &visibleSet );
-		const GafferScene::VisibleSet &getVisibleSet() const;
+	/// Limits the expanded parts of the scene to those in the specified VisibleSet.
+	void setVisibleSet( const GafferScene::VisibleSet &visibleSet );
+	const GafferScene::VisibleSet &getVisibleSet() const;
 
-		void setMinimumExpansionDepth( size_t depth );
-		size_t getMinimumExpansionDepth() const;
+	void setMinimumExpansionDepth( size_t depth );
+	size_t getMinimumExpansionDepth() const;
 
-		/// Returns the selection.
-		const IECore::PathMatcher &getSelection() const;
-		/// Sets the selection.
-		void setSelection( const IECore::PathMatcher &selection );
+	/// Returns the selection.
+	const IECore::PathMatcher &getSelection() const;
+	/// Sets the selection.
+	void setSelection( const IECore::PathMatcher &selection );
 
-		/// Renderer
-		/// ========
-		///
-		/// By default, the SceneGadget renders using OpenGL, but it can
-		/// optionally be used in a hybrid mode where OpenGL is used for
-		/// bounding boxes and visualisations, and a raytraced renderer
-		/// is used for expanded objects.
+	/// Renderer
+	/// ========
+	///
+	/// By default, the SceneGadget renders using OpenGL, but it can
+	/// optionally be used in a hybrid mode where OpenGL is used for
+	/// bounding boxes and visualisations, and a raytraced renderer
+	/// is used for expanded objects.
 
-		void setRenderer( IECore::InternedString name );
-		IECore::InternedString getRenderer();
+	void setRenderer( IECore::InternedString name );
+	IECore::InternedString getRenderer();
 
-		/// Specifies options to control the OpenGL renderer. These are used
-		/// to specify wireframe/point drawing and colours etc. A copy of
-		/// `options` is taken.
-		void setOpenGLOptions( const IECore::CompoundObject *options );
-		const IECore::CompoundObject *getOpenGLOptions() const;
+	/// Specifies options to control the OpenGL renderer. These are used
+	/// to specify wireframe/point drawing and colours etc. A copy of
+	/// `options` is taken.
+	void setOpenGLOptions( const IECore::CompoundObject *options );
+	const IECore::CompoundObject *getOpenGLOptions() const;
 
-		/// Specifies the viewport layer that the scene is rendered into.
-		void setLayer( Gadget::Layer layer );
-		Gadget::Layer getLayer() const;
+	/// Specifies the viewport layer that the scene is rendered into.
+	void setLayer( Gadget::Layer layer );
+	Gadget::Layer getLayer() const;
 
-		/// Update process
-		/// ==============
-		///
-		/// The SceneGadget updates progressively by performing
-		/// all computations on background threads, displaying
-		/// results as they become available. These methods control
-		/// that process.
+	/// Update process
+	/// ==============
+	///
+	/// The SceneGadget updates progressively by performing
+	/// all computations on background threads, displaying
+	/// results as they become available. These methods control
+	/// that process.
 
-		/// Pauses the processing of scene edits.
-		void setPaused( bool paused );
-		bool getPaused() const;
+	/// Pauses the processing of scene edits.
+	void setPaused( bool paused );
+	bool getPaused() const;
 
-		/// Specifies a set of paths that block drawing until they are
-		/// up to date. Use sparingly.
-		void setBlockingPaths( const IECore::PathMatcher &blockingPaths );
-		const IECore::PathMatcher &getBlockingPaths() const;
+	/// Specifies a set of paths that block drawing until they are
+	/// up to date. Use sparingly.
+	void setBlockingPaths( const IECore::PathMatcher &blockingPaths );
+	const IECore::PathMatcher &getBlockingPaths() const;
 
-		/// Specifies a set of paths that are given priorty when performing
-		/// asynchronous updates.
-		void setPriorityPaths( const IECore::PathMatcher &priorityPaths );
-		const IECore::PathMatcher &getPriorityPaths() const;
+	/// Specifies a set of paths that are given priorty when performing
+	/// asynchronous updates.
+	void setPriorityPaths( const IECore::PathMatcher &priorityPaths );
+	const IECore::PathMatcher &getPriorityPaths() const;
 
-		enum State
-		{
-			Paused,
-			Running,
-			Complete
-		};
+	enum State
+	{
+		Paused,
+		Running,
+		Complete
+	};
 
-		State state() const;
+	State state() const;
 
-		using SceneGadgetSignal = Gaffer::Signals::Signal<void (SceneGadget *)>;
-		SceneGadgetSignal &stateChangedSignal();
+	using SceneGadgetSignal = Gaffer::Signals::Signal<void( SceneGadget * )>;
+	SceneGadgetSignal &stateChangedSignal();
 
-		/// Blocks until the update is completed. This is primarily of
-		/// use for the unit tests.
-		void waitForCompletion();
+	/// Blocks until the update is completed. This is primarily of
+	/// use for the unit tests.
+	void waitForCompletion();
 
-		/// Scene queries
-		/// =============
-		///
-		/// These queries are performed against the current state of the scene,
-		/// which might still be being updated asynchronously. Call `waitForCompletion()`
-		/// first if you need a final answer and are willing to block the UI
-		/// waiting for it.
+	/// Scene queries
+	/// =============
+	///
+	/// These queries are performed against the current state of the scene,
+	/// which might still be being updated asynchronously. Call `waitForCompletion()`
+	/// first if you need a final answer and are willing to block the UI
+	/// waiting for it.
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-		/// Specifies which object types are selectable via `objectAt()` and `objectsAt()`.
-		/// May be null, which means all object types are selectable. A copy of `typeNames`
-		/// is taken.
-		void setSelectionMask( const IECore::StringVectorData *typeNames );
-		const IECore::StringVectorData *getSelectionMask() const;
+	/// Specifies which object types are selectable via `objectAt()` and `objectsAt()`.
+	/// May be null, which means all object types are selectable. A copy of `typeNames`
+	/// is taken.
+	void setSelectionMask( const IECore::StringVectorData *typeNames );
+	const IECore::StringVectorData *getSelectionMask() const;
 
-		/// Finds the path of the frontmost object intersecting the specified line
-		/// through gadget space. Returns true on success and false if there is no
-		/// such object.
-		bool objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path ) const;
-		/// As above. Additionally hitPoint is filled with the approximate intersection point in gadget space.
-		bool objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, Imath::V3f &hitPoint ) const;
-		/// Fills paths with all objects intersected by a rectangle in screen space,
-		/// defined by two corners in gadget space (as required for drag selection).
-		size_t objectsAt(
-			const Imath::V3f &corner0InGadgetSpace,
-			const Imath::V3f &corner1InGadgetSpace,
-			IECore::PathMatcher &paths
-		) const;
+	/// Finds the path of the frontmost object intersecting the specified line
+	/// through gadget space. Returns true on success and false if there is no
+	/// such object.
+	bool objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path ) const;
+	/// As above. Additionally hitPoint is filled with the approximate intersection point in gadget space.
+	bool objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, Imath::V3f &hitPoint ) const;
+	/// Fills paths with all objects intersected by a rectangle in screen space,
+	/// defined by two corners in gadget space (as required for drag selection).
+	size_t objectsAt(
+		const Imath::V3f &corner0InGadgetSpace,
+		const Imath::V3f &corner1InGadgetSpace,
+		IECore::PathMatcher &paths
+	) const;
 
-		/// Returns the approximate gadget space normal of the frontmost object intersecting
-		/// the specified line through gadget space, if an intersection exists. Returns `std::nullopt`
-		/// if there is no such object intersection.
-		std::optional<Imath::V3f> normalAt( const IECore::LineSegment3f &lineInGadgetSpace ) const;
+	/// Returns the approximate gadget space normal of the frontmost object intersecting
+	/// the specified line through gadget space, if an intersection exists. Returns `std::nullopt`
+	/// if there is no such object intersection.
+	std::optional<Imath::V3f> normalAt( const IECore::LineSegment3f &lineInGadgetSpace ) const;
 
-		/// Returns the bounding box of all the selected objects.
-		/// Deprecated, prefer using `bound( true )` below
-		Imath::Box3f selectionBound() const;
+	/// Returns the bounding box of all the selected objects.
+	/// Deprecated, prefer using `bound( true )` below
+	Imath::Box3f selectionBound() const;
 
-		/// Queries the bound with additional parameters - if `selected` is true, queries only
-		/// selected objects, and "omitted" is a PathMatcher with paths to specifically omit
-		Imath::Box3f bound( bool selected, const IECore::PathMatcher *omitted = nullptr ) const;
+	/// Queries the bound with additional parameters - if `selected` is true, queries only
+	/// selected objects, and "omitted" is a PathMatcher with paths to specifically omit
+	Imath::Box3f bound( bool selected, const IECore::PathMatcher *omitted = nullptr ) const;
 
-		/// Implemented to return the name of the object under the mouse.
-		std::string getToolTip( const IECore::LineSegment3f &line ) const override;
+	/// Implemented to return the name of the object under the mouse.
+	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-		/// Saves a snapshot of the current rendered scene. All renderers are supported _except_
-		/// the OpenGL renderer. All formats supported by OpenImageIO can be used. The output
-		/// display window will be set to `resolutionGate` if it is not an empty `Box2f`.
-		/// All of the supplied metadata will be written, regardless of conflicts with
-		/// OpenImageIO built-in metadata.
-		void snapshotToFile(
-			const std::filesystem::path &fileName,
-			const Imath::Box2f &resolutionGate =  Imath::Box2f(),
-			const IECore::CompoundData *metadata = nullptr
-		) const;
+	/// Saves a snapshot of the current rendered scene. All renderers are supported _except_
+	/// the OpenGL renderer. All formats supported by OpenImageIO can be used. The output
+	/// display window will be set to `resolutionGate` if it is not an empty `Box2f`.
+	/// All of the supplied metadata will be written, regardless of conflicts with
+	/// OpenImageIO built-in metadata.
+	void snapshotToFile(
+		const std::filesystem::path &fileName,
+		const Imath::Box2f &resolutionGate = Imath::Box2f(),
+		const IECore::CompoundData *metadata = nullptr
+	) const;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const GafferUI::Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const GafferUI::Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		bool openGLObjectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, float &depth ) const;
+	bool openGLObjectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, float &depth ) const;
 
-		void updateRenderer();
-		void updateCamera( GafferUI::ViewportGadget::CameraFlags changes );
-		IECore::PathMatcher convertSelection( IECore::UIntVectorDataPtr ids ) const;
-		void bufferChanged();
-		void visibilityChanged();
-		void cancelUpdateAndPauseRenderer();
-		void clearRenderer();
+	void updateRenderer();
+	void updateCamera( GafferUI::ViewportGadget::CameraFlags changes );
+	IECore::PathMatcher convertSelection( IECore::UIntVectorDataPtr ids ) const;
+	void bufferChanged();
+	void visibilityChanged();
+	void cancelUpdateAndPauseRenderer();
+	void clearRenderer();
 
-		Gaffer::Signals::Connection m_viewportChangedConnection;
-		Gaffer::Signals::Connection m_viewportCameraChangedConnection;
+	Gaffer::Signals::Connection m_viewportChangedConnection;
+	Gaffer::Signals::Connection m_viewportCameraChangedConnection;
 
-		bool m_paused;
-		IECore::PathMatcher m_blockingPaths;
-		IECore::PathMatcher m_priorityPaths;
-		SceneGadgetSignal m_stateChangedSignal;
+	bool m_paused;
+	IECore::PathMatcher m_blockingPaths;
+	IECore::PathMatcher m_priorityPaths;
+	SceneGadgetSignal m_stateChangedSignal;
 
-		IECore::InternedString m_rendererName;
-		IECoreScenePreview::RendererPtr m_renderer;
-		IECoreScenePreview::Renderer::ObjectInterfacePtr m_camera;
-		std::unique_ptr<OutputBuffer> m_outputBuffer;
-		std::unique_ptr<GafferScene::RenderController> m_controller;
-		mutable std::shared_ptr<Gaffer::BackgroundTask> m_updateTask;
-		bool m_updateErrored;
-		std::atomic_bool m_renderRequestPending;
+	IECore::InternedString m_rendererName;
+	IECoreScenePreview::RendererPtr m_renderer;
+	IECoreScenePreview::Renderer::ObjectInterfacePtr m_camera;
+	std::unique_ptr<OutputBuffer> m_outputBuffer;
+	std::unique_ptr<GafferScene::RenderController> m_controller;
+	mutable std::shared_ptr<Gaffer::BackgroundTask> m_updateTask;
+	bool m_updateErrored;
+	std::atomic_bool m_renderRequestPending;
 
-		IECore::ConstCompoundObjectPtr m_openGLOptions;
-		Gadget::Layer m_layer;
-		IECore::PathMatcher m_selection;
+	IECore::ConstCompoundObjectPtr m_openGLOptions;
+	Gadget::Layer m_layer;
+	IECore::PathMatcher m_selection;
 
-		IECore::StringVectorDataPtr m_selectionMask;
-
+	IECore::StringVectorDataPtr m_selectionMask;
 };
 
-} // namespace GafferUI
+} // namespace GafferSceneUI

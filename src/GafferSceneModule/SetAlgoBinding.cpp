@@ -95,7 +95,6 @@ void bindSetAlgo()
 	);
 
 	def( "affectsSetExpression", &SetAlgo::affectsSetExpression );
-
 }
 
 } // namespace GafferSceneModule

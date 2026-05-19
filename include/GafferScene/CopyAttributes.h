@@ -46,36 +46,35 @@ namespace GafferScene
 class GAFFERSCENE_API CopyAttributes : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		explicit CopyAttributes( const std::string &name=defaultName<CopyAttributes>() );
-		~CopyAttributes() override;
+	explicit CopyAttributes( const std::string &name = defaultName<CopyAttributes>() );
+	~CopyAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::CopyAttributes, CopyAttributesTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::CopyAttributes, CopyAttributesTypeId, FilteredSceneProcessor );
 
-		GafferScene::ScenePlug *sourcePlug();
-		const GafferScene::ScenePlug *sourcePlug() const;
+	GafferScene::ScenePlug *sourcePlug();
+	const GafferScene::ScenePlug *sourcePlug() const;
 
-		Gaffer::StringPlug *attributesPlug();
-		const Gaffer::StringPlug *attributesPlug() const;
+	Gaffer::StringPlug *attributesPlug();
+	const Gaffer::StringPlug *attributesPlug() const;
 
-		Gaffer::StringPlug *sourceLocationPlug();
-		const Gaffer::StringPlug *sourceLocationPlug() const;
+	Gaffer::StringPlug *sourceLocationPlug();
+	const Gaffer::StringPlug *sourceLocationPlug() const;
 
-		Gaffer::BoolPlug *deleteExistingPlug();
-		const Gaffer::BoolPlug *deleteExistingPlug() const;
+	Gaffer::BoolPlug *deleteExistingPlug();
+	const Gaffer::BoolPlug *deleteExistingPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( CopyAttributes )

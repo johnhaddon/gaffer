@@ -88,7 +88,7 @@ GAFFER_NODE_DEFINE_TYPE( RenderManOutputFilter );
 size_t RenderManOutputFilter::g_firstPlugIndex = 0;
 
 RenderManOutputFilter::RenderManOutputFilter( const std::string &name, FilterType filterType )
-	:	GlobalsProcessor( name ), m_filterType( filterType )
+	: GlobalsProcessor( name ), m_filterType( filterType )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( g_shaderPlugNames[(int)filterType] ) );

@@ -47,7 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( TaskList )
 size_t TaskList::g_firstPlugIndex;
 
 TaskList::TaskList( const std::string &name )
-	:	TaskNode( name )
+	: TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "sequence" ) );

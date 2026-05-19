@@ -64,88 +64,86 @@ IE_CORE_FORWARDDECLARE( ConnectionGadget )
 class GAFFERUI_API ConnectionGadget : public ConnectionCreator
 {
 
-	public :
+public:
 
-		~ConnectionGadget() override;
+	~ConnectionGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ConnectionGadget, ConnectionGadgetTypeId, ConnectionCreator );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::ConnectionGadget, ConnectionGadgetTypeId, ConnectionCreator );
 
-		/// Accepts only GraphGadgets as parent.
-		bool acceptsParent( const Gaffer::GraphComponent *potentialParent ) const override;
+	/// Accepts only GraphGadgets as parent.
+	bool acceptsParent( const Gaffer::GraphComponent *potentialParent ) const override;
 
-		/// Returns the Nodule representing the source plug in the connection.
-		/// Note that this may be null if the source plug belongs to a node which
-		/// has been hidden.
-		Nodule *srcNodule();
-		const Nodule *srcNodule() const;
-		/// Returns the Nodule representing the destination plug in the connection.
-		Nodule *dstNodule();
-		const Nodule *dstNodule() const;
-		/// May be called to change the connection represented by this gadget.
-		/// Derived classes may reimplement this method but implementations
-		/// must call the base class implementation first.
-		virtual void setNodules( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule );
+	/// Returns the Nodule representing the source plug in the connection.
+	/// Note that this may be null if the source plug belongs to a node which
+	/// has been hidden.
+	Nodule *srcNodule();
+	const Nodule *srcNodule() const;
+	/// Returns the Nodule representing the destination plug in the connection.
+	Nodule *dstNodule();
+	const Nodule *dstNodule() const;
+	/// May be called to change the connection represented by this gadget.
+	/// Derived classes may reimplement this method but implementations
+	/// must call the base class implementation first.
+	virtual void setNodules( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule );
 
-		/// A minimised connection is drawn only as a small stub
-		/// entering the destination nodule - this can be useful in
-		/// uncluttering a complex graph.
-		void setMinimised( bool minimised );
-		bool getMinimised() const;
+	/// A minimised connection is drawn only as a small stub
+	/// entering the destination nodule - this can be useful in
+	/// uncluttering a complex graph.
+	void setMinimised( bool minimised );
+	bool getMinimised() const;
 
-		/// Returns the closest point on this connection to the given point.
-		/// Used for snapping new dots onto an existing connection
-		virtual Imath::V3f closestPoint( const Imath::V3f &p ) const = 0;
+	/// Returns the closest point on this connection to the given point.
+	/// Used for snapping new dots onto an existing connection
+	virtual Imath::V3f closestPoint( const Imath::V3f &p ) const = 0;
 
-		/// Creates a ConnectionGadget to represent the connection between the two
-		/// specified Nodules.
-		static ConnectionGadgetPtr create( NodulePtr srcNodule, NodulePtr dstNodule );
+	/// Creates a ConnectionGadget to represent the connection between the two
+	/// specified Nodules.
+	static ConnectionGadgetPtr create( NodulePtr srcNodule, NodulePtr dstNodule );
 
-		using ConnectionGadgetCreator = std::function<ConnectionGadgetPtr ( NodulePtr, NodulePtr )>;
-		/// Registers a function which will return a ConnectionGadget instance for a
-		/// destination plug of a specific type.
-		static void registerConnectionGadget( IECore::TypeId dstPlugType, ConnectionGadgetCreator creator );
-		/// Registers a function which will return a Nodule instance for destination plugs with
-		/// specific names on a specific type of node. Nodules registered in this way will take
-		/// precedence over those registered above.
-		static void registerConnectionGadget( const IECore::TypeId nodeType, const std::string &dstPlugPathRegex, ConnectionGadgetCreator creator );
+	using ConnectionGadgetCreator = std::function<ConnectionGadgetPtr( NodulePtr, NodulePtr )>;
+	/// Registers a function which will return a ConnectionGadget instance for a
+	/// destination plug of a specific type.
+	static void registerConnectionGadget( IECore::TypeId dstPlugType, ConnectionGadgetCreator creator );
+	/// Registers a function which will return a Nodule instance for destination plugs with
+	/// specific names on a specific type of node. Nodules registered in this way will take
+	/// precedence over those registered above.
+	static void registerConnectionGadget( const IECore::TypeId nodeType, const std::string &dstPlugPathRegex, ConnectionGadgetCreator creator );
 
-	protected :
+protected:
 
-		ConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule );
+	ConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule );
 
-		/// Creating a static one of these is a convenient way of registering a ConnectionGadget type.
-		template<class T>
-		struct ConnectionGadgetTypeDescription
-		{
-			ConnectionGadgetTypeDescription( IECore::TypeId dstPlugType ) { ConnectionGadget::registerConnectionGadget( dstPlugType, &creator ); };
-			static ConnectionGadgetPtr creator( NodulePtr srcNodule, NodulePtr dstNodule ) { return new T( srcNodule, dstNodule ); };
-		};
+	/// Creating a static one of these is a convenient way of registering a ConnectionGadget type.
+	template<class T>
+	struct ConnectionGadgetTypeDescription
+	{
+		ConnectionGadgetTypeDescription( IECore::TypeId dstPlugType ) { ConnectionGadget::registerConnectionGadget( dstPlugType, &creator ); };
+		static ConnectionGadgetPtr creator( NodulePtr srcNodule, NodulePtr dstNodule ) { return new T( srcNodule, dstNodule ); };
+	};
 
-		/// May be overridden to update the UI state to reflect changes in the ContextTracker.
-		/// Calls to this are made by the parent GraphGadget, to avoid every individual
-		/// ConnectionGadget needing to connect to the ContextTracker signals itself.
-		virtual void updateFromContextTracker( const ContextTracker *contextTracker );
-		/// Friendship to allow calling `updateFromContextTracker()`.
-		friend class GraphGadget;
+	/// May be overridden to update the UI state to reflect changes in the ContextTracker.
+	/// Calls to this are made by the parent GraphGadget, to avoid every individual
+	/// ConnectionGadget needing to connect to the ContextTracker signals itself.
+	virtual void updateFromContextTracker( const ContextTracker *contextTracker );
+	/// Friendship to allow calling `updateFromContextTracker()`.
+	friend class GraphGadget;
 
-		bool m_active;
+	bool m_active;
 
-	private :
+private:
 
-		NodulePtr m_srcNodule;
-		NodulePtr m_dstNodule;
+	NodulePtr m_srcNodule;
+	NodulePtr m_dstNodule;
 
-		bool m_minimised;
+	bool m_minimised;
 
-		using CreatorMap = std::map<IECore::TypeId, ConnectionGadgetCreator>;
-		static CreatorMap &creators();
+	using CreatorMap = std::map<IECore::TypeId, ConnectionGadgetCreator>;
+	static CreatorMap &creators();
 
-		using RegexAndCreator = std::pair<boost::regex, ConnectionGadgetCreator>;
-		using RegexAndCreatorVector = std::vector<RegexAndCreator>;
-		using NamedCreatorMap = std::map<IECore::TypeId, RegexAndCreatorVector>;
-		static NamedCreatorMap &namedCreators();
-
-
+	using RegexAndCreator = std::pair<boost::regex, ConnectionGadgetCreator>;
+	using RegexAndCreatorVector = std::vector<RegexAndCreator>;
+	using NamedCreatorMap = std::map<IECore::TypeId, RegexAndCreatorVector>;
+	static NamedCreatorMap &namedCreators();
 };
 
 } // namespace GafferUI

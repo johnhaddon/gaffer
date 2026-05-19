@@ -47,19 +47,18 @@ namespace GafferUSD
 class GAFFERUSD_API USDShader : public GafferScene::Shader
 {
 
-	public :
+public:
 
-		explicit USDShader( const std::string &name=defaultName<USDShader>() );
-		~USDShader() override;
+	explicit USDShader( const std::string &name = defaultName<USDShader>() );
+	~USDShader() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDShader, USDShaderTypeId, GafferScene::Shader );
+	GAFFER_NODE_DECLARE_TYPE( GafferUSD::USDShader, USDShaderTypeId, GafferScene::Shader );
 
-		void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
+	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 
-	protected :
+protected:
 
-		IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
-
+	IECore::ConstCompoundObjectPtr attributes( const Gaffer::Plug *output ) const override;
 };
 
 IE_CORE_DECLAREPTR( USDShader )

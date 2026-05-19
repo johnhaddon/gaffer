@@ -56,50 +56,49 @@ namespace GafferImage
 class GAFFERIMAGE_API Ramp : public FlatImageSource
 {
 
-	public :
+public:
 
-		explicit Ramp( const std::string &name=defaultName<Ramp>() );
-		~Ramp() override;
+	explicit Ramp( const std::string &name = defaultName<Ramp>() );
+	~Ramp() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Ramp, RampTypeId, FlatImageSource );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Ramp, RampTypeId, FlatImageSource );
 
-		GafferImage::FormatPlug *formatPlug();
-		const GafferImage::FormatPlug *formatPlug() const;
+	GafferImage::FormatPlug *formatPlug();
+	const GafferImage::FormatPlug *formatPlug() const;
 
-		Gaffer::RampfColor4fPlug *rampPlug();
-		const Gaffer::RampfColor4fPlug *rampPlug() const;
+	Gaffer::RampfColor4fPlug *rampPlug();
+	const Gaffer::RampfColor4fPlug *rampPlug() const;
 
-		Gaffer::V2fPlug *startPositionPlug();
-		const Gaffer::V2fPlug *startPositionPlug() const;
+	Gaffer::V2fPlug *startPositionPlug();
+	const Gaffer::V2fPlug *startPositionPlug() const;
 
-		Gaffer::V2fPlug *endPositionPlug();
-		const Gaffer::V2fPlug *endPositionPlug() const;
+	Gaffer::V2fPlug *endPositionPlug();
+	const Gaffer::V2fPlug *endPositionPlug() const;
 
-		Gaffer::StringPlug *layerPlug();
-		const Gaffer::StringPlug *layerPlug() const;
+	Gaffer::StringPlug *layerPlug();
+	const Gaffer::StringPlug *layerPlug() const;
 
-		Gaffer::Transform2DPlug *transformPlug();
-		const Gaffer::Transform2DPlug *transformPlug() const;
+	Gaffer::Transform2DPlug *transformPlug();
+	const Gaffer::Transform2DPlug *transformPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 
-		GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-		IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Ramp )

@@ -48,34 +48,34 @@ namespace Gaffer
 class GAFFER_API NumericBookmarkSet : public Gaffer::Set
 {
 
-	public :
+public:
 
-		NumericBookmarkSet( Gaffer::ScriptNodePtr script, int bookmark );
-		~NumericBookmarkSet() override;
+	NumericBookmarkSet( Gaffer::ScriptNodePtr script, int bookmark );
+	~NumericBookmarkSet() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::NumericBookmarkSet, NumericBookmarkSetTypeId, Gaffer::Set );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::NumericBookmarkSet, NumericBookmarkSetTypeId, Gaffer::Set );
 
-		void setBookmark( int bookmark );
-		int getBookmark() const;
+	void setBookmark( int bookmark );
+	int getBookmark() const;
 
-		/// @name Set interface
-		////////////////////////////////////////////////////////////////////
-		//@{
-		bool contains( const Member *object ) const override;
-		Member *member( size_t index ) override;
-		const Member *member( size_t index ) const override;
-		size_t size() const override;
-		//@}
+	/// @name Set interface
+	////////////////////////////////////////////////////////////////////
+	//@{
+	bool contains( const Member *object ) const override;
+	Member *member( size_t index ) override;
+	const Member *member( size_t index ) const override;
+	size_t size() const override;
+	//@}
 
-	private :
+private:
 
-		Gaffer::ScriptNodePtr m_script;
-		int m_bookmark;
+	Gaffer::ScriptNodePtr m_script;
+	int m_bookmark;
 
-		Gaffer::NodePtr m_node;
-		void updateNode();
+	Gaffer::NodePtr m_node;
+	void updateNode();
 
-		void metadataChanged( IECore::InternedString key, Gaffer::Node *node );
+	void metadataChanged( IECore::InternedString key, Gaffer::Node *node );
 };
 
 IE_CORE_DECLAREPTR( NumericBookmarkSet );

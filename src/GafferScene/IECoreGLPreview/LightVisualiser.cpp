@@ -99,7 +99,7 @@ Visualisations LightVisualiser::allVisualisations( const IECore::CompoundObject 
 	/// This seems pretty expensive to do everywhere.
 	/// The alternative would be to register attribute visualisers to specific attributes.  But then we wouldn't be able to have a visualiser that is influenced by multiple attributes simultaneously
 	for( IECore::CompoundObject::ObjectMap::const_iterator it = attributes->members().begin();
-		it != attributes->members().end(); it++ )
+		 it != attributes->members().end(); it++ )
 	{
 		const std::string &attributeName = it->first.string();
 		if( !( boost::ends_with( attributeName, ":light" ) || attributeName == "light" ) )
@@ -182,7 +182,7 @@ Visualisations LightVisualiser::allVisualisations( const IECore::CompoundObject 
 			{
 				resultState = new IECoreGL::State( false );
 			}
-			resultState->add( const_cast<IECoreGL::State*>( curState.get() ) );
+			resultState->add( const_cast<IECoreGL::State *>( curState.get() ) );
 		}
 	}
 

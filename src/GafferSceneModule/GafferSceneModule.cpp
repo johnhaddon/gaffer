@@ -99,5 +99,4 @@ BOOST_PYTHON_MODULE( _GafferScene )
 	bindVisibleSet();
 	bindRenderManifest();
 	bindCatalogue();
-
 }

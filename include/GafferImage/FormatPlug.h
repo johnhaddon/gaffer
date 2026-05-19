@@ -58,78 +58,77 @@ namespace GafferImage
 class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 {
 
-	public :
+public:
 
-		using ValueType = Format;
+	using ValueType = Format;
 
-		GAFFER_PLUG_DECLARE_TYPE( GafferImage::FormatPlug, FormatPlugTypeId, Gaffer::ValuePlug );
+	GAFFER_PLUG_DECLARE_TYPE( GafferImage::FormatPlug, FormatPlugTypeId, Gaffer::ValuePlug );
 
-		explicit FormatPlug(
-			const std::string &name = defaultName<FormatPlug>(),
-			Direction direction=In,
-			Format defaultValue = Format(),
-			unsigned flags = Default
-		);
+	explicit FormatPlug(
+		const std::string &name = defaultName<FormatPlug>(),
+		Direction direction = In,
+		Format defaultValue = Format(),
+		unsigned flags = Default
+	);
 
-		~FormatPlug() override;
+	~FormatPlug() override;
 
-		/// Accepts no children following construction.
-		bool acceptsChild( const GraphComponent *potentialChild ) const override;
-		Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
+	/// Accepts no children following construction.
+	bool acceptsChild( const GraphComponent *potentialChild ) const override;
+	Gaffer::PlugPtr createCounterpart( const std::string &name, Direction direction ) const override;
 
-		Gaffer::Box2iPlug *displayWindowPlug();
-		const Gaffer::Box2iPlug *displayWindowPlug() const;
+	Gaffer::Box2iPlug *displayWindowPlug();
+	const Gaffer::Box2iPlug *displayWindowPlug() const;
 
-		Gaffer::FloatPlug *pixelAspectPlug();
-		const Gaffer::FloatPlug *pixelAspectPlug() const;
+	Gaffer::FloatPlug *pixelAspectPlug();
+	const Gaffer::FloatPlug *pixelAspectPlug() const;
 
-		Format defaultValue() const;
+	Format defaultValue() const;
 
-		/// \undoable
-		void setValue( const Format &value );
-		/// Implemented to substitute in the default format from the current
-		/// context if the current value is empty.
-		/// \note Substitution is not performed automatically when accessing
-		/// individual components (display window and pixel aspect) from the
-		/// child plugs directly.
-		Format getValue() const;
+	/// \undoable
+	void setValue( const Format &value );
+	/// Implemented to substitute in the default format from the current
+	/// context if the current value is empty.
+	/// \note Substitution is not performed automatically when accessing
+	/// individual components (display window and pixel aspect) from the
+	/// child plugs directly.
+	Format getValue() const;
 
-		/// Reimplemented to account for the substitutions performed in getValue().
-		IECore::MurmurHash hash() const override;
-		/// Ensures the method above doesn't mask
-		/// ValuePlug::hash( h )
-		using ValuePlug::hash;
+	/// Reimplemented to account for the substitutions performed in getValue().
+	IECore::MurmurHash hash() const override;
+	/// Ensures the method above doesn't mask
+	/// ValuePlug::hash( h )
+	using ValuePlug::hash;
 
-		/// @name Default format
-		///
-		/// The FormatPlug provides the concept of a default format - one which
-		/// will be used automatically wherever a FormatPlug contains an empty
-		/// (default constructed) value. The default format is specified via a
-		/// context variable, so the same node graph may be evaluated with
-		/// different defaults in different contexts.
-		///
-		/// To expose this mechanism to user control, a default format may be
-		/// specified for each script via a plug on the ScriptNode itself.
-		////////////////////////////////////////////////////////////////////
-		//@{
-		/// Returns the default format in effect for the specified context.
-		static Format getDefaultFormat( const Gaffer::Context *context );
-		/// Sets the default format for the specified context.
-		static void setDefaultFormat( Gaffer::Context *context, const Format &format );
-		/// Acquires (creating if necessary) a plug which the user can use
-		/// to specify the default format for a particular script. When the
-		/// value of this plug is changed, the default format within
-		/// ScriptNode::context() will be updated automatically.
-		static FormatPlug *acquireDefaultFormatPlug( Gaffer::ScriptNode *scriptNode );
-		//@}
+	/// @name Default format
+	///
+	/// The FormatPlug provides the concept of a default format - one which
+	/// will be used automatically wherever a FormatPlug contains an empty
+	/// (default constructed) value. The default format is specified via a
+	/// context variable, so the same node graph may be evaluated with
+	/// different defaults in different contexts.
+	///
+	/// To expose this mechanism to user control, a default format may be
+	/// specified for each script via a plug on the ScriptNode itself.
+	////////////////////////////////////////////////////////////////////
+	//@{
+	/// Returns the default format in effect for the specified context.
+	static Format getDefaultFormat( const Gaffer::Context *context );
+	/// Sets the default format for the specified context.
+	static void setDefaultFormat( Gaffer::Context *context, const Format &format );
+	/// Acquires (creating if necessary) a plug which the user can use
+	/// to specify the default format for a particular script. When the
+	/// value of this plug is changed, the default format within
+	/// ScriptNode::context() will be updated automatically.
+	static FormatPlug *acquireDefaultFormatPlug( Gaffer::ScriptNode *scriptNode );
+	//@}
 
-	private :
+private:
 
-		void parentChanging( Gaffer::GraphComponent *newParent ) override;
-		void plugDirtied( Gaffer::Plug *plug );
+	void parentChanging( Gaffer::GraphComponent *newParent ) override;
+	void plugDirtied( Gaffer::Plug *plug );
 
-		Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
-
+	Gaffer::Signals::ScopedConnection m_plugDirtiedConnection;
 };
 
 IE_CORE_DECLAREPTR( FormatPlug );

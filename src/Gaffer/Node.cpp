@@ -48,7 +48,7 @@ size_t Node::g_firstPlugIndex;
 GAFFER_NODE_DEFINE_TYPE( Node );
 
 Node::Node( const std::string &name )
-	:	GraphComponent( name )
+	: GraphComponent( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Plug( "user", Plug::In, Plug::Default & ~Plug::AcceptsInputs ) );
@@ -145,14 +145,14 @@ void Node::parentChanging( Gaffer::GraphComponent *newParent )
 		vector<PlugPtr> toDisconnect;
 		for( Plug::RecursiveIterator it( this ); !it.done(); ++it )
 		{
-			if( Plug *input = (*it)->getInput() )
+			if( Plug *input = ( *it )->getInput() )
 			{
 				if( !this->isAncestorOf( input ) )
 				{
 					toDisconnect.push_back( *it );
 				}
 			}
-			for( Plug::OutputContainer::const_iterator oIt = (*it)->outputs().begin(), oeIt = (*it)->outputs().end(); oIt != oeIt; ++oIt )
+			for( Plug::OutputContainer::const_iterator oIt = ( *it )->outputs().begin(), oeIt = ( *it )->outputs().end(); oIt != oeIt; ++oIt )
 			{
 				if( !this->isAncestorOf( *oIt ) )
 				{
@@ -163,7 +163,7 @@ void Node::parentChanging( Gaffer::GraphComponent *newParent )
 
 		for( vector<PlugPtr>::const_iterator it = toDisconnect.begin(), eIt = toDisconnect.end(); it != eIt; ++it )
 		{
-			(*it)->setInput( nullptr );
+			( *it )->setInput( nullptr );
 		}
 	}
 }

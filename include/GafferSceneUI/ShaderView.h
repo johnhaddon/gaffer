@@ -54,77 +54,76 @@ namespace GafferSceneUI
 class GAFFERSCENEUI_API ShaderView : public GafferImageUI::ImageView
 {
 
-	public :
+public:
 
-		explicit ShaderView( Gaffer::ScriptNodePtr scriptNode );
-		~ShaderView() override;
+	explicit ShaderView( Gaffer::ScriptNodePtr scriptNode );
+	~ShaderView() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::ShaderView, ShaderViewTypeId, GafferImageUI::ImageView );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::ShaderView, ShaderViewTypeId, GafferImageUI::ImageView );
 
-		Gaffer::StringPlug *scenePlug();
-		const Gaffer::StringPlug *scenePlug() const;
+	Gaffer::StringPlug *scenePlug();
+	const Gaffer::StringPlug *scenePlug() const;
 
-		// The prefix for the shader currently being viewed.
-		std::string shaderPrefix() const;
+	// The prefix for the shader currently being viewed.
+	std::string shaderPrefix() const;
 
-		// The scene currently being used.
-		Gaffer::Node *scene();
-		const Gaffer::Node *scene() const;
+	// The scene currently being used.
+	Gaffer::Node *scene();
+	const Gaffer::Node *scene() const;
 
-		using SceneChangedSignal = Gaffer::Signals::Signal<void ( ShaderView * )>;
-		SceneChangedSignal &sceneChangedSignal();
+	using SceneChangedSignal = Gaffer::Signals::Signal<void( ShaderView * )>;
+	SceneChangedSignal &sceneChangedSignal();
 
-		using RendererCreator = std::function<GafferScene::InteractiveRenderPtr ()>;
-		/// \todo We should probably remove `RendererCreator` and just pass the renderer's name.
-		static void registerRenderer( const std::string &shaderPrefix, RendererCreator rendererCreator );
-		static void deregisterRenderer( const std::string &shaderPrefix );
+	using RendererCreator = std::function<GafferScene::InteractiveRenderPtr()>;
+	/// \todo We should probably remove `RendererCreator` and just pass the renderer's name.
+	static void registerRenderer( const std::string &shaderPrefix, RendererCreator rendererCreator );
+	static void deregisterRenderer( const std::string &shaderPrefix );
 
-		using SceneCreator = std::function<Gaffer::NodePtr ()>;
-		static void registerScene( const std::string &shaderPrefix, const std::string &name, SceneCreator sceneCreator );
-		static void registerScene( const std::string &shaderPrefix, const std::string &name, const std::filesystem::path &referenceFileName );
-		static void registeredScenes( const std::string &shaderPrefix, std::vector<std::string> &names );
+	using SceneCreator = std::function<Gaffer::NodePtr()>;
+	static void registerScene( const std::string &shaderPrefix, const std::string &name, SceneCreator sceneCreator );
+	static void registerScene( const std::string &shaderPrefix, const std::string &name, const std::filesystem::path &referenceFileName );
+	static void registeredScenes( const std::string &shaderPrefix, std::vector<std::string> &names );
 
-	private :
+private:
 
-		using PrefixAndName = std::pair<std::string, std::string>;
-		using Scenes = std::map<PrefixAndName, Gaffer::NodePtr>;
+	using PrefixAndName = std::pair<std::string, std::string>;
+	using Scenes = std::map<PrefixAndName, Gaffer::NodePtr>;
 
-		GafferScene::Display *display();
-		const GafferScene::Display *display() const;
+	GafferScene::Display *display();
+	const GafferScene::Display *display() const;
 
-		void viewportVisibilityChanged();
+	void viewportVisibilityChanged();
 
-		void contextChanged();
-		void plugSet( Gaffer::Plug *plug );
-		void plugDirtied( Gaffer::Plug *plug );
-		void sceneRegistrationChanged( const PrefixAndName &prefixAndName );
-		void rendererRegistrationChanged();
+	void contextChanged();
+	void plugSet( Gaffer::Plug *plug );
+	void plugDirtied( Gaffer::Plug *plug );
+	void sceneRegistrationChanged( const PrefixAndName &prefixAndName );
+	void rendererRegistrationChanged();
 
-		void idleUpdate();
-		void updateRenderer();
-		void updateRendererContext();
-		void updateRendererState();
-		void updateScene();
-		void preRender();
-		void imageGadgetStateChanged();
+	void idleUpdate();
+	void updateRenderer();
+	void updateRendererContext();
+	void updateRendererState();
+	void updateScene();
+	void preRender();
+	void imageGadgetStateChanged();
 
-		void driverCreated( IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters );
+	void driverCreated( IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters );
 
-		bool m_framed;
-		Gaffer::NodePtr m_imageConverter;
+	bool m_framed;
+	Gaffer::NodePtr m_imageConverter;
 
-		Gaffer::Signals::ScopedConnection m_idleConnection;
+	Gaffer::Signals::ScopedConnection m_idleConnection;
 
-		GafferScene::InteractiveRenderPtr m_renderer;
-		std::string m_rendererShaderPrefix;
+	GafferScene::InteractiveRenderPtr m_renderer;
+	std::string m_rendererShaderPrefix;
 
-		Scenes m_scenes;
-		Gaffer::NodePtr m_scene;
-		PrefixAndName m_scenePrefixAndName;
-		SceneChangedSignal m_sceneChangedSignal;
+	Scenes m_scenes;
+	Gaffer::NodePtr m_scene;
+	PrefixAndName m_scenePrefixAndName;
+	SceneChangedSignal m_sceneChangedSignal;
 
-		static ViewDescription<ShaderView> g_viewDescription;
-
+	static ViewDescription<ShaderView> g_viewDescription;
 };
 
 IE_CORE_DECLAREPTR( ShaderView );

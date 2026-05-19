@@ -49,26 +49,25 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldAOVShader : public GafferScene::GlobalShader
 {
 
-	public :
+public:
 
-		explicit ArnoldAOVShader( const std::string &name=defaultName<ArnoldAOVShader>() );
-		~ArnoldAOVShader() override;
+	explicit ArnoldAOVShader( const std::string &name = defaultName<ArnoldAOVShader>() );
+	~ArnoldAOVShader() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldAOVShader, ArnoldAOVShaderTypeId, GafferScene::GlobalShader );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldAOVShader, ArnoldAOVShaderTypeId, GafferScene::GlobalShader );
 
-		Gaffer::StringPlug *optionSuffixPlug();
-		const Gaffer::StringPlug *optionSuffixPlug() const;
+	Gaffer::StringPlug *optionSuffixPlug();
+	const Gaffer::StringPlug *optionSuffixPlug() const;
 
-	protected :
+protected:
 
-		bool affectsOptionName( const Gaffer::Plug *input ) const override;
-		void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		std::string computeOptionName( const Gaffer::Context *context ) const override;
+	bool affectsOptionName( const Gaffer::Plug *input ) const override;
+	void hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	std::string computeOptionName( const Gaffer::Context *context ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ArnoldAOVShader )

@@ -49,50 +49,49 @@ namespace GafferML
 class GAFFERML_API DataToTensor : public Gaffer::ComputeNode
 {
 
-	public :
+public:
 
-		explicit DataToTensor( const std::string &name=defaultName<DataToTensor>() );
-		~DataToTensor() override;
+	explicit DataToTensor( const std::string &name = defaultName<DataToTensor>() );
+	~DataToTensor() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferML::DataToTensor, DataToTensorTypeId, Gaffer::ComputeNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferML::DataToTensor, DataToTensorTypeId, Gaffer::ComputeNode );
 
-		enum class ShapeMode
-		{
-			Automatic,
-			Custom
-		};
+	enum class ShapeMode
+	{
+		Automatic,
+		Custom
+	};
 
-		bool canSetup( const Gaffer::ValuePlug *prototypeDataPlug );
-		void setup( const Gaffer::ValuePlug *prototypeDataPlug );
+	bool canSetup( const Gaffer::ValuePlug *prototypeDataPlug );
+	void setup( const Gaffer::ValuePlug *prototypeDataPlug );
 
-		template<typename T = Gaffer::ValuePlug>
-		T *dataPlug();
-		template<typename T = Gaffer::ValuePlug>
-		const T *dataPlug() const;
+	template<typename T = Gaffer::ValuePlug>
+	T *dataPlug();
+	template<typename T = Gaffer::ValuePlug>
+	const T *dataPlug() const;
 
-		Gaffer::IntPlug *shapeModePlug();
-		const Gaffer::IntPlug *shapeModePlug() const;
+	Gaffer::IntPlug *shapeModePlug();
+	const Gaffer::IntPlug *shapeModePlug() const;
 
-		Gaffer::Int64VectorDataPlug *shapePlug();
-		const Gaffer::Int64VectorDataPlug *shapePlug() const;
+	Gaffer::Int64VectorDataPlug *shapePlug();
+	const Gaffer::Int64VectorDataPlug *shapePlug() const;
 
-		TensorPlug *tensorPlug();
-		const TensorPlug *tensorPlug() const;
+	TensorPlug *tensorPlug();
+	const TensorPlug *tensorPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
+	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-		Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
+	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-		static const IECore::InternedString g_dataPlugName;
-
+	static size_t g_firstPlugIndex;
+	static const IECore::InternedString g_dataPlugName;
 };
 
 IE_CORE_DECLAREPTR( DataToTensor )

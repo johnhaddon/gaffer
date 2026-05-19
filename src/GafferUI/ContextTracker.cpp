@@ -78,13 +78,9 @@ using SharedInstances = boost::multi_index::multi_index_container<
 	SharedInstance,
 	boost::multi_index::indexed_by<
 		boost::multi_index::hashed_unique<
-			boost::multi_index::key<&SharedInstance::first>
-		>,
+			boost::multi_index::key<&SharedInstance::first>>,
 		boost::multi_index::hashed_non_unique<
-			boost::multi_index::key<&SharedInstance::second>
-		>
-	>
->;
+			boost::multi_index::key<&SharedInstance::second>>>>;
 
 SharedInstances &sharedInstances()
 {
@@ -97,13 +93,9 @@ using SharedFocusInstances = boost::multi_index::multi_index_container<
 	SharedFocusInstance,
 	boost::multi_index::indexed_by<
 		boost::multi_index::hashed_unique<
-			boost::multi_index::key<&SharedFocusInstance::first>
-		>,
+			boost::multi_index::key<&SharedFocusInstance::first>>,
 		boost::multi_index::hashed_non_unique<
-			boost::multi_index::key<&SharedFocusInstance::second>
-		>
-	>
->;
+			boost::multi_index::key<&SharedFocusInstance::second>>>>;
 
 SharedFocusInstances &sharedFocusInstances()
 {
@@ -160,7 +152,6 @@ Gaffer::ScriptNode *scriptNode( Gaffer::GraphComponent *graphComponent )
 	if( !e )
 	{
 		return nullptr;
-
 	}
 
 	if( auto view = runTimeCast<View>( e ) )
@@ -185,7 +176,7 @@ const InternedString g_inPlugName( "in" );
 //////////////////////////////////////////////////////////////////////////
 
 ContextTracker::ContextTracker( const Gaffer::NodePtr &node, const Gaffer::ContextPtr &context )
-	:	m_targetContext( context ), m_defaultContext( new Context( *context ) )
+	: m_targetContext( context ), m_defaultContext( new Context( *context ) )
 {
 	context->changedSignal().connect( boost::bind( &ContextTracker::contextChanged, this, ::_2 ) );
 	updateNode( node );
@@ -311,7 +302,7 @@ void ContextTracker::scheduleUpdate()
 	m_idleConnection = Gadget::idleSignal().connect(
 		// OK to capture `this` without owning a reference, because
 		// `~ContextTracker` will remove the connection.
-		[this] () {
+		[this]() {
 			this->updateInBackground();
 		}
 	);
@@ -344,8 +335,7 @@ void ContextTracker::updateInBackground()
 		// OK to capture `this` without incrementing reference count, because
 		// ~UpstreamContext cancels background task and waits for it to
 		// complete. Therefore `this` will always outlive the task.
-		[toVisit, this] () mutable {
-
+		[toVisit, this]() mutable {
 			PlugContexts plugContexts;
 			NodeContexts nodeContexts;
 
@@ -374,7 +364,7 @@ void ContextTracker::updateInBackground()
 					ParallelAlgo::callOnUIThread(
 						// Need to own a reference via `thisRef`, because otherwise we could be deleted
 						// before `callOnUIThread()` gets to us.
-						[thisRef = Ptr( that )] () {
+						[thisRef = Ptr( that )]() {
 							thisRef->m_updateTask.reset();
 							thisRef->scheduleUpdate();
 						}
@@ -392,12 +382,10 @@ void ContextTracker::updateInBackground()
 				ParallelAlgo::callOnUIThread(
 					// Need to own a reference via `thisRef`, because otherwise we could be deleted
 					// before `callOnUIThread()` gets to us.
-					[
-						thisRef = Ptr( that ),
-						plugContexts = std::move( plugContexts ),
-						nodeContexts = std::move( nodeContexts ),
-						defaultContext = ConstContextPtr( new Context( *Context::current(), /* omitCanceller = */ true ) )
-					] () mutable {
+					[thisRef = Ptr( that ),
+					 plugContexts = std::move( plugContexts ),
+					 nodeContexts = std::move( nodeContexts ),
+					 defaultContext = ConstContextPtr( new Context( *Context::current(), /* omitCanceller = */ true ) )]() mutable {
 						thisRef->m_nodeContexts.swap( nodeContexts );
 						thisRef->m_plugContexts.swap( plugContexts );
 						thisRef->m_defaultContext = defaultContext;
@@ -613,7 +601,7 @@ void ContextTracker::visit( std::deque<std::pair<const Plug *, ConstContextPtr>>
 			}
 		}
 
-		if( !node || plug->direction() == Plug::Out || !nodeData.allInputsActive || *context != *nodeData.context  )
+		if( !node || plug->direction() == Plug::Out || !nodeData.allInputsActive || *context != *nodeData.context )
 		{
 			plugContexts.insert( { plug, context } );
 		}
@@ -629,7 +617,7 @@ void ContextTracker::visit( std::deque<std::pair<const Plug *, ConstContextPtr>>
 		{
 			for( Plug::RecursiveInputIterator it( plug ); !it.done(); ++it )
 			{
-				if( auto input = (*it)->getInput() )
+				if( auto input = ( *it )->getInput() )
 				{
 					toVisit.push_back( { input, context } );
 					it.prune();

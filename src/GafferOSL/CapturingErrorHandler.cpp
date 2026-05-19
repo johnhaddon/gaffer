@@ -42,7 +42,7 @@ CapturingErrorHandler::CapturingErrorHandler()
 {
 }
 
-void CapturingErrorHandler::operator()( int errorCode, const std::string &message )
+void CapturingErrorHandler::operator () ( int errorCode, const std::string &message )
 {
 	if( errorCode >= EH_ERROR )
 	{

@@ -105,19 +105,16 @@ void GafferSceneModule::bindHierarchy()
 				const ScenePlug::ScenePath &,
 				const Gaffer::Context &,
 				const IECore::MurmurHash &,
-				const Imath::Box3f &
-			>()
+				const Imath::Box3f &>()
 		)
 		.def( "scene", &scene )
 		.def( "root", &root )
 		.def( "context", &context )
 		.def( "setRenderOptions", &Capsule::setRenderOptions )
-		.def( "getRenderOptions", &getRenderOptionsWrapper )
-	;
+		.def( "getRenderOptions", &getRenderOptionsWrapper );
 
 	GafferBindings::DependencyNodeClass<Group>()
-		.def( "nextInPlug", (ScenePlug *(Group::*)())&Group::nextInPlug, return_value_policy<CastToIntrusivePtr>() )
-	;
+		.def( "nextInPlug", ( ScenePlug * (Group::*)() ) & Group::nextInPlug, return_value_policy<CastToIntrusivePtr>() );
 
 	GafferBindings::DependencyNodeClass<BranchCreator>();
 	GafferBindings::DependencyNodeClass<GafferScene::Parent>();
@@ -137,8 +134,7 @@ void GafferSceneModule::bindHierarchy()
 		enum_<MergeScenes::Mode>( "Mode" )
 			.value( "Keep", MergeScenes::Mode::Keep )
 			.value( "Replace", MergeScenes::Mode::Replace )
-			.value( "Merge", MergeScenes::Mode::Merge )
-		;
+			.value( "Merge", MergeScenes::Mode::Merge );
 	}
 
 	{
@@ -146,21 +142,11 @@ void GafferSceneModule::bindHierarchy()
 		enum_<Instancer::PrototypeMode>( "PrototypeMode" )
 			.value( "IndexedRootsList", Instancer::PrototypeMode::IndexedRootsList )
 			.value( "IndexedRootsVariable", Instancer::PrototypeMode::IndexedRootsVariable )
-			.value( "RootPerVertex", Instancer::PrototypeMode::RootPerVertex )
-		;
+			.value( "RootPerVertex", Instancer::PrototypeMode::RootPerVertex );
 
 		GafferBindings::PlugClass<Instancer::ContextVariablePlug>()
-			.def( init<const char *, Plug::Direction, bool, unsigned>(
-					(
-						boost::python::arg_( "name" )=GraphComponent::defaultName<Instancer::ContextVariablePlug>(),
-						boost::python::arg_( "direction" )=Plug::In,
-						boost::python::arg_( "defaultEnable" )=true,
-						boost::python::arg_( "flags" )=Plug::Default
-					)
-				)
-			)
-			.attr( "__qualname__" ) = "Instancer.ContextVariablePlug"
-		;
+			.def( init<const char *, Plug::Direction, bool, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<Instancer::ContextVariablePlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultEnable" ) = true, boost::python::arg_( "flags" ) = Plug::Default ) ) )
+			.attr( "__qualname__" ) = "Instancer.ContextVariablePlug";
 
 		// Expose InstancerCapsules as if they were plain Capsules. We don't
 		// want to bind them fully because then we'd be exposing a private class, but
@@ -173,7 +159,6 @@ void GafferSceneModule::bindHierarchy()
 		boost::python::objects::copy_class_object(
 			type_id<Capsule>(), Instancer::instancerCapsuleTypeInfo()
 		);
-
 	}
 
 	{
@@ -181,12 +166,10 @@ void GafferSceneModule::bindHierarchy()
 
 		enum_<MotionPath::FrameMode>( "FrameMode" )
 			.value( "Relative", MotionPath::FrameMode::Relative )
-			.value( "Absolute", MotionPath::FrameMode::Absolute )
-			;
+			.value( "Absolute", MotionPath::FrameMode::Absolute );
 
 		enum_<MotionPath::SamplingMode>( "SamplingMode" )
 			.value( "Variable", MotionPath::SamplingMode::Variable )
-			.value( "Fixed", MotionPath::SamplingMode::Fixed )
-			;
+			.value( "Fixed", MotionPath::SamplingMode::Fixed );
 	}
 }

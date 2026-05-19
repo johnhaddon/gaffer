@@ -48,13 +48,13 @@ GAFFER_NODE_DEFINE_TYPE( Deformer );
 size_t Deformer::g_firstPlugIndex = 0;
 
 Deformer::Deformer( const std::string &name )
-	:	ObjectProcessor( name )
+	: ObjectProcessor( name )
 {
 	init();
 }
 
 Deformer::Deformer( const std::string &name, size_t minInputs, size_t maxInputs )
-	:	ObjectProcessor( name, minInputs, maxInputs )
+	: ObjectProcessor( name, minInputs, maxInputs )
 {
 	init();
 }

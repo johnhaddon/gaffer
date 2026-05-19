@@ -55,12 +55,10 @@ void GafferImageModule::bindUtilityNodes()
 		enum_<ImageStats::AreaSource>( "AreaSource" )
 			.value( "Area", ImageStats::Area )
 			.value( "DataWindow", ImageStats::DataWindow )
-			.value( "DisplayWindow", ImageStats::DisplayWindow )
-		;
+			.value( "DisplayWindow", ImageStats::DisplayWindow );
 	}
 
 	DependencyNodeClass<ImageSampler>();
 	DependencyNodeClass<FormatQuery>();
 	DependencyNodeClass<DataWindowQuery>();
-
 }

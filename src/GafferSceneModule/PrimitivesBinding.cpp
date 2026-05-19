@@ -68,7 +68,8 @@ using namespace Gaffer;
 using namespace GafferBindings;
 using namespace GafferScene;
 
-namespace {
+namespace
+{
 
 class LightSerialiser : public GafferBindings::NodeSerialiser
 {
@@ -83,7 +84,7 @@ class LightSerialiser : public GafferBindings::NodeSerialiser
 		// ( Now we create the parameters with a loadShader after the constructor, so they don't need to be dynamic )
 		for( Plug::Iterator it( light->parametersPlug() ); !it.done(); ++it )
 		{
-			(*it)->setFlags( Gaffer::Plug::Dynamic, false );
+			( *it )->setFlags( Gaffer::Plug::Dynamic, false );
 		}
 
 		const std::string shaderName = light->getChild<GafferScene::Shader>( "__shader" )->namePlug()->getValue();
@@ -94,7 +95,6 @@ class LightSerialiser : public GafferBindings::NodeSerialiser
 
 		return defaultPC;
 	}
-
 };
 
 template<typename T>
@@ -106,7 +106,8 @@ void loadShaderWrapper( T &node, const std::string &shaderName, bool keepExistin
 
 } // namespace
 
-namespace GafferSceneModule {
+namespace GafferSceneModule
+{
 
 class LightFilterSerialiser : public GafferBindings::NodeSerialiser
 {
@@ -125,7 +126,6 @@ class LightFilterSerialiser : public GafferBindings::NodeSerialiser
 
 		return defaultPostConstructor;
 	}
-
 };
 
 } // namespace GafferSceneModule
@@ -146,8 +146,7 @@ void GafferSceneModule::bindPrimitives()
 		scope s = GafferBindings::DependencyNodeClass<Camera>();
 		enum_<Camera::PerspectiveMode>( "PerspectiveMode" )
 			.value( "FieldOfView", Camera::FieldOfView )
-			.value( "ApertureFocalLength", Camera::ApertureFocalLength )
-		;
+			.value( "ApertureFocalLength", Camera::ApertureFocalLength );
 	}
 
 	GafferBindings::DependencyNodeClass<ClippingPlane>();
@@ -155,13 +154,11 @@ void GafferSceneModule::bindPrimitives()
 	GafferBindings::DependencyNodeClass<ExternalProcedural>();
 	GafferBindings::DependencyNodeClass<Grid>();
 	GafferBindings::DependencyNodeClass<Light>( nullptr, no_init )
-		.def( "loadShader", &loadShaderWrapper<Light>, ( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false ) )
-	;
+		.def( "loadShader", &loadShaderWrapper<Light>, ( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false ) );
 	GafferBindings::Serialisation::registerSerialiser( Light::staticTypeId(), new LightSerialiser() );
 
 	NodeClass<LightFilter>( nullptr, no_init )
-		.def( "loadShader", &loadShaderWrapper<LightFilter>, ( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false ) )
-	;
+		.def( "loadShader", &loadShaderWrapper<LightFilter>, ( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false ) );
 
 	GafferBindings::Serialisation::registerSerialiser( LightFilter::staticTypeId(), new LightFilterSerialiser() );
 
@@ -172,8 +169,6 @@ void GafferSceneModule::bindPrimitives()
 
 		enum_<Sphere::Type>( "Type" )
 			.value( "Primitive", Sphere::Primitive )
-			.value( "Mesh", Sphere::Mesh )
-		;
+			.value( "Mesh", Sphere::Mesh );
 	}
-
 }

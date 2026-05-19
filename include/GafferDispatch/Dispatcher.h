@@ -73,9 +73,9 @@ struct PreDispatchSignalCombiner
 	using result_type = bool;
 
 	template<typename InputIterator>
-	bool operator()( InputIterator first, InputIterator last ) const
+	bool operator () ( InputIterator first, InputIterator last ) const
 	{
-		while ( first != last )
+		while( first != last )
 		{
 			if( *first )
 			{
@@ -99,207 +99,205 @@ IE_CORE_FORWARDDECLARE( Dispatcher )
 /// plugs which affect Task execution.
 class GAFFERDISPATCH_API Dispatcher : public TaskNode
 {
-	public :
+public:
 
-		explicit Dispatcher( const std::string &name=defaultName<Dispatcher>() );
-		~Dispatcher() override;
+	explicit Dispatcher( const std::string &name = defaultName<Dispatcher>() );
+	~Dispatcher() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferDispatch::Dispatcher, DispatcherTypeId, TaskNode );
+	GAFFER_NODE_DECLARE_TYPE( GafferDispatch::Dispatcher, DispatcherTypeId, TaskNode );
 
-		using PreDispatchSignal = Gaffer::Signals::Signal<bool ( const Dispatcher * ), Detail::PreDispatchSignalCombiner>;
-		using DispatchSignal = Gaffer::Signals::Signal<void ( const Dispatcher * ), Gaffer::Signals::CatchingCombiner<void>>;
-		using PostDispatchSignal = Gaffer::Signals::Signal<void ( const Dispatcher *, bool ), Gaffer::Signals::CatchingCombiner<void>>;
-		//! @name Dispatch Signals
-		/// These signals are emitted on dispatch events for any registered Dispatcher instance.
-		////////////////////////////////////////////////////////////////////////////////////////
-		//@{
-		/// Called when any dispatcher might begin to dispatch tasks. Slots should have the
-		/// signature `bool slot( dispatcher )`, and may return True to cancel
-		/// the dispatch, or False to allow it to continue.
-		static PreDispatchSignal &preDispatchSignal();
-		/// Called when any dispatcher is going to dispatch tasks. Slots should have the
-		/// signature `bool slot( dispatcher )`. This differs from the `preDispatchSignal`
-		/// in that it is triggered when dispatching is imminent and non-cancellable.
-		static DispatchSignal &dispatchSignal();
-		/// Called after any dispatcher has finished dispatching nodes, or after a pending dispatch
-		/// has been cancelled by the preDispatchSignal slots. Slots should have the signature
-		/// `void slot( dispatcher, bool )`. The third argument will be True if the process
-		/// was successful, and False otherwise.
-		static PostDispatchSignal &postDispatchSignal();
-		//@}
+	using PreDispatchSignal = Gaffer::Signals::Signal<bool( const Dispatcher * ), Detail::PreDispatchSignalCombiner>;
+	using DispatchSignal = Gaffer::Signals::Signal<void( const Dispatcher * ), Gaffer::Signals::CatchingCombiner<void>>;
+	using PostDispatchSignal = Gaffer::Signals::Signal<void( const Dispatcher *, bool ), Gaffer::Signals::CatchingCombiner<void>>;
+	//! @name Dispatch Signals
+	/// These signals are emitted on dispatch events for any registered Dispatcher instance.
+	////////////////////////////////////////////////////////////////////////////////////////
+	//@{
+	/// Called when any dispatcher might begin to dispatch tasks. Slots should have the
+	/// signature `bool slot( dispatcher )`, and may return True to cancel
+	/// the dispatch, or False to allow it to continue.
+	static PreDispatchSignal &preDispatchSignal();
+	/// Called when any dispatcher is going to dispatch tasks. Slots should have the
+	/// signature `bool slot( dispatcher )`. This differs from the `preDispatchSignal`
+	/// in that it is triggered when dispatching is imminent and non-cancellable.
+	static DispatchSignal &dispatchSignal();
+	/// Called after any dispatcher has finished dispatching nodes, or after a pending dispatch
+	/// has been cancelled by the preDispatchSignal slots. Slots should have the signature
+	/// `void slot( dispatcher, bool )`. The third argument will be True if the process
+	/// was successful, and False otherwise.
+	static PostDispatchSignal &postDispatchSignal();
+	//@}
 
-		Gaffer::ArrayPlug *tasksPlug();
-		const Gaffer::ArrayPlug *tasksPlug() const;
+	Gaffer::ArrayPlug *tasksPlug();
+	const Gaffer::ArrayPlug *tasksPlug() const;
 
-		enum FramesMode
-		{
-			CurrentFrame,
-			FullRange,
-			CustomRange
-		};
+	enum FramesMode
+	{
+		CurrentFrame,
+		FullRange,
+		CustomRange
+	};
 
-		//! @name Frame range
-		/// Dispatchers define a frame range for execution.
-		///////////////////////////////////////////////////
-		//@{
-		/// Returns a FramesMode for getting the active frame range.
-		Gaffer::IntPlug *framesModePlug();
-		const Gaffer::IntPlug *framesModePlug() const;
-		/// Returns frame range to be used when framesModePlug is set to CustomRange.
-		Gaffer::StringPlug *frameRangePlug();
-		const Gaffer::StringPlug *frameRangePlug() const;
-		/// Returns the frame range that would be used by a dispatch in the
-		/// current context.
-		virtual IECore::FrameListPtr frameRange() const;
-		//@}
+	//! @name Frame range
+	/// Dispatchers define a frame range for execution.
+	///////////////////////////////////////////////////
+	//@{
+	/// Returns a FramesMode for getting the active frame range.
+	Gaffer::IntPlug *framesModePlug();
+	const Gaffer::IntPlug *framesModePlug() const;
+	/// Returns frame range to be used when framesModePlug is set to CustomRange.
+	Gaffer::StringPlug *frameRangePlug();
+	const Gaffer::StringPlug *frameRangePlug() const;
+	/// Returns the frame range that would be used by a dispatch in the
+	/// current context.
+	virtual IECore::FrameListPtr frameRange() const;
+	//@}
 
-		//! @name Dispatcher Jobs
-		/// Utility functions which derived classes may use when dispatching jobs.
-		//////////////////////////////////////////////////////////////////////////
-		//@{
-		/// Returns the name of the next job to dispatch.
-		Gaffer::StringPlug *jobNamePlug();
-		const Gaffer::StringPlug *jobNamePlug() const;
-		/// Returns the plug which specifies the directory used by dispatchers to store temporary
-		/// files on a per-job basis.
-		Gaffer::StringPlug *jobsDirectoryPlug();
-		const Gaffer::StringPlug *jobsDirectoryPlug() const;
-		/// At the start of dispatch(), a directory is created under `jobsDirectoryPlug / jobNamePlug`
-		/// which the dispatcher writes temporary files to. This method returns the most recent created directory.
-		/// \todo Remove. Nodes shouldn't store state.
-		const std::filesystem::path jobDirectory() const;
-		//@}
+	//! @name Dispatcher Jobs
+	/// Utility functions which derived classes may use when dispatching jobs.
+	//////////////////////////////////////////////////////////////////////////
+	//@{
+	/// Returns the name of the next job to dispatch.
+	Gaffer::StringPlug *jobNamePlug();
+	const Gaffer::StringPlug *jobNamePlug() const;
+	/// Returns the plug which specifies the directory used by dispatchers to store temporary
+	/// files on a per-job basis.
+	Gaffer::StringPlug *jobsDirectoryPlug();
+	const Gaffer::StringPlug *jobsDirectoryPlug() const;
+	/// At the start of dispatch(), a directory is created under `jobsDirectoryPlug / jobNamePlug`
+	/// which the dispatcher writes temporary files to. This method returns the most recent created directory.
+	/// \todo Remove. Nodes shouldn't store state.
+	const std::filesystem::path jobDirectory() const;
+	//@}
 
-		/// A function which creates a Dispatcher.
-		using Creator = std::function<DispatcherPtr ()>;
-		/// SetupPlugsFn may be registered along with a Dispatcher Creator. It will be called by setupPlugs,
-		/// along with all other registered SetupPlugsFns. It is recommended that each registered dispatcher
-		/// store its plugs contained within a dedicated parent Plug, named according to the registration
-		/// type. The SetupPlugsFn must be implemented in a way that gracefully accepts situations where the
-		/// plugs already exist (i.e. nodes loaded from a script may already have the necessary dispatcher plugs).
-		/// One way to avoid this issue is to always create non-dynamic plugs. Since setupPlugs is called from
-		/// the TaskNode constructor, the non-dynamic plugs will always be created according to the current
-		/// definition, and will not be serialized into scripts. The downside of using non-dynamic plugs is that
-		/// loading a script before all Dispatchers have been registered could result in lost settings.
-		using SetupPlugsFn = std::function<void (Gaffer::Plug *)>;
+	/// A function which creates a Dispatcher.
+	using Creator = std::function<DispatcherPtr()>;
+	/// SetupPlugsFn may be registered along with a Dispatcher Creator. It will be called by setupPlugs,
+	/// along with all other registered SetupPlugsFns. It is recommended that each registered dispatcher
+	/// store its plugs contained within a dedicated parent Plug, named according to the registration
+	/// type. The SetupPlugsFn must be implemented in a way that gracefully accepts situations where the
+	/// plugs already exist (i.e. nodes loaded from a script may already have the necessary dispatcher plugs).
+	/// One way to avoid this issue is to always create non-dynamic plugs. Since setupPlugs is called from
+	/// the TaskNode constructor, the non-dynamic plugs will always be created according to the current
+	/// definition, and will not be serialized into scripts. The downside of using non-dynamic plugs is that
+	/// loading a script before all Dispatchers have been registered could result in lost settings.
+	using SetupPlugsFn = std::function<void( Gaffer::Plug * )>;
 
-		//! @name Registration
-		/// Utility functions for registering and retrieving Dispatchers.
-		/////////////////////////////////////////////////////////////////
-		//@{
-		/// Create a registered Dispatcher of the specified type.
-		static DispatcherPtr create( const std::string &dispatcherType );
-		static const std::string &getDefaultDispatcherType();
-		static void setDefaultDispatcherType( const std::string &dispatcherType );
-		/// Register a Dispatcher creation function.
-		static void registerDispatcher( const std::string &dispatcherType, Creator creator, SetupPlugsFn setupPlugsFn = nullptr );
-		/// Fills the vector with the names of all the registered Dispatcher creators.
-		static void registeredDispatchers( std::vector<std::string> &dispatcherTypes );
-		/// Removes a dispatcher from the registry
-		static void deregisterDispatcher( const std::string &dispatcherType );
-		//@}
+	//! @name Registration
+	/// Utility functions for registering and retrieving Dispatchers.
+	/////////////////////////////////////////////////////////////////
+	//@{
+	/// Create a registered Dispatcher of the specified type.
+	static DispatcherPtr create( const std::string &dispatcherType );
+	static const std::string &getDefaultDispatcherType();
+	static void setDefaultDispatcherType( const std::string &dispatcherType );
+	/// Register a Dispatcher creation function.
+	static void registerDispatcher( const std::string &dispatcherType, Creator creator, SetupPlugsFn setupPlugsFn = nullptr );
+	/// Fills the vector with the names of all the registered Dispatcher creators.
+	static void registeredDispatchers( std::vector<std::string> &dispatcherTypes );
+	/// Removes a dispatcher from the registry
+	static void deregisterDispatcher( const std::string &dispatcherType );
+	//@}
 
-	protected :
+protected:
 
-		IE_CORE_FORWARDDECLARE( TaskBatch )
+	IE_CORE_FORWARDDECLARE( TaskBatch )
 
-		using TaskBatches = std::vector<TaskBatchPtr>;
+	using TaskBatches = std::vector<TaskBatchPtr>;
 
-		/// A batch of tasks to be executed together, along
-		/// with references to batches of preTasks which must
-		/// be executed first. This DAG is the primary
-		/// data structure used in the dispatch process.
-		///
-		/// All tasks within a batch are from the same plug
-		/// and have identical contexts except for the frame
-		/// number.
-		class GAFFERDISPATCH_API TaskBatch : public IECore::RefCounted
-		{
-			public :
+	/// A batch of tasks to be executed together, along
+	/// with references to batches of preTasks which must
+	/// be executed first. This DAG is the primary
+	/// data structure used in the dispatch process.
+	///
+	/// All tasks within a batch are from the same plug
+	/// and have identical contexts except for the frame
+	/// number.
+	class GAFFERDISPATCH_API TaskBatch : public IECore::RefCounted
+	{
+	public:
 
-				IE_CORE_DECLAREMEMBERPTR( TaskBatch );
+		IE_CORE_DECLAREMEMBERPTR( TaskBatch );
 
-				void execute() const;
+		void execute() const;
 
-				const TaskNode::TaskPlug *plug() const;
-				/// \deprecated.
-				const TaskNode *node() const;
-				const Gaffer::Context *context() const;
+		const TaskNode::TaskPlug *plug() const;
+		/// \deprecated.
+		const TaskNode *node() const;
+		const Gaffer::Context *context() const;
 
-				const std::vector<float> &frames() const;
-				const TaskBatches &preTasks() const;
+		const std::vector<float> &frames() const;
+		const TaskBatches &preTasks() const;
 
-				/// Name suitable for displaying to a user.
-				const std::string &name() const;
+		/// Name suitable for displaying to a user.
+		const std::string &name() const;
 
-				IECore::CompoundData *blindData();
-				const IECore::CompoundData *blindData() const;
+		IECore::CompoundData *blindData();
+		const IECore::CompoundData *blindData() const;
 
-			private :
+	private:
 
-				TaskBatch();
-				TaskBatch( TaskNode::ConstTaskPlugPtr plug, Gaffer::ConstContextPtr context );
+		TaskBatch();
+		TaskBatch( TaskNode::ConstTaskPlugPtr plug, Gaffer::ConstContextPtr context );
 
-				class Namer;
+		class Namer;
 
-				void addPreTask( const TaskBatchPtr &preTask, bool forPostTask = false );
-				void preprocess( bool omitEmpty, Namer &namer, bool immediate = false );
-				void isolate();
+		void addPreTask( const TaskBatchPtr &preTask, bool forPostTask = false );
+		void preprocess( bool omitEmpty, Namer &namer, bool immediate = false );
+		void isolate();
 
-				friend class Dispatcher;
-				friend class Batcher;
+		friend class Dispatcher;
+		friend class Batcher;
 
-				TaskNode::ConstTaskPlugPtr m_plug;
-				Gaffer::ConstContextPtr m_context;
-				IECore::CompoundDataPtr m_blindData;
-				std::vector<float> m_frames;
-				// We have to track batch size separately from
-				// `m_frames().size()`, because no-ops don't update `frames()`,
-				// but _do_ count towards batch size.
-				size_t m_size;
-				// We want to store pretasks in the order we discover them,
-				// so our primary storage is a vector.
-				TaskBatches m_preTasks;
-				size_t m_postTaskIndex;
-				// But we also need to perform quick membership
-				// queries, for which we use a secondary set.
-				std::unordered_set<const TaskBatch *> m_preTasksSet;
-				// Flags used by `preprocessBatches()`.
-				bool m_immediate;
-				bool m_visited;
-				bool m_executed;
+		TaskNode::ConstTaskPlugPtr m_plug;
+		Gaffer::ConstContextPtr m_context;
+		IECore::CompoundDataPtr m_blindData;
+		std::vector<float> m_frames;
+		// We have to track batch size separately from
+		// `m_frames().size()`, because no-ops don't update `frames()`,
+		// but _do_ count towards batch size.
+		size_t m_size;
+		// We want to store pretasks in the order we discover them,
+		// so our primary storage is a vector.
+		TaskBatches m_preTasks;
+		size_t m_postTaskIndex;
+		// But we also need to perform quick membership
+		// queries, for which we use a secondary set.
+		std::unordered_set<const TaskBatch *> m_preTasksSet;
+		// Flags used by `preprocessBatches()`.
+		bool m_immediate;
+		bool m_visited;
+		bool m_executed;
+	};
 
-		};
+	/// Must be implemented by derived classes to execute the DAG of task batches,
+	/// taking care that all Batch::preTasks() are executed before the batch itself.
+	/// Note that it is possible for an individual TaskBatch to appear multiple
+	/// times within the graph. It is the responsibility of derived classes to track which
+	/// batches have been dispatched in order to prevent duplicate work.
+	virtual void doDispatch( const TaskBatch *batch ) const = 0;
 
-		/// Must be implemented by derived classes to execute the DAG of task batches,
-		/// taking care that all Batch::preTasks() are executed before the batch itself.
-		/// Note that it is possible for an individual TaskBatch to appear multiple
-		/// times within the graph. It is the responsibility of derived classes to track which
-		/// batches have been dispatched in order to prevent duplicate work.
-		virtual void doDispatch( const TaskBatch *batch ) const = 0;
+private:
 
-	private :
+	// Friendship to allow `setupPlugs()` to be called.
+	friend GAFFERDISPATCH_API void intrusive_ptr_add_ref( TaskNode *node );
+	static void setupPlugs( Gaffer::Plug *parentPlug );
 
-		// Friendship to allow `setupPlugs()` to be called.
-		friend GAFFERDISPATCH_API void intrusive_ptr_add_ref( TaskNode *node );
-		static void setupPlugs( Gaffer::Plug *parentPlug );
+	void preTasks( const Gaffer::Context *context, Tasks &tasks ) const final;
+	void postTasks( const Gaffer::Context *context, Tasks &tasks ) const final;
+	IECore::MurmurHash hash( const Gaffer::Context *context ) const final;
+	void execute() const final;
 
-		void preTasks( const Gaffer::Context *context, Tasks &tasks ) const final;
-		void postTasks( const Gaffer::Context *context, Tasks &tasks ) const final;
-		IECore::MurmurHash hash( const Gaffer::Context *context ) const final;
-		void execute() const final;
+	void createJobDirectory( const Gaffer::ScriptNode *script, Gaffer::Context *context ) const;
+	mutable std::filesystem::path m_jobDirectory;
 
-		void createJobDirectory( const Gaffer::ScriptNode *script, Gaffer::Context *context ) const;
-		mutable std::filesystem::path m_jobDirectory;
+	using CreatorMap = std::map<std::string, std::pair<Creator, SetupPlugsFn>>;
+	static CreatorMap &creators();
 
-		using CreatorMap = std::map<std::string, std::pair<Creator, SetupPlugsFn>>;
-		static CreatorMap &creators();
+	class Batcher;
 
-		class Batcher;
-
-		static size_t g_firstPlugIndex;
-		static std::string g_defaultDispatcherType;
-
+	static size_t g_firstPlugIndex;
+	static std::string g_defaultDispatcherType;
 };
 
 } // namespace GafferDispatch

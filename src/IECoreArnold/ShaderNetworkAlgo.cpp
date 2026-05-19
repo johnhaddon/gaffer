@@ -308,7 +308,7 @@ void resetNode( AtNode *node )
 	AiParamIteratorDestroy( it );
 
 	AtUserParamIterator *itUser = AiNodeGetUserParamIterator( node );
-	while ( !AiUserParamIteratorFinished( itUser ) )
+	while( !AiUserParamIteratorFinished( itUser ) )
 	{
 		const AtUserParamEntry *param = AiUserParamIteratorGetNext( itUser );
 		const char *name = AiUserParamGetName( param );
@@ -380,12 +380,7 @@ ShaderNetworkPtr preprocessedNetwork( const IECoreScene::ShaderNetwork *shaderNe
 			float width = parameterValue<float>( newShader.get(), "width", 2.f );
 			float height = parameterValue<float>( newShader.get(), "height", 2.f );
 
-			newShader->parameters()["vertices"] = new V3fVectorData( {
-				V3f( -width / 2, -height / 2, 0 ),
-				V3f( -width / 2, height / 2 , 0 ),
-				V3f( width / 2, height / 2, 0 ),
-				V3f( width / 2, -height / 2, 0 )
-			} );
+			newShader->parameters()["vertices"] = new V3fVectorData( { V3f( -width / 2, -height / 2, 0 ), V3f( -width / 2, height / 2, 0 ), V3f( width / 2, height / 2, 0 ), V3f( width / 2, -height / 2, 0 ) } );
 
 			newShader->parameters().erase( "width" );
 			newShader->parameters().erase( "height" );
@@ -407,7 +402,7 @@ namespace ShaderNetworkAlgo
 {
 
 NodeParameter::NodeParameter( AtNode *node, AtString parameterName, AtString parameterValue )
-	:	m_node( node ), m_parameterName( parameterName ), m_parameterValue( parameterValue )
+	: m_node( node ), m_parameterName( parameterName ), m_parameterValue( parameterValue )
 {
 }
 
@@ -486,7 +481,7 @@ bool update( std::vector<AtNode *> &nodes, std::vector<NodeParameter> &nodeParam
 	boost::unordered_map<AtString, AtNode *, AtStringHash> originalNodes;
 	for( const auto &n : nodes )
 	{
-		originalNodes[AtString(AiNodeGetName(n))] = n;
+		originalNodes[AtString( AiNodeGetName( n ) )] = n;
 	}
 	std::unordered_set<AtNode *> reusedNodes;
 	nodes.clear();
@@ -555,23 +550,20 @@ struct DataTraits
 {
 
 	using DataType = IECore::TypedData<T>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec2<T> >
+struct DataTraits<Vec2<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec2<T>>;
-
 };
 
 template<typename T>
-struct DataTraits<Vec3<T> >
+struct DataTraits<Vec3<T>>
 {
 
 	using DataType = IECore::GeometricTypedData<Vec3<T>>;
-
 };
 
 Color3f blackbody( float kelvins )
@@ -581,25 +573,25 @@ Color3f blackbody( float kelvins )
 	static SplinefColor3f g_spline(
 		CubicBasisf::catmullRom(),
 		{
-			{  1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
-			{  1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
-			{  1500.0f, Color3f( 1.000000f, 0.149664f, 0.000000f ) },
-			{  2000.0f, Color3f( 1.000000f, 0.256644f, 0.008095f ) },
-			{  2500.0f, Color3f( 1.000000f, 0.372033f, 0.067450f ) },
-			{  3000.0f, Color3f( 1.000000f, 0.476725f, 0.153601f ) },
-			{  3500.0f, Color3f( 1.000000f, 0.570376f, 0.259196f ) },
-			{  4000.0f, Color3f( 1.000000f, 0.653480f, 0.377155f ) },
-			{  4500.0f, Color3f( 1.000000f, 0.726878f, 0.501606f ) },
-			{  5000.0f, Color3f( 1.000000f, 0.791543f, 0.628050f ) },
-			{  5500.0f, Color3f( 1.000000f, 0.848462f, 0.753228f ) },
-			{  6000.0f, Color3f( 1.000000f, 0.898581f, 0.874905f ) },
-			{  6500.0f, Color3f( 1.000000f, 0.942771f, 0.991642f ) },
-			{  7000.0f, Color3f( 0.906947f, 0.890456f, 1.000000f ) },
-			{  7500.0f, Color3f( 0.828247f, 0.841838f, 1.000000f ) },
-			{  8000.0f, Color3f( 0.765791f, 0.801896f, 1.000000f ) },
-			{  8500.0f, Color3f( 0.715255f, 0.768579f, 1.000000f ) },
-			{  9000.0f, Color3f( 0.673683f, 0.740423f, 1.000000f ) },
-			{  9500.0f, Color3f( 0.638992f, 0.716359f, 1.000000f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
+			{ 1000.0f, Color3f( 1.000000f, 0.027490f, 0.000000f ) },
+			{ 1500.0f, Color3f( 1.000000f, 0.149664f, 0.000000f ) },
+			{ 2000.0f, Color3f( 1.000000f, 0.256644f, 0.008095f ) },
+			{ 2500.0f, Color3f( 1.000000f, 0.372033f, 0.067450f ) },
+			{ 3000.0f, Color3f( 1.000000f, 0.476725f, 0.153601f ) },
+			{ 3500.0f, Color3f( 1.000000f, 0.570376f, 0.259196f ) },
+			{ 4000.0f, Color3f( 1.000000f, 0.653480f, 0.377155f ) },
+			{ 4500.0f, Color3f( 1.000000f, 0.726878f, 0.501606f ) },
+			{ 5000.0f, Color3f( 1.000000f, 0.791543f, 0.628050f ) },
+			{ 5500.0f, Color3f( 1.000000f, 0.848462f, 0.753228f ) },
+			{ 6000.0f, Color3f( 1.000000f, 0.898581f, 0.874905f ) },
+			{ 6500.0f, Color3f( 1.000000f, 0.942771f, 0.991642f ) },
+			{ 7000.0f, Color3f( 0.906947f, 0.890456f, 1.000000f ) },
+			{ 7500.0f, Color3f( 0.828247f, 0.841838f, 1.000000f ) },
+			{ 8000.0f, Color3f( 0.765791f, 0.801896f, 1.000000f ) },
+			{ 8500.0f, Color3f( 0.715255f, 0.768579f, 1.000000f ) },
+			{ 9000.0f, Color3f( 0.673683f, 0.740423f, 1.000000f ) },
+			{ 9500.0f, Color3f( 0.638992f, 0.716359f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.609681f, 0.695588f, 1.000000f ) },
 			{ 10000.0f, Color3f( 0.609681f, 0.695588f, 1.000000f ) },
 		}
@@ -739,7 +731,7 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	{
 		if( boost::starts_with( name.string(), g_arnoldNamespace ) )
 		{
-			shader->parameters()[name.string().substr(g_arnoldNamespace.size())] = value;
+			shader->parameters()[name.string().substr( g_arnoldNamespace.size() )] = value;
 		}
 	}
 }
@@ -921,7 +913,7 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 
 			// Easy stuff with a one-to-one correspondence between `UsdPreviewSurface` and `standard_surface`.
 
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_diffuseColorParameter, newShader.get(),g_baseColorParameter, Color3f( 0.18 ) );
+			transferUSDParameter( shaderNetwork, handle, shader.get(), g_diffuseColorParameter, newShader.get(), g_baseColorParameter, Color3f( 0.18 ) );
 			transferUSDParameter( shaderNetwork, handle, shader.get(), g_roughnessParameter, newShader.get(), g_specularRoughnessParameter, 0.5f );
 			transferUSDParameter( shaderNetwork, handle, shader.get(), g_clearcoatParameter, newShader.get(), g_coatParameter, 0.0f );
 			transferUSDParameter( shaderNetwork, handle, shader.get(), g_clearcoatRoughnessParameter, newShader.get(), g_coatRoughnessParameter, 0.01f );
@@ -1012,7 +1004,6 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			m.rotate( V3f( 0, 0, IECore::degreesToRadians( r ) ) );
 			m.scale( V3f( s.x, s.y, 1 ) );
 			newShader->parameters()[g_matrixParameter] = new M44fData( m );
-
 		}
 		else if( shader->getName() == "UsdPrimvarReader_float" )
 		{
@@ -1095,8 +1086,8 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			transferUSDParameter( shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_radiusParameter, 0.5f );
 			const float length = parameterValue( shader.get(), g_lengthParameter, 1.0f );
 			// From USD schema : "The cylinder is centered at the origin and has its major axis on the X axis"
-			newShader->parameters()[g_topParameter] = new V3fData( V3f( length/2, 0, 0 ) );
-			newShader->parameters()[g_bottomParameter] = new V3fData( V3f( -length/2, 0, 0 ) );
+			newShader->parameters()[g_topParameter] = new V3fData( V3f( length / 2, 0, 0 ) );
+			newShader->parameters()[g_bottomParameter] = new V3fData( V3f( -length / 2, 0, 0 ) );
 			if( parameterValue( shader.get(), g_treatAsLineParameter, false ) )
 			{
 				// Should be 0.0, but that triggers an Arnold bug that loses the
@@ -1135,12 +1126,7 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			const float width = parameterValue( shader.get(), g_widthParameter, 1.0f );
 			const float height = parameterValue( shader.get(), g_heightParameter, 1.0f );
-			newShader->parameters()[g_verticesParameter] = new V3fVectorData( {
-				V3f( width / 2, -height / 2, 0 ),
-				V3f( -width / 2, -height / 2, 0 ),
-				V3f( -width / 2, height / 2, 0 ),
-				V3f( width / 2, height / 2, 0 )
-			} );
+			newShader->parameters()[g_verticesParameter] = new V3fVectorData( { V3f( width / 2, -height / 2, 0 ), V3f( -width / 2, -height / 2, 0 ), V3f( -width / 2, height / 2, 0 ), V3f( width / 2, height / 2, 0 ) } );
 			transferUSDTextureFile( shaderNetwork, handle, shader.get(), newShader.get() );
 		}
 

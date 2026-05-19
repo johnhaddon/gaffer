@@ -59,8 +59,7 @@ using ConstFrameSetPtr = std::shared_ptr<const FrameSet>;
 
 IECorePreview::LRUCache<std::string, ConstFrameSetPtr> g_frameListCache(
 
-	[] ( const std::string &frameExpression, size_t &cost, const IECore::Canceller *canceller )
-	{
+	[]( const std::string &frameExpression, size_t &cost, const IECore::Canceller *canceller ) {
 		std::vector<FrameList::Frame> frames;
 		FrameList::parse( frameExpression )->asList( frames );
 		cost = frames.size();
@@ -79,7 +78,7 @@ GAFFER_NODE_DEFINE_TYPE( FrameMask )
 size_t FrameMask::g_firstPlugIndex;
 
 FrameMask::FrameMask( const std::string &name )
-	:	TaskNode( name )
+	: TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "mask" ) );

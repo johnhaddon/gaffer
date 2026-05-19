@@ -82,7 +82,7 @@ namespace Gaffer
 GAFFER_DECLARECONTAINERSPECIALISATIONS( Gaffer::ScriptContainer, ScriptContainerTypeId )
 template class Container<GraphComponent, ScriptNode>;
 
-}
+} // namespace Gaffer
 
 //////////////////////////////////////////////////////////////////////////
 // CompoundAction implementation. We use this to group up all the actions
@@ -92,117 +92,116 @@ template class Container<GraphComponent, ScriptNode>;
 class ScriptNode::CompoundAction : public Gaffer::Action
 {
 
-	public :
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::CompoundAction, CompoundActionTypeId, Gaffer::Action );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::CompoundAction, CompoundActionTypeId, Gaffer::Action );
 
-		CompoundAction( ScriptNode *subject, const std::string &mergeGroup )
-			:	m_subject( subject ), m_mergeGroup( mergeGroup )
+	CompoundAction( ScriptNode *subject, const std::string &mergeGroup )
+		: m_subject( subject ), m_mergeGroup( mergeGroup )
+	{
+	}
+
+	void addAction( ActionPtr action )
+	{
+		m_actions.push_back( action );
+	}
+
+	size_t numActions() const
+	{
+		return m_actions.size();
+	}
+
+protected:
+
+	friend class ScriptNode;
+
+	GraphComponent *subject() const override
+	{
+		return m_subject;
+	}
+
+	void doAction() override
+	{
+		for( std::vector<ActionPtr>::const_iterator it = m_actions.begin(), eIt = m_actions.end(); it != eIt; ++it )
 		{
+			( *it )->doAction();
+			// we know we're only ever being redone, because the ScriptNode::addAction()
+			// performs the original Do.
+			m_subject->actionSignal()( m_subject, it->get(), Action::Redo );
+		}
+	}
+
+	void undoAction() override
+	{
+		for( std::vector<ActionPtr>::const_reverse_iterator it = m_actions.rbegin(), eIt = m_actions.rend(); it != eIt; ++it )
+		{
+			( *it )->undoAction();
+			m_subject->actionSignal()( m_subject, it->get(), Action::Undo );
+		}
+	}
+
+	bool canMerge( const Action *other ) const override
+	{
+		if( !Action::canMerge( other ) )
+		{
+			return false;
 		}
 
-		void addAction( ActionPtr action )
+		if( !m_mergeGroup.size() )
 		{
-			m_actions.push_back( action );
+			return false;
 		}
 
-		size_t numActions() const
+		const CompoundAction *compoundAction = IECore::runTimeCast<const CompoundAction>( other );
+		if( !compoundAction )
 		{
-			return m_actions.size();
+			return false;
 		}
 
-	protected :
+		return m_mergeGroup == compoundAction->m_mergeGroup;
+	}
 
-		friend class ScriptNode;
+	void merge( const Action *other ) override
+	{
+		const CompoundAction *compoundAction = static_cast<const CompoundAction *>( other );
 
-		GraphComponent *subject() const override
+		bool canMergeChildActions = false;
+		if( m_actions.size() == compoundAction->m_actions.size() )
 		{
-			return m_subject;
-		}
-
-		void doAction() override
-		{
-			for( std::vector<ActionPtr>::const_iterator it = m_actions.begin(), eIt = m_actions.end(); it != eIt; ++it )
+			canMergeChildActions = true;
+			for( size_t i = 0, e = m_actions.size(); i < e; ++i )
 			{
-				(*it)->doAction();
-				// we know we're only ever being redone, because the ScriptNode::addAction()
-				// performs the original Do.
-				m_subject->actionSignal()( m_subject, it->get(), Action::Redo );
-			}
-		}
-
-		void undoAction() override
-		{
-			for( std::vector<ActionPtr>::const_reverse_iterator it = m_actions.rbegin(), eIt = m_actions.rend(); it != eIt; ++it )
-			{
-				(*it)->undoAction();
-				m_subject->actionSignal()( m_subject, it->get(), Action::Undo );
-			}
-		}
-
-		bool canMerge( const Action *other ) const override
-		{
-			if( !Action::canMerge( other ) )
-			{
-				return false;
-			}
-
-			if( !m_mergeGroup.size() )
-			{
-				return false;
-			}
-
-			const CompoundAction *compoundAction = IECore::runTimeCast<const CompoundAction>( other );
-			if( !compoundAction )
-			{
-				return false;
-			}
-
-			return m_mergeGroup == compoundAction->m_mergeGroup;
-		}
-
-		void merge( const Action *other ) override
-		{
-			const CompoundAction *compoundAction = static_cast<const CompoundAction *>( other );
-
-			bool canMergeChildActions = false;
-			if( m_actions.size() == compoundAction->m_actions.size() )
-			{
-				canMergeChildActions = true;
-				for( size_t i = 0, e = m_actions.size(); i < e; ++i )
+				if( !m_actions[i]->canMerge( compoundAction->m_actions[i].get() ) )
 				{
-					if( !m_actions[i]->canMerge( compoundAction->m_actions[i].get() ) )
-					{
-						canMergeChildActions = false;
-						break;
-					}
-				}
-			}
-
-			if( canMergeChildActions )
-			{
-				for( size_t i = 0, e = m_actions.size(); i < e; ++i )
-				{
-					m_actions[i]->merge( compoundAction->m_actions[i].get() );
-				}
-			}
-			else
-			{
-				for( std::vector<ActionPtr>::const_iterator it = compoundAction->m_actions.begin(), eIt = compoundAction->m_actions.end(); it != eIt; ++it )
-				{
-					m_actions.push_back( *it );
+					canMergeChildActions = false;
+					break;
 				}
 			}
 		}
 
-	private :
+		if( canMergeChildActions )
+		{
+			for( size_t i = 0, e = m_actions.size(); i < e; ++i )
+			{
+				m_actions[i]->merge( compoundAction->m_actions[i].get() );
+			}
+		}
+		else
+		{
+			for( std::vector<ActionPtr>::const_iterator it = compoundAction->m_actions.begin(), eIt = compoundAction->m_actions.end(); it != eIt; ++it )
+			{
+				m_actions.push_back( *it );
+			}
+		}
+	}
 
-		// this can't be a smart pointer because then we'd get
-		// a reference cycle between us and the script.
-		ScriptNode *m_subject;
-		std::string m_mergeGroup;
-		std::vector<ActionPtr> m_actions;
+private:
 
+	// this can't be a smart pointer because then we'd get
+	// a reference cycle between us and the script.
+	ScriptNode *m_subject;
+	std::string m_mergeGroup;
+	std::vector<ActionPtr> m_actions;
 };
 
 IE_CORE_DEFINERUNTIMETYPED( ScriptNode::CompoundAction );
@@ -252,85 +251,85 @@ const IECore::InternedString g_framesPerSecond( "framesPerSecond" );
 class ScriptNode::FocusSet : public Gaffer::Set
 {
 
-	public :
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::FocusSet, ScriptNodeFocusSetTypeId, Gaffer::Set );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::FocusSet, ScriptNodeFocusSetTypeId, Gaffer::Set );
 
-		void setNode( Node *node )
+	void setNode( Node *node )
+	{
+		if( node != m_node )
 		{
-			if( node != m_node )
+			if( m_node )
 			{
-				if( m_node )
-				{
-					NodePtr oldNode = m_node;
-					m_node.reset();
-					m_nodeParentChangedConnection.disconnect();
-					memberRemovedSignal()( this, oldNode.get() );
-				}
+				NodePtr oldNode = m_node;
+				m_node.reset();
+				m_nodeParentChangedConnection.disconnect();
+				memberRemovedSignal()( this, oldNode.get() );
+			}
 
-				m_node = node;
+			m_node = node;
 
-				if( node )
-				{
-					m_nodeParentChangedConnection = node->parentChangedSignal().connect(
-						boost::bind( &FocusSet::parentChanged, this, ::_1, ::_2 )
-					);
-					memberAddedSignal()( this, node );
-				}
+			if( node )
+			{
+				m_nodeParentChangedConnection = node->parentChangedSignal().connect(
+					boost::bind( &FocusSet::parentChanged, this, ::_1, ::_2 )
+				);
+				memberAddedSignal()( this, node );
 			}
 		}
+	}
 
-		Node *getNode() const
+	Node *getNode() const
+	{
+		return m_node.get();
+	}
+
+	/// @name Set interface
+	////////////////////////////////////////////////////////////////////
+	//@{
+	bool contains( const Member *object ) const override
+	{
+		return m_node && m_node.get() == object;
+	}
+
+	Member *member( size_t index ) override
+	{
+		return m_node.get();
+	}
+
+	const Member *member( size_t index ) const override
+	{
+		return m_node.get();
+	}
+
+	size_t size() const override
+	{
+		return m_node ? 1 : 0;
+	}
+	//@}
+
+private:
+
+	void parentChanged( GraphComponent *member, GraphComponent *oldParent )
+	{
+		assert( member == m_node );
+		if( !m_node->parent() )
 		{
-			return m_node.get();
-		}
-
-		/// @name Set interface
-		////////////////////////////////////////////////////////////////////
-		//@{
-		bool contains( const Member *object ) const override
-		{
-			return m_node && m_node.get() == object;
-		}
-
-		Member *member( size_t index ) override
-		{
-			return m_node.get();
-		}
-
-		const Member *member( size_t index ) const override
-		{
-			return m_node.get();
-		}
-
-		size_t size() const override
-		{
-			return m_node ? 1 : 0;
-		}
-		//@}
-
-	private :
-
-		void parentChanged( GraphComponent *member, GraphComponent *oldParent )
-		{
-			assert( member == m_node );
-			if( !m_node->parent() )
+			setNode( nullptr );
+			ScriptNode *script = IECore::runTimeCast<ScriptNode>( oldParent );
+			if( !script )
 			{
-				setNode( nullptr );
-				ScriptNode *script = IECore::runTimeCast<ScriptNode>( oldParent );
-				if( !script )
-				{
-					script = oldParent->ancestor<ScriptNode>();
-				}
-				if( script )
-				{
-					script->focusChangedSignal()( script, nullptr );
-				}
+				script = oldParent->ancestor<ScriptNode>();
+			}
+			if( script )
+			{
+				script->focusChangedSignal()( script, nullptr );
 			}
 		}
+	}
 
-		Gaffer::NodePtr m_node;
-		Signals::ScopedConnection m_nodeParentChangedConnection;
+	Gaffer::NodePtr m_node;
+	Signals::ScopedConnection m_nodeParentChangedConnection;
 };
 
 
@@ -345,14 +344,13 @@ ScriptNode::SerialiseFunction ScriptNode::g_serialiseFunction;
 ScriptNode::ExecuteFunction ScriptNode::g_executeFunction;
 
 ScriptNode::ScriptNode( const std::string &name )
-	:
-	Node( name ),
-	m_selection( new StandardSet( /* removeOrphans = */ true ) ),
-	m_focus( new FocusSet() ),
-	m_undoIterator( m_undoList.end() ),
-	m_currentActionStage( Action::Invalid ),
-	m_executing( false ),
-	m_context( new Context )
+	: Node( name ),
+	  m_selection( new StandardSet( /* removeOrphans = */ true ) ),
+	  m_focus( new FocusSet() ),
+	  m_undoIterator( m_undoList.end() ),
+	  m_currentActionStage( Action::Invalid ),
+	  m_executing( false ),
+	  m_context( new Context )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -540,7 +538,7 @@ void ScriptNode::pushUndoState( UndoScope::State state, const std::string &merge
 {
 	if( m_undoStateStack.size() == 0 )
 	{
-		assert( m_actionAccumulator==0 );
+		assert( m_actionAccumulator == 0 );
 		m_actionAccumulator = new CompoundAction( this, mergeGroup );
 		m_currentActionStage = Action::Do;
 	}
@@ -568,7 +566,7 @@ void ScriptNode::popUndoState()
 	m_undoStateStack.pop();
 
 	bool haveUnsavedChanges = false;
-	if( m_undoStateStack.size()==0 )
+	if( m_undoStateStack.size() == 0 )
 	{
 		if( m_actionAccumulator->numActions() )
 		{
@@ -608,7 +606,6 @@ void ScriptNode::popUndoState()
 		UndoScope undoDisabled( this, UndoScope::Disabled );
 		unsavedChangesPlug()->setValue( true );
 	}
-
 }
 
 void ScriptNode::postActionStageCleanup()
@@ -640,7 +637,7 @@ void ScriptNode::undo()
 		// NOTE : Decrement the undo iterator if undoAction() completes without throwing an exception
 
 		UndoIterator it = m_undoIterator;
-		(*(--it))->undoAction();
+		( *( --it ) )->undoAction();
 		m_undoIterator = it;
 	}
 	catch( ... )
@@ -670,7 +667,7 @@ void ScriptNode::redo()
 
 	try
 	{
-		(*m_undoIterator)->doAction();
+		( *m_undoIterator )->doAction();
 		++m_undoIterator;
 	}
 	catch( ... )
@@ -729,10 +726,10 @@ void ScriptNode::paste( Node *parent, bool continueOnError )
 		parent = parent ? parent : this;
 		// set up something to catch all the newly created nodes
 		StandardSetPtr newNodes = new StandardSet;
-		parent->childAddedSignal().connect( boost::bind( (bool (StandardSet::*)( IECore::RunTimeTypedPtr ) )&StandardSet::add, newNodes.get(), ::_2 ) );
+		parent->childAddedSignal().connect( boost::bind( (bool ( StandardSet::* )( IECore::RunTimeTypedPtr ))&StandardSet::add, newNodes.get(), ::_2 ) );
 
-			// do the paste
-			execute( s->readable(), parent, continueOnError );
+		// do the paste
+		execute( s->readable(), parent, continueOnError );
 
 		// transfer the newly created nodes into the selection
 		selection()->clear();
@@ -753,7 +750,7 @@ void ScriptNode::deleteNodes( Node *parent, const Set *filter, bool reconnect )
 	// because children are stored as a vector, it's
 	// much more efficient to delete those at the end before
 	// those at the beginning.
-	int i = (int)(parent->children().size()) - 1;
+	int i = (int)( parent->children().size() ) - 1;
 	while( i >= 0 )
 	{
 		Node *node = parent->getChild<Node>( i );
@@ -779,24 +776,24 @@ void ScriptNode::deleteNodes( Node *parent, const Set *filter, bool reconnect )
 						);
 					}
 
-					if ( !inPlug )
+					if( !inPlug )
 					{
 						continue;
 					}
 
 					Plug *srcPlug = inPlug->getInput();
-					if ( !srcPlug )
+					if( !srcPlug )
 					{
 						continue;
 					}
 
 					// record this plug's current outputs, and reconnect them. This is a copy of (*it)->outputs() rather
 					// than a reference, as reconnection can modify (*it)->outputs()...
-					Plug::OutputContainer outputs = (*it)->outputs();
-					for ( Plug::OutputContainer::const_iterator oIt = outputs.begin(); oIt != outputs.end(); ++oIt )
+					Plug::OutputContainer outputs = ( *it )->outputs();
+					for( Plug::OutputContainer::const_iterator oIt = outputs.begin(); oIt != outputs.end(); ++oIt )
 					{
 						Plug *dstPlug = *oIt;
-						if ( dstPlug && dstPlug->acceptsInput( srcPlug ) && this->isAncestorOf( dstPlug ) )
+						if( dstPlug && dstPlug->acceptsInput( srcPlug ) && this->isAncestorOf( dstPlug ) )
 						{
 							dstPlug->setInput( srcPlug );
 						}
@@ -849,7 +846,7 @@ bool ScriptNode::executeFile( const std::filesystem::path &fileName, Node *paren
 	return executeInternal( serialisation, parent, continueOnError, fileName.generic_string() );
 }
 
-bool ScriptNode::load( bool continueOnError)
+bool ScriptNode::load( bool continueOnError )
 {
 	DirtyPropagationScope dirtyScope;
 

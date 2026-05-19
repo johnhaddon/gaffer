@@ -58,7 +58,7 @@ std::string constructor( const ArrayPlug *plug, Serialisation *serialisation = n
 {
 	std::string result = Serialisation::classPath( plug ) + "( \"" + plug->getName().string() + "\", ";
 
-	if( plug->direction()!=Plug::In )
+	if( plug->direction() != Plug::In )
 	{
 		result += "direction = " + PlugSerialiser::directionRepr( plug->direction() ) + ", ";
 	}
@@ -93,7 +93,6 @@ std::string constructor( const ArrayPlug *plug, Serialisation *serialisation = n
 	result += ")";
 
 	return result;
-
 }
 
 std::string repr( const ArrayPlug &plug )
@@ -104,38 +103,37 @@ std::string repr( const ArrayPlug &plug )
 class ArrayPlugSerialiser : public PlugSerialiser
 {
 
-	public :
+public:
 
-		bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	{
+		// We'll call `resize()` in our `postConstructor()` to create all
+		// the child elements.
+		return false;
+	}
+
+	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
+	{
+		return ::constructor( static_cast<const ArrayPlug *>( graphComponent ), &serialisation );
+	}
+
+	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	{
+		std::string result = PlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
+
+		auto arrayPlug = static_cast<const ArrayPlug *>( graphComponent );
+		if( arrayPlug->children().size() != arrayPlug->minSize() )
 		{
-			// We'll call `resize()` in our `postConstructor()` to create all
-			// the child elements.
-			return false;
-		}
-
-		std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
-		{
-			return ::constructor( static_cast<const ArrayPlug *>( graphComponent ), &serialisation );
-		}
-
-		std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
-		{
-			std::string result = PlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
-
-			auto arrayPlug = static_cast<const ArrayPlug *>( graphComponent );
-			if( arrayPlug->children().size() != arrayPlug->minSize() )
+			if( result.size() )
 			{
-				if( result.size() )
-				{
-					result += "\n";
-				}
-
-				result += fmt::format( "{}.resize( {} )\n", identifier, arrayPlug->children().size() );
+				result += "\n";
 			}
 
-			return result;
+			result += fmt::format( "{}.resize( {} )\n", identifier, arrayPlug->children().size() );
 		}
 
+		return result;
+	}
 };
 
 PlugPtr elementPrototype( ArrayPlug &p, bool copy )
@@ -167,28 +165,14 @@ PlugPtr next( ArrayPlug &p )
 void GafferModule::bindArrayPlug()
 {
 	PlugClass<ArrayPlug>()
-		.def(	init< const std::string &, Plug::Direction, PlugPtr, size_t, size_t, unsigned, bool >
-				(
-					(
-						arg( "name" ) = GraphComponent::defaultName<ArrayPlug>(),
-						arg( "direction" ) = Plug::In,
-						arg( "elementPrototype" ) = PlugPtr(),
-						arg( "minSize" ) = 1,
-						arg( "maxSize" ) = std::numeric_limits<size_t>::max(),
-						arg( "flags" ) = Plug::Default,
-						arg( "resizeWhenInputsChange" ) = true
-					)
-				)
-		)
+		.def( init<const std::string &, Plug::Direction, PlugPtr, size_t, size_t, unsigned, bool>( ( arg( "name" ) = GraphComponent::defaultName<ArrayPlug>(), arg( "direction" ) = Plug::In, arg( "elementPrototype" ) = PlugPtr(), arg( "minSize" ) = 1, arg( "maxSize" ) = std::numeric_limits<size_t>::max(), arg( "flags" ) = Plug::Default, arg( "resizeWhenInputsChange" ) = true ) ) )
 		.def( "elementPrototype", &elementPrototype, ( arg( "_copy" ) = true ) )
 		.def( "minSize", &ArrayPlug::minSize )
 		.def( "maxSize", &ArrayPlug::maxSize )
 		.def( "resize", &resize )
 		.def( "resizeWhenInputsChange", &ArrayPlug::resizeWhenInputsChange )
 		.def( "next", &next )
-		.def( "__repr__", &repr )
-	;
+		.def( "__repr__", &repr );
 
 	Serialisation::registerSerialiser( ArrayPlug::staticTypeId(), new ArrayPlugSerialiser );
-
 }

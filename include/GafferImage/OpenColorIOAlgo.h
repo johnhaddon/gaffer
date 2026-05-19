@@ -91,4 +91,4 @@ GAFFERIMAGE_API IECore::MurmurHash currentConfigAndContextHash();
 
 } // namespace OpenColorIOAlgo
 
-} // namespace GafferImageU
+} // namespace GafferImage

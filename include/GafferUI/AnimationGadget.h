@@ -44,160 +44,159 @@
 namespace Gaffer
 {
 
-	IE_CORE_FORWARDDECLARE( Context );
+IE_CORE_FORWARDDECLARE( Context );
 
-}
+} // namespace Gaffer
 
 namespace GafferUI
 {
 
 class GAFFERUI_API AnimationGadget : public Gadget
 {
-	public :
+public:
 
-		AnimationGadget();
-		~AnimationGadget() override;
+	AnimationGadget();
+	~AnimationGadget() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::AnimationGadget, AnimationGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::AnimationGadget, AnimationGadgetTypeId, Gadget );
 
-		Gaffer::StandardSet *visiblePlugs();
-		const Gaffer::StandardSet *visiblePlugs() const;
+	Gaffer::StandardSet *visiblePlugs();
+	const Gaffer::StandardSet *visiblePlugs() const;
 
-		Gaffer::StandardSet *editablePlugs();
-		const Gaffer::StandardSet *editablePlugs() const;
+	Gaffer::StandardSet *editablePlugs();
+	const Gaffer::StandardSet *editablePlugs() const;
 
-		void setContext( Gaffer::Context *context );
-		Gaffer::Context *getContext() const;
+	void setContext( Gaffer::Context *context );
+	Gaffer::Context *getContext() const;
 
-		Gaffer::Set *selectedKeys();
-		const Gaffer::Set *selectedKeys() const;
+	Gaffer::Set *selectedKeys();
+	const Gaffer::Set *selectedKeys() const;
 
-		bool onTimeAxis( const IECore::LineSegment3f& line ) const;
-		bool onValueAxis( const IECore::LineSegment3f& line ) const;
+	bool onTimeAxis( const IECore::LineSegment3f &line ) const;
+	bool onValueAxis( const IECore::LineSegment3f &line ) const;
 
-		std::string getToolTip( const IECore::LineSegment3f &line ) const override;
+	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		struct SelectionSet;
-		IE_CORE_DECLAREPTR( SelectionSet )
+	struct SelectionSet;
+	IE_CORE_DECLAREPTR( SelectionSet )
 
-		/// \undoable
-		void insertKeyframe( Gaffer::Animation::CurvePlug *curvePlug, float time );
-		/// \undoable
-		void insertKeyframes();
-		/// \undoable
-		void removeKeyframes();
-		/// \undoable
-		void removeInactiveKeyframes();
-		/// \undoable
-		void moveKeyframes( const Imath::V2f currentDragOffset );
-		/// \undoable
-		void moveTangent( const Imath::V2f currentDragOffset );
+	/// \undoable
+	void insertKeyframe( Gaffer::Animation::CurvePlug *curvePlug, float time );
+	/// \undoable
+	void insertKeyframes();
+	/// \undoable
+	void removeKeyframes();
+	/// \undoable
+	void removeInactiveKeyframes();
+	/// \undoable
+	void moveKeyframes( const Imath::V2f currentDragOffset );
+	/// \undoable
+	void moveTangent( const Imath::V2f currentDragOffset );
 
-		void frame();
+	void frame();
 
-		void plugDirtied( Gaffer::Plug *plug );
+	void plugDirtied( Gaffer::Plug *plug );
 
-		bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
-		bool buttonRelease( GadgetPtr gadget, const ButtonEvent &event );
-		bool keyPress( GadgetPtr gadget, const KeyEvent &event );
-		bool keyRelease( GadgetPtr gadget, const KeyEvent &event );
+	bool buttonPress( GadgetPtr gadget, const ButtonEvent &event );
+	bool buttonRelease( GadgetPtr gadget, const ButtonEvent &event );
+	bool keyPress( GadgetPtr gadget, const KeyEvent &event );
+	bool keyRelease( GadgetPtr gadget, const KeyEvent &event );
 
-		bool mouseMove( GadgetPtr gadget, const ButtonEvent &event );
-		IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragEnter( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
-		bool dragEnd( GadgetPtr gadget, const DragDropEvent &event );
-		bool leave();
+	bool mouseMove( GadgetPtr gadget, const ButtonEvent &event );
+	IECore::RunTimeTypedPtr dragBegin( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragEnter( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragMove( GadgetPtr gadget, const DragDropEvent &event );
+	bool dragEnd( GadgetPtr gadget, const DragDropEvent &event );
+	bool leave();
 
-		// Find elements at certain positions
-		Gaffer::Animation::ConstKeyPtr keyAt( const IECore::LineSegment3f &position ) const;
-		Gaffer::Animation::KeyPtr keyAt( const IECore::LineSegment3f &position );
-		std::pair<Gaffer::Animation::ConstKeyPtr, Gaffer::Animation::Direction> tangentAt( const IECore::LineSegment3f &position ) const;
-		std::pair<Gaffer::Animation::KeyPtr, Gaffer::Animation::Direction> tangentAt( const IECore::LineSegment3f &position );
-		Gaffer::Animation::ConstCurvePlugPtr curveAt( const IECore::LineSegment3f &position ) const;
-		Gaffer::Animation::CurvePlugPtr curveAt( const IECore::LineSegment3f &position );
-		bool frameIndicatorUnderMouse( const IECore::LineSegment3f &position ) const;
+	// Find elements at certain positions
+	Gaffer::Animation::ConstKeyPtr keyAt( const IECore::LineSegment3f &position ) const;
+	Gaffer::Animation::KeyPtr keyAt( const IECore::LineSegment3f &position );
+	std::pair<Gaffer::Animation::ConstKeyPtr, Gaffer::Animation::Direction> tangentAt( const IECore::LineSegment3f &position ) const;
+	std::pair<Gaffer::Animation::KeyPtr, Gaffer::Animation::Direction> tangentAt( const IECore::LineSegment3f &position );
+	Gaffer::Animation::ConstCurvePlugPtr curveAt( const IECore::LineSegment3f &position ) const;
+	Gaffer::Animation::CurvePlugPtr curveAt( const IECore::LineSegment3f &position );
+	bool frameIndicatorUnderMouse( const IECore::LineSegment3f &position ) const;
 
-		void visiblePlugAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
-		void visiblePlugRemoved( Gaffer::Set *set, IECore::RunTimeTyped *member );
+	void visiblePlugAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
+	void visiblePlugRemoved( Gaffer::Set *set, IECore::RunTimeTyped *member );
 
-		void editablePlugAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
-		void editablePlugRemoved( Gaffer::Set *set, IECore::RunTimeTyped *member );
+	void editablePlugAdded( Gaffer::Set *set, IECore::RunTimeTyped *member );
+	void editablePlugRemoved( Gaffer::Set *set, IECore::RunTimeTyped *member );
 
-		void renderCurve( const Gaffer::Animation::CurvePlug *curvePlug, const Style *style ) const;
-		void renderFrameIndicator( int frame, const Style *style, bool preview=false, float lineWidth=2.0 ) const;
+	void renderCurve( const Gaffer::Animation::CurvePlug *curvePlug, const Style *style ) const;
+	void renderFrameIndicator( int frame, const Style *style, bool preview = false, float lineWidth = 2.0 ) const;
 
-		bool plugSetAcceptor( const Gaffer::Set *s, const Gaffer::Set::Member *m );
-		void updateKeyPreviewLocation( const Gaffer::Animation::CurvePlug *curvePlug, float time );
-		void updateHighlightingAndPreview( const ButtonEvent &event );
+	bool plugSetAcceptor( const Gaffer::Set *s, const Gaffer::Set::Member *m );
+	void updateKeyPreviewLocation( const Gaffer::Animation::CurvePlug *curvePlug, float time );
+	void updateHighlightingAndPreview( const ButtonEvent &event );
 
-		std::string undoMergeGroup() const;
+	std::string undoMergeGroup() const;
 
-		Gaffer::Context *m_context;
+	Gaffer::Context *m_context;
 
-		Gaffer::StandardSetPtr m_visiblePlugs;
-		Gaffer::StandardSetPtr m_editablePlugs;
+	Gaffer::StandardSetPtr m_visiblePlugs;
+	Gaffer::StandardSetPtr m_editablePlugs;
 
-		SelectionSetPtr m_selectedKeys;
+	SelectionSetPtr m_selectedKeys;
 
-		std::map< const Gaffer::Animation::Key*, std::pair< float, float > > m_originalKeyValues;
+	std::map<const Gaffer::Animation::Key *, std::pair<float, float>> m_originalKeyValues;
 
-		Gaffer::Animation::KeyPtr m_dragTangentKey;
-		Gaffer::Animation::Direction m_dragTangentDirection;
-		double m_dragTangentOriginalScale;
+	Gaffer::Animation::KeyPtr m_dragTangentKey;
+	Gaffer::Animation::Direction m_dragTangentDirection;
+	double m_dragTangentOriginalScale;
 
-		Imath::V2f m_dragStartPosition;
-		Imath::V2f m_lastDragPosition;
+	Imath::V2f m_dragStartPosition;
+	Imath::V2f m_lastDragPosition;
 
-		enum class DragMode
-		{
-			None,
-			Selecting,
-			Moving,
-			MoveFrame,
-			MoveTangent
-		};
+	enum class DragMode
+	{
+		None,
+		Selecting,
+		Moving,
+		MoveFrame,
+		MoveTangent
+	};
 
-		DragMode m_dragMode;
+	DragMode m_dragMode;
 
-		enum class MoveAxis
-		{
-			Both,
-			Undefined,
-			X,
-			Y
-		};
+	enum class MoveAxis
+	{
+		Both,
+		Undefined,
+		X,
+		Y
+	};
 
-		MoveAxis m_moveAxis;
+	MoveAxis m_moveAxis;
 
-		mutable std::vector< Imath::V2f > m_vertices;
-		Gaffer::Animation::KeyPtr m_snappingClosestKey;
-		Gaffer::Animation::KeyPtr m_highlightedKey;
-		Gaffer::Animation::CurvePlugPtr m_highlightedCurve;
-		Gaffer::Animation::KeyPtr m_highlightedTangentKey;
-		Gaffer::Animation::Direction m_highlightedTangentDirection;
+	mutable std::vector<Imath::V2f> m_vertices;
+	Gaffer::Animation::KeyPtr m_snappingClosestKey;
+	Gaffer::Animation::KeyPtr m_highlightedKey;
+	Gaffer::Animation::CurvePlugPtr m_highlightedCurve;
+	Gaffer::Animation::KeyPtr m_highlightedTangentKey;
+	Gaffer::Animation::Direction m_highlightedTangentDirection;
 
-		int m_mergeGroupId;
+	int m_mergeGroupId;
 
-		bool m_keyPreview;
-		Imath::V3f m_keyPreviewLocation;
+	bool m_keyPreview;
+	Imath::V3f m_keyPreviewLocation;
 
-		// details regarding spacing and layouting
-		int m_xMargin;
-		int m_yMargin;
-		int m_textScale;
-		int m_labelPadding;
+	// details regarding spacing and layouting
+	int m_xMargin;
+	int m_yMargin;
+	int m_textScale;
+	int m_labelPadding;
 
-		std::optional<int> m_frameIndicatorPreviewFrame;
-
+	std::optional<int> m_frameIndicatorPreviewFrame;
 };
 
 IE_CORE_DECLAREPTR( AnimationGadget );

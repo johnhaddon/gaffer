@@ -50,7 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( Premultiply );
 size_t Premultiply::g_firstPlugIndex = 0;
 
 Premultiply::Premultiply( const std::string &name )
-	:	ChannelDataProcessor( name )
+	: ChannelDataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "alphaChannel", Gaffer::Plug::In, "A" ) );
@@ -127,7 +127,7 @@ void Premultiply::hashChannelData( const GafferImage::ImagePlug *output, const G
 	}
 
 	if(
-		(!useDeepVisibility && alphaChannel == context->get<std::string>( ImagePlug::channelNameContextName ) ) ||
+		( !useDeepVisibility && alphaChannel == context->get<std::string>( ImagePlug::channelNameContextName ) ) ||
 		( useDeepVisibility && !deep )
 	)
 	{
@@ -136,7 +136,7 @@ void Premultiply::hashChannelData( const GafferImage::ImagePlug *output, const G
 	}
 
 	const std::vector<std::string> &inChannelNames = inChannelNamesPtr->readable();
-	if ( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
+	if( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
 	{
 		if( ignoreMissingAlpha )
 		{
@@ -192,7 +192,7 @@ void Premultiply::processChannelData( const Gaffer::Context *context, const Imag
 	}
 
 	const std::vector<std::string> &inChannelNames = inChannelNamesPtr->readable();
-	if ( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
+	if( std::find( inChannelNames.begin(), inChannelNames.end(), alphaChannel ) == inChannelNames.end() )
 	{
 		if( ignoreMissingAlpha )
 		{
@@ -214,7 +214,7 @@ void Premultiply::processChannelData( const Gaffer::Context *context, const Imag
 	if( !useDeepVisibility )
 	{
 		std::vector<float>::const_iterator aIt = a.begin();
-		for ( std::vector<float>::iterator outIt = out.begin(), outItEnd = out.end(); outIt != outItEnd; ++outIt, ++aIt )
+		for( std::vector<float>::iterator outIt = out.begin(), outItEnd = out.end(); outIt != outItEnd; ++outIt, ++aIt )
 		{
 			*outIt *= *aIt;
 		}

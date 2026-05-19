@@ -46,37 +46,36 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteAttributes final : public FilteredSceneProcessor
 {
 
-	public :
+public:
 
-		explicit DeleteAttributes( const std::string &name=defaultName<DeleteAttributes>() );
-		~DeleteAttributes() override;
+	explicit DeleteAttributes( const std::string &name = defaultName<DeleteAttributes>() );
+	~DeleteAttributes() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteAttributes, DeleteAttributesTypeId, FilteredSceneProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferScene::DeleteAttributes, DeleteAttributesTypeId, FilteredSceneProcessor );
 
-		Gaffer::StringPlug *namesPlug();
-		const Gaffer::StringPlug *namesPlug() const;
+	Gaffer::StringPlug *namesPlug();
+	const Gaffer::StringPlug *namesPlug() const;
 
-		Gaffer::BoolPlug *invertNamesPlug();
-		const Gaffer::BoolPlug *invertNamesPlug() const;
+	Gaffer::BoolPlug *invertNamesPlug();
+	const Gaffer::BoolPlug *invertNamesPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	private :
+private:
 
-		enum class Operation
-		{
-			PassThrough,
-			Delete,
-			Clear
-		};
+	enum class Operation
+	{
+		PassThrough,
+		Delete,
+		Clear
+	};
 
-		Operation operation( const Gaffer::Context *context, std::string &names, bool &invertNames ) const;
+	Operation operation( const Gaffer::Context *context, std::string &names, bool &invertNames ) const;
 
-		void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
-		IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
+	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
+	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( DeleteAttributes )

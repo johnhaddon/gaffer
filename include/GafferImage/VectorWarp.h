@@ -43,52 +43,51 @@ namespace GafferImage
 
 class GAFFERIMAGE_API VectorWarp : public Warp
 {
-	public :
+public:
 
-		explicit VectorWarp( const std::string &name=defaultName<Warp>() );
-		~VectorWarp() override;
+	explicit VectorWarp( const std::string &name = defaultName<Warp>() );
+	~VectorWarp() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::VectorWarp, VectorWarpTypeId, Warp );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::VectorWarp, VectorWarpTypeId, Warp );
 
-		ImagePlug *vectorPlug();
-		const ImagePlug *vectorPlug() const;
+	ImagePlug *vectorPlug();
+	const ImagePlug *vectorPlug() const;
 
-		enum VectorMode
-		{
-			Relative,   // Relative offset
-			Absolute,   // Absolute position
-		};
+	enum VectorMode
+	{
+		Relative, // Relative offset
+		Absolute, // Absolute position
+	};
 
-		Gaffer::IntPlug *vectorModePlug();
-		const Gaffer::IntPlug *vectorModePlug() const;
+	Gaffer::IntPlug *vectorModePlug();
+	const Gaffer::IntPlug *vectorModePlug() const;
 
-		enum VectorUnits
-		{
-			Pixels,  // Vector specified in pixels
-			Screen,  // Vector specified as fraction of display window
-		};
+	enum VectorUnits
+	{
+		Pixels, // Vector specified in pixels
+		Screen, // Vector specified as fraction of display window
+	};
 
-		Gaffer::IntPlug *vectorUnitsPlug();
-		const Gaffer::IntPlug *vectorUnitsPlug() const;
+	Gaffer::IntPlug *vectorUnitsPlug();
+	const Gaffer::IntPlug *vectorUnitsPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		bool affectsEngine( const Gaffer::Plug *input ) const override;
-		void hashEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		const Engine *computeEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
+	bool affectsEngine( const Gaffer::Plug *input ) const override;
+	void hashEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	const Engine *computeEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
 
-		void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
 
-	private :
+private:
 
-		struct Engine;
+	struct Engine;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( VectorWarp )

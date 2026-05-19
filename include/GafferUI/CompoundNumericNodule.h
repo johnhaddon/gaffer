@@ -49,37 +49,36 @@ class NoduleLayout;
 class GAFFERUI_API CompoundNumericNodule : public StandardNodule
 {
 
-	public :
+public:
 
-		explicit CompoundNumericNodule( Gaffer::PlugPtr plug );
-		~CompoundNumericNodule() override;
+	explicit CompoundNumericNodule( Gaffer::PlugPtr plug );
+	~CompoundNumericNodule() override;
 
-		GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::CompoundNumericNodule, CompoundNumericNoduleTypeId, StandardNodule );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::CompoundNumericNodule, CompoundNumericNoduleTypeId, StandardNodule );
 
-		Nodule *nodule( const Gaffer::Plug *plug ) override;
-		const Nodule *nodule( const Gaffer::Plug *plug ) const override;
+	Nodule *nodule( const Gaffer::Plug *plug ) override;
+	const Nodule *nodule( const Gaffer::Plug *plug ) const override;
 
-		bool canCreateConnection( const Gaffer::Plug *endpoint ) const override;
-		void createConnection( Gaffer::Plug *endpoint ) override;
+	bool canCreateConnection( const Gaffer::Plug *endpoint ) const override;
+	void createConnection( Gaffer::Plug *endpoint ) override;
 
-		Imath::Box3f bound() const override;
+	Imath::Box3f bound() const override;
 
-	protected :
+protected:
 
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
-		unsigned layerMask() const override;
-		Imath::Box3f renderBound() const override;
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
+	unsigned layerMask() const override;
+	Imath::Box3f renderBound() const override;
 
-	private :
+private:
 
-		NoduleLayout *noduleLayout();
-		const NoduleLayout *noduleLayout() const;
+	NoduleLayout *noduleLayout();
+	const NoduleLayout *noduleLayout() const;
 
-		void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key );
-		void updateChildNoduleVisibility();
+	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key );
+	void updateChildNoduleVisibility();
 
-		static NoduleTypeDescription<CompoundNumericNodule> g_noduleTypeDescription;
-
+	static NoduleTypeDescription<CompoundNumericNodule> g_noduleTypeDescription;
 };
 
 IE_CORE_DECLAREPTR( CompoundNumericNodule );

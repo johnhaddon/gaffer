@@ -51,7 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveVariableExists );
 size_t PrimitiveVariableExists::g_firstPlugIndex = 0;
 
 PrimitiveVariableExists::PrimitiveVariableExists( const std::string &name )
-	:	ComputeNode( name )
+	: ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Gaffer::Plug::In ) );
@@ -108,7 +108,7 @@ void PrimitiveVariableExists::hash( const ValuePlug *output, const Context *cont
 	ComputeNode::hash( output, context, h );
 	if( output == outPlug() )
 	{
-		if( context->getIfExists< ScenePlug::ScenePath >( ScenePlug::scenePathContextName ) )
+		if( context->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
 		{
 			h.append( primitiveVariablePlug()->hash() );
 			h.append( inPlug()->objectPlug()->hash() );
@@ -125,11 +125,11 @@ void PrimitiveVariableExists::compute( ValuePlug *output, const Context *context
 	if( output == outPlug() )
 	{
 		bool exists = false;
-		if( context->getIfExists< ScenePlug::ScenePath >( ScenePlug::scenePathContextName ) )
+		if( context->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
 		{
 			ConstObjectPtr inObject = inPlug()->objectPlug()->getValue();
 
-			const IECoreScene::Primitive* inPrimitive = runTimeCast<const IECoreScene::Primitive>( inObject.get() );
+			const IECoreScene::Primitive *inPrimitive = runTimeCast<const IECoreScene::Primitive>( inObject.get() );
 			if( inPrimitive )
 			{
 				std::string primitiveVariable = primitiveVariablePlug()->getValue();

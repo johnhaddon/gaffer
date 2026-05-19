@@ -116,321 +116,321 @@ const float g_wipeHandleThickness = 14.0f;
 class ImageView::WipeHandle : public GafferUI::Gadget
 {
 
-	public :
+public:
 
-		WipeHandle()
-			:	Gadget(), m_pos( 0 ), m_dir( 1, 0 ), m_editable( true ), m_dragHandle( HandleSelect::None )
+	WipeHandle()
+		: Gadget(), m_pos( 0 ), m_dir( 1, 0 ), m_editable( true ), m_dragHandle( HandleSelect::None )
+	{
+		mouseMoveSignal().connect( boost::bind( &WipeHandle::mouseMove, this, ::_2 ) );
+		buttonPressSignal().connect( boost::bind( &WipeHandle::buttonPress, this, ::_2 ) );
+		buttonReleaseSignal().connect( boost::bind( &WipeHandle::buttonRelease, this, ::_2 ) );
+		dragBeginSignal().connect( boost::bind( &WipeHandle::dragBegin, this, ::_1, ::_2 ) );
+		dragEnterSignal().connect( boost::bind( &WipeHandle::dragEnter, this, ::_1, ::_2 ) );
+		dragMoveSignal().connect( boost::bind( &WipeHandle::dragMove, this, ::_2 ) );
+		dragEndSignal().connect( boost::bind( &WipeHandle::dragEnd, this, ::_2 ) );
+		leaveSignal().connect( boost::bind( &WipeHandle::leave, this ) );
+	}
+
+	Imath::Box3f bound() const override
+	{
+		// The wipe indicator is an infinite line, so we don't have a sensible bound
+		return Box3f();
+	}
+
+	void setPosition( const Imath::V2f &p )
+	{
+		setWipeInternal( p, m_dir );
+	}
+
+	const Imath::V2f &getPosition() const
+	{
+		return m_pos;
+	}
+
+	void setDirection( const Imath::V2f &d )
+	{
+		if( d != V2f( 0 ) )
 		{
-			mouseMoveSignal().connect( boost::bind( &WipeHandle::mouseMove, this, ::_2 ) );
-			buttonPressSignal().connect( boost::bind( &WipeHandle::buttonPress, this, ::_2 ) );
-			buttonReleaseSignal().connect( boost::bind( &WipeHandle::buttonRelease, this, ::_2 ) );
-			dragBeginSignal().connect( boost::bind( &WipeHandle::dragBegin, this, ::_1, ::_2 ) );
-			dragEnterSignal().connect( boost::bind( &WipeHandle::dragEnter, this, ::_1, ::_2 ) );
-			dragMoveSignal().connect( boost::bind( &WipeHandle::dragMove, this, ::_2 ) );
-			dragEndSignal().connect( boost::bind( &WipeHandle::dragEnd, this, ::_2 ) );
-			leaveSignal().connect( boost::bind( &WipeHandle::leave, this ) );
+			setWipeInternal( m_pos, d.normalized() );
+		}
+	}
+
+	const Imath::V2f &getDirection() const
+	{
+		return m_dir;
+	}
+
+	void setEditable( bool editable )
+	{
+		m_editable = editable;
+	}
+
+	bool getEditable() const
+	{
+		return m_editable;
+	}
+
+protected:
+
+	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
+	{
+		if( layer != Layer::Front )
+		{
+			return;
 		}
 
-		Imath::Box3f bound() const override
-		{
-			// The wipe indicator is an infinite line, so we don't have a sensible bound
-			return Box3f();
-		}
+		float rsf = rasterScaleFactor();
+		float handleRadius = 30.0f * rsf;
 
-		void setPosition( const Imath::V2f &p )
-		{
-			setWipeInternal( p, m_dir );
-		}
+		Color4f bright( 0.8f, 0.8f, 0.8f, 0.5f );
+		Color4f dark( 0.2f, 0.2f, 0.2f, 0.5f );
 
-		const Imath::V2f &getPosition() const
+		if( isSelectionRender( reason ) )
 		{
-			return m_pos;
-		}
-
-		void setDirection( const Imath::V2f &d )
-		{
-			if( d != V2f( 0 ) )
+			if( m_editable )
 			{
-				setWipeInternal( m_pos, d.normalized() );
+				// Draw one thick handle for selection
+				renderHandle( style, handleRadius, rsf * g_wipeHandleThickness * 1.2f, 0.0f, dark );
 			}
 		}
-
-		const Imath::V2f &getDirection() const
+		else
 		{
-			return m_dir;
+			// Draw a thin bright handle offset from a dark handle, so that it will
+			// be visible on any background
+			renderHandle( style, handleRadius, rsf * 1.7f, -rsf * 0.5, dark );
+			renderHandle( style, handleRadius, rsf * 1.7f, rsf * 0.5, bright );
 		}
+	}
 
-		void setEditable( bool editable )
+	unsigned layerMask() const override
+	{
+		return (unsigned)Layer::Front;
+	}
+
+	Imath::Box3f renderBound() const override
+	{
+		Box3f b;
+		b.makeInfinite();
+		return b;
+	}
+
+private:
+
+	void renderHandle( const Style *style, float rotateHandleSize, float thickness, float offset, const Color4f &color ) const
+	{
+		const ViewportGadget *viewport = ancestor<ViewportGadget>();
+		const V2i &viewportSize = viewport->getViewport();
+
+		Box2f rasterViewport( V2f( 0 ), V2f( viewportSize.x, viewportSize.y ) );
+		Box3f worldViewport3d(
+			viewport->rasterToWorldSpace( rasterViewport.min ).p0,
+			viewport->rasterToWorldSpace( rasterViewport.max ).p0
+		);
+		float size = ( worldViewport3d.max - worldViewport3d.min ).length();
+		V2f worldViewportCenter( worldViewport3d.center().x, worldViewport3d.center().y );
+
+		// For the infinite line defined by the wipe, find the closest point to the center of the viewport,
+		// for a good place to draw it from
+		V2f closestPoint = worldViewportCenter + m_dir * m_dir.dot( m_pos - worldViewportCenter );
+
+		V2f perp( m_dir.y, -m_dir.x );
+		line2D( style, closestPoint + perp * size + m_dir * offset, closestPoint - perp * size + m_dir * offset, thickness, color );
+
+		// Draw the arc
+		const int segments = 32;
+		V2f prevArcPos;
+		for( int i = 0; i < segments + 1; i++ )
 		{
-			m_editable = editable;
-		}
-
-		bool getEditable() const
-		{
-			return m_editable;
-		}
-
-	protected :
-
-		void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
-		{
-			if( layer != Layer::Front )
+			float angle = i * M_PI / float( segments );
+			V2f arcPos = ( m_dir * sinf( angle ) + perp * cosf( angle ) ) * ( rotateHandleSize + offset );
+			if( i != 0 )
 			{
-				return;
+				line2D( style, m_pos + arcPos, m_pos + prevArcPos, thickness, color );
 			}
 
-			float rsf = rasterScaleFactor();
-			float handleRadius = 30.0f * rsf;
-
-			Color4f bright( 0.8f, 0.8f, 0.8f, 0.5f );
-			Color4f dark( 0.2f, 0.2f, 0.2f, 0.5f );
-
-			if( isSelectionRender( reason ) )
-			{
-				if( m_editable )
-				{
-					// Draw one thick handle for selection
-					renderHandle( style, handleRadius, rsf * g_wipeHandleThickness * 1.2f, 0.0f, dark );
-				}
-			}
-			else
-			{
-				// Draw a thin bright handle offset from a dark handle, so that it will
-				// be visible on any background
-				renderHandle( style, handleRadius, rsf * 1.7f, -rsf * 0.5, dark );
-				renderHandle( style, handleRadius, rsf * 1.7f, rsf * 0.5, bright );
-			}
+			prevArcPos = arcPos;
 		}
+	}
 
-		unsigned layerMask() const override
+	// Compute the scaling from our space to raster space, so we can compensate for UIs that we
+	// want to be constant sized in raster space
+	float rasterScaleFactor() const
+	{
+		const ViewportGadget *viewport = ancestor<ViewportGadget>();
+
+		V3f s;
+		Imath::extractScaling( this->fullTransform(), s );
+
+		const V2f p1 = viewport->gadgetToRasterSpace( V3f( 0.0f ), this );
+		const V2f p2 = viewport->gadgetToRasterSpace( V3f( s.x, 0.0f, 0.0f ), this );
+		return 1.0 / ( p1 - p2 ).length();
+	}
+
+	void setWipeInternal( const Imath::V2f &pos, const Imath::V2f &dir )
+	{
+		m_pos = pos;
+		m_dir = dir;
+		dirty( DirtyType::Render );
+	}
+
+	static void line2D( const Style *style, V2f p1, V2f p2, float width, const Color4f &c, float hack = 0 )
+	{
+		style->renderLine( IECore::LineSegment3f( V3f( p1.x, p1.y, 0 ), V3f( p2.x, p2.y, 0 ) ), width, &c );
+	}
+
+	bool mouseMove( const ButtonEvent &event )
+	{
+		HandleSelect h;
+		if( m_dragHandle != HandleSelect::None )
 		{
-			return (unsigned)Layer::Front;
+			// Don't change the cursor during a drag - stick with whatever we started the drag with
+			h = m_dragHandle;
 		}
-
-		Imath::Box3f renderBound() const override
+		else
 		{
-			Box3f b;
-			b.makeInfinite();
-			return b;
+			h = hoveredHandle( event );
 		}
 
-	private :
 
-		void renderHandle( const Style *style, float rotateHandleSize, float thickness, float offset, const Color4f &color ) const
+		if( h == HandleSelect::Translate )
 		{
-			const ViewportGadget *viewport = ancestor<ViewportGadget>();
-			const V2i &viewportSize = viewport->getViewport();
-
-			Box2f rasterViewport( V2f( 0 ), V2f( viewportSize.x, viewportSize.y ) );
-			Box3f worldViewport3d(
-				viewport->rasterToWorldSpace( rasterViewport.min ).p0,
-				viewport->rasterToWorldSpace( rasterViewport.max ).p0
-			);
-			float size = ( worldViewport3d.max - worldViewport3d.min ).length();
-			V2f worldViewportCenter( worldViewport3d.center().x, worldViewport3d.center().y );
-
-			// For the infinite line defined by the wipe, find the closest point to the center of the viewport,
-			// for a good place to draw it from
-			V2f closestPoint = worldViewportCenter + m_dir * m_dir.dot( m_pos - worldViewportCenter );
-
-			V2f perp( m_dir.y, -m_dir.x );
-			line2D( style, closestPoint + perp * size + m_dir * offset, closestPoint - perp * size + m_dir * offset, thickness, color );
-
-			// Draw the arc
-			const int segments = 32;
-			V2f prevArcPos;
-			for( int i = 0; i < segments + 1; i++ )
-			{
-				float angle = i * M_PI / float( segments );
-				V2f arcPos = ( m_dir * sinf( angle ) + perp * cosf( angle ) ) * ( rotateHandleSize + offset );
-				if( i != 0 )
-				{
-					line2D( style, m_pos + arcPos, m_pos + prevArcPos, thickness, color );
-				}
-
-				prevArcPos = arcPos;
-			}
+			Pointer::setCurrent( "move" );
 		}
-
-		// Compute the scaling from our space to raster space, so we can compensate for UIs that we
-		// want to be constant sized in raster space
-		float rasterScaleFactor() const
+		else if( h == HandleSelect::Rotate )
 		{
-			const ViewportGadget *viewport = ancestor<ViewportGadget>();
-
-			V3f s;
-			Imath::extractScaling( this->fullTransform(), s );
-
-			const V2f p1 = viewport->gadgetToRasterSpace( V3f( 0.0f ), this );
-			const V2f p2 = viewport->gadgetToRasterSpace( V3f( s.x, 0.0f, 0.0f ), this );
-			return 1.0 / ( p1 - p2 ).length();
+			Pointer::setCurrent( "rotate" );
 		}
-
-		void setWipeInternal( const Imath::V2f &pos, const Imath::V2f &dir )
-		{
-			m_pos = pos;
-			m_dir = dir;
-			dirty( DirtyType::Render );
-		}
-
-		static void line2D( const Style *style, V2f p1, V2f p2, float width, const Color4f &c, float hack = 0 )
-		{
-			style->renderLine( IECore::LineSegment3f( V3f( p1.x, p1.y, 0 ), V3f( p2.x, p2.y, 0 ) ), width, &c );
-		}
-
-		bool mouseMove( const ButtonEvent &event )
-		{
-			HandleSelect h;
-			if( m_dragHandle != HandleSelect::None )
-			{
-				// Don't change the cursor during a drag - stick with whatever we started the drag with
-				h = m_dragHandle;
-			}
-			else
-			{
-				h = hoveredHandle( event );
-			}
-
-
-			if( h == HandleSelect::Translate )
-			{
-				Pointer::setCurrent( "move" );
-			}
-			else if( h == HandleSelect::Rotate )
-			{
-				Pointer::setCurrent( "rotate" );
-			}
-			else
-			{
-				Pointer::setCurrent( "" );
-			}
-
-			return false;
-		}
-
-		bool buttonPress( const GafferUI::ButtonEvent &event )
-		{
-			if( event.buttons != ButtonEvent::Left )
-			{
-				return false;
-			}
-
-			m_dragHandle = hoveredHandle( event );
-			return true;
-		}
-
-		bool buttonRelease( const GafferUI::ButtonEvent &event )
-		{
-			m_dragHandle = HandleSelect::None;
-			return false;
-		}
-
-		IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
-		{
-			m_dragStart = eventPosition( event );
-			m_dragStartPos = m_pos;
-			V2f startCursorDir = ( m_dragStart - m_pos ).normalized();
-			m_dragStartAlignment = V2f(
-				startCursorDir.x * m_dir.x + startCursorDir.y * m_dir.y,
-				startCursorDir.x * m_dir.y - startCursorDir.y * m_dir.x
-			);
-			return IECore::NullObject::defaultNullObject();
-		}
-
-		bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
-		{
-			if( event.sourceGadget != this )
-			{
-				return false;
-			}
-
-			updateDrag( event );
-			return true;
-		}
-
-		bool dragMove( const GafferUI::DragDropEvent &event )
-		{
-			updateDrag( event );
-			return true;
-		}
-
-		bool dragEnd( const GafferUI::DragDropEvent &event )
-		{
-			updateDrag( event );
-			m_dragHandle = HandleSelect::None;
-			return true;
-		}
-
-		void updateDrag( const GafferUI::DragDropEvent &event )
-		{
-			const V2f p = eventPosition( event );
-
-			if( m_dragHandle == HandleSelect::Translate )
-			{
-				const V2f offset = p - m_dragStart;
-				setWipeInternal( m_dragStartPos + offset, m_dir );
-			}
-			else if( m_dragHandle == HandleSelect::Rotate )
-			{
-				V2f disp = p - m_pos;
-
-				disp = V2f(
-					disp.x * m_dragStartAlignment.x - disp.y * m_dragStartAlignment.y,
-					disp.x * m_dragStartAlignment.y + disp.y * m_dragStartAlignment.x
-				);
-
-				if( disp != V2f( 0 ) )
-				{
-					setWipeInternal( m_pos, disp.normalized() );
-				}
-			}
-		}
-
-		void leave()
+		else
 		{
 			Pointer::setCurrent( "" );
 		}
 
-		enum class HandleSelect
-		{
-			None,
-			Translate,
-			Rotate
-		};
+		return false;
+	}
 
-		HandleSelect hoveredHandle( const ButtonEvent &event ) const
+	bool buttonPress( const GafferUI::ButtonEvent &event )
+	{
+		if( event.buttons != ButtonEvent::Left )
 		{
-			const V2f p = eventPosition( event );
+			return false;
+		}
 
-			float rsf = rasterScaleFactor();
-			if( ( p - m_pos ).dot( m_dir ) < rsf * g_wipeHandleThickness * 0.5f )
+		m_dragHandle = hoveredHandle( event );
+		return true;
+	}
+
+	bool buttonRelease( const GafferUI::ButtonEvent &event )
+	{
+		m_dragHandle = HandleSelect::None;
+		return false;
+	}
+
+	IECore::RunTimeTypedPtr dragBegin( GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+	{
+		m_dragStart = eventPosition( event );
+		m_dragStartPos = m_pos;
+		V2f startCursorDir = ( m_dragStart - m_pos ).normalized();
+		m_dragStartAlignment = V2f(
+			startCursorDir.x * m_dir.x + startCursorDir.y * m_dir.y,
+			startCursorDir.x * m_dir.y - startCursorDir.y * m_dir.x
+		);
+		return IECore::NullObject::defaultNullObject();
+	}
+
+	bool dragEnter( const GafferUI::Gadget *gadget, const GafferUI::DragDropEvent &event )
+	{
+		if( event.sourceGadget != this )
+		{
+			return false;
+		}
+
+		updateDrag( event );
+		return true;
+	}
+
+	bool dragMove( const GafferUI::DragDropEvent &event )
+	{
+		updateDrag( event );
+		return true;
+	}
+
+	bool dragEnd( const GafferUI::DragDropEvent &event )
+	{
+		updateDrag( event );
+		m_dragHandle = HandleSelect::None;
+		return true;
+	}
+
+	void updateDrag( const GafferUI::DragDropEvent &event )
+	{
+		const V2f p = eventPosition( event );
+
+		if( m_dragHandle == HandleSelect::Translate )
+		{
+			const V2f offset = p - m_dragStart;
+			setWipeInternal( m_dragStartPos + offset, m_dir );
+		}
+		else if( m_dragHandle == HandleSelect::Rotate )
+		{
+			V2f disp = p - m_pos;
+
+			disp = V2f(
+				disp.x * m_dragStartAlignment.x - disp.y * m_dragStartAlignment.y,
+				disp.x * m_dragStartAlignment.y + disp.y * m_dragStartAlignment.x
+			);
+
+			if( disp != V2f( 0 ) )
 			{
-				return HandleSelect::Translate;
+				setWipeInternal( m_pos, disp.normalized() );
 			}
-
-			return HandleSelect::Rotate;
 		}
+	}
 
-		V2f eventPosition( const ButtonEvent &event ) const
+	void leave()
+	{
+		Pointer::setCurrent( "" );
+	}
+
+	enum class HandleSelect
+	{
+		None,
+		Translate,
+		Rotate
+	};
+
+	HandleSelect hoveredHandle( const ButtonEvent &event ) const
+	{
+		const V2f p = eventPosition( event );
+
+		float rsf = rasterScaleFactor();
+		if( ( p - m_pos ).dot( m_dir ) < rsf * g_wipeHandleThickness * 0.5f )
 		{
-			const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
-			const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
-			V2f pixel = imageGadget->pixelAt( event.line );
-			Context::Scope contextScope( imageGadget->getContext() );
-			pixel.x *= imageGadget->getImage()->format().getPixelAspect();
-			return pixel;
+			return HandleSelect::Translate;
 		}
 
-		V2f m_pos;
-		V2f m_dir;
+		return HandleSelect::Rotate;
+	}
 
-		bool m_editable;
+	V2f eventPosition( const ButtonEvent &event ) const
+	{
+		const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
+		const ImageGadget *imageGadget = static_cast<const ImageGadget *>( viewportGadget->getPrimaryChild() );
+		V2f pixel = imageGadget->pixelAt( event.line );
+		Context::Scope contextScope( imageGadget->getContext() );
+		pixel.x *= imageGadget->getImage()->format().getPixelAspect();
+		return pixel;
+	}
 
-		Imath::V2f m_dragStartPos;
-		Imath::V2f m_dragStartAlignment;
-		Imath::V2f m_dragStart;
+	V2f m_pos;
+	V2f m_dir;
 
-		HandleSelect m_dragHandle;
+	bool m_editable;
+
+	Imath::V2f m_dragStartPos;
+	Imath::V2f m_dragStartAlignment;
+	Imath::V2f m_dragStart;
+
+	HandleSelect m_dragHandle;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -442,9 +442,9 @@ GAFFER_NODE_DEFINE_TYPE( ImageView );
 GAFFERIMAGEUI_API ImageView::ViewDescription<ImageView> ImageView::g_viewDescription( GafferImage::ImagePlug::staticTypeId() );
 
 ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
-	:	View( defaultName<ImageView>(), scriptNode, new GafferImage::ImagePlug() ),
-		m_imageGadgets{ new ImageGadget(), new ImageGadget() },
-		m_framed( false )
+	: View( defaultName<ImageView>(), scriptNode, new GafferImage::ImagePlug() ),
+	  m_imageGadgets{ new ImageGadget(), new ImageGadget() },
+	  m_framed( false )
 {
 
 	// build the preprocessor we use for applying colour
@@ -484,13 +484,13 @@ ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
 	preprocessor->addChild( comparisonSwitch );
 	comparisonSwitch->setup( preprocessorInput.get() );
 	comparisonSwitch->selectorPlug()->setValue( "${imageView:__useComparisonImage}" );
-	comparisonSwitch->inPlugs()->getChild<NameValuePlug>(0)->valuePlug()->setInput( preprocessorInput );
-	comparisonSwitch->inPlugs()->getChild<NameValuePlug>(1)->namePlug()->setValue( "True" );
-	comparisonSwitch->inPlugs()->getChild<NameValuePlug>(1)->valuePlug()->setInput( comparisonDeleteContext->outPlug() );
+	comparisonSwitch->inPlugs()->getChild<NameValuePlug>( 0 )->valuePlug()->setInput( preprocessorInput );
+	comparisonSwitch->inPlugs()->getChild<NameValuePlug>( 1 )->namePlug()->setValue( "True" );
+	comparisonSwitch->inPlugs()->getChild<NameValuePlug>( 1 )->valuePlug()->setInput( comparisonDeleteContext->outPlug() );
 
 	SelectViewPtr selectView = new SelectView( "_selectView" );
 	preprocessor->addChild( selectView );
-	selectView->inPlug()->setInput( runTimeCast< NameValuePlug >( comparisonSwitch->outPlug() )->valuePlug() );
+	selectView->inPlug()->setInput( runTimeCast<NameValuePlug>( comparisonSwitch->outPlug() )->valuePlug() );
 
 	// All of the ways we want to interact with the image here require it to be flattened first ( ImageGadget,
 	// ImageStats, ImageSampler ).  By flattening it before any of these things, we ensure it only gets
@@ -524,9 +524,9 @@ ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
 	addChild( m_comparisonSelect );
 	m_comparisonSelect->setup( compareImagePlug() );
 	m_comparisonSelect->inPlug()->setInput( preprocessedInPlug<ImagePlug>() );
-	m_comparisonSelect->variablesPlug()->addChild( new NameValuePlug( "catalogue:imageName",  new StringData( "output:1" ), true ) );
+	m_comparisonSelect->variablesPlug()->addChild( new NameValuePlug( "catalogue:imageName", new StringData( "output:1" ), true ) );
 	m_comparisonSelect->variablesPlug()->getChild<NameValuePlug>( 0 )->valuePlug<StringPlug>()->setInput( compareCatalogueOutputPlug() );
-	m_comparisonSelect->variablesPlug()->addChild( new NameValuePlug( "imageView:__useComparisonImage",  new StringData( "True" ), true ) );
+	m_comparisonSelect->variablesPlug()->addChild( new NameValuePlug( "imageView:__useComparisonImage", new StringData( "True" ), true ) );
 
 	m_imageGadgets[1]->setImage( IECore::runTimeCast<GafferImage::ImagePlug>( m_comparisonSelect->outPlug() ) );
 	m_imageGadgets[1]->setContext( context() );
@@ -542,7 +542,6 @@ ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
 	m_wipeHandle = new WipeHandle();
 	m_wipeHandle->setVisible( false );
 	viewportGadget()->setChild( "__wipeHandle", m_wipeHandle );
-
 }
 
 void ImageView::insertConverter( Gaffer::NodePtr converter )
@@ -580,7 +579,7 @@ void ImageView::insertConverter( Gaffer::NodePtr converter )
 
 	for( Plug::OutputContainer::const_iterator it = outputsToRestore.begin(), eIt = outputsToRestore.end(); it != eIt; ++it )
 	{
-		(*it)->setInput( converterOutput );
+		( *it )->setInput( converterOutput );
 	}
 }
 
@@ -751,9 +750,7 @@ void ImageView::plugSet( Gaffer::Plug *plug )
 
 		setWipeActive( compareMode != "" && compareWipePlug()->getValue() );
 
-		getChild( "displayTransform" )->getChild<BoolPlug>( "absolute" )->setValue(
-			m == ImageGadget::BlendMode::Difference
-		);
+		getChild( "displayTransform" )->getChild<BoolPlug>( "absolute" )->setValue( m == ImageGadget::BlendMode::Difference );
 	}
 	else if( plug == compareWipePlug() )
 	{
@@ -817,12 +814,12 @@ bool ImageView::keyPress( const GafferUI::KeyEvent &event )
 	else if( event.key == "Home" && !event.modifiers )
 	{
 		V2i viewport = viewportGadget()->getViewport();
-		V3f halfViewportSize(viewport.x / 2, viewport.y / 2, 0);
+		V3f halfViewportSize( viewport.x / 2, viewport.y / 2, 0 );
 		V3f imageCenter = m_imageGadgets[0]->bound().center();
 		viewportGadget()->frame(
 			Box3f(
-				V3f(imageCenter.x - halfViewportSize.x, imageCenter.y - halfViewportSize.y, 0),
-				V3f(imageCenter.x + halfViewportSize.x, imageCenter.y + halfViewportSize.y, 0)
+				V3f( imageCenter.x - halfViewportSize.x, imageCenter.y - halfViewportSize.y, 0 ),
+				V3f( imageCenter.x + halfViewportSize.x, imageCenter.y + halfViewportSize.y, 0 )
 			)
 		);
 		return true;

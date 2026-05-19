@@ -61,7 +61,7 @@ GAFFER_NODE_DEFINE_TYPE( CreateViews );
 size_t CreateViews::g_firstPlugIndex = 0;
 
 CreateViews::CreateViews( const std::string &name )
-	:	ImageNode( name )
+	: ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -90,7 +90,7 @@ CreateViews::CreateViews( const std::string &name )
 	s->setup( new ImagePlug() );
 	s->indexPlug()->setInput( indexPlug() );
 
-	ImagePlug *switchOut = runTimeCast< ImagePlug >( s->outPlug() );
+	ImagePlug *switchOut = runTimeCast<ImagePlug>( s->outPlug() );
 	outPlug()->setFlags( Plug::Serialisable, false );
 	outPlug()->formatPlug()->setInput( switchOut->formatPlug() );
 	outPlug()->dataWindowPlug()->setInput( switchOut->dataWindowPlug() );
@@ -102,7 +102,6 @@ CreateViews::CreateViews( const std::string &name )
 
 	views->childAddedSignal().connect( boost::bind( &CreateViews::synchronizeSwitch, this ) );
 	views->childRemovedSignal().connect( boost::bind( &CreateViews::synchronizeSwitch, this ) );
-
 }
 
 CreateViews::~CreateViews()
@@ -164,7 +163,6 @@ void CreateViews::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		outputs.push_back( outPlug()->viewNamesPlug() );
 		outputs.push_back( indexPlug() );
 	}
-
 }
 
 void CreateViews::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -208,7 +206,7 @@ void CreateViews::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 	int matchIndex = -1;
 	int defaultIndex = -1;
 	int index = 0;
-	for( auto &nameValue : NameValuePlug::Range( *viewsPlug()  ) )
+	for( auto &nameValue : NameValuePlug::Range( *viewsPlug() ) )
 	{
 		if( !nameValue->enabledPlug() || nameValue->enabledPlug()->getValue() )
 		{
@@ -264,9 +262,9 @@ void CreateViews::hashViewNames( const GafferImage::ImagePlug *output, const Gaf
 IECore::ConstStringVectorDataPtr CreateViews::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
 {
 	StringVectorDataPtr resultData = new StringVectorData();
-	std::vector< string > &result = resultData->writable();
-	std::vector< std::string > newNames;
-	for( auto &nameValue : NameValuePlug::Range( *viewsPlug()  ) )
+	std::vector<string> &result = resultData->writable();
+	std::vector<std::string> newNames;
+	for( auto &nameValue : NameValuePlug::Range( *viewsPlug() ) )
 	{
 		if( !nameValue->enabledPlug() || nameValue->enabledPlug()->getValue() )
 		{

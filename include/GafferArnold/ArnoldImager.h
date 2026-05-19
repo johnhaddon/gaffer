@@ -48,39 +48,38 @@ namespace GafferArnold
 class GAFFERARNOLD_API ArnoldImager : public GafferScene::GlobalsProcessor
 {
 
-	public :
+public:
 
-		explicit ArnoldImager( const std::string &name=defaultName<ArnoldImager>() );
-		~ArnoldImager() override;
+	explicit ArnoldImager( const std::string &name = defaultName<ArnoldImager>() );
+	~ArnoldImager() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldImager, ArnoldImagerTypeId, GafferScene::GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferArnold::ArnoldImager, ArnoldImagerTypeId, GafferScene::GlobalsProcessor );
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-		enum class Mode
-		{
-			Replace,
-			InsertFirst,
-			InsertLast
-		};
+	enum class Mode
+	{
+		Replace,
+		InsertFirst,
+		InsertLast
+	};
 
-		GafferScene::ShaderPlug *imagerPlug();
-		const GafferScene::ShaderPlug *imagerPlug() const;
+	GafferScene::ShaderPlug *imagerPlug();
+	const GafferScene::ShaderPlug *imagerPlug() const;
 
-		Gaffer::IntPlug *modePlug();
-		const Gaffer::IntPlug *modePlug() const;
+	Gaffer::IntPlug *modePlug();
+	const Gaffer::IntPlug *modePlug() const;
 
-	protected :
+protected:
 
-		bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
+	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
-		void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
 
-	private :
+private:
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( ArnoldImager )

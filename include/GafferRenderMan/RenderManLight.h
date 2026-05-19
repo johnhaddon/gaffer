@@ -47,13 +47,12 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManLight : public GafferScene::Light
 {
 
-	public :
+public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManLight, RenderManLightTypeId, GafferScene::Light );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManLight, RenderManLightTypeId, GafferScene::Light );
 
-		RenderManLight( const std::string &name=defaultName<RenderManLight>() );
-		~RenderManLight() override;
-
+	RenderManLight( const std::string &name = defaultName<RenderManLight>() );
+	~RenderManLight() override;
 };
 
 IE_CORE_DECLAREPTR( RenderManLight )

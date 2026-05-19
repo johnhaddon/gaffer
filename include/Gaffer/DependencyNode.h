@@ -52,42 +52,41 @@ namespace Gaffer
 class GAFFER_API DependencyNode : public Node
 {
 
-	public :
+public:
 
-		explicit DependencyNode( const std::string &name=defaultName<DependencyNode>() );
-		~DependencyNode() override;
+	explicit DependencyNode( const std::string &name = defaultName<DependencyNode>() );
+	~DependencyNode() override;
 
-		GAFFER_NODE_DECLARE_TYPE( Gaffer::DependencyNode, DependencyNodeTypeId, Node );
+	GAFFER_NODE_DECLARE_TYPE( Gaffer::DependencyNode, DependencyNodeTypeId, Node );
 
-		using AffectedPlugsContainer = std::vector<const Plug *>;
+	using AffectedPlugsContainer = std::vector<const Plug *>;
 
-		/// Must be implemented to fill outputs with all the plugs whose computation
-		/// will be affected by the specified input. It is an error to pass a compound plug
-		/// for input or to place one in outputs as computations are always performed on the
-		/// leaf level plugs only. Implementations of this method should call the base class
-		/// implementation first.
-		/// \todo Make this protected, and add an accessor on the Plug class instead.
-		/// The general principle in effect elsewhere in Gaffer is that plugs provide
-		/// the public interface to the work done by nodes.
-		virtual void affects( const Plug *input, AffectedPlugsContainer &outputs ) const = 0;
+	/// Must be implemented to fill outputs with all the plugs whose computation
+	/// will be affected by the specified input. It is an error to pass a compound plug
+	/// for input or to place one in outputs as computations are always performed on the
+	/// leaf level plugs only. Implementations of this method should call the base class
+	/// implementation first.
+	/// \todo Make this protected, and add an accessor on the Plug class instead.
+	/// The general principle in effect elsewhere in Gaffer is that plugs provide
+	/// the public interface to the work done by nodes.
+	virtual void affects( const Plug *input, AffectedPlugsContainer &outputs ) const = 0;
 
-		/// @name Enable/Disable Behaviour
-		/// DependencyNodes can optionally define a means of being enabled and disabled.
-		/// If they do, then they can also specify an input plug corresponding
-		/// to each output plug. By providing a corresponding plug, the node
-		/// is promising that the input will pass-through to the output in some
-		/// meaningful way when the node is disabled.
-		//////////////////////////////////////////////////////////////
-		//@{
-		/// Returns the enable plug, or 0 if this node is not disable-able.
-		virtual BoolPlug *enabledPlug();
-		virtual const BoolPlug *enabledPlug() const;
-		/// Returns the input plug corresponding to the given output plug. Note that each
-		/// node is responsible for ensuring that this correspondence is respected.
-		virtual Plug *correspondingInput( const Plug *output );
-		virtual const Plug *correspondingInput( const Plug *output ) const;
-		//@}
-
+	/// @name Enable/Disable Behaviour
+	/// DependencyNodes can optionally define a means of being enabled and disabled.
+	/// If they do, then they can also specify an input plug corresponding
+	/// to each output plug. By providing a corresponding plug, the node
+	/// is promising that the input will pass-through to the output in some
+	/// meaningful way when the node is disabled.
+	//////////////////////////////////////////////////////////////
+	//@{
+	/// Returns the enable plug, or 0 if this node is not disable-able.
+	virtual BoolPlug *enabledPlug();
+	virtual const BoolPlug *enabledPlug() const;
+	/// Returns the input plug corresponding to the given output plug. Note that each
+	/// node is responsible for ensuring that this correspondence is respected.
+	virtual Plug *correspondingInput( const Plug *output );
+	virtual const Plug *correspondingInput( const Plug *output ) const;
+	//@}
 };
 
 } // namespace Gaffer

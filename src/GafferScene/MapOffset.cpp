@@ -52,7 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( MapOffset );
 size_t MapOffset::g_firstPlugIndex = 0;
 
 MapOffset::MapOffset( const std::string &name )
-	:	ObjectProcessor( name, PathMatcher::EveryMatch )
+	: ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V2fPlug( "offset" ) );
@@ -96,12 +96,10 @@ const Gaffer::StringPlug *MapOffset::uvSetPlug() const
 
 bool MapOffset::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return
-		ObjectProcessor::affectsProcessedObject( input ) ||
+	return ObjectProcessor::affectsProcessedObject( input ) ||
 		input->parent<Plug>() == offsetPlug() ||
 		input == udimPlug() ||
-		input == uvSetPlug()
-	;
+		input == uvSetPlug();
 }
 
 void MapOffset::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -132,7 +130,7 @@ IECore::ConstObjectPtr MapOffset::computeProcessedObject( const ScenePath &path,
 
 	// also early out if the uv set doesn't exist on the input primitive
 
-	if ( inputPrimitive->variables.find( uvSet ) == inputPrimitive->variables.end() )
+	if( inputPrimitive->variables.find( uvSet ) == inputPrimitive->variables.end() )
 	{
 		return inputObject;
 	}
@@ -144,8 +142,8 @@ IECore::ConstObjectPtr MapOffset::computeProcessedObject( const ScenePath &path,
 	V2f offset = offsetPlug()->getValue();
 
 	const int udim = udimPlug()->getValue();
-	offset.x += (udim - 1001) % 10;
-	offset.y += (udim - 1001) / 10;
+	offset.x += ( udim - 1001 ) % 10;
+	offset.y += ( udim - 1001 ) / 10;
 
 	if( V2fVectorData *uvData = runTimeCast<V2fVectorData>( result->variables[uvSet].data.get() ) )
 	{

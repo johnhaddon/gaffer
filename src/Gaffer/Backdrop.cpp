@@ -45,7 +45,7 @@ GAFFER_NODE_DEFINE_TYPE( Backdrop );
 size_t Backdrop::g_firstPlugIndex = 0;
 
 Backdrop::Backdrop( const std::string &name )
-	:	Node( name )
+	: Node( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "title", Plug::In, "Title" ) );

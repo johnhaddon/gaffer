@@ -66,7 +66,7 @@ size_t VolumeScatter::g_firstPlugIndex = 0;
 VolumeScatter::VolumeScatter( const std::string &name )
 	: BranchCreator( name )
 {
-	storeIndexOfNextChild(g_firstPlugIndex);
+	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new StringPlug( "name", Plug::In, "scatter" ) );
 	addChild( new StringPlug( "grid", Plug::In, "density" ) );
@@ -179,12 +179,10 @@ IECore::ConstCompoundObjectPtr VolumeScatter::computeBranchAttributes( const Sce
 
 bool VolumeScatter::affectsBranchObject( const Gaffer::Plug *input ) const
 {
-	return
-		input == inPlug()->objectPlug() ||
+	return input == inPlug()->objectPlug() ||
 		input == gridPlug() ||
 		input == densityPlug() ||
-		input == pointTypePlug()
-	;
+		input == pointTypePlug();
 }
 
 void VolumeScatter::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -203,23 +201,25 @@ void VolumeScatter::hashBranchObject( const ScenePath &sourcePath, const ScenePa
 	h = outPlug()->objectPlug()->defaultValue()->Object::hash();
 }
 
-namespace {
+namespace
+{
 
-class PointsWriter {
+class PointsWriter
+{
 public:
 
 	PointsWriter()
-		: pointsData(new IECore::V3fVectorData()), points( pointsData->writable() )
+		: pointsData( new IECore::V3fVectorData() ), points( pointsData->writable() )
 	{
 	}
 
-	void add(const openvdb::Vec3R &pos)
+	void add( const openvdb::Vec3R &pos )
 	{
-		points.emplace_back(pos.x(), pos.y(), pos.z());
+		points.emplace_back( pos.x(), pos.y(), pos.z() );
 	}
 
 	IECore::V3fVectorDataPtr pointsData;
-	std::vector<Imath::V3f> & points;
+	std::vector<Imath::V3f> &points;
 };
 
 } // namespace
@@ -241,7 +241,7 @@ IECore::ConstObjectPtr VolumeScatter::computeBranchObject( const ScenePath &sour
 
 	openvdb::GridBase::ConstPtr grid = vdbObject->findGrid( gridName );
 
-	if ( !grid )
+	if( !grid )
 	{
 		// The classic question: should we raising an exception here?
 		// It would be much easier to debug failures if we raised errors, but a user might
@@ -261,7 +261,6 @@ IECore::ConstObjectPtr VolumeScatter::computeBranchObject( const ScenePath &sour
 	if( !floatGrid )
 	{
 		throw IECore::Exception( "VolumeScatter requires a FloatGrid, does not support : " + grid->type() );
-
 	}
 
 	PointsWriter pointWriter;
@@ -278,15 +277,14 @@ IECore::ConstObjectPtr VolumeScatter::computeBranchObject( const ScenePath &sour
 	//   threshold, we just generate points as usual, but if some adjacent voxels are over threshold, we
 	//   need to evaluate the interpolated value at each generated point to check if it is under threshold ).
 	using NonUniformScatter = openvdb::tools::NonUniformPointScatter<
-		PointsWriter, pcg32, Interrupter
-	>;
+		PointsWriter, pcg32, Interrupter>;
 	NonUniformScatter densityPointScatter(
 		pointWriter, densityPlug()->getValue(), generator, spread, &interrupter
 	);
 
 	densityPointScatter( *floatGrid );
 
-	if ( interrupter.wasInterrupted() )
+	if( interrupter.wasInterrupted() )
 	{
 		throw IECore::Cancelled();
 	}

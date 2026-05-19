@@ -52,47 +52,46 @@ namespace GafferImage
 class GAFFERIMAGE_API Grade : public ChannelDataProcessor
 {
 
-	public :
+public:
 
-		explicit Grade( const std::string &name=defaultName<Grade>() );
-		~Grade() override;
+	explicit Grade( const std::string &name = defaultName<Grade>() );
+	~Grade() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferImage::Grade, GradeTypeId, ChannelDataProcessor );
+	GAFFER_NODE_DECLARE_TYPE( GafferImage::Grade, GradeTypeId, ChannelDataProcessor );
 
-		Gaffer::Color4fPlug *blackPointPlug();
-		const Gaffer::Color4fPlug *blackPointPlug() const;
-		Gaffer::Color4fPlug *whitePointPlug();
-		const Gaffer::Color4fPlug *whitePointPlug() const;
-		Gaffer::Color4fPlug *liftPlug();
-		const Gaffer::Color4fPlug *liftPlug() const;
-		Gaffer::Color4fPlug *gainPlug();
-		const Gaffer::Color4fPlug *gainPlug() const;
-		Gaffer::Color4fPlug *multiplyPlug();
-		const Gaffer::Color4fPlug *multiplyPlug() const;
-		Gaffer::Color4fPlug *offsetPlug();
-		const Gaffer::Color4fPlug *offsetPlug() const;
-		Gaffer::Color4fPlug *gammaPlug();
-		const Gaffer::Color4fPlug *gammaPlug() const;
-		Gaffer::BoolPlug *blackClampPlug();
-		const Gaffer::BoolPlug *blackClampPlug() const;
-		Gaffer::BoolPlug *whiteClampPlug();
-		const Gaffer::BoolPlug *whiteClampPlug() const;
+	Gaffer::Color4fPlug *blackPointPlug();
+	const Gaffer::Color4fPlug *blackPointPlug() const;
+	Gaffer::Color4fPlug *whitePointPlug();
+	const Gaffer::Color4fPlug *whitePointPlug() const;
+	Gaffer::Color4fPlug *liftPlug();
+	const Gaffer::Color4fPlug *liftPlug() const;
+	Gaffer::Color4fPlug *gainPlug();
+	const Gaffer::Color4fPlug *gainPlug() const;
+	Gaffer::Color4fPlug *multiplyPlug();
+	const Gaffer::Color4fPlug *multiplyPlug() const;
+	Gaffer::Color4fPlug *offsetPlug();
+	const Gaffer::Color4fPlug *offsetPlug() const;
+	Gaffer::Color4fPlug *gammaPlug();
+	const Gaffer::Color4fPlug *gammaPlug() const;
+	Gaffer::BoolPlug *blackClampPlug();
+	const Gaffer::BoolPlug *blackClampPlug() const;
+	Gaffer::BoolPlug *whiteClampPlug();
+	const Gaffer::BoolPlug *whiteClampPlug() const;
 
-		void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
+	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected :
+protected:
 
-		bool channelEnabled( const std::string &channel ) const override;
+	bool channelEnabled( const std::string &channel ) const override;
 
-		void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-		void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelIndex, IECore::FloatVectorDataPtr outData ) const override;
+	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelIndex, IECore::FloatVectorDataPtr outData ) const override;
 
-	private :
+private:
 
-		void parameters( size_t channelIndex, float &a, float &b, float &gamma ) const;
+	void parameters( size_t channelIndex, float &a, float &b, float &gamma ) const;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( Grade );

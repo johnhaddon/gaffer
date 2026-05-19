@@ -59,72 +59,71 @@ class SceneGadget;
 class GAFFERSCENEUI_API UVView : public GafferUI::View
 {
 
-	public :
+public:
 
-		explicit UVView( Gaffer::ScriptNodePtr scriptNode );
-		~UVView() override;
+	explicit UVView( Gaffer::ScriptNodePtr scriptNode );
+	~UVView() override;
 
-		GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::UVView, UVViewTypeId, View );
+	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::UVView, UVViewTypeId, View );
 
-		Gaffer::StringPlug *uvSetPlug();
-		const Gaffer::StringPlug *uvSetPlug() const;
+	Gaffer::StringPlug *uvSetPlug();
+	const Gaffer::StringPlug *uvSetPlug() const;
 
-		Gaffer::StringPlug *textureFileNamePlug();
-		const Gaffer::StringPlug *textureFileNamePlug() const;
+	Gaffer::StringPlug *textureFileNamePlug();
+	const Gaffer::StringPlug *textureFileNamePlug() const;
 
-		Gaffer::StringPlug *displayTransformPlug();
-		const Gaffer::StringPlug *displayTransformPlug() const;
+	Gaffer::StringPlug *displayTransformPlug();
+	const Gaffer::StringPlug *displayTransformPlug() const;
 
-		void setPaused( bool paused );
-		bool getPaused() const;
+	void setPaused( bool paused );
+	bool getPaused() const;
 
-		enum State
-		{
-			Paused,
-			Running,
-			Complete
-		};
+	enum State
+	{
+		Paused,
+		Running,
+		Complete
+	};
 
-		State state() const;
+	State state() const;
 
-		using UVViewSignal = Gaffer::Signals::Signal<void (UVView *)>;
-		UVViewSignal &stateChangedSignal();
+	using UVViewSignal = Gaffer::Signals::Signal<void( UVView * )>;
+	UVViewSignal &stateChangedSignal();
 
-	private :
+private:
 
-		Gaffer::CompoundObjectPlug *texturesPlug();
-		const Gaffer::CompoundObjectPlug *texturesPlug() const;
+	Gaffer::CompoundObjectPlug *texturesPlug();
+	const Gaffer::CompoundObjectPlug *texturesPlug() const;
 
-		class UVScene;
-		UVScene *uvScene();
-		const UVScene *uvScene() const;
+	class UVScene;
+	UVScene *uvScene();
+	const UVScene *uvScene() const;
 
-		SceneGadget *sceneGadget();
-		const SceneGadget *sceneGadget() const;
+	SceneGadget *sceneGadget();
+	const SceneGadget *sceneGadget() const;
 
-		GafferUI::Gadget *textureGadgets();
-		const GafferUI::Gadget *textureGadgets() const;
+	GafferUI::Gadget *textureGadgets();
+	const GafferUI::Gadget *textureGadgets() const;
 
-		void contextChanged();
-		void plugDirtied( const Gaffer::Plug *plug );
-		void preRender();
-		void visibilityChanged();
-		void selectedPathsChanged();
-		void updateTextureGadgets( const IECore::ConstCompoundObjectPtr &textures );
-		void gadgetStateChanged( const GafferUI::Gadget *gadget, bool running );
+	void contextChanged();
+	void plugDirtied( const Gaffer::Plug *plug );
+	void preRender();
+	void visibilityChanged();
+	void selectedPathsChanged();
+	void updateTextureGadgets( const IECore::ConstCompoundObjectPtr &textures );
+	void gadgetStateChanged( const GafferUI::Gadget *gadget, bool running );
 
-		UVViewSignal m_stateChangedSignal;
-		std::unordered_set<const GafferUI::Gadget *> m_runningGadgets;
+	UVViewSignal m_stateChangedSignal;
+	std::unordered_set<const GafferUI::Gadget *> m_runningGadgets;
 
-		bool m_textureGadgetsDirty;
-		std::unique_ptr<Gaffer::BackgroundTask> m_texturesTask;
+	bool m_textureGadgetsDirty;
+	std::unique_ptr<Gaffer::BackgroundTask> m_texturesTask;
 
-		bool m_framed;
+	bool m_framed;
 
-		static size_t g_firstPlugIndex;
-
+	static size_t g_firstPlugIndex;
 };
 
 IE_CORE_DECLAREPTR( UVView )
 
-} // namespace GafferUI
+} // namespace GafferSceneUI
