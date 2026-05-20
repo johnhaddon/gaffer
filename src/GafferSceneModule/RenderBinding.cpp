@@ -115,7 +115,7 @@ list sampledObjectSampleTimes( const Private::RendererAlgo::SampledObject &sampl
 	return result;
 }
 
-object objectSamplesWrapper( const Gaffer::ObjectPlug &objectPlug, object pythonSampleTimes, IECore::MurmurHash *hash, bool copy )
+object objectSamplesWrapper( const Gaffer::ObjectPlug &objectPlug, object pythonSampleTimes, GafferScene::Private::RendererAlgo::ObjectHash *hash, bool copy )
 {
 	IECoreScenePreview::Renderer::SampleTimes sampleTimes;
 	boost::python::container_utils::extend_container( sampleTimes, pythonSampleTimes );

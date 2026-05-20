@@ -133,6 +133,13 @@ struct SampledObject
 	IECoreScenePreview::Renderer::ObjectSamples samples;
 	IECoreScenePreview::Renderer::SampleTimes sampleTimes;
 };
+
+struct ObjectHash
+{
+	IECore::MurmurHash value;
+	bool isPointInstancer = false;
+};
+
 /// Samples the object from the current location in preparation for output to the renderer. The
 /// `sampleTimes` should have been obtained from `deformationMotionTimes()` and the current context should
 /// match the frame being output.
@@ -145,7 +152,7 @@ struct SampledObject
 /// sample from the current frame, no matter the values in `sampleTimes`. Therefore the returned `sampleTimes`
 /// may differ from the `sampleTimes` passed in. It is the _returned_ `sampleTimes` that should be passed to
 /// the Renderer.
-GAFFERSCENE_API std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, IECore::MurmurHash *hash = nullptr );
+GAFFERSCENE_API std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, ObjectHash *hash = nullptr );
 
 std::vector<IECoreScenePreview::Renderer::Prototype> pointInstancerPrototypes( const IECoreScene::PointInstancer *instancer, const RenderOptions &renderOptions, const ScenePlug *scene, IECoreScenePreview::Renderer *renderer );
 

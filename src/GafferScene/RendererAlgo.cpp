@@ -548,7 +548,7 @@ std::optional<SampledTransform> transformSamples( const M44fPlug *transformPlug,
 	return result;
 }
 
-std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, IECore::MurmurHash *hash )
+std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, ObjectHash *hash )
 {
 	IECoreScenePreview::Renderer::Samples<IECore::MurmurHash> sampleHashes;
 	if( !sampleTimes.size() )
@@ -595,7 +595,10 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 			}
 		}
 
-		if( combinedHash == *hash )
+		/// NEED TO HAVE APPLIED THE PROTOTYPES HASH HERE BEFORE COMPARING
+		/// BUT FIRST TIME AROUND, WE DON'T HAVE THE NECESSARY INFO UNTIL
+		/// BELOW...
+		if( combinedHash == hash->value )
 		{
 			return std::nullopt;
 		}
@@ -679,7 +682,8 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 				// at a time )
 				if( hash )
 				{
-					*hash = combinedHash;
+					hash->value = combinedHash;
+					hash->isPointInstancer = false;
 				}
 
 				return objectSamples( objectPlug, {} );
@@ -695,7 +699,8 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 
 	if( hash )
 	{
-		*hash = combinedHash;
+		hash->value = combinedHash;
+		hash->isPointInstancer = result.samples.size() && result.samples[0]->isInstanceOf( PointInstancer::staticTypeId() );
 	}
 
 	return result;

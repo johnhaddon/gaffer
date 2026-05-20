@@ -573,7 +573,7 @@ class RenderController::SceneGraph
 				// Account for `Capsule::setRenderOptions()` being called by
 				// `RendererAlgo::outputObject()` in `updateObject()`.
 				m_dirtyComponents |= ObjectComponent;
-				m_objectHash = MurmurHash();
+				m_objectHash = Private::RendererAlgo::ObjectHash();
 			}
 
 			if( ( m_dirtyComponents & ObjectComponent ) && updateObject( controller->m_scene.get(), type, controller->m_renderer.get(), controller->m_renderOptions, controller->m_lightLinks.get() ) )
@@ -599,7 +599,7 @@ class RenderController::SceneGraph
 						else
 						{
 							// Failed to apply attributes - must replace entire object.
-							m_objectHash = MurmurHash();
+							m_objectHash = Private::RendererAlgo::ObjectHash();
 							if( updateObject( controller->m_scene.get(), type, controller->m_renderer.get(), controller->m_renderOptions, controller->m_lightLinks.get() ) )
 							{
 								m_changedComponents |= ObjectComponent;
@@ -937,6 +937,7 @@ class RenderController::SceneGraph
 			}
 			else
 			{
+				fmt::print( "Updating {}\n", name );
 				m_objectInterface.assign(
 					Private::RendererAlgo::outputObject( name, *sampledObject, attributesInterface( renderer ), renderOptions, scene, renderer ),
 					ObjectInterfaceHandle::RemovalCallback(),
@@ -949,7 +950,7 @@ class RenderController::SceneGraph
 		void clearObject()
 		{
 			m_objectInterface = nullptr;
-			m_objectHash = MurmurHash();
+			m_objectHash = Private::RendererAlgo::ObjectHash();
 		}
 
 		bool updateVisibleSet( const ScenePlug::ScenePath &path, const GafferScene::VisibleSet &visibleSet, size_t minimumExpansionDepth )
@@ -1080,7 +1081,7 @@ class RenderController::SceneGraph
 
 		const SceneGraph *m_parent;
 
-		IECore::MurmurHash m_objectHash;
+		Private::RendererAlgo::ObjectHash m_objectHash;
 		ObjectInterfaceHandle m_objectInterface;
 		IECoreScenePreview::Renderer::SampleTimes m_deformationTimes;
 
